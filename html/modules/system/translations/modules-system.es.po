@@ -1,0 +1,2151 @@
+# Spanish translation of drupal (6.0)
+# Copyright (c) 2008 by the Spanish translation team
+# Generated from files:
+#  system.admin.inc,v 1.63 2008/02/04 12:35:48 goba
+#  system.module,v 1.585.2.6 2008/02/13 14:25:42 goba
+#  system.install,v 1.238.2.1 2008/02/08 17:07:55 goba
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: drupal (6.0)\n"
+"POT-Creation-Date: 2008-02-25 18:21+0100\n"
+"PO-Revision-Date: 2008-02-22 11:58+0100\n"
+"Language-Team: Spanish\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: modules/system/system.admin.inc:22
+msgid ""
+"One or more problems were detected with your Drupal installation. Check the "
+"<a href=\"@status\">status report</a> for more information."
+msgstr ""
+"Se detectaron uno o más problemas en su instalación de Drupal. Para más "
+"información, revise el <a href=\"@status\">informe de estado</a>."
+
+#: modules/system/system.admin.inc:58,79
+msgid "You do not have any administrative items."
+msgstr ""
+
+#: modules/system/system.admin.inc:118
+msgid "Get help"
+msgstr "Obtener ayuda"
+
+#: modules/system/system.admin.inc:158
+msgid "System default"
+msgstr "Opciones predefinidas del sistema"
+
+#: modules/system/system.admin.inc:166
+msgid "Administration theme"
+msgstr "Tema de administración"
+
+#: modules/system/system.admin.inc:167
+msgid ""
+"Choose which theme the administration pages should display in. If you choose "
+"\"System default\" the administration pages will use the same theme as the "
+"rest of the site."
+msgstr ""
+"Elija qué tema deben mostrar las páginas de administración. Si elije "
+"\"Opciones predefinidas del sistema\", las páginas de administración emplean "
+"el mismo tema que el resto del sitio."
+
+#: modules/system/system.admin.inc:173
+msgid "Use administration theme for content editing"
+msgstr ""
+
+#: modules/system/system.admin.inc:174
+msgid ""
+"Use the administration theme when editing existing posts or creating new "
+"ones."
+msgstr ""
+
+#: modules/system/system.admin.inc:288
+msgid ""
+"Please note that the <a href=\"!admin_theme_page\">administration theme</a> "
+"is still set to the %admin_theme theme; consequently, the theme on this page "
+"remains unchanged. All non-administrative sections of the site, however, "
+"will show the selected %selected_theme theme by default."
+msgstr ""
+"Tenga en cuenta que el <a href=\"!admin_theme_page\">tema de administración</"
+"a> todavía está definido como el tema %admin_theme. Por tanto, el tema de "
+"esta página permanece sin cambios. Todas las secciones que no sean de "
+"administración del sitio, sin embargo, muestran de forma predefinida el tema "
+"%selected_theme."
+
+#: modules/system/system.admin.inc:377
+msgid "Logo"
+msgstr "Logo"
+
+#: modules/system/system.admin.inc:379
+msgid "Site slogan"
+msgstr "Eslogan del sitio"
+
+#: modules/system/system.admin.inc:380
+msgid "Mission statement"
+msgstr "Frase con la misión"
+
+#: modules/system/system.admin.inc:381
+msgid "User pictures in posts"
+msgstr "Imágenes de los usuarios en los envíos"
+
+#: modules/system/system.admin.inc:382
+msgid "User pictures in comments"
+msgstr "Imágenes de los usuarios en los comentarios"
+
+#: modules/system/system.admin.inc:383
+msgid "Search box"
+msgstr "Bloque de búsqueda"
+
+#: modules/system/system.admin.inc:384
+msgid "Shortcut icon"
+msgstr "Icono de acceso rápido"
+
+#: modules/system/system.admin.inc:401
+msgid "Toggle display"
+msgstr "Cambiar la visualización"
+
+#: modules/system/system.admin.inc:402
+msgid "Enable or disable the display of certain page elements."
+msgstr "Activa o desactiva la visualización de ciertos elementos de la página."
+
+#: modules/system/system.admin.inc:427
+msgid "Display post information on"
+msgstr "Mostrar información del envío en"
+
+#: modules/system/system.admin.inc:428
+msgid ""
+"Enable or disable the <em>submitted by Username on date</em> text when "
+"displaying posts of the following type."
+msgstr ""
+"Activa o desactiva el texto <em>enviado por usuario el fecha</em> cuando se "
+"muestran los envíos del tipo siguiente"
+
+#: modules/system/system.admin.inc:447
+msgid "Logo image settings"
+msgstr "Opciones de la imagen del logo"
+
+#: modules/system/system.admin.inc:448
+msgid "If toggled on, the following logo will be displayed."
+msgstr "Si está activado, se muestra el logo siguiente."
+
+#: modules/system/system.admin.inc:453
+msgid "Use the default logo"
+msgstr "Usar el logo predefinido"
+
+#: modules/system/system.admin.inc:456
+msgid "Check here if you want the theme to use the logo supplied with it."
+msgstr "Márquelo si quiere que el tema use el logo que viene con él."
+
+#: modules/system/system.admin.inc:460
+msgid "Path to custom logo"
+msgstr "Ruta al logo personalizado"
+
+#: modules/system/system.admin.inc:462
+msgid ""
+"The path to the file you would like to use as your logo file instead of the "
+"default logo."
+msgstr ""
+"La ruta al archivo que quiera usar como archivo de logo, en lugar del logo "
+"predefinido."
+
+#: modules/system/system.admin.inc:466
+msgid "Upload logo image"
+msgstr "Cargar la imagen del logo"
+
+#: modules/system/system.admin.inc:468
+msgid ""
+"If you don't have direct file access to the server, use this field to upload "
+"your logo."
+msgstr ""
+"Si no tiene acceso directo a los archivos del servidor, use este campo para "
+"cargar su logo."
+
+#: modules/system/system.admin.inc:475
+msgid "Shortcut icon settings"
+msgstr "Opciones de iconos de acceso rápido"
+
+#: modules/system/system.admin.inc:476
+msgid ""
+"Your shortcut icon, or 'favicon', is displayed in the address bar and "
+"bookmarks of most browsers."
+msgstr ""
+
+#: modules/system/system.admin.inc:480
+msgid "Use the default shortcut icon."
+msgstr "Usar el icono de acceso rápido predefinido."
+
+#: modules/system/system.admin.inc:482
+msgid "Check here if you want the theme to use the default shortcut icon."
+msgstr ""
+"Márquelo si quiere que el tema use el icono de acceso rápido predefinido."
+
+#: modules/system/system.admin.inc:486
+msgid "Path to custom icon"
+msgstr "Ruta al icono personalizado"
+
+#: modules/system/system.admin.inc:488
+msgid ""
+"The path to the image file you would like to use as your custom shortcut "
+"icon."
+msgstr ""
+"La ruta al archivo de imagen que quiera utilizar como icono de acceso rápido "
+"personalizado."
+
+#: modules/system/system.admin.inc:493
+msgid "Upload icon image"
+msgstr "Cargar imagen de icono"
+
+#: modules/system/system.admin.inc:494
+msgid ""
+"If you don't have direct file access to the server, use this field to upload "
+"your shortcut icon."
+msgstr ""
+"Si no tiene acceso directo a los archivos del servidor, use este campo para "
+"cargar el icono de acceso rápido."
+
+#: modules/system/system.admin.inc:515
+msgid "Theme-engine-specific settings"
+msgstr ""
+
+#: modules/system/system.admin.inc:515
+msgid ""
+"These settings only exist for all the templates and styles based on the %"
+"engine theme engine."
+msgstr ""
+"Las opciones del tema sólo existen para todas las plantillas y los estilos "
+"basados en el motor de temas %engine."
+
+#: modules/system/system.admin.inc:527
+msgid "Theme-specific settings"
+msgstr "Opciones específicas del tema"
+
+#: modules/system/system.admin.inc:527
+msgid ""
+"These settings only exist for the %theme theme and all the styles based on "
+"it."
+msgstr ""
+"Estas opciones sólo existen para el tema %theme y para todos los estilos "
+"basados en él."
+
+#: modules/system/system.admin.inc:683,715
+msgid " (<span class=\"admin-disabled\">disabled</span>)"
+msgstr " (<span class=\"admin-disabled\">desactivado</span>)"
+
+#: modules/system/system.admin.inc:686
+msgid " (<span class=\"admin-missing\">missing</span>)"
+msgstr " (<span class=\"admin-missing\">no encontrado</span>)"
+
+#: modules/system/system.admin.inc:692,710
+msgid " (<span class=\"admin-enabled\">enabled</span>)"
+msgstr " (<span class=\"admin-enabled\">activado</span>)"
+
+#: modules/system/system.admin.inc:699
+msgid "Depends on: !dependencies"
+msgstr "Depende de: !dependencies"
+
+#: modules/system/system.admin.inc:722
+msgid "Required by: !required"
+msgstr "Necesitado por: !required"
+
+#: modules/system/system.admin.inc:841
+msgid "Some required modules must be enabled"
+msgstr "Algunos de los módulos necesarios deben estar activados"
+
+#: modules/system/system.admin.inc:843
+msgid "Would you like to continue with enabling the above?"
+msgstr "¿Quiere seguir con la activación de lo de arriba?"
+
+#: modules/system/system.admin.inc:844
+msgid "Continue"
+msgstr "Continuar"
+
+#: modules/system/system.admin.inc:1036,1081,2106
+msgid "Uninstall"
+msgstr "Desinstalar"
+
+#: modules/system/system.admin.inc:1075
+msgid ""
+"The following modules will be completely uninstalled from your site, and "
+"<em>all data from these modules will be lost</em>!"
+msgstr ""
+"Los siguientes módulos se desinstalarán completamente de su sitio, y <em>se "
+"perderán todos los datos de estos módulos</em>!"
+
+#: modules/system/system.admin.inc:1078
+msgid "Confirm uninstall"
+msgstr "Confirmar la desinstalación"
+
+#: modules/system/system.admin.inc:1080
+msgid "Would you like to continue with uninstalling the above?"
+msgstr "¿Quiere continuar con la desinstalación de lo de arriba?"
+
+#: modules/system/system.admin.inc:1093
+msgid "No modules selected."
+msgstr "Ningún módulo seleccionado."
+
+#: modules/system/system.admin.inc:1110
+msgid "The selected modules have been uninstalled."
+msgstr "Se han desinstalado los módulos seleccionados."
+
+#: modules/system/system.admin.inc:1131
+msgid "The name of this website."
+msgstr ""
+
+#: modules/system/system.admin.inc:1143
+msgid "Slogan"
+msgstr "Eslogan"
+
+#: modules/system/system.admin.inc:1145
+msgid ""
+"Your site's motto, tag line, or catchphrase (often displayed alongside the "
+"title of the site)."
+msgstr ""
+
+#: modules/system/system.admin.inc:1149
+msgid "Mission"
+msgstr "Misión"
+
+#: modules/system/system.admin.inc:1151
+msgid ""
+"Your site's mission or focus statement (often prominently displayed on the "
+"front page)."
+msgstr ""
+
+#: modules/system/system.admin.inc:1155
+msgid "Footer message"
+msgstr "Mensaje de pie de página"
+
+#: modules/system/system.admin.inc:1157
+msgid ""
+"This text will be displayed at the bottom of each page. Useful for adding a "
+"copyright notice to your pages."
+msgstr ""
+"Este texto se muestra en la zona inferior de cada página. Útil para añadir "
+"las condiciones de uso y de distribución en sus páginas."
+
+#: modules/system/system.admin.inc:1161
+msgid "Anonymous user"
+msgstr "Usuario anónimo"
+
+#: modules/system/system.admin.inc:1163
+msgid "The name used to indicate anonymous users."
+msgstr "El nombre que se usa para identificar a los usuarios anónimos."
+
+#: modules/system/system.admin.inc:1168
+msgid "Default front page"
+msgstr "Página predefinida de inicio"
+
+#: modules/system/system.admin.inc:1171
+msgid ""
+"The home page displays content from this relative URL. If unsure, specify "
+"\"node\"."
+msgstr ""
+"La página de inicio muestra el contenido de este URL relativo. Si no está "
+"seguro de qué tiene que poner, indique \"node\"."
+
+#: modules/system/system.admin.inc:1196
+msgid "The path '@path' is either invalid or you do not have access to it."
+msgstr ""
+
+#: modules/system/system.admin.inc:1210
+msgid "Default 403 (access denied) page"
+msgstr "Página 403 predefinida (acceso denegado)"
+
+#: modules/system/system.admin.inc:1213
+msgid ""
+"This page is displayed when the requested document is denied to the current "
+"user. If unsure, specify nothing."
+msgstr ""
+"Esta página se muestra cuando se niega el acceso al documento seleccionado "
+"al usuario actual. Si no está seguro, no indique nada."
+
+#: modules/system/system.admin.inc:1219
+msgid "Default 404 (not found) page"
+msgstr "Página 404 predefinida (no encontrada)"
+
+#: modules/system/system.admin.inc:1222
+msgid ""
+"This page is displayed when no other content matches the requested document. "
+"If unsure, specify nothing."
+msgstr ""
+"Esta página se muestra cuando no hay contenido que coincida con el documento "
+"seleccionado. Si no está seguro, no indique nada."
+
+#: modules/system/system.admin.inc:1227
+msgid "Error reporting"
+msgstr "Informar de errores"
+
+#: modules/system/system.admin.inc:1228
+msgid "Write errors to the log"
+msgstr "Escribir los errores en el registro"
+
+#: modules/system/system.admin.inc:1228
+msgid "Write errors to the log and to the screen"
+msgstr "Escribir los errores en el registro y en la pantalla"
+
+#: modules/system/system.admin.inc:1229
+msgid ""
+"Specify where Drupal, PHP and SQL errors are logged. While it is recommended "
+"that a site running in a production environment write errors to the log "
+"only, in a development or testing environment it may be helpful to write "
+"errors both to the log and to the screen."
+msgstr ""
+
+#: modules/system/system.admin.inc:1255
+msgid ""
+"The normal cache mode is suitable for most sites and does not cause any side "
+"effects. The aggressive cache mode causes Drupal to skip the loading (boot) "
+"and unloading (exit) of enabled modules when serving a cached page. This "
+"results in an additional performance boost but can cause unwanted side "
+"effects."
+msgstr ""
+
+#: modules/system/system.admin.inc:1261
+msgid ""
+"<strong class=\"error\">The following enabled modules are incompatible with "
+"aggressive mode caching and will not function properly: %modules</strong>"
+msgstr ""
+"<strong class=\"error\">Los siguientes módulos activos son incompatibles con "
+"el modo de caché agresivo y pueden no funcionar adecuadamente: %modules</"
+"strong>"
+
+#: modules/system/system.admin.inc:1264
+msgid ""
+"<strong class=\"ok\">Currently, all enabled modules are compatible with the "
+"aggressive caching policy.</strong> Please note, if you use aggressive "
+"caching and enable new modules, you will need to check this page again to "
+"ensure compatibility."
+msgstr ""
+"<strong class=\"ok\">Actualmente, todos los módulos activos son compatibles "
+"la política agresiva de caché.</strong> Tenga en cuenta que si utiliza una "
+"caché agresiva y activa nuevos módulos, tiene que volver a esta página para "
+"verificar su compatibilidad."
+
+#: modules/system/system.admin.inc:1268
+msgid "Page cache"
+msgstr "Caché de páginas"
+
+#: modules/system/system.admin.inc:1269
+msgid ""
+"Enabling the page cache will offer a significant performance boost. Drupal "
+"can store and send compressed cached pages requested by <em>anonymous</em> "
+"users. By caching a web page, Drupal does not have to construct the page "
+"each time it is viewed."
+msgstr ""
+
+#: modules/system/system.admin.inc:1274
+msgid "Caching mode"
+msgstr "Modo de caché"
+
+#: modules/system/system.admin.inc:1276
+msgid "Normal (recommended for production sites, no side effects)"
+msgstr ""
+
+#: modules/system/system.admin.inc:1276
+msgid "Aggressive (experts only, possible side effects)"
+msgstr "Agresivo (sólo para expertos, posibles efectos colaterales)"
+
+#: modules/system/system.admin.inc:1284
+msgid "Minimum cache lifetime"
+msgstr "Mímimo de permanencia en caché"
+
+#: modules/system/system.admin.inc:1287
+msgid ""
+"On high-traffic sites, it may be necessary to enforce a minimum cache "
+"lifetime. The minimum cache lifetime is the minimum amount of time that will "
+"elapse before the cache is emptied and recreated, and is applied to both "
+"page and block caches. A larger minimum cache lifetime offers better "
+"performance, but users will not see new content for a longer period of time."
+msgstr ""
+
+#: modules/system/system.admin.inc:1291
+msgid "Page compression"
+msgstr ""
+
+#: modules/system/system.admin.inc:1294
+msgid ""
+"By default, Drupal compresses the pages it caches in order to save bandwidth "
+"and improve download times. This option should be disabled when using a "
+"webserver that performs compression."
+msgstr ""
+
+#: modules/system/system.admin.inc:1299,1305
+msgid "Block cache"
+msgstr ""
+
+#: modules/system/system.admin.inc:1300
+msgid ""
+"Enabling the block cache can offer a performance increase for all users by "
+"preventing blocks from being reconstructed on each page load. If the page "
+"cache is also enabled, performance increases from enabling the block cache "
+"will mainly benefit authenticated users."
+msgstr ""
+
+#: modules/system/system.admin.inc:1307
+msgid "Enabled (recommended)"
+msgstr ""
+
+#: modules/system/system.admin.inc:1309
+msgid ""
+"Note that block caching is inactive when modules defining content access "
+"restrictions are enabled."
+msgstr ""
+
+#: modules/system/system.admin.inc:1314
+msgid "Bandwidth optimizations"
+msgstr "Optimizaciones del ancho de banda"
+
+#: modules/system/system.admin.inc:1315
+msgid ""
+"<p>Drupal can automatically optimize external resources like CSS and "
+"JavaScript, which can reduce both the size and number of requests made to "
+"your website. CSS files can be aggregated and compressed into a single file, "
+"while JavaScript files are aggregated (but not compressed). These optional "
+"optimizations may reduce server load, bandwidth requirements, and page "
+"loading times.</p><p>These options are disabled if you have not set up your "
+"files directory, or if your download method is set to private.</p>"
+msgstr ""
+
+#: modules/system/system.admin.inc:1322
+msgid "Optimize CSS files"
+msgstr ""
+
+#: modules/system/system.admin.inc:1326
+msgid ""
+"This option can interfere with theme development and should only be enabled "
+"in a production environment."
+msgstr ""
+
+#: modules/system/system.admin.inc:1330
+msgid "Optimize JavaScript files"
+msgstr ""
+
+#: modules/system/system.admin.inc:1334
+msgid ""
+"This option can interfere with module development and should only be enabled "
+"in a production environment."
+msgstr ""
+
+#: modules/system/system.admin.inc:1339,1345
+msgid "Clear cached data"
+msgstr ""
+
+#: modules/system/system.admin.inc:1340
+msgid ""
+"Caching data improves performance, but may cause problems while "
+"troubleshooting new modules, themes, or translations, if outdated "
+"information has been cached. To refresh all cached data on your site, click "
+"the button below. <em>Warning: high-traffic sites will experience "
+"performance slowdowns while cached data is rebuilt.</em>"
+msgstr ""
+
+#: modules/system/system.admin.inc:1375
+msgid "File system path"
+msgstr "Ruta del sistema de archivos"
+
+#: modules/system/system.admin.inc:1378
+msgid ""
+"A file system path where the files will be stored. This directory must exist "
+"and be writable by Drupal. If the download method is set to public, this "
+"directory must be relative to the Drupal installation directory and be "
+"accessible over the web. If the download method is set to private, this "
+"directory should not be accessible over the web. Changing this location will "
+"modify all download paths and may cause unexpected problems on an existing "
+"site."
+msgstr ""
+
+#: modules/system/system.admin.inc:1384
+msgid "Temporary directory"
+msgstr "Directorio temporal"
+
+#: modules/system/system.admin.inc:1387
+msgid "A file system path where uploaded files will be stored during previews."
+msgstr ""
+
+#: modules/system/system.admin.inc:1393
+msgid "Download method"
+msgstr "Método de descarga"
+
+#: modules/system/system.admin.inc:1395
+msgid "Public - files are available using HTTP directly."
+msgstr "Público: los archivos están disponibles directamente usando HTTP."
+
+#: modules/system/system.admin.inc:1395
+msgid "Private - files are transferred by Drupal."
+msgstr "Privado: los archivos los transfiere Drupal."
+
+#: modules/system/system.admin.inc:1396
+msgid ""
+"Choose the <em>Public download</em> method unless you wish to enforce fine-"
+"grained access controls over file downloads. Changing the download method "
+"will modify all download paths and may cause unexpected problems on an "
+"existing site."
+msgstr ""
+
+#: modules/system/system.admin.inc:1413
+msgid "Select an image processing toolkit"
+msgstr "Seleccione un juego de herramientas para procesar imágenes"
+
+#: modules/system/system.admin.inc:1437
+msgid "Number of items in each feed"
+msgstr ""
+
+#: modules/system/system.admin.inc:1440
+msgid "Default number of items to include in each feed."
+msgstr ""
+
+#: modules/system/system.admin.inc:1444
+msgid "Feed content"
+msgstr ""
+
+#: modules/system/system.admin.inc:1446
+msgid "Titles only"
+msgstr "Sólo títulos"
+
+#: modules/system/system.admin.inc:1446
+msgid "Titles plus teaser"
+msgstr "Títulos y avances"
+
+#: modules/system/system.admin.inc:1446
+msgid "Full text"
+msgstr "Texto completo"
+
+#: modules/system/system.admin.inc:1447
+msgid "Global setting for the default display of content items in each feed."
+msgstr ""
+
+#: modules/system/system.admin.inc:1490
+msgid "Custom format"
+msgstr ""
+
+#: modules/system/system.admin.inc:1502
+msgid "Select the default site time zone."
+msgstr "Seleccione la zona horaria predefinida del sitio."
+
+#: modules/system/system.admin.inc:1507
+msgid "User-configurable time zones"
+msgstr ""
+
+#: modules/system/system.admin.inc:1510
+msgid ""
+"When enabled, users can set their own time zone and dates will be displayed "
+"accordingly."
+msgstr ""
+
+#: modules/system/system.admin.inc:1515
+msgid "First day of week"
+msgstr "Primer día de la semana"
+
+#: modules/system/system.admin.inc:1518
+msgid "The first day of the week for calendar views."
+msgstr "El primer día de la semana para la vista del calendario."
+
+#: modules/system/system.admin.inc:1523
+msgid "Formatting"
+msgstr ""
+
+#: modules/system/system.admin.inc:1531
+msgid "Short date format"
+msgstr "Formato corto de fecha"
+
+#: modules/system/system.admin.inc:1535
+msgid "The short format of date display."
+msgstr "El formato corto de fecha."
+
+#: modules/system/system.admin.inc:1543
+msgid "Custom short date format"
+msgstr ""
+
+#: modules/system/system.admin.inc:1546
+msgid ""
+"A user-defined short date format. See the <a href=\"@url\">PHP manual</a> "
+"for available options. This format is currently set to display as <span>%"
+"date</span>."
+msgstr ""
+
+#: modules/system/system.admin.inc:1554
+msgid "Medium date format"
+msgstr "Formato medio de fecha"
+
+#: modules/system/system.admin.inc:1558
+msgid "The medium sized date display."
+msgstr "El formato de fecha de tamaño medio."
+
+#: modules/system/system.admin.inc:1566
+msgid "Custom medium date format"
+msgstr ""
+
+#: modules/system/system.admin.inc:1569
+msgid ""
+"A user-defined medium date format. See the <a href=\"@url\">PHP manual</a> "
+"for available options. This format is currently set to display as <span>%"
+"date</span>."
+msgstr ""
+
+#: modules/system/system.admin.inc:1577
+msgid "Long date format"
+msgstr "Formato largo de fecha"
+
+#: modules/system/system.admin.inc:1581
+msgid "Longer date format used for detailed display."
+msgstr "Formato de fecha más largo, usado para una visualización detallada."
+
+#: modules/system/system.admin.inc:1589
+msgid "Custom long date format"
+msgstr ""
+
+#: modules/system/system.admin.inc:1592
+msgid ""
+"A user-defined long date format. See the <a href=\"@url\">PHP manual</a> for "
+"available options. This format is currently set to display as <span>%date</"
+"span>."
+msgstr ""
+
+#: modules/system/system.admin.inc:1636
+msgid "Site status"
+msgstr "Estado del sitio"
+
+#: modules/system/system.admin.inc:1638
+msgid "Online"
+msgstr "Conectado"
+
+#: modules/system/system.admin.inc:1638
+msgid "Off-line"
+msgstr "Desconectado"
+
+#: modules/system/system.admin.inc:1639
+msgid ""
+"When set to \"Online\", all visitors will be able to browse your site "
+"normally. When set to \"Off-line\", only users with the \"administer site "
+"configuration\" permission will be able to access your site to perform "
+"maintenance; all other visitors will see the site off-line message "
+"configured below. Authorized users can log in during \"Off-line\" mode "
+"directly via the <a href=\"@user-login\">user login</a> page."
+msgstr ""
+"Cuando está definido como \"Conectado\", todos los visitantes pueden navegar "
+"con normalidad por su sitio. Cuando lo define como \"Desconectado\", sólo "
+"los usuarios con permiso para \"administrar la configuración del sitio\" "
+"pueden acceder a su sitio para realizar el mantenimiento. Todos los demás "
+"visitantes ven el mensaje de desconexión del sitio que configure debajo. Los "
+"usuarios autorizados pueden ingresar directamente durante el modo "
+"\"Desconectado\" desde la página <a href=\"@user-login\">sesión de usuario</"
+"a>."
+
+#: modules/system/system.admin.inc:1644
+msgid "Site off-line message"
+msgstr "Mensaje de sitio desconectado"
+
+#: modules/system/system.admin.inc:1646
+msgid "Message to show visitors when the site is in off-line mode."
+msgstr ""
+"Mensaje que se muestra a los vistantes cuando el sitio está desconectado."
+
+#: modules/system/system.admin.inc:1671
+msgid ""
+"Before enabling clean URLs, you must perform a test to determine if your "
+"server is properly configured. If you are able to see this page again after "
+"clicking the \"Run the clean URL test\" link, the test has succeeded and the "
+"radio buttons above will be available. If instead you are directed to a "
+"\"Page not found\" error, you will need to change the configuration of your "
+"server. The <a href=\"@handbook\">handbook page on Clean URLs</a> has "
+"additional troubleshooting information."
+msgstr ""
+
+#: modules/system/system.admin.inc:1675
+msgid "<a href=\"@clean_url\">Run the clean url test</a>."
+msgstr "<a href=\"@clean_url\">Realizar al prueba de URL limpio</a>."
+
+#: modules/system/system.admin.inc:1751
+msgid "Variable"
+msgstr "Variable"
+
+#: modules/system/system.admin.inc:1751
+msgid "Value"
+msgstr "Valor"
+
+#: modules/system/system.admin.inc:1766
+msgid "Command counters"
+msgstr "Contadores de órdenes"
+
+#: modules/system/system.admin.inc:1768
+msgid "The number of <code>SELECT</code>-statements."
+msgstr "El número de sentencias <code>SELECT</code>."
+
+#: modules/system/system.admin.inc:1769
+msgid "The number of <code>INSERT</code>-statements."
+msgstr "El número de sentencias <code>INSERT</code>."
+
+#: modules/system/system.admin.inc:1770
+msgid "The number of <code>UPDATE</code>-statements."
+msgstr "El número de sentencias <code>UPDATE</code>."
+
+#: modules/system/system.admin.inc:1771
+msgid "The number of <code>DELETE</code>-statements."
+msgstr "El número de sentencias <code>DELETE</code>."
+
+#: modules/system/system.admin.inc:1772
+msgid "The number of table locks."
+msgstr "El número de bloqueos de tabla."
+
+#: modules/system/system.admin.inc:1773
+msgid "The number of table unlocks."
+msgstr "El número de desbloqueos de tabla."
+
+#: modules/system/system.admin.inc:1776
+msgid "Query performance"
+msgstr "Rendimiento de las consultas"
+
+#: modules/system/system.admin.inc:1778
+msgid "The number of joins without an index; should be zero."
+msgstr "El número de joins sin un índice. Debe ser cero."
+
+#: modules/system/system.admin.inc:1780
+msgid "The number of sorts done without using an index; should be zero."
+msgstr ""
+"El número de ordenaciones realizadas sin utilizar un índice. Debe ser cero."
+
+#: modules/system/system.admin.inc:1781
+msgid "The number of times a lock could be acquired immediately."
+msgstr "El número de veces que se obtiene un bloqueo inmediatamente."
+
+#: modules/system/system.admin.inc:1782
+msgid "The number of times the server had to wait for a lock."
+msgstr "El número de veces que el servidor tiene que esperar en un bloqueo."
+
+#: modules/system/system.admin.inc:1785
+msgid "Query cache information"
+msgstr "Información de la caché de consultas"
+
+#: modules/system/system.admin.inc:1786
+msgid ""
+"The MySQL query cache can improve performance of your site by storing the "
+"result of queries. Then, if an identical query is received later, the MySQL "
+"server retrieves the result from the query cache rather than parsing and "
+"executing the statement again."
+msgstr ""
+
+#: modules/system/system.admin.inc:1788
+msgid "The number of queries in the query cache."
+msgstr "El número de consultas en la caché de consultas."
+
+#: modules/system/system.admin.inc:1789
+msgid "The number of times MySQL found previous results in the cache."
+msgstr ""
+
+#: modules/system/system.admin.inc:1790
+msgid "The number of times MySQL added a query to the cache (misses)."
+msgstr ""
+
+#: modules/system/system.admin.inc:1791
+msgid ""
+"The number of times MySQL had to remove queries from the cache because it "
+"ran out of memory. Ideally should be zero."
+msgstr ""
+
+#: modules/system/system.admin.inc:1904
+msgid "Show descriptions"
+msgstr "Mostrar descripciones"
+
+#: modules/system/system.admin.inc:1904
+msgid "Expand layout to include descriptions."
+msgstr ""
+
+#: modules/system/system.admin.inc:1907
+msgid "Hide descriptions"
+msgstr "Ocultar las descripciones"
+
+#: modules/system/system.admin.inc:1907
+msgid "Compress layout by hiding descriptions."
+msgstr ""
+
+#: modules/system/system.admin.inc:2023,2207
+msgid "Version"
+msgstr "Versión"
+
+#: modules/system/system.admin.inc:2030
+msgid "Other"
+msgstr "Otros"
+
+#: modules/system/system.admin.inc:2045,2050,2175,2180
+msgid "incompatible"
+msgstr ""
+
+#: modules/system/system.admin.inc:2045,2175
+msgid "Incompatible with this version of Drupal core"
+msgstr ""
+
+#: modules/system/system.admin.inc:2046,2176
+msgid ""
+"This version is incompatible with the !core_version version of Drupal core."
+msgstr ""
+
+#: modules/system/system.admin.inc:2050,2180
+msgid "Incompatible with this version of PHP"
+msgstr ""
+
+#: modules/system/system.admin.inc:2055
+msgid ""
+"This module requires PHP version @php_required and is incompatible with PHP "
+"version !php_version."
+msgstr ""
+
+#: modules/system/system.admin.inc:2123
+msgid "No modules are available to uninstall."
+msgstr "No hay ningún módulo disponible para desinstalar."
+
+#: modules/system/system.admin.inc:2149,2207
+msgid "Screenshot"
+msgstr "Captura de pantalla"
+
+#: modules/system/system.admin.inc:2185
+msgid ""
+"This theme requires PHP version @php_required and is incompatible with PHP "
+"version !php_version."
+msgstr ""
+
+#: modules/system/system.module:52
+msgid ""
+"The system module is at the foundation of your Drupal website, and provides "
+"basic but extensible functionality for use by other modules and themes. Some "
+"integral elements of Drupal are contained in and managed by the system "
+"module, including caching, enabling or disabling of modules and themes, "
+"preparing and displaying the administrative page, and configuring "
+"fundamental site settings. A number of key system maintenance operations are "
+"also part of the system module."
+msgstr ""
+
+#: modules/system/system.module:53
+msgid "The system module provides:"
+msgstr ""
+
+#: modules/system/system.module:54
+msgid ""
+"support for enabling and disabling <a href=\"@modules\">modules</a>. Drupal "
+"comes packaged with a number of core modules; each module provides a "
+"discrete set of features and may be enabled depending on the needs of your "
+"site. A wide array of additional modules contributed by members of the "
+"Drupal community are available for download at the <a href=\"@drupal-modules"
+"\">Drupal.org module page</a>."
+msgstr ""
+
+#: modules/system/system.module:55
+msgid ""
+"support for enabling and disabling <a href=\"@themes\">themes</a>, which "
+"determine the design and presentation of your site. Drupal comes packaged "
+"with several core themes and additional contributed themes are available at "
+"the <a href=\"@drupal-themes\">Drupal.org theme page</a>."
+msgstr ""
+
+#: modules/system/system.module:56
+msgid ""
+"a robust <a href=\"@cache-settings\">caching system</a> that allows the "
+"efficient re-use of previously-constructed web pages and web page "
+"components. Drupal stores the pages requested by anonymous users in a "
+"compressed format; depending on your site configuration and the amount of "
+"your web traffic tied to anonymous visitors, Drupal's caching system may "
+"significantly increase the speed of your site."
+msgstr ""
+
+#: modules/system/system.module:57
+msgid ""
+"a set of routine administrative operations that rely on a correctly-"
+"configured <a href=\"@cron\">cron maintenance task</a> to run automatically. "
+"A number of other modules, including the feed aggregator, ping module and "
+"search also rely on <a href=\"@cron\">cron maintenance tasks</a>. For more "
+"information, see the online handbook entry for <a href=\"@handbook"
+"\">configuring cron jobs</a>."
+msgstr ""
+
+#: modules/system/system.module:58
+msgid ""
+"basic configuration options for your site, including <a href=\"@date-settings"
+"\">date and time settings</a>, <a href=\"@file-system\">file system "
+"settings</a>, <a href=\"@clean-url\">clean URL support</a>, <a href=\"@site-"
+"info\">site name and other information</a>, and a <a href=\"@site-maintenance"
+"\">site maintenance</a> function for taking your site temporarily off-line."
+msgstr ""
+
+#: modules/system/system.module:59
+msgid ""
+"For more information, see the online handbook entry for <a href=\"@system"
+"\">System module</a>."
+msgstr ""
+
+#: modules/system/system.module:62
+msgid ""
+"Welcome to the administration section. Here you may control how your site "
+"functions."
+msgstr ""
+"Bienvenido a la sección de administración. Aquí puede controlar cómo "
+"funciona su sitio."
+
+#: modules/system/system.module:64
+msgid "This page shows you all available administration tasks for each module."
+msgstr ""
+"Esta página le muestra todas las tareas de administración disponibles para "
+"cada módulo."
+
+#: modules/system/system.module:66
+msgid ""
+"Select which themes are available to your users and specify the default "
+"theme. To configure site-wide display settings, click the \"configure\" task "
+"above. Alternatively, to override these settings in a specific theme, click "
+"the \"configure\" link for that theme. Note that different themes may have "
+"different regions available for displaying content; for consistency in "
+"presentation, you may wish to enable only one theme."
+msgstr ""
+
+#: modules/system/system.module:67
+msgid ""
+"To change the appearance of your site, a number of <a href=\"@themes"
+"\">contributed themes</a> are available."
+msgstr ""
+
+#: modules/system/system.module:72
+msgid ""
+"These options control the display settings for the <code>%template</code> "
+"theme. When your site is displayed using this theme, these settings will be "
+"used. By clicking \"Reset to defaults,\" you can choose to use the <a href="
+"\"@global\">global settings</a> for this theme."
+msgstr ""
+"Estas opciones controlan las opciones de visualización para el tema <code>%"
+"template</code>. Cuando se muestre su sitio usando este tema, éstas son las "
+"opciones que se utilizan. Haciendo clic en \"Volver a las opciones "
+"predefinidas\", puede elegir que se utilicen las <a href=\"@global"
+"\">opciones globales</a> para este tema."
+
+#: modules/system/system.module:74
+msgid ""
+"These options control the default display settings for your entire site, "
+"across all themes. Unless they have been overridden by a specific theme, "
+"these settings will be used."
+msgstr ""
+"Estas opciones controlan las opciones predefinidas de visualización para "
+"todo el sitio y para todos los temas. A no ser que se alteren en un tema en "
+"concreto, son las opciones que se emplean."
+
+#: modules/system/system.module:76
+msgid ""
+"Modules are plugins that extend Drupal's core functionality. Enable modules "
+"by selecting the <em>Enabled</em> checkboxes below and clicking the <em>Save "
+"configuration</em> button. Once a module is enabled, new <a href="
+"\"@permissions\">permissions</a> may be available. To reduce server load, "
+"modules with their <em>Throttle</em> checkbox selected are temporarily "
+"disabled when your site becomes extremely busy. (Note that the <em>Throttle</"
+"em> checkbox is only available if the Throttle module is enabled.)"
+msgstr ""
+
+#: modules/system/system.module:78
+msgid ""
+"The auto-throttle functionality must be enabled on the <a href=\"@throttle"
+"\">throttle configuration page</a> after having enabled the throttle module."
+msgstr ""
+
+#: modules/system/system.module:81
+msgid ""
+"It is important that <a href=\"@update-php\">update.php</a> is run every "
+"time a module is updated to a newer version."
+msgstr ""
+"Es importante ejecutar <a href=\"@update-php\">update.php</a> cada vez que "
+"un módulo sea actualizado a una nueva versión."
+
+#: modules/system/system.module:82
+msgid ""
+"You can find all administration tasks belonging to a particular module on "
+"the <a href=\"@by-module\">administration by module page</a>."
+msgstr ""
+
+#: modules/system/system.module:83
+msgid ""
+"To extend the functionality of your site, a number of <a href=\"@modules"
+"\">contributed modules</a> are available."
+msgstr ""
+
+#: modules/system/system.module:86
+msgid ""
+"The uninstall process removes all data related to a module. To uninstall a "
+"module, you must first disable it. Not all modules support this feature."
+msgstr ""
+"El proceso de desinstalación elimina todos los datos relacionados con un "
+"módulo. Para desinstalar un módulo, primero tiene que desactivarlo. No todos "
+"los módulos admiten esta característica."
+
+#: modules/system/system.module:89
+msgid ""
+"The <em>Powered by Drupal</em> block is an optional link to the home page of "
+"the Drupal project. While there is absolutely no requirement that sites "
+"feature this link, it may be used to show support for Drupal."
+msgstr ""
+
+#: modules/system/system.module:94
+msgid ""
+"Actions are individual tasks that the system can do, such as unpublishing a "
+"piece of content or banning a user. Modules, such as the trigger module, can "
+"fire these actions when certain system events happen; for example, when a "
+"new post is added or when a user logs in. Modules may also provide "
+"additional actions."
+msgstr ""
+
+#: modules/system/system.module:95
+msgid ""
+"There are two types of actions: simple and advanced. Simple actions do not "
+"require any additional configuration, and are listed here automatically. "
+"Advanced actions can do more than simple actions; for example, send an e-"
+"mail to a specified address, or check for certain words within a piece of "
+"content. These actions need to be created and configured first before they "
+"may be used. To create an advanced action, select the action from the drop-"
+"down below and click the <em>Create</em> button."
+msgstr ""
+
+#: modules/system/system.module:97
+msgid ""
+"You may proceed to the <a href=\"@url\">Triggers</a> page to assign these "
+"actions to system events."
+msgstr ""
+
+#: modules/system/system.module:101
+msgid ""
+"An advanced action offers additional configuration options which may be "
+"filled out below. Changing the <em>Description</em> field is recommended, in "
+"order to better identify the precise action taking place. This description "
+"will be displayed in modules such as the trigger module when assigning "
+"actions to system events, so it is best if it is as descriptive as possible "
+"(for example, \"Send e-mail to Moderation Team\" rather than simply \"Send e-"
+"mail\")."
+msgstr ""
+
+#: modules/system/system.module:103
+msgid ""
+"Here you can find a short overview of your site's parameters as well as any "
+"problems detected with your installation. It may be useful to copy and paste "
+"this information into support requests filed on drupal.org's support forums "
+"and project issue queues."
+msgstr ""
+
+#: modules/system/system.module:544
+msgid "Selecting a different theme will change the look and feel of the site."
+msgstr "Al seleccionar un tema diferente cambia la apariencia de su sitio."
+
+#: modules/system/system.module:556
+msgid "Time zone"
+msgstr "Zona horaria"
+
+#: modules/system/system.module:559
+msgid ""
+"Select your current local time. Dates and times throughout this site will be "
+"displayed using this time zone."
+msgstr ""
+"Seleccione la hora local. Las fechas y horas de todo el sitio se mostrarán "
+"conforme a esta zona horaria."
+
+#: modules/system/system.module:576
+msgid "Powered by Drupal"
+msgstr ""
+
+#: modules/system/system.module:586
+msgid "Badge color"
+msgstr ""
+
+#: modules/system/system.module:588
+msgid "Black"
+msgstr ""
+
+#: modules/system/system.module:588
+msgid "Blue"
+msgstr ""
+
+#: modules/system/system.module:588
+msgid "Gray"
+msgstr ""
+
+#: modules/system/system.module:592
+msgid "Badge size"
+msgstr ""
+
+#: modules/system/system.module:594
+msgid "Small"
+msgstr ""
+
+#: modules/system/system.module:594
+msgid "Large"
+msgstr ""
+
+#: modules/system/system.module:684
+msgid "Theme configuration"
+msgstr "Configuración del tema"
+
+#: modules/system/system.module:707
+msgid "(site default theme)"
+msgstr "(tema predefinido del sitio)"
+
+#: modules/system/system.module:1020
+msgid "The settings have not been saved because of the errors."
+msgstr "Las opciones no se han guardado porque hubo errores."
+
+#: modules/system/system.module:1147
+msgid "Confirm"
+msgstr "Confirmar"
+
+#: modules/system/system.module:1191
+msgid "Configure permissions"
+msgstr "Configurar permisos"
+
+#: modules/system/system.module:1240
+msgid "When cron runs"
+msgstr ""
+
+#: modules/system/system.module:1254
+msgid "Display a message to the user"
+msgstr ""
+
+#: modules/system/system.module:1275
+msgid "Redirect to URL"
+msgstr ""
+
+#: modules/system/system.module:1295
+msgid "Choose an advanced action"
+msgstr ""
+
+#: modules/system/system.module:1310
+msgid "Action type"
+msgstr ""
+
+#: modules/system/system.module:1330
+msgid "Actions available to Drupal:"
+msgstr ""
+
+#: modules/system/system.module:1356
+msgid "Make a new advanced action available"
+msgstr ""
+
+#: modules/system/system.module:1368
+msgid "Create"
+msgstr ""
+
+#: modules/system/system.module:1435
+msgid ""
+"A unique description for this advanced action. This description will be "
+"displayed in the interface of modules that integrate with actions, such as "
+"Trigger module."
+msgstr ""
+
+#: modules/system/system.module:1491
+msgid "The action has been successfully saved."
+msgstr ""
+
+#: modules/system/system.module:1509
+msgid "Are you sure you want to delete the action %action?"
+msgstr ""
+
+#: modules/system/system.module:1511
+msgid "This cannot be undone."
+msgstr "Esta acción es irreversible."
+
+#: modules/system/system.module:1527
+msgid "Action %action was deleted"
+msgstr ""
+
+#: modules/system/system.module:1539
+msgid "Deleted orphaned action (%action)."
+msgstr ""
+
+#: modules/system/system.module:1575
+msgid "Recipient"
+msgstr ""
+
+#: modules/system/system.module:1578
+msgid ""
+"The email address to which the message should be sent OR enter %author if "
+"you would like to send an e-mail to the author of the original post."
+msgstr ""
+
+#: modules/system/system.module:1585
+msgid "The subject of the message."
+msgstr ""
+
+#: modules/system/system.module:1593
+msgid ""
+"The message that should be sent. You may include the following variables: %"
+"site_name, %username, %node_url, %node_type, %title, %teaser, %body. Not all "
+"variables will be available in all contexts."
+msgstr ""
+
+#: modules/system/system.module:1606
+msgid "Please enter a valid email address or %author."
+msgstr ""
+
+#: modules/system/system.module:1739
+msgid ""
+"The message to be displayed to the current user. You may include the "
+"following variables: %site_name, %username, %node_url, %node_type, %title, %"
+"teaser, %body. Not all variables will be available in all contexts."
+msgstr ""
+
+#: modules/system/system.module:1812
+msgid ""
+"The URL to which the user should be redirected. This can be an internal URL "
+"like node/1234 or an external URL like http://drupal.org."
+msgstr ""
+
+#: modules/system/system.module:1875,1875
+msgid "Powered by Drupal, an open source content management system"
+msgstr ""
+
+#: modules/system/system.module:158
+msgid "administer site configuration"
+msgstr "administrar la configuración del sitio"
+
+#: modules/system/system.module:158
+msgid "access administration pages"
+msgstr "páginas de administración de acceso"
+
+#: modules/system/system.module:158
+msgid "administer actions"
+msgstr "administrar acciones"
+
+#: modules/system/system.module:158
+msgid "select different theme"
+msgstr "seleccionar un tema diferente"
+
+#: modules/system/system.module:158
+msgid "administer files"
+msgstr "administrar ficheros"
+
+#: modules/system/system.module:0
+msgid "system"
+msgstr "sistema"
+
+#: modules/system/system.install:417
+msgid ""
+"Named variable/value pairs created by Drupal core or any other module or "
+"theme. All variables are cached in memory at the start of every Drupal "
+"request so developers should not be careless about what is stored here."
+msgstr ""
+
+#: modules/system/system.install:420
+msgid "The name of the variable."
+msgstr ""
+
+#: modules/system/system.install:426
+msgid "The value of the variable."
+msgstr "El valor de la variable."
+
+#: modules/system/system.install:435
+msgid "Stores action information."
+msgstr ""
+
+#: modules/system/system.install:438,474
+msgid "Primary Key: Unique actions ID."
+msgstr ""
+
+#: modules/system/system.install:444
+msgid ""
+"The object that that action acts on (node, user, comment, system or custom "
+"types.)"
+msgstr ""
+
+#: modules/system/system.install:450
+msgid "The callback function that executes when the action runs."
+msgstr ""
+
+#: modules/system/system.install:456
+msgid "Parameters to be passed to the callback function."
+msgstr ""
+
+#: modules/system/system.install:461
+msgid "Description of the action."
+msgstr "Descripción de la acción"
+
+#: modules/system/system.install:471
+msgid "Stores action IDs for non-default actions."
+msgstr ""
+
+#: modules/system/system.install:483
+msgid ""
+"Stores details about batches (processes that run in multiple HTTP requests)."
+msgstr ""
+
+#: modules/system/system.install:486
+msgid "Primary Key: Unique batch ID."
+msgstr ""
+
+#: modules/system/system.install:491
+msgid ""
+"A string token generated against the current user's session id and the batch "
+"id, used to ensure that only the user who submitted the batch can "
+"effectively access it."
+msgstr ""
+
+#: modules/system/system.install:496
+msgid ""
+"A Unix timestamp indicating when this batch was submitted for processing. "
+"Stale batches are purged at cron time."
+msgstr ""
+
+#: modules/system/system.install:500
+msgid "A serialized array containing the processing data for the batch."
+msgstr ""
+
+#: modules/system/system.install:510
+msgid ""
+"Generic cache table for caching things not separated out into their own "
+"tables. Contributed modules may also use this to store cached items."
+msgstr ""
+
+#: modules/system/system.install:513
+msgid "Primary Key: Unique cache ID."
+msgstr ""
+
+#: modules/system/system.install:519
+msgid "A collection of data to cache."
+msgstr ""
+
+#: modules/system/system.install:524
+msgid ""
+"A Unix timestamp indicating when the cache entry should expire, or 0 for "
+"never."
+msgstr ""
+
+#: modules/system/system.install:529
+msgid "A Unix timestamp indicating when the cache entry was created."
+msgstr ""
+
+#: modules/system/system.install:534
+msgid "Any custom HTTP headers to be added to cached data."
+msgstr ""
+
+#: modules/system/system.install:538
+msgid "A flag to indicate whether content is serialized (1) or not (0)."
+msgstr ""
+
+#: modules/system/system.install:549
+msgid ""
+"Cache table for the form system to store recently built forms and their "
+"storage data, to be used in subsequent page requests."
+msgstr ""
+
+#: modules/system/system.install:551
+msgid ""
+"Cache table used to store compressed pages for anonymous users, if page "
+"caching is enabled."
+msgstr ""
+
+#: modules/system/system.install:553
+msgid ""
+"Cache table for the menu system to store router information as well as "
+"generated link trees for various menu/page/user combinations."
+msgstr ""
+
+#: modules/system/system.install:556
+msgid "Stores information for uploaded files."
+msgstr ""
+
+#: modules/system/system.install:559
+msgid "Primary Key: Unique files ID."
+msgstr ""
+
+#: modules/system/system.install:564
+msgid "The {users}.uid of the user who is associated with the file."
+msgstr ""
+
+#: modules/system/system.install:570
+msgid "Name of the file."
+msgstr "Nombre del fichero."
+
+#: modules/system/system.install:576
+msgid "Path of the file relative to Drupal root."
+msgstr "Ruta del fichero (relativa a la raiz de Drupal)."
+
+#: modules/system/system.install:582
+msgid "The file MIME type."
+msgstr "El tipo MIME del fichero."
+
+#: modules/system/system.install:588
+msgid "The size of the file in bytes."
+msgstr "El tamaño del fichero en bytes."
+
+#: modules/system/system.install:594
+msgid "A flag indicating whether file is temporary (1) or permanent (0)."
+msgstr ""
+
+#: modules/system/system.install:599
+msgid "UNIX timestamp for when the file was added."
+msgstr ""
+
+#: modules/system/system.install:614
+msgid ""
+"Flood controls the threshold of events, such as the number of contact "
+"attempts."
+msgstr ""
+
+#: modules/system/system.install:617
+msgid "Unique flood event ID."
+msgstr ""
+
+#: modules/system/system.install:621
+msgid "Name of event (e.g. contact)."
+msgstr ""
+
+#: modules/system/system.install:627
+msgid "Hostname of the visitor."
+msgstr ""
+
+#: modules/system/system.install:633
+msgid "Timestamp of the event."
+msgstr ""
+
+#: modules/system/system.install:645
+msgid "A record of which {users} have read which {node}s."
+msgstr ""
+
+#: modules/system/system.install:648
+msgid "The {users}.uid that read the {node} nid."
+msgstr ""
+
+#: modules/system/system.install:653
+msgid "The {node}.nid that was read."
+msgstr ""
+
+#: modules/system/system.install:658
+msgid "The Unix timestamp at which the read occurred."
+msgstr ""
+
+#: modules/system/system.install:669
+msgid "Maps paths to various callbacks (access, page and title)"
+msgstr ""
+
+#: modules/system/system.install:672
+msgid "Primary Key: the Drupal path this entry describes"
+msgstr ""
+
+#: modules/system/system.install:678
+msgid ""
+"A serialized array of function names (like node_load) to be called to load "
+"an object corresponding to a part of the current path."
+msgstr ""
+
+#: modules/system/system.install:684
+msgid ""
+"A serialized array of function names (like user_current_to_arg) to be called "
+"to replace a part of the router path with another string."
+msgstr ""
+
+#: modules/system/system.install:690
+msgid ""
+"The callback which determines the access to this router path. Defaults to "
+"user_access."
+msgstr ""
+
+#: modules/system/system.install:696
+msgid "A serialized array of arguments for the access callback."
+msgstr ""
+
+#: modules/system/system.install:700
+msgid "The name of the function that renders the page."
+msgstr ""
+
+#: modules/system/system.install:706
+msgid "A serialized array of arguments for the page callback."
+msgstr ""
+
+#: modules/system/system.install:710
+msgid "A numeric representation of how specific the path is."
+msgstr ""
+
+#: modules/system/system.install:715
+msgid "Number of parts in this router path."
+msgstr ""
+
+#: modules/system/system.install:721
+msgid ""
+"Only for local tasks (tabs) - the router path of the parent page (which may "
+"also be a local task)."
+msgstr ""
+
+#: modules/system/system.install:727
+msgid ""
+"Router path of the closest non-tab parent page. For pages that are not local "
+"tasks, this will be the same as the path."
+msgstr ""
+
+#: modules/system/system.install:733
+msgid ""
+"The title for the current page, or the title for the tab if this is a local "
+"task."
+msgstr ""
+
+#: modules/system/system.install:739
+msgid "A function which will alter the title. Defaults to t()"
+msgstr ""
+
+#: modules/system/system.install:745
+msgid ""
+"A serialized array of arguments for the title callback. If empty, the title "
+"will be used as the sole argument for the title callback."
+msgstr ""
+
+#: modules/system/system.install:751
+msgid ""
+"Numeric representation of the type of the menu item, like MENU_LOCAL_TASK."
+msgstr ""
+
+#: modules/system/system.install:756
+msgid ""
+"Name of a function used to render the block on the system administration "
+"page for this item."
+msgstr ""
+
+#: modules/system/system.install:762
+msgid "A description of this item."
+msgstr ""
+
+#: modules/system/system.install:766
+msgid ""
+"The position of the block (left or right) on the system administration page "
+"for this item."
+msgstr ""
+
+#: modules/system/system.install:772
+msgid ""
+"Weight of the element. Lighter weights are higher up, heavier weights go "
+"down."
+msgstr ""
+
+#: modules/system/system.install:777
+msgid ""
+"The file to include for this element, usually the page callback function "
+"lives in this file."
+msgstr ""
+
+#: modules/system/system.install:789
+msgid "Contains the individual links within a menu."
+msgstr "Contiene los enlaces individuales dentro de un menú."
+
+#: modules/system/system.install:792
+msgid ""
+"The menu name. All links with the same menu name (such as 'navigation') are "
+"part of the same menu."
+msgstr ""
+"El nombre del menú. Todos los enlaces con el mismo nombre de menú (como "
+"'navegación') forman parte del mismo menú."
+
+#: modules/system/system.install:798
+msgid "The menu link ID (mlid) is the integer primary key."
+msgstr ""
+
+#: modules/system/system.install:803
+msgid ""
+"The parent link ID (plid) is the mlid of the link above in the hierarchy, or "
+"zero if the link is at the top level in its menu."
+msgstr ""
+
+#: modules/system/system.install:809
+msgid "The Drupal path or external path this link points to."
+msgstr ""
+"La ruta dentro de este sistema Drupal o la ruta externa a la que apunta este "
+"enlace."
+
+#: modules/system/system.install:815
+msgid ""
+"For links corresponding to a Drupal path (external = 0), this connects the "
+"link to a {menu_router}.path for joins."
+msgstr ""
+
+#: modules/system/system.install:821
+msgid ""
+"The text displayed for the link, which may be modified by a title callback "
+"stored in {menu_router}."
+msgstr ""
+
+#: modules/system/system.install:827
+msgid ""
+"A serialized array of options to be passed to the url() or l() function, "
+"such as a query string or HTML attributes."
+msgstr ""
+
+#: modules/system/system.install:831
+msgid "The name of the module that generated this link."
+msgstr "El nombre del módulo que generó este enlace."
+
+#: modules/system/system.install:837
+msgid ""
+"A flag for whether the link should be rendered in menus. (1 = a disabled "
+"menu item that may be shown on admin screens, -1 = a menu callback, 0 = a "
+"normal, visible link)"
+msgstr ""
+
+#: modules/system/system.install:843
+msgid ""
+"A flag to indicate if the link points to a full URL starting with a "
+"protocol, like http:// (1 = external, 0 = internal)."
+msgstr ""
+
+#: modules/system/system.install:849
+msgid ""
+"Flag indicating whether any links have this link as a parent (1 = children "
+"exist, 0 = no children)."
+msgstr ""
+
+#: modules/system/system.install:855
+msgid ""
+"Flag for whether this link should be rendered as expanded in menus - "
+"expanded links always have their child links displayed, instead of only when "
+"the link is in the active trail (1 = expanded, 0 = not expanded)"
+msgstr ""
+
+#: modules/system/system.install:861
+msgid "Link weight among links in the same menu at the same depth."
+msgstr ""
+
+#: modules/system/system.install:866
+msgid ""
+"The depth relative to the top level. A link with plid == 0 will have depth "
+"== 1."
+msgstr ""
+
+#: modules/system/system.install:872
+msgid ""
+"A flag to indicate that the user has manually created or edited the link (1 "
+"= customized, 0 = not customized)."
+msgstr ""
+
+#: modules/system/system.install:878
+msgid ""
+"The first mlid in the materialized path. If N = depth, then pN must equal "
+"the mlid. If depth > 1 then p(N-1) must equal the plid. All pX where X > "
+"depth must equal zero. The columns p1 .. p9 are also called the parents."
+msgstr ""
+
+#: modules/system/system.install:884
+msgid "The second mlid in the materialized path. See p1."
+msgstr ""
+
+#: modules/system/system.install:890
+msgid "The third mlid in the materialized path. See p1."
+msgstr ""
+
+#: modules/system/system.install:896
+msgid "The fourth mlid in the materialized path. See p1."
+msgstr ""
+
+#: modules/system/system.install:902
+msgid "The fifth mlid in the materialized path. See p1."
+msgstr ""
+
+#: modules/system/system.install:908
+msgid "The sixth mlid in the materialized path. See p1."
+msgstr ""
+
+#: modules/system/system.install:914
+msgid "The seventh mlid in the materialized path. See p1."
+msgstr ""
+
+#: modules/system/system.install:920
+msgid "The eighth mlid in the materialized path. See p1."
+msgstr ""
+
+#: modules/system/system.install:926
+msgid "The ninth mlid in the materialized path. See p1."
+msgstr ""
+
+#: modules/system/system.install:932
+msgid ""
+"Flag that indicates that this link was generated during the update from "
+"Drupal 5."
+msgstr ""
+
+#: modules/system/system.install:950
+msgid ""
+"Drupal's session handlers read and write into the sessions table. Each "
+"record represents a user session, either anonymous or authenticated."
+msgstr ""
+
+#: modules/system/system.install:953
+msgid "The {users}.uid corresponding to a session, or 0 for anonymous user."
+msgstr ""
+
+#: modules/system/system.install:958
+msgid "Primary key: A session ID. The value is generated by PHP's Session API."
+msgstr ""
+
+#: modules/system/system.install:964
+msgid "The IP address that last used this session ID (sid)."
+msgstr ""
+
+#: modules/system/system.install:970
+msgid ""
+"The Unix timestamp when this session last requested a page. Old records are "
+"purged by PHP automatically."
+msgstr ""
+
+#: modules/system/system.install:975
+msgid ""
+"The time of this user's last post. This is used when the site has specified "
+"a minimum_cache_lifetime. See cache_get()."
+msgstr ""
+
+#: modules/system/system.install:980
+msgid ""
+"The serialized contents of $_SESSION, an array of name/value pairs that "
+"persists across page requests by this session ID. Drupal loads $_SESSION "
+"from here at the start of each request and saves it at the end."
+msgstr ""
+
+#: modules/system/system.install:993
+msgid ""
+"A list of all modules, themes, and theme engines that are or have been "
+"installed in Drupal's file system."
+msgstr ""
+
+#: modules/system/system.install:996
+msgid ""
+"The path of the primary file for this item, relative to the Drupal root; e."
+"g. modules/node/node.module."
+msgstr ""
+
+#: modules/system/system.install:1002
+msgid "The name of the item; e.g. node."
+msgstr ""
+
+#: modules/system/system.install:1008
+msgid "The type of the item, either module, theme, or theme_engine."
+msgstr ""
+
+#: modules/system/system.install:1014
+msgid "A theme's 'parent'. Can be either a theme or an engine."
+msgstr ""
+
+#: modules/system/system.install:1020
+msgid "Boolean indicating whether or not this item is enabled."
+msgstr ""
+
+#: modules/system/system.install:1025
+msgid ""
+"Boolean indicating whether this item is disabled when the throttle.module "
+"disables throttleable items."
+msgstr ""
+
+#: modules/system/system.install:1031
+msgid ""
+"Boolean indicating whether this module is loaded during Drupal's early "
+"bootstrapping phase (e.g. even before the page cache is consulted)."
+msgstr ""
+
+#: modules/system/system.install:1036
+msgid ""
+"The module's database schema version number. -1 if the module is not "
+"installed (its tables do not exist); 0 or the largest N of the module's "
+"hook_update_N() function that has either been run or existed when the module "
+"was first installed."
+msgstr ""
+
+#: modules/system/system.install:1042
+msgid ""
+"The order in which this module's hooks should be invoked relative to other "
+"modules. Equal-weighted modules are ordered by name."
+msgstr ""
+
+#: modules/system/system.install:1047
+msgid ""
+"A serialized array containing information from the module's .info file; keys "
+"can include name, description, package, version, core, dependencies, "
+"dependents, and php."
+msgstr ""
+
+#: modules/system/system.install:1060
+msgid ""
+"A list of URL aliases for Drupal paths; a user may visit either the source "
+"or destination path."
+msgstr ""
+
+#: modules/system/system.install:1063
+msgid "A unique path alias identifier."
+msgstr ""
+
+#: modules/system/system.install:1068
+msgid "The Drupal path this alias is for; e.g. node/12."
+msgstr ""
+
+#: modules/system/system.install:1074
+msgid "The alias for this path; e.g. title-of-the-story."
+msgstr ""
+
+#: modules/system/system.install:1080
+msgid ""
+"The language this alias is for; if blank, the alias will be used for unknown "
+"languages. Each Drupal path can have an alias for each supported language."
+msgstr ""
+
+#: modules/system/system.install:20
+msgid "Drupal"
+msgstr "Drupal"
+
+#: modules/system/system.install:30
+msgid "Web server"
+msgstr "Servidor web"
+
+#: modules/system/system.install:36
+msgid "PHP"
+msgstr "PHP"
+
+#: modules/system/system.install:40
+msgid ""
+"Your PHP installation is too old. Drupal requires at least PHP %version."
+msgstr ""
+"Su instalación de PHP es demasiado antigua. Drupal necesita al menos PHP %"
+"version."
+
+#: modules/system/system.install:107,254
+msgid "Not protected"
+msgstr "No protegido"
+
+#: modules/system/system.install:112
+msgid ""
+"The directory %file is not protected from modifications and poses a security "
+"risk. You must change the directory's permissions to be non-writable. "
+msgstr ""
+
+#: modules/system/system.install:115
+msgid ""
+"The file %file is not protected from modifications and poses a security "
+"risk. You must change the file's permissions to be non-writable."
+msgstr ""
+"El archivo %file no está protegido contra modificaciones y supone un riesgo "
+"de seguridad. Debe cambiar los permisos del archivo para que no se pueda "
+"escribir en él."
+
+#: modules/system/system.install:120,261
+msgid "Protected"
+msgstr "Protegido"
+
+#: modules/system/system.install:123
+msgid "Configuration file"
+msgstr "Archivo de configuración"
+
+#: modules/system/system.install:133
+msgid ""
+"For more information, see the online handbook entry for <a href=\"@cron-"
+"handbook\">configuring cron jobs</a>."
+msgstr ""
+
+#: modules/system/system.install:157
+msgid ""
+"Cron has not run. Please visit the <a href=\"@status\">status report</a> for "
+"more information."
+msgstr ""
+
+#: modules/system/system.install:162
+msgid "Never run"
+msgstr "No ejecutar nunca"
+
+#: modules/system/system.install:163
+msgid "Cron has not run."
+msgstr "cron no se ha ejecutado."
+
+#: modules/system/system.install:166
+msgid "Last run !time ago"
+msgstr "Ejecutado hace !time"
+
+#: modules/system/system.install:169
+msgid "Cron has not run recently."
+msgstr "Cron no se ha ejecutado recientemente."
+
+#: modules/system/system.install:174
+msgid "Cron maintenance tasks"
+msgstr "Tareas de mantenimiento de cron"
+
+#: modules/system/system.install:177
+msgid "You can <a href=\"@cron\">run cron manually</a>."
+msgstr "Puede <a href=\"@cron\">ejecutar cron manualmente</a>."
+
+#: modules/system/system.install:201
+msgid "The directory %directory is not writable."
+msgstr "No se puede escribir en el directorio %directory."
+
+#: modules/system/system.install:196
+msgid "Not writable"
+msgstr "No se puede escribir"
+
+#: modules/system/system.install:205
+msgid ""
+"You may need to set the correct directory at the <a href=\"@admin-file-system"
+"\">file system settings page</a> or change the current directory's "
+"permissions so that it is writable."
+msgstr ""
+"Puede que tenga que definir el directorio correcto en la <a href=\"@admin-"
+"file-system\">página de opciones del sistema de archivos</a> o cambiar los "
+"permisos del directorio actual, para que se pueda escribir en él."
+
+#: modules/system/system.install:220
+msgid "Writable (<em>public</em> download method)"
+msgstr "Se puede escribir (método <em>público</em> de descarga)"
+
+#: modules/system/system.install:223
+msgid "Writable (<em>private</em> download method)"
+msgstr "Se puede escribir (método <em>privado</em> de descarga)"
+
+#: modules/system/system.install:184
+msgid "File system"
+msgstr "Sistema de archivos"
+
+#: modules/system/system.install:230
+msgid "Database updates"
+msgstr ""
+
+#: modules/system/system.install:243
+msgid ""
+"Some modules have database schema updates to install. You should run the <a "
+"href=\"@update\">database update script</a> immediately."
+msgstr ""
+"Algunos módulos tienen que instalar actualizaciones al esquema de la base de "
+"datos. Debe ejecutar inmediatamente el <a href=\"@update\">guión de "
+"actualización de la base de datos</a>."
+
+#: modules/system/system.install:256
+msgid ""
+"The update.php script is accessible to everyone without authentication "
+"check, which is a security risk. You must change the $update_free_access "
+"value in your settings.php back to FALSE."
+msgstr ""
+
+#: modules/system/system.install:264
+msgid "Access to update.php"
+msgstr ""
+
+#: modules/system/system.install:275
+msgid "Not enabled"
+msgstr ""
+
+#: modules/system/system.install:277
+msgid ""
+"Update notifications are not enabled. It is <strong>highly recommended</"
+"strong> that you enable the update status module from the <a href=\"@module"
+"\">module administration page</a> in order to stay up-to-date on new "
+"releases. For more information please read the <a href=\"@update\">Update "
+"status handbook page</a>."
+msgstr ""
+
+#: modules/system/system.install:286
+msgid "HTTP request status"
+msgstr ""
+
+#: modules/system/system.install:287
+msgid "Fails"
+msgstr ""
+
+#: modules/system/system.install:289
+msgid ""
+"Your system or network configuration does not allow Drupal to access web "
+"pages, resulting in reduced functionality. This could be due to your "
+"webserver configuration or PHP settings, and should be resolved in order to "
+"download information about available updates, fetch aggregator feeds, sign "
+"in via OpenID, or use other network-dependent services."
+msgstr ""
+
+#: modules/system/system.admin.inc:1716
+msgid "Cron ran successfully."
+msgstr ""
+
+#: modules/system/system.admin.inc:1719
+msgid "Cron run failed."
+msgstr ""
+
+#: modules/system/system.module:158
+msgid "access site reports"
+msgstr "acceder a los informes del sitio web"
+
+#: modules/system/system.install:55
+msgid ""
+"<em>register_globals</em> is enabled. Drupal requires this configuration "
+"directive to be disabled. Your site may not be secure when "
+"<em>register_globals</em> is enabled. The PHP manual has instructions for <a "
+"href=\"http://php.net/configuration.changes\">how to change configuration "
+"settings</a>."
+msgstr ""
+"<em>register_globals</em> está habilitado. Drupal requiere que esta "
+"directiva de configuración sea deshabilitada. Su sitio puede no ser seguro "
+"cuando <em>register_globals</em> está habilitado. El manual de PHP tiene "
+"instrucciones de  <a href=\"http://php.net/configuration.changes\">cómo "
+"cambiar los ajustes de configuración</a>."
+
+#: modules/system/system.install:66
+msgid "PHP memory limit"
+msgstr ""
+
+#: modules/system/system.install:73
+msgid ""
+"Consider increasing your PHP memory limit to %memory_minimum_limit to help "
+"prevent errors in the installation process."
+msgstr ""
+"Considere la posibilidad de incrementar el límite de su memoria PHP a %"
+"memory_minimum_limit  para prevenir errores en el proceso de instalación."
+
+#: modules/system/system.install:79
+msgid ""
+"Depending on your configuration, Drupal can run with a %memory_limit PHP "
+"memory limit. However, a %memory_minimum_limit PHP memory limit or above is "
+"recommended, especially if your site uses additional custom or contributed "
+"modules."
+msgstr ""
+"Dependiendo de su configuración, Drupal puede funcionar con un límite de "
+"memoria PHP %memory_limit. Sin embargo es recomendable que el límite de la  "
+"memoria PHP %memory_minimum_limit  sea superior, especialmente si su sitio "
+"utiliza personalizaciones adicionales o módulos de contribución."
+
+#: modules/system/system.install:84
+msgid ""
+"Increase the memory limit by editing the memory_limit parameter in the file %"
+"configuration-file and then restart your web server (or contact your system "
+"administrator or hosting provider for assistance)."
+msgstr ""
+"Incremente el límite de memoria editando el parámentro memory_limit en el "
+"archivo %configuration-file y restaure su servidor web (o contacte con el "
+"administrador de su sistema o proveedor de alojamiento para que le ayude)"
+
+#: modules/system/system.install:87
+msgid ""
+"Contact your system administrator or hosting provider for assistance with "
+"increasing your PHP memory limit."
+msgstr ""
+
+#: modules/system/system.install:90
+msgid "See the <a href=\"@url\">Drupal requirements</a> for more information."
+msgstr ""
+
+#: modules/system/system.install:210
+msgid ""
+"An automated attempt to create this directory failed, possibly due to a "
+"permissions problem. To proceed with the installation, either create the "
+"directory and modify its permissions manually, or ensure that the installer "
+"has the permissions to create it automatically. For more information, please "
+"see INSTALL.txt or the <a href=\"@handbook_url\">on-line handbook</a>."
+msgstr ""
+"Drupal ha intentado crear de forma automática este directorio y ha fallado "
+"posiblemente debido a problemas con los permisos. Para proceder con la "
+"instalación deberá crear el directorio y establecer los permisos de forma "
+"manual o asegurarse de que el instalador automático tiene los permisos "
+"necesarios. Si desea más inforamción, pro favor lea el archivo INSTALL.txt o "
+"el <a href=\"@handbook_url\">manual on-line </a>."
+
+#: modules/system/system.install:46
+msgid "PHP register globals"
+msgstr ""
+
+#: modules/system/system.install:57
+msgid "Enabled ('@value')"
+msgstr "('@value') habilitado"
+
+#: modules/system/system.admin.inc:1779
+msgid ""
+"The number of joins without keys that check for key usage after each row; "
+"should be zero."
+msgstr ""
+
+#: modules/system/system.install:76
+msgid ""
+"Consider increasing your PHP memory limit to %memory_minimum_limit to help "
+"prevent errors in the update process."
+msgstr ""
+"Considere la opción de incrementar el límite de su memoria PHP en %"
+"memory_minimum_limit para prevenir errores en el proceso de actualización."

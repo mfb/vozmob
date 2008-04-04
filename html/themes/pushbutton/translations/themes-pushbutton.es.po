@@ -1,0 +1,18 @@
+# Spanish translation of drupal (6.0)
+# Copyright (c) 2008 by the Spanish translation team
+# Generated from file: page.tpl.php,v 1.25 2008/01/24 09:42:53 goba
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: drupal (6.0)\n"
+"POT-Creation-Date: 2008-02-25 18:21+0100\n"
+"PO-Revision-Date: 2008-01-20 18:15+0100\n"
+"Language-Team: Spanish\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: themes/pushbutton/page.tpl.php:15,15
+msgid "Skip navigation"
+msgstr "Omitir navegación"

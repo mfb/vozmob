@@ -1,0 +1,194 @@
+# Spanish translation of drupal (6.0)
+# Copyright (c) 2008 by the Spanish translation team
+# Generated from file: blogapi.module,v 1.115.2.1 2008/02/07 20:11:02 goba
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: drupal (6.0)\n"
+"POT-Creation-Date: 2008-02-25 18:21+0100\n"
+"PO-Revision-Date: 2008-02-20 03:55+0100\n"
+"Language-Team: Spanish\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: modules/blogapi/blogapi.module:15
+msgid ""
+"The Blog API module allows your site's users to access and post to their "
+"blogs from external blogging clients. External blogging clients are "
+"available for a wide range of desktop operating systems, and generally "
+"provide a feature-rich graphical environment for creating and editing posts."
+msgstr ""
+"El módulo API de Blog permite a los usuarios de su sitio acceder y escribir "
+"a sus blogs desde clientes externos. Los clientes de blog externos están "
+"disponibles para una amplia variedad de sistemas operativos de escritorios, "
+"y generalmente proporcionan un rico entorno gráfico para crear y editar "
+"artículos."
+
+#: modules/blogapi/blogapi.module:16
+msgid ""
+"<a href=\"@ecto-link\">Ecto</a>, a blogging client available for both Mac OS "
+"X and Microsoft Windows, can be used with Blog API. Blog API also supports "
+"<a href=\"@blogger-api\">Blogger API</a>, <a href=\"@metaweblog-api"
+"\">MetaWeblog API</a>, and most of the <a href=\"@movabletype-api\">Movable "
+"Type API</a>. Blogging clients and other services (e.g. <a href=\"@flickr"
+"\">Flickr's</a> \"post to blog\") that support these APIs may also be "
+"compatible."
+msgstr ""
+
+#: modules/blogapi/blogapi.module:17
+msgid ""
+"Select the content types available to external clients on the <a href="
+"\"@blogapi-settings\">Blog API settings page</a>. If supported and "
+"available, each content type will be displayed as a separate \"blog\" by the "
+"external client."
+msgstr ""
+
+#: modules/blogapi/blogapi.module:18
+msgid ""
+"For more information, see the online handbook entry for <a href=\"@blogapi"
+"\">Blog API module</a>."
+msgstr ""
+"Para mas información, mira la entrada del manual online de <a href=\"@blogapi"
+"\">API del Modulo Blog</a>."
+
+#: modules/blogapi/blogapi.module:39
+msgid "Returns a list of blogs to which an author has posting privileges."
+msgstr ""
+"Devuelve una lista de blogs para los cuales un autor tiene privilegios de "
+"autoría."
+
+#: modules/blogapi/blogapi.module:44
+msgid "Returns information about an author in the system."
+msgstr "Devuelve información sobre un autor del sistema."
+
+#: modules/blogapi/blogapi.module:49,74
+msgid "Creates a new post, and optionally publishes it."
+msgstr "Crea un envío nuevo y, opcionalmente, lo publica."
+
+#: modules/blogapi/blogapi.module:54
+msgid "Updates the information about an existing post."
+msgstr "Actualiza la información de un envío existente."
+
+#: modules/blogapi/blogapi.module:59,84
+msgid "Returns information about a specific post."
+msgstr "Devuelve información de un envío específico."
+
+#: modules/blogapi/blogapi.module:64
+msgid "Deletes a post."
+msgstr "Elimina un envío."
+
+#: modules/blogapi/blogapi.module:69,99
+msgid "Returns a list of the most recent posts in the system."
+msgstr "Devuelve una lista con los envíos más recientes del sistema."
+
+#: modules/blogapi/blogapi.module:79
+msgid "Updates information about an existing post."
+msgstr "Actualiza información de un envío existente."
+
+#: modules/blogapi/blogapi.module:89
+msgid "Uploads a file to your webserver."
+msgstr "Publica un archivo en el servidor web."
+
+#: modules/blogapi/blogapi.module:94,114
+msgid "Returns a list of all categories to which the post is assigned."
+msgstr ""
+"Devuelve una lista con todas las categorías a las que está asignado el envío."
+
+#: modules/blogapi/blogapi.module:104
+msgid ""
+"Returns a bandwidth-friendly list of the most recent posts in the system."
+msgstr ""
+"Devuelve una lista (con poco consumo de ancho de banda) de los envíos más "
+"recientes del sistema."
+
+#: modules/blogapi/blogapi.module:109
+msgid "Returns a list of all categories defined in the blog."
+msgstr "Devuelve una lista de todas las categorías definidas en el blog."
+
+#: modules/blogapi/blogapi.module:119
+msgid "Sets the categories for a post."
+msgstr "Define las categorías de un envío."
+
+#: modules/blogapi/blogapi.module:124
+msgid "Retrieve information about the XML-RPC methods supported by the server."
+msgstr "Recupera información sobre los métodos XML-RPC que admite el servidor."
+
+#: modules/blogapi/blogapi.module:129
+msgid ""
+"Retrieve information about the text formatting plugins supported by the "
+"server."
+msgstr ""
+"Recupera información sobre las extensiones de formato de texto que admite el "
+"servidor."
+
+#: modules/blogapi/blogapi.module:134
+msgid ""
+"Publish (rebuild) all of the static files related to an entry from your "
+"blog. Equivalent to saving an entry in the system (but without the ping)."
+msgstr ""
+"Publica (reconstruye) todos los ficheros estaticos relacionados con "
+"cualquier entrada de tu blog. Equivale a salvar una entrada en el sistema "
+"(pero sin hacer ping)."
+
+#: modules/blogapi/blogapi.module:216
+msgid "You do not have permission to create this type of post."
+msgstr ""
+
+#: modules/blogapi/blogapi.module:238,293
+msgid "Error storing post."
+msgstr "Error al guardar el envío."
+
+#: modules/blogapi/blogapi.module:260,502
+msgid "You do not have permission to update this post."
+msgstr "No tiene permiso para actualiza este envío."
+
+#: modules/blogapi/blogapi.module:378
+msgid "No file sent."
+msgstr "Ningún archivo enviado."
+
+#: modules/blogapi/blogapi.module:382
+msgid "Error storing file."
+msgstr "Error al guardar el archivo."
+
+#: modules/blogapi/blogapi.module:497
+msgid "Invalid post."
+msgstr "Envío no válido."
+
+#: modules/blogapi/blogapi.module:537
+msgid "You do not have permission to edit this blog."
+msgstr "No tiene privilegios para editar este blog."
+
+#: modules/blogapi/blogapi.module:541
+msgid "Wrong username or password."
+msgstr "Error en el nombre del usuario o en la contraseña."
+
+#: modules/blogapi/blogapi.module:564
+msgid "Enable for external blogging clients"
+msgstr ""
+
+#: modules/blogapi/blogapi.module:568
+msgid ""
+"Select the content types available to external blogging clients via Blog "
+"API. If supported, each enabled content type will be displayed as a separate "
+"\"blog\" by the external client."
+msgstr ""
+
+#: modules/blogapi/blogapi.module:597
+msgid "RSD"
+msgstr "RSD"
+
+#: modules/blogapi/blogapi.module:0
+msgid "blogapi"
+msgstr "blogapi"
+
+#: modules/blogapi/blogapi.module:27
+msgid "administer content with blog api"
+msgstr "administrar contenido mediante blog api"
+
+#: modules/blogapi/blogapi.module:715
+msgid ""
+"Blog API module is not configured to support the %type content type, or you "
+"don't have sufficient permissions to post this type of content."
+msgstr ""

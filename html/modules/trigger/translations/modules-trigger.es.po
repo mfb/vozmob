@@ -1,0 +1,159 @@
+# Spanish translation of drupal (6.0)
+# Copyright (c) 2008 by the Spanish translation team
+# Generated from files:
+#  trigger.admin.inc,v 1.5 2008/01/08 10:35:43 goba
+#  trigger.module,v 1.13 2008/01/21 20:08:15 goba
+#  trigger.install,v 1.5 2007/12/28 12:02:52 dries
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: drupal (6.0)\n"
+"POT-Creation-Date: 2008-02-25 18:21+0100\n"
+"PO-Revision-Date: 2008-02-22 11:54+0100\n"
+"Language-Team: Spanish\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: modules/trigger/trigger.admin.inc:74
+msgid "Are you sure you want to unassign the action %title?"
+msgstr ""
+
+#: modules/trigger/trigger.admin.inc:76
+msgid "You can assign it again later if you wish."
+msgstr ""
+
+#: modules/trigger/trigger.admin.inc:77
+msgid "Unassign"
+msgstr ""
+
+#: modules/trigger/trigger.admin.inc:88
+msgid "Action %action has been unassigned."
+msgstr ""
+
+#: modules/trigger/trigger.admin.inc:144
+msgid "Trigger: "
+msgstr ""
+
+#: modules/trigger/trigger.admin.inc:154
+msgid "unassign"
+msgstr ""
+
+#: modules/trigger/trigger.admin.inc:171
+msgid "Assign"
+msgstr ""
+
+#: modules/trigger/trigger.admin.inc:176
+msgid "No available actions for this trigger."
+msgstr ""
+
+#: modules/trigger/trigger.admin.inc:218
+msgid ""
+"You have added an action that changes a the property of a post. A Save post "
+"action has been added so that the property change will be saved."
+msgstr ""
+
+#: modules/trigger/trigger.admin.inc:238
+msgid "Operation"
+msgstr ""
+
+#: modules/trigger/trigger.module:14
+msgid ""
+"Triggers are system events, such as when new content is added or when a user "
+"logs in. Trigger module combines these triggers with actions (functional "
+"tasks), such as unpublishing content or e-mailing an administrator. The <a "
+"href=\"@url\">Actions settings page</a> contains a list of existing actions "
+"and provides the ability to create and configure additional actions."
+msgstr ""
+
+#: modules/trigger/trigger.module:17
+msgid ""
+"Below you can assign actions to run when certain comment-related triggers "
+"happen. For example, you could promote a post to the front page when a "
+"comment is added."
+msgstr ""
+
+#: modules/trigger/trigger.module:21
+msgid ""
+"Below you can assign actions to run during each pass of a <a href=\"@cron"
+"\">cron maintenance task</a>."
+msgstr ""
+
+#: modules/trigger/trigger.module:23
+msgid ""
+"Below you can assign actions to run when certain taxonomy-related triggers "
+"happen. For example, you could send an e-mail to an administrator when a "
+"term is deleted."
+msgstr ""
+
+#: modules/trigger/trigger.module:25
+msgid ""
+"Below you can assign actions to run when certain user-related triggers "
+"happen. For example, you could send an e-mail to an administrator when a "
+"user account is deleted."
+msgstr ""
+
+#: modules/trigger/trigger.module:27
+msgid ""
+"The Trigger module provides the ability to trigger <a href=\"@actions"
+"\">actions</a> upon system events, such as when new content is added or when "
+"a user logs in."
+msgstr ""
+
+#: modules/trigger/trigger.module:28
+msgid ""
+"The combination of actions and triggers can perform many useful tasks, such "
+"as e-mailing an administrator if a user account is deleted, or automatically "
+"unpublishing comments that contain certain words. By default, there are five "
+"\"contexts\" of events (Comments, Content, Cron, Taxonomy, and Users), but "
+"more may be added by additional modules."
+msgstr ""
+
+#: modules/trigger/trigger.module:29
+msgid ""
+"For more information, see the online handbook entry for <a href=\"@trigger"
+"\">Trigger module</a>."
+msgstr ""
+
+#: modules/trigger/trigger.module:0
+msgid "trigger"
+msgstr ""
+
+#: modules/trigger/trigger.install:28
+msgid "Maps trigger to hook and operation assignments from trigger.module."
+msgstr ""
+
+#: modules/trigger/trigger.install:35
+msgid ""
+"Primary Key: The name of the internal Drupal hook upon which an action is "
+"firing; for example, nodeapi."
+msgstr ""
+
+#: modules/trigger/trigger.install:42
+msgid ""
+"Primary Key: The specific operation of the hook upon which an action is "
+"firing: for example, presave."
+msgstr ""
+
+#: modules/trigger/trigger.install:49
+msgid "Primary Key: Action's {actions}.aid."
+msgstr ""
+
+#: modules/trigger/trigger.install:55
+msgid "The weight of the trigger assignment in relation to other triggers."
+msgstr ""
+
+#: modules/trigger/trigger.admin.inc:192
+msgid "The action you chose is already assigned to that trigger."
+msgstr ""
+
+#: modules/trigger/trigger.module:19
+msgid ""
+"Below you can assign actions to run when certain content-related triggers "
+"happen. For example, you could send an e-mail to an administrator when a "
+"post is created or updated."
+msgstr ""
+"Aquí debajo puede asignar acciones a ejecutarse cuando ocurren determinados "
+"disparadores relacionados con contenido. Por ejemplo, puede enviar un e-mail "
+"a un administrador cuando se cree o actualice un elemento."

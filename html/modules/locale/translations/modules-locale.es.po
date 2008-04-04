@@ -1,0 +1,527 @@
+# Spanish translation of drupal (6.0)
+# Copyright (c) 2008 by the Spanish translation team
+# Generated from files:
+#  locale.module,v 1.212 2008/01/28 17:16:34 goba
+#  locale.install,v 1.27 2008/01/10 14:35:24 goba
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: drupal (6.0)\n"
+"POT-Creation-Date: 2008-02-25 18:21+0100\n"
+"PO-Revision-Date: 2008-02-20 04:09+0100\n"
+"Language-Team: Spanish\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: modules/locale/locale.module:35
+msgid ""
+"The locale module allows your Drupal site to be presented in languages other "
+"than the default English, a defining feature of multi-lingual websites. The "
+"locale module works by examining text as it is about to be displayed: when a "
+"translation of the text is available in the language to be displayed, the "
+"translation is displayed rather than the original text. When a translation "
+"is unavailable, the original text is displayed, and then stored for later "
+"review by a translator."
+msgstr ""
+"El módulo Locale permite que su sitio Drupal sea presentado en idiomas "
+"diferentes del inglés predeterminado, una característica propia de sitios "
+"Web multilenguaje. El módulo Locale funciona examinando el texto que está a "
+"punto de desplegarse: cuando existe una traducción del texto en el idioma a "
+"desplegar, se despliega la traducción en vez del texto original. Cuando no "
+"hay una traducción disponible, se despliega el texto original y luego se "
+"almacena para ser revisado posteriormente por un traductor."
+
+#: modules/locale/locale.module:36
+msgid ""
+"Beyond translation of the Drupal interface, the locale module provides a "
+"feature set tailored to the needs of a multi-lingual site. Language "
+"negotiation allows your site to automatically change language based on the "
+"domain or path used for each request. Users may (optionally) select their "
+"preferred language on their <em>My account</em> page, and your site can be "
+"configured to honor a web browser's preferred language settings. Your site "
+"content can be created in (and translated to) any enabled language, and each "
+"post may have a language-appropriate alias for each of its translations. The "
+"locale module works in concert with the <a href=\"@content-help\">content "
+"translation module</a> to manage translated content."
+msgstr ""
+
+#: modules/locale/locale.module:37
+msgid "Translations may be provided by:"
+msgstr ""
+
+#: modules/locale/locale.module:38
+msgid ""
+"translating the original text via the locale module's integrated web "
+"interface, or"
+msgstr ""
+
+#: modules/locale/locale.module:39
+msgid ""
+"importing files from a set of existing translations, known as a translation "
+"package. A translation package enables the display of a specific version of "
+"Drupal in a specific language, and contain files in the Gettext Portable "
+"Object (<em>.po</em>) format. Although not all languages are available for "
+"every version of Drupal, translation packages for many languages are "
+"available for download from the <a href=\"@translations\">Drupal translation "
+"page</a>."
+msgstr ""
+
+#: modules/locale/locale.module:40
+msgid ""
+"If an existing translation package does not meet your needs, the Gettext "
+"Portable Object (<em>.po</em>) files within a package may be modified, or "
+"new <em>.po</em> files may be created, using a desktop Gettext editor. The "
+"locale module's <a href=\"@import\">import</a> feature allows the translated "
+"strings from a new or modified <em>.po</em> file to be added to your site. "
+"The locale module's <a href=\"@export\">export</a> feature generates files "
+"from your site's translated strings, that can either be shared with others "
+"or edited offline by a Gettext translation editor."
+msgstr ""
+
+#: modules/locale/locale.module:41
+msgid ""
+"For more information, see the online handbook entry for <a href=\"@locale"
+"\">Locale module</a>."
+msgstr ""
+"Para más información, consultar el manual en línea del <a href=\"@locale"
+"\">Módulo Localización</a>"
+
+#: modules/locale/locale.module:44
+msgid ""
+"This page provides an overview of your site's enabled languages. If multiple "
+"languages are available and enabled, the text on your site interface may be "
+"translated, registered users may select their preferred language on the "
+"<em>My account</em> page, and site authors may indicate a specific language "
+"when creating posts. The site's default language is used for anonymous "
+"visitors and for users who have not selected a preferred language."
+msgstr ""
+
+#: modules/locale/locale.module:45
+msgid ""
+"For each language available on the site, use the <em>edit</em> link to "
+"configure language details, including name, an optional language-specific "
+"path or domain, and whether the language is natively presented either left-"
+"to-right or right-to-left. These languages also appear in the <em>Language</"
+"em> selection when creating a post of a content type with multilingual "
+"support."
+msgstr ""
+
+#: modules/locale/locale.module:46
+msgid ""
+"Use the <a href=\"@add-language\">add language page</a> to enable additional "
+"languages (and automatically import files from a translation package, if "
+"available), the <a href=\"@search\">translate interface page</a> to locate "
+"strings for manual translation, or the <a href=\"@import\">import page</a> "
+"to add translations from individual <em>.po</em> files. A number of "
+"contributed translation packages containing <em>.po</em> files are available "
+"on the <a href=\"@translations\">Drupal.org translations page</a>."
+msgstr ""
+
+#: modules/locale/locale.module:49
+msgid ""
+"Add all languages to be supported by your site. If your desired language is "
+"not available in the <em>Language name</em> drop-down, click <em>Custom "
+"language</em> and provide a language code and other details manually. When "
+"providing a language code manually, be sure to enter a standardized language "
+"code, since this code may be used by browsers to determine an appropriate "
+"display language."
+msgstr ""
+
+#: modules/locale/locale.module:51
+msgid ""
+"Language negotiation settings determine the site's presentation language. "
+"Available options include:"
+msgstr ""
+
+#: modules/locale/locale.module:52
+msgid ""
+"<strong>None.</strong> The default language is used for site presentation, "
+"though users may (optionally) select a preferred language on the <em>My "
+"Account</em> page. (User language preferences will be used for site e-mails, "
+"if available.)"
+msgstr ""
+
+#: modules/locale/locale.module:53
+msgid ""
+"<strong>Path prefix only.</strong> The presentation language is determined "
+"by examining the path for a language code or other custom string that "
+"matches the path prefix (if any) specified for each language. If a suitable "
+"prefix is not identified, the default language is used. <em>Example: "
+"\"example.com/de/contact\" sets presentation language to German based on the "
+"use of \"de\" within the path.</em>"
+msgstr ""
+
+#: modules/locale/locale.module:54
+msgid ""
+"<strong>Path prefix with language fallback.</strong> The presentation "
+"language is determined by examining the path for a language code or other "
+"custom string that matches the path prefix (if any) specified for each "
+"language. If a suitable prefix is not identified, the display language is "
+"determined by the user's language preferences from the <em>My Account</em> "
+"page, or by the browser's language settings. If a presentation language "
+"cannot be determined, the default language is used."
+msgstr ""
+
+#: modules/locale/locale.module:55
+msgid ""
+"<strong>Domain name only.</strong> The presentation language is determined "
+"by examining the domain used to access the site, and comparing it to the "
+"language domain (if any) specified for each language. If a match is not "
+"identified, the default language is used. <em>Example: \"http://de.example."
+"com/contact\" sets presentation language to German based on the use of "
+"\"http://de.example.com\" in the domain.</em>"
+msgstr ""
+
+#: modules/locale/locale.module:56
+msgid ""
+"The path prefix or domain name for a language may be set by editing the <a "
+"href=\"@languages\">available languages</a>. In the absence of an "
+"appropriate match, the site is displayed in the <a href=\"@languages"
+"\">default language</a>."
+msgstr ""
+
+#: modules/locale/locale.module:59
+msgid ""
+"This page provides an overview of available translatable strings. Drupal "
+"displays translatable strings in text groups; modules may define additional "
+"text groups containing other translatable strings. Because text groups "
+"provide a method of grouping related strings, they are often used to focus "
+"translation efforts on specific areas of the Drupal interface."
+msgstr ""
+
+#: modules/locale/locale.module:60
+msgid ""
+"Review the <a href=\"@languages\">languages page</a> for more information on "
+"adding support for additional languages."
+msgstr ""
+
+#: modules/locale/locale.module:63
+msgid ""
+"This page imports the translated strings contained in an individual Gettext "
+"Portable Object (<em>.po</em>) file. Normally distributed as part of a "
+"translation package (each translation package may contain several <em>.po</"
+"em> files), a <em>.po</em> file may need to be imported after off-line "
+"editing in a Gettext translation editor. Importing an individual <em>.po</"
+"em> file may be a lengthy process."
+msgstr ""
+
+#: modules/locale/locale.module:64
+msgid ""
+"Note that the <em>.po</em> files within a translation package are imported "
+"automatically (if available) when new modules or themes are enabled, or as "
+"new languages are added. Since this page only allows the import of one <em>."
+"po</em> file at a time, it may be simpler to download and extract a "
+"translation package into your Drupal installation directory and <a href="
+"\"@language-add\">add the language</a> (which automatically imports all <em>."
+"po</em> files within the package). Translation packages are available for "
+"download on the <a href=\"@translations\">Drupal translation page</a>."
+msgstr ""
+
+#: modules/locale/locale.module:67
+msgid ""
+"This page exports the translated strings used by your site. An export file "
+"may be in Gettext Portable Object (<em>.po</em>) form, which includes both "
+"the original string and the translation (used to share translations with "
+"others), or in Gettext Portable Object Template (<em>.pot</em>) form, which "
+"includes the original strings only (used to create new translations with a "
+"Gettext translation editor)."
+msgstr ""
+
+#: modules/locale/locale.module:69
+msgid ""
+"This page allows a translator to search for specific translated and "
+"untranslated strings, and is used when creating or editing translations. "
+"(Note: For translation tasks involving many strings, it may be more "
+"convenient to <a href=\"@export\">export</a> strings for off-line editing in "
+"a desktop Gettext translation editor.) Searches may be limited to strings "
+"found within a specific text group or in a specific language."
+msgstr ""
+
+#: modules/locale/locale.module:72
+msgid ""
+"This block is only shown if <a href=\"@languages\">at least two languages "
+"are enabled</a> and <a href=\"@configuration\">language negotiation</a> is "
+"set to something other than <em>None</em>."
+msgstr ""
+"Este bloque sólo se muestra si <a href=\"@languages\">por lo menos dos "
+"lenguajes  están habilitados</a> y <a href=\"@configuration\">negociación de "
+"lenguaje</a> está fijado a un valor distinto de <em>Ninguno</em>."
+
+#: modules/locale/locale.module:198
+msgid "Built-in interface"
+msgstr ""
+
+#: modules/locale/locale.module:224
+msgid "Language settings"
+msgstr "Opciones de idioma"
+
+#: modules/locale/locale.module:255
+msgid ""
+"A path alias set for a specific language will always be used when displaying "
+"this page in that language, and takes precedence over path aliases set for "
+"<am>All languages</em>."
+msgstr ""
+
+#: modules/locale/locale.module:264
+msgid "Multilingual support"
+msgstr ""
+
+#: modules/locale/locale.module:267
+msgid ""
+"Enable multilingual support for this content type. If enabled, a language "
+"selection field will be added to the editing form, allowing you to select "
+"from one of the <a href=\"!languages\">enabled languages</a>. If disabled, "
+"new posts are saved with the default language. Existing content will not be "
+"affected by changing this option."
+msgstr ""
+
+#: modules/locale/locale.module:437
+msgid "All"
+msgstr ""
+
+#: modules/locale/locale.module:558
+msgid "Language switcher"
+msgstr "Alternador de idioma"
+
+#: modules/locale/locale.module:189
+msgid "administer languages"
+msgstr "administrar idiomas"
+
+#: modules/locale/locale.module:189
+msgid "translate interface"
+msgstr "traducir interfaz"
+
+#: modules/locale/locale.module:0
+msgid "January"
+msgstr "Enero"
+
+#: modules/locale/locale.module:0
+msgid "Jan"
+msgstr "Ene"
+
+#: modules/locale/locale.module:0
+msgid "February"
+msgstr "Febrero"
+
+#: modules/locale/locale.module:0
+msgid "Feb"
+msgstr "Feb"
+
+#: modules/locale/locale.module:0
+msgid "March"
+msgstr "Marzo"
+
+#: modules/locale/locale.module:0
+msgid "Mar"
+msgstr "Mar"
+
+#: modules/locale/locale.module:0
+msgid "April"
+msgstr "Abril"
+
+#: modules/locale/locale.module:0
+msgid "Apr"
+msgstr "Abr"
+
+#: modules/locale/locale.module:0,0
+msgid "May"
+msgstr "Mayo"
+
+#: modules/locale/locale.module:0
+msgid "June"
+msgstr "Junio"
+
+#: modules/locale/locale.module:0
+msgid "Jun"
+msgstr "Jun"
+
+#: modules/locale/locale.module:0
+msgid "July"
+msgstr "Julio"
+
+#: modules/locale/locale.module:0
+msgid "Jul"
+msgstr "Jul"
+
+#: modules/locale/locale.module:0
+msgid "August"
+msgstr "Agosto"
+
+#: modules/locale/locale.module:0
+msgid "Aug"
+msgstr "Ago"
+
+#: modules/locale/locale.module:0
+msgid "September"
+msgstr "Septiembre"
+
+#: modules/locale/locale.module:0
+msgid "Sep"
+msgstr "Sep"
+
+#: modules/locale/locale.module:0
+msgid "October"
+msgstr "Octubre"
+
+#: modules/locale/locale.module:0
+msgid "Oct"
+msgstr "Oct"
+
+#: modules/locale/locale.module:0
+msgid "November"
+msgstr "Noviembre"
+
+#: modules/locale/locale.module:0
+msgid "Nov"
+msgstr "Nov"
+
+#: modules/locale/locale.module:0
+msgid "December"
+msgstr "Diciembre"
+
+#: modules/locale/locale.module:0
+msgid "Dec"
+msgstr "Dic"
+
+#: modules/locale/locale.module:0,0
+msgid "Thu"
+msgstr "Jue"
+
+#: modules/locale/locale.module:0
+msgid "Fri"
+msgstr "Vie"
+
+#: modules/locale/locale.module:0
+msgid "Sat"
+msgstr "Sáb"
+
+#: modules/locale/locale.module:0
+msgid "Sun"
+msgstr "Dom"
+
+#: modules/locale/locale.module:0
+msgid "Mon"
+msgstr "Lun"
+
+#: modules/locale/locale.module:0
+msgid "Tue"
+msgstr "Mar"
+
+#: modules/locale/locale.module:0
+msgid "Wed"
+msgstr "Mié"
+
+#: modules/locale/locale.install:229
+msgid "List of all available languages in the system."
+msgstr "Lista de todos los idiomas disponibles en el sistema."
+
+#: modules/locale/locale.install:236
+msgid "Language code, e.g. 'de' or 'en-US'."
+msgstr "Código del idioma; por ejemplo: 'es' o 'es-ES'"
+
+#: modules/locale/locale.install:243
+msgid "Language name in English."
+msgstr "Nombre del idioma en inglés"
+
+#: modules/locale/locale.install:250
+msgid "Native language name."
+msgstr "Nombre del idioma en su propia lengua."
+
+#: modules/locale/locale.install:256
+msgid "Direction of language (Left-to-Right = 0, Right-to-Left = 1)."
+msgstr ""
+"Dirección de escritura (de izquierda a derecha = 0, de derecha a izquierda = "
+"1)."
+
+#: modules/locale/locale.install:262
+msgid "Enabled flag (1 = Enabled, 0 = Disabled)."
+msgstr "Marca de activación ( activado =1, desactivado = 0)."
+
+#: modules/locale/locale.install:268
+msgid "Number of plural indexes in this language."
+msgstr "Número de índices de plural en este idioma"
+
+#: modules/locale/locale.install:275
+msgid "Plural formula in PHP code to evaluate to get plural indexes."
+msgstr ""
+
+#: modules/locale/locale.install:282
+msgid "Domain to use for this language."
+msgstr "Dominio que se usa para este idioma"
+
+#: modules/locale/locale.install:289
+msgid "Path prefix to use for this language."
+msgstr "prefijo de la ruta para este idioma"
+
+#: modules/locale/locale.install:295
+msgid "Weight, used in lists of languages."
+msgstr "Peso que se usará al listar idiomas."
+
+#: modules/locale/locale.install:302
+msgid "Location of JavaScript translation file."
+msgstr "Ubicación del fichero de traducción de JavaScript."
+
+#: modules/locale/locale.install:312
+msgid "List of English source strings."
+msgstr "Lista de las cadenas originales en inglés."
+
+#: modules/locale/locale.install:317
+msgid "Unique identifier of this string."
+msgstr "Identificador único de este texto."
+
+#: modules/locale/locale.install:324
+msgid ""
+"Drupal path in case of online discovered translations or file path in case "
+"of imported strings."
+msgstr ""
+
+#: modules/locale/locale.install:331
+msgid "A module defined group of translations, see hook_locale()."
+msgstr ""
+
+#: modules/locale/locale.install:337
+msgid "The original string in English."
+msgstr ""
+
+#: modules/locale/locale.install:344
+msgid ""
+"Version of Drupal, where the string was last used (for locales optimization)."
+msgstr ""
+
+#: modules/locale/locale.install:354
+msgid "Stores translated versions of strings."
+msgstr ""
+
+#: modules/locale/locale.install:360
+msgid "Source string ID. References {locales_source}.lid."
+msgstr ""
+
+#: modules/locale/locale.install:366
+msgid "Translation string value in this language."
+msgstr ""
+
+#: modules/locale/locale.install:373
+msgid "Language code. References {languages}.language."
+msgstr ""
+
+#: modules/locale/locale.install:379
+msgid ""
+"Parent lid (lid of the previous string in the plural chain) in case of "
+"plural strings. References {locales_source}.lid."
+msgstr ""
+
+#: modules/locale/locale.install:385
+msgid "Plural index number in case of plural strings."
+msgstr ""
+
+#: modules/locale/locale.module:235
+msgid ""
+"This account's default language for e-mails, and preferred language for site "
+"presentation."
+msgstr ""
+
+#: modules/locale/locale.module:235
+msgid "This account's default language for e-mails."
+msgstr ""

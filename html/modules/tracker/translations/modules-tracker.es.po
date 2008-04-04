@@ -1,0 +1,67 @@
+# Spanish translation of drupal (6.0)
+# Copyright (c) 2008 by the Spanish translation team
+# Generated from files:
+#  tracker.pages.inc,v 1.5 2007/11/28 10:29:20 dries
+#  tracker.module,v 1.154 2007/12/14 18:08:49 goba
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: drupal (6.0)\n"
+"POT-Creation-Date: 2008-02-25 18:21+0100\n"
+"PO-Revision-Date: 2008-02-17 20:15+0100\n"
+"Language-Team: Spanish\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: modules/tracker/tracker.pages.inc:57
+msgid "!time ago"
+msgstr "hace !time"
+
+#: modules/tracker/tracker.pages.inc:65
+msgid "Post"
+msgstr "Envío"
+
+#: modules/tracker/tracker.pages.inc:65
+msgid "Last updated"
+msgstr "Última actualización"
+
+#: modules/tracker/tracker.module:15
+msgid ""
+"The tracker module displays the most recently added or updated content on "
+"your site, and provides user-level tracking to follow the contributions of "
+"particular authors."
+msgstr ""
+"El módulo Rastreador (Tracker) despliega el contenido más recientemente "
+"agregado o actualizado de su sitio, y ofrece rastreo a nivel usuario para "
+"seguir las contribuciones de autores particulares."
+
+#: modules/tracker/tracker.module:16
+msgid ""
+"The <em>Recent posts</em> page is available via a link in the navigation "
+"menu block and displays new and recently-updated content (including the "
+"content type, the title, the author's name, number of comments, and time of "
+"last update) in reverse chronological order. Posts are marked updated when "
+"changes occur in the text, or when new comments are added. To use the "
+"tracker module to follow a specific user's contributions, select the "
+"<em>Track</em> tab from the user's profile page."
+msgstr ""
+"La página <em>Mensajes recientes</em> está disponible vía un enlace en el "
+"bloque del menú de navegación, y despliega contenido nuevo y recién "
+"actualizado (incluyendo el tipo de contenido, el nombre del autor, el número "
+"de comentarios y la fecha de la última actualización) en orden cronológico "
+"inverso. Los mensajes incluyen un indicador de actualización cuando se "
+"cambia algo en el texto o cuando se agregan nuevos comentarios. Para usar el "
+"módulo Rastreador para seguir las contribuciones de un usuario específico, "
+"elija la pestaña <em>Rastrear</em> en la página del perfil de usuario."
+
+#: modules/tracker/tracker.module:17
+msgid ""
+"For more information, see the online handbook entry for <a href=\"@tracker"
+"\">Tracker module</a>."
+msgstr ""
+
+#: modules/tracker/tracker.module:0
+msgid "tracker"
+msgstr "seguimiento"

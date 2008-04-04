@@ -1,0 +1,1710 @@
+# Spanish translation of drupal (6.0)
+# Copyright (c) 2008 by the Spanish translation team
+# Generated from files:
+#  install.php,v 1.113.2.2 2008/02/08 22:00:45 goba
+#  taxonomy.admin.inc,v 1.22.2.1 2008/02/07 20:46:57 goba
+#  system.admin.inc,v 1.63 2008/02/04 12:35:48 goba
+#  install.inc,v 1.56.2.2 2008/02/11 15:10:26 goba
+#  node.module,v 1.947.2.2 2008/02/13 14:10:22 goba
+#  user.admin.inc,v 1.18 2008/01/16 22:54:41 goba
+#  user.module,v 1.892 2008/02/03 19:23:01 goba
+#  block.admin.inc,v 1.14 2007/12/22 23:24:24 goba
+#  comment.module,v 1.617 2008/01/25 16:19:12 goba
+#  locale.module,v 1.212 2008/01/28 17:16:34 goba
+#  statistics.admin.inc,v 1.6 2008/01/08 10:35:42 goba
+#  statistics.module,v 1.272 2008/01/04 09:31:48 goba
+#  system.install,v 1.238.2.1 2008/02/08 17:07:55 goba
+#  upload.module,v 1.197.2.1 2008/02/11 15:08:09 goba
+#  locale.inc,v 1.174 2008/01/09 21:36:13 goba
+#  menu.admin.inc,v 1.26.2.3 2008/02/11 15:12:53 goba
+#  actions.inc,v 1.8 2007/12/31 14:51:04 goba
+#  trigger.admin.inc,v 1.5 2008/01/08 10:35:43 goba
+#  batch.inc,v 1.14 2007/12/20 11:57:20 goba
+#  unicode.inc,v 1.29 2007/12/28 12:02:50 dries
+#  common.inc,v 1.756.2.4 2008/02/13 14:25:42 goba
+#  upload.admin.inc,v 1.7 2008/01/10 20:22:57 goba
+#  dblog.admin.inc,v 1.6 2008/01/08 10:35:41 goba
+#  system.module,v 1.585.2.6 2008/02/13 14:25:42 goba
+#  update.report.inc,v 1.10.2.1 2008/02/05 09:59:21 goba
+#  image.inc,v 1.24 2008/01/28 16:05:17 goba
+#  php.module,v 1.8.2.1 2008/02/05 09:29:50 goba
+#  database.mysql.inc,v 1.89 2008/01/24 10:46:54 goba
+#  database.mysqli.inc,v 1.54 2008/01/23 09:59:29 goba
+#  file.inc,v 1.121.2.1 2008/02/07 18:20:37 goba
+#  user.pages.inc,v 1.11 2008/01/08 10:35:43 goba
+#  form.inc,v 1.265.2.4 2008/02/11 14:45:57 goba
+#  filter.module,v 1.204 2008/01/21 15:08:24 goba
+#  node.admin.inc,v 1.19 2008/02/03 19:39:52 goba
+#  install.mysql.inc,v 1.9 2008/01/23 09:59:29 goba
+#  install.mysqli.inc,v 1.12 2008/01/23 09:59:29 goba
+#  filter.admin.inc,v 1.8.2.1 2008/02/12 14:25:34 goba
+#  profile.admin.inc,v 1.8 2008/01/21 15:20:43 goba
+#  aggregator.admin.inc,v 1.7 2008/01/10 22:47:17 goba
+#  book.admin.inc,v 1.8 2008/01/08 10:35:41 goba
+#  comment.admin.inc,v 1.4 2008/01/08 10:35:41 goba
+#  contact.admin.inc,v 1.3 2007/11/09 07:55:13 dries
+#  content_types.inc,v 1.50.2.1 2008/02/13 11:23:28 goba
+#  path.admin.inc,v 1.7 2008/01/08 10:35:42 goba
+#  translation.pages.inc,v 1.2 2008/01/07 13:18:40 goba
+#  node.pages.inc,v 1.28 2008/02/03 19:26:10 goba
+#  block-admin-display-form.tpl.php,v 1.3 2008/01/16 22:57:26 goba
+#  book.module,v 1.454.2.2 2008/02/13 11:20:47 goba
+#  forum.admin.inc,v 1.8 2008/01/30 10:14:42 goba
+#  menu.module,v 1.157.2.1 2008/02/11 15:12:53 goba
+#  openid.pages.inc,v 1.5 2008/01/30 22:11:22 goba
+#  statistics.pages.inc,v 1.2 2007/10/20 21:57:50 goba
+#  search.admin.inc,v 1.4 2008/01/08 10:35:42 goba
+#  blogapi.module,v 1.115.2.1 2008/02/07 20:11:02 goba
+#  forum-submitted.tpl.php,v 1.3 2007/08/07 08:39:35 goba
+#  search.module,v 1.250.2.1 2008/02/07 16:42:03 goba
+#  search.info,v 1.4 2007/06/08 05:50:55 dries
+#  mail.inc,v 1.8 2008/01/25 17:04:00 goba
+#  contact.pages.inc,v 1.6.2.1 2008/02/12 14:42:50 goba
+#  menu.inc,v 1.255.2.7 2008/02/12 22:33:51 goba
+#  blog.module,v 1.297 2008/01/09 09:51:34 goba
+#  comment.pages.inc,v 1.2.2.1 2008/02/07 18:53:38 goba
+#  forum.module,v 1.448.2.2 2008/02/13 14:06:36 goba
+#  maintenance-page.tpl.php,v 1.2 2008/01/24 09:42:51 goba
+#  page.tpl.php,v 1.11 2008/01/24 09:42:51 goba
+#  taxonomy.pages.inc,v 1.9 2008/01/18 16:23:57 goba
+#  page.tpl.php,v 1.28 2008/01/24 09:42:52 goba
+#  chameleon.theme,v 1.76 2008/01/24 09:42:53 goba
+#  page.tpl.php,v 1.25 2008/01/24 09:42:53 goba
+#  pager.inc,v 1.63 2007/12/06 09:58:30 goba
+#  book-navigation.tpl.php,v 1.1 2007/11/04 14:29:09 goba
+#  theme.inc,v 1.415 2008/01/27 19:47:06 goba
+#  aggregator-item.tpl.php,v 1.1 2007/09/13 08:02:38 goba
+#  aggregator.pages.inc,v 1.12 2008/01/08 10:35:40 goba
+#  profile.module,v 1.236 2008/02/03 19:36:46 goba
+#  aggregator.module,v 1.374 2008/01/15 08:06:32 dries
+#  aggregator.info,v 1.4 2007/06/08 05:50:53 dries
+#  blog.info,v 1.5 2007/06/08 05:50:53 dries
+#  blogapi.info,v 1.4 2007/06/08 05:50:53 dries
+#  book.info,v 1.5 2007/07/30 18:20:21 dries
+#  color.info,v 1.3 2007/06/08 05:50:54 dries
+#  comment.info,v 1.4 2007/06/08 05:50:54 dries
+#  contact.info,v 1.4 2007/06/08 05:50:54 dries
+#  dblog.info,v 1.2 2007/06/08 05:50:54 dries
+#  forum.info,v 1.6 2007/06/08 05:50:54 dries
+#  help.info,v 1.4 2007/06/08 05:50:54 dries
+#  locale.info,v 1.6 2007/11/05 08:43:48 goba
+#  menu.info,v 1.4 2007/06/08 05:50:55 dries
+#  openid.info,v 1.2 2007/06/22 22:26:43 unconed
+#  path.info,v 1.4 2007/06/08 05:50:55 dries
+#  php.info,v 1.2 2007/06/08 05:50:55 dries
+#  ping.info,v 1.4 2007/06/08 05:50:55 dries
+#  poll.info,v 1.4 2007/06/08 05:50:55 dries
+#  profile.info,v 1.4 2007/06/08 05:50:55 dries
+#  statistics.info,v 1.4 2007/06/08 05:50:56 dries
+#  syslog.info,v 1.2 2007/06/08 05:50:56 dries
+#  taxonomy.info,v 1.4 2007/06/08 05:50:56 dries
+#  throttle.info,v 1.4 2007/06/08 05:50:57 dries
+#  tracker.info,v 1.5 2007/07/04 10:54:26 goba
+#  translation.info,v 1.1 2007/06/15 18:40:14 goba
+#  trigger.info,v 1.1 2007/09/11 14:50:05 goba
+#  update.info,v 1.1 2007/07/11 15:15:40 dries
+#  upload.info,v 1.4 2007/06/08 05:50:57 dries
+#  block.info,v 1.4 2007/06/08 05:50:53 dries
+#  filter.info,v 1.4 2007/06/08 05:50:54 dries
+#  node.info,v 1.4 2007/06/08 05:50:55 dries
+#  system.info,v 1.4 2007/06/08 05:50:56 dries
+#  user.info,v 1.4 2007/06/08 05:50:57 dries
+#  blog.pages.inc,v 1.6.2.1 2008/02/08 21:15:12 goba
+#  color.module,v 1.39 2008/01/23 09:43:25 goba
+#  update.settings.inc,v 1.3 2007/10/20 21:57:50 goba
+#  tracker.pages.inc,v 1.5 2007/11/28 10:29:20 dries
+#  taxonomy.module,v 1.414 2008/01/27 17:55:15 goba
+#  forum-list.tpl.php,v 1.4 2007/08/30 18:58:12 goba
+#  forum.install,v 1.16 2007/12/31 16:58:34 goba
+#  taxonomy.install,v 1.7 2008/01/08 07:46:41 goba
+#  poll.module,v 1.263 2008/01/15 07:57:46 dries
+#  openid.module,v 1.19 2008/01/30 22:11:22 goba
+#  poll-bar.tpl.php,v 1.2 2007/08/07 08:39:35 goba
+#  poll.pages.inc,v 1.4 2007/12/14 09:50:41 goba
+#  poll-results-block.tpl.php,v 1.2 2007/08/02 20:08:53 dries
+#  poll-results.tpl.php,v 1.2 2007/08/07 08:39:35 goba
+#  search.pages.inc,v 1.4 2007/12/06 09:51:01 goba
+#  default.profile,v 1.22 2007/12/17 12:43:34 goba
+#  menu.install,v 1.9 2008/01/30 20:27:28 goba
+#  update.module,v 1.17 2008/01/30 10:14:42 goba
+#  throttle.module,v 1.83 2007/12/14 18:08:49 goba
+#  trigger.module,v 1.13 2008/01/21 20:08:15 goba
+#  update.fetch.inc,v 1.7 2008/01/30 10:14:42 goba
+#  bluemarine.info,v 1.4 2007/06/08 05:50:57 dries
+#  color.inc,v 1.4 2007/12/14 17:00:14 goba
+#  chameleon.info,v 1.4 2007/07/01 23:27:31 goba
+#  marvin.info,v 1.4 2007/06/08 05:50:57 dries
+#  garland.info,v 1.5 2007/07/01 23:27:32 goba
+#  minnelli.info,v 1.7 2007/12/04 20:58:44 goba
+#  pushbutton.info,v 1.4 2007/06/08 05:50:58 dries
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: drupal (6.0)\n"
+"POT-Creation-Date: 2008-02-25 18:21+0100\n"
+"PO-Revision-Date: 2008-02-20 04:23+0100\n"
+"Language-Team: Spanish\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+
+#: install.php:287; modules/taxonomy/taxonomy.admin.inc:676
+msgid "Advanced options"
+msgstr "Opciones avanzadas"
+
+#: install.php:714; modules/system/system.admin.inc:1678
+msgid "Your server has been successfully tested to support this feature."
+msgstr ""
+"Se ha comprobado exitosamente que su servidor ofrece soporte para esta "
+"funcionalidad."
+
+#: install.php:902,914; includes/install.inc:727
+msgid "Currently using !item !version"
+msgstr "Está usando !item !version"
+
+#: install.php:997; modules/system/system.admin.inc:378
+msgid "Site name"
+msgstr "Nombre del sitio"
+
+#: install.php:1005; modules/system/system.admin.inc:1138
+msgid ""
+"The <em>From</em> address in automated e-mails sent during registration and "
+"new password requests, and other notifications. (Use an address ending in "
+"your site's domain to help prevent this e-mail being flagged as spam.)"
+msgstr ""
+"La dirección <em>De</em> en los correos automáticos que se envían durante el "
+"registro y ante solicitudes de contraseñas nuevas, así como otros avisos. "
+"(Use una dirección cuyo sufijo corresponda al dominio de su sitio web para "
+"ayudar a evitar que este correo sea etiquetado como spam.)"
+
+#: install.php:1021; modules/node/node.module:2669,2678;
+#: modules/user/user.admin.inc:134,763,791,908;
+#: modules/user/user.module:651,1240,1424
+msgid "Username"
+msgstr "Nombre de usuario"
+
+#: install.php:1023; modules/user/user.module:1427
+msgid ""
+"Spaces are allowed; punctuation is not allowed except for periods, hyphens, "
+"and underscores."
+msgstr ""
+"Se permiten espacios; no se permite puntuación excepto puntos, guiones "
+"cortos y guiones bajos."
+
+#: install.php:1029; modules/system/system.admin.inc:1136;
+#: modules/user/user.module:1432
+msgid "E-mail address"
+msgstr "Dirección de correo"
+
+#: install.php:1049; modules/system/system.admin.inc:1499
+msgid "Default time zone"
+msgstr "Zona horaria predefinida"
+
+#: install.php:1058; modules/system/system.admin.inc:1661
+msgid "Clean URLs"
+msgstr "URLs limpios"
+
+#: install.php:1060; modules/block/block.admin.inc:358;
+#: modules/comment/comment.module:500,552,584;
+#: modules/locale/locale.module:266;
+#: modules/statistics/statistics.admin.inc:185;
+#: modules/statistics/statistics.module:255;
+#: modules/system/system.admin.inc:1276,1293,1307,1325,1333,1509,1663;
+#: modules/system/system.install:60; modules/upload/upload.module:214;
+#: modules/user/user.admin.inc:412,430
+msgid "Disabled"
+msgstr "Desactivado"
+
+#: install.php:1060; includes/locale.inc:90;
+#: modules/comment/comment.module:552; modules/locale/locale.module:266;
+#: modules/menu/menu.admin.inc:176,293;
+#: modules/statistics/statistics.admin.inc:185;
+#: modules/system/system.admin.inc:1293,1325,1333,1509,1663,2018,2207;
+#: modules/system/system.install:282; modules/upload/upload.module:214;
+#: modules/user/user.admin.inc:412,430
+msgid "Enabled"
+msgstr "Activado"
+
+#: install.php:1061; modules/system/system.admin.inc:1664
+msgid ""
+"This option makes Drupal emit \"clean\" URLs (i.e. without <code>?q=</code> "
+"in the URL)."
+msgstr ""
+"Esta opción hace que Drupal prepare URL \"limpios\" (esto es, sin incluir "
+"<code>?q=</code> en el URL)."
+
+#: install.php:1070; modules/system/system.install:293
+msgid "Update notifications"
+msgstr "Actualizar notificaciones"
+
+#: includes/actions.inc:46,275,297,303,329,337;
+#: modules/trigger/trigger.admin.inc:87
+msgid "actions"
+msgstr "acciones"
+
+#: includes/batch.inc:101; includes/unicode.inc:86
+msgid "Error"
+msgstr "Error"
+
+#: includes/common.inc:335; modules/system/system.admin.inc:1645
+msgid ""
+"@site is currently under maintenance. We should be back shortly. Thank you "
+"for your patience."
+msgstr ""
+"@site está en mantenimiento. Pronto estaremos otra vez en línea. Gracias por "
+"su paciencia."
+
+#: includes/common.inc:1090; modules/upload/upload.admin.inc:98,107,136,145
+msgid "MB"
+msgstr "MB"
+
+#: includes/common.inc:3468; modules/dblog/dblog.admin.inc:36,36;
+#: modules/system/system.module:1653,1687;
+#: modules/update/update.report.inc:57,57
+msgid "error"
+msgstr "error"
+
+#: includes/common.inc:3469; modules/dblog/dblog.admin.inc:35,35;
+#: modules/update/update.report.inc:63,63
+msgid "warning"
+msgstr "advertencia"
+
+#: includes/common.inc:609; includes/image.inc:95;
+#: includes/unicode.inc:151,184; modules/php/php.module:0
+msgid "php"
+msgstr "php"
+
+#: includes/database.mysql.inc:26; includes/database.mysqli.inc:29
+msgid "MySQL database"
+msgstr "Base de datos MySQL"
+
+#: includes/database.mysql.inc:32; includes/database.mysqli.inc:35
+msgid "Your MySQL Server is too old. Drupal requires at least MySQL %version."
+msgstr ""
+"Su servidor MySQL es demasiado antiguo. Drupal requiere al menos MySQL %"
+"version."
+
+#: includes/file.inc:109; modules/system/system.install:198
+msgid "The directory %directory does not exist."
+msgstr "El directorio %directory no existe."
+
+#: includes/file.inc:122,226; modules/system/system.module:1224
+msgid "file system"
+msgstr "sistema de archivos"
+
+#: includes/file.inc:136; modules/user/user.pages.inc:261,330;
+#: modules/user/user.module:1768,2277
+msgid "security"
+msgstr "seguridad"
+
+#: includes/form.inc:1568; modules/user/user.module:657,1249
+msgid "Password"
+msgstr "Contraseña"
+
+#: includes/form.inc:691,697; modules/filter/filter.module:526
+msgid ""
+"An illegal choice has been detected. Please contact the site administrator."
+msgstr ""
+"Se detectó una selección ilegal. Por favor póngase en contacto con el "
+"administrador del sitio."
+
+#: includes/form.inc:2406; modules/node/node.admin.inc:365
+msgid "Processing"
+msgstr "Procesando"
+
+#: includes/form.inc:692,698; modules/filter/filter.module:527
+msgid "form"
+msgstr "formulario"
+
+#: includes/install.mysql.inc:44; includes/install.mysqli.inc:39
+msgid ""
+"Failed to connect to your MySQL database server. MySQL reports the following "
+"message: %error.<ul><li>Are you sure you have the correct username and "
+"password?</li><li>Are you sure that you have typed the correct database "
+"hostname?</li><li>Are you sure that the database server is running?</li></"
+"ul>For more help, see the <a href=\"http://drupal.org/node/258"
+"\">Installation and upgrading handbook</a>. If you are unsure what these "
+"terms mean you should probably contact your hosting provider."
+msgstr ""
+"La conexión a su servidor de base de datos MySQL falló. MySQL informa del "
+"siguiente mensaje: %error.<ul><li>¿Está seguro de que el nombre de usuario y "
+"la contraseña son correctas?</li><li>¿Está seguro de que ha introducido el "
+"nombre del host de base de datos correcto?</li><li>¿Está seguro de que el "
+"servidor de base de datos está arrancado?</li></ul>Para más información, vea "
+"el <a href=\"http://drupal.org/node/258\">Manual de instalación y "
+"actualización</a>. Si no está seguro de que significas estos terminos, "
+"probablemente debería contactar con su proveedor de hosting."
+
+#: includes/install.mysql.inc:50; includes/install.mysqli.inc:45
+msgid ""
+"Failed to select your database on your MySQL database server, which means "
+"the connection username and password are valid, but there is a problem "
+"accessing your data. MySQL reports the following message: %error.<ul><li>Are "
+"you sure you have the correct database name?</li><li>Are you sure the "
+"database exists?</li><li>Are you sure the username has permission to access "
+"the database?</li></ul>For more help, see the <a href=\"http://drupal.org/"
+"node/258\">Installation and upgrading handbook</a>. If you are unsure what "
+"these terms mean you should probably contact your hosting provider."
+msgstr ""
+"No fue posible seleccionar su base de datos en el servidor de bases de datos "
+"MySQL, lo cual significa que el usuario y contraseña definidos para la "
+"conexión son válidos, pero que hay un problema llegando a sus datos. MySQL "
+"reporta el siguiente mensaje: %error.<ul><li>¿Está seguro de tener correcto "
+"el nombre de la base de datos?</li><li>¿Está seguro de que la base de datos "
+"existe?</li><li>¿Está seguro de que el usuario tiene permiso para acceder a "
+"la base de datos?</li></ul>Para más ayuda, vea el <a href=\"http://drupal."
+"org/node/258\">Manual de instalación y actualización</a>. Si no está seguro "
+"de lo que significan estos términos, probablemente deba ponerse en contacto "
+"con su proveedor de hospedaje."
+
+#: includes/install.mysql.inc:60; includes/install.mysqli.inc:55
+msgid ""
+"Failed to create a test table on your MySQL database server with the command "
+"%query. MySQL reports the following message: %error.<ul><li>Are you sure the "
+"configured username has the necessary MySQL permissions to create tables in "
+"the database?</li></ul>For more help, see the <a href=\"http://drupal.org/"
+"node/258\">Installation and upgrading handbook</a>. If you are unsure what "
+"these terms mean you should probably contact your hosting provider."
+msgstr ""
+"Fallo al crear una tabla de prueba en tu servidor de bases de datos MySQL "
+"con el comando %query. MySQL ha reportado el siguiente error: %error."
+"<ul><li>¿Estás seguro de que el usuario tiene los suficientes permisos de "
+"MySQL para crear tablas en la base de datos?</li></ul>Para más información, "
+"consulta el <a href=\"http://drupal.org/node/258\">Installation and "
+"upgrading handbook</a>. Si no estás seguro de lo que significan estos "
+"terminos deberías contactar con tu proveedor de hosting."
+
+#: includes/install.mysql.inc:71; includes/install.mysqli.inc:66
+msgid ""
+"Failed to insert a value into a test table on your MySQL database server. We "
+"tried inserting a value with the command %query and MySQL reported the "
+"following error: %error."
+msgstr ""
+"No fue posible insertar un valor en una tabla de prueba en su servidor de "
+"bases de datos MySQL. Tratamos de insertar un valor con el comando %query y "
+"MySQL reportó el siguiente error: %error."
+
+#: includes/install.mysql.inc:82; includes/install.mysqli.inc:77
+msgid ""
+"Failed to update a value in a test table on your MySQL database server. We "
+"tried updating a value with the command %query and MySQL reported the "
+"following error: %error."
+msgstr ""
+"No fue posible actualizar un valor en una tabla de prueba en su servidor de "
+"bases de datos MySQL. Tratamos de actualizar un valor con el comando %query "
+"y MySQL reportó el siguiente error: %error."
+
+#: includes/install.mysql.inc:93; includes/install.mysqli.inc:88
+msgid ""
+"Failed to delete a value from a test table on your MySQL database server. We "
+"tried deleting a value with the command %query and MySQL reported the "
+"following error: %error."
+msgstr ""
+"No fue posible borrar un valor en una tabla de prueba en su servidor de "
+"bases de datos MySQL. Tratamos de borrar un valor con el comando %query y "
+"MySQL reportó el siguiente error: %error."
+
+#: includes/install.mysql.inc:104; includes/install.mysqli.inc:99
+msgid ""
+"Failed to drop a test table from your MySQL database server. We tried "
+"dropping a table with the command %query and MySQL reported the following "
+"error %error."
+msgstr ""
+"No fue posible borrar una tabla de prueba en su servidor de bases de datos "
+"MySQL. Tratamos de borrar una tabla con el comando %query y MySQL reportó el "
+"siguiente error: %error."
+
+#: includes/locale.inc:58; modules/filter/filter.admin.inc:155,351;
+#: modules/menu/menu.admin.inc:50; modules/profile/profile.admin.inc:44;
+#: modules/system/system.admin.inc:253,276,768;
+#: modules/system/system.module:1016
+msgid "Save configuration"
+msgstr "Salvar configuración"
+
+#: includes/locale.inc:86,1984; modules/aggregator/aggregator.admin.inc:30,41;
+#: modules/book/book.admin.inc:215; modules/comment/comment.admin.inc:71;
+#: modules/comment/comment.module:827,838;
+#: modules/contact/contact.admin.inc:16; modules/menu/menu.admin.inc:97;
+#: modules/node/content_types.inc:28; modules/node/node.admin.inc:504;
+#: modules/path/path.admin.inc:44; modules/profile/profile.admin.inc:30;
+#: modules/taxonomy/taxonomy.admin.inc:203,207,401,769,773;
+#: modules/translation/translation.pages.inc:38;
+#: modules/user/user.admin.inc:185,891; modules/user/user.module:1400,2299
+msgid "edit"
+msgstr "editar"
+
+#: includes/locale.inc:86,1985; modules/block/block.admin.inc:79;
+#: modules/book/book.admin.inc:216; modules/comment/comment.module:823;
+#: modules/contact/contact.admin.inc:16; modules/filter/filter.admin.inc:35;
+#: modules/menu/menu.admin.inc:100; modules/node/content_types.inc:32;
+#: modules/node/node.pages.inc:556; modules/path/path.admin.inc:44;
+#: modules/profile/profile.admin.inc:31; modules/system/system.module:1321;
+#: modules/user/user.admin.inc:891
+msgid "delete"
+msgstr "borrar"
+
+#: includes/locale.inc:90; modules/filter/filter.admin.inc:69;
+#: modules/system/system.admin.inc:2207
+msgid "Default"
+msgstr "Predeterminado"
+
+#: includes/locale.inc:90; modules/block/block-admin-display-form.tpl.php:43;
+#: modules/book/book.admin.inc:196; modules/book/book.module:387;
+#: modules/contact/contact.admin.inc:58; modules/filter/filter.admin.inc:362;
+#: modules/forum/forum.admin.inc:52,134; modules/menu/menu.admin.inc:178,320;
+#: modules/menu/menu.module:408; modules/node/node.module:1314;
+#: modules/profile/profile.admin.inc:150,265;
+#: modules/taxonomy/taxonomy.admin.inc:90,171,705;
+#: modules/upload/upload.module:530
+msgid "Weight"
+msgstr "Peso"
+
+#: includes/locale.inc:90,1970; modules/aggregator/aggregator.admin.inc:27,38;
+#: modules/block/block-admin-display-form.tpl.php:47;
+#: modules/book/book.admin.inc:17,196; modules/comment/comment.admin.inc:58;
+#: modules/contact/contact.admin.inc:18; modules/dblog/dblog.admin.inc:52,160;
+#: modules/filter/filter.admin.inc:69; modules/menu/menu.admin.inc:179;
+#: modules/node/content_types.inc:15; modules/node/node.admin.inc:569;
+#: modules/node/node.pages.inc:526; modules/openid/openid.pages.inc:42;
+#: modules/path/path.admin.inc:32; modules/profile/profile.admin.inc:152;
+#: modules/statistics/statistics.admin.inc:17,82;
+#: modules/statistics/statistics.pages.inc:16,48;
+#: modules/system/system.admin.inc:2207; modules/system/system.module:1312;
+#: modules/taxonomy/taxonomy.admin.inc:93,612;
+#: modules/translation/translation.pages.inc:27;
+#: modules/user/user.admin.inc:139,886,913,950
+msgid "Operations"
+msgstr "Operaciones"
+
+#: includes/locale.inc:403;
+#: modules/aggregator/aggregator.admin.inc:102,142,275,306;
+#: modules/block/block.admin.inc:329; modules/comment/comment.admin.inc:248;
+#: modules/contact/contact.admin.inc:138; modules/filter/filter.admin.inc:252;
+#: modules/forum/forum.admin.inc:10,60,148,168;
+#: modules/menu/menu.admin.inc:265,393,460;
+#: modules/node/content_types.inc:393; modules/node/node.admin.inc:128;
+#: modules/node/node.pages.inc:246,504,590;
+#: modules/openid/openid.pages.inc:47; modules/profile/profile.admin.inc:374;
+#: modules/system/system.module:1512;
+#: modules/taxonomy/taxonomy.admin.inc:187,220,720,749,842,877;
+#: modules/upload/upload.module:530; modules/user/user.admin.inc:870;
+#: modules/user/user.pages.inc:244,311
+msgid "Delete"
+msgstr "Borrar"
+
+#: includes/locale.inc:403; modules/aggregator/aggregator.admin.inc:191;
+#: modules/block/block.admin.inc:329;
+#: modules/comment/comment.admin.inc:190,249;
+#: modules/contact/contact.admin.inc:138; modules/filter/filter.admin.inc:252;
+#: modules/forum/forum.admin.inc:168; modules/node/node.admin.inc:80,621;
+#: modules/node/node.pages.inc:505,570,590;
+#: modules/profile/profile.admin.inc:374; modules/search/search.admin.inc:14;
+#: modules/system/system.admin.inc:845,1082;
+#: modules/system/system.module:1135,1512;
+#: modules/taxonomy/taxonomy.admin.inc:843,878,913;
+#: modules/trigger/trigger.admin.inc:77; modules/user/user.admin.inc:871;
+#: modules/user/user.pages.inc:311; modules/user/user.module:1849
+msgid "Cancel"
+msgstr "Cancelar"
+
+#: includes/locale.inc:458; modules/comment/comment.module:1622
+msgid "Save settings"
+msgstr "Guardar las opciones"
+
+#: includes/locale.inc:489,557,1970; modules/locale/locale.module:232,251,278;
+#: modules/node/node.admin.inc:567; modules/path/path.admin.inc:36;
+#: modules/translation/translation.pages.inc:27
+msgid "Language"
+msgstr "Idioma"
+
+#: includes/locale.inc:503; modules/blogapi/blogapi.module:254;
+#: modules/filter/filter.module:455; modules/forum/forum-submitted.tpl.php:27;
+#: modules/translation/translation.pages.inc:48
+msgid "n/a"
+msgstr "n/d"
+
+#: includes/locale.inc:546,573; modules/search/search.module:159,1048,1068;
+#: modules/search/search.info:0
+msgid "Search"
+msgstr "Buscar"
+
+#: includes/locale.inc:559; modules/locale/locale.module:252
+msgid "All languages"
+msgstr "Todos los idiomas"
+
+#: includes/locale.inc:1970; modules/locale/locale.module:584
+msgid "Languages"
+msgstr "Idiomas"
+
+#: includes/locale.inc:423,662,942,999,1816,1820,2161,2164,2167,2170;
+#: modules/locale/locale.module:510,0
+msgid "locale"
+msgstr "locale"
+
+#: includes/mail.inc:134; modules/contact/contact.admin.inc:115,121,148;
+#: modules/contact/contact.pages.inc:146,231
+msgid "mail"
+msgstr "correo"
+
+#: includes/menu.inc:1455; modules/blog/blog.module:108;
+#: modules/book/book.module:625; modules/comment/comment.pages.inc:53;
+#: modules/forum/forum.module:192,649;
+#: modules/system/maintenance-page.tpl.php:34,35,42;
+#: modules/system/page.tpl.php:95,96,103;
+#: modules/taxonomy/taxonomy.pages.inc:40;
+#: themes/bluemarine/page.tpl.php:19,19,20;
+#: themes/chameleon/chameleon.theme:42,42;
+#: themes/pushbutton/page.tpl.php:21,21,27
+msgid "Home"
+msgstr "Inicio"
+
+#: includes/pager.inc:396; modules/book/book-navigation.tpl.php:40
+msgid "Go to previous page"
+msgstr "Ir a página anterior"
+
+#: includes/pager.inc:397; modules/book/book-navigation.tpl.php:46
+msgid "Go to next page"
+msgstr "Ir a página siguiente"
+
+#: includes/theme.inc:1377; modules/comment/comment.module:1683,1708
+msgid "new"
+msgstr "nuevo"
+
+#: includes/theme.inc:1555; modules/user/user.module:819
+msgid "View user profile."
+msgstr "Ver perfil de usuario."
+
+#: includes/theme.inc:1576; modules/comment/comment.module:1340,1349,1451;
+#: modules/node/node.pages.inc:183; modules/system/system.admin.inc:1162;
+#: modules/system/system.module:1755; modules/user/user.module:816
+msgid "Anonymous"
+msgstr "Anónimo"
+
+#: modules/aggregator/aggregator-item.tpl.php:42;
+#: modules/aggregator/aggregator.pages.inc:63
+msgid "Categories"
+msgstr "Categorías"
+
+#: modules/aggregator/aggregator.admin.inc:27,38,63,263;
+#: modules/book/book.admin.inc:196; modules/filter/filter.module:216;
+#: modules/menu/menu.admin.inc:413; modules/node/content_types.inc:58;
+#: modules/node/node.admin.inc:565; modules/node/node.module:584;
+#: modules/profile/profile.admin.inc:147,221;
+#: modules/statistics/statistics.admin.inc:150;
+#: modules/translation/translation.pages.inc:27
+msgid "Title"
+msgstr "Título"
+
+#: modules/aggregator/aggregator.admin.inc:30;
+#: modules/aggregator/aggregator.pages.inc:483;
+#: modules/comment/comment.module:395;
+#: modules/statistics/statistics.admin.inc:125;
+#: modules/user/user.admin.inc:184
+msgid "@time ago"
+msgstr "hace @time"
+
+#: modules/aggregator/aggregator.admin.inc:30,30;
+#: modules/aggregator/aggregator.pages.inc:486;
+#: modules/user/user.admin.inc:184
+msgid "never"
+msgstr "nunca"
+
+#: modules/aggregator/aggregator.admin.inc:70;
+#: modules/profile/profile.module:42,546;
+#: modules/statistics/statistics.admin.inc:144;
+#: modules/system/system.module:1811
+msgid "URL"
+msgstr "URL"
+
+#: modules/aggregator/aggregator.admin.inc:99,113,272,286;
+#: modules/comment/comment.module:1387,1388;
+#: modules/contact/contact.admin.inc:72; modules/forum/forum.admin.inc:58,145;
+#: modules/menu/menu.admin.inc:325,424; modules/node/node.pages.inc:233;
+#: modules/system/system.module:1461;
+#: modules/taxonomy/taxonomy.admin.inc:37,185,414,715,760;
+#: modules/user/user.pages.inc:240
+msgid "Save"
+msgstr "Guardar"
+
+#: modules/aggregator/aggregator.admin.inc:174,338;
+#: modules/blogapi/blogapi.module:233,289;
+#: modules/book/book.admin.inc:118,214; modules/comment/comment.admin.inc:111;
+#: modules/comment/comment.module:707,768;
+#: modules/contact/contact.admin.inc:115,121;
+#: modules/node/content_types.inc:335; modules/node/node.pages.inc:453;
+#: modules/profile/profile.admin.inc:345,387
+msgid "view"
+msgstr "ver"
+
+#: modules/aggregator/aggregator.admin.inc:224;
+#: modules/block/block.admin.inc:39; modules/book/book.module:412;
+#: modules/system/system.admin.inc:1281;
+#: modules/taxonomy/taxonomy.admin.inc:696
+msgid "none"
+msgstr "ninguno"
+
+#: modules/aggregator/aggregator.admin.inc:228;
+#: modules/filter/filter.module:667
+msgid "Allowed HTML tags"
+msgstr "Etiquetas HTML permitidas"
+
+#: modules/aggregator/aggregator.admin.inc:269;
+#: modules/forum/forum.admin.inc:45,126; modules/menu/menu.admin.inc:286,419;
+#: modules/node/content_types.inc:15,103;
+#: modules/system/system.admin.inc:1751,2024,2108;
+#: modules/system/system.module:1311,1432;
+#: modules/taxonomy/taxonomy.admin.inc:129,670;
+#: modules/upload/upload.module:530
+msgid "Description"
+msgstr "Descripción"
+
+#: modules/aggregator/aggregator.admin.inc:161,174,325,338;
+#: modules/aggregator/aggregator.pages.inc:16;
+#: modules/aggregator/aggregator.module:602,636,643,713,0
+msgid "aggregator"
+msgstr "agregador"
+
+#: modules/aggregator/aggregator.admin.inc:30,41;
+#: modules/aggregator/aggregator.module:923
+msgid "1 item"
+msgid_plural "@count items"
+msgstr[0] "1 elemento"
+msgstr[1] "@count elementos"
+
+#: modules/aggregator/aggregator.pages.inc:364; modules/node/node.module:1687
+msgid "read more"
+msgstr "leer más"
+
+#: modules/aggregator/aggregator.info:0
+msgid "Aggregator"
+msgstr "Agregador"
+
+#: modules/aggregator/aggregator.info:0
+msgid "Aggregates syndicated content (RSS, RDF, and Atom feeds)."
+msgstr "Integra contenido sindicado (hilos RSS, RDF y Atom)."
+
+#: modules/aggregator/aggregator.info:0; modules/blog/blog.info:0;
+#: modules/blogapi/blogapi.info:0; modules/book/book.info:0;
+#: modules/color/color.info:0; modules/comment/comment.info:0;
+#: modules/contact/contact.info:0; modules/dblog/dblog.info:0;
+#: modules/forum/forum.info:0; modules/help/help.info:0;
+#: modules/locale/locale.info:0; modules/menu/menu.info:0;
+#: modules/openid/openid.info:0; modules/path/path.info:0;
+#: modules/php/php.info:0; modules/ping/ping.info:0; modules/poll/poll.info:0;
+#: modules/profile/profile.info:0; modules/search/search.info:0;
+#: modules/statistics/statistics.info:0; modules/syslog/syslog.info:0;
+#: modules/taxonomy/taxonomy.info:0; modules/throttle/throttle.info:0;
+#: modules/tracker/tracker.info:0; modules/translation/translation.info:0;
+#: modules/trigger/trigger.info:0; modules/update/update.info:0;
+#: modules/upload/upload.info:0
+msgid "Core - optional"
+msgstr "Core - opcional"
+
+#: modules/block/block-admin-display-form.tpl.php:41;
+#: modules/block/block.info:0
+msgid "Block"
+msgstr "Bloque"
+
+#: modules/block/block-admin-display-form.tpl.php:45;
+#: modules/system/system.admin.inc:2020; modules/throttle/throttle.info:0
+msgid "Throttle"
+msgstr "Regulación"
+
+#: modules/block/block.admin.inc:77; modules/filter/filter.admin.inc:34;
+#: modules/system/system.admin.inc:219; modules/system/system.module:1320
+msgid "configure"
+msgstr "configurar"
+
+#: modules/block/block.info:0
+msgid "Controls the boxes that are displayed around the main content."
+msgstr "Controla las cajas que se muestran alrededor del contenido principal."
+
+#: modules/block/block.info:0; modules/filter/filter.info:0;
+#: modules/node/node.info:0; modules/system/system.info:0;
+#: modules/user/user.info:0
+msgid "Core - required"
+msgstr "Core - obigatorios"
+
+#: modules/blog/blog.pages.inc:15; modules/blog/blog.module:108
+msgid "@name's blog"
+msgstr "blog de @name"
+
+#: modules/blog/blog.module:51; modules/blog/blog.info:0
+msgid "Blog"
+msgstr "Blog"
+
+#: modules/blog/blog.info:0
+msgid "Enables keeping easily and regularly updated user web pages or blogs."
+msgstr ""
+"Permite mantener páginas web o bitácoras de usuario fácil y regularmente "
+"actualizados."
+
+#: modules/blogapi/blogapi.module:233,289; modules/book/book.admin.inc:118;
+#: modules/comment/comment.admin.inc:111,280,286;
+#: modules/comment/comment.module:707,768,790;
+#: modules/forum/forum.admin.inc:177;
+#: modules/node/node.pages.inc:458,462,583,597; modules/node/node.module:980
+msgid "content"
+msgstr "contenido"
+
+#: modules/blogapi/blogapi.info:0
+msgid "Blog API"
+msgstr "API para blog"
+
+#: modules/blogapi/blogapi.info:0
+msgid ""
+"Allows users to post content using applications that support XML-RPC blog "
+"APIs."
+msgstr ""
+"Permite a los usuarios publicar contenido usando aplicaciones que soportan "
+"API para blog XML-RPC."
+
+#: modules/book/book.admin.inc:17; modules/book/book.module:418;
+#: modules/book/book.info:0
+msgid "Book"
+msgstr "Book"
+
+#: modules/book/book.admin.inc:36; modules/book/book.module:43
+msgid "add content to books"
+msgstr "añadir contenido a libros"
+
+#: modules/book/book.admin.inc:36; modules/book/book.module:43
+msgid "administer book outlines"
+msgstr "administrar esquemas de libro"
+
+#: modules/book/book.admin.inc:44,60; modules/book/book.module:57
+msgid "Add child page"
+msgstr "Añadir página hija"
+
+#: modules/book/book.admin.inc:196; modules/forum/forum.admin.inc:50,131
+msgid "Parent"
+msgstr "Padre"
+
+#: modules/book/book.module:349; modules/menu/menu.admin.inc:312;
+#: modules/menu/menu.module:398
+msgid "Parent item"
+msgstr "Elemento padre"
+
+#: modules/book/book.info:0
+msgid "Allows users to structure site pages in a hierarchy or outline."
+msgstr ""
+"Permite a los usuarios estructurar las páginas del sitio en una jerarquía o "
+"esquema."
+
+#: modules/color/color.module:230; modules/comment/comment.pages.inc:60;
+#: modules/comment/comment.module:1387,1391,1394;
+#: modules/node/node.pages.inc:239,401
+msgid "Preview"
+msgstr "Previsualizar"
+
+#: modules/color/color.module:286;
+#: modules/node/content_types.inc:208,279,306,325;
+#: modules/system/system.admin.inc:257,547;
+#: modules/system/system.module:1017,1040,1050;
+#: modules/update/update.settings.inc:94
+msgid "Reset to defaults"
+msgstr "Restablecer a predeterminado"
+
+#: modules/color/color.info:0
+msgid "Color"
+msgstr "Color"
+
+#: modules/color/color.info:0
+msgid "Allows the user to change the color scheme of certain themes."
+msgstr ""
+"Permite al usuario cambiar el esquema de color de ciertos temas gráficos."
+
+#: modules/comment/comment.admin.inc:40; modules/node/node.admin.inc:472;
+#: modules/user/user.admin.inc:149
+msgid "Update options"
+msgstr "Actualizar opciones"
+
+#: modules/comment/comment.admin.inc:48; modules/node/node.admin.inc:487;
+#: modules/user/user.admin.inc:114,164
+msgid "Update"
+msgstr "Actualizar"
+
+#: modules/comment/comment.admin.inc:54; modules/comment/comment.module:1357;
+#: modules/contact/contact.pages.inc:55,187; modules/forum/forum.module:299;
+#: modules/system/system.module:1582;
+#: modules/user/user.admin.inc:257,277,297,317,342,367,392
+msgid "Subject"
+msgstr "Asunto"
+
+#: modules/comment/comment.admin.inc:55; modules/node/node.admin.inc:565;
+#: modules/tracker/tracker.pages.inc:65
+msgid "Author"
+msgstr "Autor"
+
+#: modules/comment/comment.admin.inc:57;
+#: modules/statistics/statistics.pages.inc:13
+msgid "Time"
+msgstr "Hora"
+
+#: modules/comment/comment.admin.inc:115; modules/node/node.admin.inc:380,432;
+#: modules/user/user.admin.inc:214
+msgid "The update has been performed."
+msgstr "Se ejecutó la actualización."
+
+#: modules/aggregator/aggregator.admin.inc:189;
+#: modules/comment/comment.admin.inc:189;
+#: modules/contact/contact.admin.inc:138; modules/menu/menu.admin.inc:459;
+#: modules/node/content_types.inc:391; modules/node/node.admin.inc:620;
+#: modules/node/node.pages.inc:503,590; modules/system/system.module:1126;
+#: modules/user/user.admin.inc:869; modules/user/user.module:1848
+msgid "This action cannot be undone."
+msgstr "Esta acción no puede revertirse."
+
+#: modules/comment/comment.module:559; modules/node/node.admin.inc:57
+msgid "Optional"
+msgstr "Opcional"
+
+#: modules/comment/comment.module:559; modules/node/node.admin.inc:57;
+#: modules/taxonomy/taxonomy.admin.inc:166
+msgid "Required"
+msgstr "Obigatorio"
+
+#: modules/comment/comment.module:1188; modules/node/node.module:803
+msgid "You have to specify a valid date."
+msgstr "Tiene que especificar una fecha válida."
+
+#: modules/comment/comment.module:1288,1304; modules/node/node.pages.inc:178
+msgid "Authored by"
+msgstr "Por"
+
+#: modules/comment/comment.module:1312,1343,1351;
+#: modules/user/user.admin.inc:763,802
+msgid "E-mail"
+msgstr "E-mail"
+
+#: modules/comment/comment.module:1316,1343,1351;
+#: modules/profile/profile.module:337
+msgid ""
+"The content of this field is kept private and will not be shown publicly."
+msgstr ""
+"El contenido de este campo se mantiene privado y no se mostrará públicamente."
+
+#: modules/comment/comment.module:1328; modules/node/node.pages.inc:187
+msgid "Authored on"
+msgstr "Fecha"
+
+#: modules/comment/comment.module:1330; modules/node/node.admin.inc:565;
+#: modules/translation/translation.pages.inc:27;
+#: modules/user/user.admin.inc:135,909; modules/user/user.module:1455
+msgid "Status"
+msgstr "Estatus"
+
+#: modules/comment/comment.module:1330; modules/node/content_types.inc:157;
+#: modules/node/node.pages.inc:207;
+#: modules/translation/translation.pages.inc:40
+msgid "Published"
+msgstr "Publicado"
+
+#: modules/comment/comment.module:1330;
+#: modules/translation/translation.pages.inc:40
+msgid "Not published"
+msgstr "No publicado"
+
+#: modules/comment/comment.module:1334,1340,1349;
+#: modules/contact/contact.pages.inc:43
+msgid "Your name"
+msgstr "Su nombre"
+
+#: modules/comment/comment.module:1369; modules/comment/comment.info:0
+msgid "Comment"
+msgstr "Comentario"
+
+#: modules/comment/comment.module:1856; modules/forum/forum.admin.inc:204
+msgid "Date - newest first"
+msgstr "Fecha - primero lo más nuevo"
+
+#: modules/comment/comment.module:1857; modules/forum/forum.admin.inc:204
+msgid "Date - oldest first"
+msgstr "Fecha - primero lo más viejo"
+
+#: modules/comment/comment.module:2068; modules/node/node.module:2704
+msgid "Keywords"
+msgstr "Palabras clave"
+
+#: modules/comment/comment.module:2058,2098;
+#: modules/node/node.module:2585,2594,2603,2612,2621,2630,2639,2649,2729;
+#: modules/system/system.module:1684; modules/user/user.module:2235,2245
+msgid "action"
+msgstr "acción"
+
+#: modules/comment/comment.module:418,624; modules/node/node.module:138
+msgid "1 comment"
+msgid_plural "@count comments"
+msgstr[0] "1 comentario"
+msgstr[1] "@count comentarios"
+
+#: modules/comment/comment.info:0
+msgid "Allows users to comment on and discuss published content."
+msgstr "Permite a los usuarios comentar y discutir contenido publicado."
+
+#: modules/contact/contact.admin.inc:16,64;
+#: modules/upload/upload.admin.inc:80; modules/user/user.module:2159
+msgid "Yes"
+msgstr "Sí"
+
+#: modules/contact/contact.admin.inc:16,64;
+#: modules/upload/upload.admin.inc:80; modules/user/user.module:2160
+msgid "No"
+msgstr "No"
+
+#: modules/contact/contact.admin.inc:18,40;
+#: modules/contact/contact.pages.inc:67;
+#: modules/profile/profile.admin.inc:149,214
+msgid "Category"
+msgstr "Categoría"
+
+#: modules/contact/contact.admin.inc:18,63;
+#: modules/system/system.admin.inc:2149
+msgid "Selected"
+msgstr "Seleccionado"
+
+#: modules/contact/contact.admin.inc:83; modules/profile/profile.admin.inc:301
+msgid "You must enter a category."
+msgstr "You must enter a category."
+
+#: modules/contact/contact.admin.inc:157; modules/contact/contact.pages.inc:41
+msgid "You can leave a message using the contact form below."
+msgstr "Puede enviar un mensaje usando el formulario de contacto de abajo."
+
+#: modules/contact/contact.pages.inc:63; modules/forum/forum.module:381;
+#: modules/taxonomy/taxonomy.module:418
+msgid "- Please choose -"
+msgstr "- Por favor elija -"
+
+#: modules/contact/contact.pages.inc:81,192;
+#: modules/dblog/dblog.admin.inc:50,98,148;
+#: modules/system/system.module:1589,1735
+msgid "Message"
+msgstr "Mensaje"
+
+#: modules/contact/contact.pages.inc:95,200; modules/system/system.module:1264
+msgid "Send e-mail"
+msgstr "Enviar un correo-e"
+
+#: modules/contact/contact.info:0
+msgid "Contact"
+msgstr "Contacto"
+
+#: modules/contact/contact.info:0
+msgid "Enables the use of both personal and site-wide contact forms."
+msgstr "Habilita el uso de formularios de contacto personal y a nivel sitio."
+
+#: modules/dblog/dblog.admin.inc:48,128,213;
+#: modules/node/content_types.inc:15,81,95; modules/node/node.admin.inc:565;
+#: modules/profile/profile.admin.inc:147;
+#: modules/taxonomy/taxonomy.admin.inc:88;
+#: modules/tracker/tracker.pages.inc:65
+msgid "Type"
+msgstr "Tipo"
+
+#: modules/dblog/dblog.admin.inc:49,132;
+#: modules/statistics/statistics.admin.inc:158
+msgid "Date"
+msgstr "Fecha"
+
+#: modules/dblog/dblog.admin.inc:51,136;
+#: modules/statistics/statistics.admin.inc:16,162;
+#: modules/statistics/statistics.pages.inc:15; modules/user/user.info:0
+msgid "User"
+msgstr "Usuario"
+
+#: modules/dblog/dblog.admin.inc:144;
+#: modules/statistics/statistics.admin.inc:154;
+#: modules/statistics/statistics.pages.inc:14
+msgid "Referrer"
+msgstr "Referente"
+
+#: modules/dblog/dblog.admin.inc:156;
+#: modules/statistics/statistics.admin.inc:166;
+#: modules/user/user.admin.inc:813
+msgid "Hostname"
+msgstr "Nombre del host"
+
+#: modules/dblog/dblog.admin.inc:280,296,308; modules/filter/filter.info:0;
+#: modules/node/node.admin.inc:255,320; modules/path/path.admin.inc:206;
+#: modules/user/user.admin.inc:73,98
+msgid "Filter"
+msgstr "Filtrar"
+
+#: modules/dblog/dblog.admin.inc:285,315; modules/menu/menu.admin.inc:584;
+#: modules/node/node.admin.inc:258,336; modules/path/path.admin.inc:212;
+#: modules/user/user.admin.inc:82,111
+msgid "Reset"
+msgstr "Restablecer"
+
+#: modules/dblog/dblog.info:0
+msgid "Database logging"
+msgstr "Registro en base de datos"
+
+#: modules/dblog/dblog.info:0
+msgid "Logs and records system events to the database."
+msgstr "Anota y registra eventos del sistema en la base de datos."
+
+#: modules/filter/filter.admin.inc:69,102,362;
+#: modules/node/content_types.inc:15,72;
+#: modules/profile/profile.admin.inc:147;
+#: modules/system/system.admin.inc:1129,2022,2107,2149,2207;
+#: modules/taxonomy/taxonomy.admin.inc:88,612;
+#: modules/trigger/trigger.admin.inc:238; modules/user/user.admin.inc:950
+msgid "Name"
+msgstr "Nombre"
+
+#: modules/filter/filter.admin.inc:69,110;
+#: modules/user/user.admin.inc:136,910; modules/user/user.module:1480
+msgid "Roles"
+msgstr "Roles"
+
+#: modules/filter/filter.admin.inc:146; modules/filter/filter.module:583
+msgid "More information about formatting options"
+msgstr "Más información sobre opciones de formato"
+
+#: modules/filter/filter.admin.inc:153; modules/filter/filter.module:512
+msgid "Formatting guidelines"
+msgstr "Directrices para el formato"
+
+#: modules/filter/filter.info:0
+msgid "Handles the filtering of content in preparation for display."
+msgstr "Maneja el filtrado de contenido en preparación para mostrarlo."
+
+#: modules/forum/forum-list.tpl.php:37; modules/forum/forum.info:0
+msgid "Forum"
+msgstr "Foro"
+
+#: modules/forum/forum.admin.inc:79; modules/forum/forum.module:0
+msgid "forum"
+msgstr "foro"
+
+#: modules/forum/forum.admin.inc:277; modules/taxonomy/taxonomy.admin.inc:695
+msgid "root"
+msgstr "raíz"
+
+#: modules/forum/forum.module:562; modules/tracker/tracker.pages.inc:65
+msgid "Replies"
+msgstr "Respuestas"
+
+#: modules/forum/forum.install:83; modules/taxonomy/taxonomy.install:91
+msgid "Primary Key: The {node}.vid of the node."
+msgstr "Clave primaria: el {node}.vid del nodo."
+
+#: modules/forum/forum.info:0
+msgid "Enables threaded discussions about general topics."
+msgstr "Activa discusiones por hilo acerca de tópicos generales."
+
+#: modules/help/help.info:0
+msgid "Help"
+msgstr "Ayuda"
+
+#: modules/help/help.info:0
+msgid "Manages the display of online help."
+msgstr "Administra el despliegue de ayuda en línea."
+
+#: modules/locale/locale.module:280; modules/node/node.admin.inc:167,232,502
+msgid "Language neutral"
+msgstr "Idioma neutro"
+
+#: modules/locale/locale.module:0,0; modules/system/system.admin.inc:1517
+msgid "Thursday"
+msgstr "Jueves"
+
+#: modules/locale/locale.module:0; modules/system/system.admin.inc:1517
+msgid "Friday"
+msgstr "Viernes"
+
+#: modules/locale/locale.module:0; modules/system/system.admin.inc:1517
+msgid "Saturday"
+msgstr "Sábado"
+
+#: modules/locale/locale.module:0; modules/system/system.admin.inc:1517
+msgid "Sunday"
+msgstr "Domingo"
+
+#: modules/locale/locale.module:0; modules/system/system.admin.inc:1517
+msgid "Monday"
+msgstr "Lunes"
+
+#: modules/locale/locale.module:0; modules/system/system.admin.inc:1517
+msgid "Tuesday"
+msgstr "Martes"
+
+#: modules/locale/locale.module:0; modules/system/system.admin.inc:1517
+msgid "Wednesday"
+msgstr "Miércoles"
+
+#: modules/locale/locale.info:0
+msgid "Locale"
+msgstr "Locale"
+
+#: modules/locale/locale.info:0
+msgid ""
+"Adds language handling functionality and enables the translation of the user "
+"interface to languages other than English."
+msgstr ""
+"Agrega funcionalidad de manejo de idioma y habilita la traducción de la "
+"interfaz de usuario a idiomas distintos del inglés."
+
+#: modules/menu/menu.admin.inc:72; modules/menu/menu.module:235
+msgid "disabled"
+msgstr "desactivado"
+
+#: modules/menu/menu.admin.inc:230; modules/menu/menu.module:358
+msgid "Menu settings"
+msgstr "Opciones del menú"
+
+#: modules/menu/menu.admin.inc:258,274; modules/path/path.info:0
+msgid "Path"
+msgstr "Ruta"
+
+#: modules/menu/menu.admin.inc:279; modules/menu/menu.module:385
+msgid "Menu link title"
+msgstr "Título del enlace del menú."
+
+#: modules/menu/menu.admin.inc:315; modules/menu/menu.module:401
+msgid ""
+"The maximum depth for an item and all its children is fixed at !maxdepth. "
+"Some menu items may not be available as parents if selecting them would "
+"exceed this limit."
+msgstr ""
+
+#: modules/menu/menu.admin.inc:323; modules/menu/menu.module:411
+msgid ""
+"Optional. In the menu, the heavier items will sink and the lighter items "
+"will be positioned nearer the top."
+msgstr ""
+"Opcional. En el menú, los elementos pesados se hunden y los ligeros flotan "
+"hacia la zona superior."
+
+#: modules/menu/menu.admin.inc:338; modules/system/system.admin.inc:1192
+msgid ""
+"The menu system stores system paths only, but will use the URL alias for "
+"display. %link_path has been stored as %normal_path"
+msgstr ""
+
+#: modules/menu/menu.admin.inc:354; modules/path/path.admin.inc:143
+msgid ""
+"The path '@link_path' is either invalid or you do not have access to it."
+msgstr "La ruta '@link_path' es inválida o bien usted no tiene acceso a ella."
+
+#: modules/menu/menu.admin.inc:379; modules/menu/menu.module:302
+msgid "There was an error saving the menu link."
+msgstr "Hubo un error al guardar el enlace del menú."
+
+#: modules/menu/menu.admin.inc:493,575; modules/menu/menu.module:0;
+#: modules/node/content_types.inc:404
+msgid "menu"
+msgstr "menú"
+
+#: modules/menu/menu.info:0
+msgid "Menu"
+msgstr "Menú"
+
+#: modules/menu/menu.info:0
+msgid "Allows administrators to customize the site navigation menu."
+msgstr ""
+"Permite a los administradores personalizar el menú de navegación del sitio."
+
+#: modules/node/content_types.inc:59; modules/node/node.module:591;
+#: modules/user/user.admin.inc:263,283,303,323,348,373,398
+msgid "Body"
+msgstr "Cuerpo"
+
+#: modules/node/content_types.inc:69;
+#: modules/taxonomy/taxonomy.admin.inc:118,658
+msgid "Identification"
+msgstr "Identificación"
+
+#: modules/node/content_types.inc:158; modules/node/node.pages.inc:212
+msgid "Promoted to front page"
+msgstr "Promocionado a la página principal"
+
+#: modules/node/content_types.inc:159; modules/node/node.pages.inc:217
+msgid "Sticky at top of lists"
+msgstr "Pegajoso en la cima de las listas"
+
+#: modules/node/content_types.inc:160; modules/node/node.pages.inc:156
+msgid "Create new revision"
+msgstr "Crear revisión nueva"
+
+#: modules/node/content_types.inc:335; modules/node/node.module:0
+msgid "node"
+msgstr "nodo"
+
+#: modules/node/node.admin.inc:38; modules/poll/poll.module:250
+msgid "Unlimited"
+msgstr "Ilimitado"
+
+#: modules/node/node.admin.inc:141; modules/user/user.module:1954
+msgid "status"
+msgstr "estatus"
+
+#: modules/node/node.admin.inc:255,321; modules/user/user.admin.inc:73,98
+msgid "Refine"
+msgstr "Refinar"
+
+#: modules/node/node.admin.inc:257,333; modules/user/user.admin.inc:78,108
+msgid "Undo"
+msgstr "Deshacer"
+
+#: modules/node/node.admin.inc:294; modules/user/user.admin.inc:994
+msgid "and"
+msgstr "y"
+
+#: modules/node/node.admin.inc:294; modules/user/user.admin.inc:994
+msgid "where"
+msgstr "donde"
+
+#: modules/node/node.admin.inc:300; modules/user/user.admin.inc:1000
+msgid "is"
+msgstr "es"
+
+#: modules/node/node.admin.inc:590; modules/tracker/tracker.pages.inc:62
+msgid "No posts available."
+msgstr "No hay mensajes disponibles."
+
+#: modules/node/node.admin.inc:621; modules/user/user.module:1849
+msgid "Delete all"
+msgstr "Borrar todo"
+
+#: modules/node/node.info:0
+msgid "Node"
+msgstr "Nodo"
+
+#: modules/node/node.info:0
+msgid "Allows content to be submitted to the site and displayed on pages."
+msgstr ""
+"Permite que se envíe contenido al sitio y que se despliegue en páginas."
+
+#: modules/openid/openid.pages.inc:42,64; modules/openid/openid.info:0
+msgid "OpenID"
+msgstr "OpenID"
+
+#: modules/openid/openid.module:433; modules/user/user.admin.inc:234
+msgid "Only site administrators can create new user accounts."
+msgstr "Sólo los administradores pueden crear cuentas para usuarios nuevos."
+
+#: modules/openid/openid.info:0
+msgid "Allows users to log into your site using OpenID."
+msgstr ""
+
+#: modules/path/path.admin.inc:31; modules/system/system.info:0
+msgid "System"
+msgstr "Sistema"
+
+#: modules/path/path.info:0
+msgid "Allows users to rename URLs."
+msgstr "Permite a los usuarios cambiar el nombre a URL."
+
+#: modules/php/php.info:0
+msgid "PHP filter"
+msgstr "Filtro PHP"
+
+#: modules/php/php.info:0
+msgid "Allows embedded PHP code/snippets to be evaluated."
+msgstr ""
+
+#: modules/ping/ping.info:0
+msgid "Ping"
+msgstr "Ping"
+
+#: modules/ping/ping.info:0
+msgid "Alerts other sites when your site has been updated."
+msgstr "Alerta a otros sitios cuando el de usted se actualiza."
+
+#: modules/poll/poll-bar.tpl.php:25; modules/poll/poll.pages.inc:20
+msgid "1 vote"
+msgid_plural "@count votes"
+msgstr[0] "1 voto"
+msgstr[1] "@count votos"
+
+#: modules/poll/poll-results-block.tpl.php:26;
+#: modules/poll/poll-results.tpl.php:24
+msgid "Total votes: @votes"
+msgstr ""
+
+#: modules/poll/poll.pages.inc:34; modules/statistics/statistics.admin.inc:80
+msgid "Visitor"
+msgstr "Visitante"
+
+#: modules/poll/poll.pages.inc:35; modules/poll/poll.module:571
+msgid "Vote"
+msgstr "Votar"
+
+#: modules/poll/poll.module:147,172; modules/poll/poll.info:0
+msgid "Poll"
+msgstr "Encuesta"
+
+#: modules/poll/poll.module:251; modules/user/user.module:1457
+msgid "Active"
+msgstr "Activa"
+
+#: modules/poll/poll.info:0
+msgid ""
+"Allows your site to capture votes on different topics in the form of "
+"multiple choice questions."
+msgstr ""
+"Permite que su sitio capture votos sobre diferentes tópicos en forma de "
+"preguntas de opción múltiple."
+
+#: modules/profile/profile.admin.inc:345,387; modules/profile/profile.module:0
+msgid "profile"
+msgstr "perfil"
+
+#: modules/profile/profile.info:0
+msgid "Profile"
+msgstr "Perfil"
+
+#: modules/profile/profile.info:0
+msgid "Supports configurable user profiles."
+msgstr "Soporta perfiles de usuario configurables."
+
+#: modules/search/search.pages.inc:29; modules/search/search.module:0
+msgid "search"
+msgstr "buscar"
+
+#: modules/search/search.info:0
+msgid "Enables site-wide keyword searching."
+msgstr "Permite la búsqueda de palabras en todo el sitio."
+
+#: modules/statistics/statistics.admin.inc:14;
+#: modules/statistics/statistics.pages.inc:46
+msgid "Timestamp"
+msgstr "Sello temporal"
+
+#: modules/statistics/statistics.admin.inc:15,51;
+#: modules/statistics/statistics.pages.inc:47;
+#: profiles/default/default.profile:100
+msgid "Page"
+msgstr "Página"
+
+#: modules/statistics/statistics.admin.inc:29;
+#: modules/statistics/statistics.pages.inc:25,56
+msgid "details"
+msgstr "detalles"
+
+#: modules/statistics/statistics.admin.inc:33,64,97,129;
+#: modules/statistics/statistics.pages.inc:29,60
+msgid "No statistics available."
+msgstr ""
+
+#: modules/statistics/statistics.info:0
+msgid "Statistics"
+msgstr "Estadísticas"
+
+#: modules/statistics/statistics.info:0
+msgid "Logs access statistics for your site."
+msgstr "Anota estadísticas de acceso a su sitio."
+
+#: modules/syslog/syslog.info:0
+msgid "Syslog"
+msgstr ""
+
+#: modules/syslog/syslog.info:0
+msgid "Logs and records system events to syslog."
+msgstr ""
+
+#: modules/system/system.admin.inc:209; modules/system/system.module:704
+msgid "Screenshot for %theme theme"
+msgstr "Captura de pantalla del tema %theme"
+
+#: modules/system/system.admin.inc:209; modules/system/system.module:704
+msgid "no screenshot"
+msgstr "no hay captura de pantalla"
+
+#: modules/system/system.admin.inc:306,555,933;
+#: modules/system/system.module:1054
+msgid "The configuration options have been saved."
+msgstr "Se han guardado las opciones de configuración."
+
+#: modules/menu/menu.install:13; modules/system/system.admin.inc:385
+msgid "Primary links"
+msgstr ""
+
+#: modules/menu/menu.install:14; modules/system/system.admin.inc:386
+msgid "Secondary links"
+msgstr ""
+
+#: modules/system/system.admin.inc:549; modules/system/system.module:1051
+msgid "The configuration options have been reset to their default values."
+msgstr ""
+"Se han restablecido los valores predefinidos de las opciones de "
+"configuración."
+
+#: modules/system/system.admin.inc:1494; modules/system/system.module:550
+msgid "Locale settings"
+msgstr "Opciones de localización"
+
+#: modules/system/system.module:594; modules/user/user.module:2151
+msgid "Medium"
+msgstr ""
+
+#: modules/system/system.module:1526; modules/user/user.pages.inc:66,98,134;
+#: modules/user/user.module:1314,1351,1400,1577,2299,0
+msgid "user"
+msgstr "usuario"
+
+#: modules/system/system.install:232; modules/update/update.report.inc:82;
+#: modules/update/update.module:274
+msgid "Up to date"
+msgstr "Actualizado"
+
+#: modules/system/system.install:242; modules/update/update.module:265
+msgid "Out of date"
+msgstr "Desactualizado"
+
+#: modules/system/system.info:0
+msgid "Handles general site configuration for administrators."
+msgstr "Gestión de la configuración general del sitio por administradores."
+
+#: modules/taxonomy/taxonomy.admin.inc:203,207,769,773,855,889,924;
+#: modules/taxonomy/taxonomy.module:0
+msgid "taxonomy"
+msgstr "taxonomía"
+
+#: modules/taxonomy/taxonomy.info:0
+msgid "Taxonomy"
+msgstr "Taxonomía"
+
+#: modules/taxonomy/taxonomy.info:0
+msgid "Enables the categorization of content."
+msgstr "Permite la categorización del contenido."
+
+#: modules/throttle/throttle.module:104; modules/user/user.module:776,779
+msgid "1 user"
+msgid_plural "@count users"
+msgstr[0] "1 usuario"
+msgstr[1] "@count usuarios"
+
+#: modules/throttle/throttle.info:0
+msgid "Handles the auto-throttling mechanism, to control site congestion."
+msgstr ""
+"Maneja el mecanismo de autorregulación, para controlar el congestionamiento "
+"del sitio."
+
+#: modules/forum/forum.module:763,825; modules/tracker/tracker.pages.inc:48
+msgid "1 new"
+msgid_plural "@count new"
+msgstr[0] "1 nuevo"
+msgstr[1] "@count nuevos"
+
+#: modules/tracker/tracker.info:0
+msgid "Tracker"
+msgstr "Tracker"
+
+#: modules/tracker/tracker.info:0
+msgid "Enables tracking of recent posts for users."
+msgstr "Permite el rastreo de mensajes recientes para los usuarios."
+
+#: modules/translation/translation.info:0
+msgid "Content translation"
+msgstr ""
+
+#: modules/translation/translation.info:0
+msgid "Allows content to be translated into different languages."
+msgstr ""
+
+#: modules/trigger/trigger.admin.inc:164; modules/trigger/trigger.module:411
+msgid "Choose an action"
+msgstr ""
+
+#: modules/trigger/trigger.info:0
+msgid "Trigger"
+msgstr ""
+
+#: modules/trigger/trigger.info:0
+msgid ""
+"Enables actions to be fired on certain system events, such as when new "
+"content is created."
+msgstr ""
+
+#: modules/update/update.fetch.inc:57,61; modules/update/update.module:0
+msgid "update"
+msgstr "actualizar"
+
+#: modules/update/update.info:0
+msgid "Update status"
+msgstr ""
+
+#: modules/update/update.info:0
+msgid ""
+"Checks the status of available updates for Drupal and your installed modules "
+"and themes."
+msgstr ""
+
+#: modules/upload/upload.info:0
+msgid "Upload"
+msgstr "Upload"
+
+#: modules/upload/upload.info:0
+msgid "Allows users to upload and attach files to content."
+msgstr "Permite a los usuarios subir archivos y anexarlos a contenido."
+
+#: modules/user/user.admin.inc:13; modules/user/user.module:667,2425
+msgid "Create new account"
+msgstr "Crear cuenta nueva"
+
+#: modules/user/user.admin.inc:137,911; modules/user/user.module:621
+msgid "Member for"
+msgstr "Miembro durante"
+
+#: modules/user/user.admin.inc:169; modules/user/user.module:1957
+msgid "blocked"
+msgstr "bloqueado"
+
+#: modules/user/user.admin.inc:169; modules/user/user.module:1957
+msgid "active"
+msgstr "activo"
+
+#: modules/user/user.admin.inc:563; modules/user/user.pages.inc:280,346
+msgid "The changes have been saved."
+msgstr "Se han guardado los cambios."
+
+#: modules/user/user.admin.inc:582; modules/user/user.module:1941
+msgid "@module module"
+msgstr "módulo @module"
+
+#: modules/user/user.pages.inc:110; modules/user/user.module:663,1255
+msgid "Log in"
+msgstr "Iniciar sesión"
+
+#: modules/menu/menu.install:12; modules/user/user.module:685,735
+msgid "Navigation"
+msgstr "Navegación"
+
+#: modules/user/user.info:0
+msgid "Manages the user registration and login system."
+msgstr "Maneja el sistema de registro y acceso de usuarios."
+
+#: themes/bluemarine/bluemarine.info:0; themes/garland/color/color.inc:12;
+#: themes/garland/minnelli/color/color.inc:12
+msgid "Bluemarine"
+msgstr "Bluemarine"
+
+#: themes/bluemarine/bluemarine.info:0
+msgid "Table-based multi-column theme with a marine and ash color scheme."
+msgstr ""
+
+#: themes/chameleon/chameleon.info:0
+msgid "Chameleon"
+msgstr "Chameleon"
+
+#: themes/chameleon/chameleon.info:0
+msgid "Minimalist tabled theme with light colors."
+msgstr "Tema minimalista a base de tablas con colores claros."
+
+#: themes/chameleon/marvin/marvin.info:0
+msgid "Marvin"
+msgstr "Marvin"
+
+#: themes/chameleon/marvin/marvin.info:0
+msgid "Boxy tabled theme in all grays."
+msgstr "Tema gráfico con tablas, en forma de cajas, en tonos grises."
+
+#: themes/garland/garland.info:0
+msgid "Garland"
+msgstr "Garland"
+
+#: themes/garland/garland.info:0
+msgid "Tableless, recolorable, multi-column, fluid width theme"
+msgstr ""
+"Tema gráfico de anchura fija, sin tablas, de color modificable, "
+"multicolumnas."
+
+#: themes/garland/color/color.inc:8; themes/garland/minnelli/color/color.inc:8
+msgid "Blue Lagoon (Default)"
+msgstr "Laguna azul (Predefinido)"
+
+#: themes/garland/color/color.inc:9; themes/garland/minnelli/color/color.inc:9
+msgid "Ash"
+msgstr "Ceniza"
+
+#: themes/garland/color/color.inc:10;
+#: themes/garland/minnelli/color/color.inc:10
+msgid "Aquamarine"
+msgstr "Aguamarina"
+
+#: themes/garland/color/color.inc:11;
+#: themes/garland/minnelli/color/color.inc:11
+msgid "Belgian Chocolate"
+msgstr "Chocolate belga"
+
+#: themes/garland/color/color.inc:13;
+#: themes/garland/minnelli/color/color.inc:13
+msgid "Citrus Blast"
+msgstr "Estallido cítrico"
+
+#: themes/garland/color/color.inc:14;
+#: themes/garland/minnelli/color/color.inc:14
+msgid "Cold Day"
+msgstr "Día frío"
+
+#: themes/garland/color/color.inc:15;
+#: themes/garland/minnelli/color/color.inc:15
+msgid "Greenbeam"
+msgstr "Rayo verde"
+
+#: themes/garland/color/color.inc:16;
+#: themes/garland/minnelli/color/color.inc:16
+msgid "Mediterrano"
+msgstr "Mediterráneo"
+
+#: themes/garland/color/color.inc:17;
+#: themes/garland/minnelli/color/color.inc:17
+msgid "Mercury"
+msgstr "Mercurio"
+
+#: themes/garland/color/color.inc:18;
+#: themes/garland/minnelli/color/color.inc:18
+msgid "Nocturnal"
+msgstr "Nocturno"
+
+#: themes/garland/color/color.inc:19;
+#: themes/garland/minnelli/color/color.inc:19
+msgid "Olivia"
+msgstr "Olivia"
+
+#: themes/garland/color/color.inc:20;
+#: themes/garland/minnelli/color/color.inc:20
+msgid "Pink Plastic"
+msgstr "Plástico rosado"
+
+#: themes/garland/color/color.inc:21;
+#: themes/garland/minnelli/color/color.inc:21
+msgid "Shiny Tomato"
+msgstr "Tomate brillante"
+
+#: themes/garland/color/color.inc:22;
+#: themes/garland/minnelli/color/color.inc:22
+msgid "Teal Top"
+msgstr "Verde seco"
+
+#: themes/garland/minnelli/minnelli.info:0
+msgid "Minnelli"
+msgstr "Minnelli"
+
+#: themes/garland/minnelli/minnelli.info:0
+msgid "Tableless, recolorable, multi-column, fixed width theme."
+msgstr ""
+"Tema gráfico de anchura fija, sin tablas, de color modificable, "
+"multicolumnas."
+
+#: themes/pushbutton/pushbutton.info:0
+msgid "Pushbutton"
+msgstr "Pushbutton"
+
+#: themes/pushbutton/pushbutton.info:0
+msgid "Tabled, multi-column theme in blue and orange tones."
+msgstr "Tema gráfico con tablas, multicolumnas, en tonos azul y naranja."
+
+#: modules/comment/comment.module:1658; modules/openid/openid.module:425;
+#: modules/user/user.module:1396,2293
+msgid "Error saving user account."
+msgstr "Error al guardar la cuenta de usuario"
+
+#: modules/update/update.report.inc:73; modules/update/update.module:259
+msgid "Revoked!"
+msgstr ""
