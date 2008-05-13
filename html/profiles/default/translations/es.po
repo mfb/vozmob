@@ -190,13 +190,12 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: drupal (6.0)\n"
-"POT-Creation-Date: 2008-02-25 18:21+0100\n"
-"PO-Revision-Date: 2008-02-25 18:11+0100\n"
+"POT-Creation-Date: 2008-03-30 17:19+0200\n"
+"PO-Revision-Date: 2008-03-18 14:01+0100\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n!=1);\n"
 
 #: install.php:640
 msgid "Installing @drupal"
@@ -241,14 +240,15 @@ msgstr "Tipo de base de datos:"
 
 #: install.php:240
 msgid "The type of database your @drupal data will be stored in."
-msgstr "El tipo de base de datos en el que se almacenan los datos de @drupal."
+msgstr ""
+"El tipo de base de datos en el que se almacenarán los datos de @drupal."
 
 #: install.php:242
 msgid ""
 "The name of the database your @drupal data will be stored in. It must exist "
 "on your server before @drupal can be installed."
 msgstr ""
-"El nombre de la base de datos en la que se almacenan los datos de @drupal. "
+"El nombre de la base de datos en la que se almacenarán los datos de @drupal. "
 "Debe existir en el servidor antes de instalar @drupal."
 
 #: install.php:251
@@ -256,8 +256,9 @@ msgid ""
 "The name of the %db_type database your @drupal data will be stored in. It "
 "must exist on your server before @drupal can be installed."
 msgstr ""
-"El nombre de la base de datos %db_type en la que se almacenan los datos. "
-"Debe existir en el servidor antes de instalar @drupal."
+"El nombre de la base de datos %db_type en la que se almacenaran sus datos "
+"@drupal, debe existir en tu servidor antes de que @drupal pueda ser "
+"instalado."
 
 #: install.php:258
 msgid "Database name"
@@ -287,7 +288,7 @@ msgstr ""
 
 #: install.php:296
 msgid "Database host"
-msgstr "Máquina de la base de datos"
+msgstr "Servidor de la base de datos"
 
 #: install.php:301
 msgid "If your database is located on a different server, change this."
@@ -361,7 +362,7 @@ msgstr ""
 "siguientes comandos: %commands. Para más ayuda con la configuración del "
 "servidor de tu base de datos, lee el <a href=\"http://drupal.org/node/258"
 "\">Libro de instalación y actualización</a>. Si entiendes los errores que se "
-"indican deberías ponerte en contacto con tu proveedor de hosting"
+"indican deberías ponerte en contacto con tu proveedor de hosting."
 
 #: install.php:444
 msgid "Select an installation profile"
@@ -773,12 +774,12 @@ msgid ""
 "@site is currently under maintenance. We should be back shortly. Thank you "
 "for your patience."
 msgstr ""
-"@site está en mantenimiento. Pronto estaremos otra vez en línea. Gracias por "
-"su paciencia."
+"@site esta en mantenimiento en estos momentos. Pronto estaremos de regreso. "
+"Gracias por su paciencia."
 
 #: includes/common.inc:360
 msgid "Page not found"
-msgstr "No se encontró la página"
+msgstr "Página no encontrada"
 
 #: includes/common.inc:361
 msgid "The requested page could not be found."
@@ -790,7 +791,7 @@ msgstr "Acceso denegado"
 
 #: includes/common.inc:390
 msgid "You are not authorized to access this page."
-msgstr "Carece de permisos para acceder a esta página."
+msgstr "Usted no está autorizado para visitar esta página."
 
 #: includes/common.inc:430
 msgid "The server can't issue HTTP requests"
@@ -833,7 +834,7 @@ msgstr "error"
 #: includes/common.inc:3469; modules/dblog/dblog.admin.inc:35,35;
 #: modules/update/update.report.inc:63,63
 msgid "warning"
-msgstr "advertencia"
+msgstr "alerta"
 
 #: includes/common.inc:3470
 msgid "notice"
@@ -936,7 +937,7 @@ msgstr ""
 
 #: includes/file.inc:104
 msgid "The directory %directory has been created."
-msgstr "Se ha creado el directorio %directory."
+msgstr "El directorio %directory ha sido creado."
 
 #: includes/file.inc:109; modules/system/system.install:198
 msgid "The directory %directory does not exist."
@@ -947,12 +948,12 @@ msgid ""
 "The permissions of directory %directory have been changed to make it "
 "writable."
 msgstr ""
-"Se han cambiado los permisos del directorio %directory para que se pueda "
-"escribir en él."
+"Los permisos sobre la carpeta %directory se cambiaron para poder escribir en "
+"ella."
 
 #: includes/file.inc:121
 msgid "The directory %directory is not writable"
-msgstr "No se puede escribir en el directorio %directory"
+msgstr "No es posible escribir en el directorio %directory."
 
 #: includes/file.inc:135
 msgid ""
@@ -960,9 +961,9 @@ msgid ""
 "file in your %directory directory which contains the following lines: <code>!"
 "htaccess</code>"
 msgstr ""
-"Aviso de seguridad: no se pudo escribir el archivo .htaccess. Puede crear un "
-"archivo .htaccess en el directorio %directory que contenga las siguientes "
-"líneas: <code>!htaccess</code>"
+"Alerta de seguridad: No fue posible escribir el archivo .htaccess. Por favor "
+"cree un archivo .htacess en su carpeta %directory e incluya en él las líneas "
+"siguientes: <code>!htaccess</code>"
 
 #: includes/file.inc:225
 msgid ""
@@ -1012,7 +1013,8 @@ msgstr ""
 #: includes/file.inc:509
 msgid "The file %file could not be saved, because the upload did not complete."
 msgstr ""
-"El archivo %file no se pudo guardar porque no se completó la publicación."
+"El archivo %file no se pudo salvar, porque el proceso de subirlo no se "
+"completó."
 
 #: includes/file.inc:514
 msgid "The file %file could not be saved. An unknown error has occurred."
@@ -1435,7 +1437,7 @@ msgstr ""
 #: modules/system/system.admin.inc:253,276,768;
 #: modules/system/system.module:1016
 msgid "Save configuration"
-msgstr "Salvar configuración"
+msgstr "Guardar la configuración"
 
 #: includes/locale.inc:86,1984; modules/aggregator/aggregator.admin.inc:30,41;
 #: modules/book/book.admin.inc:215; modules/comment/comment.admin.inc:71;
@@ -2086,13 +2088,17 @@ msgid "One translation file imported for the newly installed modules."
 msgid_plural ""
 "@count translation files imported for the newly installed modules."
 msgstr[0] ""
+"Se importó un archivo de traducción para los módulos recién instalados."
 msgstr[1] ""
+"Se importaron @count archivos de traducción para los módulos recién "
+"instalados."
 
 #: includes/locale.inc:2564
 msgid "One translation file imported for the enabled modules."
 msgid_plural "@count translation files imported for the enabled modules."
-msgstr[0] ""
+msgstr[0] "Se importó un archivo de traducción para los módulos habilitados."
 msgstr[1] ""
+"Se importaron @count archivos de traducción para los módulos habilitados."
 
 #: includes/mail.inc:135
 msgid ""
@@ -2698,7 +2704,7 @@ msgstr "Edad: %age"
 
 #: modules/aggregator/aggregator.pages.inc:477
 msgid "!title feed"
-msgstr ""
+msgstr "Feed !title"
 
 #: modules/aggregator/aggregator.module:15
 msgid ""
@@ -2834,7 +2840,7 @@ msgstr "Hay nuevo contenido sindicado de %site."
 
 #: modules/aggregator/aggregator.module:640
 msgid "feed not parseable"
-msgstr ""
+msgstr "feed no analizable"
 
 #: modules/aggregator/aggregator.module:644
 msgid "The feed from %site seems to be broken, because of error \"%error\"."
@@ -2872,7 +2878,7 @@ msgstr ""
 
 #: modules/aggregator/aggregator.install:35
 msgid "Primary Key: Unique aggregator category ID."
-msgstr ""
+msgstr "Llave primaria: ID único de categoría de integrador."
 
 #: modules/aggregator/aggregator.install:42
 msgid "Title of the category."
@@ -2897,7 +2903,7 @@ msgstr "El {aggregator_feed}.fid del hilo."
 
 #: modules/aggregator/aggregator.install:75
 msgid "The {aggregator_category}.cid to which the feed is being assigned."
-msgstr ""
+msgstr "El {aggregator_category}.cid al que se está asignando el hilo."
 
 #: modules/aggregator/aggregator.install:83
 msgid "Bridge table; maps feed items to categories."
@@ -2925,7 +2931,7 @@ msgstr "Título del feed."
 
 #: modules/aggregator/aggregator.install:122
 msgid "URL to the feed."
-msgstr ""
+msgstr "URL del origen de noticias"
 
 #: modules/aggregator/aggregator.install:128
 msgid "How often to check for new feed items, in seconds."
@@ -2992,7 +2998,7 @@ msgstr "Autor del elemento de hilo."
 
 #: modules/aggregator/aggregator.install:222
 msgid "Body of the feed item."
-msgstr ""
+msgstr "Cuerpo del elemento de origen de noticias"
 
 #: modules/aggregator/aggregator.install:227
 msgid "Post date of feed item, as a Unix timestamp."
@@ -3000,7 +3006,7 @@ msgstr ""
 
 #: modules/aggregator/aggregator.install:233
 msgid "Unique identifier for the feed item."
-msgstr ""
+msgstr "Identificador único del elemento del hilo."
 
 #: modules/aggregator/aggregator.info:0
 msgid "Aggregator"
@@ -3392,7 +3398,7 @@ msgstr "administrar bloques"
 
 #: modules/block/block.module:113
 msgid "use PHP for block visibility"
-msgstr "uar PHP para la visibilidad de bloques"
+msgstr "usar PHP para la visibilidad de bloques"
 
 #: modules/block/block.module:0
 msgid "block"
@@ -4112,7 +4118,7 @@ msgstr "crear un nuevo libro"
 
 #: modules/book/book.module:422
 msgid "Your page will be a part of the selected book."
-msgstr ""
+msgstr "Su página formará parte del libro seleccionado."
 
 #: modules/book/book.module:763
 msgid ""
@@ -4129,6 +4135,12 @@ msgid ""
 "placing them into the existing document by adding them to a table of "
 "contents menu."
 msgstr ""
+"El módulo de libro es adecuado para la creación de hipertextos estructurados "
+"y multi-página, tales como guías de recursos, manuales, y preguntas "
+"frecuentes (FAQs). Permite que un documento tenga capítulos, secciones, "
+"subsecciones, etc. Los autores con permisos adecuados pueden añadir páginas "
+"a un libro colaborativo, emplazándolas dentro del documento existente al "
+"añadirlas a una tabla de menú de contenidos."
 
 #: modules/book/book.module:1007
 msgid ""
@@ -7205,7 +7217,7 @@ msgstr ""
 
 #: modules/locale/locale.module:264
 msgid "Multilingual support"
-msgstr ""
+msgstr "Soporte multilenguaje"
 
 #: modules/locale/locale.module:267
 msgid ""
@@ -7215,6 +7227,12 @@ msgid ""
 "new posts are saved with the default language. Existing content will not be "
 "affected by changing this option."
 msgstr ""
+"Habilite el soporte multilenguaje para este tipo de contenido. Si está "
+"habilitado, se agregará al formulario de edición un campo selector de "
+"idioma, lo que le permitirá elegir entre uno de los <a href=\"!languages"
+"\">idiomas habilitados</a>. Si está inhabilitado, los mensajes nuevos se "
+"salvan en el idioma predeterminado. El contenido existente no se verá "
+"afectado por cambios en esta opción."
 
 #: modules/locale/locale.module:280; modules/node/node.admin.inc:167,232,502
 msgid "Language neutral"
@@ -7222,7 +7240,7 @@ msgstr "Idioma neutro"
 
 #: modules/locale/locale.module:437
 msgid "All"
-msgstr ""
+msgstr "Todos"
 
 #: modules/locale/locale.module:558
 msgid "Language switcher"
@@ -7417,6 +7435,7 @@ msgstr "Número de índices de plural en este idioma"
 #: modules/locale/locale.install:275
 msgid "Plural formula in PHP code to evaluate to get plural indexes."
 msgstr ""
+"Fórmula de plural en código PHP a evaluar para obtener índices plurales."
 
 #: modules/locale/locale.install:282
 msgid "Domain to use for this language."
@@ -7447,35 +7466,39 @@ msgid ""
 "Drupal path in case of online discovered translations or file path in case "
 "of imported strings."
 msgstr ""
+"Ruta de Drupal en caso de que se descubran traducciones en línea, o ruta de "
+"archivo en el caso de cadenas importadas."
 
 #: modules/locale/locale.install:331
 msgid "A module defined group of translations, see hook_locale()."
-msgstr ""
+msgstr "Un grupo de traducciones definidas por módulo. Vea hook_locale()."
 
 #: modules/locale/locale.install:337
 msgid "The original string in English."
-msgstr ""
+msgstr "La cadena original en inglés."
 
 #: modules/locale/locale.install:344
 msgid ""
 "Version of Drupal, where the string was last used (for locales optimization)."
 msgstr ""
+"Versión de Drupal donde se usó por última vez la cadena (para optimización "
+"de localizaciones)."
 
 #: modules/locale/locale.install:354
 msgid "Stores translated versions of strings."
-msgstr ""
+msgstr "Guarda las versiones traducidas de las cadenas de texto."
 
 #: modules/locale/locale.install:360
 msgid "Source string ID. References {locales_source}.lid."
-msgstr ""
+msgstr "ID de la cadena fuente. Hace referencia a {locales_source}.lid."
 
 #: modules/locale/locale.install:366
 msgid "Translation string value in this language."
-msgstr ""
+msgstr "Valor de la cadena de traducción en este idioma."
 
 #: modules/locale/locale.install:373
 msgid "Language code. References {languages}.language."
-msgstr ""
+msgstr "Código del idioma. Hace referencia a {languages}.language."
 
 #: modules/locale/locale.install:379
 msgid ""
@@ -7608,11 +7631,11 @@ msgstr ""
 
 #: modules/menu/menu.admin.inc:460
 msgid "Are you sure you want to delete the custom menu %title?"
-msgstr ""
+msgstr "¿Está usted seguro de querer eliminar el menú personalizado %title?"
 
 #: modules/menu/menu.admin.inc:492
 msgid "The custom menu %title has been deleted."
-msgstr ""
+msgstr "El menú personalizado %title ha sido eliminado."
 
 #: modules/menu/menu.admin.inc:502
 msgid ""
@@ -7621,7 +7644,7 @@ msgstr ""
 
 #: modules/menu/menu.admin.inc:512
 msgid "The menu already exists."
-msgstr ""
+msgstr "Este menú ya existe."
 
 #: modules/menu/menu.admin.inc:564
 msgid "Are you sure you want to delete the custom menu item %item?"
@@ -7654,6 +7677,9 @@ msgid ""
 "authoring forms. The following option sets the default menu in which a new "
 "link will be added."
 msgstr ""
+"El módulo de menú permite la creación de enlaces de menú de forma automática "
+"en los formularios de creación de contenido. Las siguientes opciones definen "
+"el menú predefinido al que se añadirá un nuevo enlace."
 
 #: modules/menu/menu.admin.inc:609
 msgid "Default menu for content"
@@ -7677,8 +7703,8 @@ msgstr "menú"
 #: modules/menu/menu.admin.inc:505
 msgid "The menu name can't be longer than 1 character."
 msgid_plural "The menu name can't be longer than @count characters."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "El nombre de menú no puede ser mayor de un caracter"
+msgstr[1] "El nombre de menú no puede ser mayor de @count caracteres"
 
 #: modules/menu/menu.module:21
 msgid ""
@@ -7710,6 +7736,8 @@ msgid ""
 "For more information, see the online handbook entry for <a href=\"@menu"
 "\">Menu module</a>."
 msgstr ""
+"Para más información, consulte la referencia en el manual para el <a href="
+"\"@menu\">módulo menú</a>."
 
 #: modules/menu/menu.module:26
 msgid ""
@@ -7741,13 +7769,15 @@ msgstr "Escriba el título y ruta de su nuevo elemento de menú."
 
 #: modules/menu/menu.module:372
 msgid "Delete this menu item."
-msgstr ""
+msgstr "Borrar este elemento de menú"
 
 #: modules/menu/menu.module:387
 msgid ""
 "The link text corresponding to this item that should appear in the menu. "
 "Leave blank if you do not wish to add this post to the menu."
 msgstr ""
+"El texto de este enlace como debería aparecer en el menú. Déjelo vacío si no "
+"quiere adjuntar este envío al menú."
 
 #: modules/menu/menu.module:40
 msgid "administer menu"
@@ -7763,6 +7793,8 @@ msgid ""
 "Primary Key: Unique key for menu. This is used as a block delta so length is "
 "32."
 msgstr ""
+"Clave primaria: Clave única para el menu. Esta es usada como un bloque delta "
+"de longitud 32"
 
 #: modules/menu/menu.install:45
 msgid "Menu title; displayed at top of block."
@@ -8200,8 +8232,8 @@ msgstr "Se han eliminado los elementos."
 #: modules/node/node.admin.inc:436
 msgid "1 item successfully processed:"
 msgid_plural "@count items successfully processed:"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "1 elemento procesado con éxito:"
+msgstr[1] "@count elementos procesados con éxito:"
 
 #: modules/node/node.pages.inc:57
 msgid "Create @name"
@@ -8839,7 +8871,7 @@ msgstr "el identificador primario de esta versión."
 
 #: modules/node/node.install:203
 msgid "The {users}.uid that created this version."
-msgstr ""
+msgstr "Los {users}.uid que han creado esta versión."
 
 #: modules/node/node.install:208
 msgid "The title of this version."
@@ -8847,11 +8879,11 @@ msgstr ""
 
 #: modules/node/node.install:214
 msgid "The body of this version."
-msgstr ""
+msgstr "El cuerpo de esta versión."
 
 #: modules/node/node.install:219
 msgid "The teaser of this version."
-msgstr ""
+msgstr "El resumen de esta versión."
 
 #: modules/node/node.install:224
 msgid "The log entry explaining the changes in this version."
@@ -11574,7 +11606,7 @@ msgstr ""
 
 #: modules/system/system.admin.inc:1384
 msgid "Temporary directory"
-msgstr "Directorio temporal"
+msgstr "Carpeta temporal"
 
 #: modules/system/system.admin.inc:1387
 msgid "A file system path where uploaded files will be stored during previews."
@@ -13003,7 +13035,7 @@ msgstr "Puede <a href=\"@cron\">ejecutar cron manualmente</a>."
 
 #: modules/system/system.install:201
 msgid "The directory %directory is not writable."
-msgstr "No se puede escribir en el directorio %directory."
+msgstr "No es posible escribir en la carpeta %directory."
 
 #: modules/system/system.install:196
 msgid "Not writable"
@@ -14647,8 +14679,8 @@ msgid ""
 "File attachments are disabled. The file directories have not been properly "
 "configured."
 msgstr ""
-"Los adjuntos de archivos están desactivados. Los directorios de archivos no "
-"se han configurado adecuadamente."
+"Los anexos de archivo están inactivados. Los directorios de archivos no han "
+"sido configurados apropiadamente."
 
 #: modules/upload/upload.module:248
 msgid ""
@@ -15522,7 +15554,7 @@ msgstr ""
 
 #: modules/user/user.module:1545
 msgid "The e-mail address %email has been denied access."
-msgstr "A la dirección de correo-e %email se le ha denegado el acceso."
+msgstr "Se negó acceso a la dirección de correo electrónico %email."
 
 #: modules/user/user.module:1625
 msgid "Account details for !username at !site"
@@ -15818,7 +15850,7 @@ msgstr ""
 "momento). Si el nombre del usuario o la dirección de correo para una cuenta "
 "coincide con una regla de denegación y no con una de permisión, no se le "
 "permitirá crear la cuenta ni tampoco ingresar. Las reglas de las máquinas "
-"sólo son efectivas para las vistas de páginas, no sólo para los registros."
+"son efectivas para cada vista de página, no sólo para los registros."
 
 #: modules/user/user.module:1884
 msgid ""
@@ -16027,11 +16059,11 @@ msgstr "administrar usuarios"
 
 #: modules/user/user.module:544
 msgid "access user profiles"
-msgstr "acceso a perfiles de usuarios"
+msgstr "acceder a perfiles de usuario"
 
 #: modules/user/user.module:544
 msgid "change own username"
-msgstr "cambiar el nombre del usuario"
+msgstr "cambiar nombre de usuario propio"
 
 #: modules/user/user.install:9
 msgid "Stores site access rules."
@@ -16055,7 +16087,7 @@ msgstr ""
 
 #: modules/user/user.install:42
 msgid "Stores distributed authentication mapping."
-msgstr ""
+msgstr "Almacena mapeos de autentificación distribuida."
 
 #: modules/user/user.install:45
 msgid "Primary Key: Unique authmap ID."
@@ -16757,21 +16789,24 @@ msgstr ""
 
 #: modules/blog/blog.pages.inc:44
 msgid "!author has not created any blog entries."
-msgstr ""
+msgstr "!author no ha creado ninguna entrada de blog."
 
 #: modules/blog/blog.pages.inc:62
 msgid "Create new blog entry."
-msgstr ""
+msgstr "Crear una nueva entrada de blog."
 
 #: modules/blog/blog.pages.inc:79
 msgid "No blog entries have been created."
-msgstr ""
+msgstr "No se han creado entradas de blog."
 
 #: modules/blogapi/blogapi.module:715
 msgid ""
 "Blog API module is not configured to support the %type content type, or you "
 "don't have sufficient permissions to post this type of content."
 msgstr ""
+"El módulo Blog API no está configurado para soportar el tipo de contenido %"
+"type , o usted no tiene suficientes permisos para utilizar este tipo de "
+"contenido."
 
 #: modules/filter/filter.module:38
 msgid ""

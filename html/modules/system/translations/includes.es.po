@@ -27,13 +27,12 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: drupal (6.0)\n"
-"POT-Creation-Date: 2008-02-25 18:21+0100\n"
-"PO-Revision-Date: 2008-02-16 13:56+0100\n"
+"POT-Creation-Date: 2008-03-30 17:19+0200\n"
+"PO-Revision-Date: 2008-03-18 14:01+0100\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n!=1);\n"
 
 #: includes/actions.inc:301
 msgid "Remove orphaned actions"
@@ -49,7 +48,7 @@ msgstr "Sitio fuera de línea"
 
 #: includes/common.inc:360
 msgid "Page not found"
-msgstr "No se encontró la página"
+msgstr "Página no encontrada"
 
 #: includes/common.inc:361
 msgid "The requested page could not be found."
@@ -61,7 +60,7 @@ msgstr "Acceso denegado"
 
 #: includes/common.inc:390
 msgid "You are not authorized to access this page."
-msgstr "Carece de permisos para acceder a esta página."
+msgstr "Usted no está autorizado para visitar esta página."
 
 #: includes/common.inc:430
 msgid "The server can't issue HTTP requests"
@@ -177,19 +176,19 @@ msgstr ""
 
 #: includes/file.inc:104
 msgid "The directory %directory has been created."
-msgstr "Se ha creado el directorio %directory."
+msgstr "El directorio %directory ha sido creado."
 
 #: includes/file.inc:118
 msgid ""
 "The permissions of directory %directory have been changed to make it "
 "writable."
 msgstr ""
-"Se han cambiado los permisos del directorio %directory para que se pueda "
-"escribir en él."
+"Los permisos sobre la carpeta %directory se cambiaron para poder escribir en "
+"ella."
 
 #: includes/file.inc:121
 msgid "The directory %directory is not writable"
-msgstr "No se puede escribir en el directorio %directory"
+msgstr "No es posible escribir en el directorio %directory."
 
 #: includes/file.inc:135
 msgid ""
@@ -197,9 +196,9 @@ msgid ""
 "file in your %directory directory which contains the following lines: <code>!"
 "htaccess</code>"
 msgstr ""
-"Aviso de seguridad: no se pudo escribir el archivo .htaccess. Puede crear un "
-"archivo .htaccess en el directorio %directory que contenga las siguientes "
-"líneas: <code>!htaccess</code>"
+"Alerta de seguridad: No fue posible escribir el archivo .htaccess. Por favor "
+"cree un archivo .htacess en su carpeta %directory e incluya en él las líneas "
+"siguientes: <code>!htaccess</code>"
 
 #: includes/file.inc:225
 msgid ""
@@ -249,7 +248,8 @@ msgstr ""
 #: includes/file.inc:509
 msgid "The file %file could not be saved, because the upload did not complete."
 msgstr ""
-"El archivo %file no se pudo guardar porque no se completó la publicación."
+"El archivo %file no se pudo salvar, porque el proceso de subirlo no se "
+"completó."
 
 #: includes/file.inc:514
 msgid "The file %file could not be saved. An unknown error has occurred."
@@ -1070,13 +1070,17 @@ msgid "One translation file imported for the newly installed modules."
 msgid_plural ""
 "@count translation files imported for the newly installed modules."
 msgstr[0] ""
+"Se importó un archivo de traducción para los módulos recién instalados."
 msgstr[1] ""
+"Se importaron @count archivos de traducción para los módulos recién "
+"instalados."
 
 #: includes/locale.inc:2564
 msgid "One translation file imported for the enabled modules."
 msgid_plural "@count translation files imported for the enabled modules."
-msgstr[0] ""
+msgstr[0] "Se importó un archivo de traducción para los módulos habilitados."
 msgstr[1] ""
+"Se importaron @count archivos de traducción para los módulos habilitados."
 
 #: includes/mail.inc:135
 msgid ""

@@ -5,13 +5,12 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: drupal (6.0)\n"
-"POT-Creation-Date: 2008-02-25 18:21+0100\n"
-"PO-Revision-Date: 2008-02-25 18:11+0100\n"
+"POT-Creation-Date: 2008-03-30 17:19+0200\n"
+"PO-Revision-Date: 2008-03-18 13:53+0100\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n!=1);\n"
 
 #: install.php:640
 msgid "Installing @drupal"
@@ -56,14 +55,15 @@ msgstr "Tipo de base de datos:"
 
 #: install.php:240
 msgid "The type of database your @drupal data will be stored in."
-msgstr "El tipo de base de datos en el que se almacenan los datos de @drupal."
+msgstr ""
+"El tipo de base de datos en el que se almacenarán los datos de @drupal."
 
 #: install.php:242
 msgid ""
 "The name of the database your @drupal data will be stored in. It must exist "
 "on your server before @drupal can be installed."
 msgstr ""
-"El nombre de la base de datos en la que se almacenan los datos de @drupal. "
+"El nombre de la base de datos en la que se almacenarán los datos de @drupal. "
 "Debe existir en el servidor antes de instalar @drupal."
 
 #: install.php:251
@@ -71,8 +71,9 @@ msgid ""
 "The name of the %db_type database your @drupal data will be stored in. It "
 "must exist on your server before @drupal can be installed."
 msgstr ""
-"El nombre de la base de datos %db_type en la que se almacenan los datos. "
-"Debe existir en el servidor antes de instalar @drupal."
+"El nombre de la base de datos %db_type en la que se almacenaran sus datos "
+"@drupal, debe existir en tu servidor antes de que @drupal pueda ser "
+"instalado."
 
 #: install.php:258
 msgid "Database name"
@@ -98,7 +99,7 @@ msgstr ""
 
 #: install.php:296
 msgid "Database host"
-msgstr "Máquina de la base de datos"
+msgstr "Servidor de la base de datos"
 
 #: install.php:301
 msgid "If your database is located on a different server, change this."
@@ -172,7 +173,7 @@ msgstr ""
 "siguientes comandos: %commands. Para más ayuda con la configuración del "
 "servidor de tu base de datos, lee el <a href=\"http://drupal.org/node/258"
 "\">Libro de instalación y actualización</a>. Si entiendes los errores que se "
-"indican deberías ponerte en contacto con tu proveedor de hosting"
+"indican deberías ponerte en contacto con tu proveedor de hosting."
 
 #: install.php:444
 msgid "Select an installation profile"

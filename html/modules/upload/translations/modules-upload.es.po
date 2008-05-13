@@ -8,13 +8,12 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: drupal (6.0)\n"
-"POT-Creation-Date: 2008-02-25 18:21+0100\n"
-"PO-Revision-Date: 2008-02-14 22:35+0100\n"
+"POT-Creation-Date: 2008-03-30 17:19+0200\n"
+"PO-Revision-Date: 2008-03-18 14:01+0100\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n!=1);\n"
 
 #: modules/upload/upload.admin.inc:10
 msgid ""
@@ -208,8 +207,8 @@ msgid ""
 "File attachments are disabled. The file directories have not been properly "
 "configured."
 msgstr ""
-"Los adjuntos de archivos están desactivados. Los directorios de archivos no "
-"se han configurado adecuadamente."
+"Los anexos de archivo están inactivados. Los directorios de archivos no han "
+"sido configurados apropiadamente."
 
 #: modules/upload/upload.module:248
 msgid ""

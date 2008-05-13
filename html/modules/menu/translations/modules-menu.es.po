@@ -8,13 +8,12 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: drupal (6.0)\n"
-"POT-Creation-Date: 2008-02-25 18:21+0100\n"
-"PO-Revision-Date: 2008-02-22 12:03+0100\n"
+"POT-Creation-Date: 2008-03-30 17:19+0200\n"
+"PO-Revision-Date: 2008-02-27 20:30+0100\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n!=1);\n"
 
 #: modules/menu/menu.admin.inc:54
 msgid "There are no menu items yet."
@@ -79,11 +78,11 @@ msgstr ""
 
 #: modules/menu/menu.admin.inc:460
 msgid "Are you sure you want to delete the custom menu %title?"
-msgstr ""
+msgstr "¿Está usted seguro de querer eliminar el menú personalizado %title?"
 
 #: modules/menu/menu.admin.inc:492
 msgid "The custom menu %title has been deleted."
-msgstr ""
+msgstr "El menú personalizado %title ha sido eliminado."
 
 #: modules/menu/menu.admin.inc:502
 msgid ""
@@ -92,7 +91,7 @@ msgstr ""
 
 #: modules/menu/menu.admin.inc:512
 msgid "The menu already exists."
-msgstr ""
+msgstr "Este menú ya existe."
 
 #: modules/menu/menu.admin.inc:564
 msgid "Are you sure you want to delete the custom menu item %item?"
@@ -125,6 +124,9 @@ msgid ""
 "authoring forms. The following option sets the default menu in which a new "
 "link will be added."
 msgstr ""
+"El módulo de menú permite la creación de enlaces de menú de forma automática "
+"en los formularios de creación de contenido. Las siguientes opciones definen "
+"el menú predefinido al que se añadirá un nuevo enlace."
 
 #: modules/menu/menu.admin.inc:609
 msgid "Default menu for content"
@@ -143,8 +145,8 @@ msgstr "Origen para los enlaces secundarios."
 #: modules/menu/menu.admin.inc:505
 msgid "The menu name can't be longer than 1 character."
 msgid_plural "The menu name can't be longer than @count characters."
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "El nombre de menú no puede ser mayor de un caracter"
+msgstr[1] "El nombre de menú no puede ser mayor de @count caracteres"
 
 #: modules/menu/menu.module:21
 msgid ""
@@ -176,6 +178,8 @@ msgid ""
 "For more information, see the online handbook entry for <a href=\"@menu"
 "\">Menu module</a>."
 msgstr ""
+"Para más información, consulte la referencia en el manual para el <a href="
+"\"@menu\">módulo menú</a>."
 
 #: modules/menu/menu.module:26
 msgid ""
@@ -207,13 +211,15 @@ msgstr "Escriba el título y ruta de su nuevo elemento de menú."
 
 #: modules/menu/menu.module:372
 msgid "Delete this menu item."
-msgstr ""
+msgstr "Borrar este elemento de menú"
 
 #: modules/menu/menu.module:387
 msgid ""
 "The link text corresponding to this item that should appear in the menu. "
 "Leave blank if you do not wish to add this post to the menu."
 msgstr ""
+"El texto de este enlace como debería aparecer en el menú. Déjelo vacío si no "
+"quiere adjuntar este envío al menú."
 
 #: modules/menu/menu.module:40
 msgid "administer menu"
@@ -229,6 +235,8 @@ msgid ""
 "Primary Key: Unique key for menu. This is used as a block delta so length is "
 "32."
 msgstr ""
+"Clave primaria: Clave única para el menu. Esta es usada como un bloque delta "
+"de longitud 32"
 
 #: modules/menu/menu.install:45
 msgid "Menu title; displayed at top of block."

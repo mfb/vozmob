@@ -10,13 +10,12 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: drupal (6.0)\n"
-"POT-Creation-Date: 2008-02-25 18:21+0100\n"
-"PO-Revision-Date: 2008-02-20 12:05+0100\n"
+"POT-Creation-Date: 2008-03-30 17:19+0200\n"
+"PO-Revision-Date: 2008-03-14 00:56+0100\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n!=1);\n"
 
 #: modules/node/content_types.inc:42
 msgid "No content types available."
@@ -375,8 +374,8 @@ msgstr "Se han eliminado los elementos."
 #: modules/node/node.admin.inc:436
 msgid "1 item successfully processed:"
 msgid_plural "@count items successfully processed:"
-msgstr[0] ""
-msgstr[1] ""
+msgstr[0] "1 elemento procesado con éxito:"
+msgstr[1] "@count elementos procesados con éxito"
 
 #: modules/node/node.pages.inc:57
 msgid "Create @name"
@@ -1014,7 +1013,7 @@ msgstr "el identificador primario de esta versión."
 
 #: modules/node/node.install:203
 msgid "The {users}.uid that created this version."
-msgstr ""
+msgstr "Los {users}.uid que han creado esta versión."
 
 #: modules/node/node.install:208
 msgid "The title of this version."
@@ -1022,11 +1021,11 @@ msgstr ""
 
 #: modules/node/node.install:214
 msgid "The body of this version."
-msgstr ""
+msgstr "El cuerpo de esta versión."
 
 #: modules/node/node.install:219
 msgid "The teaser of this version."
-msgstr ""
+msgstr "El resumen de esta versión."
 
 #: modules/node/node.install:224
 msgid "The log entry explaining the changes in this version."

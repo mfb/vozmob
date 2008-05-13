@@ -7,13 +7,12 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: drupal (6.0)\n"
-"POT-Creation-Date: 2008-02-25 18:21+0100\n"
-"PO-Revision-Date: 2008-02-20 03:55+0100\n"
+"POT-Creation-Date: 2008-03-30 17:19+0200\n"
+"PO-Revision-Date: 2008-03-14 01:10+0100\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n!=1);\n"
 
 #: modules/blog/blog.pages.inc:20
 msgid "Post new blog entry."
@@ -171,12 +170,12 @@ msgstr ""
 
 #: modules/blog/blog.pages.inc:44
 msgid "!author has not created any blog entries."
-msgstr ""
+msgstr "!author no ha creado ninguna entrada de blog."
 
 #: modules/blog/blog.pages.inc:62
 msgid "Create new blog entry."
-msgstr ""
+msgstr "Crear una nueva entrada de blog."
 
 #: modules/blog/blog.pages.inc:79
 msgid "No blog entries have been created."
-msgstr ""
+msgstr "No se han creado entradas de blog."
