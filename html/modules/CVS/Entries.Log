@@ -3,10 +3,12 @@ A D/archive////
 A D/drupal////
 A D/legacy////
 A D/page////
+A D/simpletest////
 A D/story////
 A D/watchdog////
 R D/watchdog////
 R D/story////
+R D/simpletest////
 R D/page////
 R D/legacy////
 R D/drupal////

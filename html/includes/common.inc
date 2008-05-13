@@ -1,5 +1,5 @@
 <?php
-// $Id: common.inc,v 1.756.2.9 2008/04/09 21:11:44 goba Exp $
+// $Id: common.inc,v 1.756.2.11 2008/05/05 21:40:46 dries Exp $
 
 /**
  * @file
@@ -577,7 +577,7 @@ function drupal_error_handler($errno, $message, $filename, $line, $context) {
     return;
   }
 
-  if ($errno & (E_ALL ^ E_NOTICE)) {
+  if ($errno & (E_ALL)) {
     $types = array(1 => 'error', 2 => 'warning', 4 => 'parse error', 8 => 'notice', 16 => 'core error', 32 => 'core warning', 64 => 'compile error', 128 => 'compile warning', 256 => 'user error', 512 => 'user warning', 1024 => 'user notice', 2048 => 'strict warning', 4096 => 'recoverable fatal error');
 
     // For database errors, we want the line number/file name of the place that
@@ -3515,6 +3515,7 @@ function drupal_flush_all_caches() {
 
   drupal_clear_css_cache();
   drupal_clear_js_cache();
+  system_theme_data();
   drupal_rebuild_theme_registry();
   menu_rebuild();
   node_types_rebuild();
