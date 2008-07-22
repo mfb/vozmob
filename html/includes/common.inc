@@ -1,5 +1,5 @@
 <?php
-// $Id: common.inc,v 1.756.2.11 2008/05/05 21:40:46 dries Exp $
+// $Id: common.inc,v 1.756.2.21 2008/07/09 21:58:35 goba Exp $
 
 /**
  * @file
@@ -260,7 +260,7 @@ function drupal_get_destination() {
  *
  * Usually the redirected URL is constructed from this function's input
  * parameters. However you may override that behavior by setting a
- * <em>destination</em> in either the $_REQUEST-array (i.e. by using
+ * destination in either the $_REQUEST-array (i.e. by using
  * the query string of an URI) or the $_REQUEST['edit']-array (i.e. by
  * using a hidden form field). This is used to direct the user back to
  * the proper page after completing a form. For example, after editing
@@ -571,8 +571,8 @@ function drupal_http_request($url, $headers = array(), $method = 'GET', $data = 
  * - 1 = Log errors to database and to screen.
  */
 function drupal_error_handler($errno, $message, $filename, $line, $context) {
-  // If the @ error suppression operator was used, error_reporting is
-  // temporarily set to 0.
+  // If the @ error suppression operator was used, error_reporting will have
+  // been temporarily set to 0.
   if (error_reporting() == 0) {
     return;
   }
@@ -1225,27 +1225,27 @@ function format_date($timestamp, $type = 'medium', $format = '', $timezone = NUL
  *   '<front>' may also be given and will generate the site's base URL.
  * @param $options
  *   An associative array of additional options, with the following keys:
- *     'query'
+ *   - 'query'
  *       A query string to append to the link, or an array of query key/value
  *       properties.
- *     'fragment'
+ *   - 'fragment'
  *       A fragment identifier (or named anchor) to append to the link.
  *       Do not include the '#' character.
- *     'absolute' (default FALSE)
+ *   - 'absolute' (default FALSE)
  *       Whether to force the output to be an absolute link (beginning with
  *       http:). Useful for links that will be displayed outside the site, such
  *       as in an RSS feed.
- *     'alias' (default FALSE)
+ *   - 'alias' (default FALSE)
  *       Whether the given path is an alias already.
- *     'external'
+ *   - 'external'
  *       Whether the given path is an external URL.
- *     'language'
+ *   - 'language'
  *       An optional language object. Used to build the URL to link to and
  *       look up the proper alias for the link.
- *     'base_url'
+ *   - 'base_url'
  *       Only used internally, to modify the base URL when a language dependent
  *       URL requires so.
- *     'prefix'
+ *   - 'prefix'
  *       Only used internally, to modify the path when a language dependent URL
  *       requires so.
  * @return
@@ -1406,23 +1406,23 @@ function drupal_attributes($attributes = array()) {
  *       used as is.
  * @param $options
  *   An associative array of additional options, with the following keys:
- *     'attributes'
+ *     - 'attributes'
  *       An associative array of HTML attributes to apply to the anchor tag.
- *     'query'
+ *     - 'query'
  *       A query string to append to the link, or an array of query key/value
  *       properties.
- *     'fragment'
+ *     - 'fragment'
  *       A fragment identifier (named anchor) to append to the link.
  *       Do not include the '#' character.
- *     'absolute' (default FALSE)
+ *     - 'absolute' (default FALSE)
  *       Whether to force the output to be an absolute link (beginning with
  *       http:). Useful for links that will be displayed outside the site, such
  *       as in an RSS feed.
- *     'html' (default FALSE)
+ *     - 'html' (default FALSE)
  *       Whether the title is HTML, or just plain-text. For example for making
  *       an image a link, this must be set to TRUE, or else you will see the
  *       escaped HTML.
- *     'alias' (default FALSE)
+ *     - 'alias' (default FALSE)
  *       Whether the given path is an alias already.
  * @return
  *   an HTML string containing a link to the given path.
@@ -1712,21 +1712,26 @@ function drupal_get_css($css = NULL) {
         // If the theme supplies its own style using the name of the module style, skip its inclusion.
         // This includes any RTL styles associated with its main LTR counterpart.
         if ($type == 'module' && in_array(str_replace('-rtl.css', '.css', basename($file)), $theme_styles)) {
+          // Unset the file to prevent its inclusion when CSS aggregation is enabled.
+          unset($types[$type][$file]);
           continue;
         }
-        if (!$preprocess || !($is_writable && $preprocess_css)) {
-          // If a CSS file is not to be preprocessed and it's a module CSS file, it needs to *always* appear at the *top*,
-          // regardless of whether preprocessing is on or off.
-          if (!$preprocess && $type == 'module') {
-            $no_module_preprocess .= '<link type="text/css" rel="stylesheet" media="'. $media .'" href="'. base_path() . $file . $query_string .'" />'."\n";
-          }
-          // If a CSS file is not to be preprocessed and it's a theme CSS file, it needs to *always* appear at the *bottom*,
-          // regardless of whether preprocessing is on or off.
-          else if (!$preprocess && $type == 'theme') {
-            $no_theme_preprocess .= '<link type="text/css" rel="stylesheet" media="'. $media .'" href="'. base_path() . $file . $query_string .'" />'."\n";
-          }
-          else {
-            $output .= '<link type="text/css" rel="stylesheet" media="'. $media .'" href="'. base_path() . $file . $query_string .'" />'."\n";
+        // Only include the stylesheet if it exists.
+        if (file_exists($file)) {
+          if (!$preprocess || !($is_writable && $preprocess_css)) {
+            // If a CSS file is not to be preprocessed and it's a module CSS file, it needs to *always* appear at the *top*,
+            // regardless of whether preprocessing is on or off.
+            if (!$preprocess && $type == 'module') {
+              $no_module_preprocess .= '<link type="text/css" rel="stylesheet" media="'. $media .'" href="'. base_path() . $file . $query_string .'" />'."\n";
+            }
+            // If a CSS file is not to be preprocessed and it's a theme CSS file, it needs to *always* appear at the *bottom*,
+            // regardless of whether preprocessing is on or off.
+            else if (!$preprocess && $type == 'theme') {
+              $no_theme_preprocess .= '<link type="text/css" rel="stylesheet" media="'. $media .'" href="'. base_path() . $file . $query_string .'" />'."\n";
+            }
+            else {
+              $output .= '<link type="text/css" rel="stylesheet" media="'. $media .'" href="'. base_path() . $file . $query_string .'" />'."\n";
+            }
           }
         }
       }
@@ -2008,10 +2013,10 @@ function drupal_add_js($data = NULL, $type = 'module', $scope = 'header', $defer
  * are added to the page. Then, all settings are output, followed by 'inline'
  * JavaScript code. If running update.php, all preprocessing is disabled.
  *
- * @parameter $scope
+ * @param $scope
  *   (optional) The scope for which the JavaScript rules should be returned.
  *   Defaults to 'header'.
- * @parameter $javascript
+ * @param $javascript
  *   (optional) An array with all JavaScript code. Defaults to the default
  *   JavaScript array for the given scope.
  * @return
@@ -2712,7 +2717,7 @@ function drupal_render(&$elements) {
   $elements += array('#title' => NULL, '#description' => NULL);
   if (!isset($elements['#children'])) {
     $children = element_children($elements);
-    /* Render all the children that use a theme function */
+    // Render all the children that use a theme function.
     if (isset($elements['#theme']) && empty($elements['#theme_used'])) {
       $elements['#theme_used'] = TRUE;
 
@@ -2736,7 +2741,7 @@ function drupal_render(&$elements) {
         $elements[$key] = isset($previous[$key]) ? $previous[$key] : NULL;
       }
     }
-    /* render each of the children using drupal_render and concatenate them */
+    // Render each of the children using drupal_render and concatenate them.
     if (!isset($content) || $content === '') {
       foreach ($children as $key) {
         $content .= drupal_render($elements[$key]);
@@ -3074,8 +3079,8 @@ function drupal_get_schema($table = NULL, $rebuild = FALSE) {
  *   The module for which the tables will be created.
  * @return
  *   An array of arrays with the following key/value pairs:
- *      success: a boolean indicating whether the query succeeded
- *      query: the SQL query(s) executed, passed through check_plain()
+ *    - success: a boolean indicating whether the query succeeded.
+ *    - query: the SQL query(s) executed, passed through check_plain().
  */
 function drupal_install_schema($module) {
   $schema = drupal_get_schema_unprocessed($module);
@@ -3099,8 +3104,8 @@ function drupal_install_schema($module) {
  *   The module for which the tables will be removed.
  * @return
  *   An array of arrays with the following key/value pairs:
- *      success: a boolean indicating whether the query succeeded
- *      query: the SQL query(s) executed, passed through check_plain()
+ *    - success: a boolean indicating whether the query succeeded.
+ *    - query: the SQL query(s) executed, passed through check_plain().
  */
 function drupal_uninstall_schema($module) {
   $schema = drupal_get_schema_unprocessed($module);
@@ -3225,6 +3230,11 @@ function drupal_write_record($table, &$object, $update = array()) {
     $update = array($update);
   }
 
+  $schema = drupal_get_schema($table);
+  if (empty($schema)) {
+    return FALSE;
+  }
+  
   // Convert to an object if needed.
   if (is_array($object)) {
     $object = (object) $object;
@@ -3232,11 +3242,6 @@ function drupal_write_record($table, &$object, $update = array()) {
   }
   else {
     $array = FALSE;
-  }
-
-  $schema = drupal_get_schema($table);
-  if (empty($schema)) {
-    return FALSE;
   }
 
   $fields = $defs = $values = $serials = $placeholders = array();
@@ -3307,16 +3312,17 @@ function drupal_write_record($table, &$object, $update = array()) {
         $object->$field = db_last_insert_id($table, $field);
       }
     }
-
-    // If we began with an array, convert back so we don't surprise the caller.
-    if ($array) {
-      $object = (array) $object;
-    }
-
-    return $return;
+  }
+  else {
+    $return = FALSE;
   }
 
-  return FALSE;
+  // If we began with an array, convert back so we don't surprise the caller.
+  if ($array) {
+    $object = (array) $object;
+  }
+
+  return $return;
 }
 
 /**
@@ -3507,7 +3513,7 @@ function drupal_implode_tags($tags) {
  * Flush all cached data on the site.
  *
  * Empties cache tables, rebuilds the menu cache and theme registries, and
- * exposes a hook for other modules to clear their own cache data as well.
+ * invokes a hook so that other modules' cache data can be cleared as well.
  */
 function drupal_flush_all_caches() {
   // Change query-strings on css/js files to enforce reload for all users.

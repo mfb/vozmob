@@ -1,5 +1,5 @@
 <?php
-// $Id: install.php,v 1.113.2.2 2008/02/08 22:00:45 goba Exp $
+// $Id: install.php,v 1.113.2.5 2008/07/18 07:17:44 dries Exp $
 
 require_once './includes/install.inc';
 
@@ -98,6 +98,13 @@ function install_main() {
 
   // Tasks come after the database is set up
   if (!$task) {
+    global $db_url;
+
+    if (!$verify && !empty($db_url)) {
+      // Do not install over a configured settings.php.
+      install_already_done_error();
+    }
+
     // Check the installation requirements for Drupal and this profile.
     install_check_requirements($profile, $verify);
 
@@ -188,14 +195,6 @@ function install_change_settings($profile = 'default', $install_locale = '') {
   // We always need this because we want to run form_get_errors.
   include_once './includes/form.inc';
   install_task_list('database');
-
-  if ($db_url == 'mysql://username:password@localhost/databasename') {
-    $db_user = $db_pass = $db_path = '';
-  }
-  elseif (!empty($db_url)) {
-    // Do not install over a configured settings.php.
-    install_already_done_error();
-  }
 
   $output = drupal_get_form('install_settings_form', $profile, $install_locale, $settings_file, $db_url, $db_type, $db_prefix, $db_user, $db_pass, $db_host, $db_port, $db_path);
   drupal_set_title(st('Database configuration'));
@@ -449,23 +448,41 @@ function install_select_profile() {
 
 /**
  * Form API array definition for the profile selection form.
+ *
+ * @param $form_state
+ *   Array of metadata about state of form processing.
+ * @param $profile_files
+ *   Array of .profile files, as returned from file_scan_directory().
  */
-function install_select_profile_form(&$form_state, $profiles) {
-  foreach ($profiles as $profile) {
+function install_select_profile_form(&$form_state, $profile_files) {
+  $profiles = array();
+  $names = array();
+
+  foreach ($profile_files as $profile) {
     include_once($profile->filename);
-    // Load profile details.
+
+    // Load profile details and store them for later retrieval.
     $function = $profile->name .'_profile_details';
     if (function_exists($function)) {
       $details = $function();
     }
-    // If set, used defined name. Otherwise use file name.
+    $profiles[$profile->name] = $details;
+
+    // Determine the name of the profile; default to file name if defined name
+    // is unspecified.
     $name = isset($details['name']) ? $details['name'] : $profile->name;
+    $names[$profile->name] = $name;
+  }
+
+  // Display radio buttons alphabetically by human-readable name. 
+  natcasesort($names);
+  foreach ($names as $profile => $name) {
     $form['profile'][$name] = array(
       '#type' => 'radio',
       '#value' => 'default',
-      '#return_value' => $profile->name,
+      '#return_value' => $profile,
       '#title' => $name,
-      '#description' => isset($details['description']) ? $details['description'] : '',
+      '#description' => isset($profiles[$profile]['description']) ? $profiles[$profile]['description'] : '',
       '#parents' => array('profile'),
     );
   }
@@ -869,21 +886,26 @@ function install_check_requirements($profile, $verify) {
     $conf_path = './'. conf_path(FALSE, TRUE);
     $settings_file = $conf_path .'/settings.php';
     $file = $conf_path;
+    $exists = FALSE;
     // Verify that the directory exists.
     if (drupal_verify_install_file($conf_path, FILE_EXIST, 'dir')) {
-      // Check to see if a settings.php already exists.
+      // Check to make sure a settings.php already exists.
+      $file = $settings_file;
       if (drupal_verify_install_file($settings_file, FILE_EXIST)) {
+        $exists = TRUE;
         // If it does, make sure it is writable.
         $writable = drupal_verify_install_file($settings_file, FILE_READABLE|FILE_WRITABLE);
-        $file = $settings_file;
-      }
-      else {
-        // If not, make sure the directory is.
-        $writable = drupal_verify_install_file($conf_path, FILE_READABLE|FILE_WRITABLE, 'dir');
       }
     }
-
-    if (!$writable) {
+    if (!$exists) {
+      drupal_set_message(st('The @drupal installer requires that you create a settings file as part of the installation process.
+<ol>
+<li>Copy the %default_file file to %file.</li>
+<li>Change file permissions so that it is writable by the web server. If you are unsure how to grant file permissions, please consult the <a href="@handbook_url">on-line handbook</a>.</li>
+</ol>
+More details about installing Drupal are available in INSTALL.txt.', array('@drupal' => drupal_install_profile_name(), '%file' => $file, '%default_file' => $conf_path .'/default.settings.php', '@handbook_url' => 'http://drupal.org/server-permissions')), 'error');
+    }
+    elseif (!$writable) {
       drupal_set_message(st('The @drupal installer requires write permissions to %file during the installation process. If you are unsure how to grant file permissions, please consult the <a href="@handbook_url">on-line handbook</a>.', array('@drupal' => drupal_install_profile_name(), '%file' => $file, '@handbook_url' => 'http://drupal.org/server-permissions')), 'error');
     }
   }

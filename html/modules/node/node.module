@@ -1,5 +1,5 @@
 <?php
-// $Id: node.module,v 1.947.2.7 2008/04/19 22:18:51 dries Exp $
+// $Id: node.module,v 1.947.2.11 2008/06/25 08:59:57 goba Exp $
 
 /**
  * @file
@@ -135,7 +135,7 @@ function node_title_list($result, $title = NULL) {
   $items = array();
   $num_rows = FALSE;
   while ($node = db_fetch_object($result)) {
-    $items[] = l($node->title, 'node/'. $node->nid, !empty($node->comment_count) ? array('title' => format_plural($node->comment_count, '1 comment', '@count comments')) : array());
+    $items[] = l($node->title, 'node/'. $node->nid, !empty($node->comment_count) ? array('attributes' => array('title' => format_plural($node->comment_count, '1 comment', '@count comments'))) : array());
     $num_rows = TRUE;
   }
 
@@ -907,23 +907,22 @@ function node_save(&$node) {
 
   // Generate the node table query and the node_revisions table query.
   if ($node->is_new) {
-    drupal_write_record('node', $node);
     _node_save_revision($node, $user->uid);
+    drupal_write_record('node', $node);
+    db_query('UPDATE {node_revisions} SET nid = %d WHERE vid = %d', $node->nid, $node->vid);
     $op = 'insert';
   }
   else {
     drupal_write_record('node', $node, 'nid');
     if (!empty($node->revision)) {
       _node_save_revision($node, $user->uid);
+      db_query('UPDATE {node} SET vid = %d WHERE nid = %d', $node->vid, $node->nid);
     }
     else {
       _node_save_revision($node, $user->uid, 'vid');
       $update_node = FALSE;
     }
     $op = 'update';
-  }
-  if ($update_node) {
-    db_query('UPDATE {node} SET vid = %d WHERE nid = %d', $node->vid, $node->nid);
   }
 
   // Call the node specific callback (if any).
@@ -1257,12 +1256,22 @@ function node_search($op = 'search', $keys = NULL) {
         $join2 .= ' LEFT JOIN {node_counter} nc ON nc.nid = i.sid';
         $total += $weight;
       }
-      $select2 = (count($ranking) ? implode(' + ', $ranking) : 'i.relevance') .' AS score';
+      
+      // When all search factors are disabled (ie they have a weight of zero), 
+      // the default score is based only on keyword relevance and there is no need to 
+      // adjust the score of each item. 
+      if ($total == 0) {
+        $select2 = 'i.relevance AS score';
+        $total = 1;
+      }
+      else {
+        $select2 = implode(' + ', $ranking) . ' AS score';
+      }
+      
+      // Do search.
+      $find = do_search($keys, 'node', 'INNER JOIN {node} n ON n.nid = i.sid '. $join1, $conditions1 . (empty($where1) ? '' : ' AND '. $where1), $arguments1, $select2, $join2, $arguments2);
 
-      // Do search
-      $find = do_search($keys, 'node', 'INNER JOIN {node} n ON n.nid = i.sid '. $join1 .' INNER JOIN {users} u ON n.uid = u.uid', $conditions1 . (empty($where1) ? '' : ' AND '. $where1), $arguments1, $select2, $join2, $arguments2);
-
-      // Load results
+      // Load results.
       $results = array();
       foreach ($find as $item) {
         // Build the node body.
@@ -1271,9 +1280,9 @@ function node_search($op = 'search', $keys = NULL) {
         $node = node_build_content($node, FALSE, FALSE);
         $node->body = drupal_render($node->content);
 
-        // Fetch comments for snippet
+        // Fetch comments for snippet.
         $node->body .= module_invoke('comment', 'nodeapi', $node, 'update index');
-        // Fetch terms for snippet
+        // Fetch terms for snippet.
         $node->body .= module_invoke('taxonomy', 'nodeapi', $node, 'update index');
 
         $extra = node_invoke_nodeapi($node, 'search result');

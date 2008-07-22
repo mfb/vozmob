@@ -1,5 +1,5 @@
 <?php
-// $Id: menu.inc,v 1.255.2.11 2008/04/09 21:11:44 goba Exp $
+// $Id: menu.inc,v 1.255.2.17 2008/07/09 15:23:50 goba Exp $
 
 /**
  * @file
@@ -514,7 +514,7 @@ function _menu_item_localize(&$item, $map, $link_translate = FALSE) {
   if (!empty($item['description'])) {
     $original_description = $item['description'];
     $item['description'] = t($item['description']);
-    if ($link_translate && $item['options']['attributes']['title'] == $original_description) {
+    if ($link_translate && isset($item['options']['attributes']['title']) && $item['options']['attributes']['title'] == $original_description) {
       $item['localized_options']['attributes']['title'] = $item['description'];
     }
   }
@@ -570,8 +570,11 @@ function _menu_translate(&$router_item, $map, $to_arg = FALSE) {
   $router_item['href'] = implode('/', $link_map);
   $router_item['options'] = array();
   _menu_check_access($router_item, $map);
-
-  _menu_item_localize($router_item, $map);
+  
+  // For performance, don't localize an item the user can't access.
+  if ($router_item['access']) {
+    _menu_item_localize($router_item, $map);
+  }
 
   return $map;
 }
@@ -649,8 +652,10 @@ function _menu_link_translate(&$item) {
       }
       _menu_check_access($item, $map);
     }
-
-    _menu_item_localize($item, $map, TRUE);
+    // For performance, don't localize a link the user can't access.
+    if ($item['access']) {
+      _menu_item_localize($item, $map, TRUE);
+    }
   }
   
   // Allow other customizations - e.g. adding a page-specific query string to the
@@ -1257,6 +1262,14 @@ function menu_navigation_links($menu_name, $level = 0) {
       $l = $item['link']['localized_options'];
       $l['href'] = $item['link']['href'];
       $l['title'] = $item['link']['title'];
+      if ($item['link']['in_active_trail']) {
+        if (empty($l['attributes']['class'])) {
+          $l['attributes']['class'] = 'active-trail';
+        }
+        else {
+          $l['attributes']['class'] .= ' active-trail'; 
+        }
+      }
       // Keyed with unique menu id to generate classes from theme_links().
       $links['menu-'. $item['link']['mlid']] = $l;
     }
@@ -1514,10 +1527,10 @@ function menu_set_active_trail($new_trail = NULL) {
         $curr = FALSE;
       }
       else {
-        // Move to the child link if it's in the active trail.
-        if ($curr['below'] && $curr['link']['in_active_trail']) {
+        // Add the link if it's in the active trail, then move to the link below.
+        if ($curr['link']['in_active_trail']) {
           $trail[] = $curr['link'];
-          $tree = $curr['below'];
+          $tree = $curr['below'] ? $curr['below'] : array();
         }
         list($key, $curr) = each($tree);
       }
@@ -1658,7 +1671,6 @@ function menu_router_build($reset = FALSE) {
       $menu = $cache->data;
     }
     else {
-      db_query('DELETE FROM {menu_router}');
       // We need to manually call each module so that we can know which module
       // a given item came from.
       $callbacks = array();
@@ -1674,7 +1686,6 @@ function menu_router_build($reset = FALSE) {
       // Alter the menu as defined in modules, keys are like user/%user.
       drupal_alter('menu', $callbacks);
       $menu = _menu_router_build($callbacks);
-      cache_set('router:', $menu, 'cache_menu');
     }
   }
   return $menu;
@@ -2254,6 +2265,13 @@ function _menu_router_build($callbacks) {
   }
   array_multisort($sort, SORT_NUMERIC, $menu);
 
+  if (!$menu) {
+    // We must have a serious error - there is no data to save.
+    watchdog('php', 'Menu router rebuild failed - some paths may not work correctly.', array(), WATCHDOG_ERROR);
+    return array();
+  }
+  // Delete the existing router since we have some data to replace it.
+  db_query('DELETE FROM {menu_router}');
   // Apply inheritance rules.
   foreach ($menu as $path => $v) {
     $item = &$menu[$path];
@@ -2356,6 +2374,7 @@ function _menu_router_build($callbacks) {
   $masks = array_keys($masks);
   rsort($masks);
   variable_set('menu_masks', $masks);
+  cache_set('router:', $menu, 'cache_menu');
   return $menu;
 }
 

@@ -5,8 +5,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: drupal (6.0)\n"
-"POT-Creation-Date: 2008-03-30 17:19+0200\n"
-"PO-Revision-Date: 2008-03-18 13:53+0100\n"
+"POT-Creation-Date: 2008-05-17 18:41+0200\n"
+"PO-Revision-Date: 2008-05-12 14:07+0200\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
@@ -18,7 +18,7 @@ msgstr "Instalando @drupal"
 
 #: install.php:641
 msgid "The installation has encountered an error."
-msgstr "Se ha encontrado un error en la instalación."
+msgstr "La instalación ha encontrado un error."
 
 #: install.php:111
 msgid "Requirements problem"
@@ -168,12 +168,12 @@ msgid ""
 "provider."
 msgstr ""
 "Para que Drupal funcione, y para continuar con el proceso de instalación, "
-"tienes que resolver todos los problemas de permisos listados arriba. "
-"Nosotros hemos sido capaces de verificar que tenemos permisos para los "
-"siguientes comandos: %commands. Para más ayuda con la configuración del "
-"servidor de tu base de datos, lee el <a href=\"http://drupal.org/node/258"
-"\">Libro de instalación y actualización</a>. Si entiendes los errores que se "
-"indican deberías ponerte en contacto con tu proveedor de hosting."
+"debería resolver todos los problemas con los permisos listados "
+"anteriormente. Hemos sido capaces de verificar que hay permisos para los "
+"comandos siguientes: %commands. Para más ayuda con la configuración de la "
+"base de datos de su servidor, consulte  href=\"http://drupal.org/node/258"
+"\">El manual de instalación y actualización</a>. Si no está seguro de qué "
+"significa todo esto, debería contactar con sus proveedores de alojamiento."
 
 #: install.php:444
 msgid "Select an installation profile"
@@ -332,13 +332,13 @@ msgid ""
 "href=\"http://drupal.org/node/15365\">handbook page on Clean URLs</a> has "
 "additional troubleshooting information."
 msgstr ""
-"La configuración de tu sistema no soporta actualmente esta función. La <a "
-"href=\"http://drupal.org/node/15365\">hoja del libro sobre URLs Limpias</a> "
-"tiene información adicional acerca este problema."
+"La configuración de su sistema no soporta actualmente esta característica. "
+"La <a href=\"http://drupal.org/node/15365\">página del manual sobre URL "
+"limpios</a> tiene más información sobre posibles problemas."
 
 #: install.php:714
 msgid "Testing clean URLs..."
-msgstr "Probar URLs limpias..."
+msgstr "Probando URL limpios..."
 
 #: install.php:779
 msgid "@drupal installation complete"
@@ -346,7 +346,7 @@ msgstr "Instalación de @drupal completa"
 
 #: install.php:781
 msgid "Congratulations, @drupal has been successfully installed."
-msgstr "¡Felicidades! @drupal se han instalado correctamente."
+msgstr "¡Felicidades! @drupal se ha instalado correctamente."
 
 #: install.php:782
 msgid ""

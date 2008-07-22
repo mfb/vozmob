@@ -8,8 +8,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: drupal (6.0)\n"
-"POT-Creation-Date: 2008-03-30 17:19+0200\n"
-"PO-Revision-Date: 2008-02-27 20:30+0100\n"
+"POT-Creation-Date: 2008-07-14 10:36+0200\n"
+"PO-Revision-Date: 2008-07-13 22:54+0200\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
@@ -21,7 +21,7 @@ msgstr "Todavía no hay elementos de menú."
 
 #: modules/menu/menu.admin.inc:104
 msgid "reset"
-msgstr "reiniciar"
+msgstr "restablecer"
 
 #: modules/menu/menu.admin.inc:175
 msgid "Menu item"
@@ -45,6 +45,8 @@ msgstr ""
 msgid ""
 "The link text corresponding to this item that should appear in the menu."
 msgstr ""
+"El enlace de texto correspondiente a este elemento que debería aparecer en "
+"el menú."
 
 #: modules/menu/menu.admin.inc:289
 msgid "The description displayed when hovering over a menu item."
@@ -75,6 +77,10 @@ msgid ""
 "name must contain only lowercase letters, numbers, and hyphens, and must be "
 "unique."
 msgstr ""
+"El nombre de este menú legible para la máquina. Este será el texto que se "
+"use para construir la URL de la página de <em>resumen de menú</em> para éste "
+"menú. Este nombre sólo puede incluir letras minúsculas sin acentuar, cifras "
+"y guiones bajos, y debe ser único."
 
 #: modules/menu/menu.admin.inc:460
 msgid "Are you sure you want to delete the custom menu %title?"
@@ -88,6 +94,8 @@ msgstr "El menú personalizado %title ha sido eliminado."
 msgid ""
 "The menu name may only consist of lowercase letters, numbers, and hyphens."
 msgstr ""
+"El nombre del menú sólo puede consistir en letras minúsculas, números y "
+"guiones."
 
 #: modules/menu/menu.admin.inc:512
 msgid "The menu already exists."
@@ -105,7 +113,7 @@ msgstr "Se ha eliminado la opción de menú %title."
 #: modules/menu/menu.admin.inc:584
 msgid "Are you sure you want to reset the item %item to its default values?"
 msgstr ""
-"¿Está seguro de que quiere reiniciar el elemento %item con sus valores "
+"¿Está seguro de que quiere restablecer el elemento %item con sus valores "
 "predefinidos?"
 
 #: modules/menu/menu.admin.inc:584
@@ -137,6 +145,7 @@ msgid ""
 "Choose the menu to be the default in the menu options in the content "
 "authoring form."
 msgstr ""
+"Elija el menú predefinido en las opciones de menú del formulario de creación."
 
 #: modules/menu/menu.admin.inc:629
 msgid "Source for the secondary links"
@@ -145,8 +154,8 @@ msgstr "Origen para los enlaces secundarios."
 #: modules/menu/menu.admin.inc:505
 msgid "The menu name can't be longer than 1 character."
 msgid_plural "The menu name can't be longer than @count characters."
-msgstr[0] "El nombre de menú no puede ser mayor de un caracter"
-msgstr[1] "El nombre de menú no puede ser mayor de @count caracteres"
+msgstr[0] "El nombre del menú no  puede ser mayor de un caracter."
+msgstr[1] "El nombre del menú no puede ser mayor de @count caracteres."
 
 #: modules/menu/menu.module:21
 msgid ""
@@ -163,6 +172,20 @@ msgid ""
 "and <em>Secondary links</em> contain no menu items but may be configured to "
 "contain custom menu items specific to your site."
 msgstr ""
+"El módulo de menú proporciona una interface para controlar y personalizar el "
+"poderoso sistema de menú de Drupal. Los menús son una colección jerarquica "
+"de enlaces, o elementos del menú, usados para navegar un sitio web, y son "
+"posicionados y desplegados usando el flexible sistema de bloques de Drupal. "
+"Por defecto, tres menús se crean durante la instalación: <em>Navegación</"
+"em>, <em>Enlaces principales</em>, y <em>Enlaces secundarios</em>. El menú "
+"<em>Navegación</em> contienen la mayoría de enlaces necesarios para trabajar "
+"con y navegar en su sitio, y a menudo se muestra ya sea en la barra de la "
+"izquierda o en la de la derecha. La mayoría de temas de Drupal también "
+"proporcionan soporte para <em>Enlaces principales</em> y <em>Enlaces "
+"secundarios</em>, desplegándolos ya sea en la cabecera o en el pie de cada "
+"página. Por defecto, <em>Enlaces principales</em> y <em>Enlaces secundarios</"
+"em> no contienen elementos del menú, pero puede ser configurado para que "
+"contenga elementos de menú personalizados específicamente para su sitio."
 
 #: modules/menu/menu.module:22
 msgid ""
@@ -172,6 +195,12 @@ msgid ""
 "menu\">add menu page</a> (the block containing a new menu must also be "
 "enabled on the <a href=\"@blocks\">blocks administration page</a>)."
 msgstr ""
+"La <a href=\"@menu\"> página de menús</a> muestra todos los menús "
+"actualmente disponibles en su sitio. Seleccione un menú de esta lista para "
+"agregar o editar un elemento de menú, o para reordenar los elementos dentro "
+"del menú. Cree nuevos menús usando <a href=\"@add-menu\">agregar una página "
+"de menú</a> (el bloque que contiene el nuevo menú también debe  estar "
+"activada en <a href=\"@blocks\">página de administración de bloques</a>"
 
 #: modules/menu/menu.module:23
 msgid ""
@@ -187,6 +216,10 @@ msgid ""
 "menus currently available on your site are displayed below. Select a menu "
 "from this list to manage its menu items."
 msgstr ""
+"Los memús son lotes de elnlaces (elementos de menú) que se usan para navegar "
+"por un sitio web. Los menús actualmente disponibles en este sitio se "
+"muestran más abajo. Seleccione uno de los menús de la lista para administrar "
+"sus elementos de menú."
 
 #: modules/menu/menu.module:28
 msgid ""
@@ -204,6 +237,11 @@ msgid ""
 "over a handle icon.) Remember that your changes will not be saved until you "
 "click the <em>Save configuration</em> button at the bottom of the page."
 msgstr ""
+"Para reordenar elementos de menú, tome un manejador de arrastrar y soltar "
+"debajo de la columna del <em>Elemento de menú</em> y arrástre los elementos "
+"(o grupo de elementos) a su nueva posición en la lista. Recuerde que los "
+"cambios no se guardarán hasta que no haga clic en el botón <em>Guardar "
+"configuración</em> al final de la página."
 
 #: modules/menu/menu.module:32
 msgid "Enter the title and path for your new menu item."
@@ -229,6 +267,8 @@ msgstr "administrar menú"
 msgid ""
 "Holds definitions for top-level custom menus (for example, Primary Links)."
 msgstr ""
+"Tiene definiciones de menús personalizados de primer nivel (por ejemplo, "
+"Enlaces Principales)."
 
 #: modules/menu/menu.install:38
 msgid ""
@@ -256,11 +296,11 @@ msgstr "Sin enlaces secundarios"
 
 #: modules/menu/menu.admin.inc:619
 msgid "Source for the primary links"
-msgstr ""
+msgstr "Origen para los enlaces primarios"
 
 #: modules/menu/menu.admin.inc:623
 msgid "Select what should be displayed as the primary links."
-msgstr ""
+msgstr "Seleccione qué debería mostrarse como enlaces primarios."
 
 #: modules/menu/menu.admin.inc:633
 msgid ""
@@ -269,6 +309,10 @@ msgid ""
 "you do this, the children of the active primary menu link will be displayed "
 "as secondary links."
 msgstr ""
+"Seleccione qué debería ser mostrado como enlaces secundarios. Puede elegir "
+"el mismo menú para los enlaces secundarios como para los enlaces primarios "
+"(actualmente %primary). Si hace esto, los submenús del menú de enlaces "
+"primarios se mostrará como enlaces secundarios."
 
 #: modules/menu/menu.install:12
 msgid ""
@@ -276,6 +320,10 @@ msgid ""
 "for any site. It is usually the only menu that contains personalized links "
 "for authenticated users, and is often not even visible to anonymous users."
 msgstr ""
+"El menú de navegación es proporcionado por Drupal y es el principal menú "
+"interactivo para cualquier sitio. Normalmente es el único menú que contiene "
+"enlaces personalizados para usuarios autenticados y a menudo no es visible "
+"para usuarios anónimos."
 
 #: modules/menu/menu.install:13
 msgid ""
