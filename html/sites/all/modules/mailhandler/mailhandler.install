@@ -1,0 +1,164 @@
+<?php
+
+/**
+ * Implementation of hook_install().
+ */
+function mailhandler_install() {
+  drupal_install_schema('mailhandler');
+}
+
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function mailhandler_uninstall() {
+  drupal_uninstall_schema('mailhandler');
+}
+
+/**
+ * Implementation of hook_schema
+ */
+ function mailhandler_schema() {
+  $schema['mailhandler'] = array(
+    'description' => t('Mailhandler table'),
+    'fields' => array(
+      'mid' => array(
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'disp-width' => '10',
+      ),
+      'mail' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+      'domain' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+      'port' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'disp-width' => '5',
+      ),
+      'name' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+      'pass' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+      'security' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'size' => 'tiny',
+        'not null' => TRUE,
+      ),
+      'replies' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'size' => 'tiny',
+        'not null' => TRUE,
+        'default' => 1,
+      ),
+      'fromheader' => array(
+        'type' => 'varchar',
+        'length' => '128',
+        'not null' => FALSE,
+      ),
+      'commands' => array(
+        'type' => 'text',
+        'not null' => FALSE,
+      ),
+      'sigseparator' => array(
+        'type' => 'varchar',
+        'length' => '128',
+        'not null' => FALSE,
+      ),
+      'enabled' => array(
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => FALSE,
+      ),
+      'folder' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+      'imap' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'size' => 'tiny',
+        'not null' => TRUE,
+      ),
+      'mime' => array(
+        'type' => 'varchar',
+        'length' => '128',
+        'not null' => FALSE,
+      ),
+      'mailto' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+      'delete_after_read' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'size' => 'tiny',
+        'not null' => TRUE,
+        'default' => 1,
+      ),
+      'extraimap' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+      ),
+      'format' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('mid'),
+    'indexes' => array(
+      'mail' => array('mail'),
+      ),
+    );
+
+  return $schema;
+}
+
+/**
+ * Update database hooks
+ */
+function mailhandler_update_1() {
+  return _system_update_utf8(array('mailhandler'));
+}
+
+
+/**
+ * Check that the IMAP extension exists for PHP.
+ */
+function mailhandler_requirements($phase) {
+  // Ensure translations don't break at install time
+  $t = get_t();$has_imap = function_exists('imap_open');
+  
+  $requirements['mailhandler'] = array(
+    'title' => $t('IMAP'),
+    'description' => $t("Mailhandler requires that PHP's !ext is enabled in order to function properly.", array('!ext' => l('IMAP extension', 'http://www.php.net/imap'))),
+    'value' => $has_imap ? $t('Enabled') : $t('Not found'),
+    'severity' => $has_imap ? REQUIREMENT_OK : REQUIREMENT_ERROR,
+  );
+  return $requirements;
+}
+
+
+/**
+
+**/

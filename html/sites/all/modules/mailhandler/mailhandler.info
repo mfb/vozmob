@@ -1,0 +1,4 @@
+; $Id $
+name = Mailhandler
+description = Accepts submissions via e-mail.
+core = 6.x

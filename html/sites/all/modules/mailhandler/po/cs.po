@@ -1,0 +1,386 @@
+# Czech translation of Drupal (mailhandler.module)
+# Generated from file: mailhandler.module,v 1.74 2005/04/25 04:22:41 weitzman
+# Adam Rambousek <xrambous@fi.muni.cz>, 2005.
+msgid ""
+msgstr ""
+"Project-Id-Version: cs\n"
+"POT-Creation-Date: 2005-06-26 21:30+0200\n"
+"PO-Revision-Date: 2005-06-26 22:10GMT+1\n"
+"Last-Translator: Adam Rambousek <xrambous@fi.muni.cz>\n"
+"Language-Team: Czech\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms:  nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"X-Generator: KBabel 1.9.1\n"
+
+#: mailhandler.module:81
+msgid "Mailhandler retrieve successful: %num_processed messages for %m"
+msgstr "Mailhandler proběhl úspěšně: zpracováno zpráv %num_processed / %m"
+
+#: mailhandler.module:85 ;86
+msgid "Mailhandler %c connection failed: %m"
+msgstr "Mailhandler, selhalo spojení %c: %m"
+
+#: mailhandler.module:89
+msgid "Mailhandler: Could not access local folder: %m"
+msgstr "Mailhandler: Nelze přistoupit k místní složce: %m"
+
+#: mailhandler.module:90
+msgid "Mailhandler could not access local folder: %m"
+msgstr "Mailhandler nemohl přistoupit k místní složce: %m"
+
+#: mailhandler.module:109 ;339
+msgid ""
+"\n"
+"\n"
+"You sent:\n"
+"\n"
+"From: %f\n"
+"Subject: %t\n"
+"Body:\n"
+"%b"
+msgstr "\n\nPoslal jste:\n\nOd: %f\nPředmět: %t\nTělo:\n%b"
+
+#: mailhandler.module:112 ;342
+msgid "Email submission to %sn failed - %subj"
+msgstr "Emailové zaslání do %sn selhalo - %subj"
+
+#: mailhandler.module:138 ;138
+msgid "Duplicate subject"
+msgstr "Duplikovaný předmět"
+
+#: mailhandler.module:295
+msgid "Submission failed"
+msgstr "Odeslání selhalo"
+
+#: mailhandler.module:316
+msgid "The e-mail address '%f' may not update %t items."
+msgstr "E-mailová adresa '%f' nemůže aktualizovat položky %t."
+
+#: mailhandler.module:325
+msgid "The e-mail address '%f' may not create %t items."
+msgstr "E-mailová adresa '%f' nemůže vytvářet položky %t."
+
+#: mailhandler.module:330
+msgid ""
+"Your submission is invalid: \n"
+"\n"
+msgstr "Odeslání neplatné:\n\n"
+
+#: mailhandler.module:594 ;597
+msgid "Mail Handler"
+msgstr "Mail Handler"
+
+#: mailhandler.module:594
+msgid ""
+"You may post to <i>%sn</i> by sending an e-mail to <i>%e</i>. Be sure to "
+"include your password at the top of your e-mail body (e.g. "
+"<i>pass=mypassword</i>)."
+msgstr "Můžete odesílat <i>%sn</i> pomocí e-mailu na adresu <i>%e</i>. Nezapomeňte na začátek těla textu přiadt heslo (tj. <i>pass=heslo</i>)."
+
+#: mailhandler.module:597
+msgid "You may post to <i>%sn</i> by sending an e-mail to <i>%e</i>."
+msgstr "Můžete odesílat <i>%sn</i> pomocí e-mailu na adresu <i>%e</i>."
+
+#: mailhandler.module:625 ;0
+msgid "mailhandler"
+msgstr "mailhandler"
+
+#: mailhandler.module:629
+msgid "list"
+msgstr "seznam"
+
+#: mailhandler.module:633 ;806
+msgid "add mailbox"
+msgstr "přidat mailbox"
+
+#: mailhandler.module:704
+msgid "Mailhandler: Mailbox %m deleted"
+msgstr "Mailhandler: Mailbox %m odstraněn"
+
+#: mailhandler.module:705
+msgid "Mailbox %m deleted"
+msgstr "Mailbox %m odstraněn"
+
+#: mailhandler.module:709
+msgid "Do you wish to delete this mailbox <i>%m</i>"
+msgstr "Chcete smazat tento mailbox <i>%m</i>?"
+
+#: mailhandler.module:726
+msgid " Mailbox port must be an integer."
+msgstr " Port mailboxu musí být celé číslo."
+
+#: mailhandler.module:732
+msgid ""
+" The local folder has to be readable and writable by owner of the webserver "
+"process, e.g. nobody."
+msgstr " Vlastní procesu webserveru musí mít právo číst a zapisovat do místní složky."
+
+#: mailhandler.module:744
+msgid "Mailbox updated"
+msgstr "Mailbox aktualizován"
+
+#: mailhandler.module:750
+msgid "Mailbox added"
+msgstr "Mailbox přidán"
+
+#: mailhandler.module:761
+msgid "mailbox"
+msgstr "mailbox"
+
+#: mailhandler.module:765
+msgid "Edit this mailbox configuration"
+msgstr "Upravit nastavení mailboxu"
+
+#: mailhandler.module:766
+msgid "retrieve"
+msgstr "získat"
+
+#: mailhandler.module:766
+msgid "Retrieve and process pending e-mails in this mailbox"
+msgstr "Získá a zpracuje e-maily z tohoto mailboxu"
+
+#: mailhandler.module:776
+msgid "The e-mail address to which users should send their submissions."
+msgstr "E-mailová adresa, na kterou mají uživatelé posílat své příspěvky."
+
+#: mailhandler.module:777
+msgid "Second E-mail address"
+msgstr "Druhá e-mailová adresa"
+
+#: mailhandler.module:777
+msgid "Optional. The e-mail address to which modules should send generated content."
+msgstr "Volitelné. E-mailová adresa, na kterou moduly posílají generovaný obsah."
+
+#: mailhandler.module:778
+msgid "Folder"
+msgstr "Složka"
+
+#: mailhandler.module:778
+msgid ""
+"Optional. The folder where the mail is stored. If you want this mailbox to "
+"read from a local folder, give the full path. Leave domain, port, name, and "
+"pass empty below. Remember to set the folder to readable and writable by the "
+"webserver."
+msgstr "Volitelné. Složka, ve které se ukládají maily. Pokud chcete číst maily z místní složky, zadejte kompletní cestu. Nevyplňujte doménu, port, jméno a heslo. K místní složce musí mít webserver právo čtení a zápisu."
+
+#: mailhandler.module:779
+msgid "POP3 or IMAP Mailbox"
+msgstr "POP3 nebo IMAP"
+
+#: mailhandler.module:779
+msgid ""
+"If you wish to retrieve mail from a POP3 or IMAP mailbox instead of a "
+"Folder, select POP3 or IMAP. Also, complete the Mailbox items below."
+msgstr "Pokud chcete získávat maily z POP3 nebo IMAP schránky, vyberte POP3 nebo IMAP. Také vyplňte položky níže."
+
+#: mailhandler.module:780
+msgid "Mailbox domain"
+msgstr "Doména mailboxu"
+
+#: mailhandler.module:780
+msgid "The domain of the server used to collect mail"
+msgstr "Doména serveru, na který chodí maily"
+
+#: mailhandler.module:781
+msgid "Mailbox port"
+msgstr "Port mailboxu"
+
+#: mailhandler.module:781
+msgid ""
+"The port of the mailbox used to collect mail (usually 110 for POP3, 143 for "
+"IMAP)"
+msgstr "Port pro výběr e-mailů (obvykle 110 pro POP3 a 143 pro IMAP)."
+
+#: mailhandler.module:782
+msgid "Mailbox username"
+msgstr "Uživatelské jméno mailboxu"
+
+#: mailhandler.module:782
+msgid "This username is used while logging into this mailbox during mail retrieval."
+msgstr "Uživatelské jméno, které se používá pro přihlášení k mailboxu."
+
+#: mailhandler.module:783
+msgid "Mailbox password"
+msgstr "Heslo mailboxu"
+
+#: mailhandler.module:783
+msgid ""
+"The password corrosponding to the username above. Consider using a non-vital "
+"password, since this field is stored without encryption in the database."
+msgstr "Heslo odpovídající níže zadenému uživatelskému jménu. Používejte nedůležité heslo, protože toto pole je v databázi uloženo nešifrované."
+
+#: mailhandler.module:785
+msgid "Extra commands"
+msgstr "Další příkazy"
+
+#: mailhandler.module:785
+msgid ""
+"Optional. In some circumstances you need to issue extra commands to connect "
+"to your mail server (e.g. \"/notls\", \"/novalidate-cert\" etc.). See "
+"documentation for <a href=\"http://php.net/imap_open\">imap_open</a>. Begin "
+"the string with a \"/\", separating each subsequent command with another \"/"
+"\""
+msgstr "Volitelné. V některých případech je potřeba pro připojení k mailserveru zadat další příkazy (např. \"/notls\", \"/novalidate-cert\" apod.). Podívejte se do dokumentace k <a href=\"http://php.net/imap_open\">imap_open</a>. Příkazy začínají znakem \"/\" a tímto znakem se také oddělují."
+
+#: mailhandler.module:786
+msgid "Mime preference"
+msgstr "Nastavení MIME"
+
+#: mailhandler.module:786
+msgid "Plain text"
+msgstr "Čistý text"
+
+#: mailhandler.module:786
+msgid ""
+"When a user sends an e-mail containing both HTML and plain text parts, use "
+"this part as the node body."
+msgstr "Když uživatel odešle e-mail, který obsahuje části v HTML i čistém textu, použije se jako tělo uzlu určená část."
+
+#: mailhandler.module:787
+msgid "Security"
+msgstr "Bezpečnost"
+
+#: mailhandler.module:787
+msgid "Require password"
+msgstr "Vyžadovat heslo"
+
+#: mailhandler.module:787
+msgid ""
+"Disable security if your site does not require a password in the Commands "
+"section of incoming e-mails. Note: Security=Enabled and Mime preference=HTML "
+"is an unsupported combination."
+msgstr "Zvolte \"vypnuto\", pokud nevyžadujete heslo v příchozích e-mailech. Poznámka: Nastavení MIME=HTML a Bezpečnost=Vyžadovat heslo je nepodporovaná kombinace."
+
+#: mailhandler.module:788
+msgid "Send error replies"
+msgstr "Posílat chybové odpovědi."
+
+#: mailhandler.module:788
+msgid ""
+"Send helpful replies to all unsuccessful e-mail submissions. Consider "
+"disabling when a listserv posts to this mailbox."
+msgstr "Na neúspěšné příspěvky e-mailem odesílá uživatečné odpovědi s popisem chyby. Pokud do tohoto mailboxu přispívá listserv, raději tuto možnost vypněte."
+
+#: mailhandler.module:789
+msgid "From header"
+msgstr "Hlavička From"
+
+#: mailhandler.module:789
+msgid ""
+"Use this e-mail header to determine the author of the resulting node. Admins "
+"usually leave this field blank (thus using the <b>From</b> header), but "
+"<b>Sender</b> is also useful when working with listservs."
+msgstr "Pro určení autora výsledného uzlu se použije tato e-mailová hlavička. Obvykle se toto pole ponechává prázdné (a tak se použije hlavička <b>From</b>), ale při práci s mailing listy je užitečná i hlavička <b>Sender</b>."
+
+#: mailhandler.module:790
+msgid "Default commands"
+msgstr "Implicitní příkazy"
+
+#: mailhandler.module:790
+msgid ""
+"A set of commands which are added to each message. One command per line. See "
+"%link."
+msgstr "Sada příkazů, která se přidá ke každé zprávě. Jeden příkaz na řádek. Viz %link."
+
+#: mailhandler.module:790
+msgid "Commands"
+msgstr "Příkazy"
+
+#: mailhandler.module:791
+msgid "Signature separator"
+msgstr "Oddělovač podpisu"
+
+#: mailhandler.module:791
+msgid ""
+"All text after this string will be discarded. A typical value is <b>\"-- \"</"
+"b> that is two dashes followed by a blank in an otherwise empty line. Leave "
+"blank to include signature text in nodes."
+msgstr "Veškerý text za tímto řetězcem se zahodí. Typická hodnota je <b>\"-- \"</b>, tj. dvě pomlčky a mezera na samostatném řádku. Pokud chcete do textu uzlů zahrnout i podpisy, ponechte toto pole prázdné."
+
+#: mailhandler.module:792
+msgid "Delete messages after they are processed?"
+msgstr "Smazat zprávy po zpracování?"
+
+#: mailhandler.module:792
+msgid ""
+"Uncheck this box to leave read messages in the mailbox.  They will not be "
+"processed again unless they become marked as unread."
+msgstr "Zrušte zakšrtnutí tohoto pole, pokud chcete přečtené zprávy ponechat v mailboxu. Nebudou se znovu zpracovávat, pokud je neoznačíte jako nepřečtené."
+
+#: mailhandler.module:793
+msgid "Cron processing"
+msgstr "Zpracování cronem"
+
+#: mailhandler.module:793
+msgid "Select disable to temporarily stop cron processing for this mailbox."
+msgstr "Zvolte Vypnuto, pokud chcete dočasně vypnout zpracování cronem pro tento mailbox."
+
+#: mailhandler.module:810
+msgid "Accepts submissions via e-mail"
+msgstr "Přijímá příspěvky e-mailem"
+
+#: mailhandler.module:813
+msgid ""
+"The mailhandler module allows registered users to create or edit nodes and "
+"comments via email. Authentication is usually based on the From: email "
+"address. There is also an email filter that can be used to prettify incoming "
+"email. Users may post taxonomy terms, teasers, and other node parameters "
+"using the Command capability."
+msgstr "Modul mailhandler umožňuje registrovaným uživatelům vytvářet nebo upravovat uzly a komentáře e-mailem. Autentizace je obvykle založena na hlavičce From. Obsažen je také emailový filtr, který můžete použít pro zlepšení vzhledu příchozích emailů. Uživatelé mohou posílat příkazy pro taxonomii, upoutávky a další parametry uzlů."
+
+#: mailhandler.module:816
+msgid ""
+"Add a mailbox whose mail you wish to import into Drupal. Can be IMAP, POP3, "
+"or local folder."
+msgstr "Přidá mailbox, ze kterého chcete importovat do Drupalu. Může to být IMAP, POP3 nebo místní složka."
+
+#: mailhandler.module:930
+msgid ""
+"This filter will interpret a node as a plain text email. It will attempt to "
+"thread conversations in colour, convert entities into HTML, and, depending "
+"on the configuration, remove any extra linebreaks."
+msgstr "Tento filtr interpretuje uzel jako email v čistém textu. Pokusí se převést entity na HTML a v závislosti na nastavení odstranit nadbytečné prázdné řádky."
+
+#: mailhandler.module:933
+msgid "This filter will interpret a node as a plain text email."
+msgstr "Tento filtr interpretuje uzel jako email v čistém textu."
+
+#: mailhandler.module:1003 ;1015
+msgid "Email filter"
+msgstr "Email filtr"
+
+#: mailhandler.module:1016
+msgid "Indent quoted blocks"
+msgstr "Odsadit citace"
+
+#: mailhandler.module:1016
+msgid ""
+"If checked, the email filter will attempt to indent quoted blocks (i.e. "
+"lines beginning with \"> ...\")."
+msgstr "Pokud je zaškrtnuto, pokusí se tento filtr odsadit bloky s citací (tj. řádky začínající \"> \")."
+
+#: mailhandler.module:1017
+msgid "Convert hyperlinks"
+msgstr "Převést odkazy"
+
+#: mailhandler.module:1017
+msgid ""
+"If checked, the email filter will attempt to create hyperlinks from their "
+"plain text form."
+msgstr "Pokud je zaškrtnuto, pokusí se filtr vytvořit odkazy z čistého textu."
+
+#: mailhandler.module:1018
+msgid "Remove line breaks"
+msgstr "Odstranit prázdné řádky"
+
+#: mailhandler.module:1018
+msgid "If checked, the email filter will attempt to remove extra linebreaks."
+msgstr "Pokud je zaškrtnuto, pokusí se filtr odstranit nadbytečné prázdné řádky."
+
+#: mailhandler.module:615
+msgid "administer mailhandler"
+msgstr "administrace mailhandler"
+

@@ -1,0 +1,30 @@
+div.email {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 0.95em;
+  background-color: #f0f0f0;
+  margin: 5px 0px;
+  line-height: 110%;
+  padding: 5px;
+  overflow: auto;
+  height: auto;
+  border: 1px solid;
+  text-align: left;
+}
+
+div.email div.email {
+  font-size: 0.95em;
+  color: #053999;
+}
+
+div.email div.email div.email {
+  font-size: 1em;
+  color: #23961F;
+}
+
+div.email div.email div.email div.email {
+  color: #A0072D;
+}
+
+div.email div.email div.email div.email div.email {
+  color: #24AB9D;
+}

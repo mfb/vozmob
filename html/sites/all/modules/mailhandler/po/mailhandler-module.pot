@@ -1,0 +1,325 @@
+# LANGUAGE translation of Drupal (mailhandler.module)
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from file: mailhandler.module,v 1.74 2005/04/25 04:22:41 weitzman
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2005-06-26 21:30+0200\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: mailhandler.module:81
+msgid "Mailhandler retrieve successful: %num_processed messages for %m"
+msgstr ""
+
+#: mailhandler.module:85;86
+msgid "Mailhandler %c connection failed: %m"
+msgstr ""
+
+#: mailhandler.module:89
+msgid "Mailhandler: Could not access local folder: %m"
+msgstr ""
+
+#: mailhandler.module:90
+msgid "Mailhandler could not access local folder: %m"
+msgstr ""
+
+#: mailhandler.module:109;339
+msgid "\n\nYou sent:\n\nFrom: %f\nSubject: %t\nBody:\n%b"
+msgstr ""
+
+#: mailhandler.module:112;342
+msgid "Email submission to %sn failed - %subj"
+msgstr ""
+
+#: mailhandler.module:138;138
+msgid "Duplicate subject"
+msgstr ""
+
+#: mailhandler.module:295
+msgid "Submission failed"
+msgstr ""
+
+#: mailhandler.module:316
+msgid "The e-mail address '%f' may not update %t items."
+msgstr ""
+
+#: mailhandler.module:325
+msgid "The e-mail address '%f' may not create %t items."
+msgstr ""
+
+#: mailhandler.module:330
+msgid "Your submission is invalid: \n\n"
+msgstr ""
+
+#: mailhandler.module:594;597
+msgid "Mail Handler"
+msgstr ""
+
+#: mailhandler.module:594
+msgid "You may post to <i>%sn</i> by sending an e-mail to <i>%e</i>. Be sure to include your password at the top of your e-mail body (e.g. <i>pass=mypassword</i>)."
+msgstr ""
+
+#: mailhandler.module:597
+msgid "You may post to <i>%sn</i> by sending an e-mail to <i>%e</i>."
+msgstr ""
+
+#: mailhandler.module:625;0
+msgid "mailhandler"
+msgstr ""
+
+#: mailhandler.module:629
+msgid "list"
+msgstr ""
+
+#: mailhandler.module:633;806
+msgid "add mailbox"
+msgstr ""
+
+#: mailhandler.module:704
+msgid "Mailhandler: Mailbox %m deleted"
+msgstr ""
+
+#: mailhandler.module:705
+msgid "Mailbox %m deleted"
+msgstr ""
+
+#: mailhandler.module:709
+msgid "Do you wish to delete this mailbox <i>%m</i>"
+msgstr ""
+
+#: mailhandler.module:726
+msgid " Mailbox port must be an integer."
+msgstr ""
+
+#: mailhandler.module:732
+msgid " The local folder has to be readable and writable by owner of the webserver process, e.g. nobody."
+msgstr ""
+
+#: mailhandler.module:744
+msgid "Mailbox updated"
+msgstr ""
+
+#: mailhandler.module:750
+msgid "Mailbox added"
+msgstr ""
+
+#: mailhandler.module:761
+msgid "mailbox"
+msgstr ""
+
+#: mailhandler.module:765
+msgid "Edit this mailbox configuration"
+msgstr ""
+
+#: mailhandler.module:766
+msgid "retrieve"
+msgstr ""
+
+#: mailhandler.module:766
+msgid "Retrieve and process pending e-mails in this mailbox"
+msgstr ""
+
+#: mailhandler.module:776
+msgid "The e-mail address to which users should send their submissions."
+msgstr ""
+
+#: mailhandler.module:777
+msgid "Second E-mail address"
+msgstr ""
+
+#: mailhandler.module:777
+msgid "Optional. The e-mail address to which modules should send generated content."
+msgstr ""
+
+#: mailhandler.module:778
+msgid "Folder"
+msgstr ""
+
+#: mailhandler.module:778
+msgid "Optional. The folder where the mail is stored. If you want this mailbox to read from a local folder, give the full path. Leave domain, port, name, and pass empty below. Remember to set the folder to readable and writable by the webserver."
+msgstr ""
+
+#: mailhandler.module:779
+msgid "POP3 or IMAP Mailbox"
+msgstr ""
+
+#: mailhandler.module:779
+msgid "If you wish to retrieve mail from a POP3 or IMAP mailbox instead of a Folder, select POP3 or IMAP. Also, complete the Mailbox items below."
+msgstr ""
+
+#: mailhandler.module:780
+msgid "Mailbox domain"
+msgstr ""
+
+#: mailhandler.module:780
+msgid "The domain of the server used to collect mail"
+msgstr ""
+
+#: mailhandler.module:781
+msgid "Mailbox port"
+msgstr ""
+
+#: mailhandler.module:781
+msgid "The port of the mailbox used to collect mail (usually 110 for POP3, 143 for IMAP)"
+msgstr ""
+
+#: mailhandler.module:782
+msgid "Mailbox username"
+msgstr ""
+
+#: mailhandler.module:782
+msgid "This username is used while logging into this mailbox during mail retrieval."
+msgstr ""
+
+#: mailhandler.module:783
+msgid "Mailbox password"
+msgstr ""
+
+#: mailhandler.module:783
+msgid "The password corrosponding to the username above. Consider using a non-vital password, since this field is stored without encryption in the database."
+msgstr ""
+
+#: mailhandler.module:785
+msgid "Extra commands"
+msgstr ""
+
+#: mailhandler.module:785
+msgid "Optional. In some circumstances you need to issue extra commands to connect to your mail server (e.g. \"/notls\", \"/novalidate-cert\" etc.). See documentation for <a href=\"http://php.net/imap_open\">imap_open</a>. Begin the string with a \"/\", separating each subsequent command with another \"/\""
+msgstr ""
+
+#: mailhandler.module:786
+msgid "Mime preference"
+msgstr ""
+
+#: mailhandler.module:786
+msgid "Plain text"
+msgstr ""
+
+#: mailhandler.module:786
+msgid "When a user sends an e-mail containing both HTML and plain text parts, use this part as the node body."
+msgstr ""
+
+#: mailhandler.module:787
+msgid "Security"
+msgstr ""
+
+#: mailhandler.module:787
+msgid "Require password"
+msgstr ""
+
+#: mailhandler.module:787
+msgid "Disable security if your site does not require a password in the Commands section of incoming e-mails. Note: Security=Enabled and Mime preference=HTML is an unsupported combination."
+msgstr ""
+
+#: mailhandler.module:788
+msgid "Send error replies"
+msgstr ""
+
+#: mailhandler.module:788
+msgid "Send helpful replies to all unsuccessful e-mail submissions. Consider disabling when a listserv posts to this mailbox."
+msgstr ""
+
+#: mailhandler.module:789
+msgid "From header"
+msgstr ""
+
+#: mailhandler.module:789
+msgid "Use this e-mail header to determine the author of the resulting node. Admins usually leave this field blank (thus using the <b>From</b> header), but <b>Sender</b> is also useful when working with listservs."
+msgstr ""
+
+#: mailhandler.module:790
+msgid "Default commands"
+msgstr ""
+
+#: mailhandler.module:790
+msgid "A set of commands which are added to each message. One command per line. See %link."
+msgstr ""
+
+#: mailhandler.module:790
+msgid "Commands"
+msgstr ""
+
+#: mailhandler.module:791
+msgid "Signature separator"
+msgstr ""
+
+#: mailhandler.module:791
+msgid "All text after this string will be discarded. A typical value is <b>\"-- \"</b> that is two dashes followed by a blank in an otherwise empty line. Leave blank to include signature text in nodes."
+msgstr ""
+
+#: mailhandler.module:792
+msgid "Delete messages after they are processed?"
+msgstr ""
+
+#: mailhandler.module:792
+msgid "Uncheck this box to leave read messages in the mailbox.  They will not be processed again unless they become marked as unread."
+msgstr ""
+
+#: mailhandler.module:793
+msgid "Cron processing"
+msgstr ""
+
+#: mailhandler.module:793
+msgid "Select disable to temporarily stop cron processing for this mailbox."
+msgstr ""
+
+#: mailhandler.module:810
+msgid "Accepts submissions via e-mail"
+msgstr ""
+
+#: mailhandler.module:813
+msgid "The mailhandler module allows registered users to create or edit nodes and comments via email. Authentication is usually based on the From: email address. There is also an email filter that can be used to prettify incoming email. Users may post taxonomy terms, teasers, and other node parameters using the Command capability."
+msgstr ""
+
+#: mailhandler.module:816
+msgid "Add a mailbox whose mail you wish to import into Drupal. Can be IMAP, POP3, or local folder."
+msgstr ""
+
+#: mailhandler.module:930
+msgid "This filter will interpret a node as a plain text email. It will attempt to thread conversations in colour, convert entities into HTML, and, depending on the configuration, remove any extra linebreaks."
+msgstr ""
+
+#: mailhandler.module:933
+msgid "This filter will interpret a node as a plain text email."
+msgstr ""
+
+#: mailhandler.module:1003;1015
+msgid "Email filter"
+msgstr ""
+
+#: mailhandler.module:1016
+msgid "Indent quoted blocks"
+msgstr ""
+
+#: mailhandler.module:1016
+msgid "If checked, the email filter will attempt to indent quoted blocks (i.e. lines beginning with \"> ...\")."
+msgstr ""
+
+#: mailhandler.module:1017
+msgid "Convert hyperlinks"
+msgstr ""
+
+#: mailhandler.module:1017
+msgid "If checked, the email filter will attempt to create hyperlinks from their plain text form."
+msgstr ""
+
+#: mailhandler.module:1018
+msgid "Remove line breaks"
+msgstr ""
+
+#: mailhandler.module:1018
+msgid "If checked, the email filter will attempt to remove extra linebreaks."
+msgstr ""
+
+#: mailhandler.module:615
+msgid "administer mailhandler"
+msgstr ""
+
