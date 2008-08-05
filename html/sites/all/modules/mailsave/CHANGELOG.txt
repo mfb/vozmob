@@ -1,0 +1,167 @@
+12 July 2008
+------------
+A little later than planned, but mailhandler went official a while back, so
+mailsave is now ready for an official release. At the moment none of the add
+on modules such as mailsave_to_image are ready, but the main image module is
+only at alpha stage in any case. The clean up filters are still available so
+MMS cleaning is still possible.
+
+First commit still included some debug messages, so re-committed!
+
+05 December 2007
+----------------
+This is the first development commit of mailsave for Drupal 6. Technically
+mailhandler hasn't been officially migrated yet, but using a locally updated
+copy this version of mailsave is working.
+
+Not that related mailsave modules, such as mailsave to image, or mailsave to
+image field, have not yet been updated as these also require related modules
+to be ported to Drupal 6.
+
+28 October 2007
+---------------
+Discovered that constants defined for mime encoding are in fact already defined
+by the IMAP extensions, so no need to create new ones. Mailsave updated to use
+them!
+
+23 October 2007
+---------------
+There are quite a lot of changes in this version of mailsave!
+
+# Optimized for latest mailhandler
+Mailhandler has been updated and now extracts mime parts as part of its
+retrieval process, and it makes these attachments available via the node.
+For users with the latest mailhandler it is therefore not necessary for
+mailsave to do its own extraction, which requires a second call to the mail
+host. This latest version of mailsave will test for the new mailhandler and
+take advantage of it to speed up message processing. Mailhandler later than
+5.1.2 (currently therefore only HEAD) is required.
+
+# Unnamed files handled
+Unknown files found by mailsave are now assigned the name unnamed_attachment
+in order to be consistent with the mailhandler naming convention. At present
+this isn't too critical, but will help if future modules were to test for
+empty filenames for some reason.
+
+# Mailsave to imagefield
+A contributed plug-in that allows mailsave to interact with the CCK imagefield
+module was provided by Moonshine (drupal.org/user/133705) and is included in
+this release.
+
+# Mailsave to image_attach
+A requested plug-in that allows mailsave to use image_attach rather than
+forcing conversion to image nodes is included. This can be helpful if you
+don't want the original node type to be changed. Instead of making image nodes
+out of jpegs a new image node is created and linked to the "parent" node. If
+activating the mailsave to image attach module you will want to make sure
+mailsave to image is disabled! Also, don't forget to assign appropriate user
+permissions (allow images from email to be attached) and enable image attach
+for the appropriate content types.
+
+# Mailsave to audio (beta)
+This module is still in beta, but it seems to mostly work, so it is included
+in this release to see how it gets on. It probably needs some further work
+doing, and I'm not sure how many people will really want to post audio via
+email/MMS!
+
+# Clean up filters
+Some additional clean up filters are added. The filters are still under
+development. It seems that the content of MMS emails might vary depending on
+the sending handset, which was unexpected. If the filter you need isn't in the
+current package you can likely adapt one of the existing filters. If you do
+this please consider contributing the filter back to the community. If you
+aren't sure how to write a filter then you can post an MMS to the test box at
+mailsave@stuartandnicola.com and I'll try to develop one if I get time. Thanks
+to those users who sent messages to help create the initial set of filters.
+
+18 October 2007
+---------------
+A sample MMS from Telia showed messages via this network did not make the file
+name available via parameters/dparameters, so mailsave did not retrieve it.
+Mailsave modified so that it will assign a filename "Unknown" to attachments of
+type other than text that don't return a filename. At the same time a Telia
+MMS filter was written to retrieve and update the filename for this network.
+
+28 May 2007
+-----------
+Cleanup filters re-engineered so that they no longer appear on the module page
+(where the list was getting long!) The filters are now treated as plug-ins and
+are written as .inc files. A new mailsave > settings page has been created
+which allows the user to turn on/off each plug-in. The list is grouped by
+country using ISO country codes - this seems to make most sense since a user
+is likely to be receiving most messages from their own locale, so this groups
+providers nicely in one place.
+
+The option to have other modules implement clean-up via hook_mailsave_clean is
+retained in case, for some reason, someone wanted a plug-in that runs as a
+module in its own right (not sure why that would be, but easy enough to leave
+in!)
+
+15 May 2007
+-----------
+As a result of allowing mailsave to store text attachments some of the filters
+were acquiring additional text files. Affected clean up filters modified so
+that they discard these additional files.
+
+Clean up filters re-named to just mms_xx_yyyyyy where xx is two letter country
+identified and yyyyyy is the network name. Things were getting messy as new
+filters were added! Filters moved to a subdirectory MMS to keep them neat and
+tidy and away from the main module elements.
+
+Sample message received from Meteor (Ireland) - new filter created to handle
+this.
+
+14 May 2007
+-----------
+In developing a clean up filter for O2 realised that mailsave was not
+storing text attachments (it was programmed to ignore type text/plain)
+This is now changed so any attachment that has a filename is added to the
+attachments list, including text types.
+
+23 April 2007
+-------------
+Beta of mailsave version 2.
+Basic modular system is working - now have mailsave.module and
+mailsave_to_image.module interacting via hook_mailsave()
+New modular system written to handle tidying up of MMS messages, via
+hook_mailsave_clean. Use this hook to discard attachments and tidy up
+the body on the basis of the service provider. Only tested via
+Vodafone (UK) at this time (because that is who I use!)
+
+22 April 2007
+-------------
+First prototype that uses hook_mailsave to handle file attachments.
+Mailsave itself will now just save everything it is supplied with.
+A separate module handles the jpeg to image routine, thereby separating
+the mailsave function of obtaining attachments, and the handling of content.
+Internally $node->attachments renamed to $node->mailsave_attachments to ensure
+that attached files are made specific to the mailsave module.
+
+11 April 2007
+-------------
+Oops - when I copied over the upload validation code I forget to replace
+references to form_set_error('upload',...) with watchdog('error',...)
+This is now fixed!
+
+17 March 2007
+-------------
+Upgraded to Drupal 5.x
+No changes to functionality.
+
+
+02 December 2006
+----------------
+Overhauled and updated for Drupal 4.7
+
+Key changes:
+ - Settings replaced with access control
+ - Now uses upload module to handle saving
+ - Uploads now saved in standard drupal files folder
+ - Now stores uploads in temporary folder before attaching
+
+
+22 April 2006
+-------------
+First version for Drupal 4.6
+
+; $Id: CHANGELOG.txt,v 1.12.2.1 2008/07/12 22:11:54 stuartgreenfield Exp $

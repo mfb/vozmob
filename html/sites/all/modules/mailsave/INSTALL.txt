@@ -1,0 +1,23 @@
+mailsave.module installation instructions
+=========================================
+
+1.) Install mailhandler first and check that it is working.
+
+2.) Copy this directory to your modules/ directory.
+
+3.) Enable the mailsave from Administer > Site Building > Modules.
+
+4.) Set the mailsave user permissions as required to allow users to save
+attachments. To save attachments you must enable upload.module and give the
+user upload files permission AND save attachments permission.
+
+5.) Enable additional mailsave extensions as required, for example, mailsave
+to image. Don't forget to also set necessary user permissions to allow users
+to access the features of the additional module and create any required content
+types.
+
+6.) Enable MMS clean-up filters as required to suit your mobile service
+provider if you want to take advantage of MMS to email messaging. Filters are
+found under Administer > Site configuration > Mailsave.
+
+; $Id: INSTALL.txt,v 1.5 2007/10/23 22:04:01 stuartgreenfield Exp $

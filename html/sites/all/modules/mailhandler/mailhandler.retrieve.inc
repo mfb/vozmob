@@ -354,6 +354,7 @@ function mailhandler_authenticate($node, $header, $origbody, $mailbox) {
  * Create the comment.
  */
 function mailhandler_comment_submit($node, $header, $mailbox, $origbody) {
+  global $user;
   if (!$node->subject) $node->subject = $node->title;
   if (!$node->comment) $node->comment = $node->body;
   // We want the comment to have the email time, not the current time
@@ -365,11 +366,9 @@ function mailhandler_comment_submit($node, $header, $mailbox, $origbody) {
   if (!comment_save($edit) && $mailbox['replies']) {
     // $fromaddress really refers to the mail header which is authoritative for authentication
     list($fromaddress, $fromname) = mailhandler_get_fromaddress($header, $mailbox);
-    $error_txt = t("Sorry, your comment experienced an error and was not posted. Possible reasons are\n- you have insufficient permission to post comments\n- The node is no longer open for comments.\n\n");
-    $error = $error_txt. t("\n\nYou sent:\n\nFrom: %f\nSubject: %t\nBody:\n%b", array('%f' => $fromaddress, '%t' => $header->subject, '%b' => $origbody));
-    $sitemail = variable_get('site_mail', ini_get('sendmail_from'));
-    $headers = "From: $sitemail\nReply-to: $sitemail\nX-Mailer: Drupal\nReturn-path: $sitemail\nErrors-to: $sitemail";
-    drupal_mail($fromaddress, t('Email submission to %sn failed - %subj', array('%sn' => variable_get('site_name', 'Drupal'), '%subj' => $header->subject)), $error, $headers);
+    $error_txt = t('Sorry, your comment experienced an error and was not posted. Possible reasons are that you have insufficient permission to post comments or the node is no longer open for comments.');
+    $params = array('body' => $origbody, 'error' => $error_txt, 'errors' => array(), 'from' => $fromaddress, 'header' => $header, 'node' => $node);
+    drupal_mail('mailhandler', 'mailhandler_error_comment', $fromaddress, user_preferred_language($user), $params);
     watchdog('mailhandler', 'Comment submission failure: %subject.', array('%subject' => $edit['subject']), WATCHDOG_ERROR);
   }
 }
@@ -378,18 +377,9 @@ function mailhandler_comment_submit($node, $header, $mailbox, $origbody) {
 /**
  * Create the node.
  */
-  // handle defaults for node creation (e.g. comment | promote | moderate | sticky fields)
-  $node_blog_default = variable_get('node_options_blog', array('status', 'promote'));
-  $node->status = in_array('status', $node_blog_default);
-  $node->promote = in_array('promote', $node_blog_default);
-  $node->moderate = in_array('moderate', $node_blog_default);
-  $node->revision = in_array('revision', $node_blog_default);
-  $node->comment = variable_get('comment_blog', 2);
 function mailhandler_node_submit($node, $header, $mailbox, $origbody) {
-
+  global $user;
   list($fromaddress, $fromname) = mailhandler_get_fromaddress($header, $mailbox);
-
-  //dprint_r($node); //DEBUG
 
   // Drupal 5.x & 6.x don't support multiple validations: each node_validate()
   // call will ADD error messages to previous ones, so if some validation error
@@ -452,21 +442,35 @@ function mailhandler_node_submit($node, $header, $mailbox, $origbody) {
     }
   }
   else {
-    $errortxt = t("Your submission is invalid: \n\n");
-    foreach ($error as $key => $value) {
-      $errortxt .= "$key: $value\n";
-    }
+    $errortxt = t("Your submission is invalid:");
   }
 
   if ($errortxt) {
-    watchdog('mailhandler', "$errortxt", array(), WATCHDOG_WARNING);
+    watchdog('mailhandler', $errortxt, NULL, WATCHDOG_WARNING);
     if ($mailbox['replies']) {
-      $errortxt .= t("\n\nYou sent:\n\nFrom: %f\nSubject: %t\nBody:\n%b", array('%f' => $fromaddress, '%t' => $header->subject, '%b' => $origbody));
-      $sitemail = variable_get('site_mail', ini_get('sendmail_from'));
-      $headers = "From: $sitemail\nReply-to: $sitemail\nX-Mailer: Drupal\nReturn-path: $sitemail\nErrors-to: $sitemail";
-      drupal_mail($fromaddress, t('Email submission to %sn failed - %subj', array('%sn' => variable_get('site_name', 'Drupal'), '%subj' => $node->title)), $errortxt, $headers);
+      $params = array('body' => $origbody, 'error' => $errortxt, 'errors' => $error, 'from' => $fromaddress, 'header' => $header, 'node' => $node);
+      drupal_mail('mailhandler', 'mailhandler_error_node', $fromaddress, user_preferred_language($user), $params);
     }
   }
+}
+
+
+/**
+ * Implementation of hook_mail().
+ */
+function mailhandler_mail($key, &$message, $params) {
+  $variables = array(
+    '!body' => $params['body'],
+    '!from' => $params['from'],
+    '!site_name' => variable_get('site_name', 'Drupal'),
+    '!subject' => $params['header']->subject,
+  );
+  $message['subject'] = t('Email submission to !site_name failed - !subject', $variables);
+  $message['body'][] = strip_tags($params['error']);
+  foreach ($params['errors'] as $key => $value) {
+    $message['body'][] = "$key: $value";
+  }
+  $message['body'][] = t("You sent:\n\nFrom: !from\nSubject: !subject\nBody:\n!body", $variables);
 }
 
 

@@ -1,0 +1,411 @@
+<?php
+// $Id: mailsave.module,v 1.14.2.1 2008/07/12 22:11:54 stuartgreenfield Exp $
+
+/**
+ * This module interacts with mailhandler to save attachments from emails
+ * mailhandler.module is required
+ * upload.module must be enabled to allow attachments to be saved
+ * If image.module is available the first jpeg in a message can optionally cause the node to be created as an image type.
+ * Creation of image nodes and saving of attachments is managed via user access control privileges
+ */
+
+// Some constant definitions to make later code clearer
+// This value is defined to reflect the default filename created by mailhandler
+define('MAILSAVE_UNNAMED_ATTACHMENT', 'unnamed_attachment');
+
+/**
+ * Implementation of hook_help().
+ */
+function mailsave_help($path, $arg) {
+
+  switch ($path) {
+
+    case 'admin/help#mailsave':
+
+      $output .= '<p>' . t('<strong>mailsave</strong> works with <strong>mailhandler</strong> to detach files from incoming emails and attach them to the resulting nodes.') . '</p>';
+      $output .= '<p>' . t('If <strong>upload</strong> is installed you can allow users to submit files by email if they have both <em>save attachments</em> and <em>upload files</em> permissions.') . '</p>';
+      $output .= '<p>' . t('You can enable other modules, such as <strong>mailsave to image</strong>, to extend the functions of mailsave. For example, having messages with jpeg attachments automatically turned in to image nodes.') . '</p>';
+      return $output;
+
+    case 'admin/settings/mailsave':
+      $output .= '<p>' . t('This page shows all the cleanup plug-ins that are available to mailhandler to carry out pre-processing of messages prior to saving them. These plug-ins are generally of most help when receiving messages that are submitted via a mobile phone multimedia messaging service (MMS) gateway.') . '</p>';
+      $output .= '<p>' . t('If additional modules have been installed that also provide clean up functions then these will not appear in this list. These modules must be enabled separately using the site\'s !admin.', array('!admin' => l(t('module adminstration page'), 'admin/build'))) . '</p>';
+      return $output;
+  }
+}
+
+
+/**
+ * Implementation of hook_perm
+ */
+function mailsave_perm() {
+
+  return array(
+    'save attachments',
+    'administer mailsave',
+  );
+
+}
+
+
+/**
+ * Implementation of hook_mailhandler().
+ * Retrieve all attachments from the mail
+ * Then call mailsave handlers to process attachments
+ * Then try to store remaining attachments
+ */
+function mailsave_mailhandler($node, $result, $i, $header, $mailbox) {
+
+  // Initialise attachments array
+  $attachments = array();
+
+  /**
+   * Mailhandler now supplies the attachments - mailsave doesn't need to do this step
+   */
+  $attachments = _mailsave_use_mailhandler_attachments($node);
+
+  // Link attachments to the node under mailsave_attachments
+  $node->mailsave_attachments = $attachments;
+
+  // Get the list of cleanup filters - it is returned grouped by country
+  foreach (_mailsave_build_cleanup_list() as $country => $cleanup) {
+
+    // Retrieve the array of active cleanup filters for this country from the variables table
+    $active_cleanup = variable_get('mailsave_'.$country, array());
+
+    // Go through the array of available clean-up filters for this country
+    foreach ($cleanup as $module => $filter) {
+
+      // See if the filter is active (uses module name as the keys in the array)
+      if ($active_cleanup[$module]) {
+
+        // If active, build the function name and call it
+        $function = $module .'_mailsave_clean';
+        $function($node, $result, $i, $header, $mailbox);
+      }
+    }
+  }
+
+  // Process the node through any other module that implements mailsave_clean
+  foreach (module_list() as $name) {
+    if (module_hook($name, 'mailsave_clean')) {
+      $function = $name .'_mailsave_clean';
+      $function($node, $result, $i, $header, $mailbox);
+    }
+  }
+
+  // See if any other module wants to try and react to the attachments
+  foreach (module_list() as $name) {
+    if (module_hook($name, 'mailsave')) {
+      $function = $name .'_mailsave';
+      if (!($node = $function($node, $result, $i, $header, $mailbox))) {
+        // Exit if a module has handled the submitted data.
+        break;
+      }
+    }
+  }
+
+  // Save remaining attachments that weren't handled elsewhere
+  _mailsave_save_files($node);
+
+  // Return the updated node
+  return $node;
+
+}
+
+
+/**
+ * Attach files to a post
+ * At the moment we go via $node->mailsave_attachments
+ * Maybe a little re-jig needed to give upload the format it wants
+ * Could probably go straight to $node->files at some point?
+ */
+function _mailsave_save_files(&$node) {
+
+  // If $node->mailsave_attachments is empty or upload not installed just return
+  if (!$node->mailsave_attachments || !module_exists('upload')) {
+    return;
+  }
+
+  // If user doesn't have upload permission then don't bother processing
+  if (!(user_access('save attachments') && user_access('upload files'))) {
+    return;
+  }
+
+  // Convert $node->mailsave_attachments to $node->files ready for upload to use
+  foreach ($node->mailsave_attachments as $filekey => $attachment) {
+
+    global $user;
+
+    $limits = _upload_file_limits($user);
+    $validators = array(
+      'file_validate_extensions' => array($limits['extensions']),
+      'file_validate_image_resolution' => array($limits['resolution']),
+      'file_validate_size' => array($limits['file_size'], $limits['user_size']),
+    );
+
+    if ($file = _mailsave_save_file($attachment, $validators)) {
+      // Create the $node->files elements
+      $file->list = variable_get('upload_list_default', 1);
+      $file->description = $file->filename;
+      $node->files[$file->fid] = $file;
+
+      // This is a temporary line to get upload_save to work (see upload.module line 413)
+      // upload_save checks for either the presence of an old_vid, or the session variable, to determine
+      // if a new upload has been supplied and create a new entry in the database
+      $node->old_vid = 1;
+    }
+
+  }
+
+  // Destroy $node->mailsave_attachments now we have created $node->files
+  unset($node->mailsave_attachments);
+
+}
+
+
+/**
+ * mailsave_discard_attachment
+ * This function discards attachments with the specified name.
+ * It is typically used by the mailsave_clean hook to throw away logos or similar
+ * images that are attached by a service provider. As this is likely to be a common
+ * requirement of a clean routine it has been incorporated in to mailsave itself
+ * to avoid developers of future plug ins having to rewrite this over and over.
+ * Function does not return any vale
+ */
+function mailsave_discard_attachment(&$node, $filename) {
+
+    foreach ($node->mailsave_attachments as $key => $attachment) {
+    if ($attachment['filename'] == $filename) {
+      unset($node->mailsave_attachments[$key]);
+    }
+  }
+
+  return;
+}
+
+
+/**
+ * Implementation of hook_menu
+ */
+function mailsave_menu() {
+  $items = array();
+
+  $items['admin/settings/mailsave'] = array(
+    'title' => t('Mailsave'),
+    'description' => t('Choose which e-mail and MMS clean up filters to apply to incoming messages.'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mailsave_admin_settings'),
+    'access' => user_access('administer mailsave'),
+  );
+
+  return $items;
+}
+
+
+/**
+ * Present a form to allow the user to choose which clean up filters should be run
+ *
+ * It is done this way, rather than as discrete modules, to keep the module page short as there could
+ * be many filters available! It is possible to implement cleanup via a regular hook_mailsave_clean too
+ */
+function mailsave_admin_settings() {
+
+  // Initialise an array
+  $form = array();
+
+  // _mailsave_build_cleanup_list returns available filters, grouped by country
+  foreach (_mailsave_build_cleanup_list() as $country => $cleanup) {
+
+    // Reset the options array for this country
+    $options = array();
+
+    // Go through each provider in turn and build the options group
+    foreach ($cleanup as $id => $filter) {
+      $options[$id] = $filter['provider'];
+    }
+
+    // Generate a set of checkboxes for this country
+    $form['mailsave_'. $country] = array(
+      '#type' => 'checkboxes',
+      '#title' => t('Providers - @country', array('@country' => $country)),
+      '#default_value' => variable_get('mailsave_'. $country, array()),
+      '#options' => $options,
+    );
+  }
+
+  // Return the form
+  return system_settings_form($form);
+
+}
+
+
+/**
+ * Return a list of available cleanup filters from the local cleanup directory
+ */
+function _mailsave_build_cleanup_list() {
+
+  // Initialise an array to hold results
+  $cleanup_name = array();
+
+  // Load all modules from the cleanup directory
+  $path = drupal_get_path('module', 'mailsave') .'/cleanup';
+  $files = drupal_system_listing('.inc$', $path, 'name', 0);
+
+  // Process the list of files and include each one
+  foreach ($files as $file) {
+    require_once('./' . $file->filename);
+
+    // Build the function name to retrieve module information
+    $function = $file->name . '_mailsave_clean_info';
+
+    // If the function exists, call it, and get the results
+    if (function_exists($function)) {
+      $result = $function();
+
+      // If results are returned, and they are an array, merge them in to $cleanup_name
+      if (isset($result) && is_array($result)) {
+        $cleanup_name = array_merge($cleanup_name, $result);
+      }
+    }
+  }
+
+  // Group by country by creating a new array to make admin form easier to use
+  $cleanup_country = array();
+
+  // Go through each cleanup filter in turn
+  foreach ($cleanup_name as $name => $filter) {
+
+    // Build new array, using country as the first key
+    $cleanup_country[$filter['country']][$name] = $filter;
+
+  }
+
+  // Return result
+  return $cleanup_country;
+
+}
+
+
+/**
+ * Newer versions of mailhandler extract and decode mime parts
+ * Process the mailhandler attachments and return them in mailsave format
+ * to make them compatible with existing mailsave modules
+ * @TODO - with version six all other modules could be re-written to make this unnecessary
+ */
+function _mailsave_use_mailhandler_attachments($node) {
+
+  // Initialise attachments array
+  $attachments = array();
+
+  // Parse each mime part in turn
+  foreach ($node->mimeparts as $mimepart) {
+
+    // Only return those parts that have a filename, or are non-text
+    // This is try and prevent unnamed text parts getting treated as attachments
+    if ($mimepart->filename != MAILSAVE_UNNAMED_ATTACHMENT || ((strpos($mimepart->filemime, 'TEXT') === FALSE) && (strpos($mimepart->filemime, 'MULTIPART') === FALSE))) {
+
+      // Save the data to temporary file
+      $temp_file = tempnam(file_directory_temp(), 'mail');
+      $filepath = file_save_data($mimepart->data, $temp_file);
+
+      // Add the item to the attachments array
+      $attachments[] = array(
+        'filename' => $mimepart->filename,
+        'filepath' => $filepath,
+        'filemime' => strtolower($mimepart->filemime),
+        'filesize' => strlen($mimepart->data),
+      );
+    }
+  }
+
+  // Return the attachments
+  return $attachments;
+
+}
+
+
+// This started as a copy of file_save_upload
+//function _mailsave_save_file($attachment, $source, $validators = array(), $dest = FALSE, $replace = FILE_EXISTS_RENAME) {
+function _mailsave_save_file($attachment, $validators = array()) {
+
+  global $user;
+
+  // Filenames may be encoded, so decode to ensure they work properly
+  $attachment['filename'] = mb_decode_mimeheader($attachment['filename']);
+
+  // Replaces all characters up through space and all past ~ along with the above reserved characters to sanitise filename
+  // from php.net/manual/en/function.preg-replace.php#80431
+
+  // Define characters that are  illegal on any of the 3 major OS's
+  $reserved = preg_quote('\/:*?"<>|', '/');
+
+  // Perform cleanup
+  $attachment['filename'] = preg_replace("/([\\x00-\\x20\\x7f-\\xff{$reserved}])/e", "_", $attachment['filename']);
+
+  // Add in our check of the the file name length.
+  $validators['file_validate_name_length'] = array();
+
+    // Build the list of non-munged extensions.
+    // @todo: this should not be here. we need to figure out the right place.
+    $extensions = '';
+    foreach ($user->roles as $rid => $name) {
+      $extensions .= ' '. variable_get("upload_extensions_$rid",
+      variable_get('upload_extensions_default', 'jpg jpeg gif png txt html doc xls pdf ppt pps odt ods odp'));
+    }
+
+    // Begin building file object.
+    $file = new stdClass();
+    $file->filename = file_munge_filename(trim(basename($attachment['filename']), '.'), $extensions);
+    $file->filepath = $attachment['filepath'];
+    $file->filemime = $attachment['filemime'];
+
+    // Rename potentially executable files, to help prevent exploits.
+    if (preg_match('/\.(php|pl|py|cgi|asp|js)$/i', $file->filename) && (substr($file->filename, -4) != '.txt')) {
+      $file->filemime = 'text/plain';
+      $file->filepath .= '.txt';
+      $file->filename .= '.txt';
+    }
+
+    // Create temporary name/path for newly uploaded files.
+    //if (!$dest) {
+      $dest = file_destination(file_create_path($file->filename), FILE_EXISTS_RENAME);
+    //}
+    //$file->source = $source;
+    $file->destination = $dest;
+    $file->filesize = $attachment['filesize'];
+
+    // Call the validation functions.
+    $errors = array();
+    foreach ($validators as $function => $args) {
+      array_unshift($args, $file);
+      $errors = array_merge($errors, call_user_func_array($function, $args));
+    }
+
+    // Check for validation errors.
+    if (!empty($errors)) {
+      watchdog('mailhandler', 'The selected file %name could not be uploaded.', array('%name' => $file->filename), WATCHDOG_WARNING);
+      while ($errors) {
+        watchdog('mailhandler', array_shift($errors));
+      }
+      return 0;
+    }
+
+    // Move uploaded files from PHP's tmp_dir to Drupal's temporary directory.
+    // This overcomes open_basedir restrictions for future file operations.
+    $file->filepath = $file->destination;
+    if (!file_move($attachment['filepath'], $file->filepath)) {
+      watchdog('mailhandler', 'Upload error. Could not move file %file to destination %destination.', array('%file' => $file->filename, '%destination' => $file->filepath), WATCHDOG_ERROR);
+      return 0;
+    }
+
+    // If we made it this far it's safe to record this file in the database.
+    $file->uid = $user->uid;
+    $file->status = FILE_STATUS_TEMPORARY;
+    $file->timestamp = time();
+    drupal_write_record('files', $file);
+
+    // Return the results of the save operation
+    return $file;
+
+}
