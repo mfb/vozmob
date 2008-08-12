@@ -1,0 +1,5 @@
+; $Id: sms.info,v 1.3 2008/08/07 18:08:59 diggersf Exp $
+name = "SMS Framework"
+description = "Provides a extensible API that facilitates communication between Drupal and various SMS gateways."
+package = SMS Framework
+core = 6.x

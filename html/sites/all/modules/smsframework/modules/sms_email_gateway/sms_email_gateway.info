@@ -1,0 +1,6 @@
+; $Id: sms_email_gateway.info,v 1.3 2008/08/07 18:08:59 diggersf Exp $
+name = "E-mail Gateway"
+description = "Allows the SMS Framework to use E-mail gateways."
+dependencies[] = sms
+package = SMS Framework
+core = 6.x

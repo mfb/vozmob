@@ -1,0 +1,5 @@
+; $Id: smm_blast.info,v 1.2 2008/07/30 19:42:56 diggersf Exp $
+name = SMS Blast
+description = Allows bulk text messages to be sent to registered users.
+dependencies = sms_user
+package = SMS Framework

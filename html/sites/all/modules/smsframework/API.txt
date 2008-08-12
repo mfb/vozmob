@@ -1,0 +1,67 @@
+$Id: API.txt,v 1.2 2008/08/04 21:24:17 diggersf Exp $
+
+Overview
+========
+The SMS Framework API allows your modules to take advantage of the convenience
+and flexibility of SMS messaging. In most cases your module will fall into one
+of two categories.
+
+* Modules that provide integration between the framework and Drupal. Your
+  module could provide a feature that could integrate nicely with SMS or your
+  module could supplement an existing module with SMS integration.
+
+* Modules that provide intergration between the framework and a third party SMS
+  service.
+
+Different parts of the API are used for each of these applications, so it's
+important to decide which you'll be building using before you begin.
+
+Writing a Gateway Module
+========================
+The first step is to tell the SMS Framework about your gateway module using
+hook_gateway_info(). Your implentation of this hook should return and array of
+properties and callbacks about each gateway. Here is an example:
+
+  function my_gateway_gateway_info() {
+    return array(
+      'my_gateway' => array(
+        'name' => 'My Gateway',
+        'send' => 'my_gateway_send',
+        'receive' => TRUE,
+        'configure form' => 'my_gateway_admin_form',
+        'send form' => 'my_gateway_send_form',
+      ),
+    );
+  }
+    
+* name - Human readable name for the gateway.
+* send - Callback function that the SMS Framework will call to send a message
+* receive (optional) - Set to true if the gateway has support for handling
+  incoming messages
+* configure form (optional) - Form function for gateway configuration options
+* send form (optional) - Form function for adding gateway-specific fields to
+  the sending form
+
+Next you need to write the callback function for sending SMS messages using
+your gateway. Using the example from above, our function would look something
+like this:
+
+function my_gateway_send($number, $message, $options) {
+  // Code for sending message through third party gateway service
+}
+
+The callback function is passed the following parameters:
+$number - The validated destination number.
+$message - The text of the message.
+$options (optional) - An array of dditional properties as defined your gateway
+module's send form.
+
+The actual contents of the function will depend on the gateway service. Refer
+to the gateway's API documentation.
+
+# @todo How to use sms_receive_incoming()
+
+Writing a SMS Enabled Module
+============================
+# @todo How to use sms_send()
+# @todo How to use hook_sms_send()

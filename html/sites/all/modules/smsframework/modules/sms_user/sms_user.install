@@ -1,0 +1,66 @@
+<?php
+// $Id: sms_user.install,v 1.3 2008/08/07 18:08:59 diggersf Exp $
+/**
+ * Implementation of hook_install().
+ */
+function sms_user_install() {
+  drupal_install_schema('sms_user');
+}
+
+/**
+ * Implementation of hook_schema().
+ */
+function sms_user_schema() {
+  $schema['sms_user'] = array(
+    'fields' => array(
+      'uid'       => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE),
+      'delta'     => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE),
+      'number'    => array('type' => 'varchar', 'not null' => TRUE, 'length' => 32),
+      'status'    => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE),
+      'code'      => array('type' => 'varchar', 'not null' => TRUE, 'length' => 16),
+      'gateway'   => array('type' => 'text'),
+    ),
+    'primary key' => array('uid', 'delta'),
+    'unique key'  => array('number'),
+  );
+  
+  return $schema;
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function sms_user_uninstall() {
+  drupal_uninstall_schema('sms_user');
+}
+
+/**
+ * Update: Storing user numbers in separate table
+ */
+function sms_user_update_1() {
+  $ret = array();
+  // Add table
+  $ret[] = update_sql("CREATE TABLE {sms_user} (
+    uid int(10) NOT NULL,
+    delta varchar(32),
+    number varchar(32) NOT NULL,
+    status tinyint(4) NOT NULL,
+    code varchar(4) NOT NULL,
+    gateway longtext,
+    PRIMARY KEY (uid, delta),
+    UNIQUE KEY number (number)
+  ) /*!40100 DEFAULT CHARACTER SET utf8 */ ");
+  
+  $result = db_query("SELECT uid, data FROM {users} WHERE uid <> 0");
+  while ($user = db_fetch_array($result)) {
+    $data = unserialize($user['data']);
+    if ($data['sms_user']) {
+      $sms_data = $data['sms_user'];
+      db_query("INSERT INTO {sms_user} (number, status, code, gateway, uid, delta) VALUES ('%s', %d, '%s', '%s', %d, %d)", array($sms_data['number'], $sms_data['status'], $sms_data['code'], serialize($sms_data['gateway']), $user['uid'], 0));
+      unset($data['sms_user']);
+      $ret[] = update_sql("UPDATE {users} SET data = '". serialize($data) ."' WHERE uid = ". $user['uid']);
+    }
+  }
+  
+  return $ret;
+}

@@ -1,0 +1,91 @@
+<?php
+// $Id: sms_og.module,v 1.2 2008/07/30 19:42:57 diggersf Exp $
+
+/**
+ * Implements hook_menu()
+ */
+function sms_og_menu() {
+  $items[] = array(
+    'path' => 'admin/smsframework/og',
+    'title' => t('Organic Groups'),
+    'description' => t('Setting for SMS Receive with Organic Groups.'),
+    'access' => user_access('administer smsframework'),
+    'callback' => 'drupal_get_form',
+    'callback arguments' => array('sms_og_admin_form'),
+  );
+  return $items;
+}
+
+/**
+ * Menu callback.
+ */
+function sms_og_admin_form() {
+  $types = node_get_types();
+  $group_types = array();
+  foreach($types as $type => $key) {
+   if(variable_get('og_content_type_usage_'. $type,'') == 'group') {
+    $group_types[$type] = $type;
+   }
+  }
+  if(count($group_types) > 1) {
+    $form['sms_og_type'] = array(
+      '#type' => 'select',
+      '#title' => t('Choose the group type'),
+      '#default_value' => variable_get('sms_og_type', ''),
+      '#options' => $group_types,
+    );
+  }
+  else {
+    variable_set('sms_og_type', key($group_types));
+  }
+  if(variable_get('sms_og_type', '') != '') {
+    $form['sms_og_field'] = array(
+      '#type' => 'select',
+      '#title' => t("Choose which %type field should be used for routing", array('%type' => variable_get('sms_og_type', ''))),
+      '#default_value' => variable_get('sms_og_field', ''),
+      '#options' => sms_receive_type_fields(variable_get('sms_og_type', '')),
+    );
+  }
+  if(count($group_types) == 0) {
+    $form['og_no_group'] = array(
+      '#value' => t('Please create a group content type'),
+    );
+  }
+  else {
+    $form['submit'] = array(
+      '#type' => 'submit', 
+      '#value' => t('Submit'),
+    );
+  }
+  return $form;
+}
+
+function sms_og_admin_form_submit($form_id, $form_values) {
+  if ($form_values['sms_og_type']) {
+    variable_set('sms_og_type', $form_values['sms_og_type']);
+  }
+  if ($form_values['sms_og_field']) {
+    variable_set('sms_og_field', $form_values['sms_og_field']);
+  }
+}
+
+/**
+ * Implements hook_sms_receive()
+ */
+function sms_og_sms_receive($node, $message) {
+  //$groups = og_get_subscriptions($node->uid); // Could be a feature, check if user is subscribed
+  $words = explode(' ', $message['text']);
+  foreach($words as $word) {
+    // is it appropriate for '#' to be hardcoded or can other keys be chosen?
+    if(substr($word, 0, 1) == '#') {
+      $tag = rtrim(ltrim($word, '#'), '`~!@#$%^&*()_+-={}|[]\:;"<>?,./');
+      $content_type = variable_get('sms_og_type');
+      $content_field = variable_get('sms_og_field');
+      $result = db_query("SELECT * FROM {content_type_". $content_type ."} WHERE `". $content_field ."_value` = '%s'", $tag); 
+      if ($group = db_fetch_object($result)) {
+        $node->og_groups[$group->nid] = $group->nid;
+      }
+    }
+  }
+  return $node;
+}

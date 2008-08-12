@@ -1,0 +1,7 @@
+; $Id: sms_user.info,v 1.3 2008/08/07 18:08:59 diggersf Exp $
+name = "SMS User"
+description = "Provides integration between the SMS Framework and Drupal users."
+dependencies[] = sms
+dependencies[] = token
+package = SMS Framework
+core = 6.x
