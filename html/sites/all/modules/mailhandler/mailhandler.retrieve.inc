@@ -80,6 +80,7 @@ function mailhandler_get_part($stream, $msg_number, $mime_type, $structure = fal
       }
     }
     if ($structure->type == TYPEMULTIPART) { /* multipart */
+      $prefix = '';
       while (list($index, $sub_structure) = each ($structure->parts)) {
         if ($part_number) {
           $prefix = $part_number .'.';
@@ -127,6 +128,7 @@ function mailhandler_get_parts($stream, $msg_number, $max_depth = 10, $depth = 0
       watchdog('mailhandler', 'Maximum recursion depths met in mailhander_get_structure_part for message number %msg_number.',  array('%msg_number' => $msg_number), WATCHDOG_NOTICE);
       return $parts;
     }
+    $prefix = '';
     foreach($structure->parts as $index => $sub_structure) {
       // If a part number was passed in and we are a multitype message, prefix the
       // the part number for the recursive call to match the imap4 dot seperated part indexing.
@@ -228,19 +230,20 @@ function mailhandler_process_message($header, $body, $mailbox) {
 
   // Initialise a node object
   $node = new stdClass();
+  $node->pass = NULL;
 
   // Initialize parameters
   $sep = $mailbox['sigseparator'];
 
   // Copy any name/value pairs from In-Reply-To or References e-mail headers to $node. Useful for maintaining threading info.
-  if ($header->references) {
+  if (!empty($header->references)) {
     // we want the final element in references header, watching out for white space
     $threading = substr(strrchr($header->references, '<'), 0);
   }
-  else if ($header->in_reply_to) {
+  else if (!empty($header->in_reply_to)) {
     $threading = str_replace(strstr($header->in_reply_to, '>'), '>', $header->in_reply_to); // Some MUAs send more info in that header.
   }
-  if ($threading = rtrim(ltrim($threading, '<'), '>')) { //strip angle brackets
+  if (isset($threading) && $threading = rtrim(ltrim($threading, '<'), '>')) { //strip angle brackets
     if ($threading) $node->threading = $threading;
     parse_str($threading, $tmp);
     if ($tmp['host']) {
@@ -256,6 +259,12 @@ function mailhandler_process_message($header, $body, $mailbox) {
     $body = trim($mailbox['commands']) ."\n". $body;
   }
 
+  // Set a default type if none provided
+  if (!$node->type) $node->type = mailhandler_default_type();
+
+  // Reset $node->taxonomy
+  $node->taxonomy = array();
+
   // Process the commands and the body
   $lines = explode("\n", $body);
   for ($i = 0; $i < count($lines); $i++) {
@@ -263,7 +272,7 @@ function mailhandler_process_message($header, $body, $mailbox) {
     $words = explode(' ', $line);
 
     // Look for a command line. if not present, note which line number is the boundary
-    if (substr($words[0], -1) == ':' && is_null($endcommands)) {
+    if (substr($words[0], -1) == ':' && !isset($endcommands)) {
 
       // Looks like a name: value pair
       $data = explode(': ', $line, 2);
@@ -278,13 +287,35 @@ function mailhandler_process_message($header, $body, $mailbox) {
       // if needed, map term names into IDs. this should move to taxonomy_mailhandler()
       if ($data[0] == 'taxonomy' && !is_numeric($data[1][0])) {
         array_walk($data[1], 'mailhandler_term_map');
+        $node->taxonomy = array_merge($node->taxonomy, $data[1]);
+        unset($data[0]);
+      }
+      else if (substr($data[0], 0, 9) == 'taxonomy[' && substr($data[0], -1, 1) == ']'){
+        // make sure a valid vid is passed in:
+        $vid = substr($data[0], 9, -1);
+        $vocabulary = taxonomy_get_vocabulary($vid);
+        // if the vocabulary is not activated for that node type, unset $data[0], so the command will be ommited from $node
+        // TODO: add an error message
+        if (!in_array($node->type, $vocabulary->nodes)) {
+          unset($data[0]);
+        }
+        else if (!$vocabulary->tags) {
+          array_walk($data[1], 'mailhandler_term_map');
+          $node->taxonomy = array_merge($node->taxonomy, $data[1]);
+          unset($data[0]);
+        }
+        else if ($vocabulary->tags) {
+          // for freetagging vocabularies, we just pass the list of terms
+          $node->taxonomy['tags'][$vid] = implode(',', $data[1]);
+          unset($data[0]); // unset, so it won't be included when populating the node object
+        }
       }
       if (!empty($data[0])) {
         $node->$data[0] = $data[1];
       }
     }
     else {
-      if (is_null($endcommands)) $endcommands = $i;
+      if (!isset($endcommands)) $endcommands = $i;
     }
 
     // Stop when we encounter the sig. we'll discard all remaining text.
@@ -299,10 +330,8 @@ function mailhandler_process_message($header, $body, $mailbox) {
   // flatten and assign the body to node object. note that filter() is called within node_save() [tested with blog post]
   $node->body = implode("\n", $tmp);
 
-  if (!$node->teaser) $node->teaser = node_teaser($node->body);
+  if (empty($node->teaser)) $node->teaser = node_teaser($node->body);
 
-  // Set a default type if none provided
-  if (!$node->type) $node->type = mailhandler_default_type();
   // decode encoded subject line
   $subjectarr = imap_mime_header_decode($header->subject);
   for ($i = 0; $i < count($subjectarr); $i++) {
@@ -366,8 +395,8 @@ function mailhandler_comment_submit($node, $header, $mailbox, $origbody) {
   if (!comment_save($edit) && $mailbox['replies']) {
     // $fromaddress really refers to the mail header which is authoritative for authentication
     list($fromaddress, $fromname) = mailhandler_get_fromaddress($header, $mailbox);
-    $error_txt = t('Sorry, your comment experienced an error and was not posted. Possible reasons are that you have insufficient permission to post comments or the node is no longer open for comments.');
-    $params = array('body' => $origbody, 'error' => $error_txt, 'errors' => array(), 'from' => $fromaddress, 'header' => $header, 'node' => $node);
+    $error_text = t('Sorry, your comment experienced an error and was not posted. Possible reasons are that you have insufficient permission to post comments or the node is no longer open for comments.');
+    $params = array('body' => $origbody, 'error_messages' => array(), 'error_text' => $error_text, 'from' => $fromaddress, 'header' => $header, 'node' => $node);
     drupal_mail('mailhandler', 'mailhandler_error_comment', $fromaddress, user_preferred_language($user), $params);
     watchdog('mailhandler', 'Comment submission failure: %subject.', array('%subject' => $edit['subject']), WATCHDOG_ERROR);
   }
@@ -392,11 +421,10 @@ function mailhandler_node_submit($node, $header, $mailbox, $origbody) {
   if (!isset($_SESSION['messages'])) {
     $_SESSION['messages'] = array();
   }
-  $saved_errors = is_array($_SESSION['messages']['error']) ? $_SESSION['messages']['error'] : array();
+  $saved_errors = isset($_SESSION['messages']['error']) ? $_SESSION['messages']['error'] : array();
   $_SESSION['messages']['error'] = array();
   node_validate($node);
-  $error = form_get_errors();
-  $error = array();
+  $error_messages = array();
   if (count($_SESSION['messages']['error'])) {
     $allerrors = form_get_errors();
     foreach ($_SESSION['messages']['error'] as $message) {
@@ -407,7 +435,7 @@ function mailhandler_node_submit($node, $header, $mailbox, $origbody) {
       } else {
         // This is a validation error, i take the last field with it (previous fields
         // should be about previous validations)
-        $error[$keys[count($keys) - 1]] = $message;
+        $error_messages[$keys[count($keys) - 1]] = $message;
       }
     }
   }
@@ -418,37 +446,39 @@ function mailhandler_node_submit($node, $header, $mailbox, $origbody) {
     unset($_SESSION['messages']['error']);
   } 
    
-  if (!$error) {
+  if (!$error_messages) {
     // Prepare the node for save and allow modules make changes
     $node = node_submit($node);
     // Save the node
-    if ($node->nid) {
+    if (!empty($node->nid)) {
       if (node_access('update', $node)) {
         node_save($node);
-        watchdog('mailhandler', "Updated '%t' by %f", array('%t' => $node->title, '%f' => $fromaddress), WATCHDOG_INFO);
+        watchdog('mailhandler', 'Updated %title by %from.', array('%title' => $node->title, '%from' => $fromaddress));
       }
       else {
-        $errortxt = t("The e-mail address '%f' may not update %t items.", array('%f' => $fromaddress, '%t' => $node->type));
+        $error_text = t('The e-mail address !from may not update !type items.', array('!from' => $fromaddress, '!type' => $node->type));
+        watchdog('mailhandler', 'Node submission failure: %from may not update %type items.', array('%from' => $fromaddress, '%type' => $node->type), WATCHDOG_WARNING);
       }
     }
     else {
       if (node_access('create', $node)) {
         node_save($node);
-        watchdog('mailhandler', "Added '%t' by %f", array('%t' => $node->title, '%f' => $fromaddress), WATCHDOG_INFO);
+        watchdog('mailhandler', 'Added %title by %from.', array('%title' => $node->title, '%from' => $fromaddress));
       }
       else {
-        $errortxt = t("The e-mail address '%f' may not create %t items.", array('%f' => $fromaddress, '%t' => $node->type));
+        $error_text = t('The e-mail address !from may not create !type items.', array('!from' => $fromaddress, '!type' => $node->type));
+        watchdog('mailhandler', 'Node submission failure: %from may not create %type items.', array('%from' => $fromaddress, '%type' => $node->type), WATCHDOG_WARNING);
       }
     }
   }
   else {
-    $errortxt = t("Your submission is invalid:");
+    $error_text = t('Your submission is invalid:');
+    watchdog('mailhandler', 'Node submission failure: validation error.', array(), WATCHDOG_WARNING);
   }
 
-  if ($errortxt) {
-    watchdog('mailhandler', $errortxt, NULL, WATCHDOG_WARNING);
+  if (isset($error_text)) {
     if ($mailbox['replies']) {
-      $params = array('body' => $origbody, 'error' => $errortxt, 'errors' => $error, 'from' => $fromaddress, 'header' => $header, 'node' => $node);
+      $params = array('body' => $origbody, 'error_messages' => $error_messages, 'error_text' => $error_text, 'from' => $fromaddress, 'header' => $header, 'node' => $node);
       drupal_mail('mailhandler', 'mailhandler_error_node', $fromaddress, user_preferred_language($user), $params);
     }
   }
@@ -464,11 +494,12 @@ function mailhandler_mail($key, &$message, $params) {
     '!from' => $params['from'],
     '!site_name' => variable_get('site_name', 'Drupal'),
     '!subject' => $params['header']->subject,
+    '!type' => $params['node']->type,
   );
   $message['subject'] = t('Email submission to !site_name failed - !subject', $variables);
-  $message['body'][] = strip_tags($params['error']);
-  foreach ($params['errors'] as $key => $value) {
-    $message['body'][] = "$key: $value";
+  $message['body'][] = $params['error_text'];
+  foreach ($params['error_messages'] as $key => $error) {
+    $message['body'][$key] = decode_entities(strip_tags($error));
   }
   $message['body'][] = t("You sent:\n\nFrom: !from\nSubject: !subject\nBody:\n!body", $variables);
 }
@@ -583,6 +614,10 @@ function mailhandler_retrieve_message($mailbox, $i, &$context) {
   if ($result) {
 
       $header = imap_header($result, $i);
+      // Initialize the subject in case it's missing.
+      if (!isset($header->subject)) {
+        $header->subject = '';
+      }
 
       $mime = explode(',', $mailbox['mime']);
 

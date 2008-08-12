@@ -22,13 +22,13 @@ function mailsave_help($path, $arg) {
 
     case 'admin/help#mailsave':
 
-      $output .= '<p>' . t('<strong>mailsave</strong> works with <strong>mailhandler</strong> to detach files from incoming emails and attach them to the resulting nodes.') . '</p>';
+      $output = '<p>' . t('<strong>mailsave</strong> works with <strong>mailhandler</strong> to detach files from incoming emails and attach them to the resulting nodes.') . '</p>';
       $output .= '<p>' . t('If <strong>upload</strong> is installed you can allow users to submit files by email if they have both <em>save attachments</em> and <em>upload files</em> permissions.') . '</p>';
       $output .= '<p>' . t('You can enable other modules, such as <strong>mailsave to image</strong>, to extend the functions of mailsave. For example, having messages with jpeg attachments automatically turned in to image nodes.') . '</p>';
       return $output;
 
     case 'admin/settings/mailsave':
-      $output .= '<p>' . t('This page shows all the cleanup plug-ins that are available to mailhandler to carry out pre-processing of messages prior to saving them. These plug-ins are generally of most help when receiving messages that are submitted via a mobile phone multimedia messaging service (MMS) gateway.') . '</p>';
+      $output = '<p>' . t('This page shows all the cleanup plug-ins that are available to mailhandler to carry out pre-processing of messages prior to saving them. These plug-ins are generally of most help when receiving messages that are submitted via a mobile phone multimedia messaging service (MMS) gateway.') . '</p>';
       $output .= '<p>' . t('If additional modules have been installed that also provide clean up functions then these will not appear in this list. These modules must be enabled separately using the site\'s !admin.', array('!admin' => l(t('module adminstration page'), 'admin/build'))) . '</p>';
       return $output;
   }
@@ -192,11 +192,11 @@ function mailsave_menu() {
   $items = array();
 
   $items['admin/settings/mailsave'] = array(
-    'title' => t('Mailsave'),
-    'description' => t('Choose which e-mail and MMS clean up filters to apply to incoming messages.'),
+    'title' => 'Mailsave',
+    'description' => 'Choose which e-mail and MMS clean up filters to apply to incoming messages.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mailsave_admin_settings'),
-    'access' => user_access('administer mailsave'),
+    'access arguments' => array('administer mailsave'),
   );
 
   return $items;

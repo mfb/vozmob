@@ -1,5 +1,5 @@
 <?php
-// $Id: mailhandler.module,v 1.96.2.1 2008/05/15 10:43:55 weitzman Exp $
+// $Id: mailhandler.module,v 1.96.2.2 2008/08/09 11:54:43 weitzman Exp $
 
 
 /**
@@ -106,6 +106,21 @@ function mailhandler_help($path = 'admin/help#mailhandler', $arg) {
   $output = '';
   $link->add = l(t('Add mailbox'), 'admin/content/mailhandler/add');
 
+  // Gather examples of useful commands, and build a definition list with them:
+  $commands[] = array('command' => 'taxonomy: [term1, term2]',
+                      'description' => t('Use this to add the terms <em>term1</em> and <em>term2</em> to the node.<br />
+                      Both of the terms should already exist. In case they do not exist already, they will be quietly ommitted'));
+  $commands[] = array('command' => 'taxonomy[v]: [term1, term2]',
+                      'description' => t('Similar to the above: adds the terms <em>term1</em> and <em>term2</em> to the node, but uses the vocabulary with the vocabulary id <em>v</em>. For example <em>taxonomy[3]</em> will chose only terms from the vocabulary which id is 3.<br />
+                      In case some of the terms do not exist already, the behavior will depend on whether the vocabulary is a free tagging vocabulary or not. If it is a free tagging vocabulary, the term will be added, otherwise, it will be quietly ommitted'));
+
+  $commands_list = '<dl>';
+  foreach ($commands as $command) {
+    $commands_list .= '<dt>'. $command['command'] .'</dt>';
+    $commands_list .= '<dl>'. $command['description'] .'</dl>';
+  }
+  $commands_list .= '</dl>';
+
   switch ($path) {
     case 'admin/help#mailhandler':
       $output = '<p>'. t('The mailhandler module allows registered users to create or edit nodes and comments via e-mail. Users may post taxonomy terms, teasers, and other post attributes using the mail commands capability.  This module is useful because e-mail is the preferred method of communication by community members.') .'</p>';
@@ -126,6 +141,8 @@ function mailhandler_help($path = 'admin/help#mailhandler', $arg) {
      '@admin-mailhandler' => url('admin/content/mailhandler'),
      '@admin-mailhandler-settings' => url('admin/settings/mailhandler'),
    ));
+      $output .= '<h3 id="commands">'. t('Useful Commands') .'</h3>';
+      $output .= $commands_list;
       $output .= '<p>'. t('For more information please read the configuration and customization handbook <a href="%mailhandler">Mailhandler page</a>.', array('%mailhandler' => 'http://www.drupal.org/handbook/modules/mailhandler/')) .'</p>';
       return $output;
     case 'admin/content/mailhandler':
