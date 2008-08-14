@@ -32,7 +32,7 @@ function sms_email_gateway_send_form($destination = NULL, $required = TRUE) {
     '#multiple' => FALSE,
     '#description' => t('Select your wireless carrier.'),
     '#options' => $options,
-    '#default_value' => $destination->carrier,
+    '#default_value' => isset($destination->carrier) ? $destination->carrier : NULL,
     '#required' => $required,
   );
   

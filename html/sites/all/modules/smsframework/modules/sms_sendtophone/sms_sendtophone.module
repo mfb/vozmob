@@ -100,7 +100,7 @@ function sms_sendtophone_page($type, $reference) {
     $form = drupal_render($register);
   }
 
-  if ($_GET['thickbox']) {
+  if (isset($_GET['thickbox'])) {
     print $form;
     exit;
   }
@@ -421,7 +421,7 @@ function sms_sendtophone_node_form($form_state, $nid) {
       '#attributes' => array('disabled' => 'true'),
     );
   global $user;
-  $destination->number = $user->sms_user['0']['number'];
+  $destination->number = isset($user->sms_user) ? $user->sms_user['0']['number'] : NULL;
   return sms_send_form($form, $destination);
   }
 }
@@ -446,7 +446,7 @@ function sms_sendtophone_link($type, $node = NULL, $teaser = FALSE) {
 }
 
 function sms_sendtophone_form_alter(&$form, $form_state, $form_id) {
-  if($form_id == sms_sendtophone_inline_form || $form_id == sms_sendtophone_node_form || $form_id == sms_sendtophone_cck_form) {
+  if($form_id == 'sms_sendtophone_inline_form' || $form_id == 'sms_sendtophone_node_form' || $form_id == 'sms_sendtophone_cck_form') {
     if(!user_access('send to any number')) {
       // Makes number field plain text
       $form['sms']['number']['#type'] = 'item';

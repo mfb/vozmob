@@ -74,7 +74,7 @@ function sms_admin_default_form() {
     $active = ($identifier == variable_get('sms_default_gateway', 0));
     $options[$identifier] = '';
     $form[$gateway['name']]['id'] = array('#value' => $identifier);
-    if (is_array($gateway['options'])) {
+    if (isset($gateway['options'])) {
       $form[$gateway['name']]['configure'] = array('#value' => l(t('configure'), 'admin/smsframework/gateways/'. $identifier));
     }
     else {
@@ -183,7 +183,7 @@ function _gateways_build() {
   
   $gateway_array = module_invoke_all('gateway_info');
   foreach ($gateway_array as $identifier => $info) {
-    if (is_array($info['options'])) {
+    if (isset($info['options'])) {
       foreach ($info['options'] as $key => $option) {
         $info['configuration'][$key] = variable_get($key, '');
       }
@@ -275,7 +275,7 @@ function sms_send_form($form = NULL, $destination = NULL, $required = TRUE) {
     '#maxlength' => 255,
     '#required' => $required,
     '#weight' => -5,
-    '#default_value' => $destination->number,
+    '#default_value' => isset($destination->number) ? $destination->number : '',
   );
 
   if ($gateway['send_form'] && function_exists($gateway['send_form'])) {

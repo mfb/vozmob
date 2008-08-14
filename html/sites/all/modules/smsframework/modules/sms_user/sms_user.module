@@ -67,7 +67,7 @@ function sms_user_sms_send(&$number, &$message, &$options, &$gateway) {
   if (variable_get('sms_user_sleep', 1) && $uid = sms_user_get_uid($number)) {
     $account = user_load(array('uid' => $uid, 'status' => 1));
     
-    if ($account->sms_user['sleep_enabled'] && _sms_user_sleep_active($account)) {
+    if (!empty($account->sms_user['sleep_enabled']) && _sms_user_sleep_active($account)) {
       unset($gateway['send']);
       watchdog('sms', t('Message was not sent to @user due to sleep settings.', array('@user' => $account->name)));
     }
@@ -90,27 +90,26 @@ function _sms_user_sleep_active($account) {
  */ 
 function sms_user_settings($register = FALSE) {
   $account = user_load(array('uid' => arg(1)));
-  $edit = $_POST['op'] ? $_POST : (array)$account;
-  switch ($account->sms_user[0]['status']) {
+  switch (isset($account->sms_user) ? $account->sms_user[0]['status'] : 0) {
     case 0:
-      $output = drupal_get_form('sms_user_settings_add_form', $account, $edit);
+      $output = drupal_get_form('sms_user_settings_add_form', $account);
       break;
     case 1:
-      $output = drupal_get_form('sms_user_settings_confirm_form', $account, $edit);
+      $output = drupal_get_form('sms_user_settings_confirm_form', $account);
       break;
     case 2:
-      $output = drupal_get_form('sms_user_settings_reset_form', $account, $edit);
+      $output = drupal_get_form('sms_user_settings_reset_form', $account);
       break;
   }
   
   if (variable_get('sms_user_sleep', 1)) {
-    $output .= drupal_get_form('sms_user_settings_sleep_form', $account, $edit);
+    $output .= drupal_get_form('sms_user_settings_sleep_form', $account);
   }
   
   return $output;
 }
 
-function sms_user_settings_add_form(&$form_state, $account, $edit) {
+function sms_user_settings_add_form(&$form_state, $account) {
   $form = sms_send_form();
   $form['submit'] = array(
     '#type' => 'submit', 
@@ -152,7 +151,7 @@ function sms_user_settings_add_form_submit($form, &$form_state, $account = NULL)
   sms_send($form_state['values']['number'], _sms_user_confirm_message($code), $form_state['values']['gateway']);
 }
 
-function sms_user_settings_confirm_form(&$form_state, $account, $edit) {
+function sms_user_settings_confirm_form(&$form_state, $account) {
   $form['number'] = array(
     '#type' => 'item',
     '#title' => t('Number'),
@@ -201,7 +200,7 @@ function sms_user_settings_confirm_form_submit($form, &$form_state) {
   }
 }
 
-function sms_user_settings_reset_form(&$form_state, $account, $edit) {
+function sms_user_settings_reset_form(&$form_state, $account) {
   $form['sms_user']['number'] = array(
     '#type' => 'item',
     '#title' => t('Your number'),
@@ -223,7 +222,7 @@ function sms_user_settings_reset_form_submit($form, &$form_state) {
   drupal_set_message(t('Your mobile information has been removed'), 'status');
 }
 
-function sms_user_settings_sleep_form(&$form_state, $account, $edit) {
+function sms_user_settings_sleep_form(&$form_state, $account) {
   $form['sleep'] = array(
     '#type' => 'fieldset',
     '#title' => t('Sleep Time'),
@@ -234,7 +233,7 @@ function sms_user_settings_sleep_form(&$form_state, $account, $edit) {
     '#type' => 'checkbox',
     '#title' => t('Disable messages between these hours'),
     '#description' => t('If enabled, you will not receive messages between the specified hours.'),
-    '#default_value' => $account->sms_user['sleep_enabled'],
+    '#default_value' => isset($account->sms_user['sleep_enabled']) ? $account->sms_user['sleep_enabled'] : NULL,
   );
   
   // Determine whether to use the 24-hour or 12-hour clock based on site settings
@@ -255,14 +254,14 @@ function sms_user_settings_sleep_form(&$form_state, $account, $edit) {
     '#type' => 'select',
     '#multiple' => FALSE,
     '#options' => $options,
-    '#default_value' => $account->sms_user['sleep_start_time'],
+    '#default_value' => isset($account->sms_user['sleep_start_time']) ? $account->sms_user['sleep_start_time'] : NULL,
   );
   
   $form['sleep']['sleep_end_time'] = array(
     '#type' => 'select',
     '#multiple' => FALSE,
     '#options' => $options,
-    '#default_value' => $account->sms_user['sleep_end_time'],
+    '#default_value' => isset($account->sms_user['sleep_end_time']) ? $account->sms_user['sleep_end_time'] : NULL,
   );
   
   $form['sleep']['save'] = array(
@@ -346,8 +345,8 @@ function sms_user_save(&$edit, &$account, $category) {
   if (($category == 'mobile' || $category == 'account') && $edit['sms_user']) {
     foreach ($edit['sms_user'] as $delta => $number) {
       if (is_numeric($delta)) {
-        $db_values = array($number['number'], $number['status'], $number['code'], serialize($number['gateway']));
-        if ($account->sms_user[$delta]) {
+        $db_values = array($number['number'], $number['status'], isset($number['code']) ? $number['code'] : NULL, serialize($number['gateway']));
+        if (isset($account->sms_user[$delta])) {
           db_query("UPDATE {sms_user} SET number = '%s', status = %d, code = '%s', gateway = '%s'
             WHERE uid = %d AND delta = %d", array_merge($db_values, array($account->uid, $delta)));
         }
