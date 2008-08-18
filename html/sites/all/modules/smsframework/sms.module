@@ -1,10 +1,35 @@
 <?php
-// $Id: sms.module,v 1.7 2008/08/07 18:08:59 diggersf Exp $
+// $Id: sms.module,v 1.11 2008/08/18 13:27:08 diggersf Exp $
 
 /**
  * @file
- * SMS API that acts as an interface between Drupal and various gateway engines.
+ * The core of the SMS Framework. Provides gateway managment and API for
+ * sending and receiving SMS messages.
  */
+
+/**
+ * Returns the current default gateway.
+ */
+function sms_default_gateway() {
+  return sms_gateways('gateway', variable_get('sms_default_gateway', 'log'));
+}
+
+/**
+ * Implementation of hook_gateway_info().
+ */
+function sms_gateway_info() {
+  return array(
+    'log' => array(
+      'name' => t('Log only'),
+      'send' => 'sms_send_log',
+    ),
+  );
+}
+
+function sms_send_log($number, $message, $options) {
+  watchdog('sms', 'SMS message sent to %number with the text: @message', array('%number' => $number, '@message' => $message), WATCHDOG_INFO);
+  return array('status' => TRUE);
+}
 
 /**
  * Implementation of hook_menu().
@@ -14,7 +39,7 @@ function sms_menu() {
 
   $items['admin/smsframework'] = array(
     'title' => 'SMS Framework',
-    'description' => t('Control how your site uses SMS.'),
+    'description' => 'Control how your site uses SMS.',
     'position' => 'right',
     'page callback' => 'system_admin_menu_block_page',
     'access arguments' => array('administer smsframework'),
@@ -24,9 +49,9 @@ function sms_menu() {
 
   $items['admin/smsframework/gateways'] = array(
     'title' => 'Gateway configuration',
-    'description' => t('Configure gateways and chose the default gateway.'),
+    'description' => 'Configure gateways and chose the default gateway.',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('sms_admin_default_form', null),
+    'page arguments' => array('sms_admin_default_form', NULL),
     'access arguments' => array('administer smsframework'),
   );
 
@@ -71,17 +96,17 @@ function sms_admin_default_form() {
   $gateways = sms_gateways();
   
   foreach ($gateways as $identifier => $gateway) {
-    $active = ($identifier == variable_get('sms_default_gateway', 0));
+    $active = ($identifier == variable_get('sms_default_gateway', 'log'));
     $options[$identifier] = '';
     $form[$gateway['name']]['id'] = array('#value' => $identifier);
-    if (isset($gateway['options'])) {
+    if (function_exists($gateway['configure form'])) {
       $form[$gateway['name']]['configure'] = array('#value' => l(t('configure'), 'admin/smsframework/gateways/'. $identifier));
     }
     else {
       $form[$gateway['name']]['configure'] = array('#value' => t('No configuration options'));
     }
   }
-  $form['default'] = array('#type' => 'radios', '#options' => $options, '#default_value' => variable_get('sms_default_gateway', 0));
+  $form['default'] = array('#type' => 'radios', '#options' => $options, '#default_value' => variable_get('sms_default_gateway', 'log'));
   
   $form['submit'] = array(
     '#type' => 'submit', 
@@ -112,39 +137,50 @@ function theme_sms_admin_default_form($form) {
     }
   }
   $header = array(t('Default'), t('Name'), array('data' => t('Operations'), 'colspan' => 1));
-  $output = '<h3>Default gateway</h3>';
   $output .= theme('table', $header, $rows);
   $output .= drupal_render($form);
 
   return $output;
 }
 
-function sms_admin_gateway_form($form_state, $gateway_id) {
+function sms_admin_gateway_form(&$form_state, $gateway_id) {
   $gateway = sms_gateways('gateway', $gateway_id);
-  if (!is_array($gateway)) {
-    drupal_not_found();
+  if ($gateway && function_exists($gateway['configure form'])) {
+    drupal_set_title(t('@gateway configuration', array('@gateway' => $gateway['name'])));
+    $form = $gateway['configure form']($gateway['configuration']);
+
+    $form['submit'] = array(
+      '#type' => 'submit', 
+      '#value' => t('Save'),
+    );
+    $form['gateway'] = array('#type' => 'value', '#value' => $gateway);
+
+    return $form;
   }
-  $form = $gateway['options'];
-  $form['submit'] = array(
-    '#type' => 'submit', 
-    '#value' => t('Save'),
-  );
-  $form['#validate'] = array('sms_admin_gateway_form_validate', $gateway['validate']);
-  $form['gateway'] = array('#type' => 'value', '#value' => $gateway);
-  $form['gateway_id'] = array('#type' => 'value', '#value' => $gateway_id);
-    
-  return $form;    
+  drupal_not_found();
+  exit();
+}
+
+/**
+ * Validation for gateway configuration. If the gateway defines a validation
+ * function it uses that.
+ */
+function sms_admin_gateway_form_validate($form, &$form_state) {
+  // Pass validation to gateway
+  $function = $form_state['values']['gateway']['configure form'] .'_validate';
+  if (function_exists($function)) {
+    $function($form, &$form_state);
+  }
 }
 
 function sms_admin_gateway_form_submit($form, &$form_state) {
   $gateway = $form_state['values']['gateway'];
-  if (is_array($gateway['options'])) {
-    foreach ($gateway['options'] as $key => $option) {
-      variable_set($key, $form_state['values'][$key]);
-    }
-  }
+  
+  // Remove uneccesary values
+  unset($form_state['values']['op'], $form_state['values']['submit'], $form_state['values']['gateway'], $form_state['values']['form_token'], $form_state['values']['form_id']);
+  variable_set('sms_'. $gateway['identifier'] .'_settings', $form_state['values']);
   drupal_set_message(t('The gateway settings have been saved.'));
-  return 'admin/smsframework/gateways';
+  $form_state['redirect'] = 'admin/smsframework/gateways';
 }
 
 /**
@@ -169,7 +205,9 @@ function sms_gateways($op = 'gateways', $gateway = NULL) {
     case 'gateways':
       return $_gateways;
     case 'gateway':
-      return $_gateways[$gateway];
+      $return = $_gateways[$gateway];
+      $return['identifier'] = $gateway;
+      return $return;
     case 'names':
       return $_names;
     case 'name':
@@ -183,11 +221,7 @@ function _gateways_build() {
   
   $gateway_array = module_invoke_all('gateway_info');
   foreach ($gateway_array as $identifier => $info) {
-    if (isset($info['options'])) {
-      foreach ($info['options'] as $key => $option) {
-        $info['configuration'][$key] = variable_get($key, '');
-      }
-    }
+    $info['configuration'] = variable_get('sms_'. $identifier .'_settings', '');
     $_gateways[$identifier] = $info;
     $_names[$identifier] = $info['name'];
   }
@@ -210,7 +244,7 @@ function _gateways_build() {
  *   An array of dditional properties as defined by gateway modules.
  */
 function sms_send($number, $message, $options = array()) {
-  $gateway = sms_gateways('gateway', variable_get('sms_default_gateway', 0));
+  $gateway = sms_default_gateway();
   
   foreach (module_implements('sms_send') as $module) {
     $function = $module .'_sms_send';
@@ -218,19 +252,32 @@ function sms_send($number, $message, $options = array()) {
   }
 
   if (function_exists($gateway['send'])) {
-    $gateway['send']($number, $message, $options);
+    $response = $gateway['send']($number, $message, $options);
   }
+  
+  return sms_handle_result($response, $number, $message);
 }
 
-function sms_log_message($number, $message, $gateway) {
-  $mid = db_next_id('{sms_messages}');
-  if (db_query('INSERT INTO {sms_messages} (mid, sent, status, destination, message, gateway) VALUES(%d, %d, %d, "%s", "%s", "%s")', $mid, time(), 0, $number, $message, $gateway['identifier'])) {
-    return $mid;
+function sms_handle_result($result, $number, $message) {
+  if ($result['status']) {
+    return TRUE;
+  }
+  else {
+    $error_message = 'Sending SMS to %number failed.';
+    $variables['%number'] = $number;
+    if ($result['message']) {
+      $error_message .= ' The gateway said '. $result['message'];
+      if (!empty($result['variables'])) {
+        $variables = array_merge($variables, $result['variables']);
+      }
+    }
+    watchdog('sms', $error_message, $variables, WATCHDOG_ERROR);
+    return FALSE;
   }
 }
 
 function sms_number_format($number) {
-  $gateway = sms_gateways('gateway', variable_get('sms_default_gateway', 0));
+  $gateway = sms_default_gateway();
   
   if ($gateway['number_formatter'] && function_exists($gateway['number_formatter'])) {
     return $gateway['number_formatter']($number_formatter);
@@ -260,57 +307,44 @@ function sms_formatter($number, $format = 1) {
 }
 
 /**
- * Generates a SMS sending form and adds gateway defined elements
+ * Generates a SMS sending form and adds gateway defined elements. The form
+ * array that is returned can be merged with an existing form using
+ * array_merge().
  * 
- * TODO
- * - If the user is logged in, look for a number stored
- * - Show a 'remeber this info' field and store as a cookie depending on admin settings
+ * @param $required
+ *   Specify if the user is required to provide information for the fields.
+ * 
+ * @return $form
  */
-function sms_send_form($form = NULL, $destination = NULL, $required = TRUE) {
-  $gateway = sms_gateways('gateway', variable_get('sms_default_gateway', 0));
-  $sms_form['number'] = array(
+function sms_send_form($required = FALSE) {
+  $gateway = sms_default_gateway();
+  $form['number'] = array(
     '#type' => 'textfield',
     '#title' => t('Phone number'),
     '#size' => 40,
     '#maxlength' => 255,
     '#required' => $required,
-    '#weight' => -5,
-    '#default_value' => isset($destination->number) ? $destination->number : '',
   );
 
-  if ($gateway['send_form'] && function_exists($gateway['send_form'])) {
-    $sms_form['gateway']['#tree'] = TRUE;
-    $sms_form['gateway']['#weight'] = -5;
-    $sms_form['gateway'] += $gateway['send_form']($destination, $required);
+  // Add gateway defined fields
+  if (function_exists($gateway['send form'])) {
+    $form['gateway']['#tree'] = TRUE;
+    $form['gateway'] = array_merge($gateway['send form']($required), $form['gateway']);
   }
-  
-  if (is_array($form)) {
-    $form['sms'] = $sms_form;
-    $form['#submit'][] = 'sms_send_form_submit';
-    $form['#validate'][] = 'sms_send_form_validate';
-    $form['submit'] = array(
-      '#type' => 'submit',
-      '#value' => t('Send'),
-      '#weight' => 20,
-    );
-    
-    return $form;
-  }
-  
-  return $sms_form;
-}
 
-/**
- * Performs a simple send on submit. 
- * 
- */
-function sms_send_form_submit($form, &$form_state) {
-  $form_state['values']['number'] = sms_formatter($form_state['values']['number']);
-  sms_send($form_state['values']['number'], $form_state['values']['message'], $form_state['values']['gateway']);
+  return $form;
 }
 
 function sms_send_form_validate($form, &$form_state) {
   if (!sms_formatter($form_state['values']['number'])) {
-    form_set_error('number', t('You must enter a valid ten digit phone number.'));
+    form_set_error('number', t('You must enter a valid phone number.'));
   }
+}
+
+/**
+ * Performs a simple send on submit. 
+ */
+function sms_send_form_submit($form, &$form_state) {
+  $form_state['values']['number'] = sms_formatter($form_state['values']['number']);
+  sms_send($form_state['values']['number'], $form_state['values']['message'], $form_state['values']['gateway']);
 }

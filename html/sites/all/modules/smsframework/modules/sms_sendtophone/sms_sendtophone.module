@@ -1,5 +1,5 @@
 <?php
-// $Id: sms_sendtophone.module,v 1.3 2008/08/07 18:08:59 diggersf Exp $
+// $Id: sms_sendtophone.module,v 1.4 2008/08/16 18:20:27 diggersf Exp $
 
 /**
  * Implementation of hook_menu().
@@ -67,24 +67,11 @@ function sms_sendtophone_admin_overview() {
 /**
  * Menu callback.
  */
-function sms_sendtophone_page($type, $reference) {
+function sms_sendtophone_page($type = NULL) {
   global $user;
   $user = user_load(array('uid' => $user-> uid));
   if (user_access('send to any number') || !empty($user->sms_user['0']['number'])) {
-    switch ($type) {
-      case 'inline':
-        $form = drupal_get_form('sms_sendtophone_inline_form');
-        break;
-      case 'node':
-        $form = drupal_get_form('sms_sendtophone_node_form', $reference);
-        break;
-      case 'field':
-        $form = drupal_get_form('sms_sendtophone_cck_form');
-        break;
-      default:
-        $form = t('An error occured.');
-        break;
-    }
+    $form = drupal_get_form('sms_sendtophone_form', $type);
   }
   else {
     if(empty($user->sms_user['0']['number']) && user_access('send to any number')) {
@@ -348,82 +335,60 @@ function theme_sms_sendtophone_field($text) {
   return '<span class="sms-sendtophone-field">'. $text .'</span> ('. $link .')';
 }
 
-function sms_sendtophone_inline_form() {
-  $form['module'] = array('#type' => 'value', '#value' => 'sms_sendtophone');
-  $form['behavior'] = array('#type' => 'value', '#value' => 'inline');
+function sms_sendtophone_form($form_state, $type) {
+  global $user;
 
-  if ($_GET['text']) {    
-    if (strlen($_GET['text']) > 120) {
-      $form['notice'] = array(
-        '#value' => '<div class="messages status">test</div>',
-      );
-      $form['message'] = array(
-        '#type' => 'textarea',
-        '#title' => t('Message'),
-        '#cols' => 35,
-        '#rows' => 5,
-        '#default_value' => $_GET['text'],
-      );
-    }
-    else {
+  switch ($type) {
+    case 'cck':
+    case 'inline':
       $form['message'] = array('#type' => 'value', '#value' => $_GET['text']);
       $form['message_preview'] = array(
         '#type' => 'item',
         '#value' => '<p class="message-preview">'. $_GET['text'] .'</p>',
         '#title' => t('Message preview'),
       );
+      break;
+    case 'node':
+      if (is_numeric(arg(3))) {
+        $node = node_load(arg(3));
+        $form['message'] = array(
+          '#type' => 'textarea',
+          '#title' => t('Message preview'),
+          '#description' => t('This URL will be sent to the phone.'),
+          '#cols' => 35,
+          '#rows' => 2,
+          '#attributes' => array('disabled' => true),
+          '#default_value' => url('node/'. $node->nid, array('absolute' => TRUE)),
+        );
+      }
+      break;
+  }
+
+  $form = array_merge(sms_send_form(), $form);
+  $form['number']['#default_value'] = $user->sms_user['0']['number'];
+  if (is_array($user->sms_user['0']['gateway'])) {
+    foreach ($user->sms_user['0']['gateway'] as $option => $value) {
+      $form['gateway'][$option]['#default_value'] = $value;
     }
   }
-  global $user;
-  $destination->number = $user->sms_user['0']['number'];
-  return sms_send_form($form, $destination);
+  
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Send'),
+    '#weight' => 20,
+  );
+  
+  return $form;
 }
 
-function sms_sendtophone_cck_form() {
-  $form['module'] = array('#type' => 'value', '#value' => 'sms_sendtophone');
-  $form['behavior'] = array('#type' => 'value', '#value' => 'cck');
-
-  if ($_GET['text']) {    
-    if (strlen($_GET['text']) > 120) {
-      $form['message'] = array(
-        '#type' => 'textarea',
-        '#title' => t('Message'),
-        '#cols' => 35,
-        '#rows' => 5,
-        '#default_value' => $_GET['text'],
-      );
-    }
-    else {
-      $form['message'] = array('#type' => 'value', '#value' => $_GET['text']);
-      $form['message_preview'] = array(
-        '#type' => 'item',
-        '#value' => '<p class="message-preview">'. $_GET['text'] .'</p>',
-        '#title' => t('Message preview'),
-      );
-    }
-  }  
-  global $user;
-  $destination->number = $user->sms_user['0']['number'];
-  return sms_send_form($form, $destination);
-}
-
-function sms_sendtophone_node_form($form_state, $nid) {
-  if (is_numeric($nid)) {
-    $node = node_load($nid);
-        
-    $form['message'] = array(
-      '#type' => 'textarea',
-      '#title' => t('Link preview'),
-      '#description' => t('This URL will be sent to the phone.'),
-      '#cols' => 35,
-      '#rows' => 2,
-      '#default_value' => url('node/'. $node->nid, array('absolute' => TRUE)),
-      '#attributes' => array('disabled' => 'true'),
-    );
-  global $user;
-  $destination->number = isset($user->sms_user) ? $user->sms_user['0']['number'] : NULL;
-  return sms_send_form($form, $destination);
+function sms_sendtophone_form_validate($form, &$form_state) {
+  if (!$form_state['values']['number'] = sms_formatter($form_state['values']['number'])) {
+    form_set_error('number', t('Please enter a valid phone number.'));
   }
+}
+
+function sms_sendtophone_form_submit($form, &$form_state) {
+  sms_send($form_state['values']['number'], $form_state['values']['message'], $form_state['values']['gateway']);
 }
 
 function sms_sendtophone_link($type, $node = NULL, $teaser = FALSE) {

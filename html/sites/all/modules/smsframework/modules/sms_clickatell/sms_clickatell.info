@@ -1,7 +1,6 @@
-; $Id: sms_clickatell.info,v 1.3 2008/08/07 18:08:59 diggersf Exp $
+; $Id: sms_clickatell.info,v 1.4 2008/08/17 15:46:22 diggersf Exp $
 name = "Clickatell"
 description = "Allows the SMS Framework to use Clickatell as a gateway."
 package = SMS Framework
 dependencies[] = sms
 core = 6.x
-

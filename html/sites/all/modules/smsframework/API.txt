@@ -1,7 +1,7 @@
-$Id: API.txt,v 1.2 2008/08/04 21:24:17 diggersf Exp $
+$Id: API.txt,v 1.3 2008/08/18 13:27:08 diggersf Exp $
 
-Overview
-========
+h1. Overview
+
 The SMS Framework API allows your modules to take advantage of the convenience
 and flexibility of SMS messaging. In most cases your module will fall into one
 of two categories.
@@ -16,8 +16,8 @@ of two categories.
 Different parts of the API are used for each of these applications, so it's
 important to decide which you'll be building using before you begin.
 
-Writing a Gateway Module
-========================
+h1. Writing a Gateway Module
+
 The first step is to tell the SMS Framework about your gateway module using
 hook_gateway_info(). Your implentation of this hook should return and array of
 properties and callbacks about each gateway. Here is an example:
@@ -41,14 +41,17 @@ properties and callbacks about each gateway. Here is an example:
 * configure form (optional) - Form function for gateway configuration options
 * send form (optional) - Form function for adding gateway-specific fields to
   the sending form
+  
+h3. Create the custom send function
 
 Next you need to write the callback function for sending SMS messages using
 your gateway. Using the example from above, our function would look something
 like this:
 
-function my_gateway_send($number, $message, $options) {
-  // Code for sending message through third party gateway service
-}
+  function my_gateway_send($number, $message, $options) {
+    // Code for sending message through third party gateway service
+    return $result;
+  }
 
 The callback function is passed the following parameters:
 $number - The validated destination number.
@@ -56,12 +59,44 @@ $message - The text of the message.
 $options (optional) - An array of dditional properties as defined your gateway
 module's send form.
 
+The callback should return an array indicating the result of the send. Here is
+an example:
+
+  $result = array(
+    'status' => FALSE,
+    'message' => 'Could not connect to %server.',
+    'variables' => array('%server', 'http://www.example.com'),
+  );
+  return $result;
+  
+* status - Set to TRUE if the send was successful, FALSE if it was not.
+* message - If 'status' is FALSE, you may provide more details about the error.
+  See t() for documentation on how 'message' and 'variables' interact. Keep
+  'message' translatable by not concatenating dynamic values into it!
+* variables - Array of variables to replace in the message or NULL
+  if message is already translated or not possible to translate.
+
 The actual contents of the function will depend on the gateway service. Refer
 to the gateway's API documentation.
 
+h3. Define gateway-specific fields for send forms
+
+The SMS Framework allows gateway modules to specify custom fields to
+be added to what's called the "send form." SMS enabled modules use this form 
+in most cases to collect mobile information from the end-user. It is generated
+by calling sms_send_form() and your gateway module can add custom fields
+specifying a callback function for the 'send form' property in
+hook_gateway_info(). Here's an example:
+
+  function my_gateway_send_form($required = FALSE) {
+    // Define custom fields here. Values from each field will be made available
+    // in the options parameter of your gateway's sending callback.
+    return $form;
+  }
+
 # @todo How to use sms_receive_incoming()
 
-Writing a SMS Enabled Module
-============================
+h2. Writing a SMS Enabled Module
+
 # @todo How to use sms_send()
 # @todo How to use hook_sms_send()

@@ -1,5 +1,0 @@
-; $Id: sms_og.info,v 1.2 2008/07/30 19:42:57 diggersf Exp $
-name = SMS Organic Groups
-description = "Allows for integration with Organic Groups"
-package = SMS Framework
-dependencies = sms_receive

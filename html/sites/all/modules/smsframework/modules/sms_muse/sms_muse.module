@@ -1,74 +1,63 @@
 <?php
-// $Id: sms_muse.module,v 1.3 2008/08/07 19:05:11 tylor Exp $
+// $Id: sms_muse.module,v 1.4 2008/08/16 18:20:26 diggersf Exp $
 
 function sms_muse_gateway_info() {
-  $options['sms_muse_user'] = array(
-    '#type' => 'textfield',
-    '#title' => t('User'),
-    '#description' => t('The username of your Muse account.'),
-    '#size' => 40,
-    '#maxlength' => 255,
-    '#default_value' => variable_get('sms_muse_user', ''),
-    '#required' => true,
-  );
-  $options['sms_muse_password'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Password'),
-    '#description' => t('The current password on your Muse account.'),
-    '#size' => 30,
-    '#maxlength' => 64,
-    '#default_value' => variable_get('sms_muse_password', ''),
-    '#required' => true,
-  );
-  $options['sms_muse_soap'] = array(
-    '#type' => 'textfield',
-    '#title' => t('SOAP'),
-    '#description' => t('The SOAP access point.'),
-    '#size' => 30,
-    '#maxlength' => 255,
-    '#default_value' => variable_get('sms_muse_soap', ''),
-    '#required' => true,
-  );
-    $options['sms_muse_service'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Service name'),
-    '#description' => t('The service that you would like to use with this account.'),
-    '#size' => 30,
-    '#maxlength' => 255,
-    '#default_value' => variable_get('sms_muse_service', ''),
-    '#required' => true,
-  );
-  drupal_add_css(drupal_get_path('module', 'sms_muse') .'/sms_muse.css');
-  drupal_add_js(drupal_get_path('module', 'sms_muse') .'/sms_muse.js');
-  $options['sms_muse_validate'] = array(
-    '#type' => 'button',
-    '#value' => t('Validate'),
-    '#weight' => 10,
-    );
   return array(
     'muse' => array(
       'name' => 'Muse',
-      'identifier' => 'muse',
-      'options' => $options,
-      // 'validate' => 'sms_muse_validate',
+      'configure form' => 'sms_muse_admin_form',
       'send' => 'sms_muse_send',
-      // 'send_form' => 'sms_muse_send_form',
       'get_callback' => 'sms_muse_get_callback',
       'set_callback' => 'sms_muse_set_callback',
     ),
   );
 }
 
-function sms_muse_send_form() {
-  /* $form['country'] = array(
-    '#type' => 'select',
-    '#title' => t('Country'),
-    '#multiple' => FALSE,
-    '#options' => sms_muse_country_codes(),
-    '#default_value' => -1,
-    // '#required' => TRUE,
-  );*/
-  $form = array();
+function sms_muse_admin_form($configuration) {
+  drupal_add_css(drupal_get_path('module', 'sms_muse') .'/sms_muse.css');
+  drupal_add_js(drupal_get_path('module', 'sms_muse') .'/sms_muse.js');
+  $form['sms_muse_user'] = array(
+    '#type' => 'textfield',
+    '#title' => t('User'),
+    '#description' => t('The username of your Muse account.'),
+    '#size' => 40,
+    '#maxlength' => 255,
+    '#default_value' => $configuration['sms_muse_user'],
+    '#required' => true,
+  );
+  $form['sms_muse_password'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Password'),
+    '#description' => t('The current password on your Muse account.'),
+    '#size' => 30,
+    '#maxlength' => 64,
+    '#default_value' => $configuration['sms_muse_password'],
+    '#required' => true,
+  );
+  $form['sms_muse_soap'] = array(
+    '#type' => 'textfield',
+    '#title' => t('SOAP'),
+    '#description' => t('The SOAP access point.'),
+    '#size' => 30,
+    '#maxlength' => 255,
+    '#default_value' => $configuration['sms_muse_soap'],
+    '#required' => true,
+  );
+  $form['sms_muse_service'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Service name'),
+    '#description' => t('The service that you would like to use with this account.'),
+    '#size' => 30,
+    '#maxlength' => 255,
+    '#default_value' => $configuration['sms_muse_service'],
+    '#required' => true,
+  );
+  $form['sms_muse_validate'] = array(
+    '#type' => 'button',
+    '#value' => t('Validate'),
+    '#weight' => 10,
+  );
+  
   return $form;
 }
 

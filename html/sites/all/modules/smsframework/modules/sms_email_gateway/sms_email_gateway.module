@@ -1,14 +1,12 @@
 <?php
-// $Id: sms_email_gateway.module,v 1.3 2008/08/07 18:08:59 diggersf Exp $
+// $Id: sms_email_gateway.module,v 1.5 2008/08/18 13:27:08 diggersf Exp $
 
 function sms_email_gateway_gateway_info() {
-  
   return array(
     'email' => array(
       'name' => 'E-mail',
-      'identifier' => 'email',
-      'send_form' => 'sms_email_gateway_send_form',
-      'send' => 'sms_email_gateway_send',
+      'send' => 'sms_email_gateway_send',      
+      'send form' => 'sms_email_gateway_send_form',
     ),
   );
 }
@@ -16,12 +14,8 @@ function sms_email_gateway_gateway_info() {
 /**
  * Returns custom additions to be added to the send forms
  */
-function sms_email_gateway_send_form($destination = NULL, $required = TRUE) {  
+function sms_email_gateway_send_form() {  
   $options = array();
-  if (!$required) {
-    $options[0] = '<'. t('none') .'>';
-  }
-  
   $providers = module_invoke_all('sms_email_gateway_providers');
   asort($providers);
   $options += $providers;
@@ -32,8 +26,7 @@ function sms_email_gateway_send_form($destination = NULL, $required = TRUE) {
     '#multiple' => FALSE,
     '#description' => t('Select your wireless carrier.'),
     '#options' => $options,
-    '#default_value' => isset($destination->carrier) ? $destination->carrier : NULL,
-    '#required' => $required,
+    '#default_value' => -1,
   );
   
   return $form;
@@ -45,7 +38,10 @@ function sms_email_gateway_send_form($destination = NULL, $required = TRUE) {
 function sms_email_gateway_send($number, $message, $options) {
   $to = $number .'@'. $options['carrier'];
   $params['message'] = $message; 
-  drupal_mail('sms_email_gateway', 'sms', $to, language_default(), $params);
+  $message = drupal_mail('sms_email_gateway', 'sms', $to, language_default(), $params);
+  if ($message['result']) {
+    return array('status' => TRUE);
+  }
 }
 
 /**
