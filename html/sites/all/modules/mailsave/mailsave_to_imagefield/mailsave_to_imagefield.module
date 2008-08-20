@@ -1,0 +1,140 @@
+<?php
+// $Id: mailsave_to_imagefield.module,v 1.3 2007/11/27 22:03:44 stuartgreenfield Exp $
+/**
+ * This module interacts with mailsave
+ * It creates CCK imagefield items from attached images
+ * This module contributed by Moonshine (drupal.org/user/133705)
+ */
+
+/**
+ * Implementation of hook_help().
+ */
+function mailsave_to_imagefield_help($section) {
+  switch ($section) {
+    case 'admin/help#mailsave_to_imagefield':
+      $output .= '<p>'. t('This module is a plug-in for mailsave. If an incoming e-mail contains image attachments then they will be converted to CCK imagefield items (inside the first CCK imagefield field listed on the node). If there are no imagefields in the node then then no processing occurs.');
+      return $output;
+  }
+}
+
+/**
+ * Implementation of hook_perm
+ */
+function mailsave_to_imagefield_perm() {
+  return array(
+    'convert to imagefield',
+   );
+}
+
+/**
+ * Implementation of hook_mailsave().
+ * Try to convert images to imagefields
+ */
+function mailsave_to_imagefield_mailsave($node, $result, $i, $header, $mailbox) {
+
+  // See if conversion to image is needed
+  _mailsave_to_imagefield_attempt_image($node);
+
+  // Return the (possibly updated!) updated node
+  return $node;
+}
+
+/**
+ * Attempt to find images in the node and convert them to CCK imagefileds if they exit
+ */
+function _mailsave_to_imagefield_attempt_image(&$node) {
+
+  // If $node->mailsave_attachments is empty or imagefield not installed just return
+  if (!$node->mailsave_attachments || !module_exists('imagefield')) {
+    return;
+  }
+
+  // If user doesn't have image conversion permissions just return
+  if (!user_access('convert to imagefield')) {
+    // mailsave modules don't need to flag that the user doesn't have attach permission
+    // it just ignores the process silently
+    //watchdog('mailsave', t('User doesn\'t have permission for Mailsave To Imagefield'));
+    return;
+  }
+
+  // Query to find a CCK Imagefield attached to the node type
+  $cck_info = content_types($node->type);
+  $cck_imagefield = FALSE;
+  $cck_multiple = FALSE;
+  $cck_image_extensions = '';
+
+  if (is_array($cck_info['fields'])) {
+    foreach ($cck_info['fields'] as $cck_field => $field_info) {
+      if ($field_info['type'] == 'image') {
+        $cck_imagefield = $cck_field;
+        $cck_multiple = $field_info['multiple'];
+        $cck_image_extensions = $field_info['widget']['file_extensions'];
+        break;
+      }
+    }
+  }
+
+  if (!$cck_imagefield) {
+    watchdog('mailsave', t('No CCK Imagefields found for content type %type.', array ('%type' => $node->type)));
+    return;
+  }
+
+  // Begin processing attachments
+  foreach ($node->mailsave_attachments as $key => $file) {
+
+    // Check to see if it's a image type that the imagefield will take
+    // Note - current official release of imagefield doesn't include cck_image_extensions, this only appears in
+    // branch 5--2 onwards. So we check that the extension list is empty, or the extension is otherwise allowed
+    /// but we also check the mime type is image/. This might cause problems for some webmail type clients that
+    // report image uploads as octet streams, but will have to do for now!
+    if ( (trim($cck_image_extensions) == '' || strpos($cck_image_extensions, _file_ext($file['filename'])) !== FALSE ) && strpos(strtolower($file['filemime']), 'image/') === 0 )  {
+
+      // Let's scale the image per the imagefield max settings
+      $file = _imagefield_scale_image($file, $field_info['widget']['max_resolution']);
+
+      // If there are tokenized as part of imagefield 2.x let's use them
+      if (function_exists('token_replace')) {
+        global $user;
+        $widget_image_path = token_replace($field_info['widget']['image_path'], 'user', $user);
+      }
+      else {
+        $widget_image_path = $field_info['widget']['image_path'];
+      }
+
+      // Let's create the directory path if it hasn't been created already
+      imagefield_check_directory($widget_image_path);
+
+      // Build the array for the image found
+      $cckimageinfo = array(
+        'flags'    => array('delete' => '0'),
+        'alt'      => $file['filename'],
+        'title'    => '',
+        'filename' => $file['filename'],
+        'filepath' => $file['filepath'],
+        'filemime' => $file['filemime'],
+        'filesize' => $file['filesize'],
+        'fid'      => 'upload',
+      );
+
+      // Add the image info to the imagefield array
+      $node->{$cck_imagefield}[] = $cckimageinfo;
+
+      // Lets remove the CCK image we found from attachments
+      // We will leave the temp file though, as imagefield will need it
+      unset($node->mailsave_attachments[$key]);
+
+      // if this isn't a multiple image CCK imagefield then let's exit
+      if (!$cck_multiple) return;
+    }
+  }
+}
+
+/*
+ * Find the file extension for a given attachement
+ */
+function _file_ext($filename) {
+  $filename = strtolower($filename) ;
+  $parts = explode('.', $filename);
+  $ext = $parts[(sizeof($parts) - 1)];
+  return $ext;
+}

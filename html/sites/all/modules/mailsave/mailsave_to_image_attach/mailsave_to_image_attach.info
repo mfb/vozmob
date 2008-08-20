@@ -1,0 +1,7 @@
+; $Id: mailsave_to_image_attach.info,v 1.1 2007/08/16 14:17:19 stuartgreenfield Exp $
+
+name = Mailsave to image attach
+description = Works with mailsave to create image nodes and attach them to the main node
+dependencies = mailsave image_attach
+package = "Mailsave"
+

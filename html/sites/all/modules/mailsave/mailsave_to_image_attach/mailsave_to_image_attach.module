@@ -1,0 +1,123 @@
+<?php
+// $Id: mailsave_to_image_attach.module,v 1.2 2007/10/23 22:04:02 stuartgreenfield Exp $
+
+/**
+ * This module interacts with mailsave
+ * If an email message contains a jpeg, and image_attach is active for the content
+ * type then an image node is created and attached
+ * This is a prototype!
+ */
+
+
+/**
+ * Implementation of hook_help().
+ */
+function mailsave_to_image_attach_help($section) {
+
+  // TODO improve wording of help
+  switch ($section) {
+
+    case 'admin/help#mailsave_to_image_attach':
+      $output .= '<p>' . t('This module is a plug-in for mailsave. If an incoming email contains a jpeg and image_attach has been set up for that content type then an image node will be created and attached automatically. The first jpeg is used for this - if there is more than one jpeg file then the other files will be attached to the node. If you want to attach multiple images to a node consider using the !inline module.', array( '!inline' => '<a href="http://drupal.org/project/inline">inline</a>')) . '</p>';
+      return $output;
+  }
+}
+
+
+/**
+ * Implementation of hook_perm
+ */
+function mailsave_to_image_attach_perm() {
+
+  return array(
+    'allow images from email to be attached',
+   );
+
+}
+
+
+/**
+ * Implementation of hook_mailsave().
+ * Try to switch node type to image
+ */
+function mailsave_to_image_attach_mailsave($node, $result, $i, $header, $mailbox) {
+
+  // See if image attachment is needed
+  _mailsave_to_image_attach_attempt_image_attach($node);
+
+  // Return the (possibly updated!) updated node
+  return $node;
+
+}
+
+
+/**
+ * Attempt to find a jpeg and attach to this node
+ * Supply an array of attachments attached to the node, and look for the first jpeg
+ * If found save a temporary copy and if successful create an object containing its parts
+ * Change the node type to image, and pass the object to image_validate
+ * Although not uploaded from a form image_validate will process this object
+ * and generate the derivative images
+ * If $node->new_file is not true at the end then validation failed so revert type
+ * Unset the jpeg file as it either failed, or we used it, so we don't want to save it as well
+ */
+function _mailsave_to_image_attach_attempt_image_attach(&$node) {
+
+  // If $node->mailsave_attachments is empty or image not installed just return
+  if (!$node->mailsave_attachments || !module_exists('image')) {
+    return;
+  }
+
+  // If user doesn't have image attachment permission just return
+  if (!(user_access('allow images from email to be attached'))) {
+    return;
+  }
+
+  // If this node type does not support image_attach simply return
+  if (variable_get('image_attach_'. $node->type, 0) == 0) {
+    return;
+  }
+
+  // Begin processing attachments
+  foreach ($node->mailsave_attachments as $key => $jpeg) {
+
+    // Use filemime to detect the first jpeg
+    if ($jpeg['filemime'] == 'image/jpeg') {
+
+      // Create an object for passing to image.module via image_prepare
+      $file = new StdClass();
+      $file->filename = $jpeg['filename'];
+      $file->filemime = $jpeg['filemime'];
+      $file->filepath = $jpeg['filepath'];
+      $file->filesize = $jpeg['filesize'];
+      $file->error = 0;
+      $file->source = 'mailsave';
+
+
+      // START OF CODE FROM image_attach.module
+
+      //$image->title = $_POST['image_title'];
+      $image->uid = $node->uid;
+      $image->name = $node->name;
+      $image->created = $node->created;
+      $image->type = 'image';
+
+      // image_prepare($image, 'image');
+      image_prepare($image, $file);
+
+      if ($image->images) {
+        $image->title = basename($image->images[IMAGE_ORIGINAL]);
+        node_validate($image);
+        if (!form_get_errors()) {
+          $image = node_submit($image);
+          node_save($image);
+          $node->iid = $image->nid;
+          $node->new_image = TRUE;
+        }
+      }
+
+      // END OF CODE FROM image_attach.module
+
+    }
+  }
+}

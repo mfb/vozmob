@@ -1,0 +1,135 @@
+<?php
+// $Id: mailsave_to_audio.module,v 1.1 2007/04/25 00:15:32 stuartgreenfield Exp $
+
+/**
+ * This module interacts with mailsave
+ * This is a prototype!
+ */
+
+
+/**
+ * Implementation of hook_help().
+ */
+
+function mailsave_to_audio_help($section) {
+
+  // TODO improve wording of help
+  switch ($section) {
+
+    case 'admin/help#mailsave_to_audio':
+      $output .= '<p>' . t('This module is a plug-in for mailsave. If an incoming email contains a jpeg then the post will be automatically converted to an image node. The first jpeg is used for this - if there is more than one jpeg file then the other files will be attached to the node. If you want to attach multiple images to a node consider using the !inline module.', array( '!inline' => '<a href="http://drupal.org/project/inline">inline</a>')) . '</p>';
+      return $output;
+  }
+}
+
+
+/**
+ * Implementation of hook_perm
+ */
+function mailsave_to_audio_perm() {
+
+  return array('convert to audio node');
+
+}
+
+
+/**
+ * Implementation of hook_mailsave().
+ * Try to switch node type to image
+ */
+
+function mailsave_to_audio_mailsave($node, $result, $i, $header, $mailbox) {
+
+  // TODO Do we need to do this - can we go straight from .tmp files?
+  _mailsave_to_audio_check_temp();
+
+  // see if conversion to audio is needed
+  _mailsave_to_audio_attempt_audio($node);
+
+  // if an nid is now assigned then the node was saved so
+  // we return empty in this case to show mailhandler that we're done
+  // otherwise return the node
+  if ($node->nid) {
+
+    // Generate a log message as mailhandler will miss this
+    list($fromaddress, $fromname) = mailhandler_get_fromaddress($header, $mailbox);
+    watchdog('special', t("Mailhandler: Added '%t' by %f", array('%t' => $node->title, '%f' => $fromaddress)));
+    return;
+  }
+  else {
+    return $node;
+  }
+}
+
+
+/**
+ * Attempt to find a jpeg and convert this node to image type, if image module is available
+ * Supply an array of attachments attached to the node, and look for the first jpeg
+ * If found save a temporary copy and if successful create an object containing its parts
+ * Change the node type to image, and pass the object to image_validate
+ * Although not uploaded from a form image_validate will process this object
+ * and generate the derivative images
+ * If $node->new_file is not true at the end then validation failed so revert type
+ * Unset the jpeg file as it either failed, or we used it, so we don't want to save it as well
+ */
+
+function _mailsave_to_audio_attempt_audio(&$node) {
+
+  // if $node->mailsave_attachments is empty or image not installed just return
+  if (!$node->mailsave_attachments || !module_exists('audio')) {
+    return;
+  }
+
+  // if user doesn't have image conversion permissions just return
+  if (!(user_access('convert to audio node') && user_access('create audio'))) {
+    return;
+  }
+
+  // begin processing attachments
+  foreach ($node->mailsave_attachments as $key => $mpeg) {
+
+    // use filemime to detect the first mp3
+    if ($mpeg['filemime'] == 'audio/mpeg' || $mpeg['filemime'] == 'audio/mp3') {
+
+      _mailsave_to_audio_move_temp($mpeg['filepath'], $mpeg['filename']);
+
+      $title = $node->title;
+      $node = audio_api_insert($mpeg['filepath']);
+
+      // Amend title and re-save? Perhaps if length too short?
+      $node->title = $title;
+      node_save($node);
+
+      // TODO add a log message to say audio was added
+
+      // stop processing
+      break;
+    }
+  }
+}
+
+/**
+ * Verify the image module and toolkit settings.
+ */
+function _mailsave_to_audio_check_temp() {
+  // File paths
+  $temp_path = file_create_path(variable_get('mailsave_temp_path', 'mailsave'));
+
+  if (!file_check_directory($temp_path, FILE_CREATE_DIRECTORY)) {
+    return;
+  }
+
+}
+
+/**
+ * Move upload to temporary folder
+ */
+function _mailsave_to_audio_move_temp(&$source, $target) {
+
+  $temp_path = variable_get('mailsave_temp_path', 'mailsave') . '/';
+
+  $source = file_create_path($source);
+  $target = file_create_path($temp_path . $target);
+
+  file_move($source, $target);
+}

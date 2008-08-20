@@ -1,0 +1,9 @@
+; $Id: mailsave_to_image.info,v 1.2 2008/07/12 21:58:54 stuartgreenfield Exp $
+
+name = Mailsave to image
+description = Works with mailsave and image to create image nodes from incoming jpegs
+dependencies[] = mailsave
+dependencies[] = image
+package = "Mailsave"
+core = 6.x
+

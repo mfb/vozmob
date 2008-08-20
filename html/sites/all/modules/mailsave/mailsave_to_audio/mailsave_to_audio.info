@@ -1,0 +1,6 @@
+; $Id: mailsave_to_audio.info,v 1.2 2007/10/23 22:04:02 stuartgreenfield Exp $
+
+name = Mailsave to audio - beta
+description = Works with mailsave to create audio nodes from incoming mp3 files
+dependencies = mailsave audio
+package = "Mailsave"

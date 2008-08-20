@@ -1,3 +1,22 @@
+20 August 2008
+--------------
+Fix security vulnerability in mime allocation. Mailsave now requires
+Drupal 6.4 or higher in order to work. Thanks to mfb (user/12302) for
+pointing this one out.
+
+07 August 2008
+--------------
+Incorporate patch from #291232 to fix menu access argument and tidy up
+strings. Thanks to mfb (user/12302).
+
+17 July 2008
+------------
+Error reports of problems using Blackberry devices highlighted that the file
+name decoding was being done in the wrong place. New filename decode and
+sanitise routine written to ensure child modules are only given usable file
+names for processing. Thanks to spanders (drupal.org/user/29009) for putting
+me on the right track in post 217516#comment-925326.
+
 12 July 2008
 ------------
 A little later than planned, but mailhandler went official a while back, so
@@ -5,8 +24,6 @@ mailsave is now ready for an official release. At the moment none of the add
 on modules such as mailsave_to_image are ready, but the main image module is
 only at alpha stage in any case. The clean up filters are still available so
 MMS cleaning is still possible.
-
-First commit still included some debug messages, so re-committed!
 
 05 December 2007
 ----------------
@@ -164,4 +181,4 @@ Key changes:
 -------------
 First version for Drupal 4.6
 
-; $Id: CHANGELOG.txt,v 1.12.2.1 2008/07/12 22:11:54 stuartgreenfield Exp $
+; $Id: CHANGELOG.txt,v 1.15 2008/08/20 21:50:18 stuartgreenfield Exp $

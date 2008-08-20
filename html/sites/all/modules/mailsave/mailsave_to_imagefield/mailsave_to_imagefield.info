@@ -1,0 +1,4 @@
+name = Mailsave to CCK Imagefield
+description = Works with mailsave to create CCK imagefield items from attached images
+dependencies = mailsave imagefield
+package = "Mailsave"

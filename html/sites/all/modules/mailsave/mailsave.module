@@ -1,5 +1,5 @@
 <?php
-// $Id: mailsave.module,v 1.14.2.1 2008/07/12 22:11:54 stuartgreenfield Exp $
+// $Id: mailsave.module,v 1.17 2008/08/20 21:50:17 stuartgreenfield Exp $
 
 /**
  * This module interacts with mailhandler to save attachments from emails
@@ -60,8 +60,13 @@ function mailsave_mailhandler($node, $result, $i, $header, $mailbox) {
   $attachments = array();
 
   /**
-   * Mailhandler now supplies the attachments - mailsave doesn't need to do this step
+   * A legacy step follows as mailhandler never used to provide attachments.
+   * It now does, but in a slightly different structure to what mailsave used.
+   * This is a slightly lazy approach as we convert the mailhandler structure to
+   * mailsave - we could rewrite mailsave to use the new format natively, but that's
+   * for another day as it means updating all the mailsave modules.
    */
+  // Create array of attachments that mailsave modules can use
   $attachments = _mailsave_use_mailhandler_attachments($node);
 
   // Link attachments to the node under mailsave_attachments
@@ -309,9 +314,9 @@ function _mailsave_use_mailhandler_attachments($node) {
       $temp_file = tempnam(file_directory_temp(), 'mail');
       $filepath = file_save_data($mimepart->data, $temp_file);
 
-      // Add the item to the attachments array
+      // Add the item to the attachments array, and sanitise filename
       $attachments[] = array(
-        'filename' => $mimepart->filename,
+        'filename' => _mailsave_sanitise_filename($mimepart->filename),
         'filepath' => $filepath,
         'filemime' => strtolower($mimepart->filemime),
         'filesize' => strlen($mimepart->data),
@@ -331,18 +336,6 @@ function _mailsave_save_file($attachment, $validators = array()) {
 
   global $user;
 
-  // Filenames may be encoded, so decode to ensure they work properly
-  $attachment['filename'] = mb_decode_mimeheader($attachment['filename']);
-
-  // Replaces all characters up through space and all past ~ along with the above reserved characters to sanitise filename
-  // from php.net/manual/en/function.preg-replace.php#80431
-
-  // Define characters that are  illegal on any of the 3 major OS's
-  $reserved = preg_quote('\/:*?"<>|', '/');
-
-  // Perform cleanup
-  $attachment['filename'] = preg_replace("/([\\x00-\\x20\\x7f-\\xff{$reserved}])/e", "_", $attachment['filename']);
-
   // Add in our check of the the file name length.
   $validators['file_validate_name_length'] = array();
 
@@ -351,14 +344,14 @@ function _mailsave_save_file($attachment, $validators = array()) {
     $extensions = '';
     foreach ($user->roles as $rid => $name) {
       $extensions .= ' '. variable_get("upload_extensions_$rid",
-      variable_get('upload_extensions_default', 'jpg jpeg gif png txt html doc xls pdf ppt pps odt ods odp'));
+      variable_get('upload_extensions_default', 'jpg jpeg gif png txt doc xls pdf ppt pps odt ods odp'));
     }
 
     // Begin building file object.
     $file = new stdClass();
     $file->filename = file_munge_filename(trim(basename($attachment['filename']), '.'), $extensions);
     $file->filepath = $attachment['filepath'];
-    $file->filemime = $attachment['filemime'];
+    $file->filemime = file_get_mimetype($file->filename);
 
     // Rename potentially executable files, to help prevent exploits.
     if (preg_match('/\.(php|pl|py|cgi|asp|js)$/i', $file->filename) && (substr($file->filename, -4) != '.txt')) {
@@ -408,4 +401,26 @@ function _mailsave_save_file($attachment, $validators = array()) {
     // Return the results of the save operation
     return $file;
 
+}
+
+/**
+ * Take a raw attachment filename, decode it if necessary, and strip out invalid characters
+ * Return a sanitised filename that should be ok for use by modules that want to save the file
+ */
+function _mailsave_sanitise_filename($filename) {
+
+  // Decode multibyte encoded filename
+  $filename = mb_decode_mimeheader($filename);
+
+  // Replaces all characters up through space and all past ~ along with the above reserved characters to sanitise filename
+  // from php.net/manual/en/function.preg-replace.php#80431
+
+  // Define characters that are  illegal on any of the 3 major OS's
+  $reserved = preg_quote('\/:*?"<>|', '/');
+
+  // Perform cleanup
+  $filename = preg_replace("/([\\x00-\\x20\\x7f-\\xff{$reserved}])/e", "_", $filename);
+
+  // Return the cleaned up filename
+  return $filename;
 }

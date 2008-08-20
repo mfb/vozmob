@@ -1,0 +1,155 @@
+<?php
+// $Id: mailsave_to_image.module,v 1.5 2008/07/12 22:06:40 stuartgreenfield Exp $
+
+/**
+ * This module interacts with mailsave
+ * Creation of image nodes and saving of attachments is managed via user access control privileges
+ * This is a prototype!
+ */
+
+
+/**
+ * Implementation of hook_help().
+ */
+function mailsave_to_image_help($path, $arg) {
+
+  switch ($path) {
+
+    case 'admin/help#mailsave_to_image':
+      $output .= '<p>' . t('This module is a plug-in for mailsave. If an incoming email contains a jpeg then the post will be automatically converted to an image node. The first jpeg is used for this - if there is more than one jpeg file then the other files will be attached to the node. If you want to attach multiple images to a node consider using the !inline module.', array( '!inline' => '<a href="http://drupal.org/project/inline">inline</a>')) . '</p>';
+      return $output;
+  }
+}
+
+
+/**
+ * Implementation of hook_perm
+ */
+function mailsave_to_image_perm() {
+
+  return array(
+    'convert to image node',
+   );
+
+}
+
+
+/**
+ * Implementation of hook_mailsave().
+ * Try to switch node type to image
+ */
+function mailsave_to_image_mailsave($node, $result, $i, $header, $mailbox) {
+
+  // See if conversion to image is needed
+  _mailsave_to_image_attempt_image($node, $result, $i, $header, $mailbox);
+
+  // Return the (possibly updated!) updated node
+  return $node;
+
+}
+
+
+/**
+ * Attempt to find a jpeg and convert this node to image type, if image module is available
+ * Supply an array of attachments attached to the node, and look for the first jpeg
+ * If found save a temporary copy and if successful create an object containing its parts
+ * Change the node type to image, and pass the object to image_validate
+ * Although not uploaded from a form image_validate will process this object
+ * and generate the derivative images
+ * If $node->new_file is not true at the end then validation failed so revert type
+ * Unset the jpeg file as it either failed, or we used it, so we don't want to save it as well
+ */
+function _mailsave_to_image_attempt_image(&$node, $result, $i, $header, $mailbox) {
+
+  // If $node->mailsave_attachments is empty or image not installed just return
+  if (!$node->mailsave_attachments || !module_exists('image')) {
+    return;
+  }
+
+  // If user doesn't have image conversion permissions just return
+  if (!(user_access('convert to image node') && user_access('create images'))) {
+    return;
+  }
+
+  // First work out how many jpegs there are - if there are multiple ones we will make several nodes...
+  $number_of_jpegs = 0;
+  foreach ($node->mailsave_attachments as $key => $jpeg) {
+    if ($jpeg['filemime'] == 'image/jpeg') {
+      $number_of_jpegs++;
+    }
+  }
+
+  // If we didn't find a jpeg simply return
+  if (!$number_of_jpegs) {
+    return;
+  }
+
+  // Begin processing attachments
+  foreach ($node->mailsave_attachments as $key => $jpeg) {
+
+    // Use filemime to detect the first jpeg
+    if ($jpeg['filemime'] == 'image/jpeg') {
+
+      // Because we are about to use code copied from image.module put our filepath in $filepath for convenience
+      $filepath = $jpeg['filepath'];
+
+      // FOLLOWING CODE IS TAKEN FROM image_create_node_from
+      // We do it this way because we need to retain publish status etc that might have been set by the email
+      // Note - this is not an exact copy - some lines are changed!
+
+      // Ensure it's a valid image.
+      if (!$image_info = image_get_info($filepath)) {
+        return;
+      }
+
+      // Make sure we can copy the file into our temp directory.
+      $original_path = $filepath;
+      if (!file_copy($filepath, _image_filename($jpeg['filename'], IMAGE_ORIGINAL, TRUE))) {
+        return;
+      }
+
+      // Resize the original image.
+      $aspect_ratio = $image_info['height'] / $image_info['width'];
+      $size = image_get_sizes(IMAGE_ORIGINAL, $aspect_ratio);
+      if (!empty($size['width']) && !empty($size['height'])) {
+        image_scale($filepath, $filepath, $size['width'], $size['height']);
+      }
+
+      $node->type = 'image';
+      $node->new_file = TRUE;
+      $node->images[IMAGE_ORIGINAL] = $filepath;
+      $node->images = _image_build_derivatives($node, TRUE);
+
+      // Save the node? Only if there are more jpegs to be processed
+      $number_of_jpegs--;
+      if ($number_of_jpegs) {
+
+        // Need to refetch origbody as mailhandler doesn't pass us this
+        $mime = explode(',', variable_get('mime', 'TEXT/HTML,TEXT/PLAIN'));
+
+        // Get the first text part - this will be the node body
+        if (!$origbody) {
+          $origbody = mailhandler_get_part($result, $i, $mime[0]);
+        }
+
+        // If we didn't get a body from our first attempt, try the alternate format (HTML or PLAIN)
+        if (!$origbody) {
+          $origbody = mailhandler_get_part($result, $i, $mime[1]);
+        }
+
+        // Save this node
+        mailhandler_node_submit($node, $header, $mailbox, $orig_body);
+
+        // Unset nid and vid so that the next save is treated as a new node
+        unset($node->nid);
+        unset($node->vid);
+      }
+
+      // Remove the original image now that the import has completed.
+      file_delete($original_path);
+
+      // We don't want to do anything else with this attachment so unset it
+      unset($node->mailsave_attachments[$key]);
+    }
+  }
+}
