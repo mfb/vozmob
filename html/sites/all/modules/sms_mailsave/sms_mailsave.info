@@ -1,4 +1,4 @@
-; $Id: mailsave.info,v 1.3 2007/12/05 22:59:29 stuartgreenfield Exp $
+; $Id$
 
 name = SMS mailsave
 description = Allows users to register via an e-mailed SMS message.

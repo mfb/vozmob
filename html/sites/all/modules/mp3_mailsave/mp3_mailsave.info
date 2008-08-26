@@ -1,0 +1,6 @@
+; $Id$
+
+name = MP3 mailsave
+description = Convert attached WAV files to MP3.
+dependencies[] = mailsave
+core = 6.x
