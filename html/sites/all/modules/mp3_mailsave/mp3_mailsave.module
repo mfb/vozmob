@@ -19,7 +19,7 @@ function mp3_mailsave_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
         $outfile = escapeshellarg($filepath);
         exec("$lame $infile $outfile");
         if (file_exists($filepath) && $filesize = filesize($filepath)) {
-//        file_delete($mailsave_attachment['filepath']);
+          file_delete($mailsave_attachment['filepath']);
           $node->mailsave_attachments[$key]['filename'] .= '.mp3';
           $node->mailsave_attachments[$key]['filepath'] = $filepath;
           $node->mailsave_attachments[$key]['filemime'] = 'audio/mpeg';
