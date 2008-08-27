@@ -120,10 +120,12 @@ function sms_user_settings_add_form(&$form_state, $account) {
 }
 
 function sms_user_settings_add_form_validate($form, &$form_state) {
-  if (!$form_state['values']['number'] = sms_formatter($form_state['values']['number'])) {
+  // hook_user('validate') provides only the form values.
+  $number = isset($form_state['values']['number']) ? $form_state['values']['number'] : $form_state['number'];
+  if (!$number = sms_formatter($number)) {
     form_set_error('number', t('Please enter a valid phone number.'));
   }
-  elseif (sms_user_get_uid($form_state['values']['number'])) {
+  elseif (sms_user_get_uid($number)) {
     form_set_error('number', t('The phone number you entered is already in use.'));
   }
 }
@@ -313,9 +315,10 @@ function sms_user_user($op, &$edit, &$account, $category = NULL) {
     case 'delete':
       return sms_user_delete($account->uid);
     case 'validate':
-      if ($edit['sms_user'][0]) {
+      if (isset($edit['sms_user'][0]['number']) && strlen($edit['sms_user'][0]['number'])) {
         return sms_user_settings_add_form_validate('', $edit['sms_user'][0]);
       }
+      break;
     case 'login':
       // Check if first it's the user's first time logging in.
       if (!$account->access && $account->sms_user[0]['number']) {
@@ -380,7 +383,7 @@ function sms_user_register() {
     if (variable_get('sms_user_registration_form', 0) == 2) {
       $required = TRUE;
     }
-    $form['sms_user'][0] = sms_send_form(NULL, NULL, $required);
+    $form['sms_user'][0] = sms_send_form($required);
   
     return $form;
   }
