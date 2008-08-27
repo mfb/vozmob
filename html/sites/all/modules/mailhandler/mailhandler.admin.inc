@@ -5,9 +5,7 @@
  */
 function mailhandler_add_edit_mailbox($form_state, $mid) {
 
-  if ($mid && !$form_state['post']) {
-  	$edit = mailhandler_get_mailbox($mid);
-  }
+  $edit = $mid ? mailhandler_get_mailbox($mid) : mailhandler_get_mailbox_defaults();
 
   if (empty($edit['folder'])) {
     $edit['folder'] = 'INBOX';
@@ -284,9 +282,9 @@ function mailhandler_list_mailboxes() {
   while ($mailbox = db_fetch_object($result)) {
     $rows[] = array(
       '<a href="mailto:'. $mailbox->mail .'">'. $mailbox->mail .'</a>',
-      l(t('retrieve'), 'admin/content/mailhandler/retrieve/'.$mailbox->mid, array('title' => t('Retrieve and process pending e-mails in this mailbox')), $destination),
-      l(t('edit'), 'admin/content/mailhandler/edit/'.$mailbox->mid, array('title' => t('Edit this mailbox configuration')), $destination),
-      l(t('delete'), 'admin/content/mailhandler/delete/'.$mailbox->mid, array('title' => t('Delete this mailbox')), $destination),
+      l(t('retrieve'), 'admin/content/mailhandler/retrieve/'.$mailbox->mid, array('title' => t('Retrieve and process pending e-mails in this mailbox'))),
+      l(t('edit'), 'admin/content/mailhandler/edit/'.$mailbox->mid, array('title' => t('Edit this mailbox configuration'))),
+      l(t('delete'), 'admin/content/mailhandler/delete/'.$mailbox->mid, array('title' => t('Delete this mailbox'))),
     );
   }
 
@@ -342,4 +340,15 @@ function mailhandler_admin_settings_validate($form, &$form_state) {
   ) {
     form_set_error('mailhandler_max_retrieval', t('The value should a positive integer, or zero.'));
   }
+}
+
+/**
+ * Return an array of mailbox default values.
+ */
+function mailhandler_get_mailbox_defaults() {
+  $schema = drupal_get_schema('mailhandler');
+  foreach ($schema['fields'] as $field => $params) {
+    $defaults[$field] = isset($params['default']) ? $params['default'] : '';
+  }
+  return $defaults;
 }
