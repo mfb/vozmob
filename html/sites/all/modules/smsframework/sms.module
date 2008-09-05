@@ -1,11 +1,54 @@
 <?php
-// $Id: sms.module,v 1.11 2008/08/18 13:27:08 diggersf Exp $
+// $Id: sms.module,v 1.14 2008/09/05 20:05:17 diggersf Exp $
 
 /**
  * @file
  * The core of the SMS Framework. Provides gateway managment and API for
  * sending and receiving SMS messages.
  */
+
+/**
+ * Sends a message using the active gateway.
+ * 
+ * @param $number
+ *   The destination number.
+ * 
+ * @param $message
+ *   The text of the messsage to send.
+ * 
+ * @param $options
+ *   An array of dditional properties as defined by gateway modules.
+ */
+function sms_send($number, $message, $options = array()) {
+  $gateway = sms_default_gateway();
+  
+  foreach (module_implements('sms_send') as $module) {
+    $function = $module .'_sms_send';
+    $function($number, $message, $options, $gateway);
+  }
+
+  if (function_exists($gateway['send'])) {
+    $response = $gateway['send']($number, $message, $options);
+  }
+  return sms_handle_result($response, $number, $message);
+}
+
+/**
+ * Callback for incoming messages. Allows gateways modules to pass messages in
+ * a standard format for processing.
+ * 
+ * @param $number
+ *   The sender's mobile number.
+ * 
+ * @param $message
+ *   The content of the text message.
+ */
+function sms_incoming($number, $message) {
+  // Execute three phases
+  module_invoke_all('sms_incoming', 'pre process', $number, $message);
+  module_invoke_all('sms_incoming', 'process', $number, $message);
+  module_invoke_all('sms_incoming', 'post process', $number, $message);
+}
 
 /**
  * Returns the current default gateway.
@@ -231,33 +274,6 @@ function _gateways_build() {
   return array($_gateways, $_names);
 }
 
-/**
- * Sends a message using the active gateway.
- * 
- * @param $number
- *   The destination number.
- * 
- * @param $message
- *   The text of the messsage to send.
- * 
- * @param $options
- *   An array of dditional properties as defined by gateway modules.
- */
-function sms_send($number, $message, $options = array()) {
-  $gateway = sms_default_gateway();
-  
-  foreach (module_implements('sms_send') as $module) {
-    $function = $module .'_sms_send';
-    $function($number, $message, $options, $gateway);
-  }
-
-  if (function_exists($gateway['send'])) {
-    $response = $gateway['send']($number, $message, $options);
-  }
-  
-  return sms_handle_result($response, $number, $message);
-}
-
 function sms_handle_result($result, $number, $message) {
   if ($result['status']) {
     return TRUE;
@@ -338,6 +354,18 @@ function sms_send_form($required = FALSE) {
 function sms_send_form_validate($form, &$form_state) {
   if (!sms_formatter($form_state['values']['number'])) {
     form_set_error('number', t('You must enter a valid phone number.'));
+  }
+}
+
+function sms_validate_number(&$number) {
+  if (!strlen($number) || !$number = sms_formatter($number)) {
+    return t('The phone number is invalid.');
+  }
+
+  // Allow the active gateway to provide number validation
+  $gateway = sms_default_gateway();
+  if (function_exists($gateway['validate number']) && $error = $gateway['validate number']($number)) {
+    return $error;
   }
 }
 

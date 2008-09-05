@@ -1,5 +1,5 @@
 <?php
-// $Id: sms_email_gateway.module,v 1.5 2008/08/18 13:27:08 diggersf Exp $
+// $Id: sms_email_gateway.module,v 1.6 2008/09/05 20:49:49 diggersf Exp $
 
 function sms_email_gateway_gateway_info() {
   return array(
@@ -36,9 +36,10 @@ function sms_email_gateway_send_form() {
  * Callback for sending messages.
  */
 function sms_email_gateway_send($number, $message, $options) {
+  $from = !empty($options['from']) ? $options['from'] : NULL;
   $to = $number .'@'. $options['carrier'];
-  $params['message'] = $message; 
-  $message = drupal_mail('sms_email_gateway', 'sms', $to, language_default(), $params);
+  $params['message'] = $message;
+  $message = drupal_mail('sms_email_gateway', 'sms', $to, language_default(), $params, $from);
   if ($message['result']) {
     return array('status' => TRUE);
   }

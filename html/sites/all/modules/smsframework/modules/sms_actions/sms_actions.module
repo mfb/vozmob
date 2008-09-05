@@ -1,0 +1,444 @@
+<?php
+// $Id: sms_actions.module,v 1.1 2008/08/20 19:52:37 diggersf Exp $
+
+/**
+ * @file
+ * Provides a "Send SMS" action and the ability to define custom triggers for
+ * incoming messages.
+ */
+
+/**
+ * Implementation of hook_sms_incoming()
+ */
+function sms_actions_sms_incoming($op, $number, $message) {
+  if ($op == 'process') {
+    $commands = sms_actions_get_commands();
+    foreach ($commands as $command) {
+      if (stripos($message, $command->discriminator) === 0) {
+        $active_command = $command;
+      }
+    }
+  
+    if ($active_command) {
+      sms_actions_do($active_command, $number, $message);
+    }
+    else {
+      // Try to figure out what command was actually given
+      // preg_match('!^([A-z0-9\-]+).+$!', $message, $matches);
+      // if (variable_get('sms_actions_invalid_cmd_reply', 0)) {
+      //   sms_send($number, t('The command @command was not found.', array('@command' => $matches[1])));
+      // }
+      // watchdog('sms', t('Command %command not found from @number.', array('%command' => $matches[1], '@number' => $number)), WATCHDOG_WARNING);
+    }
+  }
+}
+
+function sms_actions_do($command, $number, $message) {
+  // Keep objects for reuse so that changes actions make to objects can persist.
+  static $objects;
+  
+  $aids = _trigger_get_hook_aids('sms_actions', $command->op);
+  
+  if (!$aids) {
+    return;
+  }
+  
+  $context = array(
+    'hook' => 'sms_actions',
+    'op' => $command->op,
+    'number' => $number,
+  );
+
+  foreach ($aids as $aid => $action_info) {
+    if ($action_info['type'] != 'sms') {
+      if ($action_info['type'] == 'node') {
+        preg_match('!^[A-z0-9\-]+\s(.+)$!', $message, $matches);
+        $params = explode(' ', $matches[1]);
+        $node = node_load($params[0]);
+        if (!isset($objects[$action_info['type']])) {
+          $objects[$action_info['type']] = _trigger_normalize_comment_context($action_info['type'], $node);
+        }
+        $context['hook'] = 'nodeapi';
+        actions_do($aid, $objects[$action_info['type']], $context, $a3, $a4);
+      }
+    }
+    else {
+      $result = actions_do($aid, $message, $context, $options);
+    }
+  }
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+function sms_actions_menu() {
+  $items['admin/smsframework/actions'] = array(
+    'title' => 'SMS Actions',
+    'description' => 'Define custom triggers for incoming SMS messages.',
+    'access arguments' => array('administer smsframework'),
+    'page callback' => 'sms_actions_command_list',
+  );
+  $items['admin/smsframework/actions/list'] = array(
+    'title' => 'List',
+    'access arguments' => array('administer smsframework'),
+    'weight' => -5,
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+  $items['admin/smsframework/actions/add'] = array(
+    'title' => 'Add command',
+    'access arguments' => array('administer smsframework'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sms_actions_edit_command_form'),
+    'type' => MENU_LOCAL_TASK,
+  );
+  $items['admin/smsframework/actions/edit'] = array(
+    'title' => 'Edit command',
+    'access arguments' => array('administer smsframework'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('sms_actions_edit_command_form', 4),
+    'type' => MENU_CALLBACK,
+  );
+  
+  return $items;
+}
+
+/**
+ * Implementation of hook_action_info().
+ */
+function sms_actions_action_info() {
+  return array(
+    'sms_actions_send_action' => array(
+      'type' => 'sms',
+      'description' => t('Send SMS'),
+      'configurable' => TRUE,
+      'hooks' => array(
+        'sms_actions' => array('sms_actions'),
+        'nodeapi' => array('presave', 'insert', 'update', 'delete'),
+        'comment' => array('delete', 'insert', 'update'),
+      ),
+    ),
+  );
+}
+
+function sms_actions_send_action_form($context) {
+  // Set default values for form.
+  if (!isset($context['number'])) {
+    $context['number'] = '';
+  }
+  if (!isset($context['author'])) {
+    $context['author'] = FALSE;
+  }
+  if (!isset($context['message'])) {
+    $context['message'] = '';
+  }
+  
+  $form = sms_send_form(NULL, NULL, FALSE);
+  $form['number']['#default_value'] = $context['number'];
+  
+  $form['author'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Send to author of original post'),
+    '#description' => t('If checked, the message will be sent to author of the orginal post and the number field will be ignored.'),
+    '#default_value' => $context['author'],
+  );
+
+  $form['message'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Message'),
+    '#default_value' => $context['message'],
+    '#cols' => '80',
+    '#rows' => '20',
+    '#description' => t('The message that should be sent. You may include the following variables: %site_name, %username, %uid, %node_url, %node_alias, %node_type, %title, %teaser, %body. Not all variables will be available in all contexts.'),
+  );
+  return $form;
+}
+
+/**
+ * Process sms_actions_send_action form submissions.
+ */
+function sms_actions_send_action_submit($form, &$form_state) {
+  // Process the HTML form to store configuration. The keyed array that
+  // we return will be serialized to the database.
+  $params = array(
+    'number' => $form_state['values']['number'],
+    'author' => $form_state['values']['author'],
+    'message'   => $form_state['values']['message'],
+  );
+  return $params;
+}
+
+/**
+ * Implementation of a Drupal action.
+ */
+function sms_actions_send_action($object, $context) {
+  global $user;
+  switch ($context['hook']) {
+    case 'nodeapi':
+      $node = $context['node'];
+      break;
+    case 'comment':
+      $comment = $context['comment'];
+      $node = node_load($comment->nid);
+      break;
+    case 'user':
+      // Because this is not an action of type 'user' the user
+      // object is not passed as $object, but it will still be available
+      // in $context.
+      $account = $context['account'];
+      if (isset($context['node'])) {
+        $node = $context['node'];
+      }
+      elseif ($context['recipient'] == '%author') {
+        // If we don't have a node, we don't have a node author.
+        watchdog('error', t("Cannot use '%author' token in this context."));
+        return;
+      }
+      break;
+    default:
+      // Check context for node.
+      if (!isset($object) && isset($context['node'])) {
+        $node = $context['node'];
+      }
+      else {
+        // We are being called directly.
+        $node = $object;
+      }
+      break;
+  }
+
+  $number = $context['number'];
+  
+  $variables = array(
+    '%site_name' => variable_get('site_name', 'Drupal'),
+    '%username' => $account->name,
+  );
+  
+  if (isset($node)) {
+    if (!isset($account)) {
+      $account = user_load(array('uid' => $node->uid));
+    }
+    if ($context['author'] && $account->sms_user[0]['status'] == 2) {
+      $number = $account->sms_user[0]['number'];
+    }
+
+    $variables = array_merge($variables, array(
+      '%uid' => $node->uid,
+      '%node_url' => url('node/'. $node->nid, array('absolute' => TRUE)),
+      '%node_type' => check_plain(node_get_types('name', $node)),
+      '%title' => filter_xss($node->title),
+      '%teaser' => filter_xss($node->teaser),
+      '%body' => filter_xss($node->body),
+      )
+    );
+  }
+
+  $message = strtr($context['message'], $variables);
+  if (isset($node) && $context['author']) {
+    sms_user_send($account->uid, $message);
+  }
+  else{  
+    sms_send($number, $message);
+  }
+}
+
+function sms_actions_action_info_alter(&$actions) {
+  // Actions to alter
+  $hooks = array(
+    'node_publish_action',
+    'node_unpublish_action',
+    'node_make_sticky_action',
+    'node_make_unsticky_action',
+    'node_promote_action',
+    'node_unpromote_action',
+    'node_assign_owner_action',
+    'node_save_action',
+    'node_unpublish_by_keyword_action',
+    'system_send_email_action',
+  );
+  
+  $commands = sms_actions_get_commands();
+  $command_triggers[] = 'sms_actions';
+  foreach ($commands as $command) {
+    $command_triggers[] = 'sms_actions_' . $command->discriminator;
+  }
+  
+  foreach ($actions as $hook => $action) {
+    if (in_array($hook, $hooks)) {
+      $actions[$hook]['hooks']['sms_actions'] = $command_triggers;
+    }
+  }
+}
+
+/**
+ * Implementation of hook_hook_info().
+ */
+function sms_actions_hook_info() {
+  $hooks = array();
+
+  $hooks['sms_actions']['sms_actions']['sms_actions'] = array(
+    'runs when' => t('When an SMS message with any discriminator is received.'),
+  );  
+  
+  $commands = sms_actions_get_commands();
+  
+  foreach ($commands as $command) {
+    $hooks['sms_actions']['sms_actions'][$command->op] = array(
+      'runs when' => t('When an SMS message with the %discriminator discriminator is received.', array('%discriminator' => $command->discriminator)),
+    );
+  }
+  
+  return $hooks;
+}
+
+/**
+ * Returns an array of commands objects.
+ */
+function sms_actions_get_commands() {
+  $commands =  variable_get('sms_actions_commands', array());
+  
+  foreach ($commands as $key => $command) {
+    $commands[$key]->op = 'sms_actions_' . $command->discriminator;
+  }
+  
+  return $commands;
+}
+
+/**
+ * Load a specific command.
+ */
+function sms_actions_command_load($discriminator) {
+  $commands = variable_get('sms_actions_commands', array());
+  return $commands[$discriminator];
+}
+
+/**
+ * Save a command.
+ */
+function sms_actions_command_save($command) {
+  $commands = sms_actions_get_commands();
+  $is_existing = FALSE;
+  $existing_discriminator = !empty($command->old_discriminator) ? $command->old_discriminator : $command->discriminator;
+  $is_existing = count($commands[$existing_discriminator]);
+  if ($is_existing) {
+    db_query("UPDATE {trigger_assignments} SET op = '%s' WHERE op = '%s'", array('sms_actions_' . $command->discriminator, 'sms_actions_' . $existing_discriminator));
+  }
+  unset($commands[$existing_discriminator]);
+  $commands[$command->discriminator] = $command;
+  variable_set('sms_actions_commands', $commands);
+}
+
+/**
+ * Delete a command.
+ */
+function sms_actions_command_delete($discriminator) {
+  $commands = variable_get('sms_actions_commands', array());
+  unset($commands[$discriminator]);
+  variable_set('sms_actions_commands', $commands);
+  db_query("DELETE FROM {trigger_assignments} WHERE op = '%s'", 'sms_actions_' . $discriminator);
+}
+
+/**
+ * Menu callback: command listing
+ */
+function sms_actions_command_list() {
+  $header = array(t('Discriminator'), t('Operations'));
+  $commands = sms_actions_get_commands();
+  
+  if (!empty($commands)) {
+    foreach ($commands as $command) {
+      $row = array($command->discriminator, l(t('edit'), 'admin/smsframework/actions/edit/' . $command->discriminator));
+      $rows[] = $row;
+    }
+  }
+  else {
+    $rows[] = array(array('data' => t('No commands available.'), 'colspan' => 2));
+  }
+  return theme('table', $header, $rows);
+}
+
+function sms_actions_edit_command_form(&$form_state, $discriminator = NULL) {
+  if (isset($discriminator)) {
+    $command = sms_actions_command_load($discriminator);
+  }
+  
+  // Check for confirmation forms.
+  if (isset($form_state['confirm_delete'])) {
+    return sms_actions_command_confirm_delete($form_state, $discriminator);
+  }
+  
+  $form['discriminator'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Discriminator'),
+    '#description' => t('A keyword that will be used to idenifty incoming messages. The discriminator may consist only of lowercase letters, numbers, and dashes.'),
+    '#size' => 40,
+    '#maxlength' => 16,
+    '#required' => TRUE,
+    '#default_value' => $command->discriminator,
+  );
+  
+  $form['submit'] = array(
+    '#type' => 'submit', 
+    '#value' => t('Save command'),
+  );
+
+  if (isset($command)) {
+    $form['old_discriminator'] = array(
+      '#type' => 'value',
+      '#value' => $command->discriminator,
+    );
+    $form['delete'] = array(
+      '#type' => 'submit',
+      '#value' => t('Delete'),
+      '#weight' => 45,
+    );
+  }
+  
+  return $form;
+}
+
+function sms_actions_edit_command_form_validate($form, &$form_state) {
+  if (!preg_match('!^[a-z0-9\-]+$!', $form_state['values']['discriminator'])) {
+    form_set_error('discriminator', t('The discriminator may only consist of lowercase letters, dashes, and numbers.'));
+  }
+}
+
+function sms_actions_edit_command_form_submit($form, &$form_state) {
+  // $commands = sms_actions_get_commands();
+  $command = new StdClass();
+  $command->discriminator = $form_state['values']['discriminator'];
+  $command->old_discriminator = $form_state['values']['old_discriminator'];
+  
+  if ($form_state['clicked_button']['#value'] == t('Delete')) {
+    if ($form_state['values']['delete'] === TRUE) {
+      return sms_actions_command_confirm_delete_submit($form, $form_state);
+    }
+    $form_state['rebuild'] = TRUE;
+    $form_state['confirm_delete'] = TRUE;
+    return;
+  }
+  sms_actions_command_save($command);
+  // $commands[$command->discriminator] = $command;
+  // variable_set('sms_actions_commands', $commands);
+  $form_state['redirect'] = 'admin/smsframework/actions';
+}
+
+function sms_actions_command_confirm_delete($form_state, $discriminator) {
+  $command = sms_actions_command_load($discriminator);
+  
+  $form['discriminator'] = array('#type' => 'value', '#value' => $command->discriminator);
+  $form['delete'] = array('#type' => 'value', '#value' => TRUE);
+  return confirm_form($form,
+                  t('Are you sure you want to delete the command %discriminator?',
+                  array('%discriminator' => $command->discriminator)),
+                  'admin/smsframework/actions',
+                  t('Deleting a command will remove any action assignments. This action cannot be undone.'),
+                  t('Delete'),
+                  t('Cancel'));
+}
+
+function sms_actions_command_confirm_delete_submit($form, &$form_state) {
+  sms_actions_command_delete($form_state['values']['discriminator']);
+  drupal_set_message(t('The command %command has been deleted.', array('%command' => $form_state['values']['discriminator'])));
+  
+  $form_state['redirect'] = 'admin/smsframework/actions';
+}

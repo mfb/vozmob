@@ -1,5 +1,10 @@
 <?php
-// $Id: sms_clickatell.module,v 1.6 2008/08/18 13:27:08 diggersf Exp $
+// $Id: sms_clickatell.module,v 1.7 2008/08/20 19:52:38 diggersf Exp $
+
+/**
+ * @file
+ * Adds support for sending SMS messages using the Clickatell gateway.
+ */
 
 /**
  * Implementation of hook_gateway_info().

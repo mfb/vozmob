@@ -1,5 +1,5 @@
 <?php
-// $Id: sms_sendtophone.module,v 1.4 2008/08/16 18:20:27 diggersf Exp $
+// $Id: sms_sendtophone.module,v 1.5 2008/09/05 20:21:27 diggersf Exp $
 
 /**
  * Implementation of hook_menu().

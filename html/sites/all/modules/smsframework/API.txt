@@ -1,4 +1,4 @@
-$Id: API.txt,v 1.3 2008/08/18 13:27:08 diggersf Exp $
+$Id: API.txt,v 1.5 2008/08/21 03:44:46 diggersf Exp $
 
 h1. Overview
 
@@ -10,7 +10,7 @@ of two categories.
   module could provide a feature that could integrate nicely with SMS or your
   module could supplement an existing module with SMS integration.
 
-* Modules that provide intergration between the framework and a third party SMS
+* Modules that provide integration between the framework and a third party SMS
   service.
 
 Different parts of the API are used for each of these applications, so it's
@@ -19,7 +19,7 @@ important to decide which you'll be building using before you begin.
 h1. Writing a Gateway Module
 
 The first step is to tell the SMS Framework about your gateway module using
-hook_gateway_info(). Your implentation of this hook should return and array of
+hook_gateway_info(). Your implementation of this hook should return and array of
 properties and callbacks about each gateway. Here is an example:
 
   function my_gateway_gateway_info() {
@@ -56,7 +56,7 @@ like this:
 The callback function is passed the following parameters:
 $number - The validated destination number.
 $message - The text of the message.
-$options (optional) - An array of dditional properties as defined your gateway
+$options (optional) - An array of additional properties as defined your gateway
 module's send form.
 
 The callback should return an array indicating the result of the send. Here is
@@ -94,7 +94,22 @@ hook_gateway_info(). Here's an example:
     return $form;
   }
 
-# @todo How to use sms_receive_incoming()
+h3. Handle incoming messages with sms_incoming()
+
+If the gateway you are integrating with has support for two-way messaging, you
+may use sms_incoming() to pass incoming messages into the SMS Framework. Your
+gateway module will be the first point of contact for messages coming in from
+the gateway. Gateway services pass incoming messages to applications in
+different ways (HTTP GET/POST, SOAP, XML-RPC, etc). Refer to the API
+documentation for your gateway service.
+
+After receiving the message and doing any necessary pre-processing, your module
+should call sms_incoming(). Here is an example:
+
+  function my_gateway_incoming_callback() {
+    // Any necessary processing to extract the number and message
+    sms_incoming($number, $message);
+  }
 
 h2. Writing a SMS Enabled Module
 
