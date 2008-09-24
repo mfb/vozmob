@@ -5,7 +5,9 @@
  */
 function mailhandler_add_edit_mailbox($form_state, $mid) {
 
-  $edit = $mid ? mailhandler_get_mailbox($mid) : mailhandler_get_mailbox_defaults();
+  if ($mid && !$form_state['post']) {
+  	$edit = mailhandler_get_mailbox($mid);
+  }
 
   if (empty($edit['folder'])) {
     $edit['folder'] = 'INBOX';
@@ -90,10 +92,10 @@ function mailhandler_add_edit_mailbox($form_state, $mid) {
   );
 
   $form['security'] = array(
-    '#type' => 'radios', 
-    '#title' => t('Security'), 
-    '#options' => array(t('Disabled'), t('Require password')), 
-    '#default_value' => isset($edit['security']) ? $edit['security'] : 0, 
+    '#type' => 'radios',
+    '#title' => t('Security'),
+    '#options' => array(t('Disabled'), t('Require password')),
+    '#default_value' => isset($edit['security']) ? $edit['security'] : 0,
     '#description' => t('Disable security if your site does not require a password in the Commands section of incoming e-mails. Note: Security=Enabled and Mime preference=HTML is an unsupported combination.')
   );
 
@@ -276,12 +278,13 @@ function mailhandler_test_mailbox(&$form_state) {
 
 function mailhandler_list_mailboxes() {
 
-  $header = array(t('Mailbox'), array('data' => t('Operations'), 'colspan' => 3));
+  $header = array(t('Mailbox'), t('Folder'), array('data' => t('Operations'), 'colspan' => 3));
   $rows = array();
   $result = db_query('SELECT * FROM {mailhandler} ORDER BY mail');
   while ($mailbox = db_fetch_object($result)) {
     $rows[] = array(
       '<a href="mailto:'. $mailbox->mail .'">'. $mailbox->mail .'</a>',
+      $mailbox->folder ? check_plain($mailbox->folder) : '',
       l(t('retrieve'), 'admin/content/mailhandler/retrieve/'.$mailbox->mid, array('title' => t('Retrieve and process pending e-mails in this mailbox'))),
       l(t('edit'), 'admin/content/mailhandler/edit/'.$mailbox->mid, array('title' => t('Edit this mailbox configuration'))),
       l(t('delete'), 'admin/content/mailhandler/delete/'.$mailbox->mid, array('title' => t('Delete this mailbox'))),
@@ -340,15 +343,4 @@ function mailhandler_admin_settings_validate($form, &$form_state) {
   ) {
     form_set_error('mailhandler_max_retrieval', t('The value should a positive integer, or zero.'));
   }
-}
-
-/**
- * Return an array of mailbox default values.
- */
-function mailhandler_get_mailbox_defaults() {
-  $schema = drupal_get_schema('mailhandler');
-  foreach ($schema['fields'] as $field => $params) {
-    $defaults[$field] = isset($params['default']) ? $params['default'] : '';
-  }
-  return $defaults;
 }

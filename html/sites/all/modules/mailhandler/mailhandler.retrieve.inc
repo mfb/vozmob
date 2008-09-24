@@ -184,7 +184,6 @@ function mailhandler_get_parts($stream, $msg_number, $max_depth = 10, $depth = 0
 
   // Retrieve part and convert MIME encoding to UTF-8
   if(!$part->data = imap_fetchbody($stream, $msg_number, $part_number)) {
-    drupal_set_message("imap_fetchbody($stream, $msg_number, $part_number)");
     watchdog('mailhandler', 'No Data!!', array(), WATCHDOG_ERROR);
     return $parts;
   }
@@ -361,7 +360,7 @@ function mailhandler_authenticate($node, $header, $origbody, $mailbox) {
     $node->name = $from_user->name;
   }
   else if (function_exists('mailalias_user')) { // since $fromaddress failed, try e-mail aliases
-    $result = db_query("SELECT mail FROM {users} WHERE data LIKE '%%". $fromaddress ."%%'");
+    $result = db_query("SELECT mail FROM {users} WHERE data LIKE '%%%s%%'", $fromaddress);
     while ($alias = db_result($result)) {
       if ($from_user = mailhandler_user_load($alias, $node->pass, $mailbox)) {
         $node->uid = $from_user->uid; // success!
@@ -510,7 +509,7 @@ function mailhandler_mail($key, &$message, $params) {
  */
 function mailhandler_term_map(&$term) {
   // provide case insensitive and trimmed map so as to maximize likelihood of successful mapping
-  $term = db_result(db_query("SELECT tid FROM {term_data} WHERE LOWER('". trim($term) ."') LIKE LOWER(name)"));
+  $term = db_result(db_query("SELECT tid FROM {term_data} WHERE LOWER('%s') LIKE LOWER(name)", trim($term)));
 }
 
 
