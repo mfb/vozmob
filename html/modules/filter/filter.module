@@ -1,5 +1,5 @@
 <?php
-// $Id: filter.module,v 1.204.2.4 2008/08/13 23:59:13 drumm Exp $
+// $Id: filter.module,v 1.204.2.7 2008/09/17 12:47:14 goba Exp $
 
 /**
  * @file
@@ -932,7 +932,7 @@ function _filter_autop($text) {
  * for scripts and styles.
  */
 function filter_xss_admin($string) {
-  return filter_xss($string, array('a', 'abbr', 'acronym', 'address', 'b', 'bdo', 'big', 'blockquote', 'br', 'caption', 'cite', 'code', 'col', 'colgroup', 'dd', 'del', 'dfn', 'div', 'dl', 'dt', 'em', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr', 'i', 'img', 'ins', 'kbd', 'li', 'ol', 'p', 'param', 'pre', 'q', 'samp', 'small', 'span', 'strong', 'sub', 'sup', 'table', 'tbody', 'td', 'tfoot', 'th', 'thead', 'tr', 'tt', 'ul', 'var'));
+  return filter_xss($string, array('a', 'abbr', 'acronym', 'address', 'b', 'bdo', 'big', 'blockquote', 'br', 'caption', 'cite', 'code', 'col', 'colgroup', 'dd', 'del', 'dfn', 'div', 'dl', 'dt', 'em', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'hr', 'i', 'img', 'ins', 'kbd', 'li', 'ol', 'p', 'pre', 'q', 'samp', 'small', 'span', 'strong', 'sub', 'sup', 'table', 'tbody', 'td', 'tfoot', 'th', 'thead', 'tr', 'tt', 'ul', 'var'));
 }
 
 /**
@@ -953,8 +953,6 @@ function filter_xss_admin($string) {
  *   an XSS attack.
  * @param $allowed_tags
  *   An array of allowed tags.
- * @param $format
- *   The format to use.
  */
 function filter_xss($string, $allowed_tags = array('a', 'em', 'strong', 'cite', 'code', 'ul', 'ol', 'li', 'dl', 'dt', 'dd')) {
   // Only operate on valid UTF-8 strings. This is necessary to prevent cross
@@ -1174,7 +1172,7 @@ function _filter_xss_attributes($attr) {
 function filter_xss_bad_protocol($string, $decode = TRUE) {
   static $allowed_protocols;
   if (!isset($allowed_protocols)) {
-    $allowed_protocols = array_flip(variable_get('filter_allowed_protocols', array('http', 'https', 'ftp', 'news', 'nntp', 'telnet', 'mailto', 'irc', 'ssh', 'sftp', 'webcal')));
+    $allowed_protocols = array_flip(variable_get('filter_allowed_protocols', array('http', 'https', 'ftp', 'news', 'nntp', 'telnet', 'mailto', 'irc', 'ssh', 'sftp', 'webcal', 'rtsp')));
   }
 
   // Get the plain text representation of the attribute value (i.e. its meaning).

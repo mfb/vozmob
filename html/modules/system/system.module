@@ -1,5 +1,5 @@
 <?php
-// $Id: system.module,v 1.585.2.17 2008/08/14 00:13:30 drumm Exp $
+// $Id: system.module,v 1.585.2.21 2008/10/08 20:47:04 goba Exp $
 
 /**
  * @file
@@ -9,7 +9,7 @@
 /**
  * The current system version.
  */
-define('VERSION', '6.5-dev');
+define('VERSION', '6.6-dev');
 
 /**
  * Core API compatibility.
@@ -39,7 +39,7 @@ define('DRUPAL_MINIMUM_PGSQL',  '7.4');
 /**
  * Maximum age of temporary files in seconds.
  */
-define('DRUPAL_MAXIMUM_TEMP_FILE_AGE', 1440);
+define('DRUPAL_MAXIMUM_TEMP_FILE_AGE', 21600);
 
 /**
  * Implementation of hook_help().
@@ -1327,7 +1327,7 @@ function system_actions_manage() {
   }
 
   $row = array();
-  $instances_present = db_fetch_object(db_query("SELECT aid FROM {actions} WHERE parameters != ''"));
+  $instances_present = db_fetch_object(db_query("SELECT aid FROM {actions} WHERE parameters <> ''"));
   $header = array(
     array('data' => t('Action type'), 'field' => 'type'),
     array('data' => t('Description'), 'field' => 'description'),
@@ -1431,7 +1431,7 @@ function system_actions_configure($form_state, $action = NULL) {
   if (is_numeric($action)) {
     $aid = $action;
     // Load stored parameter values from database.
-    $data = db_fetch_object(db_query("SELECT * FROM {actions} WHERE aid = %d", intval($aid)));
+    $data = db_fetch_object(db_query("SELECT * FROM {actions} WHERE aid = '%s'", $aid));
     $edit['actions_description'] = $data->description;
     $edit['actions_type'] = $data->type;
     $function = $data->callback;

@@ -35,7 +35,6 @@
 /print.css/1.6/Sun Jun 10 08:55:55 2007//TDRUPAL-6
 /progress.gif/1.3/Tue Feb 21 08:34:01 2006/-kb/TDRUPAL-6
 /progress.js/1.20/Fri Jan  4 11:53:21 2008//TDRUPAL-6
-/tableheader.js/1.16/Wed Jan 30 10:17:39 2008//TDRUPAL-6
 /tableselect.js/1.8/Mon Nov 19 12:15:16 2007//TDRUPAL-6
 /teaser.js/1.12/Wed Jan  9 12:10:04 2008//TDRUPAL-6
 /textarea.js/1.22/Thu Jan 17 19:31:56 2008//TDRUPAL-6
@@ -49,4 +48,5 @@
 D/farbtastic////
 /drupal.js/1.41.2.3/Tue Jul 22 21:29:02 2008//TDRUPAL-6
 /jquery.js/1.12.2.3/Tue Jul 22 21:29:02 2008//TDRUPAL-6
-/tabledrag.js/1.13.2.3/Tue Jul 22 21:29:02 2008//TDRUPAL-6
+/tabledrag.js/1.13.2.4/Wed Oct  8 21:55:45 2008//TDRUPAL-6
+/tableheader.js/1.16.2.1/Wed Oct  8 21:55:46 2008//TDRUPAL-6

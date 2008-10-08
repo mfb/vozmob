@@ -1,5 +1,5 @@
 <?php
-// $Id: locale.inc,v 1.174.2.1 2008/07/09 21:48:28 goba Exp $
+// $Id: locale.inc,v 1.174.2.4 2008/09/17 08:47:04 goba Exp $
 
 /**
  * @file
@@ -267,7 +267,7 @@ function _locale_languages_common_controls(&$form, $language = NULL) {
   );
   $form['domain'] = array('#type' => 'textfield',
     '#title' => t('Language domain'),
-    '#maxlength' => 64,
+    '#maxlength' => 128,
     '#default_value' => @$language->domain,
     '#description' => t('Language-specific URL, with protocol. With language negotiation set to <em>Domain name only</em>, the site is presented in this language when the URL accessing the site references this domain. For the default language, this value may be left blank. <strong>This value must include a protocol as part of the string.</strong> <em>Example: Specifying "http://example.de" or "http://de.example.com" as language domains for German results in URLs in the forms "http://example.de/node" and "http://de.example.com/node", respectively.</em>'),
   );
@@ -853,6 +853,7 @@ function locale_translate_edit_form_submit($form, &$form_state) {
   drupal_set_message(t('The string has been saved.'));
 
   // Clear locale cache.
+  _locale_invalidate_js();
   cache_clear_all('locale:', 'cache', TRUE);
 
   $form_state['redirect'] = 'admin/build/translate/search';
@@ -2376,7 +2377,7 @@ function _locale_get_predefined_list() {
     "pi" => array("Pali"),
     "pl" => array("Polish", "Polski"),
     "ps" => array("Pashto", /* Left-to-right marker "‭" */ "پښتو", LANGUAGE_RTL),
-    "pt" => array("Portuguese, Portugal", "Português"),
+    "pt-pt" => array("Portuguese, Portugal", "Português"),
     "pt-br" => array("Portuguese, Brazil", "Português"),
     "qu" => array("Quechua"),
     "rm" => array("Rhaeto-Romance"),
