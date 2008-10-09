@@ -1,5 +1,5 @@
 <?php
-// $Id: sms_clickatell.module,v 1.7 2008/08/20 19:52:38 diggersf Exp $
+// $Id: sms_clickatell.module,v 1.10 2008/10/07 17:21:38 diggersf Exp $
 
 /**
  * @file
@@ -21,6 +21,12 @@ function sms_clickatell_gateway_info() {
 }
 
 function sms_clickatell_admin_form($configuration) {
+  $form['sms_clickatell_balance'] = array(
+    '#type' => 'item',
+    '#title' => t('Current balance'),
+    '#value' => sms_clickatell_balance(),
+  );
+  
   $form['sms_clickatell_ssl'] = array(
     '#type' => 'checkbox',
     '#title' => t('Use SSL Encyption'),
@@ -91,7 +97,7 @@ function sms_clickatell_send($number, $message, $options) {
 
 function sms_clickatell_balance() {
   $result = sms_clickatell_command('getbalance');
-  return $return['data'];
+  return str_replace('Credit: ', '', $result['data']);
 }
 
 /**
@@ -135,7 +141,7 @@ function sms_clickatell_command($command = 'auth', $data = array(), $config = NU
 
   // Check for HTTP errors
   if ($http_result->error) {
-    return array('status' => FALSE, 'message' => 'An error occured during the HTTP request: @error', 'variables' => array('@error' => $http_result->error));
+    return array('status' => FALSE, 'message' => t('An error occured during the HTTP request: @error', array('@error' => $http_result->error)));
   }
   
   if ($http_result->data) {
@@ -143,17 +149,13 @@ function sms_clickatell_command($command = 'auth', $data = array(), $config = NU
     if (strpos($http_result->data, 'ERR') !== FALSE) {
       $result = array('status' => FALSE, 'message' => $http_result->data);
     }
-    else {
+    elseif ($command == 'auth') {
+      // Add Clickatell session ID to result array.
+      list($status, $sid) = explode(': ', $http_result->data);
       $result = array('status' => TRUE, 'sid' => $sid);
     }
-    switch ($command) {
-      case 'auth':
-        if ($result['status']) {
-          // Add Clickatell session ID to result array.
-          list($status, $sid) = explode(': ', $http_result->data);
-          $result['sid'] = $sid;
-        }
-        break;
+    else {
+      $result = array('status' => TRUE, 'data' => $http_result->data);
     }
   }
   return $result;
@@ -162,10 +164,10 @@ function sms_clickatell_command($command = 'auth', $data = array(), $config = NU
 function sms_clickatell_get_session_id() {
   if (variable_get('sms_clickatell_session_id_timestamp', 0) < strtotime('-10 mins')) {
     if ($result = sms_clickatell_command()) {
-      if ($result['status'] == TRUE) {
+      if ($result['status']) {
         variable_set('sms_clickatell_session_id', $result['sid']);
         variable_set('sms_clickatell_session_id_timestamp', time());
-        watchdog('sms', 'Clickatell session ID refreshed: %data', array('%data' => $result['sid']));
+        watchdog('sms', 'Clickatell session ID refreshed: %sid', array('%sid' => $result['sid']));
       }
     }
   }
@@ -197,7 +199,215 @@ function sms_clickatell_error_codes() {
 
 function sms_clickatell_country_codes() {
   return array(
-    1 => 'United States',
+    93 => "Afghanistan",
+    355 => "Albania",
+    213 => "Algeria",
+    376 => "Andorra",
+    244 => "Angola",
+    1264 => "Anguilla",
+    1268 => "Antigua & Barbuda",
+    54 => "Argentina",
+    374 => "Armenia",
+    297 => "Aruba",
+    61 => "Australia",
+    43 => "Austria",
+    994 => "Azerbaijan",
+    1242 => "Bahamas",
+    973 => "Bahrain",
+    880 => "Bangladesh",
+    1246 => "Barbados",
+    375 => "Belarus",
+    32 => "Belgium",
+    501 => "Belize",
+    229 => "Benin",
+    1441 => "Bermuda",
+    975 => "Bhutan",
+    591 => "Bolivia",
+    387 => "Bosnia-Herzegovina",
+    267 => "Botswana",
+    55 => "Brazil",
+    1284 => "British Virgin Islands",
+    673 => "Brunei",
+    359 => "Bulgaria",
+    226 => "Burkina Faso",
+    257 => "Burundi",
+    855 => "Cambodia",
+    237 => "Cameroon",
+    34 => "Canary Islands",
+    238 => "Cape Verde",
+    1345 => "Cayman Islands",
+    236 => "Central African Republic",
+    235 => "Chad",
+    56 => "Chile",
+    86 => "China",
+    57 => "Colombia",
+    269 => "Comoros",
+    242 => "Congo",
+    243 => "Democratic Republic Congo",
+    682 => "Cook Islands",
+    385 => "Croatia",
+    53 => "Cuba",
+    357 => "Cyprus",
+    420 => "Czech Republic",
+    45 => "Denmark",
+    253 => "Djibouti",
+    1767 => "Dominica",
+    670 => "East Timor",
+    593 => "Ecuador",
+    20 => "Egypt",
+    503 => "El Salvador",
+    240 => "Equatorial Guinea",
+    372 => "Estonia",
+    251 => "Ethiopia",
+    500 => "Falkland Islands",
+    298 => "Faroe Islands",
+    679 => "Fiji",
+    358 => "Finland",
+    33 => "France",
+    594 => "French Guiana",
+    689 => "French Polynesia",
+    241 => "Gabon",
+    220 => "Gambia",
+    995 => "Georgia",
+    49 => "Germany",
+    233 => "Ghana",
+    350 => "Gibraltar",
+    881 => "Global Mobile Satellite",
+    30 => "Greece",
+    299 => "Greenland",
+    1473 => "Grenada",
+    590 => "Guadeloupe",
+    1671 => "Guam",
+    502 => "Guatemala",
+    224 => "Guinea",
+    592 => "Guyana",
+    509 => "Haiti",
+    504 => "Honduras",
+    852 => "HongKong",
+    36 => "Hungary",
+    354 => "Iceland",
+    91 => "India",
+    62 => "Indonesia",
+    98 => "Iran",
+    964 => "Iraq",
+    353 => "Ireland",
+    972 => "Israel",
+    39 => "Italy / Vatican City State",
+    225 => "Ivory Coast",
+    1876 => "Jamaica",
+    81 => "Japan",
+    962 => "Jordan",
+    254 => "Kenya",
+    82 => "Korea (South)",
+    965 => "Kuwait",
+    996 => "Kyrgyzstan",
+    856 => "Lao",
+    371 => "Latvia",
+    961 => "Lebanon",
+    266 => "Lesotho",
+    231 => "Liberia",
+    218 => "Libya",
+    423 => "Liechtenstein",
+    370 => "Lithuania",
+    352 => "Luxembourg",
+    853 => "Macau",
+    389 => "Macedonia",
+    261 => "Madagascar",
+    265 => "Malawi",
+    60 => "Malaysia",
+    960 => "Maldives",
+    223 => "Mali",
+    356 => "Malta",
+    596 => "Martinique",
+    222 => "Mauritania",
+    230 => "Mauritius",
+    269 => "Mayotte Island (Comoros)",
+    52 => "Mexico",
+    373 => "Moldova",
+    377 => "Monaco (Kosovo)",
+    976 => "Mongolia",
+    382 => "Montenegro",
+    1664 => "Montserrat",
+    212 => "Morocco",
+    258 => "Mozambique",
+    95 => "Myanmar",
+    264 => "Namibia",
+    977 => "Nepal",
+    31 => "Netherlands",
+    599 => "Netherlands Antilles",
+    687 => "New Caledonia",
+    64 => "New Zealand",
+    505 => "Nicaragua",
+    227 => "Niger",
+    234 => "Nigeria",
+    47 => "Norway",
+    968 => "Oman",
+    92 => "Pakistan",
+    970 => "Palestine (+970)",
+    9725 => "Palestine (+9725)",
+    507 => "Panama",
+    675 => "Papua New Guinea",
+    595 => "Paraguay",
+    51 => "Peru",
+    63 => "Philippines",
+    48 => "Poland",
+    351 => "Portugal",
+    974 => "Qatar",
+    262 => "Reunion",
+    40 => "Romania",
+    7 => "Russia / Kazakhstan",
+    250 => "Rwanda",
+    1670 => "Saipan",
+    1684 => "Samoa (American)",
+    685 => "Samoa (Western)",
+    378 => "San Marino",
+    882 => "Satellite-Thuraya",
+    966 => "Saudi Arabia",
+    221 => "Senegal",
+    381 => "Serbia",
+    248 => "Seychelles",
+    232 => "Sierra Leone",
+    65 => "Singapore",
+    421 => "Slovakia",
+    386 => "Slovenia",
+    252 => "Somalia",
+    27 => "South Africa",
+    34 => "Spain",
+    94 => "Sri Lanka",
+    1869 => "St. Kitts And Nevis",
+    1758 => "St. Lucia",
+    1784 => "St. Vincent",
+    249 => "Sudan",
+    597 => "Suriname",
+    268 => "Swaziland",
+    46 => "Sweden",
+    41 => "Switzerland",
+    963 => "Syria",
+    886 => "Taiwan",
+    992 => "Tajikistan",
+    255 => "Tanzania",
+    66 => "Thailand",
+    228 => "Togo",
+    676 => "Tonga Islands",
+    1868 => "Trinidad and Tobago",
+    216 => "Tunisia",
+    90 => "Turkey",
+    993 => "Turkmenistan",
+    1649 => "Turks and Caicos Islands",
+    256 => "Uganda",
+    44 => "UK / Isle of Man / Jersey / Guernsey",
+    380 => "Ukraine",
+    971 => "United Arab Emirates",
+    598 => "Uruguay",
+    1 => "USA / Canada / Dominican Rep. / Puerto Rico",
+    998 => "Uzbekistan",
+    678 => "Vanuatu",
+    58 => "Venezuela",
+    84 => "Vietnam",
+    967 => "Yemen",
+    260 => "Zambia",
+    255 => "Zanzibar",
+    263 => "Zimbabwe",
   );
 }
 

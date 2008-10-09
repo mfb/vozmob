@@ -1,8 +1,8 @@
 <?php
 // $Id$
 
-// CURRENTLY SUPPORTED:
-// 'txt.att.net' => t('AT&T/Cingular'),
+// SUPPORTED GATEWAYS:
+// 'txt.att.net' => t('AT&amp;T/Cingular'),
 // 'mobile.celloneusa.com' => t('CellularOne'),
 // 'cwemail.com' => t('Centennial Wireless'),
 // 'sms.mycricket.com' => t('Cricket'),
@@ -13,12 +13,11 @@
 // 'tmomail.net' => t('T-Mobile'),
 // 'vmobl.com' => t('Virgin Mobile'),
 // 'vtext.com' => t('Verizon'),
-
-// TO BE SUPPORTED:
-// @mms.att.net are                                                                                                          
-// @myboostmobile.com                                                                                                                                                               
-// @messaging.nextel.com                                                                                                                                                            
-// @mymetropcs.com
+// 'myboostmobile.com' => Boost Mobile
+// 'mymetropcs.com' => Metro PCS
+// SUPPORTED ALIASES:
+// @mms.att.net => AT&T
+// @messaging.nextel.com => Nextel
 
 /**
  * Implementation of hook_mailsave_clean().
@@ -30,7 +29,15 @@ function sms_mailsave_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
   if (!$node->uid) {
     list($from_address, $from_name) = mailhandler_get_fromaddress($header, $mailbox);
     $from = explode('@', $from_address);
-    $sms_message['from'] = $from[0];
+    $email_gateway_aliases = array(
+      'messaging.nextel.com' => 'page.nextel.com',
+      'mms.att.net' => 'txt.att.net',
+      'vzwpix.com' => 'vtext.com',
+    );
+    if (isset($email_gateway_aliases[$from[1]])) {
+      $from[1] = $email_gateway_aliases[$from[1]];
+    }
+    $sms_message['from'] = $from[0];    
     sms_user_sms_receive($node, $sms_message);
     $sms_email_gateway_providers = sms_email_gateway_sms_email_gateway_providers();
     if (!$node->uid && isset($sms_email_gateway_providers[$from[1]])) {

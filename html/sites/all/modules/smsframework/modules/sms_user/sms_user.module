@@ -1,5 +1,5 @@
 <?php
-// $Id: sms_user.module,v 1.8 2008/09/05 20:33:59 diggersf Exp $
+// $Id: sms_user.module,v 1.9 2008/10/07 17:05:55 diggersf Exp $
 
 /**
  * @file
@@ -367,7 +367,7 @@ function sms_user_save(&$edit, &$account, $category) {
 
 function _sms_user_confirm_message($code) {
   $text_format = variable_get('sms_user_confirmation_message', '[site-name] confirmation code: [confirm-code]');
-  $text = token_replace_multiple($text_format, array('sms_user' => array('confirm-code' => $code), 'global'));
+  $text = token_replace_multiple($text_format, array('sms_user' => array('confirm-code' => $code)));
   return $text;
 }
 
