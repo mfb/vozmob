@@ -2,19 +2,21 @@
 // $Id$
 
 // SUPPORTED GATEWAYS:
-// 'txt.att.net' => t('AT&amp;T/Cingular'),
+// 'msg.acsalaska.com' => t('Alaska Communications Systems'),
+// 'message.alltel.com' => t('Alltel Wireless'),
+// 'txt.att.net' => t('AT&T/Cingular'),
+// 'myboostmobile.com' => t('Boost Mobile'),
 // 'mobile.celloneusa.com' => t('CellularOne'),
 // 'cwemail.com' => t('Centennial Wireless'),
 // 'sms.mycricket.com' => t('Cricket'),
 // 'messaging.sprintpcs.com' => t('Helio'),
+// 'mymetropcs.com' => t('Metro PCS'),
 // 'page.nextel.com' => t('Nextel'),
 // 'qwestmp.com' => t('Qwest'),
 // 'messaging.sprintpcs.com' => t('Sprint'),
 // 'tmomail.net' => t('T-Mobile'),
 // 'vmobl.com' => t('Virgin Mobile'),
 // 'vtext.com' => t('Verizon'),
-// 'myboostmobile.com' => Boost Mobile
-// 'mymetropcs.com' => Metro PCS
 // SUPPORTED ALIASES:
 // mms.att.net => AT&T
 // messaging.nextel.com => Nextel
