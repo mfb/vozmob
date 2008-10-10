@@ -1,0 +1,14 @@
+Upgrading From 5.x-2.x -> 6.x-2.x
+
+1) If FileField is not already installed, disable ImageField.
+2) Upgrade Drupal and contributed Modules to 6.x.
+3) Run Update.php 
+4) If FileField is not already installed
+  a) install FileField 
+  b) enable both ImageField and FileField.
+  c) run update.php.
+
+  
+
+
+

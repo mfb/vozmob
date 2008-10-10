@@ -413,6 +413,7 @@ function file_create_filename($basename, $directory) {
     }
     else {
       $name = $basename;
+      $ext = '';
     }
 
     $counter = 0;
@@ -792,7 +793,9 @@ function file_set_status(&$file, $status) {
  * @param $headers An array of http headers to send along with file.
  */
 function file_transfer($source, $headers) {
-  ob_end_clean();
+  if (ob_get_level()) {
+    ob_end_clean();
+  }
 
   foreach ($headers as $header) {
     // To prevent HTTP header injection, we delete new lines that are

@@ -5,9 +5,25 @@
  */
 function mailhandler_add_edit_mailbox($form_state, $mid) {
 
-  if ($mid && !$form_state['post']) {
-  	$edit = mailhandler_get_mailbox($mid);
-  }
+  $edit = $mid ? mailhandler_get_mailbox($mid) : array(
+    'mail' => '',
+    'mailto' => '',
+    'imap' => 1,
+    'domain' => '',
+    'port' => '',
+    'name' => '',
+    'pass' => '',
+    'extraimap' => '',
+    'mime' => 'TEXT/HTML,TEXT/PLAIN',
+    'security' => 0,
+    'replies' => 1,
+    'fromheader' => '',
+    'commands' => '',
+    'sigseparator' => '',
+    'delete_after_read' => 1,
+    'enabled' => 1,
+    'format' => FILTER_FORMAT_DEFAULT,
+  );
 
   if (empty($edit['folder'])) {
     $edit['folder'] = 'INBOX';

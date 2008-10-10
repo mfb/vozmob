@@ -1,0 +1,1529 @@
+# $Id: hu.po,v 1.1.2.2 2008/08/13 20:22:11 aries Exp $
+#
+# Generated from files:
+#  content.module,v 1.290 2008/04/25 01:08:34 karens
+#  nodereference.module,v 1.128 2008/04/25 00:48:43 karens
+#  content.crud.inc,v 1.73 2008/04/23 19:00:12 karens
+#  content_copy.module,v 1.25 2008/04/23 19:00:13 karens
+#  content.admin.inc,v 1.172 2008/04/23 22:26:09 karens
+#  content.info,v 1.6 2007/07/04 23:46:29 yched
+#  content_copy.info,v 1.6 2008/04/23 18:01:48 dww
+#  content_permissions.info,v 1.2 2008/04/23 18:01:52 dww
+#  fieldgroup.info,v 1.6 2008/04/23 18:01:58 dww
+#  nodereference.info,v 1.8 2008/04/23 18:02:07 dww
+#  number.info,v 1.7 2008/04/23 18:02:16 dww
+#  optionwidgets.info,v 1.7 2008/04/23 18:02:24 dww
+#  text.info,v 1.9 2008/04/23 18:02:31 dww
+#  userreference.info,v 1.8 2008/04/23 18:02:38 dww
+#  example_field.php,v 1.5 2008/04/23 08:24:06 karens
+#  simple_field.php,v 1.5 2008/04/23 08:24:06 karens
+#  text.module,v 1.91 2008/04/23 18:02:36 dww
+#  userreference.module,v 1.100 2008/04/25 00:48:43 karens
+#  number.module,v 1.90 2008/04/23 18:02:22 dww
+#  fieldgroup.module,v 1.78 2008/04/25 01:34:23 karens
+#  content.node_form.inc,v 1.6 2008/04/23 18:01:39 dww
+#  content.token.inc,v 1.5 2008/04/25 01:24:40 karens
+#  content.views.inc,v 1.64 2008/04/25 02:03:14 karens
+#  content_permissions.module,v 1.4 2008/04/25 02:03:14 karens
+#  content_permissions.install,v 1.1 2008/04/25 02:03:14 karens
+#  optionwidgets.module,v 1.61 2008/04/23 18:02:29 dww
+#
+# Fehér János <feher.janos@mindworks.hu>, 2008.
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2008-08-01 11:11+0200\n"
+"PO-Revision-Date: 2008-08-01 11:08+0200\n"
+"Last-Translator: Fehér János <feher.janos@mindworks.hu>\n"
+"Language-Team: Drupal.hu Fordítói Csapat <forditas [at] drupal.hu>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: KAider 0.1\n"
+
+#: cck/content.module:25
+msgid ""
+"The content module, a required component of the Content Construction Kit "
+"(CCK), allows administrators to associate custom fields with content types. "
+"In Drupal, content types are used to define the characteristics of a post, "
+"including the title and description of the fields displayed on its add and "
+"edit pages. Using the content module (and the other helper modules included "
+"in CCK), custom fields beyond the default \"Title\" and \"Body\" may be "
+"added. CCK features are accessible through tabs on the <a href=\"@content-"
+"types\">content types administration page</a>. (See the <a href=\"@node-help"
+"\">node module help page</a> for more information about content types.)"
+msgstr ""
+
+#: cck/content.module:26
+msgid ""
+"When adding a custom field to a content type, you determine its type "
+"(whether it will contain text, numbers, or references to other objects) and "
+"how it will be displayed (either as a text field or area, a select box, "
+"checkbox, radio button, or autocompleting field). A field may have multiple "
+"values (i.e., a \"person\" may have multiple e-mail addresses) or a single "
+"value (i.e., an \"employee\" has a single employee identification number). "
+"As you add and edit fields, CCK automatically adjusts the structure of the "
+"database as necessary. CCK also provides a number of other features, "
+"including intelligent caching for your custom data, an import and export "
+"facility for content type definitions, and integration with other "
+"contributed modules."
+msgstr ""
+
+#: cck/content.module:27
+msgid ""
+"Custom field types are provided by a set of optional modules included with "
+"CCK (each module provides a different type). The <a href=\"@modules"
+"\">modules page</a> allows you to enable or disable CCK components. A "
+"default installation of CCK includes:"
+msgstr ""
+
+#: cck/content.module:29
+msgid ""
+"<em>number</em>, which adds numeric field types, in integer, decimal or "
+"floating point form. You may define a set of allowed inputs, or specify an "
+"allowable range of values. A variety of common formats for displaying "
+"numeric data are available."
+msgstr ""
+
+#: cck/content.module:30
+msgid ""
+"<em>text</em>, which adds text field types. A text field may contain plain "
+"text only, or optionally, may use Drupal's input format filters to securely "
+"manage rich text input. Text input fields may be either a single line (text "
+"field), multiple lines (text area), or for greater input control, a select "
+"box, checkbox, or radio buttons. If desired, CCK can validate the input to a "
+"set of allowed values."
+msgstr ""
+
+#: cck/content.module:31
+msgid ""
+"<em>nodereference</em>, which creates custom references between Drupal "
+"nodes. By adding a <em>nodereference</em> field and two different content "
+"types, for instance, you can easily create complex parent/child "
+"relationships between data (multiple \"employee\" nodes may contain a "
+"<em>nodereference</em> field linking to an \"employer\" node)."
+msgstr ""
+
+#: cck/content.module:32
+msgid ""
+"<em>userreference</em>, which creates custom references to your sites' user "
+"accounts. By adding a <em>userreference</em> field, you can create complex "
+"relationships between your site's users and posts. To track user involvement "
+"in a post beyond Drupal's standard <em>Authored by</em> field, for instance, "
+"add a <em>userreference</em> field named \"Edited by\" to a content type to "
+"store a link to an editor's user account page."
+msgstr ""
+
+#: cck/content.module:33
+msgid ""
+"<em>fieldgroup</em>, which creates collapsible fieldsets to hold a group of "
+"related fields. A fieldset may either be open or closed by default. The "
+"order of your fieldsets, and the order of fields within a fieldset, is "
+"managed via a drag-and-drop interface provided by content module."
+msgstr ""
+
+#: cck/content.module:35
+msgid ""
+"For more information, see the online handbook entry for <a href=\"@handbook-"
+"cck\">CCK</a> or the <a href=\"@project-cck\">CCK project page</a>."
+msgstr ""
+
+#: cck/content.module:41
+msgid ""
+"Configure how this content type's fields and field labels should be "
+"displayed when it's viewed in teaser and full-page mode."
+msgstr ""
+
+#: cck/content.module:44
+msgid ""
+"Configure how this content type's fields should be displayed when it's "
+"rendered in the following contexts."
+msgstr ""
+
+#: cck/content.module:48
+msgid "Control the order of fields in the input form."
+msgstr ""
+
+#: cck/content.module:439
+msgid "This field is required."
+msgstr "Ez a mező nem lett kitöltve."
+
+#: cck/content.module:443
+msgid "!title: !required"
+msgstr "!title: !required"
+
+#: cck/content.module:446
+msgid "Order"
+msgstr "Sorrend"
+
+#: cck/content.module:1604 cck/modules/nodereference/nodereference.module:217
+msgid "Teaser"
+msgstr "Bevezető"
+
+#: cck/content.module:1605 cck/modules/nodereference/nodereference.module:212
+msgid "Full node"
+msgstr "Teljes tartalom"
+
+#: cck/content.module:1609
+msgid "RSS Item"
+msgstr "RSS-elem"
+
+#: cck/content.module:1611
+msgid "Search Index"
+msgstr "Keresés Index"
+
+#: cck/content.module:1612
+msgid "Search Result"
+msgstr "Keresési találat"
+
+#: cck/content.module:1969
+msgid "Language"
+msgstr "Nyelv"
+
+#: cck/content.module:1976
+msgid "Menu settings (admin)"
+msgstr "Menü beállítások (admin)"
+
+#: cck/content.module:1983
+msgid "Taxonomy"
+msgstr "Taxonómia"
+
+#: cck/content.module:1990
+msgid "File attachments"
+msgstr "Csatolt fájlok"
+
+#: cck/content.module:521;528;0 cck/includes/content.crud.inc:585;624
+msgid "content"
+msgstr "tartalom"
+
+#: cck/content.module:521
+msgid "Updating field type %type with module %module."
+msgstr ""
+
+#: cck/content.module:528
+msgid "Updating widget type %type with module %module."
+msgstr ""
+
+#: cck/content.module:84
+msgid "Use PHP input for field settings (dangerous - grant with care)"
+msgstr ""
+
+#: cck/content.module:103 cck/modules/content_copy/content_copy.module:125
+msgid "Fields"
+msgstr "Mezők"
+
+#: cck/content.module:125
+msgid "Manage fields"
+msgstr "Mezők szerkesztése"
+
+#: cck/content.module:134
+msgid "Display fields"
+msgstr "Mezők megjelenítése"
+
+#: cck/content.module:143
+msgid "General"
+msgstr "Általános"
+
+#: cck/content.module:149
+msgid "Advanced"
+msgstr "Haladó"
+
+#: cck/content.module:156 cck/includes/content.admin.inc:549
+msgid "Add field"
+msgstr "Mező hozzáadása"
+
+#: cck/content.module:177
+msgid "Remove field"
+msgstr "Mező törlése"
+
+#: cck/content.info:0 cck/includes/content.views.inc:61;102
+msgid "Content"
+msgstr "Tartalom"
+
+#: cck/content.info:0
+msgid "Allows administrators to define new content types."
+msgstr ""
+
+#: cck/content.info:0 cck/modules/content_copy/content_copy.info:0
+#: cck/modules/content_permissions/content_permissions.info:0
+#: cck/modules/fieldgroup/fieldgroup.info:0
+#: cck/modules/nodereference/nodereference.info:0
+#: cck/modules/number/number.info:0
+#: cck/modules/optionwidgets/optionwidgets.info:0 cck/modules/text/text.info:0
+#: cck/modules/userreference/userreference.info:0
+msgid "CCK"
+msgstr "CCK"
+
+#: cck/examples/example_field.php:107 cck/examples/simple_field.php:115
+#: cck/modules/text/text.module:49 cck/modules/text/text.info:0
+msgid "Text"
+msgstr "Szöveg"
+
+#: cck/examples/example_field.php:158;388 cck/examples/simple_field.php:332
+#: cck/modules/text/text.module:66;205
+#: cck/modules/userreference/userreference.module:151
+msgid "Plain text"
+msgstr "Egyszerű szöveg"
+
+#: cck/examples/example_field.php:158 cck/modules/text/text.module:66
+msgid "Filtered text (user selects input format)"
+msgstr "Formázott szöveg (a felhasználó választja ki a beviteli formát)"
+
+#: cck/examples/example_field.php:161 cck/modules/text/text.module:69
+msgid "Text processing"
+msgstr "Szövegfeldolgozás"
+
+#: cck/examples/example_field.php:167 cck/examples/simple_field.php:164
+#: cck/modules/text/text.module:75
+msgid "Maximum length"
+msgstr "Maximális hossz"
+
+#: cck/examples/example_field.php:170 cck/examples/simple_field.php:167
+#: cck/modules/text/text.module:78
+msgid ""
+"The maximum length of the field in characters. Leave blank for an unlimited "
+"size."
+msgstr ""
+
+#: cck/examples/example_field.php:174 cck/modules/number/number.module:129
+#: cck/modules/text/text.module:88
+msgid "Allowed values list"
+msgstr "Megengedett értékek"
+
+#: cck/examples/example_field.php:178 cck/modules/number/number.module:133
+#: cck/modules/text/text.module:92
+msgid ""
+"The possible values this field can contain. Enter one value per line, in the "
+"format key|label. The key is the value that will be stored in the database, "
+"and it must match the field storage type (%type). The label is optional, and "
+"the key will be used as the label if no label is specified.<br />Allowed "
+"HTML tags: @tags"
+msgstr ""
+
+#: cck/examples/example_field.php:182 cck/includes/content.admin.inc:951
+#: cck/modules/number/number.module:137 cck/modules/text/text.module:96
+msgid "PHP code"
+msgstr "PHP kód"
+
+#: cck/examples/example_field.php:188 cck/includes/content.admin.inc:966;979
+#: cck/modules/number/number.module:144;153
+#: cck/modules/text/text.module:103;112
+msgid "Code"
+msgstr "Kód"
+
+#: cck/examples/example_field.php:191 cck/modules/number/number.module:147
+#: cck/modules/text/text.module:106
+msgid ""
+"Advanced usage only: PHP code that returns a keyed array of allowed values. "
+"Should not include &lt;?php ?&gt; delimiters. If this field is filled out, "
+"the array returned by this code will override the allowed values list above."
+msgstr ""
+
+#: cck/examples/example_field.php:278
+msgid "Illegal value for %name."
+msgstr "Érvénytelen érték lett megadva ennek: %name"
+
+#: cck/examples/example_field.php:287 cck/examples/simple_field.php:231
+msgid "%label is longer than %max characters."
+msgstr "%label nem tartalmazhat %max karakternél többet."
+
+#: cck/examples/example_field.php:383 cck/examples/simple_field.php:327
+#: cck/modules/text/text.module:200
+#: cck/modules/userreference/userreference.module:146
+msgid "Default"
+msgstr "Alapértelmezett"
+
+#: cck/examples/example_field.php:393 cck/modules/text/text.module:210
+msgid "Trimmed"
+msgstr "Levágva"
+
+#: cck/examples/example_field.php:476 cck/examples/simple_field.php:400
+#: cck/modules/number/number.module:346 cck/modules/text/text.module:260
+msgid "Text field"
+msgstr "Szöveg mező"
+
+#: cck/examples/example_field.php:484
+msgid "Text area"
+msgstr "Szöveg doboz"
+
+#: cck/examples/example_field.php:551 cck/examples/simple_field.php:430
+#: cck/modules/text/text.module:320
+msgid "Rows"
+msgstr "Sorok"
+
+#: cck/examples/example_field.php:560 cck/examples/simple_field.php:438
+#: cck/modules/text/text.module:329
+msgid "\"Rows\" must be a positive integer."
+msgstr "A „Sorok” számának pozitív egész számot lehet megadni."
+
+#: cck/includes/content.admin.inc:16;212
+msgid "Name"
+msgstr "Név"
+
+#: cck/includes/content.admin.inc:16;212
+msgid "Type"
+msgstr "Típus"
+
+#: cck/includes/content.admin.inc:16
+#: cck/modules/fieldgroup/fieldgroup.module:156
+msgid "Description"
+msgstr "Leírás"
+
+#: cck/includes/content.admin.inc:16;212
+msgid "Operations"
+msgstr "Műveletek"
+
+#: cck/includes/content.admin.inc:30
+msgid "edit"
+msgstr "szerkesztés"
+
+#: cck/includes/content.admin.inc:33
+msgid "add field"
+msgstr "mező hozzáadása"
+
+#: cck/includes/content.admin.inc:34
+msgid "manage fields"
+msgstr "mezők szerkesztése"
+
+#: cck/includes/content.admin.inc:37
+msgid "delete"
+msgstr "törlés"
+
+#: cck/includes/content.admin.inc:48
+msgid "No content types available."
+msgstr "Nincs elérhető tartalomtípus."
+
+#: cck/includes/content.admin.inc:55
+msgid "» Add a new content type"
+msgstr "Új tartalomtípus hozzáadása"
+
+#: cck/includes/content.admin.inc:64;623;877
+msgid "Field name"
+msgstr "Mező neve"
+
+#: cck/includes/content.admin.inc:64;653;664;883
+msgid "Field type"
+msgstr "Mező típusa"
+
+#: cck/includes/content.admin.inc:64
+msgid "Used in"
+msgstr "Ez használja"
+
+#: cck/includes/content.admin.inc:87
+msgid "No fields have been defined for any content type yet."
+msgstr "Egyetlen tartalomtípushoz sincs még mező hozzárendelve."
+
+#: cck/includes/content.admin.inc:112;297
+msgid "There are no fields configured for this content type. You can !link."
+msgstr "Még egy mező sem hozzárendelve ehhez a tartalomtípushoz. !link"
+
+#: cck/includes/content.admin.inc:113;298
+msgid "Add a new field"
+msgstr "Új mező hozzáadása"
+
+#: cck/includes/content.admin.inc:137
+msgid ""
+"To change the order of a field, grab a drag-and-drop handle under the Label "
+"column and drag the field to a new location in the list. (Grab a handle by "
+"clicking and holding the mouse while hovering over a handle icon.) Remember "
+"that your changes will not be saved until you click the Save button at the "
+"bottom of the page."
+msgstr ""
+
+#: cck/includes/content.admin.inc:147;163
+msgid "Configure"
+msgstr "Beállítások"
+
+#: cck/includes/content.admin.inc:148;164;811
+#: cck/modules/fieldgroup/fieldgroup.module:236
+msgid "Remove"
+msgstr "Törlés"
+
+#: cck/includes/content.admin.inc:201;408
+#: cck/modules/fieldgroup/fieldgroup.module:110;363
+msgid "Save"
+msgstr "Mentés"
+
+#: cck/includes/content.admin.inc:212;419;644;871
+#: cck/includes/content.views.inc:326
+#: cck/modules/fieldgroup/fieldgroup.module:121
+msgid "Label"
+msgstr "Cimke"
+
+#: cck/includes/content.admin.inc:212
+msgid "Weight"
+msgstr "Súly"
+
+#: cck/includes/content.admin.inc:325;366
+msgid "Above"
+msgstr "Felette"
+
+#: cck/includes/content.admin.inc:326
+msgid "Inline"
+msgstr "Beágyazott"
+
+#: cck/includes/content.admin.inc:327;352;367;375
+msgid "<Hidden>"
+msgstr "<Rejtett>"
+
+#: cck/includes/content.admin.inc:370
+msgid "no styling"
+msgstr "formázás nélkül"
+
+#: cck/includes/content.admin.inc:371
+msgid "simple"
+msgstr "egyszerű"
+
+#: cck/includes/content.admin.inc:372
+msgid "fieldset"
+msgstr "mezőcsoport"
+
+#: cck/includes/content.admin.inc:373
+msgid "fieldset - collapsible"
+msgstr "mezőcsoport - összecsukható"
+
+#: cck/includes/content.admin.inc:374
+msgid "fieldset - collapsed"
+msgstr "mezőcsoport - összecsukva"
+
+#: cck/includes/content.admin.inc:419
+msgid "Field"
+msgstr "Mező"
+
+#: cck/includes/content.admin.inc:464
+msgid "Your settings have been saved."
+msgstr "A beállítások el lettek mentve."
+
+#: cck/includes/content.admin.inc:481
+msgid ""
+"No field modules are enabled. You need to <a href=\"!modules_url\">enable "
+"one</a>, such as text.module, before you can add new fields."
+msgstr ""
+
+#: cck/includes/content.admin.inc:540
+msgid "Add existing field"
+msgstr "Létező mező hozzáadása"
+
+#: cck/includes/content.admin.inc:568
+msgid "Added field %label."
+msgstr "%label mező hozzá lett adva."
+
+#: cck/includes/content.admin.inc:571
+msgid "There was a problem adding field %label."
+msgstr "A mező hozzáadásánál hiba történt: %label."
+
+#: cck/includes/content.admin.inc:611
+msgid "Create new field"
+msgstr "Új mező létrehozása"
+
+#: cck/includes/content.admin.inc:618
+msgid "Edit basic information"
+msgstr "Alapadatok szerkesztése"
+
+#: cck/includes/content.admin.inc:627
+msgid "The machine-readable name of the field."
+msgstr "A mező gépek számára olvasható neve."
+
+#: cck/includes/content.admin.inc:631
+msgid "This name cannot be changed."
+msgstr "Ez a név nem változtatható."
+
+#: cck/includes/content.admin.inc:639
+msgid ""
+"This name cannot be changed later! The name will be prefixed with 'field_' "
+"and can include lowercase unaccented letters, numbers, and underscores. The "
+"length of the name, including the prefix, is limited to no more than 32 "
+"characters."
+msgstr ""
+"Ez a név később nem változtatható meg! A név „field_” előtaggal fog "
+"kezdődni, kisbetűs ékezet nélküli betűket, számokat és aláhúzást "
+"tartalmazhat. A mező neve az előtaggal együtt nem lehet hosszabb 32 "
+"karakternél."
+
+#: cck/includes/content.admin.inc:647
+msgid ""
+"A human-readable name to be used as the label for this field in the %type "
+"content type."
+msgstr ""
+
+#: cck/includes/content.admin.inc:657
+msgid ""
+"The type of data you would like to store in the database with this field."
+msgstr ""
+
+#: cck/includes/content.admin.inc:667
+msgid ""
+"The type of data you would like to store in the database with this field. "
+"This option cannot be changed."
+msgstr ""
+
+#: cck/includes/content.admin.inc:672;890
+msgid "Widget type"
+msgstr "Felületi elem típusa"
+
+#: cck/includes/content.admin.inc:676
+msgid ""
+"The type of form element you would like to present to the user when creating "
+"this field in the %type content type."
+msgstr ""
+
+#: cck/includes/content.admin.inc:690
+msgid "Continue"
+msgstr "Folytatás"
+
+#: cck/includes/content.admin.inc:713
+msgid ""
+"The field name %field_name is invalid. The name must include only lowercase "
+"unaccentuated letters, numbers, and underscores."
+msgstr ""
+
+#: cck/includes/content.admin.inc:716
+msgid ""
+"The field name %field_name is too long. The name is limited to 32 "
+"characters, including the 'field_' prefix."
+msgstr ""
+
+#: cck/includes/content.admin.inc:727
+msgid "The field name %field_name already exists."
+msgstr "Már létezik mező ilyen néven: %field_name"
+
+#: cck/includes/content.admin.inc:730
+msgid "The name 'field_instance' is a reserved name."
+msgstr ""
+
+#: cck/includes/content.admin.inc:762
+msgid "Created field %label."
+msgstr "%label mező létre lett hozva."
+
+#: cck/includes/content.admin.inc:766
+msgid "There was a problem creating field %label."
+msgstr "Hiba történt a mező létrehozásakor: %label."
+
+#: cck/includes/content.admin.inc:775
+msgid "Updated field %label."
+msgstr "%label mező frissítve lett."
+
+#: cck/includes/content.admin.inc:779
+msgid "There was a problem updating field %label."
+msgstr "Hiba történt a mező frissítésekor: %label."
+
+#: cck/includes/content.admin.inc:807
+msgid "Are you sure you want to remove the field %field?"
+msgstr "Biztosan törölhető a mező: %field?"
+
+#: cck/includes/content.admin.inc:810
+msgid ""
+"If you have any content left in this field, it will be lost. This action "
+"cannot be undone."
+msgstr ""
+
+#: cck/includes/content.admin.inc:811
+#: cck/modules/fieldgroup/fieldgroup.module:236
+msgid "Cancel"
+msgstr "Mégsem"
+
+#: cck/includes/content.admin.inc:829
+msgid "Removed field %field from %type."
+msgstr "A mező törölve lett: %field (%type tartalomtípusból)."
+
+#: cck/includes/content.admin.inc:834
+msgid "There was a problem deleting %field from %type."
+msgstr ""
+
+#: cck/includes/content.admin.inc:867
+msgid "%type basic information"
+msgstr ""
+
+#: cck/includes/content.admin.inc:897;1059
+msgid "Change basic information"
+msgstr "Alapadatok megváltoztatása"
+
+#: cck/includes/content.admin.inc:903
+msgid "%type settings"
+msgstr "%type beállításai"
+
+#: cck/includes/content.admin.inc:904
+msgid ""
+"These settings apply only to the %field field as it appears in the %type "
+"content type."
+msgstr ""
+
+#: cck/includes/content.admin.inc:918
+#: cck/modules/fieldgroup/fieldgroup.module:143
+msgid "Help text"
+msgstr "Súgó szöveg"
+
+#: cck/includes/content.admin.inc:921
+msgid ""
+"Instructions to present to the user below this field on the editing form."
+"<br />Allowed HTML tags: @tags"
+msgstr ""
+
+#: cck/includes/content.admin.inc:929
+msgid "Default value"
+msgstr "Alapértelmezett érték"
+
+#: cck/includes/content.admin.inc:960;1106
+msgid "'@column' => value for @column"
+msgstr ""
+
+#: cck/includes/content.admin.inc:962;1108
+msgid ""
+"return array(\n"
+"  0 => array(@columns),\n"
+"  // You'll usually want to stop here. Provide more values\n"
+"  // if you want your 'default value' to be multi-valued:\n"
+"  1 => array(@columns),\n"
+"  2 => ...\n"
+");"
+msgstr ""
+
+#: cck/includes/content.admin.inc:970
+msgid ""
+"Advanced usage only: PHP code that returns a default value. Should not "
+"include &lt;?php ?&gt; delimiters. If this field is filled out, the value "
+"returned by this code will override any value specified above. Expected "
+"format: <pre>!sample</pre>Using !link_devel 'devel load' tab on a %type "
+"content page might help you figure out the expected format."
+msgstr ""
+
+#: cck/includes/content.admin.inc:980 cck/modules/number/number.module:154
+#: cck/modules/text/text.module:113
+msgid "&lt;none&gt;"
+msgstr ""
+
+#: cck/includes/content.admin.inc:981 cck/modules/number/number.module:155
+#: cck/modules/text/text.module:114
+msgid "You're not allowed to input PHP code."
+msgstr ""
+
+#: cck/includes/content.admin.inc:981
+msgid ""
+"This PHP code was set by an administrator and will override any value "
+"specified above."
+msgstr ""
+
+#: cck/includes/content.admin.inc:988
+msgid "Global settings"
+msgstr "Általános beállítások"
+
+#: cck/includes/content.admin.inc:989
+msgid ""
+"These settings apply to the %field field in every content type in which it "
+"appears."
+msgstr ""
+
+#: cck/includes/content.admin.inc:993
+msgid "Required"
+msgstr "Szükséges"
+
+#: cck/includes/content.admin.inc:996
+msgid "Maximum number of values users can enter for this field."
+msgstr ""
+
+#: cck/includes/content.admin.inc:998
+msgid ""
+"'Unlimited' will provide an 'Add more' button so the users can add as many "
+"values as they like."
+msgstr ""
+
+#: cck/includes/content.admin.inc:1000
+msgid ""
+"Warning! Changing this setting after data has been created could result in "
+"the loss of data!"
+msgstr ""
+
+#: cck/includes/content.admin.inc:1003
+msgid "Number of values"
+msgstr "Értékek száma"
+
+#: cck/includes/content.admin.inc:1004
+msgid "Unlimited"
+msgstr "Végtelen"
+
+#: cck/includes/content.admin.inc:1021
+msgid "Save field settings"
+msgstr "Mező beállításainak mentése"
+
+#: cck/includes/content.admin.inc:1110
+msgid ""
+"The default value PHP code returned an incorrect value.<br/>Expected format: "
+"<pre>!sample</pre> Returned value: @value"
+msgstr ""
+
+#: cck/includes/content.admin.inc:1148
+msgid "The PHP code for 'default value' returned @value, which is invalid."
+msgstr ""
+
+#: cck/includes/content.admin.inc:1152
+msgid "The default value is invalid."
+msgstr "Az alapértelmezett érték érvénytelen"
+
+#: cck/includes/content.admin.inc:1175
+msgid "Saved field %label."
+msgstr "%label mező el lett mentve."
+
+#: cck/includes/content.admin.inc:1480
+msgid "Processing"
+msgstr "Feldolgozás"
+
+#: cck/includes/content.admin.inc:1481
+msgid "The update has encountered an error."
+msgstr "A frissítés során hiba történt."
+
+#: cck/includes/content.admin.inc:1495
+msgid "The database has been altered and data has been migrated or deleted."
+msgstr "Az adatbázis megváltozott és az adatok átemelve vagy törölve lettek."
+
+#: cck/includes/content.admin.inc:1498
+msgid "An error occurred and database alteration did not complete."
+msgstr "Hiba történt és az adatbázis megváltoztatása nem fejeződött be."
+
+#: cck/includes/content.admin.inc:1601
+msgid "Processing %title"
+msgstr ""
+
+#: cck/includes/content.admin.inc:1499
+msgid "1 item successfully processed:"
+msgid_plural "@count items successfully processed:"
+msgstr[0] "1 elem sikeresen feldolgozva:"
+msgstr[1] "@count elem sikeresen feldolgozva:"
+
+#: cck/includes/content.crud.inc:585
+msgid ""
+"Content fields table %old_name has been renamed to %new_name and field "
+"instances have been updated."
+msgstr ""
+
+#: cck/includes/content.crud.inc:624
+msgid "The content fields table %name has been deleted."
+msgstr "A mezők %name táblája törölve lett."
+
+#: cck/includes/content.node_form.inc:209
+msgid "Add another item"
+msgstr "Újabb elem hozzáadása"
+
+#: cck/includes/content.token.inc:60
+msgid "Referenced node ID"
+msgstr "Hivatkozott tartalom ID"
+
+#: cck/includes/content.token.inc:61
+msgid "Referenced node title"
+msgstr "Hivatkozott tartalom cím"
+
+#: cck/includes/content.token.inc:62
+msgid "Formatted HTML link to the node"
+msgstr "HTML link a tartalomra"
+
+#: cck/includes/content.token.inc:86
+msgid "Raw number value"
+msgstr "Nyers szám érték"
+
+#: cck/includes/content.token.inc:87
+msgid "Formatted number value"
+msgstr "Formázott szám"
+
+#: cck/includes/content.token.inc:110
+msgid "Raw, unfiltered text"
+msgstr "Nyers, formázatlan szöveg"
+
+#: cck/includes/content.token.inc:111
+msgid "Formatted and filtered text"
+msgstr "Formázott és szűrt szöveg"
+
+#: cck/includes/content.token.inc:133
+msgid "Referenced user ID"
+msgstr "Hivatkozott felhasználói ID"
+
+#: cck/includes/content.token.inc:134
+msgid "Referenced user name"
+msgstr "Hivatkozott felhasználói név"
+
+#: cck/includes/content.token.inc:135
+msgid "Formatted HTML link to referenced user"
+msgstr "HTML link a hivatkozott felhasználóra"
+
+#: cck/includes/content.views.inc:104
+msgid "Appears in: @types"
+msgstr "Ez használja: @types"
+
+#: cck/includes/content.views.inc:317
+msgid "Format"
+msgstr "Formátum"
+
+#: cck/includes/content.views.inc:329
+msgid "None"
+msgstr "Nincs"
+
+#: cck/includes/content.views.inc:330
+msgid "Widget label (@label)"
+msgstr "Felületi elem cimke (@label)"
+
+#: cck/includes/content.views.inc:331
+msgid "Custom"
+msgstr "Egyedi"
+
+#: cck/includes/content.views.inc:337
+msgid "Custom label"
+msgstr "Egyedi cimke"
+
+#: cck/includes/content.views.inc:431
+msgid "Group multiple values"
+msgstr "Többszörös értékek csoportosítása"
+
+#: cck/includes/content.views.inc:437
+msgid "Show @count value(s)"
+msgstr ""
+
+#: cck/includes/content.views.inc:446
+msgid "starting from @count"
+msgstr "@count értékről kezdve"
+
+#: cck/includes/content.views.inc:455
+msgid "Reversed (start from last values)"
+msgstr ""
+
+#: cck/modules/content_copy/content_copy.module:80
+msgid ""
+"This form will process a content type and one or more fields from that type "
+"and export the settings. The export created by this process can be copied "
+"and pasted as an import into the current or any other database. The import "
+"will add the fields to into an existing content type or create a new content "
+"type that includes the selected fields."
+msgstr ""
+
+#: cck/modules/content_copy/content_copy.module:86
+msgid "Types"
+msgstr "Típusok"
+
+#: cck/modules/content_copy/content_copy.module:90
+msgid "Select the content type to export."
+msgstr ""
+
+#: cck/modules/content_copy/content_copy.module:115
+msgid "Groups"
+msgstr "Csoportok"
+
+#: cck/modules/content_copy/content_copy.module:119
+msgid "Select the group definitions to export from %type."
+msgstr ""
+
+#: cck/modules/content_copy/content_copy.module:129
+msgid "Select the field definitions to export from %type."
+msgstr ""
+
+#: cck/modules/content_copy/content_copy.module:139
+msgid "Export data"
+msgstr "Adatok exportálása"
+
+#: cck/modules/content_copy/content_copy.module:144
+msgid ""
+"Copy the export text and paste it into another content type using the import "
+"function."
+msgstr ""
+
+#: cck/modules/content_copy/content_copy.module:154;38
+msgid "Export"
+msgstr "Export"
+
+#: cck/modules/content_copy/content_copy.module:227
+msgid ""
+"This form will import field definitions exported from another content type "
+"or another database.<br/>Note that fields cannot be duplicated within the "
+"same content type, so imported fields will be added only if they do not "
+"already exist in the selected type."
+msgstr ""
+
+#: cck/modules/content_copy/content_copy.module:230
+msgid "<Create>"
+msgstr "<Létrehozás>"
+
+#: cck/modules/content_copy/content_copy.module:232
+msgid "Content type"
+msgstr "Tartalomtípus"
+
+#: cck/modules/content_copy/content_copy.module:233
+msgid ""
+"Select the content type to import these fields into.<br/>Select &lt;"
+"Create&gt; to create a new content type to contain the fields."
+msgstr ""
+
+#: cck/modules/content_copy/content_copy.module:238
+msgid "Import data"
+msgstr "Adatok importálása"
+
+#: cck/modules/content_copy/content_copy.module:240
+msgid "Paste the text created by a content export into this field."
+msgstr ""
+
+#: cck/modules/content_copy/content_copy.module:244;46
+msgid "Import"
+msgstr "Importálás"
+
+#: cck/modules/content_copy/content_copy.module:270
+msgid "The import data is not valid import text."
+msgstr ""
+
+#: cck/modules/content_copy/content_copy.module:318
+msgid ""
+"The following modules must be enabled for this import to work: %modules."
+msgstr ""
+
+#: cck/modules/content_copy/content_copy.module:326
+msgid "The content type %type already exists in this database."
+msgstr ""
+
+#: cck/modules/content_copy/content_copy.module:333
+msgid "Exiting. No import performed."
+msgstr ""
+
+#: cck/modules/content_copy/content_copy.module:355
+msgid ""
+"An error has occurred adding the content type %type.<br/>Please check the "
+"errors displayed for more details."
+msgstr ""
+
+#: cck/modules/content_copy/content_copy.module:380
+msgid ""
+"The imported field %field_label (%field_name) was not added to %type because "
+"that field already exists in %type."
+msgstr ""
+
+#: cck/modules/content_copy/content_copy.module:389
+msgid ""
+"The field %field_label (%field_name) was added to the content type %type."
+msgstr ""
+
+#: cck/modules/content_copy/content_copy.module:503
+msgid ""
+"An error occurred when exporting the 'display settings' data for the field %"
+"field_name.<br/>The db error is: '%db_err'."
+msgstr ""
+
+#: cck/modules/content_copy/content_copy.module:0
+msgid "content_copy"
+msgstr ""
+
+#: cck/modules/content_copy/content_copy.info:0
+msgid "Content Copy"
+msgstr ""
+
+#: cck/modules/content_copy/content_copy.info:0
+msgid "Enables ability to import/export field definitions."
+msgstr ""
+
+#: cck/modules/content_permissions/content_permissions.module:9
+msgid "edit "
+msgstr "szerkesztés"
+
+#: cck/modules/content_permissions/content_permissions.module:9;10
+msgid "field_name"
+msgstr "field_name"
+
+#: cck/modules/content_permissions/content_permissions.module:10
+msgid "view "
+msgstr "nézet "
+
+#: cck/modules/content_permissions/content_permissions.module:0
+msgid "content_permissions"
+msgstr "content_permissions"
+
+#: cck/modules/content_permissions/content_permissions.install:7
+msgid ""
+"Please <a href=\"!url\">configure your field permissions</a> immediately. "
+"All fields are inaccessible by default."
+msgstr ""
+
+#: cck/modules/content_permissions/content_permissions.info:0
+msgid "Content Permissions"
+msgstr "Tartalom Jogosultságok"
+
+#: cck/modules/content_permissions/content_permissions.info:0
+msgid "Set field-level permissions for CCK fields."
+msgstr "Mezőszintű jogosultságok beállítása."
+
+#: cck/modules/fieldgroup/fieldgroup.module:103
+msgid "Add"
+msgstr "Hozzáadás"
+
+#: cck/modules/fieldgroup/fieldgroup.module:128
+msgid "Form settings"
+msgstr "Űrlap beállításai"
+
+#: cck/modules/fieldgroup/fieldgroup.module:129
+msgid "These settings apply to the group in the node editing form."
+msgstr ""
+
+#: cck/modules/fieldgroup/fieldgroup.module:133
+msgid "Style"
+msgstr "Stílus"
+
+#: cck/modules/fieldgroup/fieldgroup.module:136
+msgid "always open"
+msgstr "mindig nyitott"
+
+#: cck/modules/fieldgroup/fieldgroup.module:137
+msgid "collapsible"
+msgstr "összecsukható"
+
+#: cck/modules/fieldgroup/fieldgroup.module:138
+msgid "collapsed"
+msgstr "összecsukott"
+
+#: cck/modules/fieldgroup/fieldgroup.module:146
+msgid "Instructions to present to the user on the editing form."
+msgstr ""
+
+#: cck/modules/fieldgroup/fieldgroup.module:151
+msgid "Display settings"
+msgstr "Megjelenítési beállítások"
+
+#: cck/modules/fieldgroup/fieldgroup.module:152
+msgid "These settings apply to the group on node display."
+msgstr ""
+
+#: cck/modules/fieldgroup/fieldgroup.module:159
+msgid "A description of the group."
+msgstr "A csoport leírása."
+
+#: cck/modules/fieldgroup/fieldgroup.module:194
+msgid "The group name %name already exists."
+msgstr "%name néven már létezik csoport."
+
+#: cck/modules/fieldgroup/fieldgroup.module:198
+msgid "The group name %name is invalid."
+msgstr "A csoportnév érvénytelen: %name."
+
+#: cck/modules/fieldgroup/fieldgroup.module:233
+msgid "Are you sure you want to remove the group %label?"
+msgstr "Biztosan törölhető a csoport: %label?"
+
+#: cck/modules/fieldgroup/fieldgroup.module:235
+msgid "This action cannot be undone."
+msgstr "Ez a művelet nem visszavonható."
+
+#: cck/modules/fieldgroup/fieldgroup.module:244
+msgid "The group %group_name has been removed."
+msgstr "%group_name csoport törölve lett."
+
+#: cck/modules/fieldgroup/fieldgroup.module:293
+msgid "none"
+msgstr "nincs"
+
+#: cck/modules/fieldgroup/fieldgroup.module:347
+msgid "Display in group"
+msgstr "Megjelenés csoportban"
+
+#: cck/modules/fieldgroup/fieldgroup.module:350
+msgid ""
+"Select a group, in which the field will be displayed on the editing form."
+msgstr ""
+
+#: cck/modules/fieldgroup/fieldgroup.module:29
+msgid "Add group"
+msgstr "Csoport hozzáadása"
+
+#: cck/modules/fieldgroup/fieldgroup.module:37;44
+msgid "Edit group"
+msgstr "Csoport szerkesztése"
+
+#: cck/modules/fieldgroup/fieldgroup.module:0
+msgid "fieldgroup"
+msgstr "mezőcsoport"
+
+#: cck/modules/fieldgroup/fieldgroup.info:0
+msgid "Fieldgroup"
+msgstr "Mezőcsoport"
+
+#: cck/modules/fieldgroup/fieldgroup.info:0
+msgid "Create field groups for CCK fields."
+msgstr ""
+
+#: cck/modules/nodereference/nodereference.views.inc:14
+msgid "Simple"
+msgstr "Egyszerű"
+
+#: cck/modules/nodereference/nodereference.views.inc:15
+msgid "Destination-agnostic display. Mostly useful for programmatic views."
+msgstr ""
+
+#: cck/modules/nodereference/nodereference.views.inc:26
+msgid "Results array"
+msgstr ""
+
+#: cck/modules/nodereference/nodereference.views.inc:27
+msgid "Returns the view as a PHP array of titles + renderd rows."
+msgstr ""
+
+#: cck/modules/nodereference/nodereference.module:68
+msgid "Node reference"
+msgstr "Tartalomra hivatkozás"
+
+#: cck/modules/nodereference/nodereference.module:69
+msgid "Store the ID of a related node as an integer value."
+msgstr ""
+
+#: cck/modules/nodereference/nodereference.module:87
+msgid "Content types that can be referenced"
+msgstr ""
+
+#: cck/modules/nodereference/nodereference.module:99
+msgid "Default Views"
+msgstr "Alapértelmezett nézetek"
+
+#: cck/modules/nodereference/nodereference.module:102
+msgid "Existing Views"
+msgstr "Létező nézetek"
+
+#: cck/modules/nodereference/nodereference.module:110
+msgid "Advanced - Nodes that can be referenced (View)"
+msgstr ""
+
+#: cck/modules/nodereference/nodereference.module:116
+msgid "View used to select the nodes"
+msgstr "Nézet használata a tartalmak kiválasztásához"
+
+#: cck/modules/nodereference/nodereference.module:119
+msgid ""
+"Choose the \"Views module\" view that selects the nodes that can be "
+"referenced.<br />Note:<ul><li>Only views that have fields will work for this "
+"purpose.</li><li>This will discard the \"Content types\" settings above. Use "
+"the view's \"filters\" section instead.</li><li>Use the view's \"fields\" "
+"section to display additional informations about candidate nodes on node "
+"creation/edition form.</li><li>Use the view's \"sort criteria\" section to "
+"determine the order in which candidate nodes will be displayed.</li></ul>"
+msgstr ""
+
+#: cck/modules/nodereference/nodereference.module:123
+msgid "View arguments"
+msgstr "A nézet paraméterei"
+
+#: cck/modules/nodereference/nodereference.module:126
+msgid "Provide a comma separated list of arguments to pass to the view."
+msgstr "Vesszővel elválasztott lista, amely a nézetnek küldendő paramétereket tartalmazza."
+
+#: cck/modules/nodereference/nodereference.module:177
+msgid "%name: this post can't be referenced."
+msgstr "%name: erre a tartalomra nem lehet hivatkozni."
+
+#: cck/modules/nodereference/nodereference.module:202
+msgid "Title (link)"
+msgstr "Cím (linkkelve)"
+
+#: cck/modules/nodereference/nodereference.module:207
+msgid "Title (no link)"
+msgstr "Cím (link nélkül)"
+
+#: cck/modules/nodereference/nodereference.module:305
+#: cck/modules/optionwidgets/optionwidgets.module:79
+#: cck/modules/userreference/userreference.module:198
+msgid "Select list"
+msgstr "Legördülő lista"
+
+#: cck/modules/nodereference/nodereference.module:313
+#: cck/modules/optionwidgets/optionwidgets.module:87
+msgid "Check boxes/radio buttons"
+msgstr "Jelölőnégyzetek / radio gombok"
+
+#: cck/modules/nodereference/nodereference.module:321
+#: cck/modules/userreference/userreference.module:206
+msgid "Autocomplete text field"
+msgstr ""
+
+#: cck/modules/nodereference/nodereference.module:581
+msgid "%name: title mismatch. Please check your selection."
+msgstr "%name: a cím nem egyezik."
+
+#: cck/modules/nodereference/nodereference.module:588
+msgid "%name: found no valid post with that title."
+msgstr ""
+
+#: cck/modules/nodereference/nodereference.module:15
+msgid "Nodereference autocomplete"
+msgstr ""
+
+#: cck/modules/nodereference/nodereference.module:0
+msgid "nodereference"
+msgstr "tartalomhivatozás"
+
+#: cck/modules/nodereference/nodereference.info:0
+msgid "Node Reference"
+msgstr "Tartalomra hivatkozás"
+
+#: cck/modules/nodereference/nodereference.info:0
+msgid "Defines a field type for referencing one node from another."
+msgstr ""
+
+#: cck/modules/number/number.module:41
+msgid "Integer"
+msgstr "Egész szám"
+
+#: cck/modules/number/number.module:42
+msgid "Store a number in the database as an integer."
+msgstr "Egészként tárol számot az adatbázisban."
+
+#: cck/modules/number/number.module:49
+msgid "Decimal"
+msgstr "Decimális"
+
+#: cck/modules/number/number.module:50
+msgid "Store a number in the database in a fixed decimal format."
+msgstr "Rögzített tízes számot tárol az adatbázisban"
+
+#: cck/modules/number/number.module:57
+msgid "Float"
+msgstr "Lebegőpontos"
+
+#: cck/modules/number/number.module:58
+msgid "Store a number in the database in a floating point format."
+msgstr "Lebegőpontos számot tárol az adatbázisban."
+
+#: cck/modules/number/number.module:76
+msgid "Minimum"
+msgstr "Minimum"
+
+#: cck/modules/number/number.module:81
+msgid "Maximum"
+msgstr "Maximum"
+
+#: cck/modules/number/number.module:88
+msgid "Precision"
+msgstr "Helyiértékek"
+
+#: cck/modules/number/number.module:89
+msgid ""
+"The total number of digits to store in the database, including those to the "
+"right of the decimal."
+msgstr ""
+
+#: cck/modules/number/number.module:95
+msgid "Scale"
+msgstr "Felbontás"
+
+#: cck/modules/number/number.module:96
+msgid "The number of digits to the right of the decimal."
+msgstr "A számjegyek száma."
+
+#: cck/modules/number/number.module:102
+msgid "Decimal marker"
+msgstr "Decimális jelölő"
+
+#: cck/modules/number/number.module:103
+msgid "The character users will input to mark the decimal point in forms."
+msgstr ""
+
+#: cck/modules/number/number.module:109
+msgid "Prefix"
+msgstr "Előtag"
+
+#: cck/modules/number/number.module:112
+msgid ""
+"Define a string that should be prefixed to the value, like $ or €. Leave "
+"blank for none. Separate singular and plural values with a pipe (pound|"
+"pounds)."
+msgstr ""
+
+#: cck/modules/number/number.module:116
+msgid "Suffix"
+msgstr "Toldalék"
+
+#: cck/modules/number/number.module:119
+msgid ""
+"Define a string that should suffixed to the value, like m², m/s², kb/s. "
+"Leave blank for none. Separate singular and plural values with a pipe (pound|"
+"pounds)."
+msgstr ""
+
+#: cck/modules/number/number.module:123 cck/modules/text/text.module:82
+msgid "Allowed values"
+msgstr "Megengedett értékek"
+
+#: cck/modules/number/number.module:155 cck/modules/text/text.module:114
+msgid ""
+"This PHP code was set by an administrator and will override the allowed "
+"values list above."
+msgstr ""
+
+#: cck/modules/number/number.module:162
+msgid "\"Minimum\" must be a number."
+msgstr "„Minimum”-nak számot kell megadni."
+
+#: cck/modules/number/number.module:165
+msgid "\"Maximum\" must be a number."
+msgstr "„Maximum”-nak számot kell megadni."
+
+#: cck/modules/number/number.module:222
+msgid "%name: the value may be no smaller than %min."
+msgstr "%name: az érték nem lehet kisebb ennél: %min."
+
+#: cck/modules/number/number.module:225
+msgid "%name: the value may be no larger than %max."
+msgstr "%name: az érték nem lehet nagyobb ennél: %max."
+
+#: cck/modules/number/number.module:228 cck/modules/text/text.module:161
+msgid "%name: illegal value."
+msgstr "%name: érvénytelen érték."
+
+#: cck/modules/number/number.module:263
+msgid "unformatted"
+msgstr "formázatlan"
+
+#: cck/modules/number/number.module:497
+msgid ""
+"Only numbers and decimals are allowed in %field. %start was changed to %"
+"value."
+msgstr ""
+
+#: cck/modules/number/number.module:519
+msgid "Only numbers are allowed in %field. %start was changed to %value."
+msgstr ""
+
+#: cck/modules/number/number.module:542
+msgid ""
+"Only numbers and the decimal character (%decimal) are allowed in %field. %"
+"start was changed to %value."
+msgstr ""
+
+#: cck/modules/number/number.module:0
+msgid "number"
+msgstr "szám"
+
+#: cck/modules/number/number.info:0
+msgid "Number"
+msgstr "Szám"
+
+#: cck/modules/number/number.info:0
+msgid "Defines numeric field types."
+msgstr ""
+
+#: cck/modules/optionwidgets/optionwidgets.module:18
+msgid ""
+"Create a list of options as a list in <strong>Allowed values list</strong> "
+"or as an array in PHP code. These values will be the same for %field in all "
+"content types."
+msgstr ""
+
+#: cck/modules/optionwidgets/optionwidgets.module:21
+msgid ""
+"For a 'single on/off checkbox' widget, define the 'off' value first, then "
+"the 'on' value in the <strong>Allowed values</strong> section. Note that the "
+"checkbox will be labeled with the label of the 'on' value."
+msgstr ""
+
+#: cck/modules/optionwidgets/optionwidgets.module:24
+msgid ""
+"The 'checkboxes/radio buttons' widget will display checkboxes if the "
+"multiple values option is selected for this field, otherwise radios will be "
+"displayed."
+msgstr ""
+
+#: cck/modules/optionwidgets/optionwidgets.module:36
+msgid "You need to specify the 'allowed values' for this field."
+msgstr "Ki kell tölteni a „Megengedett értékek”-et ennél a mezőnél. "
+
+#: cck/modules/optionwidgets/optionwidgets.module:95
+msgid "Single on/off checkbox"
+msgstr "Egyszerű be/ki jelölőnégyzet"
+
+#: cck/modules/optionwidgets/optionwidgets.module:406
+msgid "N/A"
+msgstr "N/A"
+
+#: cck/modules/optionwidgets/optionwidgets.module:410
+msgid "- None -"
+msgstr "- Nincs -"
+
+#: cck/modules/optionwidgets/optionwidgets.module:0
+msgid "optionwidgets"
+msgstr ""
+
+#: cck/modules/optionwidgets/optionwidgets.info:0
+msgid "Option Widgets"
+msgstr "Kapcsoló felületi elemek"
+
+#: cck/modules/optionwidgets/optionwidgets.info:0
+msgid ""
+"Defines selection, check box and radio button widgets for text and numeric "
+"fields."
+msgstr ""
+"Legördülő lista, szövegdoboz és radio gomb típusú felületi elemeket "
+"határoz meg szöveg és szám mezőtípusokhoz."
+
+#: cck/modules/text/text.module:50
+msgid "Store text in the database."
+msgstr "Szöveget tárol az adatbázisban."
+
+#: cck/modules/text/text.module:164
+msgid "%name: the value may not be longer than %max characters."
+msgstr "%name: az érték nem lehet hosszabb %max karakternél."
+
+#: cck/modules/text/text.module:268
+msgid "Text area (multiple rows)"
+msgstr "Szövegdoboz (többsoros)"
+
+#: cck/modules/text/text.module:0
+msgid "text"
+msgstr "szöveg"
+
+#: cck/modules/text/text.info:0
+msgid "Defines simple text field types."
+msgstr "Egyszerű szöveges mező típusokat határoz meg."
+
+#: cck/modules/userreference/userreference.module:52
+msgid "User reference"
+msgstr "Hivatkozás felhasználóra"
+
+#: cck/modules/userreference/userreference.module:53
+msgid "Store the ID of a related user as an integer value."
+msgstr ""
+
+#: cck/modules/userreference/userreference.module:71
+msgid "User roles that can be referenced"
+msgstr "Felhasználói csoport, amelyre hivatkozni lehet"
+
+#: cck/modules/userreference/userreference.module:77
+msgid "User status that can be referenced"
+msgstr "Felhasználói állapot, amelyre hivatkozni lehet"
+
+#: cck/modules/userreference/userreference.module:79
+msgid "Active"
+msgstr "Aktív"
+
+#: cck/modules/userreference/userreference.module:79
+msgid "Blocked"
+msgstr "Blokkolt"
+
+#: cck/modules/userreference/userreference.module:122
+msgid "%name: invalid user."
+msgstr "%name: érvénytelen felhasználó."
+
+#: cck/modules/userreference/userreference.module:253
+msgid "Reverse link"
+msgstr "Fordított link"
+
+#: cck/modules/userreference/userreference.module:255
+msgid ""
+"If selected, a reverse link back to the referencing node will displayed on "
+"the referenced user record."
+msgstr ""
+
+#: cck/modules/userreference/userreference.module:587
+msgid "Related content"
+msgstr "Kapcsolódó tartalom"
+
+#: cck/modules/userreference/userreference.module:15
+msgid "Userreference autocomplete"
+msgstr ""
+
+#: cck/modules/userreference/userreference.module:0
+msgid "userreference"
+msgstr "felhasználóhivatkozás"
+
+#: cck/modules/userreference/userreference.info:0
+msgid "User Reference"
+msgstr "Felhasználói hivatkozás"
+
+#: cck/modules/userreference/userreference.info:0
+msgid "Defines a field type for referencing a user from a node."
+msgstr "Olyan mezőtípus, amely a tartalomban egy felhasználóra hivatkozik."

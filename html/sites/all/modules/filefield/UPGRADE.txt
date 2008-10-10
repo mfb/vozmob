@@ -1,0 +1,23 @@
+Upgrading from 5.x-2.x to 6.x-2.x
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+MODULE DEVELOPERS:
+
+Upgrading from 5.x-2.x to 6.x-2.x
+  the field type for filefields has changed from 'file' to 'filefield'.
+  I suggest you just reread the whole module...
+
+

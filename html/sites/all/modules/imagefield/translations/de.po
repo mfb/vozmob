@@ -1,0 +1,104 @@
+# 
+# 
+# German translation of Drupal (imagefield.module)
+# Copyright Gabriel Birke http://www.d-scribe.de
+# Generated from files:
+# imagefield.module,v 1.30.2.20 2007/10/19 08:03:02 quicksketch
+# imagefield.info,v 1.4.2.1 2007/06/18 23:06:46 dww
+# 
+#, fuzzy
+msgid ""
+""
+msgstr ""
+
+#: imagefield.module:113
+msgid "Image upload was unsuccessful."
+msgstr "Das Bild konnte nicht hochgeladen werden."
+
+#: imagefield.module:248
+msgid "Maximum resolution for Images"
+msgstr "Maximale Auflösung für Bilder"
+
+#: imagefield.module:253
+msgid "The maximum allowed image size expressed as WIDTHxHEIGHT (e.g. 640x480). Set to 0 for no restriction."
+msgstr "Maximale Auflösung für Bilder im Format BREITExHÖHE (z.B. 640x480). Auf 0 setzen um Breite nicht zu beschränken."
+
+#: imagefield.module:257
+msgid "Image path"
+msgstr "Bildpfad"
+
+#: imagefield.module:259
+msgid "Optional subdirectory within the \"%dir\" directory where images will be stored. Do not include trailing slash."
+msgstr "Optionales Unterverzeichnis im Verzeichnis "%dir", in dem die Bilder gespeichert werden sollen. Kein Slash am Ende!"
+
+#: imagefield.module:264
+msgid "Enable custom alternate text"
+msgstr "Eigener Alternativtext"
+
+#: imagefield.module:266
+msgid "Enable custom alternate text for images. Filename will be used if not checked."
+msgstr "Textfeld für alternativen Bildtext anzeigen. Wenn nicht aktiviert, wird der Dateiname benutzt."
+
+#: imagefield.module:270
+msgid "Enable custom title text"
+msgstr "Eigener Titel-Text"
+
+#: imagefield.module:272
+msgid "Enable custom title text for images. Filename will be used if not checked."
+msgstr "Textfeld für Titeltext anzeigen. Wenn nicht aktiviert, wird der Dateiname benutzt."
+
+#: imagefield.module:325
+msgid "The image was resized to fit within the maximum allowed resolution of %resolution pixels"
+msgstr "Die Größe des Bildes wurde verändert, damit es die maximal erlaubte Auflösung von %resolution Pixeln nicht überschreitet."
+
+#: imagefield.module:460
+msgid "Upload"
+msgstr "Hochladen"
+
+#: imagefield.module:477
+msgid "Delete"
+msgstr "Löschen"
+
+#: imagefield.module:491
+msgid "Filename: "
+msgstr "Dateiname:"
+
+#: imagefield.module:502
+msgid "Alternate text"
+msgstr "Alternativtext"
+
+#: imagefield.module:504
+msgid "Alternate text to be displayed if the image cannot be displayed."
+msgstr "Der Alternativtext wird angezeigt, wenn das Bild nicht angezeigt werden kann."
+
+#: imagefield.module:518
+msgid "Title"
+msgstr "Titel"
+
+#: imagefield.module:520
+msgid "Text to be displayed on mouse overs."
+msgstr "Der Titeltext wird angezeigt, wenn der Mauszeiger über dem Bild ist."
+
+#: imagefield.module:530
+msgid "If a new image is chosen, the current image will be replaced upon submitting the form."
+msgstr "Wenn ein neues Bild ausgewählt wird, wird das aktuelle Bild beim Abschicken des Formulars ausgetauscht."
+
+#: imagefield.info:0
+msgid "Image"
+msgstr "Bild"
+
+#: imagefield.info:0
+msgid "Defines an image field type."
+msgstr "Definiert den Feldtyp "Bild""
+
+#: imagefield.info:0
+msgid "CCK"
+msgstr ""
+
+#: imagefield.info:0
+msgid "imagefield"
+msgstr ""
+
+#: imagefield.info:0
+msgid "1197871807"
+msgstr ""

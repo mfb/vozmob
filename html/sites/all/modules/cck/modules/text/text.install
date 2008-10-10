@@ -1,0 +1,130 @@
+<?php
+// $Id: text.install,v 1.37.2.8 2008/10/04 13:14:23 karens Exp $
+
+/**
+ * @file
+ * Implementation of hook_install().
+ */
+function text_install() {
+  drupal_load('module', 'content');
+  content_notify('install', 'text');
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function text_uninstall() {
+  drupal_load('module', 'content');
+  content_notify('uninstall', 'text');
+}
+
+/**
+ * Implementation of hook_enable().
+ *
+ * Notify content module when this module is enabled.
+ */
+function text_enable() {
+  drupal_load('module', 'content');
+  content_notify('enable', 'text');
+}
+
+/**
+ * Implementation of hook_disable().
+ *
+ * Notify content module when this module is disabled.
+ */
+function text_disable() {
+  drupal_load('module', 'content');
+  content_notify('disable', 'text');
+}
+
+function text_update_last_removed() {
+  return 5;
+}
+
+/**
+ * Rename widgets to match hook_elements values.
+ *
+ * The change in field_types will keep content_update_6000() from correctly updating
+ * the module names in the field and instance tables, so do it here.
+ *
+ */
+function text_update_6000() {
+  if ($abort = content_check_update('text')) {
+    return $abort;
+  }
+
+  $ret = array();
+
+  drupal_load('module', 'content');
+  $result = db_query("SELECT * FROM {". content_instance_tablename() ."} WHERE widget_type = 'text'");
+  while ($field_instance = db_fetch_array($result)) {
+    $widget_settings = unserialize($field_instance['widget_settings']);
+    $new_widget_type = ($widget_settings['rows'] > 1) ? 'text_textarea' : 'text_textfield';
+    $ret[] = update_sql("UPDATE {". content_instance_tablename() ."} SET widget_module = 'text', widget_type = '". $new_widget_type ."' WHERE field_name = '{$field_instance['field_name']}' AND type_name = '{$field_instance['type_name']}'");
+  }
+  content_associate_fields('text');
+  return $ret;
+}
+
+/**
+ * Set all columns to accept NULL values and set empty string values in the
+ * database to NULL.
+ *
+ * Leaving it up to module developers to handle conversion of numbers to
+ * NULL values, since there are times when zeros are valid data and times
+ * when they should be NULL.
+ *
+ */
+function text_update_6001() {
+  if ($abort = content_check_update('text')) {
+    return $abort;
+  }
+
+  $ret = array();
+
+  drupal_load('module', 'content');
+  // Get the latest cache values and schema.
+  content_clear_type_cache(TRUE, TRUE);
+
+  include_once('./'. drupal_get_path('module', 'content') .'/content.install');
+  $types = content_types_install();
+  foreach ($types as $type_name => $fields) {
+    foreach ($fields as $field) {
+      switch ($field['type']) {
+        case 'text':
+          $db_info = content_database_info($field);
+          $table = $db_info['table'];
+          foreach ($db_info['columns'] as $column => $attributes) {
+            $attributes['not null'] = FALSE;
+            $column = $attributes['column'];
+            db_change_field($ret, $table, $column, $column, $attributes);
+            // TODO: errors on text/blob columns: no default value allowed (!)
+            db_field_set_no_default($ret, $table, $column);
+            if ($attributes['type'] == 'varchar' || $attributes['type'] == 'text') {
+              $ret[] = update_sql("UPDATE {". $table ."} SET ". $column ." = NULL WHERE ". $column ." = ''");
+            }
+            else {
+              // TODO: replace format = 0 with format = NULL ?? Is this right ?
+              $ret[] = update_sql("UPDATE {". $table ."} SET ". $column ." = NULL WHERE ". $column ." = 0");
+            }
+          }
+          break;
+      }
+    }
+  }
+  return $ret;
+}
+
+/**
+ * Update 6000 and 6001 were possibly broken if they were executed while
+ * the modules were still disabled, so we re-run them.
+ * Having them run a second time on sites that got updated correctly has no
+ * side-effect (see http://drupal.org/node/310873).
+ */
+function text_update_6002() {
+  return text_update_6000();
+}
+function text_update_6003() {
+  return text_update_6001();
+}

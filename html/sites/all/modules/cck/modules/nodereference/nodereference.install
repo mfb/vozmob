@@ -1,0 +1,73 @@
+<?php
+// $Id: nodereference.install,v 1.25.2.6 2008/10/04 13:14:22 karens Exp $
+
+/**
+ * @file
+ * Implementation of hook_install().
+ */
+function nodereference_install() {
+  drupal_load('module', 'content');
+  content_notify('install', 'nodereference');
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function nodereference_uninstall() {
+  drupal_load('module', 'content');
+  content_notify('uninstall', 'nodereference');
+}
+
+/**
+ * Implementation of hook_enable().
+ *
+ * Notify content module when this module is enabled.
+ */
+function nodereference_enable() {
+  drupal_load('module', 'content');
+  content_notify('enable', 'nodereference');
+}
+
+/**
+ * Implementation of hook_disable().
+ *
+ * Notify content module when this module is disabled.
+ */
+function nodereference_disable() {
+  drupal_load('module', 'content');
+  content_notify('disable', 'nodereference');
+}
+
+function nodereference_update_last_removed() {
+  return 3;
+}
+
+/**
+ * All fields must allow NULL values to indicate empty fields.
+ */
+function nodereference_update_6000() {
+  if ($abort = content_check_update('nodereference')) {
+    return $abort;
+  }
+
+  $ret = array();
+
+  drupal_load('module', 'content');
+  content_clear_type_cache();
+  include_once('./'. drupal_get_path('module', 'content') .'/content.install');
+  $types = content_types_install();
+  foreach ($types as $type_name => $fields) {
+    foreach ($fields as $field) {
+      switch ($field['type']) {
+        case 'nodereference':
+          $db_info = content_database_info($field);
+          $table = $db_info['table'];
+          $column = $db_info['columns']['nid']['column'] ;
+          db_change_field($ret, $table, $column, $column, array('type' => 'int', 'not null' => FALSE));
+          db_field_set_no_default($ret, $db_info['table'], $column);
+          $ret[] = update_sql("UPDATE {". $db_info['table'] ."} SET ". $column ." = NULL WHERE ". $column ." = 0");
+      }
+    }
+  }
+  return $ret;
+}

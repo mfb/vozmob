@@ -1,0 +1,56 @@
+<?php
+// $Id: filefield_meta.install,v 1.4 2008/07/31 01:02:15 drewish Exp $
+/**
+ * @file
+ * FileField Meta: Add Video Support to File Field.
+ */
+
+/**
+ * Implementation of hook_install().
+ */
+function filefield_meta_install() {
+  drupal_install_schema('filefield_meta');
+}
+
+function filefield_meta_uninstall() {
+  drupal_uninstall_schema('filefield_meta');
+}
+
+/**
+ * Implementation of hook_schema().
+ */
+function filefield_meta_schema() {
+  // The primary field/index.
+  $schema['filefield_meta'] = array(
+    'description' => t('The table for meta data about filefield files.'),
+    'fields' => array(
+      'fid' => array(
+        'description' => t('The file id.'),
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'width' => array(
+        'description' => t('Width of a video or image file in pixels.'),
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+      ),
+      'height' => array(
+        'description' => t('Height of a video or image file in pixels.'),
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => FALSE,
+      ),
+      'duration' => array(
+        'description' => t('The duration of audio or video files, in seconds.'),
+        'type' => 'float',
+        'size' => 'normal',
+        'not null' => FALSE,
+      ),
+    ),
+    'primary key' => array('fid'),
+  );
+
+  return $schema;
+}

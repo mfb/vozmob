@@ -1,0 +1,50 @@
+<?php
+// $Id: content_permissions.module,v 1.5.2.2 2008/10/06 15:11:39 karens Exp $
+/**
+ *  Implementation of hook_perm().
+ */
+function content_permissions_perm() {
+  $perms = array();
+  foreach (content_fields() as $field) {
+    $perms[] = 'edit '. $field['field_name'];
+    $perms[] = 'view '. $field['field_name'];
+  }
+  return $perms;
+}
+
+/**
+ *  Implementation of hook_nodeapi(). Remove inaccessible fields from node display.
+ */
+function content_permissions_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  if ($op == 'view') {
+    $type = content_types($node->type);
+    foreach ($type['fields'] as $field_name => $field) {
+      if (isset($node->content[$field_name])) {
+        $node->content[$field_name]['#access'] = user_access('view '. $field_name);
+      }
+    }
+  }
+}
+
+/**
+ *  Remove inaccessible fields from nodes.
+ *
+ * @see content_field_form().
+ */
+function content_permissions_field_access($op, $field) {
+  switch ($op) {
+    case 'view':
+    case 'edit':
+      return user_access($op .' '. $field['field_name']);
+  }
+  return TRUE;
+}
+
+/**
+ *  The default field access callback. Remove inaccessible fields from Views.
+ *
+ * @see content_views_field_views_data().
+ */
+function content_views_access_callback($field) {
+  return user_access('view '. $field['field_name']);
+}

@@ -1,0 +1,241 @@
+<?php
+// $Id: imagefield.install,v 1.15 2008/10/08 20:20:09 drewish Exp $
+
+/**
+ * Implementation of hook_install().
+ */
+
+function imagefield_install() {
+  content_notify('install', 'imagefield');
+}
+
+function imagefield_uninstall() {
+  content_notify('uninstall', 'imagefield');
+}
+
+function imagefield_enable() {
+  content_notify('enable', 'imagefield');
+}
+
+function imagefield_disable() {
+  content_notify('disable', 'imagefield');
+}
+
+/**
+ * Data is now stored in per-field tables.
+ */
+function imagefield_update_1() {
+  $ret = array();
+
+  include_once(drupal_get_path('module', 'content') .'/content.module');
+  include_once(drupal_get_path('module', 'content') .'/content_admin.inc');
+
+
+
+  $fields = content_fields();
+
+  foreach ($fields as $field) {
+    switch ($field['type']) {
+      case 'file':
+        $columns = array(
+          'list' => array('type' => 'int', 'not null' => TRUE, 'default' => '0'),
+        );
+        content_alter_db_field(array(), array(), $field, $columns);
+        break;
+    }
+  }
+  db_query('DELETE FROM {cache}');
+  return $ret;
+}
+
+
+
+
+
+/**
+ * Schema change to enable alt and title tags.
+ */
+
+function imagefield_update_2() {
+  $ret = array();
+
+  include_once(drupal_get_path('module', 'content') .'/content.module');
+  include_once(drupal_get_path('module', 'content') .'/content_admin.inc');
+
+  $fields = content_fields();
+
+  foreach ($fields as $field) {
+    switch ($field['type']) {
+      case 'image':
+        $oldcolumns = array(
+          'fid' => array('type' => 'int', 'not null' => TRUE, 'default' => '0'),
+        );
+        $newcolumns = array(
+          'fid' => array('type' => 'int', 'not null' => TRUE, 'default' => '0'),
+          'title' => array('type' => 'varchar', 'length' => 255, 'not null' => TRUE, 'default' => "''", 'sortable' => TRUE),
+          'alt' => array('type' => 'varchar', 'length' => 255, 'not null' => TRUE, 'default' => "''", 'sortable' => TRUE),
+        );
+        content_alter_db_field($field, $oldcolumns, $field, $newcolumns);
+        break;
+    }
+    drupal_set_message('altered: <br /><pre>'. print_r($field, true) .'</pre>');
+  }
+
+  db_query('DELETE FROM {cache}');
+  return $ret;
+}
+
+/**
+ * Upgrade to CCK 2 and Drupal 6.
+ * @todo: update widget type from 'image' to 'imagefield_widget_default'
+ * @todo: update formatter name changes.
+ *    default => image_plain
+ *    imagefield_nodelink => image_nodelink
+ *    imagefield_imagelink => image_imagelink
+ *    imagefield_path => path_plain
+ *    imagefield_url => url_plain
+ */
+function imagefield_update_6001() {
+  // Make sure CCK's been updated first.
+  if ($abort = content_check_update('imagefield')) {
+    return $abort;
+  }
+
+  module_load_include('inc', 'content', 'includes/content.admin');
+  module_load_include('inc', 'content', 'includes/content.crud');
+
+  foreach (content_fields() as $field) {
+    // skip non imagefields.
+    if ($field['type'] != 'image') continue;
+
+    if (isset($field['widget']['max_number_images'])) {
+      if ($field['widget']['max_number_images'] == 0) {
+        $field['multiple'] = 1; // 1 means "Unlimited" in CCK.
+      }
+      elseif ($field['widget']['max_number_images'] == 1) {
+        $field['multiple'] = 0; // 0 means "Not Multiple" in CCK.
+      }
+      else {
+        $field['multiple'] == $field['widget']['max_number_images'];
+      }
+      $field = array_merge($field, $field['widget']);
+    }
+
+    // update widget names.
+    if ($field['widget']['type'] == 'image') $field['widget']['type'] = 'imagefield_widget_default';
+
+    // rename image_path to file_path to help convergence with filefield.module.
+    $field['widget']['file_path'] = $field['widget']['image_path'];
+
+    // update formatter names.
+    $display_settings = array('teaser','full','4');
+    foreach ($display_settings as $context) {
+      switch($field['display_settings'][$context]['formatter']) {
+        case 'default':
+          $field['display_settings'][$context]['formatter'] = 'image_plain';
+          break;
+        case 'imagefield_nodelink':
+          $field['display_settings'][$context]['formatter'] = 'image_nodelink';
+          break;
+        case 'imagefield_imagelink':
+          $field['display_settings'][$context]['formatter'] = 'image_imagelink';
+          break;
+        case 'imagefield_path':
+          $field['display_settings'][$context]['formatter'] = 'path_plain';
+          break;
+        case 'imagefield_url':
+          $field['display_settings'][$context]['formatter'] = 'url_plain';
+          break;
+      }
+    }
+
+    // set list options inherited from file field to behave consistently with old imagefield.
+    $field['list_default'] = 1;
+    $field['force_list_default'] = 1;
+
+    content_field_instance_update($field);
+
+
+    // Add data column to imagefield.
+    $new_field = $field;
+    $new_field['columns']['data'] = array('type' => 'text', 'serialize' => true);
+    content_alter_db($field, $new_field);
+
+    // move alt and title values to serializes 'data' column.
+    $batch = array(
+      'title' => t('Migrating filefield values'),
+      'operations' => array(),
+      'file' => drupal_get_path('module', 'imagefield') .'/imagefield.install',
+    );
+    $batch['operations'][] = array('_imagefield_update_6102_move_operation', array($field));
+    $batch['operations'][] = array('_imagefield_update_6102_drop_operation', array($field));
+    batch_set($batch);
+  }
+  // clear cache..
+  cache_clear_all('content_type_info', content_cache_tablename());
+  return array();
+}
+
+
+/**
+ * Move the list and descriptions column into the serialized data column.
+ */
+function _imagefield_update_6001_move_operation($field, &$context) {
+  // Setup the first through
+  if (!isset($context['sandbox']['progress'])) {
+    $db_info = content_database_info($field);
+
+    $context['sandbox']['db_info'] = $db_info;
+    $context['sandbox']['table'] = $db_info['table'];
+    $context['sandbox']['col_data'] = $db_info['columns']['data']['column'];
+    $context['sandbox']['col_alt'] = $db_info['columns']['alt']['column'];
+    $context['sandbox']['col_title'] = $db_info['columns']['title']['column'];
+    $context['sandbox']['max'] = db_result(db_query("SELECT COUNT(*) FROM {". $db_info['table'] ."}"));
+    $context['sandbox']['progress'] = 0;
+    $context['sandbox']['current_node'] = 0;
+  }
+
+
+  // Work our way through the field values 50 rows at a time.
+  $limit = 50;
+  $result = db_query_range("SELECT * FROM {{$context['sandbox']['table']}} WHERE vid > %d ORDER BY nid ASC", $context['sandbox']['current_node'], 0, $limit);
+  while ($row = db_fetch_array($result)) {
+    // Try to unserialize the data column.
+    if (!empty($row[$context['sandbox']['col_data']])) {
+      $data = unserialize($row[$context['sandbox']['col_data']]);
+    }
+    if (empty($data)) {
+      $data = array();
+    }
+
+    // Copy move the values from the columns into the array...
+    $data['alt'] = $row[$context['sandbox']['col_alt']];
+    $data['title'] = $row[$context['sandbox']['col_title']];
+
+    // ...serialize it and store it back to the db.
+    db_query("UPDATE {{$context['sandbox']['table']}} SET {$context['sandbox']['col_data']} = '%s' WHERE vid = %d", serialize($data), $row['vid']);
+
+    // Update our progress information.
+    $context['sandbox']['progress']++;
+    $context['sandbox']['current_node'] = $row['vid'];
+  }
+
+  // Inform the batch engine that we are not finished,
+  // and provide an estimation of the completion level we reached.
+  if ($context['sandbox']['progress'] != $context['sandbox']['max']) {
+    $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
+  }
+}
+
+/**
+ * Drop the list and description columns.
+ */
+function _imagefield_update_6001_drop_operation($field, &$context) {
+  $db_info = content_database_info($field);
+  // TODO: Now that the data has been migrated we can drop the columns.
+  db_query('ALTER TABLE '. $db_info['table'] .' DROP COLUMN '.  $db_info['columns']['alt']['column']);
+  db_query('ALTER TABLE '. $db_info['table'] .' DROP COLUMN '.  $db_info['columns']['title']['column']);
+  $context['finished'] = 1;
+}
+
+

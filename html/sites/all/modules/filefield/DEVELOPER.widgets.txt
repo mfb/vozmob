@@ -1,0 +1,52 @@
+FileType Field Widgets..
+
+1. Delcaring your widget.
+
+  mymodule.moldule:hook_widget_info(); -- declare you widget.
+
+2. Implementing widget hooks:
+  mymodule.module:hook_widget_settings()
+  mymodule.module:hook_widget(); 
+    -- only needs to pass through to filefield_* functions.
+    -- unless you know what you're doing and want to 
+    -- override.
+
+
+2. Implementing your widgets callbacks...
+  {$widget['type']}_widget.inc:
+    -- will be dynamically included by filefield_widget_settings();
+      {$widget['type']}_widget_settings_form($widget)
+        -- return your form array
+      {$widget['type']}_widget_settings_validate($widget)
+      {$widget['type']}_widget_settings_save($widget)
+   
+3. Implementing your widget...
+   In D6 and CCK 2 widgets are form elements... 
+
+   #value callback
+   #process
+   #after_build
+
+   AHAH?
+
+   Ajaxification.
+
+
+4. Where to store miscellaneous data... in 'data'.
+
+
+
+
+
+
+5. FileField Widget Setting User Interface Guidelines...
+  form element weights. - group field sets at the end..
+  solo items at the top, and put CCK and FileField settings
+  before widget specific settings.
+ 
+  0 = CCK added form elements.
+  1 = FileField Common non-fieldset form elements.
+  2 = Widget Specific non-fieldset form elements.
+ 
+  6 = FileField fieldset form elements.
+  8 = Widget Specific Fieldset form elements.

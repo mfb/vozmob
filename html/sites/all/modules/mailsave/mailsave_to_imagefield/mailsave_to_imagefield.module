@@ -82,42 +82,58 @@ function _mailsave_to_imagefield_attempt_image(&$node) {
   // Begin processing attachments
   foreach ($node->mailsave_attachments as $key => $file) {
 
+    // PHP imap sometimes fails to detect a filename for inline attached JPEG images.
+    // For these supposedly "unnamed" files, generate an appropriate filename.
+    if ($file['filename'] == MAILSAVE_UNNAMED_ATTACHMENT) {
+      mailsave_generate_filename($file);
+    }
+
     // Check to see if it's a image type that the imagefield will take
     // Note - current official release of imagefield doesn't include cck_image_extensions, this only appears in
     // branch 5--2 onwards. So we check that the extension list is empty, or the extension is otherwise allowed
     /// but we also check the mime type is image/. This might cause problems for some webmail type clients that
     // report image uploads as octet streams, but will have to do for now!
+
     if ( (trim($cck_image_extensions) == '' || strpos($cck_image_extensions, _file_ext($file['filename'])) !== FALSE ) && strpos(strtolower($file['filemime']), 'image/') === 0 )  {
 
       // Let's scale the image per the imagefield max settings
-      $file = _imagefield_scale_image($file, $field_info['widget']['max_resolution']);
+      if ($field_info['widget']['max_resolution']) {
+        $file = _imagefield_scale_image($file, $field_info['widget']['max_resolution']);
+      }
 
       // If there are tokenized as part of imagefield 2.x let's use them
       if (function_exists('token_replace')) {
         global $user;
-        $widget_image_path = token_replace($field_info['widget']['image_path'], 'user', $user);
+        $widget_image_path = token_replace($field_info['widget']['file_path'], 'user', $user);
       }
       else {
-        $widget_image_path = $field_info['widget']['image_path'];
+        $widget_image_path = $field_info['widget']['file_path'];
       }
 
       // Let's create the directory path if it hasn't been created already
-      imagefield_check_directory($widget_image_path);
+      $directory = file_create_path($widget_image_path);
+      file_check_directory($directory, FILE_CREATE_DIRECTORY);
+
+      $destination = file_destination(file_create_path($widget_image_path .'/'. $file['filename']), FILE_EXISTS_RENAME);
+      file_move($file['filepath'], $destination);
 
       // Build the array for the image found
-      $cckimageinfo = array(
-        'flags'    => array('delete' => '0'),
-        'alt'      => $file['filename'],
-        'title'    => '',
-        'filename' => $file['filename'],
-        'filepath' => $file['filepath'],
-        'filemime' => $file['filemime'],
-        'filesize' => $file['filesize'],
-        'fid'      => 'upload',
-      );
+      $file['list'] = 0;
+      $file['data'] = array('description' => '', 'alt' => $file['filename'], 'title' => '');
+      $file['uid'] = $node->uid;
+      $file['filepath'] = $destination;
+      $file['status'] = 1;
+      $file['timestamp'] = time();
+
+      drupal_write_record('files', $file);
+
+      foreach (module_implements('file_insert') as $module) {
+        $function = $module .'_file_insert';
+        $function((object) $file);
+      }
 
       // Add the image info to the imagefield array
-      $node->{$cck_imagefield}[] = $cckimageinfo;
+      $node->{$cck_imagefield}[] = $file;
 
       // Lets remove the CCK image we found from attachments
       // We will leave the temp file though, as imagefield will need it

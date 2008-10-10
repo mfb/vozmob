@@ -1,0 +1,83 @@
+<?php
+// $Id: filefield_meta.module,v 1.5 2008/07/31 12:22:55 drewish Exp $
+/**
+ * @file
+ * FileField Meta: Add Video Support to File Field.
+ */
+
+function filefield_meta_theme() {
+  return array(
+    'filefield_meta_duration' => array(
+      'arguments' => array('duration' => NULL),
+    ),
+  );
+}
+
+/**
+ * Implementation of filefield's hook_file_insert().
+ */
+function filefield_meta_file_insert($file) {
+  filefield_meta($file);
+  $record = array_merge(array('fid' => $file->fid), $file->data);
+  drupal_write_record('filefield_meta', $record);
+}
+
+/**
+ * Implementation of filefield's hook_file_update().
+ */
+function filefield_meta_file_update($file) {
+  filefield_meta_file_delete($file);
+  filefield_meta($file);
+  $record = array_merge(array('fid' => $file->fid), $file->data);
+  drupal_write_record('filefield_meta', $record);
+}
+
+/**
+ * Implementation of filefield's hook_file_delete().
+ */
+function filefield_meta_file_delete($file) {
+  db_query('DELETE FROM {filefield_meta} WHERE fid = %d', $file->fid);
+}
+
+/**
+ * Implementation of filefield's hook_file_load().
+ */
+function filefield_meta_file_load(&$file) {
+  if ($meta = db_fetch_array(db_query('SELECT * FROM {filefield_meta} WHERE fid = %d', $file->fid))) {
+    $file->data = is_array($file->data) ? array_merge($meta, $file->data) : $meta;
+  }
+  else {
+    filefield_meta($file);
+  }
+}
+
+function filefield_meta(&$file) {
+  $info = getid3_analyze($file->filepath);
+  $file->data['width'] = $file->data['height'] = $file->data['duration'] = 0;
+  if (isset($info['video']['resolution_x'])) {
+    $file->data['width'] = $info['video']['resolution_x'];
+    $file->data['height'] = $info['video']['resolution_y'];
+  }
+  else if (isset($info['video']['streams'])) {
+    foreach($info['video']['streams'] as $stream) {
+      $file->data['width'] = max($file->data['width'], $stream['resolution_x']);
+      $file->data['height'] = max($file->data['height'], $stream['resolution_y']);
+    }
+  }
+  $file->data['duration'] = $info['playtime_seconds'];
+};
+
+/**
+ * Convert the float druation into a pretty string.
+ *
+ * @param $duration
+ */
+function theme_filefield_meta_duration($duration) {
+  $seconds = round((($duration / 60) - floor($duration / 60)) * 60);
+  $minutes = floor($duration / 60);
+  if ($seconds >= 60) {
+      $seconds -= 60;
+      $minutes++;
+  }
+  return intval($minutes).':'.str_pad($seconds, 2, 0, STR_PAD_LEFT);
+}

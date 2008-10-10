@@ -1,0 +1,55 @@
+<?php
+// $Id: userreference.install,v 1.23.2.6 2008/10/04 13:14:23 karens Exp $
+
+/**
+ * @file
+ * Implementation of hook_install().
+ */
+function userreference_install() {
+  drupal_load('module', 'content');
+  content_notify('install', 'userreference');
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function userreference_uninstall() {
+  drupal_load('module', 'content');
+  content_notify('uninstall', 'userreference');
+}
+
+/**
+ * Implementation of hook_enable().
+ *
+ * Notify content module when this module is enabled.
+ */
+function userreference_enable() {
+  drupal_load('module', 'content');
+  content_notify('enable', 'userreference');
+}
+
+/**
+ * Implementation of hook_disable().
+ *
+ * Notify content module when this module is disabled.
+ */
+function userreference_disable() {
+  drupal_load('module', 'content');
+  content_notify('disable', 'userreference');
+}
+
+function userreference_update_last_removed() {
+  return 4;
+}
+
+/**
+ * Placeholder update to set newly installed versions to the latest update number.
+ */
+function userreference_update_6000() {
+  if ($abort = content_check_update('userreference')) {
+    return $abort;
+  }
+
+  $ret = array();
+  return $ret;
+}

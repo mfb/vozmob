@@ -1,0 +1,18 @@
+; $Id: page.tpl.php,v 1.15.4.1 2008/08/27 04:47:37 m3avrck Exp $
+name = Blueprint
+description = Drupal base theme built with Blueprint CSS framework.
+version = VERSION
+core = 6.x
+engine = phptemplate
+stylesheets[screen,projection][] = blueprint/blueprint/screen.css
+stylesheets[print][] = blueprint/blueprint/print.css
+stylesheets[screen,projection][] = css/blueprint.css
+stylesheets[screen,projection][] = css/style.css
+
+scripts[] = scripts/general.js
+
+regions[left] = Left sidebar
+regions[right] = Right sidebar
+regions[content] = Content
+regions[header] = Header
+regions[footer] = Footer

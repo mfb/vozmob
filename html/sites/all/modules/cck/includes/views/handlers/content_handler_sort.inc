@@ -1,0 +1,18 @@
+<?php
+// $Id: content_handler_sort.inc,v 1.1.2.2 2008/10/04 13:14:21 karens Exp $
+
+/**
+ * @file
+ * The subclass simply adds properties,
+ * for field-specific subclasses to use if they need to.
+ */
+class content_handler_sort extends views_handler_sort {
+  var $content_field;
+
+  function construct() {
+    parent::construct();
+
+    $this->content_field = content_fields($this->definition['content_field_name']);
+    $this->additional_fields = $this->definition['additional fields'];
+  }
+}

@@ -1,0 +1,109 @@
+# $Id: modules-fieldgroup.pot,v 1.1.2.7 2008/08/25 20:49:00 hass Exp $
+#
+# LANGUAGE translation of Drupal (modules-fieldgroup)
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from files:
+#  fieldgroup.module,v 1.79.2.11 2008/08/25 15:46:11 yched
+#  fieldgroup.info,v 1.6 2008/04/23 18:01:58 dww
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2008-08-25 22:44+0200\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: modules/fieldgroup/fieldgroup.module:103
+msgid "Add"
+msgstr ""
+
+#: modules/fieldgroup/fieldgroup.module:128
+msgid "Form settings"
+msgstr ""
+
+#: modules/fieldgroup/fieldgroup.module:129
+msgid "These settings apply to the group in the node editing form."
+msgstr ""
+
+#: modules/fieldgroup/fieldgroup.module:133
+msgid "Style"
+msgstr ""
+
+#: modules/fieldgroup/fieldgroup.module:136
+msgid "always open"
+msgstr ""
+
+#: modules/fieldgroup/fieldgroup.module:137
+msgid "collapsible"
+msgstr ""
+
+#: modules/fieldgroup/fieldgroup.module:138
+msgid "collapsed"
+msgstr ""
+
+#: modules/fieldgroup/fieldgroup.module:146
+msgid "Instructions to present to the user on the editing form."
+msgstr ""
+
+#: modules/fieldgroup/fieldgroup.module:151
+msgid "Display settings"
+msgstr ""
+
+#: modules/fieldgroup/fieldgroup.module:152
+msgid "These settings apply to the group on node display."
+msgstr ""
+
+#: modules/fieldgroup/fieldgroup.module:159
+msgid "A description of the group."
+msgstr ""
+
+#: modules/fieldgroup/fieldgroup.module:194
+msgid "The group name %name already exists."
+msgstr ""
+
+#: modules/fieldgroup/fieldgroup.module:198
+msgid "The group name %name is invalid."
+msgstr ""
+
+#: modules/fieldgroup/fieldgroup.module:233
+msgid "Are you sure you want to remove the group %label?"
+msgstr ""
+
+#: modules/fieldgroup/fieldgroup.module:235
+msgid "This action cannot be undone."
+msgstr ""
+
+#: modules/fieldgroup/fieldgroup.module:244
+msgid "The group %group_name has been removed."
+msgstr ""
+
+#: modules/fieldgroup/fieldgroup.module:293
+msgid "none"
+msgstr ""
+
+#: modules/fieldgroup/fieldgroup.module:29
+msgid "Add group"
+msgstr ""
+
+#: modules/fieldgroup/fieldgroup.module:37;44
+msgid "Edit group"
+msgstr ""
+
+#: modules/fieldgroup/fieldgroup.module:0
+msgid "fieldgroup"
+msgstr ""
+
+#: modules/fieldgroup/fieldgroup.info:0
+msgid "Fieldgroup"
+msgstr ""
+
+#: modules/fieldgroup/fieldgroup.info:0
+msgid "Create field groups for CCK fields."
+msgstr ""
+

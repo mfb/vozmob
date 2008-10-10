@@ -1,0 +1,23 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Cleanup messages received from Gizmo.
+ */
+
+/**
+ * Implementation of hook_mailsave_clean().
+ */
+function gizmo_mailsave_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
+  // Check if this message was from Gizmo.
+  if ($header->fromaddress == 'voicemail@gizmoproject.com') {
+    // Check for "Voicemail from:" in case the format changes.
+    // Worst case is that match fails and nothing is changed.
+    if (is_int(strpos($node->body, '<title>Voicemail from:'))) {
+      // Store the amended body
+      $node->body = '';
+      $node->teaser = node_teaser($node->body);
+    }
+  }
+}

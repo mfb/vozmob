@@ -1,0 +1,118 @@
+# $Id: modules-fieldgroup.de.po,v 1.1.2.8 2008/08/26 06:44:27 hass Exp $
+# German translation of CCK
+# Copyright 2006 Lukas Gangoly <lukas.gangoly@univie.ac.at>
+# Copyright 2006 Jakob Petsovits <jpetso@gmx.at>
+# Generated from files:
+#  field.php,v 1.3 2006/04/16 13:47:13 luke
+#  text.module,v 1.34 2006/06/12 19:59:53 luke
+#  number.module,v 1.28 2006/05/02 13:52:16 luke
+#  content_admin.inc,v 1.16 2006/06/12 19:36:54 luke
+#  content.module,v 1.64 2006/06/12 19:36:54 luke
+#  nodereference.module,v 1.28 2006/06/12 19:36:54 luke
+#  optionwidgets.module,v 1.8 2006/05/01 15:45:29 luke
+#  userreference.module,v 1.24 2006/05/05 14:10:44 luke
+#  weburl.module,v 1.8 2006/06/12 19:36:54 luke
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: German translation of CCK\n"
+"POT-Creation-Date: 2008-08-25 22:44+0200\n"
+"PO-Revision-Date: 2008-08-26 08:21+0100\n"
+"Last-Translator: Alexander Hass\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+"X-Poedit-Language: German\n"
+"X-Poedit-Country: GERMANY\n"
+"X-Poedit-SourceCharset: utf-8\n"
+
+#: modules/fieldgroup/fieldgroup.module:103
+msgid "Add"
+msgstr "Hinzufügen"
+
+#: modules/fieldgroup/fieldgroup.module:128
+msgid "Form settings"
+msgstr "Formulareinstellungen"
+
+#: modules/fieldgroup/fieldgroup.module:129
+msgid "These settings apply to the group in the node editing form."
+msgstr "Diese Einstellungen gelten im Bearbeitungsformular des Beitrages für die Gruppe."
+
+#: modules/fieldgroup/fieldgroup.module:133
+msgid "Style"
+msgstr "Darstellung"
+
+#: modules/fieldgroup/fieldgroup.module:136
+msgid "always open"
+msgstr "Immer geöffnet"
+
+#: modules/fieldgroup/fieldgroup.module:137
+msgid "collapsible"
+msgstr "Zusammenklappbar"
+
+#: modules/fieldgroup/fieldgroup.module:138
+msgid "collapsed"
+msgstr "Zusammengeklappt"
+
+#: modules/fieldgroup/fieldgroup.module:146
+msgid "Instructions to present to the user on the editing form."
+msgstr "Eine Hilfestellung, die dem Benutzer im Bearbeitungsformular angezeigt wird."
+
+#: modules/fieldgroup/fieldgroup.module:151
+msgid "Display settings"
+msgstr "Anzeigeeinstellungen"
+
+#: modules/fieldgroup/fieldgroup.module:152
+msgid "These settings apply to the group on node display."
+msgstr "Diese Einstellungen gelten in der Beitragsanzeige für die Gruppe."
+
+#: modules/fieldgroup/fieldgroup.module:159
+msgid "A description of the group."
+msgstr "Eine Beschreibung der Gruppe."
+
+#: modules/fieldgroup/fieldgroup.module:194
+msgid "The group name %name already exists."
+msgstr "Der Gruppenname %name ist bereits vorhanden."
+
+#: modules/fieldgroup/fieldgroup.module:198
+msgid "The group name %name is invalid."
+msgstr "Der Gruppenname %name ist ungültig."
+
+#: modules/fieldgroup/fieldgroup.module:233
+msgid "Are you sure you want to remove the group %label?"
+msgstr "Soll die Gruppe %label wirklich gelöscht werden?"
+
+#: modules/fieldgroup/fieldgroup.module:235
+msgid "This action cannot be undone."
+msgstr "Dieser Vorgang kann nicht rückgängig gemacht werden."
+
+#: modules/fieldgroup/fieldgroup.module:244
+msgid "The group %group_name has been removed."
+msgstr "Die Gruppe %group_name wurde gelöscht."
+
+#: modules/fieldgroup/fieldgroup.module:293
+msgid "none"
+msgstr "Keine"
+
+#: modules/fieldgroup/fieldgroup.module:29
+msgid "Add group"
+msgstr "Gruppe hinzufügen"
+
+#: modules/fieldgroup/fieldgroup.module:37;44
+msgid "Edit group"
+msgstr "Gruppe bearbeiten"
+
+#: modules/fieldgroup/fieldgroup.module:0
+msgid "fieldgroup"
+msgstr "Feldgruppe"
+
+#: modules/fieldgroup/fieldgroup.info:0
+msgid "Fieldgroup"
+msgstr "Feldgruppe"
+
+#: modules/fieldgroup/fieldgroup.info:0
+msgid "Create field groups for CCK fields."
+msgstr "Feldgruppen für CCK-Felder erstellen."
+

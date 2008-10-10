@@ -1,0 +1,199 @@
+# $Id: general.de.po,v 1.1.2.9 2008/08/26 06:44:27 hass Exp $
+#
+# LANGUAGE translation of Drupal (general)
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from files:
+#  content.module,v 1.301.2.3 2008/06/14 02:24:00 yched
+#  nodereference.module,v 1.138.2.1 2008/06/04 12:56:58 karens
+#  content.crud.inc,v 1.76.2.1 2008/06/04 11:53:57 karens
+#  content_copy.module,v 1.27 2008/05/29 22:27:04 karens
+#  content.admin.inc,v 1.181.2.2 2008/06/14 02:50:08 yched
+#  example_field.php,v 1.5 2008/04/23 08:24:06 karens
+#  simple_field.php,v 1.5 2008/04/23 08:24:06 karens
+#  text.module,v 1.95.2.2 2008/06/14 02:50:08 yched
+#  userreference.module,v 1.106 2008/06/01 22:00:36 karens
+#  number.module,v 1.91.2.3 2008/06/14 02:50:08 yched
+#  fieldgroup.module,v 1.79.2.1 2008/06/13 21:41:06 yched
+#  optionwidgets.module,v 1.69 2008/06/03 12:25:45 karens
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: German translation of CCK\n"
+"POT-Creation-Date: 2008-08-25 22:44+0200\n"
+"PO-Revision-Date: 2008-08-26 08:42+0100\n"
+"Last-Translator: Alexander Hass\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+"X-Poedit-Language: German\n"
+"X-Poedit-Country: GERMANY\n"
+
+#: content.module:1643
+#: modules/nodereference/nodereference.module:217
+msgid "Teaser"
+msgstr "Anrisstext"
+
+#: content.module:1644
+#: modules/nodereference/nodereference.module:212
+msgid "Full node"
+msgstr "Vollständiger Beitrag"
+
+#: content.module:531;538;0
+#: includes/content.crud.inc:585;624
+msgid "content"
+msgstr "Inhalt"
+
+#: content.module:103
+#: modules/content_copy/content_copy.module:110
+msgid "Fields"
+msgstr "Felder"
+
+#: content.module:156
+#: includes/content.admin.inc:560
+msgid "Add field"
+msgstr "Feld hinzufügen"
+
+#: includes/content.admin.inc:16
+#: modules/fieldgroup/fieldgroup.module:156
+msgid "Description"
+msgstr "Beschreibung"
+
+#: includes/content.admin.inc:149;171;829
+#: modules/fieldgroup/fieldgroup.module:236
+msgid "Remove"
+msgstr "Entfernen"
+
+#: includes/content.admin.inc:210;418
+#: modules/fieldgroup/fieldgroup.module:110;349
+msgid "Save"
+msgstr "Speichern"
+
+#: includes/content.admin.inc:221;429;662;907
+#: includes/content.views.inc:375
+#: modules/fieldgroup/fieldgroup.module:121
+msgid "Label"
+msgstr "Bezeichnung"
+
+#: includes/content.admin.inc:829
+#: modules/fieldgroup/fieldgroup.module:236
+msgid "Cancel"
+msgstr "Abbrechen"
+
+#: includes/content.admin.inc:954
+#: modules/fieldgroup/fieldgroup.module:143
+msgid "Help text"
+msgstr "Hilfetext"
+
+#: includes/content.admin.inc:987
+#: modules/number/number.module:139
+#: modules/text/text.module:96
+msgid "PHP code"
+msgstr "PHP-Code"
+
+#: includes/content.admin.inc:1002;1015
+#: modules/number/number.module:146;155
+#: modules/text/text.module:103;112
+msgid "Code"
+msgstr "Kürzel"
+
+#: includes/content.admin.inc:1016
+#: modules/number/number.module:156
+#: modules/text/text.module:113
+msgid "&lt;none&gt;"
+msgstr "&lt;Keine&gt;"
+
+#: includes/content.admin.inc:1017
+#: modules/number/number.module:157
+#: modules/text/text.module:114
+msgid "You're not allowed to input PHP code."
+msgstr "Keine Berechtigung zur Eingabe von PHP-Code vorhanden."
+
+#: includes/content.admin.inc:1057
+#: modules/content_copy/content_copy.module:196
+msgid "Save field settings"
+msgstr "Feldeinstellungen speichern"
+
+#: modules/nodereference/nodereference.module:99
+#: modules/userreference/userreference.module:96
+msgid "Default Views"
+msgstr "Standardansichten"
+
+#: modules/nodereference/nodereference.module:102
+#: modules/userreference/userreference.module:99
+msgid "Existing Views"
+msgstr "Vorhandene Ansichten"
+
+#: modules/nodereference/nodereference.module:123
+#: modules/userreference/userreference.module:120
+msgid "View arguments"
+msgstr "Argumente anzeigen"
+
+#: modules/nodereference/nodereference.module:126
+#: modules/userreference/userreference.module:123
+msgid "Provide a comma separated list of arguments to pass to the view."
+msgstr "Eine kommagetrennte Liste von Argumenten angeben, welche an die Ansicht übergeben werden."
+
+#: modules/nodereference/nodereference.module:307
+#: modules/optionwidgets/optionwidgets.module:79
+#: modules/userreference/userreference.module:249
+msgid "Select list"
+msgstr "Auswahlliste"
+
+#: modules/nodereference/nodereference.module:315
+#: modules/optionwidgets/optionwidgets.module:87
+#: modules/userreference/userreference.module:257
+msgid "Check boxes/radio buttons"
+msgstr "Ankreuzfelder/Auswahlknöpfe"
+
+#: modules/nodereference/nodereference.module:323
+#: modules/userreference/userreference.module:265
+msgid "Autocomplete text field"
+msgstr "Textfeld mit Autovervollständigung"
+
+#: modules/number/number.module:125
+#: modules/text/text.module:82
+msgid "Allowed values"
+msgstr "Zulässige Werte"
+
+#: modules/number/number.module:131
+#: modules/text/text.module:88
+msgid "Allowed values list"
+msgstr "Zulässige Werteliste"
+
+#: modules/number/number.module:135
+#: modules/text/text.module:92
+msgid "The possible values this field can contain. Enter one value per line, in the format key|label. The key is the value that will be stored in the database, and it must match the field storage type (%type). The label is optional, and the key will be used as the label if no label is specified.<br />Allowed HTML tags: @tags"
+msgstr "Die möglichen Werte, die dieses Feld enthalten kann. Geben Sie pro Zeile einen Wert im Format „Schlüssel|Bezeichnung“ ein. Der Schüssel ist der Wert, welcher in der Datenbank gespeichert wird und muss dem Datentyp (%type) des Feldes entsprechen. Der Schlüssel wird als Bezeichnung verwendet, wenn die optionale Bezeichnung nicht angegeben wird.<br />Zulässige HTML-Tags: @tags"
+
+#: modules/number/number.module:149
+#: modules/text/text.module:106
+msgid "Advanced usage only: PHP code that returns a keyed array of allowed values. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the array returned by this code will override the allowed values list above."
+msgstr "Nur erweiterte Verwendung: PHP-Code der ein Array mit Schlüsseln der zulässigen Werte zurückliefert. Dieser sollte keine &lt;?php ?&gt; Trennzeichen enthalten. Sollte dieses Feld ausgefüllt werden, wird das von diesem Code zurückgegebene Array die zulässige Werteliste oberhalb übersteuern."
+
+#: modules/number/number.module:157
+#: modules/text/text.module:114
+msgid "This PHP code was set by an administrator and will override the allowed values list above."
+msgstr "Dieser PHP-Code wurde von einem Administrator festgelegt und wird die obige zulässige Werteliste übersteuern."
+
+#: modules/number/number.module:238
+#: modules/text/text.module:162
+msgid "%name: illegal value."
+msgstr "%name: ungültiger Wert."
+
+#: modules/number/number.module:356
+#: modules/text/text.module:262
+msgid "Text field"
+msgstr "Textfeld"
+
+#: modules/text/text.module:66;207
+#: modules/userreference/userreference.module:202
+msgid "Plain text"
+msgstr "Einfacher Text"
+
+#: modules/text/text.module:202
+#: modules/userreference/userreference.module:197
+msgid "Default"
+msgstr "Standard"
+

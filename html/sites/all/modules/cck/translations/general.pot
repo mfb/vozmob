@@ -1,0 +1,158 @@
+# $Id: general.pot,v 1.1.2.5 2008/08/25 20:49:00 hass Exp $
+#
+# LANGUAGE translation of Drupal (general)
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from files:
+#  content.module,v 1.301.2.36 2008/08/25 15:46:11 yched
+#  nodereference.module,v 1.138.2.25 2008/08/23 00:12:19 yched
+#  content.crud.inc,v 1.76.2.8 2008/07/27 04:04:14 yched
+#  content_copy.module,v 1.27.2.3 2008/08/22 16:11:09 yched
+#  content.admin.inc,v 1.181.2.28 2008/08/09 17:49:49 yched
+#  fieldgroup.module,v 1.79.2.11 2008/08/25 15:46:11 yched
+#  content.views.inc,v 1.68.2.17 2008/08/23 00:12:19 yched
+#  number.module,v 1.91.2.13 2008/08/23 00:12:18 yched
+#  text.module,v 1.95.2.16 2008/08/23 00:12:19 yched
+#  userreference.module,v 1.106.2.12 2008/08/25 17:23:17 yched
+#  optionwidgets.module,v 1.69.2.10 2008/08/22 23:32:46 yched
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2008-08-25 22:44+0200\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: content.module:1643 modules/nodereference/nodereference.module:217
+msgid "Teaser"
+msgstr ""
+
+#: content.module:1644 modules/nodereference/nodereference.module:212
+msgid "Full node"
+msgstr ""
+
+#: content.module:531;538;0 includes/content.crud.inc:585;624
+msgid "content"
+msgstr ""
+
+#: content.module:103 modules/content_copy/content_copy.module:110
+msgid "Fields"
+msgstr ""
+
+#: content.module:156 includes/content.admin.inc:560
+msgid "Add field"
+msgstr ""
+
+#: includes/content.admin.inc:16 modules/fieldgroup/fieldgroup.module:156
+msgid "Description"
+msgstr ""
+
+#: includes/content.admin.inc:149;171;829 modules/fieldgroup/fieldgroup.module:236
+msgid "Remove"
+msgstr ""
+
+#: includes/content.admin.inc:210;418 modules/fieldgroup/fieldgroup.module:110;349
+msgid "Save"
+msgstr ""
+
+#: includes/content.admin.inc:221;429;662;907 includes/content.views.inc:375 modules/fieldgroup/fieldgroup.module:121
+msgid "Label"
+msgstr ""
+
+#: includes/content.admin.inc:829 modules/fieldgroup/fieldgroup.module:236
+msgid "Cancel"
+msgstr ""
+
+#: includes/content.admin.inc:954 modules/fieldgroup/fieldgroup.module:143
+msgid "Help text"
+msgstr ""
+
+#: includes/content.admin.inc:987 modules/number/number.module:139 modules/text/text.module:96
+msgid "PHP code"
+msgstr ""
+
+#: includes/content.admin.inc:1002;1015 modules/number/number.module:146;155 modules/text/text.module:103;112
+msgid "Code"
+msgstr ""
+
+#: includes/content.admin.inc:1016 modules/number/number.module:156 modules/text/text.module:113
+msgid "&lt;none&gt;"
+msgstr ""
+
+#: includes/content.admin.inc:1017 modules/number/number.module:157 modules/text/text.module:114
+msgid "You're not allowed to input PHP code."
+msgstr ""
+
+#: includes/content.admin.inc:1057 modules/content_copy/content_copy.module:196
+msgid "Save field settings"
+msgstr ""
+
+#: modules/nodereference/nodereference.module:99 modules/userreference/userreference.module:96
+msgid "Default Views"
+msgstr ""
+
+#: modules/nodereference/nodereference.module:102 modules/userreference/userreference.module:99
+msgid "Existing Views"
+msgstr ""
+
+#: modules/nodereference/nodereference.module:123 modules/userreference/userreference.module:120
+msgid "View arguments"
+msgstr ""
+
+#: modules/nodereference/nodereference.module:126 modules/userreference/userreference.module:123
+msgid "Provide a comma separated list of arguments to pass to the view."
+msgstr ""
+
+#: modules/nodereference/nodereference.module:307 modules/optionwidgets/optionwidgets.module:79 modules/userreference/userreference.module:249
+msgid "Select list"
+msgstr ""
+
+#: modules/nodereference/nodereference.module:315 modules/optionwidgets/optionwidgets.module:87 modules/userreference/userreference.module:257
+msgid "Check boxes/radio buttons"
+msgstr ""
+
+#: modules/nodereference/nodereference.module:323 modules/userreference/userreference.module:265
+msgid "Autocomplete text field"
+msgstr ""
+
+#: modules/number/number.module:125 modules/text/text.module:82
+msgid "Allowed values"
+msgstr ""
+
+#: modules/number/number.module:131 modules/text/text.module:88
+msgid "Allowed values list"
+msgstr ""
+
+#: modules/number/number.module:135 modules/text/text.module:92
+msgid "The possible values this field can contain. Enter one value per line, in the format key|label. The key is the value that will be stored in the database, and it must match the field storage type (%type). The label is optional, and the key will be used as the label if no label is specified.<br />Allowed HTML tags: @tags"
+msgstr ""
+
+#: modules/number/number.module:149 modules/text/text.module:106
+msgid "Advanced usage only: PHP code that returns a keyed array of allowed values. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the array returned by this code will override the allowed values list above."
+msgstr ""
+
+#: modules/number/number.module:157 modules/text/text.module:114
+msgid "This PHP code was set by an administrator and will override the allowed values list above."
+msgstr ""
+
+#: modules/number/number.module:238 modules/text/text.module:162
+msgid "%name: illegal value."
+msgstr ""
+
+#: modules/number/number.module:356 modules/text/text.module:262
+msgid "Text field"
+msgstr ""
+
+#: modules/text/text.module:66;207 modules/userreference/userreference.module:202
+msgid "Plain text"
+msgstr ""
+
+#: modules/text/text.module:202 modules/userreference/userreference.module:197
+msgid "Default"
+msgstr ""
+

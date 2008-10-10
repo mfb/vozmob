@@ -1,0 +1,7 @@
+; $Id: filefield.info,v 1.8 2008/06/27 23:36:31 jpetso Exp $
+name = FileField
+description = Defines a file field type.
+dependencies[] = content
+package = CCK
+core = 6.x
+php = 5.2

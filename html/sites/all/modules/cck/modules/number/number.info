@@ -1,0 +1,6 @@
+; $Id: number.info,v 1.7 2008/04/23 18:02:16 dww Exp $
+name = Number
+description = Defines numeric field types.
+dependencies[] = content
+package = CCK
+core = 6.x

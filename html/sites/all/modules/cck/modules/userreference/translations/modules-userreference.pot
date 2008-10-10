@@ -1,0 +1,89 @@
+# $Id: modules-userreference.pot,v 1.1.2.7 2008/08/25 20:49:01 hass Exp $
+#
+# LANGUAGE translation of Drupal (modules-userreference)
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from files:
+#  userreference.module,v 1.106.2.12 2008/08/25 17:23:17 yched
+#  userreference.info,v 1.8 2008/04/23 18:02:38 dww
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2008-08-25 22:44+0200\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: modules/userreference/userreference.module:60
+msgid "User reference"
+msgstr ""
+
+#: modules/userreference/userreference.module:61
+msgid "Store the ID of a related user as an integer value."
+msgstr ""
+
+#: modules/userreference/userreference.module:79
+msgid "User roles that can be referenced"
+msgstr ""
+
+#: modules/userreference/userreference.module:85
+msgid "User status that can be referenced"
+msgstr ""
+
+#: modules/userreference/userreference.module:87
+msgid "Active"
+msgstr ""
+
+#: modules/userreference/userreference.module:87
+msgid "Blocked"
+msgstr ""
+
+#: modules/userreference/userreference.module:107
+msgid "Advanced - Users that can be referenced (View)"
+msgstr ""
+
+#: modules/userreference/userreference.module:113
+msgid "View used to select the users"
+msgstr ""
+
+#: modules/userreference/userreference.module:116
+msgid "Choose the \"Views module\" view that selects the users that can be referenced.<br />Note:<ul><li>Only views that have fields will work for this purpose.</li><li>This will discard the \"Referenceable Roles\" and \"Referenceable Status\" settings above. Use the view's \"filters\" section instead.</li><li>Use the view's \"fields\" section to display additional informations about candidate users on user creation/edition form.</li><li>Use the view's \"sort criteria\" section to determine the order in which candidate users will be displayed.</li></ul>"
+msgstr ""
+
+#: modules/userreference/userreference.module:173
+msgid "%name: invalid user."
+msgstr ""
+
+#: modules/userreference/userreference.module:317
+msgid "Reverse link"
+msgstr ""
+
+#: modules/userreference/userreference.module:319
+msgid "If selected, a reverse link back to the referencing node will displayed on the referenced user record."
+msgstr ""
+
+#: modules/userreference/userreference.module:798
+msgid "Related content"
+msgstr ""
+
+#: modules/userreference/userreference.module:15
+msgid "Userreference autocomplete"
+msgstr ""
+
+#: modules/userreference/userreference.module:0
+msgid "userreference"
+msgstr ""
+
+#: modules/userreference/userreference.info:0
+msgid "User Reference"
+msgstr ""
+
+#: modules/userreference/userreference.info:0
+msgid "Defines a field type for referencing a user from a node."
+msgstr ""
+

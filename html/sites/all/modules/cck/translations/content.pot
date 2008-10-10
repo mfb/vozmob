@@ -1,0 +1,182 @@
+# $Id: content.pot,v 1.1.2.5 2008/08/25 20:49:00 hass Exp $
+#
+# LANGUAGE translation of Drupal (root)
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from files:
+#  content.module,v 1.301.2.36 2008/08/25 15:46:11 yched
+#  content.info,v 1.6 2007/07/04 23:46:29 yched
+#  content.views.inc,v 1.68.2.17 2008/08/23 00:12:19 yched
+#  content_copy.info,v 1.6 2008/04/23 18:01:48 dww
+#  content_permissions.info,v 1.2 2008/04/23 18:01:52 dww
+#  fieldgroup.info,v 1.6 2008/04/23 18:01:58 dww
+#  nodereference.info,v 1.8 2008/04/23 18:02:07 dww
+#  number.info,v 1.7 2008/04/23 18:02:16 dww
+#  optionwidgets.info,v 1.7 2008/04/23 18:02:24 dww
+#  text.info,v 1.9 2008/04/23 18:02:31 dww
+#  userreference.info,v 1.8 2008/04/23 18:02:38 dww
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2008-08-25 22:44+0200\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: content.module:25
+msgid "The content module, a required component of the Content Construction Kit (CCK), allows administrators to associate custom fields with content types. In Drupal, content types are used to define the characteristics of a post, including the title and description of the fields displayed on its add and edit pages. Using the content module (and the other helper modules included in CCK), custom fields beyond the default \"Title\" and \"Body\" may be added. CCK features are accessible through tabs on the <a href=\"@content-types\">content types administration page</a>. (See the <a href=\"@node-help\">node module help page</a> for more information about content types.)"
+msgstr ""
+
+#: content.module:26
+msgid "When adding a custom field to a content type, you determine its type (whether it will contain text, numbers, or references to other objects) and how it will be displayed (either as a text field or area, a select box, checkbox, radio button, or autocompleting field). A field may have multiple values (i.e., a \"person\" may have multiple e-mail addresses) or a single value (i.e., an \"employee\" has a single employee identification number). As you add and edit fields, CCK automatically adjusts the structure of the database as necessary. CCK also provides a number of other features, including intelligent caching for your custom data, an import and export facility for content type definitions, and integration with other contributed modules."
+msgstr ""
+
+#: content.module:27
+msgid "Custom field types are provided by a set of optional modules included with CCK (each module provides a different type). The <a href=\"@modules\">modules page</a> allows you to enable or disable CCK components. A default installation of CCK includes:"
+msgstr ""
+
+#: content.module:29
+msgid "<em>number</em>, which adds numeric field types, in integer, decimal or floating point form. You may define a set of allowed inputs, or specify an allowable range of values. A variety of common formats for displaying numeric data are available."
+msgstr ""
+
+#: content.module:30
+msgid "<em>text</em>, which adds text field types. A text field may contain plain text only, or optionally, may use Drupal's input format filters to securely manage rich text input. Text input fields may be either a single line (text field), multiple lines (text area), or for greater input control, a select box, checkbox, or radio buttons. If desired, CCK can validate the input to a set of allowed values."
+msgstr ""
+
+#: content.module:31
+msgid "<em>nodereference</em>, which creates custom references between Drupal nodes. By adding a <em>nodereference</em> field and two different content types, for instance, you can easily create complex parent/child relationships between data (multiple \"employee\" nodes may contain a <em>nodereference</em> field linking to an \"employer\" node)."
+msgstr ""
+
+#: content.module:32
+msgid "<em>userreference</em>, which creates custom references to your sites' user accounts. By adding a <em>userreference</em> field, you can create complex relationships between your site's users and posts. To track user involvement in a post beyond Drupal's standard <em>Authored by</em> field, for instance, add a <em>userreference</em> field named \"Edited by\" to a content type to store a link to an editor's user account page."
+msgstr ""
+
+#: content.module:33
+msgid "<em>fieldgroup</em>, which creates collapsible fieldsets to hold a group of related fields. A fieldset may either be open or closed by default. The order of your fieldsets, and the order of fields within a fieldset, is managed via a drag-and-drop interface provided by content module."
+msgstr ""
+
+#: content.module:35
+msgid "For more information, see the online handbook entry for <a href=\"@handbook-cck\">CCK</a> or the <a href=\"@project-cck\">CCK project page</a>."
+msgstr ""
+
+#: content.module:41
+msgid "Configure how this content type's fields and field labels should be displayed when it's viewed in teaser and full-page mode."
+msgstr ""
+
+#: content.module:44
+msgid "Configure how this content type's fields should be displayed when it's rendered in the following contexts."
+msgstr ""
+
+#: content.module:48
+msgid "Control the order of fields in the input form."
+msgstr ""
+
+#: content.module:449
+msgid "This field is required."
+msgstr ""
+
+#: content.module:453
+msgid "!title: !required"
+msgstr ""
+
+#: content.module:456
+msgid "Order"
+msgstr ""
+
+#: content.module:1648
+msgid "RSS Item"
+msgstr ""
+
+#: content.module:1650
+msgid "Search Index"
+msgstr ""
+
+#: content.module:1651
+msgid "Search Result"
+msgstr ""
+
+#: content.module:1987;1994
+msgid "Node module form."
+msgstr ""
+
+#: content.module:2001
+msgid "Language"
+msgstr ""
+
+#: content.module:2002
+msgid "Locale module form."
+msgstr ""
+
+#: content.module:2008
+msgid "Menu settings"
+msgstr ""
+
+#: content.module:2009
+msgid "Menu module form."
+msgstr ""
+
+#: content.module:2015
+msgid "Taxonomy"
+msgstr ""
+
+#: content.module:2016
+msgid "Taxonomy module form."
+msgstr ""
+
+#: content.module:2022
+msgid "File attachments"
+msgstr ""
+
+#: content.module:2023
+msgid "Upload module form."
+msgstr ""
+
+#: content.module:531
+msgid "Updating field type %type with module %module."
+msgstr ""
+
+#: content.module:538
+msgid "Updating widget type %type with module %module."
+msgstr ""
+
+#: content.module:84
+msgid "Use PHP input for field settings (dangerous - grant with care)"
+msgstr ""
+
+#: content.module:125
+msgid "Manage fields"
+msgstr ""
+
+#: content.module:134
+msgid "Display fields"
+msgstr ""
+
+#: content.module:143
+msgid "General"
+msgstr ""
+
+#: content.module:149
+msgid "Advanced"
+msgstr ""
+
+#: content.module:177
+msgid "Remove field"
+msgstr ""
+
+#: content.info:0 includes/content.views.inc:61;102
+msgid "Content"
+msgstr ""
+
+#: content.info:0
+msgid "Allows administrators to define new content types."
+msgstr ""
+
+#: content.info:0 modules/content_copy/content_copy.info:0 modules/content_permissions/content_permissions.info:0 modules/fieldgroup/fieldgroup.info:0 modules/nodereference/nodereference.info:0 modules/number/number.info:0 modules/optionwidgets/optionwidgets.info:0 modules/text/text.info:0 modules/userreference/userreference.info:0
+msgid "CCK"
+msgstr ""
+

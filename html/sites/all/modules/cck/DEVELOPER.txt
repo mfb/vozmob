@@ -1,0 +1,10 @@
+// $Id: DEVELOPER.txt,v 1.5.2.2 2008/09/09 15:00:09 yched Exp $
+
+DEVELOPER DOCUMENTATION
+UPDATING FROM 5.x TO 6.x
+
+TODO:
+- field modules have to write an update function to update their columns
+  (can we provide a helper function to make this easier ?)
+
+See http://drupal.org/node/191796 for an guide to updating field modules.

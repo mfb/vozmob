@@ -1,0 +1,244 @@
+<?php
+// $Id: filefield.install,v 1.14 2008/10/08 20:19:37 drewish Exp $
+/**
+ * @file
+ * FileField: Defines a CCK file field type.
+ *
+ * Uses content.module to store the fid and field specific metadata,
+ * and Drupal's {files} table to store the actual file data.
+ */
+
+include_once(drupal_get_path('module', 'filefield') .'/field_file.inc');
+
+/**
+ * Implementation of hook_install().
+ */
+function filefield_install() {
+  content_notify('install', 'filefield');
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function filefield_uninstall() {
+  content_notify('uninstall', 'filefield');
+}
+
+/**
+ * Implementation of hook_enable().
+ */
+function filefield_enable() {
+  content_notify('enable', 'filefield');
+}
+
+/**
+ * Implementation of hook_disable().
+ */
+function filefield_disable() {
+  content_notify('disable', 'filefield');
+}
+
+// Update procedures.
+
+function filefield_update_1() {
+  $ret = array();
+
+  include_once(drupal_get_path('module', 'content') .'/content.module');
+  include_once(drupal_get_path('module', 'content') .'/content_admin.inc');
+
+  $fields = content_fields();
+
+  foreach ($fields as $field) {
+    switch ($field['type']) {
+      case 'file':
+        $columns = array(
+          'list' => array('type' => 'int', 'not null' => TRUE, 'default' => '0'),
+        );
+        content_alter_db_field(array(), array(), $field, $columns);
+        break;
+    }
+  }
+  db_query('DELETE FROM {cache}');
+  return $ret;
+}
+
+function filefield_update_2() {
+  cache_clear_all('*', 'cache_menu', TRUE);
+  return array();
+}
+
+/**
+ * Update to filefield 5.x-2.3: Move the 'show_list' widget setting
+ * to the (inverse) 'force_list' field setting.
+ */
+function filefield_update_3() {
+  $ret = array();
+
+  include_once(drupal_get_path('module', 'content') .'/content.module');
+  include_once(drupal_get_path('module', 'content') .'/content_admin.inc');
+
+  $fields = content_fields();
+  foreach ($fields as $field) {
+    switch ($field['type']) {
+      case 'file':
+        $result = db_query("SELECT * FROM {node_field_instance} WHERE field_name = '%s'", $field['field_name']);
+
+        while ($instance = db_fetch_object($result)) {
+          $widget_settings = unserialize($instance->widget_settings);
+
+          if (isset($widget_settings['show_list'])) {
+            $show_list = $widget_settings['show_list'];
+            unset($widget_settings['show_list']);
+
+            // write the widget settings without 'show_list' to the instance
+            $ret[] = update_sql(
+              "UPDATE {node_field_instance}
+               SET widget_settings = '". serialize($widget_settings) ."'
+               WHERE field_name = '". $field['field_name'] ."'
+               AND type_name = '". $instance->type_name ."'"
+            );
+
+            // write the field settings with the new $force_list to the global settings
+            $global = db_result(db_query(
+              "SELECT * FROM {node_field} WHERE field_name = '%s'", $field['field_name']
+            ));
+            $field_settings = unserialize($global->global_settings);
+            $field_settings['force_list'] = ($show_list == 0) ? 1 : 0;
+            $ret[] = update_sql(
+              "UPDATE {node_field}
+               SET global_settings = '". serialize($field_settings) ."'
+               WHERE field_name = '". $field['field_name'] ."'"
+            );
+          }
+        }
+        break;
+    }
+  }
+  db_query('DELETE FROM {cache}');
+  db_query('DELETE FROM {cache_content}');
+  return $ret;
+}
+
+function filefield_update_6001() {
+  if ($abort = content_check_update('filefield')) {
+    return $abort;
+  }
+
+  $ret = array();
+  include_once(drupal_get_path('module','content') .'/includes/content.admin.inc');
+
+  // rename the field type from file to filefield. adhere to module namespace.
+  $ret[] = update_sql("UPDATE {content_node_field} SET type='filefield' WHERE type='file'");
+  // rename default widget to filefield_widget. adhere to module namespace.
+  $ret[] = update_sql("UPDATE {content_node_field_instance} SET widget_type='filefield_widget' WHERE widget_type='file'");
+
+  // update list default value and force list settings.
+  $result = db_query("SELECT * FROM {content_node_field} WHERE type = 'filefield'");
+  while ($field = db_fetch_object($result)) {
+    $updated = false;
+    $field_settings = unserialize($field->global_settings);
+    if (!isset($field_settings['list_default']) || !is_numeric($field_settings['list_default'])) {
+      $field_settings['list_default'] = 1;
+      $updated = true;
+
+    }
+    // set behavior to match old force_list behavior.
+    if (!empty($field_settings['force_list'])) {
+      $field_settings['list_default'] = 1;
+      $field_settings['force_list_default'] = 1;
+      $updated = true;
+    }
+    if ($updated) {
+      $ret[] = update_sql("UPDATE {content_node_field} SET global_settings = '". serialize($field_settings) ."' WHERE field_name = '$field->field_name'");
+    }
+  }
+
+
+  // add data column to filefields.
+  $fields = content_fields();
+  foreach($fields as $field) {
+    if ($field['type'] != 'filefield') continue;
+    $new_field = $field;
+    $new_field['columns']['data'] =  array('type' => 'text');
+    content_alter_db($field, $new_field);
+  }
+
+  // Build a batch that migrates the data in each filefield
+  $batch = array(
+    'title' => t('Migrating filefield values'),
+    'operations' => array(),
+    'file' => drupal_get_path('module', 'filefield') .'/filefield.install',
+  );
+  $content_info = _content_type_info();
+  foreach ($content_info['content types'] as $node_type => $node_info) {
+    foreach ($node_info['fields'] as $field_name => $field) {
+      if ($field['type'] == 'filefield') {
+        $batch['operations'][] = array('_filefield_update_6001_move_operation', array($field));
+        $batch['operations'][] = array('_filefield_update_6001_drop_operation', array($field));
+      }
+    }
+  }
+  batch_set($batch);
+
+
+  // clear them caches.
+  cache_clear_all('*', content_cache_tablename(), true);
+  cache_clear_all('*', 'cache', true);
+  return $ret;
+}
+
+/**
+ * Move the list and descriptions column into the serialized data column.
+ */
+function _filefield_update_6001_move_operation($field, &$context) {
+  // Setup the first through
+  if (!isset($context['sandbox']['progress'])) {
+    $db_info = content_database_info($field);
+    $context['sandbox']['db_info'] = $db_info;
+    $context['sandbox']['table'] = $db_info['table'];
+    $context['sandbox']['col_data'] = $db_info['columns']['data']['column'];
+    $context['sandbox']['col_desc'] = $db_info['columns']['description']['column'];
+    $context['sandbox']['max'] = db_result(db_query("SELECT COUNT(*) FROM {". $db_info['table'] ."}"));
+    $context['sandbox']['progress'] = 0;
+    $context['sandbox']['current_node'] = 0;
+  }
+
+  // Work our way through the field values 50 rows at a time.
+  $limit = 50;
+  $result = db_query_range("SELECT * FROM {{$context['sandbox']['table']}} WHERE vid > %d ORDER BY nid ASC", $context['sandbox']['current_node'], 0, $limit);
+  while ($row = db_fetch_array($result)) {
+    // Try to unserialize the data column.
+    if (!empty($row[$context['sandbox']['col_data']])) {
+      $data = unserialize($row[$context['sandbox']['col_data']]);
+    }
+    if (empty($data)) {
+      $data = array();
+    }
+
+    // Copy move the values from the columns into the array...
+    $data['description'] = $row[$context['sandbox']['col_desc']];
+
+    // ...serialize it and store it back to the db.
+    db_query("UPDATE {{$context['sandbox']['table']}} SET {$context['sandbox']['col_data']} = '%s' WHERE vid = %d", serialize($data), $row['vid']);
+
+    // Update our progress information.
+    $context['sandbox']['progress']++;
+    $context['sandbox']['current_node'] = $row['vid'];
+  }
+
+  // Inform the batch engine that we are not finished,
+  // and provide an estimation of the completion level we reached.
+  if ($context['sandbox']['progress'] != $context['sandbox']['max']) {
+    $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
+  }
+}
+
+/**
+ * Drop the list and description columns.
+ */
+function _filefield_update_6001_drop_operation($field, &$context) {
+  $db_info = content_database_info($field);
+  // TODO: Now that the data has been migrated we can drop the columns.
+  db_query('ALTER TABLE '. $db_info['table'] .' DROP COLUMN '.  $db_info['columns']['description']['column']);
+  $context['finished'] = 1;
+}

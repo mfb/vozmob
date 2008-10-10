@@ -1,0 +1,6 @@
+; $Id: imageapi.info,v 1.3 2008/04/30 15:42:40 dopry Exp $
+name = ImageAPI
+description = ImageAPI supporting multiple toolkits.
+package = ImageCache
+core = 6.x
+php = 5.2
