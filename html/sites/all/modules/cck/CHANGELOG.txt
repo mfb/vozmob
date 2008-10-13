@@ -1,8 +1,11 @@
-//$Id: CHANGELOG.txt,v 1.1.6.219 2008/10/09 01:46:52 karens Exp $
+//$Id: CHANGELOG.txt,v 1.1.6.221 2008/10/09 20:58:25 karens Exp $
 
 CCK 6.2-dev
 ===========
 
+- #300368 Add option on Display fields screen to omit fields or groups from the $content value passed to the node template.
+- Get rid of t() around Views field label since Views already has it marked as a translatable option.
+- #285470 by jhuckabee, store field label in the view in all cases, previously only custom labels were stored.
 - #266309 by abbasmousavi, change silent fix to error message for invalid input into number fields.
 - #318224 by brmassa, error in Content Copy handling of fieldgroups.
 - #198508 Add messages to Manage fields screen about inactive fields.

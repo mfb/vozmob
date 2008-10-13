@@ -1,0 +1,5 @@
+; $Id: jquery_plugin.info,v 1.1.4.4 2008/08/11 23:47:24 mfb Exp $
+name = jQuery plugins
+description = An API and home for miscellaneous jQuery plugins.
+package = User interface
+core = 6.x

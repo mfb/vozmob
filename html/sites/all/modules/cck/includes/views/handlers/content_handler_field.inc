@@ -1,5 +1,5 @@
 <?php
-// $Id: content_handler_field.inc,v 1.1.2.7 2008/10/04 13:14:21 karens Exp $
+// $Id: content_handler_field.inc,v 1.1.2.8 2008/10/09 14:31:15 karens Exp $
 
 /**
  * @file
@@ -76,13 +76,44 @@ class content_handler_field extends views_handler_field_node {
     );
   }
 
+  
+  /**
+   * Make sure some value is stored as a label.
+   * 
+   * Don't use t(), since Views' views_handler_field already has 
+   * $this->options['label'] marked as a translatable field.
+   * 
+   * @see http://drupal.org/node/285470
+   */
+  function options_submit($form, &$form_state) {
+    switch ($form_state['values']['options']['label_type']) {
+      case 'none':
+        $form_state['values']['options']['label'] = '';
+        break;
+      case 'widget':
+        $form_state['values']['options']['label'] = $this->content_field['widget']['label'];
+        break;
+    }
+  }
+
+  /**
+   * @TODO 
+   * Now that we save the label in the submit process above we could 
+   * get rid of this function. Leave it here for now to be sure the 
+   * label works for fields that haven't been updated since this
+   * change was made, since $this->options['label'] will be missing a 
+   * value until it is updated in the view.
+   * 
+   * Don't use t(), since Views' views_handler_field already has 
+   * $this->options['label'] marked as a translatable field.
+   */
   function label() {
     $field = $this->content_field;
     switch ($this->options['label_type']) {
       case 'none':
         return '';
       case 'widget':
-        return t($field['widget']['label']);
+        return $field['widget']['label'];
       default:
         return $this->options['label'];
     }

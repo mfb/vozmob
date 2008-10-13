@@ -1,5 +1,5 @@
 <?php
-// $Id: content-admin-display-overview-form.tpl.php,v 1.1.2.2 2008/09/23 17:32:31 yched Exp $
+// $Id: content-admin-display-overview-form.tpl.php,v 1.1.2.3 2008/10/09 20:58:26 karens Exp $
 ?>
 <div>
   <?php print $help; ?>
@@ -14,6 +14,7 @@
         <?php endif; ?>
         <?php foreach ($contexts as $key => $value): ?>
           <th><?php print $value['title']; ?></th>
+          <th><?php print t('Exclude'); ?></th>
         <?php endforeach; ?>
       </tr>
     </thead>
@@ -27,7 +28,8 @@
             <td><?php print $row->label; ?></td>
           <?php endif; ?>
           <?php foreach ($contexts as $context => $title): ?>
-            <td><?php print $row->{$context}; ?></td>
+            <td><?php print $row->{$context}->format; ?></td>
+            <td><?php print $row->{$context}->exclude; ?></td>
           <?php endforeach; ?>
         </tr>
         <?php $count++;

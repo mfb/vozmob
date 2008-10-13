@@ -1,1 +1,12 @@
 /* put your custom CSS in here */
+
+div.field-type-image div.field-items img {  
+  padding: 15px;  
+  border:  1px solid #ccc;  
+  background-color: #eee;
+}
+
+#cycle-nav a { border: 1px solid #ccc; background: #fc0; text-decoration: none; margin: 0 5px; padding: 3px 5px;  }
+#cycle-nav a.activeSlide { background: #ea0 }
+#cycle-nav a:focus { outline: none; }
+

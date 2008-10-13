@@ -1,5 +1,5 @@
 <?php
-// $Id: fieldgroup.module,v 1.79.2.34 2008/10/06 15:11:39 karens Exp $
+// $Id: fieldgroup.module,v 1.79.2.36 2008/10/10 20:35:56 karens Exp $
 
 /**
  * @file
@@ -154,7 +154,8 @@ function fieldgroup_group_edit_form(&$form_state, $type_name, $group_name) {
   );
   module_load_include('inc', 'content', 'includes/content.admin');
   foreach (array_merge(array_keys(content_build_modes()), array('label')) as $key) {
-    $form['settings']['display'][$key] = array('#type' => 'value', '#value' => $group['settings']['display'][$key]);
+    $form['settings']['display'][$key]['format'] = array('#type' => 'value', '#value' => is_array($group['settings']['display'][$key]) ? $group['settings']['display'][$key]['format'] : $group['settings']['display'][$key]);
+    $form['settings']['display'][$key]['exclude'] = array('#type' => 'value', '#value' => is_array($group['settings']['display'][$key]) ? $group['settings']['display'][$key]['exclude'] : 0);
   }
   $form['weight'] = array('#type' => 'hidden', '#default_value' => $group['weight']);
   $form['group_name'] = array('#type' => 'hidden', '#default_value' => $group_name);
@@ -481,6 +482,7 @@ function field_group_default_settings($group_type) {
   module_load_include('inc', 'content', 'includes/content.admin');
   foreach (array_keys(content_build_modes()) as $key) {
     $settings['display'][$key]['format'] = 'fieldset';
+    $settings['display'][$key]['exclude'] = 0;
   }
   // Allow other modules to add new default settings.
   $settings = array_merge($settings, module_invoke_all('fieldgroup_default_settings', $group_type));
@@ -573,18 +575,39 @@ function fieldgroup_nodeapi(&$node, $op, $teaser, $page) {
           }
         }
 
-        // The wrapper lets us get the themed output for the whole group
-        // once the $node->content has been rendered.
-        // See fieldgroup_preprocess_node().
+        // The wrapper lets us get the themed output for the group
+        // to populate the $GROUP_NAME_rendered variable for node templates,
+        // and hide it from the $content variable if needed.
+        // See fieldgroup_preprocess_node(), theme_fieldgroup_wrapper().
         $wrapper = array(
           'group' => $element,
           '#weight' => $group['weight'],
+          '#post_render' => array('fieldgroup_wrapper_post_render'),
+          '#group_name' => $group_name,
+          '#type_name' => $node->type,
+          '#context' => $context,
         );
 
         $node->content[$group_name] = $wrapper;
       }
       break;
   }
+}
+
+/**
+ * Hide specified fields from the $content variable in node templates.
+ */
+function fieldgroup_wrapper_post_render($content, $element) {
+  $groups = fieldgroup_groups($element['#type_name']);
+  $group = $groups[$element['#group_name']];
+  
+  // The display settings are not in quite the same place in the
+  // group and the field, so create the value the theme will expect.
+  $group['display_settings'] = $group['settings']['display'];
+  if (theme('content_exclude', $content, $group, $element['#context'])) {
+    return '';
+  }
+  return $content;
 }
 
 /*

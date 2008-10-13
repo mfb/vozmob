@@ -6,7 +6,7 @@
  * flush the theme cache when you load the page. That way it will
  * always look for new tpl files.
  */
- drupal_flush_all_caches();
+// drupal_flush_all_caches();
 
 /**
  * Intercept page template variables
@@ -119,6 +119,8 @@ function phptemplate_preprocess_page(&$vars) {
  *   A sequential array of variables passed to the theme function.
  */
 function phptemplate_preprocess_node(&$vars) {
+  jquery_plugin_add('cycle');
+  drupal_add_js(drupal_get_path('theme', 'blueprint') . '/scripts/cycle.js', 'theme');
   $node = $vars['node']; // for easy reference
   // for easy variable adding for different node types
   switch ($node->type) {
@@ -434,6 +436,6 @@ function blueprint_media_element($file, $href) {
   $elements = drupal_map_assoc(array('audio', 'video'));
   list($element) = explode('/', $file->filemime);
   if (isset($elements[$element])) {
-    return '<' . $element . ' controls="controls" src="' . check_url(url($href)) . '" />';
+    return '<' . $element . ' controls="controls" src="' . check_url($href) . '" />';
   }
 }

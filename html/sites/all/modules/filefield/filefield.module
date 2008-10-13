@@ -1,4 +1,4 @@
-<?php  // $Id: filefield.module,v 1.150 2008/09/15 20:58:53 drewish Exp $
+<?php  // $Id: filefield.module,v 1.151 2008/10/09 22:13:26 drewish Exp $
 
 /**
  * @file
@@ -12,10 +12,6 @@
  * Implementation of hook_init().
  */
 function filefield_init() {
-  // field hooks and callbacks.
-  module_load_include('inc', 'filefield', 'filefield_field');
-  // widget hooks and callbacks.
-  module_load_include('inc', 'filefield', 'filefield_widget');
   // file hooks and callbacks.
   module_load_include('inc', 'filefield', 'filefield_file');
   module_load_include('inc', 'filefield', 'field_file');
@@ -213,7 +209,7 @@ function filefield_field_info() {
 function filefield_field_settings($op, $field) {
   $return = array();
 
-  module_load_include('inc','filefield','filefield_field');
+  module_load_include('inc', 'filefield', 'filefield_field');
   $op = str_replace(' ', '_', $op);
   // add filefield specific handlers...
   $function = 'filefield_field_settings_'. $op;
@@ -237,7 +233,8 @@ function filefield_field_settings($op, $field) {
  * Implementtation of CCK's hook_field().
  */
 function filefield_field($op, $node, $field, &$items, $teaser, $page) {
-  module_load_include('inc','filefield','filefield_field');
+  module_load_include('inc', 'filefield', 'filefield_field');
+  module_load_include('inc', 'filefield', 'field_file');
   $op = str_replace(' ', '_', $op);
   // add filefield specific handlers...
   $function = 'filefield_field_'. $op;
@@ -250,9 +247,9 @@ function filefield_field($op, $node, $field, &$items, $teaser, $page) {
  * Implementation of CCK's hook_widget_settings().
  */
 function filefield_widget_settings($op, $widget) {
+  module_load_include('inc', 'filefield', 'filefield_widget');
   $return = array();
   // load our widget settings callbacks..
-  module_load_include('inc','filefield','filefield_widget');
   $op =  str_replace(' ', '_', $op);
   $function = 'filefield_widget_settings_'. $op;
   if (function_exists($function)) {
@@ -280,6 +277,7 @@ function filefield_widget_settings($op, $widget) {
  * Implementation of hook_widget().
  */
 function filefield_widget(&$form, &$form_state, $field, $items, $delta = 0) {
+  module_load_include('inc', 'filefield', 'filefield_widget');
   // CCK doesn't give a validate callback at the field level...
   // and FAPI's #require is naieve to complex structures...
   // we validate at the field level ourselves.

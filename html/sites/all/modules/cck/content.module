@@ -1,5 +1,5 @@
 <?php
-// $Id: content.module,v 1.301.2.70 2008/10/09 00:24:49 karens Exp $
+// $Id: content.module,v 1.301.2.72 2008/10/10 20:35:56 karens Exp $
 /**
  * @file
  * Allows administrators to associate custom fields to content types.
@@ -199,6 +199,9 @@ function content_theme() {
       'file' => 'theme.inc',
       'path' => $path,
       'arguments' => array('form' => NULL),
+    ),
+    'content_exclude' => array(
+      'arguments' => array('content' => NULL, 'object' => array(), 'context' => NULL),
     ),
     'content_view_multiple_field' => array(
       'arguments' => array('items' => NULL, 'field' => NULL, 'data' => NULL),
@@ -738,11 +741,16 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
         }
 
         // The wrapper lets us get the themed output for the whole field
-        // once the $node->content has been rendered.
-        // See op 'preprocess_node' below.
+        // to populate the $FIELD_NAME_rendered variable for node templates,
+        // and hide it from the $content variable if needed.
+        // See 'preprocess_node' op and theme_content_field_wrapper()?
         $wrapper = array(
           'field' => $element,
           '#weight' => $field['widget']['weight'],
+          '#post_render' => array('content_field_wrapper_post_render'),
+          '#field_name' => $field['field_name'],
+          '#type_name' => $node->type,
+          '#context' => $context,
         );
 
         $addition = array($field['field_name'] => $wrapper);
@@ -2022,6 +2030,79 @@ function content_default_value(&$form, &$form_state, $field, $delta) {
     $default_value = $field['widget']['default_value'];
   }
   return (array) $default_value;
+}
+
+ /**
+ * Hide specified fields from the $content variable in node templates.
+ */
+function content_field_wrapper_post_render($content, $element) {
+  $fields = content_fields();
+  $field = $fields[$element['#field_name']];
+  if (theme('content_exclude', $content, $field, $element['#context'])) {
+    return '';
+  }
+  return $content;
+}
+
+
+/**
+ * 'Theme' function for a field's addition to $content.
+ *
+ * Adapts the all-inclusive $content variable in node templates to allow
+ * some field content to be excluded. This is a theme, so it can be
+ * overridden in different themes to produce different results.
+ * 
+ * The html for individual fields and groups are available in the 
+ * $FIELD_NAME_rendered and $GROUP_NAME_rendered variables.
+ * 
+ * This allows more flexibility in node templates : you can use custom markup
+ * around a few specific fields, and print the rest of the node with $content.
+ *
+ * @param $content
+ *    The themed content for this field or group.
+ * 
+ * @param $object
+ *    The field or group array for this item.
+ *    $object['#type_name'] holds the content type.
+ *    $object['#field_name'] holds the field name (if a field).
+ *    $object['#group_name'] holds the group name (if a group).
+ *    $object['display_settings'] holds the display settings 
+ *    for all contexts, in an array like: 
+ *      $object['display_settings'] => array(
+ *        'full' => array(
+ *          'format' => 'default', 
+ *          'exclude' => 0,
+ *         ),
+ *        'teaser' => array(
+ *          'format' => 'default', 
+ *          'exclude' => 1,
+ *         ),
+ *      );
+ *      
+ * @param $context
+ *    The context for which the node is being rendered.
+ *    Can be one of the following values :
+ *    - 'teaser'
+ *    - 'full'
+ *    - NODE_BUILD_SEARCH_INDEX
+ *    - NODE_BUILD_SEARCH_RESULT
+ *    - NODE_BUILD_RSS
+ *    - NODE_BUILD_PRINT
+ *
+ * @return
+ *   Whether or not content is to be added to $content in this context.
+ *   Uses the value of the 'Exclude' checkbox for this field
+ *   as set on the Manage fields screen.
+ */
+function theme_content_exclude($content, $object, $context) {
+  if (empty($object['display_settings']) 
+    || !is_array($object['display_settings'][$context]) 
+    || empty($object['display_settings'][$context]['exclude'])) {
+    return FALSE;
+  }
+  else {
+    return TRUE;
+  }
 }
 
 /**

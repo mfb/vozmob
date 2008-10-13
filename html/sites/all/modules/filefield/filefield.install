@@ -1,5 +1,5 @@
 <?php
-// $Id: filefield.install,v 1.14 2008/10/08 20:19:37 drewish Exp $
+// $Id: filefield.install,v 1.15 2008/10/10 00:59:10 drewish Exp $
 /**
  * @file
  * FileField: Defines a CCK file field type.
@@ -237,8 +237,9 @@ function _filefield_update_6001_move_operation($field, &$context) {
  * Drop the list and description columns.
  */
 function _filefield_update_6001_drop_operation($field, &$context) {
+  $ret = array();
   $db_info = content_database_info($field);
   // TODO: Now that the data has been migrated we can drop the columns.
-  db_query('ALTER TABLE '. $db_info['table'] .' DROP COLUMN '.  $db_info['columns']['description']['column']);
+  db_drop_field($ret, $db_info['table'], $db_info['columns']['description']['column']);
   $context['finished'] = 1;
 }

@@ -1,0 +1,13 @@
+<?php
+// $Id: jquery_plugin.module,v 1.1.4.7 2008/05/15 02:06:44 mfb Exp $
+
+/**
+ * Add a jQuery plugin to a page.
+ */
+function jquery_plugin_add($plugin) {
+  static $plugins = array();
+  if (!isset($plugins[$plugin])) {
+    drupal_add_js(drupal_get_path('module', 'jquery_plugin') .'/jquery.'. $plugin .'.min.js');
+    $plugins[$plugin] = TRUE;
+  }
+}

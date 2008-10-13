@@ -1,5 +1,5 @@
 <?php
-// $Id: filefield_meta.module,v 1.5 2008/07/31 12:22:55 drewish Exp $
+// $Id: filefield_meta.module,v 1.6 2008/10/10 01:03:09 drewish Exp $
 /**
  * @file
  * FileField Meta: Add Video Support to File Field.
@@ -16,7 +16,7 @@ function filefield_meta_theme() {
 /**
  * Implementation of filefield's hook_file_insert().
  */
-function filefield_meta_file_insert($file) {
+function filefield_meta_file_insert(&$file) {
   filefield_meta($file);
   $record = array_merge(array('fid' => $file->fid), $file->data);
   drupal_write_record('filefield_meta', $record);
@@ -25,11 +25,9 @@ function filefield_meta_file_insert($file) {
 /**
  * Implementation of filefield's hook_file_update().
  */
-function filefield_meta_file_update($file) {
+function filefield_meta_file_update(&$file) {
   filefield_meta_file_delete($file);
-  filefield_meta($file);
-  $record = array_merge(array('fid' => $file->fid), $file->data);
-  drupal_write_record('filefield_meta', $record);
+  filefield_meta_file_insert($file);
 }
 
 /**
@@ -47,7 +45,7 @@ function filefield_meta_file_load(&$file) {
     $file->data = is_array($file->data) ? array_merge($meta, $file->data) : $meta;
   }
   else {
-    filefield_meta($file);
+    filefield_meta_file_insert($file);
   }
 }
 

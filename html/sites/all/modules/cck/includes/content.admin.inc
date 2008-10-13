@@ -1,5 +1,5 @@
 <?php
-// $Id: content.admin.inc,v 1.181.2.50 2008/10/08 20:01:25 karens Exp $
+// $Id: content.admin.inc,v 1.181.2.51 2008/10/09 20:58:25 karens Exp $
 
 /**
  * @file
@@ -551,7 +551,7 @@ function content_display_overview_form(&$form_state, $type_name, $contexts_selec
     $group_options = _fieldgroup_groups_label($type['type']);
   }
   $contexts = content_build_modes($contexts_selector);
-
+  
   $form = array(
     '#tree' => TRUE,
     '#type_name' => $type['type'],
@@ -599,11 +599,18 @@ function content_display_overview_form(&$form_state, $type_name, $contexts_selec
       $options[$formatter_name] = $formatter_info['label'];
     }
     $options['hidden'] = t('<Hidden>');
+    
     foreach ($contexts as $key => $value) {
       $form[$name][$key]['format'] = array(
         '#type' => 'select',
         '#options' => $options,
         '#default_value' => isset($defaults[$key]['format']) ? $defaults[$key]['format'] : 'default',
+      );
+      // exclude from $content
+      $form[$name][$key]['exclude'] = array(
+        '#type' => 'checkbox',
+        '#options' => array(0 => t('Include'), 1 => t('Exclude')),
+        '#default_value' => isset($defaults[$key]['exclude']) ? $defaults[$key]['exclude'] : 0,
       );
     }
   }
@@ -640,7 +647,13 @@ function content_display_overview_form(&$form_state, $type_name, $contexts_selec
       $form[$name][$key]['format'] = array(
         '#type' => 'select',
         '#options' => $options,
-        '#default_value' => isset($defaults[$key]) ? $defaults[$key] : 'fieldset',
+        '#default_value' => isset($defaults[$key]['format']) ? $defaults[$key]['format'] : 'fieldset',
+      );
+      // exclude in $content
+      $form[$name][$key]['exclude'] = array(
+        '#type' => 'checkbox',
+        '#options' => array(0 => t('Include'), 1 => t('Exclude')),
+        '#default_value' => isset($defaults[$key]['exclude']) ? $defaults[$key]['exclude'] : 0,
       );
     }
     foreach ($group['fields'] as $field_name => $field) {
@@ -1120,7 +1133,7 @@ function content_field_edit_form(&$form_state, $type_name, $field_name) {
   if (is_array($additions)) {
     $form['field'] = array_merge($form['field'], $additions);
   }
-
+  
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save field settings'),

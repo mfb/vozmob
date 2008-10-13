@@ -1,5 +1,5 @@
 <?php
-// $Id: filefield_widget.inc,v 1.39 2008/09/13 00:43:27 drewish Exp $
+// $Id: filefield_widget.inc,v 1.40 2008/10/10 00:59:10 drewish Exp $
 /**
  * @file
  * FileField: Defines a CCK file field type.
@@ -357,7 +357,7 @@ function filefield_node_form_validate($form, &$form_state) {
   }
 }
 
-function filefield_node_form_submit($form, $form_state) {
+function filefield_node_form_submit($form, &$form_state) {
   // we ignore all but the save button here.
   if ($form_state['values']['op'] != t('Save')) {
     return;

@@ -1,5 +1,5 @@
 <?php
-// $Id: content.crud.inc,v 1.76.2.11 2008/10/07 11:55:17 karens Exp $
+// $Id: content.crud.inc,v 1.76.2.12 2008/10/09 20:58:25 karens Exp $
 
 /**
  * @file
@@ -89,13 +89,14 @@ function content_instance_default_values($field_name, $type_name, $widget_type) 
   $widget['display_settings'] = array();
   foreach ($settings_names as $name) {
     $widget['display_settings'][$name]['format'] = ($name == 'label') ? 'above' : 'default';
+    $widget['display_settings'][$name]['exclude'] = 0;
   }
 
   // Make sure widget settings all have an index in the array.
   $settings_names = module_invoke($module, 'widget_settings', 'save', $widget);
   $widget['widget_settings'] = array();
   foreach ((array) $settings_names as $name) {
-    $widget['widget_settings'][$name] = NULL;
+    $widget['widget_settings'][$name]['format'] = NULL;
   }
   return $widget;
 }

@@ -1,5 +1,5 @@
 <?php
-// $Id: content.install,v 1.85.2.23 2008/10/08 13:29:37 karens Exp $
+// $Id: content.install,v 1.85.2.25 2008/10/09 21:49:21 karens Exp $
 
 function content_requirements($phase) {
   $requirements = array();
@@ -81,7 +81,7 @@ function content_types_install() {
  * Implementation of hook_install().
  */
 function content_install() {
-  variable_set('content_schema_version', 6008);
+  variable_set('content_schema_version', 6009);
   drupal_install_schema('content');
 }
 
@@ -470,4 +470,35 @@ function content_update_6008() {
 
   variable_set('content_schema_version', 6008);
   return array();
+}
+
+function content_update_6009() {
+  if ($abort = content_check_update()) {
+    return $abort;
+  }
+
+  $ret = array();
+  $result = db_query("SELECT *  FROM {content_node_field_instance}");
+  while ($type = db_fetch_array($result)) {
+    $new_settings = array();
+    $display_settings = unserialize($type['display_settings']);  
+    if (!empty($display_settings)) {
+      foreach ($display_settings as $key => $val) {
+        $new_settings[$key] = $val;
+        if ($key !== 'label' && is_array($val)) {
+          $new_settings[$key]['exclude'] = 0;
+        }
+      }
+    }
+    else {
+      $new_settings = array(
+        'label' => array('format' => 'above'),
+        'full' => array('format' => 'default', 'exclude' => 0),
+        'teaser' => array('format' => 'default', 'exclude' => 0),
+        );
+    }
+    db_query("UPDATE {content_node_field_instance} SET display_settings='%s' WHERE field_name='%s' AND type_name='%s'", serialize($new_settings), $type['field_name'], $type['type_name']);
+  }
+  variable_set('content_schema_version', 6009);
+  return $ret;
 }

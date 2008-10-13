@@ -1,5 +1,5 @@
 <?php
-// $Id: theme.inc,v 1.1.2.8 2008/10/06 15:11:39 karens Exp $
+// $Id: theme.inc,v 1.1.2.9 2008/10/09 20:58:26 karens Exp $
 
 /**
  * @file
@@ -148,6 +148,7 @@ function template_preprocess_content_display_overview_form(&$vars) {
   else {
     $help = t("Configure how this content type's fields should be displayed when it's rendered in the following contexts.");
   }
+  $help .= ' '. t("Use the 'Exclude' checkbox to exclude an item from the !content value passed to the node template.", array('!content' => '$content'));
   $vars['help'] = $help;
 
   if (empty($order)) {
@@ -164,7 +165,13 @@ function template_preprocess_content_display_overview_form(&$vars) {
     $element = &$form[$key];
     $row = new stdClass();
     foreach (element_children($element) as $child) {
-      $row->{$child} = drupal_render($element[$child]);
+      if (!array_key_exists('exclude', $element[$child])) {
+        $row->{$child} = drupal_render($element[$child]);
+      }
+      else {
+        $row->{$child}->format = drupal_render($element[$child]['format']);
+        $row->{$child}->exclude = drupal_render($element[$child]['exclude']);
+      }
     }
     $row->label_class = in_array($key, $form['#groups']) ? 'label-group' : 'label-field';
     $row->indentation = theme('indentation', isset($element['#depth']) ? $element['#depth'] : 0);
@@ -173,4 +180,3 @@ function template_preprocess_content_display_overview_form(&$vars) {
   $vars['rows'] = $rows;
   $vars['submit'] = drupal_render($form);
 }
-

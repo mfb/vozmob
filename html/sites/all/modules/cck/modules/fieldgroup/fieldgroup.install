@@ -1,5 +1,5 @@
 <?php
-// $Id: fieldgroup.install,v 1.34.2.13 2008/10/08 12:45:25 karens Exp $
+// $Id: fieldgroup.install,v 1.34.2.15 2008/10/09 21:49:22 karens Exp $
 
 /**
  * @file
@@ -265,5 +265,33 @@ function fieldgroup_update_6004() {
   $ret = array();
   db_add_field($ret, 'content_group', 'group_type', array('type' => 'varchar', 'length' => 32, 'not null' => TRUE, 'default' => 'standard'));
   $ret[] = update_sql("DELETE FROM {cache_content} WHERE cid='fieldgroup_data'");
+  return $ret;
+}
+
+function fieldgroup_update_6005() {
+  $ret = array();
+  $result = db_query("SELECT *  FROM {content_group}");
+  while ($type = db_fetch_array($result)) {
+    $new_settings = array();
+    $settings = unserialize($type['settings']);  
+    $new_settings = $settings;
+    $display_settings = !empty($settings['display']) ? $settings['display'] : array();
+    if (!empty($display_settings)) {
+      foreach ($display_settings as $key => $val) {
+        $new_settings['display'][$key] = $val;
+        if ($key !== 'label' && is_array($val)) {
+          $new_settings['display'][$key]['exclude'] = 0;
+        }
+      }
+    }
+    else {
+      $new_settings['display'] = array(
+        'label' => array('format' => 'above'),
+        'full' => array('format' => 'default', 'exclude' => 0),
+        'teaser' => array('format' => 'default', 'exclude' => 0),
+        );
+    }
+    db_query("UPDATE {content_group} SET settings='%s' WHERE group_name='%s' AND type_name='%s'", serialize($new_settings), $type['group_name'], $type['type_name']);
+  }
   return $ret;
 }
