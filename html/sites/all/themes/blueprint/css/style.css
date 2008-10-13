@@ -6,7 +6,7 @@ div.field-type-image div.field-items img {
   background-color: #eee;
 }
 
-#cycle-nav a { border: 1px solid #ccc; background: #fc0; text-decoration: none; margin: 0 5px; padding: 3px 5px;  }
-#cycle-nav a.activeSlide { background: #ea0 }
-#cycle-nav a:focus { outline: none; }
+.cycle-nav a { border: 1px solid #ccc; background: #fc0; text-decoration: none; margin: 0 5px; padding: 3px 5px;  }
+.cycle-nav a.activeSlide { background: #ea0 }
+.cycle-nav a:focus { outline: none; }
 

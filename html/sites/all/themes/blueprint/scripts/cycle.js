@@ -2,10 +2,14 @@
 
 $(document).ready(function() {
   // Set up the slideshow.
-  $('div.field-type-image div.field-items').before('<div id="cycle-nav"></div>').after('<br clear="left" />').cycle({ 
-    fx:    'fade',
-    pager: '#cycle-nav',
-    pause: 1
+  var cycleIndex = 0;
+  $('div.field-type-image div.field-items').each(function() {
+    $(this).before('<div class="cycle-nav" id="cycle-nav-' + cycleIndex + '"></div>').cycle({ 
+      fx:    'fade',
+      pager: '#cycle-nav-' + cycleIndex,
+      pause: 1
+    });
+    cycleIndex = 1 + cycleIndex;
   });
   // Set the height of the field since its images are now absolutely positioned.
   $('div.field-type-image div.field-items').each(function() {
