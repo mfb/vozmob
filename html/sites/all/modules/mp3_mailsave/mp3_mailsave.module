@@ -13,11 +13,11 @@ function mp3_mailsave_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
   if (isset($node->mailsave_attachments)) {
     foreach ($node->mailsave_attachments as $key => $mailsave_attachment) {
       if ($mailsave_attachment['filemime'] == 'audio/wav' || $mailsave_attachment['filemime'] == 'audio/x-wav' || preg_match('/\.wav$/i', $mailsave_attachment['filename'])) {
-        $lame = escapeshellcmd(variable_get('mp3_mailsave_lame', '/usr/bin/lame'));
+        $ffmpeg = escapeshellcmd(variable_get('mp3_mailsave_ffmpeg', '/usr/bin/ffmpeg'));
         $infile = escapeshellarg($mailsave_attachment['filepath']);
         $filepath = file_create_filename(basename($mailsave_attachment['filepath']), file_directory_temp());
         $outfile = escapeshellarg($filepath);
-        exec("$lame $infile $outfile");
+        exec("$ffmpeg -i $infile -ar 22050 $outfile");
         if (file_exists($filepath) && $filesize = filesize($filepath)) {
           file_delete($mailsave_attachment['filepath']);
           $node->mailsave_attachments[$key]['filename'] .= '.mp3';
