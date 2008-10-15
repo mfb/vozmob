@@ -68,6 +68,7 @@
   <?php print $right; ?>
 
   <?php print $scripts ?>
+  <script type="text/javascript" src="http://mediaplayer.yahoo.com/js"></script>
   <?php print $closure; ?>
 
 </div>

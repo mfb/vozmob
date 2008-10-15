@@ -421,7 +421,7 @@ function blueprint_upload_attachments($files) {
     if ($file->list && empty($file->remove)) {
       $href = file_create_url($file->filepath);
       $text = $file->description ? $file->description : $file->filename;
-      $rows[] = array(blueprint_media_element($file, $href), l($text, $href), format_size($file->filesize));
+      $rows[] = array(blueprint_media_element($file, $href), l($text, $href, array('attributes' => array('class' => 'htrack'))), format_size($file->filesize));
     }
   }
   if (count($rows)) {
