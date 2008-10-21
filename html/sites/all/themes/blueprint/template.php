@@ -421,7 +421,7 @@ function blueprint_upload_attachments($files) {
     if ($file->list && empty($file->remove)) {
       $href = file_create_url($file->filepath);
       $text = $file->description ? $file->description : $file->filename;
-      $rows[] = array(blueprint_media_element($file, $href), l($text, $href, array('attributes' => array('class' => 'htrack'))), format_size($file->filesize));
+      $rows[] = array(blueprint_media_element($file, $href), l($text, $href, blueprint_media_options($file)), format_size($file->filesize));
     }
   }
   if (count($rows)) {
@@ -438,4 +438,18 @@ function blueprint_media_element($file, $href) {
   if (isset($elements[$element])) {
     return '<' . $element . ' controls="controls" src="' . check_url($href) . '" />';
   }
+}
+
+/**
+ * Generates attachment link options based file parameters.
+ * Currently used to add "htrack" class for Yahoo Media Player.
+ */
+function blueprint_media_options($file) {
+  $elements = drupal_map_assoc(array('audio'));
+  list($element) = explode('/', $file->filemime);
+  $options = array();
+  if (isset($elements[$element])) {
+    $options['attributes'] = array('class' => 'htrack');
+  }
+  return $options;
 }
