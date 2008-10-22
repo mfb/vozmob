@@ -1,5 +1,5 @@
 <?php
-// $Id: bootstrap.inc,v 1.206.2.4 2008/08/18 18:56:30 dries Exp $
+// $Id: bootstrap.inc,v 1.206.2.6 2008/10/22 19:26:01 goba Exp $
 
 /**
  * @file
@@ -238,6 +238,11 @@ function conf_path($require_settings = TRUE, $reset = FALSE) {
 
   $confdir = 'sites';
   $uri = explode('/', $_SERVER['SCRIPT_NAME'] ? $_SERVER['SCRIPT_NAME'] : $_SERVER['SCRIPT_FILENAME']);
+  if (strpos($_SERVER['HTTP_HOST'], '/') !== FALSE) {
+    // A HTTP_HOST containing slashes may be an attack and is invalid.
+    header('HTTP/1.1 400 Bad Request');
+    exit;
+  }
   $server = explode('.', implode('.', array_reverse(explode(':', rtrim($_SERVER['HTTP_HOST'], '.')))));
   for ($i = count($uri) - 1; $i > 0; $i--) {
     for ($j = count($server); $j > 0; $j--) {
@@ -618,7 +623,7 @@ function drupal_page_cache_header($cache) {
     header('HTTP/1.1 304 Not Modified');
     // All 304 responses must send an etag if the 200 response for the same object contained an etag
     header("Etag: $etag");
-    exit();
+    return;
   }
 
   // Send appropriate response:

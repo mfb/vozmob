@@ -1,5 +1,5 @@
 <?php
-// $Id: menu.inc,v 1.255.2.21 2008/10/08 12:33:55 goba Exp $
+// $Id: menu.inc,v 1.255.2.25 2008/10/22 17:04:12 goba Exp $
 
 /**
  * @file
@@ -1265,19 +1265,15 @@ function menu_navigation_links($menu_name, $level = 0) {
   $links = array();
   foreach ($tree as $item) {
     if (!$item['link']['hidden']) {
+      $class = '';
       $l = $item['link']['localized_options'];
       $l['href'] = $item['link']['href'];
       $l['title'] = $item['link']['title'];
       if ($item['link']['in_active_trail']) {
-        if (empty($l['attributes']['class'])) {
-          $l['attributes']['class'] = 'active-trail';
-        }
-        else {
-          $l['attributes']['class'] .= ' active-trail'; 
-        }
+        $class = ' active-trail';
       }
-      // Keyed with unique menu id to generate classes from theme_links().
-      $links['menu-'. $item['link']['mlid']] = $l;
+      // Keyed with the unique mlid to generate classes in theme_links().
+      $links['menu-'. $item['link']['mlid'] . $class] = $l;
     }
   }
   return $links;
@@ -2218,7 +2214,10 @@ function _menu_router_build($callbacks) {
     // Extract load and to_arg functions.
     foreach ($parts as $k => $part) {
       $match = FALSE;
-      if (preg_match('/^%([a-z_]*)$/', $part, $matches)) {
+      // Look for wildcards in the form allowed to be used in PHP functions,
+      // because we are using these to construct the load function names.
+      // See http://php.net/manual/en/language.functions.php for reference.
+      if (preg_match('/^%(|[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*)$/', $part, $matches)) {
         if (empty($matches[1])) {
           $match = TRUE;
           $load_functions[$k] = NULL;
@@ -2421,7 +2420,7 @@ function _menu_site_is_offline() {
       // page redirects], and specifically suppress its display on the site
       // maintenance page.
       if (drupal_get_normal_path($_GET['q']) != 'admin/settings/site-maintenance') {
-        drupal_set_message(t('Operating in off-line mode.'), 'status', FALSE);
+        drupal_set_message(l(t('Operating in off-line mode.'), 'admin/settings/site-maintenance'), 'status', FALSE);
       }
     }
     else {
