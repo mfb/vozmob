@@ -23,6 +23,9 @@
 <div class="container">
   <div id="header">
     <h1 id="logo">
+      <?php if ($logo): ?>
+        <img src="<?php print check_url($logo); ?>" alt="<?php print $site_name; ?>" id="logo" />
+      <?php endif; ?>
       <a title="<?php print $site_name; ?><?php if ($site_slogan != '') print ' &ndash; '. $site_slogan; ?>" href="<?php print url(); ?>"><?php print $site_name; ?><?php if ($site_slogan != '') print ' &ndash; '. $site_slogan; ?></a>
     </h1>
     <?php print $header; ?>
