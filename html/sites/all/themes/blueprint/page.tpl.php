@@ -1,4 +1,4 @@
-<?php // $Id: page.tpl.php,v 1.15.4.2 2008/09/05 00:07:37 m3avrck Exp $ ?>
+<?php // $Id: page.tpl.php,v 1.15.4.3 2008/10/28 18:28:11 designerbrent Exp $ ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -60,8 +60,15 @@
       print $feed_icons;
     ?>
 
-    <?php if ($footer_message != ''): ?>
-      <div id="footer"><?php print $footer_message; ?></div>
+    <?php if ($footer_message | $footer): ?>
+      <div id="footer" class="clear">
+        <?php if ($footer): ?>
+          <?php print $footer; ?>
+        <?php endif; ?>
+        <?php if ($footer_message): ?>
+          <div id="footer-message"><?php print $footer_message; ?></div>
+        <?php endif; ?>
+      </div>
     <?php endif; ?>
   </div>
 
