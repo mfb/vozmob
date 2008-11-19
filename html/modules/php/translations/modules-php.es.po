@@ -7,8 +7,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: drupal (6.0)\n"
-"POT-Creation-Date: 2008-03-30 17:19+0200\n"
-"PO-Revision-Date: 2008-02-20 04:29+0100\n"
+"POT-Creation-Date: 2008-11-16 19:34+0100\n"
+"PO-Revision-Date: 2008-07-13 22:06+0200\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
@@ -81,6 +81,13 @@ msgid ""
 "improperly. Even a small mistake when posting PHP code may accidentally "
 "compromise your site."
 msgstr ""
+"Es posible incluir código PHP personalizado en algunos tipos de contenido "
+"del sitio, incluyendo entradas y bloques. Si bien incluir código PHP dentro "
+"de un mensaje o bloque es una característica flexible y poderosa si la "
+"emplea un usuario confiable con experiencia en PHP, es un riesgo de "
+"seguridad importante y peligroso cuando se usa de manera inapropiada. "
+"Incluso un error pequeño al publicar código PHP puede accidentalmente "
+"comprometer su sitio."
 
 #: modules/php/php.module:36
 msgid ""
@@ -88,26 +95,34 @@ msgid ""
 "within posts. Experimenting with PHP may corrupt your database, render your "
 "site inoperable, or significantly compromise security."
 msgstr ""
+"Si no está familiarizado con PHP. SQL o Drupal, evite usar código PHP "
+"personalizado en sus entradas. Experimentar con PHP puede corromper su base "
+"de datos, hacer que su sitio deje de funcionar o comprometer la seguridad de "
+"modo importante."
 
 #: modules/php/php.module:37
 msgid "Notes:"
-msgstr ""
+msgstr "Notas:"
 
 #: modules/php/php.module:38
 msgid ""
 "Remember to double-check each line for syntax and logic errors "
 "<strong>before</strong> saving."
 msgstr ""
+"Recuerde verificar dos veces cada línea en busca de errores de sintaxis y "
+"lógica <strong>antes</strong> de guardar."
 
 #: modules/php/php.module:39
 msgid "Statements must be correctly terminated with semicolons."
-msgstr ""
+msgstr "Las declaraciones deben terminarse correctamente con punto y coma."
 
 #: modules/php/php.module:40
 msgid ""
 "Global variables used within your PHP code retain their values after your "
 "script executes."
 msgstr ""
+"Las variables globales usadas en su código PHP conservan sus valores después "
+"de que se ejecuta su script."
 
 #: modules/php/php.module:41
 msgid ""
@@ -115,18 +130,25 @@ msgid ""
 "use forms, understand and use the functions in <a href=\"@formapi\">the "
 "Drupal Form API</a>."
 msgstr ""
+"<code>register_globals</code> está <strong>desactivado</strong>. Si necesita "
+"usar formularios, comprenda y use las funciones disponibles en la <a href="
+"\"@formapi\">API para formularios de Drupal</a>."
 
 #: modules/php/php.module:42
 msgid ""
 "Use a <code>print</code> or <code>return</code> statement in your code to "
 "output content."
 msgstr ""
+"Use una declaración <code>print</code> o <code>return</code> en su código "
+"para devolver contenido."
 
 #: modules/php/php.module:43
 msgid ""
 "Develop and test your PHP code using a separate test script and sample "
 "database before deploying on a production site."
 msgstr ""
+"Desarrolle y pruebe su código PHP usando un script de prueba separado y una "
+"base de datos de pruebas antes de desplegarlo en un sitio en producción."
 
 #: modules/php/php.module:44
 msgid ""
@@ -134,6 +156,9 @@ msgid ""
 "<code>template.php</code> file rather than embedding it directly into a post "
 "or block."
 msgstr ""
+"Considere incluir su código PHP personalizado dentro de un módulo específico "
+"del sitio o de un archivo <code>template.php</code> en vez de insertarlo "
+"directamente en un mensaje o bloque."
 
 #: modules/php/php.module:45
 msgid ""
@@ -141,12 +166,18 @@ msgid ""
 "the PHP Filter module. If this module is disabled or deleted, then blocks "
 "and posts with embedded PHP may display, rather than execute, the PHP code."
 msgstr ""
+"Tenga presente que la capacidad de incluir código PHP en el contenido es "
+"ofrecida por el módulo Filtro PHP. Si este módulo es desactivado o borrado, "
+"los bloques y mensajes que incluyan PHP podrían desplegar el código PHP en "
+"vez de ejecutarlo."
 
 #: modules/php/php.module:46
 msgid ""
 "A basic example: <em>Creating a \"Welcome\" block that greets visitors with "
 "a simple message.</em>"
 msgstr ""
+"Ejemplo básico: <em>Cómo crear un bloque «Bienvenido» que reciba a los "
+"visitantes con un mensaje sencillo.</em>"
 
 #: modules/php/php.module:47
 msgid ""
@@ -157,6 +188,12 @@ msgid ""
 "print t('Welcome visitor! Thank you for visiting.');\n"
 "</pre>"
 msgstr ""
+"<p>Agregue a su sitio un bloque personalizado llamado «Bienvenido». Con su "
+"formato de entrada definido como «Código PHP» (u otro formato que soporte el "
+"ingreso de código PHP), agregue lo siguiente al cuerpo del bloque:</p>\n"
+"<pre>\n"
+"print t('Welcome visitor! Thank you for visiting.');\n"
+"</pre>"
 
 #: modules/php/php.module:51
 msgid ""
@@ -172,6 +209,17 @@ msgid ""
 "}\n"
 "</pre>"
 msgstr ""
+"<p>Para desplegar el nombre de un usuario registrado, use lo siguiente:</p>\n"
+"<pre>\n"
+"global $user;\n"
+"if ($user->uid) {\n"
+"  print t('Welcome @name! Thank you for visiting.', array('@name' => $user-"
+">name));\n"
+"}\n"
+"else {\n"
+"  print t('Welcome visitor! Thank you for visiting.');\n"
+"}\n"
+"</pre>"
 
 #: modules/php/php.module:75
 msgid "PHP evaluator"
@@ -187,7 +235,7 @@ msgstr ""
 
 #: modules/php/php.install:20
 msgid "A !php-code input format has been created."
-msgstr ""
+msgstr "Se ha creado un formato de entrada !php-code."
 
 #: modules/php/php.install:28
 msgid ""
@@ -196,3 +244,7 @@ msgid ""
 "a security risk by exposing sensitive information, if any, used in the PHP "
 "code."
 msgstr ""
+"El módulo de PHP ha sido desactivado, Por favor tome en cuenta que cualquier "
+"contenido que estuviera usando el filtro PHP será ahora visible en texto "
+"plano. Esto podría plantear un riesgo de seguridad exponiendo información "
+"delicada que pudiera haberse incluido en el código PHP."

@@ -190,8 +190,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: drupal (6.0)\n"
-"POT-Creation-Date: 2008-07-14 10:36+0200\n"
-"PO-Revision-Date: 2008-07-13 23:05+0200\n"
+"POT-Creation-Date: 2008-11-16 19:34+0100\n"
+"PO-Revision-Date: 2008-10-17 06:14+0200\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
@@ -563,7 +563,7 @@ msgid ""
 "installation process. If you are unsure how to grant file permissions, "
 "please consult the <a href=\"@handbook_url\">on-line handbook</a>."
 msgstr ""
-"El instalador de @drupal requiere permisos de escritura en el fichero %file "
+"El instalador de @drupal requiere permisos de escritura en el archivo %file "
 "durante el proceso de instalación. Si no está seguro de como conceder estos "
 "permisos, por favor consulte el <a href=\"@handbook_url\">manual on-line</a>"
 
@@ -1634,7 +1634,7 @@ msgstr ""
 
 #: includes/locale.inc:277
 msgid "Direction that text in this language is presented."
-msgstr "Dirección en la que se presenta el texto en este idioma."
+msgstr "Dirección en el que este lenguaje es presentado."
 
 #: includes/locale.inc:48,279
 msgid "Left to right"
@@ -1657,13 +1657,14 @@ msgid ""
 "The language %language has been created and can now be used. More "
 "information is available on the <a href=\"@locale-help\">help screen</a>."
 msgstr ""
-"El idioma %language ha sido creado y ya se puede usar. Hay más información "
-"disponible en la <a href=\"@locale-help\">pantalla de ayuda</a>."
+"El idioma %language ha sido creado y ahora puede usarse. Hay más información "
+"disponible en la &lt;a href=\"@locale-help\"&gt;pantalla de ayuda&lt;/a&gt;."
 
 #: includes/locale.inc:339
 msgid "Domain and path prefix values should not be set at the same time."
 msgstr ""
-"No deben definirse al mismo tiempo valores para dominio y prefijo de ruta."
+"No deben fijarse al mismo tiempo valores para el dominio y para el prefijo "
+"de ruta."
 
 #: includes/locale.inc:342
 msgid "The domain (%domain) is already tied to a language (%language)."
@@ -1672,12 +1673,12 @@ msgstr "El dominio (%domain) ya está relacionado con un idioma (%language)."
 #: includes/locale.inc:345
 msgid "Only the default language can have both the domain and prefix empty."
 msgstr ""
-"Sólo el idioma predeterminado puede tener vacíos tanto el dominio como el "
+"Sólo el idioma predeterminado puede tener en blanco tanto el dominio como el "
 "prefijo."
 
 #: includes/locale.inc:348
 msgid "The prefix (%prefix) is already tied to a language (%language)."
-msgstr "El prefijo (%prefix) ya está asociado a un idioma (%language)."
+msgstr "El prefijo (%prefix) ya está relacionado con un idioma (%language)."
 
 #: includes/locale.inc:386
 msgid "The English language cannot be deleted."
@@ -1762,10 +1763,9 @@ msgid ""
 "<strong>Modifying this setting may break all incoming URLs and should be "
 "used with caution in a production environment.</strong>"
 msgstr ""
-"Seleccione el mecanismo utilizado para determinar la presentación del idioma "
-"en su sitio. <strong>Modificar estas opciones puede romper todas las "
-"direcciones URLs y debería utilizarse con mucha precaución en entornos de "
-"producción</strong>"
+"Elija el mecanismo usado para determinar el idioma de presentación de su "
+"sitio. <strong>Modificar esta opción puede destruir todos los URL entrantes "
+"y debe usarse con precaución en un ambiente de producción.</strong>"
 
 #: includes/locale.inc:458; modules/comment/comment.module:1622
 msgid "Save settings"
@@ -1832,7 +1832,7 @@ msgstr "Sólo las cadenas no traducidas"
 
 #: includes/locale.inc:568
 msgid "Limit search to"
-msgstr "Limitar la búsqueda a"
+msgstr "Limitar búsqueda a"
 
 #: includes/locale.inc:570
 msgid "All text groups"
@@ -1867,8 +1867,8 @@ msgid ""
 "Choose the language you want to add strings into. If you choose a language "
 "which is not yet set up, it will be added."
 msgstr ""
-"Elija a qué idioma desea agregar las cadenas traducidas. Si elige un idioma "
-"que aún no está instalado, se agregará."
+"Elija a qué idioma desea agregar cadenas. Si elige un idioma que todavía no "
+"está incluido, se agregará."
 
 #: includes/locale.inc:623,715,734,1970
 msgid "Text group"
@@ -1876,7 +1876,7 @@ msgstr "Grupo de texto"
 
 #: includes/locale.inc:626
 msgid "Imported translations will be added to this text group."
-msgstr "Las traducciones importadas se agregarán a este grupo de texto."
+msgstr "Las traducciones importadas se añadirán a este grupo de textos."
 
 #: includes/locale.inc:629
 msgid "Mode"
@@ -2087,17 +2087,19 @@ msgid "One translation file imported for the newly installed modules."
 msgid_plural ""
 "@count translation files imported for the newly installed modules."
 msgstr[0] ""
-"Se importó un archivo de traducción para los módulos recién instalados."
+"Se ha importado un documento de traducción para los módulos recien "
+"instalados."
 msgstr[1] ""
-"Se importaron @count archivos de traducción para los módulos recién "
+"Se ha importado @count documentos de traducción para los módulos recien "
 "instalados."
 
 #: includes/locale.inc:2564
 msgid "One translation file imported for the enabled modules."
 msgid_plural "@count translation files imported for the enabled modules."
-msgstr[0] "Se importó un archivo de traducción para los módulos habilitados."
+msgstr[0] ""
+"Se han importado 1 documento de traducción para los módulos activados."
 msgstr[1] ""
-"Se importaron @count archivos de traducción para los módulos habilitados."
+"Se han importado @count documentos de traducción para los módulos activados."
 
 #: includes/mail.inc:135
 msgid ""
@@ -2158,11 +2160,11 @@ msgstr "Ir a la primera página"
 
 #: includes/pager.inc:396; modules/book/book-navigation.tpl.php:40
 msgid "Go to previous page"
-msgstr "Ir a página anterior"
+msgstr "Ir a la página anterior"
 
 #: includes/pager.inc:397; modules/book/book-navigation.tpl.php:46
 msgid "Go to next page"
-msgstr "Ir a página siguiente"
+msgstr "Ir a la página siguiente"
 
 #: includes/pager.inc:398
 msgid "Go to last page"
@@ -2755,7 +2757,7 @@ msgid ""
 "For more information, see the online handbook entry for <a href=\"@aggregator"
 "\">Aggregator module</a>."
 msgstr ""
-"Para más información, vea la entrada del manual en línea para el <a href="
+"Para más información, vea en el manual en línea la entrada para el <a href="
 "\"@aggregator\">Módulo Integrador (Aggregator)</a>."
 
 #: modules/aggregator/aggregator.module:20
@@ -2777,10 +2779,10 @@ msgid ""
 "added</a>. For each feed or feed category, the <em>latest items</em> block "
 "may be enabled at the <a href=\"@block\">blocks administration page</a>."
 msgstr ""
-"En seguida se enlistan los hilos actuales, y es posible <a href=\"@addfeed"
-"\">agregar nuevos hilos</a>. Para cada hilo o categoría d ehilos, el bloque "
-"con los <em>elementos más recientes</em> puede configurarse en la <a href="
-"\"@block\">página de administración de bloques</a>."
+"A continuación se listan los origenes externos activos. Además se pueden <a "
+"href=\"@addfeed\">añadir otros nuevos</a>. A cada origen o categoría de "
+"orígenes, se le puede activar su bloque de elementos más recientes en la <a "
+"href=\"@block\">página de administración de bloques</a>."
 
 #: modules/aggregator/aggregator.module:24
 msgid "Add a feed in RSS, RDF or Atom format. A feed may only have one entry."
@@ -2815,7 +2817,7 @@ msgstr "Elementos más recientes del hilo !title"
 
 #: modules/aggregator/aggregator.module:320
 msgid "Number of news items in block"
-msgstr "Número de elementos noticiosos en el bloque"
+msgstr "Número de noticias en el bloque"
 
 #: modules/aggregator/aggregator.module:339
 msgid "View this feed's recent news."
@@ -2855,7 +2857,7 @@ msgstr ""
 
 #: modules/aggregator/aggregator.module:891,891
 msgid "blog it"
-msgstr "bloguear"
+msgstr "Añadir a la bitácora"
 
 #: modules/aggregator/aggregator.module:892
 msgid "Comment on this news item in your personal blog."
@@ -3067,7 +3069,7 @@ msgstr "Guardar bloques"
 
 #: modules/block/block.admin.inc:100
 msgid "The block settings have been updated."
-msgstr "Se han actualizado las opciones del bloque."
+msgstr "Las opciones del bloque han sido actualizadas."
 
 #: modules/block/block.admin.inc:151
 msgid "Block specific settings"
@@ -3079,7 +3081,7 @@ msgstr "Título del bloque"
 
 #: modules/block/block.admin.inc:158
 msgid "The title of the block as shown to the user."
-msgstr "El título del bloque como se muestra al usuario."
+msgstr "El título del bloque que ven los usuarios."
 
 #: modules/block/block.admin.inc:158
 msgid ""
@@ -3131,7 +3133,7 @@ msgstr "Opciones de visibilidad específicas por rol"
 
 #: modules/block/block.admin.inc:213
 msgid "Show block for specific roles"
-msgstr "Mostrar el bloque a roles específicos"
+msgstr "Mostrar el bloque a roles determinados"
 
 #: modules/block/block.admin.inc:216
 msgid ""
@@ -3151,7 +3153,7 @@ msgstr "Mostrar en todas las páginas excepto las de esta lista."
 
 #: modules/block/block.admin.inc:232
 msgid "Show on only the listed pages."
-msgstr "Mostrar solamente en las páginas de esta lista."
+msgstr "Mostrar sólamente en las páginas de esta lista."
 
 #: modules/block/block.admin.inc:233
 msgid ""
@@ -3160,16 +3162,16 @@ msgid ""
 "personal blog. %front is the front page."
 msgstr ""
 "Introduzca una página por línea en forma de rutas de Drupal. El carácter '*' "
-"es un comodín. Ejemplos de rutas: %blog para la página de blogs y %blog-"
-"wildcard para todos los blogs personales. %front es la página inicial."
+"es un comodín. Ejemplos de rutas: %blog para la página de bitácoras y %blog-"
+"wildcard para todas las bitácoras personales. %front es la página inicial."
 
 #: modules/block/block.admin.inc:236
 msgid ""
 "Show if the following PHP code returns <code>TRUE</code> (PHP-mode, experts "
 "only)."
 msgstr ""
-"Mostrar si el siguiente código PHP devuelve <code>TRUE</code> (modo PHP, "
-"sólo para expertos)."
+"Mostrar si el siguiente código PHP devuelve el valor <code>TRUE</code> (modo "
+"PHP, sólo para expertos)."
 
 #: modules/block/block.admin.inc:237
 msgid ""
@@ -3182,7 +3184,7 @@ msgstr ""
 
 #: modules/block/block.admin.inc:241
 msgid "Show block on specific pages"
-msgstr "Mostrar el bloque en páginas especificadas"
+msgstr "Mostrar el bloque en páginas específicas"
 
 #: modules/block/block.admin.inc:247
 msgid "Pages"
@@ -3198,11 +3200,11 @@ msgstr "Recuerde que la descripción de cada bloque es única."
 
 #: modules/block/block.admin.inc:277
 msgid "The block configuration has been saved."
-msgstr "Se ha salvado la configuración del bloque."
+msgstr "La configuración del bloque ha sido guardada."
 
 #: modules/block/block.admin.inc:314
 msgid "The block has been created."
-msgstr "Se ha creado el bloque."
+msgstr "El bloque ha sido creado."
 
 #: modules/block/block.admin.inc:329
 msgid "Are you sure you want to delete the block %name?"
@@ -3210,7 +3212,7 @@ msgstr "¿Está seguro de que desea eliminar el bloque %name?"
 
 #: modules/block/block.admin.inc:338
 msgid "The block %name has been removed."
-msgstr "Se ha eliminado el bloque %name."
+msgstr "El bloque %name se ha eliminado."
 
 #: modules/block/block.module:70
 msgid ""
@@ -3259,7 +3261,7 @@ msgstr ""
 #: modules/block/block.module:74
 msgid "disabled blocks, or blocks not in a region, are never shown."
 msgstr ""
-"los bloques inactivos, o los bloques que no están en una región, nunca se "
+"los bloques inactivos o los bloques que no están en una región nunca se "
 "muestran."
 
 #: modules/block/block.module:75
@@ -3481,9 +3483,9 @@ msgid ""
 "Contents of the \"Pages\" block; contains either a list of paths on which to "
 "include/exclude the block or PHP code, depending on \"visibility\" setting."
 msgstr ""
-"Contenido del bloque \"Páginas\"; contiene o bien una lista de rutas en las "
-"cuales se debe incluir/excluir el bloque, o código PHP, dependiendo de la "
-"opción \"visibilidad\"."
+"Contenido del bloque \"Páginas\". Contiene una lista de rutas en el que "
+"incluir o excluir el bloque o el código PHP, dependiendo de los ajustes de "
+"\"visibilidad\"."
 
 #: modules/block/block.install:89
 msgid ""
@@ -3568,7 +3570,7 @@ msgstr "Core - obligatorios"
 
 #: modules/blog/blog.pages.inc:15; modules/blog/blog.module:108
 msgid "@name's blog"
-msgstr "blog de @name"
+msgstr "Bitácora de @name"
 
 #: modules/blog/blog.pages.inc:20
 msgid "Post new blog entry."
@@ -3588,7 +3590,7 @@ msgstr "RSS: blogs"
 
 #: modules/blog/blog.module:15
 msgid "Blog entry"
-msgstr "Entrada de blog"
+msgstr "Entrada de bitácora"
 
 #: modules/blog/blog.module:17
 msgid ""
@@ -3600,15 +3602,15 @@ msgstr ""
 
 #: modules/blog/blog.module:51; modules/blog/blog.info:0
 msgid "Blog"
-msgstr "Blog"
+msgstr "Bitácora"
 
 #: modules/blog/blog.module:52
 msgid "View recent blog entries"
-msgstr "Ver entradas de blog recientes"
+msgstr "Ver entradas de bitácoras recientes"
 
 #: modules/blog/blog.module:52,124
 msgid "Read @username's latest blog entries."
-msgstr "Leer lo más reciente del blog de @username."
+msgstr "Leer lo más reciente de la bitácora de @username."
 
 #: modules/blog/blog.module:64
 msgid ""
@@ -3617,10 +3619,10 @@ msgid ""
 "the blog entries are most often displayed in descending order by creation "
 "time."
 msgstr ""
-"El módulo Blog permite a los usuarios registrados mantener un diario en "
-"línea, o <em>blog</em>. Los blogs están hechos de <em>entradas de blog</em> "
-"individuales, y lo más común es que las entradas de blog se desplieguen en "
-"orden descendiente por fecha de creación."
+"El módulo de bitácoras permite a los usuarios registrados mantener un diario "
+"en línea, o <em>blog</em>. Las bitácoras están hechos de <em>entradas de "
+"bitácora</em> individuales, y lo más común es que las entradas de bitácora "
+"se desplieguen en orden descendiente por fecha de creación."
 
 #: modules/blog/blog.module:65
 msgid ""
@@ -3631,10 +3633,11 @@ msgid ""
 "created."
 msgstr ""
 "Se agrega al menú de Navegación un elemento de menú (opcional) llamado "
-"<em>Blogs</em>, el cual despliega todos los blogs disponibles en su sitio, "
-"así como un elemento <em>Mi blog</em> que despliega las entradas de blog del "
-"usuario actual. El elemento de menú <em>Entrada de blog</em> disponible bajo "
-"<em>Crear contenido</em> permite crear nuevas entradas de blog."
+"<em>Bitácoras</em>, el cual despliega todas las bitácoras disponibles en su "
+"sitio, así como un elemento <em>Mi bitácora</em> que despliega las entradas "
+"de bitácora del usuario actual. El elemento de menú <em>Entrada de bitácora</"
+"em> disponible bajo <em>Crear contenido</em> permite crear nuevas entradas "
+"de bitácora."
 
 #: modules/blog/blog.module:66
 msgid ""
@@ -3664,17 +3667,18 @@ msgid ""
 "configure</a> a feed from another site, and <a href=\"@blocks\">position</a> "
 "the feed's <em>latest items</em> block."
 msgstr ""
-"Al usar el módulo Integrador [Aggregator] se despliega un icono automático "
-"<em>bloguearlo</em> junto al elemento en un bloque con los <em>elementos más "
-"recientes</em> de un hilo. Hacer clic en el icono carga una <em>entrada de "
-"blog</em> con un título (el título del elemento del hilo) y un cuerpo (un "
-"enlace al elemento fuente en su sitio original, y contenido ilustrativo "
-"apropiado para su uso en una cita en bloque). Los autores de blogs pueden "
-"usar esta función para comentar fácilmente elementos de interés que aparecen "
-"en los hilos de integración de otros sitios. Para usar esta función, "
-"asegúrese de <a href=\"@modules\">activar</a> el módulo Integrador, de <a "
-"href=\"@feeds\">agregar y configurar</a> un hilo de otro sitio, y de <a href="
-"\"@blocks\">ubicar</a> el bloque <em>elementos más recientes</em> del hilo."
+"Al usar el módulo agregador se despliega un icono automático <em>añadir a la "
+"bitácora</em> junto al elemento en un bloque con los <em>elementos más "
+"recientes</em> de un canal. Hacer clic en el icono carga una <em>entrada de "
+"bitácora</em> con un título (el título del elemento del canal) y un cuerpo "
+"(un enlace al elemento fuente en su sitio original, y contenido ilustrativo "
+"apropiado para su uso en una cita en bloque). Los autores de bitácoras "
+"pueden usar esta función para comentar fácilmente elementos de interés que "
+"aparecen en los canales agregados de otros sitios. Para usar esta función, "
+"asegúrese de <a href=\"@modules\">activar</a> el módulo agregador, de <a "
+"href=\"@feeds\">agregar y configurar</a> un canal de otro sitio, y de <a "
+"href=\"@blocks\">ubicar</a> el bloque <em>elementos más recientes</em> del "
+"canal."
 
 #: modules/blog/blog.module:68
 msgid ""
@@ -3682,23 +3686,23 @@ msgid ""
 "\">Blog module</a>."
 msgstr ""
 "Para más información, vea la entrada del manual en línea para el <a href="
-"\"@blog\">módulo Blog</a>."
+"\"@blog\">módulo de bitácoras</a>."
 
 #: modules/blog/blog.module:108
 msgid "Blogs"
-msgstr "Blogs"
+msgstr "Bitácoras"
 
 #: modules/blog/blog.module:122
 msgid "@username's blog"
-msgstr "blog de @username"
+msgstr "bitácora de @username"
 
 #: modules/blog/blog.module:178,187
 msgid "Recent blog posts"
-msgstr "Envíos recientes a bitácoras"
+msgstr "Entradas recientes en bitácoras"
 
 #: modules/blog/blog.module:186
 msgid "Read the latest blog entries."
-msgstr "Leer los últimos envíos al blog."
+msgstr "Leer las últimos entradas de bitácora."
 
 #: modules/blog/blog.module:0
 msgid "blog"
@@ -3707,8 +3711,8 @@ msgstr "bitácora"
 #: modules/blog/blog.info:0
 msgid "Enables keeping easily and regularly updated user web pages or blogs."
 msgstr ""
-"Permite mantener páginas web o bitácoras de usuario fácil y regularmente "
-"actualizados."
+"Permite mantener fácilmente y actualizar regularmente páginas web de usuario "
+"o bitácoras."
 
 #: modules/blogapi/blogapi.module:15
 msgid ""
@@ -3749,9 +3753,9 @@ msgid ""
 "external client."
 msgstr ""
 "Selecciones los tipos de contenido disponibles para los clientes externos en "
-"la <a href=\"@blogapi-settings\">página de configuración de Blog API</a>. Si "
-"está soportado y disponible, cada tipo de contenido será mostrado por el "
-"cliente externo como un \"blog\" aparte."
+"la <a href=\"@blogapi-settings\">página de configuración de API de "
+"bitácoras</a>. Si está soportado y disponible, cada tipo de contenido será "
+"mostrado por el cliente externo como una «bitácora» aparte."
 
 #: modules/blogapi/blogapi.module:18
 msgid ""
@@ -3759,7 +3763,7 @@ msgid ""
 "\">Blog API module</a>."
 msgstr ""
 "Para mas información, mira la entrada del manual online de <a href=\"@blogapi"
-"\">API del Modulo Blog</a>."
+"\">módulo API de Bitácoras</a>."
 
 #: modules/blogapi/blogapi.module:39
 msgid "Returns a list of blogs to which an author has posting privileges."
@@ -3814,7 +3818,7 @@ msgstr ""
 
 #: modules/blogapi/blogapi.module:109
 msgid "Returns a list of all categories defined in the blog."
-msgstr "Devuelve una lista de todas las categorías definidas en el blog."
+msgstr "Devuelve una lista de todas las categorías definidas en la bitácora."
 
 #: modules/blogapi/blogapi.module:119
 msgid "Sets the categories for a post."
@@ -3837,9 +3841,9 @@ msgid ""
 "Publish (rebuild) all of the static files related to an entry from your "
 "blog. Equivalent to saving an entry in the system (but without the ping)."
 msgstr ""
-"Publica (reconstruye) todos los ficheros estaticos relacionados con "
-"cualquier entrada de tu blog. Equivale a guardar una entrada en el sistema "
-"(pero sin hacer ping)."
+"Publica (reconstruye) todos los ficheros estáticos relacionados con "
+"cualquier entrada de tu bitácora. Equivale a guardar una entrada en el "
+"sistema (pero sin hacer ping)."
 
 #: modules/blogapi/blogapi.module:216
 msgid "You do not have permission to create this type of post."
@@ -3867,7 +3871,7 @@ msgstr "Entrada no válida."
 
 #: modules/blogapi/blogapi.module:537
 msgid "You do not have permission to edit this blog."
-msgstr "No tiene privilegios para editar este blog."
+msgstr "No tiene privilegios para editar esta bitácora."
 
 #: modules/blogapi/blogapi.module:541
 msgid "Wrong username or password."
@@ -3883,9 +3887,10 @@ msgid ""
 "API. If supported, each enabled content type will be displayed as a separate "
 "\"blog\" by the external client."
 msgstr ""
-"Seleccione los tipos de contenido disponibles para clientes de blog externos "
-"vía Blog API. Si hay soporte, cada tipo de contenido habilitado se mostrará "
-"como un \"blog\" separado por el cliente externo."
+"Seleccione los tipos de contenido disponibles para clientes de bitácora "
+"externos a través la API de bitácoras. Si hay soporte, cada tipo de "
+"contenido habilitado se mostrará como una «bitácora» separada por el cliente "
+"externo."
 
 #: modules/blogapi/blogapi.module:597
 msgid "RSD"
@@ -3905,7 +3910,7 @@ msgstr "blogapi"
 
 #: modules/blogapi/blogapi.info:0
 msgid "Blog API"
-msgstr "API para blog"
+msgstr "API de bitácoras"
 
 #: modules/blogapi/blogapi.info:0
 msgid ""
@@ -3913,7 +3918,7 @@ msgid ""
 "APIs."
 msgstr ""
 "Permite a los usuarios publicar contenido usando aplicaciones que soportan "
-"API para blog XML-RPC."
+"APIs de bitácoras XML-RPC."
 
 #: modules/book/book-navigation.tpl.php:40
 msgid "‹ "
@@ -4262,7 +4267,7 @@ msgstr ""
 
 #: modules/book/book.module:43
 msgid "create new books"
-msgstr "crear nuevos libros"
+msgstr "crear libros nuevos"
 
 #: modules/book/book.module:43
 msgid "access printer-friendly version"
@@ -4411,7 +4416,7 @@ msgstr "Color del texto"
 #: modules/comment/comment.module:1387,1391,1394;
 #: modules/node/node.pages.inc:239,401
 msgid "Preview"
-msgstr "Vista previa"
+msgstr "Previsualizar"
 
 #: modules/color/color.module:271
 msgid ""
@@ -4460,7 +4465,7 @@ msgstr ""
 
 #: modules/color/color.install:31
 msgid "GD library"
-msgstr "Biblioteca GD"
+msgstr "Librería GD"
 
 #: modules/color/color.info:0
 msgid "Color"
@@ -4468,8 +4473,7 @@ msgstr "Color"
 
 #: modules/color/color.info:0
 msgid "Allows the user to change the color scheme of certain themes."
-msgstr ""
-"Permite al usuario cambiar el esquema de color de ciertos temas gráficos."
+msgstr "Permite al usuario cambiar el esquema de color de algunos temas."
 
 #: modules/comment/comment-folded.tpl.php:20
 msgid "by"
@@ -4682,7 +4686,7 @@ msgstr "Añadir nuevo comentario"
 
 #: modules/comment/comment.module:442
 msgid "Add a new comment to this page."
-msgstr "Añade a esta página un comentario nuevo."
+msgstr "Añadir un comentario nuevo a esta página."
 
 #: modules/comment/comment.module:463
 msgid "Share your thoughts and opinions related to this posting."
@@ -4698,11 +4702,11 @@ msgstr "Opciones predefinidas para comentarios"
 
 #: modules/comment/comment.module:500,584
 msgid "Read only"
-msgstr "Sólo lectura"
+msgstr "Sólo Lectura"
 
 #: modules/comment/comment.module:500,584
 msgid "Read/Write"
-msgstr "Lectura y escritura"
+msgstr "Lectura/Escritura"
 
 #: modules/comment/comment.module:501
 msgid ""
@@ -4821,7 +4825,7 @@ msgstr "Opcional"
 #: modules/comment/comment.module:559; modules/node/node.admin.inc:57;
 #: modules/taxonomy/taxonomy.admin.inc:166
 msgid "Required"
-msgstr "Obigatorio"
+msgstr "Obligatorio"
 
 #: modules/comment/comment.module:560
 msgid ""
@@ -4884,7 +4888,7 @@ msgstr "Retirar los comentarios seleccionados"
 
 #: modules/comment/comment.module:1188; modules/node/node.module:803
 msgid "You have to specify a valid date."
-msgstr "Tiene que especificar una fecha válida."
+msgstr "Debe especificar una fecha válida."
 
 #: modules/comment/comment.module:1192
 msgid "You have to specify a valid author."
@@ -4921,7 +4925,7 @@ msgstr "Administración"
 
 #: modules/comment/comment.module:1288,1304; modules/node/node.pages.inc:178
 msgid "Authored by"
-msgstr "Por"
+msgstr "Escrito por"
 
 #: modules/comment/comment.module:1312,1343,1351;
 #: modules/user/user.admin.inc:763,802
@@ -4947,7 +4951,7 @@ msgstr "Fecha"
 #: modules/translation/translation.pages.inc:27;
 #: modules/user/user.admin.inc:135,909; modules/user/user.module:1455
 msgid "Status"
-msgstr "Estatus"
+msgstr "Estado"
 
 #: modules/comment/comment.module:1330; modules/node/content_types.inc:157;
 #: modules/node/node.pages.inc:207;
@@ -5035,7 +5039,7 @@ msgstr "Después de guardar un comentario nuevo"
 
 #: modules/comment/comment.module:2003
 msgid "After saving an updated comment"
-msgstr "Después de guardar un comentario actualizado"
+msgstr "Después de guardar un comentario modificado"
 
 #: modules/comment/comment.module:2006
 msgid "After deleting a comment"
@@ -5090,11 +5094,11 @@ msgstr[1] "@count comentarios nuevos"
 
 #: modules/comment/comment.module:274
 msgid "access comments"
-msgstr "acceder a comentarios"
+msgstr "acceder a los comentarios"
 
 #: modules/comment/comment.module:274
 msgid "post comments"
-msgstr "enviar comentarios"
+msgstr "publicar comentarios"
 
 #: modules/comment/comment.module:274
 msgid "administer comments"
@@ -5102,7 +5106,7 @@ msgstr "administrar comentarios"
 
 #: modules/comment/comment.module:274
 msgid "post comments without approval"
-msgstr "enviar comentarios sin aprobación"
+msgstr "publicar comentarios sin aprobación"
 
 #: modules/comment/comment.module:0
 msgid "comment"
@@ -5121,8 +5125,8 @@ msgid ""
 "The {comments}.cid to which this comment is a reply. If set to 0, this "
 "comment is not a reply to an existing comment."
 msgstr ""
-"El {comments}.cid del cual este comentario es una respuesta. Si el valor es "
-"0, este comentario no será una respuesta de un comentario existente."
+"La {comments}.cid a la que este comentario responde. Si se deja en 0, este "
+"comentario no es una respuesta a un comentario ya existente."
 
 #: modules/comment/comment.install:93
 msgid "The {node}.nid to which this comment is a reply."
@@ -5257,7 +5261,7 @@ msgstr "No"
 #: modules/contact/contact.pages.inc:67;
 #: modules/profile/profile.admin.inc:149,214
 msgid "Category"
-msgstr "Categoría"
+msgstr "Categoria"
 
 #: modules/contact/contact.admin.inc:18,47
 msgid "Recipients"
@@ -5271,7 +5275,7 @@ msgstr "Seleccionado"
 #: modules/contact/contact.admin.inc:43
 msgid "Example: 'website feedback' or 'product information'."
 msgstr ""
-"Ejemplo: «realimentación sobre la sede web» o «información del producto»."
+"Ejemplo: \"retroalimentación del sitio web\" o \"información del producto\"."
 
 #: modules/contact/contact.admin.inc:49
 msgid ""
@@ -5313,11 +5317,11 @@ msgstr ""
 
 #: modules/contact/contact.admin.inc:83; modules/profile/profile.admin.inc:301
 msgid "You must enter a category."
-msgstr "You must enter a category."
+msgstr "Debe escribir una categoría."
 
 #: modules/contact/contact.admin.inc:86
 msgid "You must enter one or more recipients."
-msgstr "Debe introducir uno o más destinatarios."
+msgstr "Debe indicar uno o más destinatarios."
 
 #: modules/contact/contact.admin.inc:92
 msgid "%recipient is an invalid e-mail address."
@@ -5604,7 +5608,7 @@ msgstr "Opciones de contacto"
 
 #: modules/contact/contact.module:145
 msgid "Personal contact form"
-msgstr "Formulario para contacto personal"
+msgstr "Formulario de contacto personal"
 
 #: modules/contact/contact.module:147
 msgid ""
@@ -5663,7 +5667,7 @@ msgstr "contacto"
 
 #: modules/contact/contact.install:29
 msgid "Contact form category settings."
-msgstr "Opciones para las categorías del formulario de contacto"
+msgstr "Opciones para las categorías del formulario de contacto."
 
 #: modules/contact/contact.install:35
 msgid "Primary Key: Unique category ID."
@@ -7131,7 +7135,7 @@ msgstr "Hay ayuda disponible sobre los siguientes elementos:"
 
 #: modules/help/help.admin.inc:30
 msgid "No help is available for module %module."
-msgstr "No hay ayuda disponible para el módulo %module."
+msgstr "No hay ayuda para el módulo %module."
 
 #: modules/help/help.admin.inc:41
 msgid "@module administration pages"
@@ -7181,7 +7185,7 @@ msgstr ""
 
 #: modules/help/help.module:0
 msgid "help"
-msgstr "help"
+msgstr "ayuda"
 
 #: modules/help/help.info:0
 msgid "Help"
@@ -7845,7 +7849,7 @@ msgstr ""
 
 #: modules/locale/locale.install:354
 msgid "Stores translated versions of strings."
-msgstr "Guarda las versiones traducidas de las cadenas de texto."
+msgstr "Guarda las versiones traducidas de los textos."
 
 #: modules/locale/locale.install:360
 msgid "Source string ID. References {locales_source}.lid."
@@ -7956,9 +7960,9 @@ msgid ""
 "Some menu items may not be available as parents if selecting them would "
 "exceed this limit."
 msgstr ""
-"La profundidad máxima para un elemento y sus descendientes se fija en !"
+"La profundidad máxima para un elemento y sus hijos se ha fijado en !"
 "maxdepth. Algunos elementos de menú podrían no estar disponibles como padres "
-"si al seleccionarlos se excediese ese límite."
+"si al seleccionarlos se excede ese límite."
 
 #: modules/menu/menu.admin.inc:323; modules/menu/menu.module:411
 msgid ""
@@ -8331,7 +8335,7 @@ msgstr "Pegajoso en la cima de las listas"
 
 #: modules/node/content_types.inc:160; modules/node/node.pages.inc:156
 msgid "Create new revision"
-msgstr "Crear revisión nueva"
+msgstr "Crear nueva revisión"
 
 #: modules/node/content_types.inc:162
 msgid ""
@@ -8546,7 +8550,7 @@ msgstr "Quitar condición de pegajoso"
 
 #: modules/node/node.admin.inc:141; modules/user/user.module:1954
 msgid "status"
-msgstr "estatus"
+msgstr "estado"
 
 #: modules/node/node.admin.inc:143,500
 msgid "published"
@@ -8870,10 +8874,10 @@ msgid ""
 "created, users of your site will be able to create posts that are instances "
 "of this content type."
 msgstr ""
-"Para crear un tipo de contenido nuevo, introduzca el nombre legible por los "
-"humanos, el nombre legible por la máquina y todos los campos relevantes que "
-"hay en esta página. Cando se crean, los usuarios de su sitio pueden crear "
-"envíos que son ejemplares de este tipo de contenido."
+"Para crear un nuevo tipo de contenido, introduzca el nombre legible por los "
+"humanos, el nombre interno de sistema y todos los campos relevantes que hay "
+"en esta página. Una vez creados, los usuarios de su sitio podrán crear "
+"publicaciones que serán ejemplares de este tipo de contenido."
 
 #: modules/node/node.module:51
 msgid ""
@@ -8962,7 +8966,7 @@ msgstr "Leer el resto de !title."
 
 #: modules/node/node.module:1610,1616,1617
 msgid "Syndicate"
-msgstr "Distribuir"
+msgstr "Sindicar"
 
 #: modules/node/node.module:1731
 msgid "RSS"
@@ -8973,8 +8977,8 @@ msgid ""
 "<h1 class=\"title\">Welcome to your new Drupal website!</h1><p>Please follow "
 "these steps to set up and start using your website:</p>"
 msgstr ""
-"<h1 class=\"title\">Bienvenido a su nuevo sitio web con Drupal.</h1><p>Debe "
-"seguir estos pasos para configurar y empezar a usar su sitio web:</p>"
+"<h1 class=\"title\">¡Bienvenido a tu nuevo sitio Drupal!</h1><p>Por favor "
+"sigue estos pasos para configurar y comenzar a usar tu sitio:</p>"
 
 #: modules/node/node.module:1738
 msgid ""
@@ -8982,9 +8986,10 @@ msgid ""
 "\"@admin\">administration section</a>, where you can <a href=\"@config"
 "\">customize and configure</a> all aspects of your website."
 msgstr ""
-"<strong>Configure su sitio web</strong> Cuando ingrese, puede visitar la <a "
-"href=\"@admin\">sección de administración</a>, en la que puede <a href="
-"\"@config\">personalizar y configurar</a> todos los aspectos de su sitio web."
+"&lt;strong&gt;Configure su sitio web&lt;/strong&gt; Cuando inicie sesión, "
+"visite la &lt;a href=\"@admin\"&gt;sección de administración&lt;/a&gt;, en "
+"la que puede &lt;a href=\"@config\"&gt;personalizar y configurar&lt;/a&gt; "
+"todos los aspectos de su sitio web."
 
 #: modules/node/node.module:1739
 msgid ""
@@ -8993,9 +8998,9 @@ msgid ""
 "needs. You can find additional modules in the <a href=\"@download_modules"
 "\">Drupal modules download section</a>."
 msgstr ""
-"<strong>Active funcionalidad adicional</strong> Luego, puede visitar la <a "
-"href=\"@modules\">lista de módulos</a> y activar características que se "
-"ajustes a sus necesidades específicas. Puede encontrar módulos adicionales "
+"<strong>Habilite funcionalidad adicional</strong> Luego, visite la <a href="
+"\"@modules\">lista de módulos</a> y active las características que se "
+"ajusten a sus necesidades específicas. Puede encontrar módulos adicionales "
 "en la <a href=\"@download_modules\">sección de descarga de módulos de "
 "Drupal</a>."
 
@@ -9007,10 +9012,9 @@ msgid ""
 "from the <a href=\"@download_themes\">Drupal themes download section</a>."
 msgstr ""
 "<strong>Personalice el diseño de su sitio web</strong> Para cambiar la "
-"\"apariencia\" de su sitio web, puede visitar la <a href=\"@themes\">sección "
-"temas</a>. Puede elegir de entre uno de los temas incluidos o descargar "
-"temas adicionales de la <a href=\"@download_themes\">sección de descarga de "
-"temas de Drupal</a>."
+"\"apariencia\" de su sitio web, visite la <a href=\"@themes\">sección temas</"
+"a>. Puede elegir uno de los temas incluidos o descargar temas adicionales de "
+"la <a href=\"@download_themes\">sección de descarga de temas de Drupal</a>."
 
 #: modules/node/node.module:1741
 msgid ""
@@ -9666,7 +9670,8 @@ msgstr ""
 
 #: modules/openid/openid.module:433; modules/user/user.admin.inc:234
 msgid "Only site administrators can create new user accounts."
-msgstr "Sólo los administradores pueden crear cuentas para usuarios nuevos."
+msgstr ""
+"Sólo los administradores del sitio pueden crear nuevas cuentas de usuario."
 
 #: modules/openid/openid.module:0
 msgid "openid"
@@ -9767,7 +9772,7 @@ msgstr "Actualizar alias"
 
 #: modules/path/path.admin.inc:121
 msgid "Create new alias"
-msgstr "Crear alias nuevo"
+msgstr "Crear nuevo alias"
 
 #: modules/path/path.admin.inc:139
 msgid "The alias %alias is already in use in this language."
@@ -9897,7 +9902,7 @@ msgstr ""
 
 #: modules/path/path.module:209
 msgid "create url aliases"
-msgstr "crear alias de url"
+msgstr "crear alias de URL"
 
 #: modules/path/path.module:209
 msgid "administer url aliases"
@@ -10344,15 +10349,15 @@ msgstr "Opción @n"
 
 #: modules/poll/poll.module:314
 msgid "Votes for choice @n"
-msgstr "Votos para la opción @n"
+msgstr "Votos por la opción @n"
 
 #: modules/poll/poll.module:385
 msgid "Negative values are not allowed."
-msgstr "No se permiten los valores negativos."
+msgstr "No se permiten valores negativos."
 
 #: modules/poll/poll.module:390
 msgid "You must fill in at least two choices."
-msgstr "Debe cumplimentar al menos dos opciones."
+msgstr "Debe llenar al menos dos opciones."
 
 #: modules/poll/poll.module:511
 msgid "Older polls"
@@ -10372,7 +10377,7 @@ msgstr "Ver los resultados de la encuesta actual."
 
 #: modules/poll/poll.module:616
 msgid "Your vote was recorded."
-msgstr "Se ha registrado su voto."
+msgstr "Su voto ha sido registrado."
 
 #: modules/poll/poll.module:672
 msgid "Add another choice"
@@ -10404,7 +10409,7 @@ msgstr "editar contenido de encuesta propia"
 
 #: modules/poll/poll.module:57
 msgid "vote on polls"
-msgstr "votar en encuestas"
+msgstr "votar en las encuestas"
 
 #: modules/poll/poll.module:57
 msgid "cancel own vote"
@@ -10495,7 +10500,7 @@ msgstr ""
 
 #: modules/profile/profile.admin.inc:55
 msgid "Add new field"
-msgstr "Añadir un campo nuevo"
+msgstr "Agregar nuevo campo"
 
 #: modules/profile/profile.admin.inc:82
 msgid "Profile fields have been updated."
@@ -10519,7 +10524,7 @@ msgstr "editar %title"
 
 #: modules/profile/profile.admin.inc:196
 msgid "add new %type"
-msgstr "añadir nuevo %type"
+msgstr "agregar nuevo %type"
 
 #: modules/profile/profile.admin.inc:211
 msgid "Field settings"
@@ -10530,17 +10535,17 @@ msgid ""
 "The category the new field should be part of. Categories are used to group "
 "fields logically. An example category is \"Personal information\"."
 msgstr ""
-"La categoría debería ser parte del campo nuevo. Las categorías se usan para "
-"agrupar los campos de una forma lógica.  Por ejemplo, una categoría podría "
-"ser «Información personal»."
+"La categoría de la que debe ser parte el nuevo campo. Las categorías se usan "
+"para agrupar lógicamente los campos. Un ejemplo de categoría es "
+"\"Información personal\"."
 
 #: modules/profile/profile.admin.inc:223
 msgid ""
 "The title of the new field. The title will be shown to the user. An example "
 "title is \"Favorite color\"."
 msgstr ""
-"El título del campo nuevo. El título se le mostrará al usuario. Un ejemplo "
-"de título podría ser «Color favorito»."
+"El título del nuevo campo. El título se mostrará al usuario. Un título de "
+"ejemplo es \"Color favorito\"."
 
 #: modules/profile/profile.admin.inc:227
 msgid "Form name"
@@ -10556,13 +10561,14 @@ msgid ""
 "underscore (_) are not allowed. An example name is \"profile_favorite_color"
 "\" or perhaps just \"profile_color\"."
 msgstr ""
-"El nombre del campo. El nombre del formulario no se muestra al usuario, pero "
-"se usa internamente en el código HTML y en los URLs.\n"
-"A no ser que sepa lo que está haciendo, se recomienda encarecidamente que "
-"preceda el nombre del formulario con <code>profile_</code> para evitar "
-"conflictos con otros campos. No se admiten ni espacios ni caracteres "
-"especiales, salvo el guión (-) y el guión bajo (_). Un ejemplo de nombre es "
-"«profile_color_favorito» o quizás simplemente «profile_color»."
+"El nombre del campo. El nombre del formulario no se le muestra al usuario "
+"pero se utiliza internamente en el código HTML y en los URL.\n"
+"A menos que sepa lo que hace, se le recomienda encarecidamente que use el "
+"prefijo &amp;lt;code&amp;gt;profile_&amp;lt;/code&amp;gt; en el nombre del "
+"formulario para evitar conflictos de nombres con otros campos. Espacios y "
+"cualquier otro caracter especial excepto el guión corto (-) y el guión bajo "
+"(_) no están permitidos. Un ejemplo de nombre es \"perfil_color_favorito\" o "
+"quizás sólo \"perfil_color\"."
 
 #: modules/profile/profile.admin.inc:234
 msgid "Explanation"
@@ -10585,8 +10591,8 @@ msgid ""
 "A list of all options. Put each option on a separate line. Example options "
 "are \"red\", \"blue\", \"green\", etc."
 msgstr ""
-"Una lista con todas las opciones. Ponga cada opción en una línea. Ejemplos "
-"de opciones son «rojo», «azul», «verde», etc."
+"Una lista de todas las opciones. Ponga cada opción en una línea separada. "
+"Ejemplos de opciones son \"rojo\", \"azul\", \"verde\", etc."
 
 #: modules/profile/profile.admin.inc:246
 msgid "Visibility"
@@ -10602,22 +10608,21 @@ msgstr ""
 #: modules/profile/profile.admin.inc:248
 msgid "Private field, content only available to privileged users."
 msgstr ""
-"Campo privado. El contenido sólo está disponible para los usuarios "
-"privilegiados."
+"Campo privado, contenido sólo disponible para usuarios con privilegios."
 
 #: modules/profile/profile.admin.inc:248
 msgid ""
 "Public field, content shown on profile page but not used on member list "
 "pages."
 msgstr ""
-"Campo público. El contenido se muestra en la página del perfil, pero no se "
-"usa en las páginas de las listas de usuarios."
+"Campo público, contenido mostrado en la página del perfil pero no en las "
+"páginas con listas de miembros."
 
 #: modules/profile/profile.admin.inc:248
 msgid "Public field, content shown on profile page and on member list pages."
 msgstr ""
-"Campo público. El contenido se muestra en la página del perfil y en las "
-"páginas de las listas de usuarios."
+"Campo público, contenido mostrado en la página del perfil y en las páginas "
+"con listas de miembros."
 
 #: modules/profile/profile.admin.inc:252,259
 msgid "Page title"
@@ -10683,16 +10688,16 @@ msgstr ""
 #: modules/profile/profile.admin.inc:297
 msgid "The specified form name is reserved for use by Drupal."
 msgstr ""
-"El nombre del formulario especificado está reservado para su uso por Drupal."
+"El nombre de formulario especificado está reservado para su uso por Drupal."
 
 #: modules/profile/profile.admin.inc:304
 msgid "The specified category name is reserved for use by Drupal."
 msgstr ""
-"El nombre de la categoría indicada está reservado para su uso por Drupal."
+"El nombre de categoría especificado está reservado para su uso por Drupal."
 
 #: modules/profile/profile.admin.inc:316
 msgid "The specified title is already in use."
-msgstr "El título especificado ya se está usando."
+msgstr "El título especificado ya está en uso."
 
 #: modules/profile/profile.admin.inc:319
 msgid "The specified name is already in use."
@@ -11072,7 +11077,7 @@ msgstr "Resultados de la búsqueda"
 
 #: modules/search/search.pages.inc:38
 msgid "Your search yielded no results"
-msgstr "Su búsqueda no produjo ningún resultado"
+msgstr "Su búsqueda no produjo resultados"
 
 #: modules/search/search.pages.inc:123
 msgid "Please enter some keywords."
@@ -11194,7 +11199,7 @@ msgstr "usar búsqueda avanzada"
 
 #: modules/search/search.module:144
 msgid "administer search"
-msgstr "administrar la búsqueda"
+msgstr "administrar búsqueda"
 
 #: modules/search/search.install:29
 msgid "Stores items that will be searched."
@@ -11292,7 +11297,7 @@ msgstr "No hay estadísticas disponibles."
 
 #: modules/statistics/statistics.admin.inc:50,79,115
 msgid "Hits"
-msgstr "Accesos"
+msgstr "Visitas"
 
 #: modules/statistics/statistics.admin.inc:52
 msgid "Average page generation time"
@@ -11600,7 +11605,7 @@ msgstr "Últimas impresiones:"
 msgid "1 read"
 msgid_plural "@count reads"
 msgstr[0] "1 lectura"
-msgstr[1] "%count lecturas"
+msgstr[1] "@count lecturas"
 
 #: modules/statistics/statistics.module:72
 msgid "access statistics"
@@ -11660,7 +11665,7 @@ msgstr "Estadísticas"
 
 #: modules/statistics/statistics.info:0
 msgid "Logs access statistics for your site."
-msgstr "Anota estadísticas de acceso a su sitio."
+msgstr "Guarda estadísticas de acceso al sitio."
 
 #: modules/syslog/syslog.module:22
 msgid ""
@@ -11977,7 +11982,7 @@ msgstr ""
 
 #: modules/system/system.admin.inc:493
 msgid "Upload icon image"
-msgstr "Cargar imagen de icono"
+msgstr "Subir imagen del icono"
 
 #: modules/system/system.admin.inc:494
 msgid ""
@@ -12035,11 +12040,11 @@ msgstr "Depende de: !dependencies"
 
 #: modules/system/system.admin.inc:722
 msgid "Required by: !required"
-msgstr "Necesitado por: !required"
+msgstr "Requerido por: !required"
 
 #: modules/system/system.admin.inc:841
 msgid "Some required modules must be enabled"
-msgstr "Algunos de los módulos necesarios deben estar activados"
+msgstr "Algunos módulos requeridos deben ser activados"
 
 #: modules/system/system.admin.inc:843
 msgid "Would you like to continue with enabling the above?"
@@ -12071,11 +12076,11 @@ msgstr "¿Quiere continuar con la desinstalación de lo de arriba?"
 
 #: modules/system/system.admin.inc:1093
 msgid "No modules selected."
-msgstr "Ningún módulo seleccionado."
+msgstr "No seleccionó ningún módulo"
 
 #: modules/system/system.admin.inc:1110
 msgid "The selected modules have been uninstalled."
-msgstr "Se han desinstalado los módulos seleccionados."
+msgstr "Los módulos seleccionados han sido desinstalados."
 
 #: modules/system/system.admin.inc:1131
 msgid "The name of this website."
@@ -12107,15 +12112,15 @@ msgstr ""
 
 #: modules/system/system.admin.inc:1155
 msgid "Footer message"
-msgstr "Mensaje de pie de página"
+msgstr "Mensaje del pie de página"
 
 #: modules/system/system.admin.inc:1157
 msgid ""
 "This text will be displayed at the bottom of each page. Useful for adding a "
 "copyright notice to your pages."
 msgstr ""
-"Este texto se muestra en la zona inferior de cada página. Útil para añadir "
-"las condiciones de uso y de distribución en sus páginas."
+"Este texto se mostrará al final de cada página. Es útil para agregar un "
+"aviso de derechos de autor a sus páginas."
 
 #: modules/system/system.admin.inc:1161
 msgid "Anonymous user"
@@ -12123,11 +12128,11 @@ msgstr "Usuario anónimo"
 
 #: modules/system/system.admin.inc:1163
 msgid "The name used to indicate anonymous users."
-msgstr "El nombre que se usa para identificar a los usuarios anónimos."
+msgstr "El nombre usado para indicar usuarios anónimos."
 
 #: modules/system/system.admin.inc:1168
 msgid "Default front page"
-msgstr "Página predefinida de inicio"
+msgstr "Página inicial predeterminada"
 
 #: modules/system/system.admin.inc:1171
 msgid ""
@@ -12424,7 +12429,7 @@ msgstr "Público: los archivos están disponibles directamente usando HTTP."
 
 #: modules/system/system.admin.inc:1395
 msgid "Private - files are transferred by Drupal."
-msgstr "Privado: los archivos los transfiere Drupal."
+msgstr "Privada - los archivos son transferidos por Drupal."
 
 #: modules/system/system.admin.inc:1396
 msgid ""
@@ -12786,7 +12791,7 @@ msgstr ""
 
 #: modules/system/system.admin.inc:2123
 msgid "No modules are available to uninstall."
-msgstr "No hay ningún módulo disponible para desinstalar."
+msgstr "No hay módulos disponibles para desinstalar."
 
 #: modules/system/system.admin.inc:2149,2207
 msgid "Screenshot"
@@ -12913,8 +12918,8 @@ msgid ""
 "Welcome to the administration section. Here you may control how your site "
 "functions."
 msgstr ""
-"Bienvenido a la sección de administración. Aquí puede controlar cómo "
-"funciona su sitio."
+"Bienvenido a la sección de administración. Aquí usted puede controlar el "
+"funcionamiento de su sitio."
 
 #: modules/system/system.module:64
 msgid "This page shows you all available administration tasks for each module."
@@ -13314,7 +13319,7 @@ msgstr "usuario"
 
 #: modules/system/system.module:158
 msgid "administer site configuration"
-msgstr "administrar la configuración del sitio"
+msgstr "administrar configuración del sitio"
 
 #: modules/system/system.module:158
 msgid "access administration pages"
@@ -14097,7 +14102,7 @@ msgstr ""
 
 #: modules/system/system.install:162
 msgid "Never run"
-msgstr "No ejecutar nunca"
+msgstr "No se ha ejecutado nunca"
 
 #: modules/system/system.install:163
 msgid "Cron has not run."
@@ -14105,7 +14110,7 @@ msgstr "cron no se ha ejecutado."
 
 #: modules/system/system.install:166
 msgid "Last run !time ago"
-msgstr "Ejecutado hace !time"
+msgstr "Última ejecución hace !time"
 
 #: modules/system/system.install:169
 msgid "Cron has not run recently."
@@ -14240,7 +14245,7 @@ msgstr "lista de términos"
 
 #: modules/taxonomy/taxonomy.admin.inc:31
 msgid "add terms"
-msgstr "añadir términos"
+msgstr "agregar términos"
 
 #: modules/taxonomy/taxonomy.admin.inc:85
 msgid "No vocabularies available."
@@ -14252,7 +14257,7 @@ msgstr "Nombre del vocabulario"
 
 #: modules/taxonomy/taxonomy.admin.inc:131
 msgid "Description of the vocabulary; can be used by modules."
-msgstr "Descripción del vocabulario: la pueden usar los módulos."
+msgstr "Descripción del vocabulario; puede ser usada por módulos."
 
 #: modules/taxonomy/taxonomy.admin.inc:134
 msgid "Help text"
@@ -15603,7 +15608,7 @@ msgstr ""
 
 #: modules/update/update.settings.inc:26
 msgid "Check for updates"
-msgstr "Revisar si hay actualizaciones"
+msgstr "Comprobar si hay actualizaciones"
 
 #: modules/update/update.settings.inc:29
 msgid "Daily"
@@ -15631,7 +15636,7 @@ msgstr "Todas las versiones más recientes"
 
 #: modules/update/update.settings.inc:41
 msgid "Only security updates"
-msgstr "Sólo las actualizaciones de seguridad"
+msgstr "Sólo actualizaciones de seguridad"
 
 #: modules/update/update.settings.inc:43
 msgid ""
@@ -15849,7 +15854,7 @@ msgstr ""
 
 #: modules/upload/upload.admin.inc:21,24,31
 msgid "default"
-msgstr "predefinido"
+msgstr "predeterminado"
 
 #: modules/upload/upload.admin.inc:31,49
 msgid ""
@@ -15918,7 +15923,7 @@ msgstr ""
 
 #: modules/upload/upload.admin.inc:102
 msgid "Default total file size per user"
-msgstr "Tamaño total de archivos predefinido por usuario"
+msgstr "Tamaño total de archivos predeterminado por usuario"
 
 #: modules/upload/upload.admin.inc:106
 msgid "The default maximum size of all files a user can have on the site."
@@ -15938,7 +15943,7 @@ msgstr "Opciones para @role"
 
 #: modules/upload/upload.admin.inc:124
 msgid "Permitted file extensions"
-msgstr "Extensiones de archivos permitidas"
+msgstr "Extensiones de archivo permitidas"
 
 #: modules/upload/upload.admin.inc:127
 msgid ""
@@ -15964,7 +15969,7 @@ msgstr ""
 
 #: modules/upload/upload.admin.inc:140
 msgid "Total file size per user"
-msgstr "Tamaño total de archivos por usuario"
+msgstr "Tamaño total de archivo por usuario"
 
 #: modules/upload/upload.admin.inc:144
 msgid "The maximum size of all files a user can have on the site."
@@ -16103,7 +16108,7 @@ msgstr[1] "@count adjuntos"
 
 #: modules/upload/upload.module:46
 msgid "upload files"
-msgstr "cargar archivos"
+msgstr "subir archivos"
 
 #: modules/upload/upload.module:46
 msgid "view uploaded files"
@@ -16156,7 +16161,7 @@ msgstr "Permite a los usuarios subir archivos y anexarlos a contenido."
 
 #: modules/user/user.admin.inc:13; modules/user/user.module:667,2425
 msgid "Create new account"
-msgstr "Crear cuenta nueva"
+msgstr "Crear nueva cuenta"
 
 #: modules/user/user.admin.inc:43
 msgid "Show only users where"
@@ -16375,7 +16380,7 @@ msgstr "Imágenes de usuarios"
 
 #: modules/user/user.admin.inc:428
 msgid "Picture support"
-msgstr "Soporte para imágenes de usuarios"
+msgstr "Soporte para imágenes"
 
 #: modules/user/user.admin.inc:448
 msgid "Picture image path"
@@ -16387,7 +16392,7 @@ msgstr "Subdirectorio del directorio %dir en el que se guardan las imágenes."
 
 #: modules/user/user.admin.inc:456
 msgid "Default picture"
-msgstr "Imagen predefinida"
+msgstr "Imagen predeterminada"
 
 #: modules/user/user.admin.inc:460
 msgid ""
@@ -16407,7 +16412,7 @@ msgstr "Las dimensiones máximas para las imágenes, en píxeles."
 
 #: modules/user/user.admin.inc:472
 msgid "Picture maximum file size"
-msgstr "Tamaño máximo de archivo de la imagen"
+msgstr "Tamaño máximo del archivo de imagen"
 
 #: modules/user/user.admin.inc:476
 msgid "Maximum file size for pictures, in kB."
@@ -16550,7 +16555,7 @@ msgstr "Introduzca un nombre de usuario para comprobar si se le permite o no."
 
 #: modules/user/user.admin.inc:794
 msgid "Check username"
-msgstr "Verificar nombre de usuario"
+msgstr "Revisar nombre de usuario"
 
 #: modules/user/user.admin.inc:803
 msgid "Enter an e-mail address to check if it will be denied or allowed."
@@ -16598,7 +16603,7 @@ msgstr "El nombre de máquina %host está permitido."
 
 #: modules/user/user.admin.inc:861,888
 msgid "username"
-msgstr "nombre del usuario"
+msgstr "nombre de usuario"
 
 #: modules/user/user.admin.inc:861,888
 msgid "e-mail"
@@ -16622,7 +16627,7 @@ msgstr "permitir"
 
 #: modules/user/user.admin.inc:891
 msgid "deny"
-msgstr "denegar"
+msgstr "Denegar"
 
 #: modules/user/user.admin.inc:894
 msgid "There are currently no access rules."
@@ -16738,11 +16743,11 @@ msgstr "El nombre del usuario no puede finalizar con un espacio."
 
 #: modules/user/user.module:382
 msgid "The username cannot contain multiple spaces in a row."
-msgstr "El nombre del usuario no puede contener varios espacios seguidos."
+msgstr "El nombre de usuario no puede contener múltiples espacios seguidos"
 
 #: modules/user/user.module:383,394
 msgid "The username contains an illegal character."
-msgstr "El nombre del usuario contiene un carácter ilegal."
+msgstr "El nombre de usuario contiene un carácter no permitido."
 
 #: modules/user/user.module:396
 msgid "The username is not a valid authentication ID."
@@ -16751,7 +16756,7 @@ msgstr "El nombre del usuario no es un id. de autenticación válido."
 #: modules/user/user.module:397
 msgid "The username %name is too long: it must be %max characters or less."
 msgstr ""
-"El nombre del usuario %name es demasiado largo. Debe tener %max caracteres o "
+"El nombre de usuario %name es demasiado largo: debe tener %max caracteres o "
 "menos."
 
 #: modules/user/user.module:401
@@ -16784,11 +16789,11 @@ msgstr "Opciones de la cuenta"
 
 #: modules/user/user.module:667
 msgid "Create a new user account."
-msgstr "Crea una cuenta de usuario nueva."
+msgstr "Crear una nueva cuenta de usuario."
 
 #: modules/user/user.module:669
 msgid "Request new password"
-msgstr "Solicitar nueva contraseña"
+msgstr "Solicitar una nueva contraseña"
 
 #: modules/user/user.module:669
 msgid "Request new password via e-mail."
@@ -16804,19 +16809,19 @@ msgstr "Navegación"
 
 #: modules/user/user.module:690,749
 msgid "Who's new"
-msgstr "Nuevos"
+msgstr "Usuarios nuevos"
 
 #: modules/user/user.module:693,788
 msgid "Who's online"
-msgstr "En línea"
+msgstr "Quién está en línea"
 
 #: modules/user/user.module:700
 msgid "Number of users to display"
-msgstr "Número de usuarios que mostrar"
+msgstr "Número de usuarios a mostrar"
 
 #: modules/user/user.module:708
 msgid "User activity"
-msgstr "Actividad del usuario"
+msgstr "Actividad de usuario"
 
 #: modules/user/user.module:708
 msgid ""
@@ -16827,7 +16832,7 @@ msgstr ""
 
 #: modules/user/user.module:709
 msgid "User list length"
-msgstr "Longitud de lista de usuarios"
+msgstr "Tamaño de la lista de usuarios"
 
 #: modules/user/user.module:709
 msgid "Maximum number of currently online users to display."
@@ -16835,11 +16840,11 @@ msgstr "Número máximo de usuarios conectados que se muestran."
 
 #: modules/user/user.module:776
 msgid "There is currently %members and %visitors online."
-msgstr "En este momento hay %members y %visitors en línea."
+msgstr "Actualmente hay %members y %visitors en línea."
 
 #: modules/user/user.module:779
 msgid "There are currently %members and %visitors online."
-msgstr "En este momento hay %members y %visitors en línea."
+msgstr "Actualmente hay %members y %visitors en línea."
 
 #: modules/user/user.module:785
 msgid "Online users"
@@ -16851,15 +16856,15 @@ msgstr "Imagen de @user"
 
 #: modules/user/user.module:1247
 msgid "Enter your @s username."
-msgstr "Introduzca su nombre de usuario @s."
+msgstr "Ingrese su nombre de usuario @s."
 
 #: modules/user/user.module:1250
 msgid "Enter the password that accompanies your username."
-msgstr "Introduzca la contraseña que acompaña a su nombre de usuario."
+msgstr "Ingrese la contraseña asignada a su nombre de usuario."
 
 #: modules/user/user.module:1289
 msgid "The username %name has not been activated or is blocked."
-msgstr "El usuario %name no se ha activado o se encuentra bloqueado."
+msgstr "El nombre de usuario %name no ha sido activado o está bloqueado."
 
 #: modules/user/user.module:1293
 msgid "The name %name is a reserved username."
@@ -16926,11 +16931,11 @@ msgstr "Eliminar imagen"
 
 #: modules/user/user.module:1509
 msgid "Check this box to delete your current picture."
-msgstr "Marque esta casilla para eliminar su imagen actual."
+msgstr "Marque esta casilla para borrar su imagen actual."
 
 #: modules/user/user.module:1514
 msgid "Upload picture"
-msgstr "Cargar imagen"
+msgstr "Subir imagen"
 
 #: modules/user/user.module:1514
 msgid ""
@@ -16962,7 +16967,7 @@ msgstr "Se negó acceso a la dirección de correo electrónico %email."
 
 #: modules/user/user.module:1625
 msgid "Account details for !username at !site"
-msgstr "Detalles de la cuenta para !username en !site"
+msgstr "Detalles de la cuenta de !username en !site"
 
 #: modules/user/user.module:1627
 msgid ""
@@ -17136,7 +17141,7 @@ msgstr ""
 
 #: modules/user/user.module:1644
 msgid "Account details for !username at !site (approved)"
-msgstr "Detalles de la cuenta de !username en !site (cuenta aprobada)"
+msgstr "Detalles de la cuenta de usuario de !username en !site (aprobada)."
 
 #: modules/user/user.module:1646
 msgid ""
@@ -17205,19 +17210,19 @@ msgid ""
 msgstr ""
 "!username,\n"
 "\n"
-"Su cuenta en !site ha sido borrada"
+"Su cuenta en !site ha sido borrada."
 
 #: modules/user/user.module:1714
 msgid "Unblock the selected users"
-msgstr "Desbloquear los usuarios seleccionados"
+msgstr "Desbloquear a los usuarios seleccionados"
 
 #: modules/user/user.module:1718
 msgid "Block the selected users"
-msgstr "Bloquear los usuarios seleccionados"
+msgstr "Bloquear a los usuarios seleccionados"
 
 #: modules/user/user.module:1722
 msgid "Delete the selected users"
-msgstr "Eliminar los usuarios seleccionados"
+msgstr "Borrar a los usuarios seleccionados"
 
 #: modules/user/user.module:1742
 msgid "Add a role to the selected users"
@@ -17246,15 +17251,15 @@ msgid ""
 "<em>anonymous</em> - a user who has not logged in, and <em>authenticated</"
 "em> a user who has signed up and who has been authorized."
 msgstr ""
-"El módulo \"User\" permite a los usuarios registrarse, iniciar sesión o "
-"cerrar sesión. Los usuarios se benefician al conectarse porque asocia el "
-"contenido que han creado con sus cuentas y permite que adjudiquen varios "
-"permisos a sus  roles. El módulo \"user\"  soporta roles, que permiten "
-"establecer permisos específicos para cada rol, dependiendo de los permisos "
-"que les quiera conceder el administrador. A cada usuario se le asigna uno o "
-"más roles. Por defecto hay dos roles <em>anonimo</em> - un usuario que no ha "
-"iniciado sesión, y <em>autentificado</em> un usuario que ha iniciado sesión "
-"y ha sido autorizado."
+"El módulo de usuarios permite a los visitantes registrarse, iniciar y cerrar "
+"sesiones. Los usuarios registrados se benefician de poder asociar el "
+"contenido que crean con sus cuentas. Este módulo permite asociar los "
+"visitantes con distintos tipos de roles y establecer un detallado sistema de "
+"permisos que permite a cada tipo de usuario hacer y acceder sólo a aquello "
+"que los administradores disponen. Cada usuario puede tener más de un rol. "
+"Por omisión existen dos roles básicos: <em>anónimo</em> - un visitante que "
+"no ha iniciado sesión, y  <em>autenticado</em> - un usuario que ha iniciado "
+"sesión y ha sido autorizado."
 
 #: modules/user/user.module:1872
 msgid ""
@@ -17294,7 +17299,7 @@ msgid ""
 "\">User module</a>."
 msgstr ""
 "Para más información, vea la entrada del manual en línea para el <a href="
-"\"@user\">módulo de usuario (User)</a>."
+"\"@user\">módulo de usuario</a>."
 
 #: modules/user/user.module:1877
 msgid ""
@@ -17439,7 +17444,7 @@ msgstr "Agregando números"
 
 #: modules/user/user.module:2157
 msgid "Adding punctuation."
-msgstr "Agregar signos de puntuación (-_.,:;)."
+msgstr "Agregando signos de puntuación."
 
 #: modules/user/user.module:2158
 msgid "It is recommended to choose a password different from the username."
@@ -17452,11 +17457,11 @@ msgstr "Las contraseñas coinciden:"
 
 #: modules/user/user.module:2176
 msgid "After a user account has been created"
-msgstr "Después de crear una cuenta de usuario"
+msgstr "Después de que se haya creado una cuenta de usuario"
 
 #: modules/user/user.module:2179
 msgid "After a user's profile has been updated"
-msgstr "Después de que un perfil de usuario ha sido actualizado"
+msgstr "Después de que se haya actualizado el perfil de un usuario"
 
 #: modules/user/user.module:2182
 msgid "After a user has been deleted"
@@ -17464,7 +17469,7 @@ msgstr "Después de que se haya borrado un usuario"
 
 #: modules/user/user.module:2185
 msgid "After a user has logged in"
-msgstr "Después de que se haya conectado un usuario"
+msgstr "Después de que un usuario haya iniciado sesión"
 
 #: modules/user/user.module:2188
 msgid "After a user has logged out"
@@ -17476,7 +17481,7 @@ msgstr "Cuando se esté viendo un perfil de usuario"
 
 #: modules/user/user.module:2204
 msgid "Block current user"
-msgstr "Boquear al usuario actual"
+msgstr "Bloquear usuario actual"
 
 #: modules/user/user.module:2210
 msgid "Ban IP address of current user"
@@ -17540,13 +17545,13 @@ msgstr ""
 
 #: modules/user/user.module:2382
 msgid "Notify user of new account"
-msgstr "Avisar al usuario sobre la nueva cuenta."
+msgstr "Notificar al usuario de la cuenta nueva"
 
 #: modules/user/user.module:776,779
 msgid "1 guest"
 msgid_plural "@count guests"
 msgstr[0] "1 invitado"
-msgstr[1] "%count invitados"
+msgstr[1] "@count invitados"
 
 #: modules/user/user.module:544
 msgid "administer permissions"
@@ -17558,11 +17563,11 @@ msgstr "administrar usuarios"
 
 #: modules/user/user.module:544
 msgid "access user profiles"
-msgstr "acceso a perfiles de usuarios"
+msgstr "acceder a perfiles de usuario"
 
 #: modules/user/user.module:544
 msgid "change own username"
-msgstr "cambiar el propio nombre de usuario"
+msgstr "cambiar nombre de usuario propio"
 
 #: modules/user/user.install:9
 msgid "Stores site access rules."
@@ -17582,7 +17587,7 @@ msgstr "Tipo de regla de acceso: nombre, correo o alojamiento."
 
 #: modules/user/user.install:35
 msgid "Whether rule is to allow(1) or deny(0) access."
-msgstr "Si la regla permitirá (1) o rechazará (0) el acceso."
+msgstr "Si la regla es para permitir (1) o impedir (0) el acceso"
 
 #: modules/user/user.install:42
 msgid "Stores distributed authentication mapping."
@@ -17610,7 +17615,7 @@ msgstr "Almacena los permisos para los usuarios."
 
 #: modules/user/user.install:81
 msgid "Primary Key: Unique permission ID."
-msgstr "Clave primaria: ID de permiso único."
+msgstr "Clave primaria: ID única de permisos."
 
 #: modules/user/user.install:88
 msgid "The {role}.rid to which the permissions are assigned."
@@ -17631,11 +17636,11 @@ msgstr "Almacena los roles de usuario."
 
 #: modules/user/user.install:115
 msgid "Primary Key: Unique role id."
-msgstr "Clave primaria; ID de rol único."
+msgstr "Clave primaria: id únida de rol."
 
 #: modules/user/user.install:122
 msgid "Unique role name."
-msgstr "Nombre del rol único."
+msgstr "Nombre único para el rol."
 
 #: modules/user/user.install:130
 msgid "Stores user data."
@@ -17643,7 +17648,7 @@ msgstr "Almacena los datos del usuario"
 
 #: modules/user/user.install:136
 msgid "Primary Key: Unique user ID."
-msgstr "Clave primaria: ID de usuario único."
+msgstr "Clave primaria: ID única de usuario."
 
 #: modules/user/user.install:143
 msgid "Unique user name."
@@ -17749,7 +17754,7 @@ msgstr "Clave primaria: {role}.rid para el rol."
 
 #: modules/user/user.info:0
 msgid "Manages the user registration and login system."
-msgstr "Gestiona el registro de usuarios y el sistema de inicio de sesión."
+msgstr "Administra el registro de usuarios y el sistema de inicio de sesión."
 
 #: profiles/default/default.profile:102
 msgid ""
@@ -17775,15 +17780,15 @@ msgid ""
 msgstr ""
 "Una <em>historia</em>, con estructura similar a una <em>página</em>, es "
 "ideal para crear y mostrar contenido que informa a los visitantes del sitio. "
-"Notas de prensa, anuncios del sitio, y entradas informales de un blog puden "
-"ser creadas con una <em>historia</em>. Por defecto, una <em>historia</em> es "
-"ubicada automáticamente en la página inicial del sitio, y permite enviar "
-"comentarios."
+"Notas de prensa, anuncios del sitio, y entradas informales de una bitácora "
+"puden ser creadas con una <em>historia</em>. Por defecto, una <em>historia</"
+"em> es ubicada automáticamente en la página inicial del sitio, y permite "
+"enviar comentarios."
 
 #: themes/bluemarine/bluemarine.info:0; themes/garland/color/color.inc:12;
 #: themes/garland/minnelli/color/color.inc:12
 msgid "Bluemarine"
-msgstr "Bluemarine"
+msgstr "Azul marino"
 
 #: themes/bluemarine/bluemarine.info:0
 msgid "Table-based multi-column theme with a marine and ash color scheme."
@@ -17899,7 +17904,7 @@ msgstr "Tomate brillante"
 #: themes/garland/color/color.inc:22;
 #: themes/garland/minnelli/color/color.inc:22
 msgid "Teal Top"
-msgstr "Verde seco"
+msgstr "Verde hoja seca"
 
 #: themes/garland/minnelli/minnelli.info:0
 msgid "Minnelli"
@@ -17908,8 +17913,8 @@ msgstr "Minnelli"
 #: themes/garland/minnelli/minnelli.info:0
 msgid "Tableless, recolorable, multi-column, fixed width theme."
 msgstr ""
-"Tema gráfico de anchura fija, sin tablas, de color modificable, "
-"multicolumnas."
+"Tema de ancho fijo, con múltiples columnas, sin tablas y de colores "
+"configurables."
 
 #: themes/pushbutton/page.tpl.php:15,15
 msgid "Skip navigation"
@@ -17921,7 +17926,7 @@ msgstr "Pushbutton"
 
 #: themes/pushbutton/pushbutton.info:0
 msgid "Tabled, multi-column theme in blue and orange tones."
-msgstr "Tema gráfico con tablas, multicolumnas, en tonos azul y naranja."
+msgstr "Tema con tablas, múltiples columnas, en tonos azúl y naranja."
 
 #: modules/aggregator/aggregator.admin.inc:190
 msgid "Remove items"
@@ -17956,32 +17961,32 @@ msgstr "¿Está seguro de que quiere eliminar todo los elementos del hilo %feed?
 
 #: modules/blog/blog.module:26
 msgid "create blog entries"
-msgstr "crear entradas de blog"
+msgstr "crear entradas de bitácora"
 
 #: modules/blog/blog.module:26
 msgid "delete own blog entries"
-msgstr "borrar entradas de blog propias"
+msgstr "borrar las entradas de bitácora propias"
 
 #: modules/blog/blog.module:26
 msgid "delete any blog entry"
-msgstr "borrar cualquier entrada de blog"
+msgstr "borrar cualquier entrada de bitácora"
 
 #: modules/blog/blog.module:26
 msgid "edit own blog entries"
-msgstr "editar entradas de blog propias"
+msgstr "editar entradas de bitácora propias"
 
 #: modules/blog/blog.module:26
 msgid "edit any blog entry"
-msgstr "editar cualquier entrada de blog"
+msgstr "editar cualquier entrada de bitácora"
 
 #: modules/blogapi/blogapi.module:27
 msgid "administer content with blog api"
-msgstr "administrar contenido mediante blog api"
+msgstr "administrar contenido mediante la api de bitácoras"
 
 #: modules/comment/comment.module:1658; modules/openid/openid.module:425;
 #: modules/user/user.module:1396,2293
 msgid "Error saving user account."
-msgstr "Hubo un error al guardar la cuenta del usuario."
+msgstr "Error al guardar la cuenta de usuario"
 
 #: modules/forum/forum.admin.inc:168
 msgid ""
@@ -18030,12 +18035,12 @@ msgid ""
 "\"&lt;!--break--&gt;\" (without the quotes) in the Body of the post to "
 "indicate the end of the summary and the start of the main content.)"
 msgstr ""
-"Ha especificado que el resumen no debería ser mostrado cuando este artículo "
-"sea mostrado al completo. Esta opción ha sido ignorada ya que no ha definido "
-"un resumen para el artículo. (Para definir un resumen, inserte el "
-"delimitador \"&lt;!--break--&gt;\" (sin las comillas) en el cuerpo del "
-"artículo para indicar el fin del resumen y el comienzo del contenido "
-"principal."
+"Ha especificado que el resumen no debería ser mostrado cuando esta entrada "
+"sea mostrada en la vista completa.\n"
+"Esta opción ha sido ignorada ya que no ha definido un resumen para la "
+"entrada. (Para definir un resumen, inserte el delimitador \"&lt;!--break--"
+"&gt;\" (sin las comillas) en el cuerpo del artículo para indicar el fin del "
+"resumen y el comienzo del contenido principal."
 
 #: modules/poll/poll.module:57
 msgid "delete own poll content"
@@ -18050,8 +18055,9 @@ msgid ""
 "Stores items (like nodes) that link to other nodes, used to improve search "
 "scores for nodes that are frequently linked to."
 msgstr ""
-"Almacena elementos (como nodos) que enlazan a otros nodos, usados para "
-"mejorar las búsquedas para nodos a los que se enlaza frecuentemente."
+"Almacena elementos (como los nodos) que enlazan con otros nodos. Se usa para "
+"mejorar los resultados de búsquedas de nodos con los que se enlaza con "
+"frecuencia."
 
 #: modules/search/search.install:124
 msgid ""
@@ -18071,7 +18077,7 @@ msgstr ""
 
 #: modules/system/system.admin.inc:1716
 msgid "Cron ran successfully."
-msgstr "Cron se ejecutó con éxito"
+msgstr "La ejecución de cron tuvo éxito."
 
 #: modules/system/system.admin.inc:1719
 msgid "Cron run failed."
@@ -18089,9 +18095,9 @@ msgid ""
 "href=\"http://php.net/configuration.changes\">how to change configuration "
 "settings</a>."
 msgstr ""
-"<em>register_globals</em> está habilitado. Drupal requiere que esta "
-"directiva de configuración esté inhabilitada. Su sitio podría no ser seguro "
-"si <em>register_globals</em> está habiltiado. El manual de PHP tiene "
+"<em>register_globals</em> está activado. Drupal requiere que esta directiva "
+"de configuración esté desactivada. Su sitio podría no ser seguro si "
+"<em>register_globals</em> está activado. El manual de PHP tiene "
 "instrucciones acerca de <a href=\"http://php.net/configuration.changes"
 "\">cómo cambiar las opciones de configuración</a>."
 
@@ -18114,10 +18120,10 @@ msgid ""
 "recommended, especially if your site uses additional custom or contributed "
 "modules."
 msgstr ""
-"Dependiendo de su configuración, Drupal puede funcionar con un límite de "
-"memoria PHP %memory_limit. Sin embargo es recomendable que el límite de la  "
-"memoria PHP %memory_minimum_limit  sea superior, especialmente si su sitio "
-"utiliza personalizaciones adicionales o módulos de contribución."
+"Dependiendo de su configuración, Drupal puede ejecutarse con un límite de "
+"memoria de PHP %memory_limit. Sin embargo, se recomienda tener un límite de "
+"memoria de PHP de %memory_minimum_limit, especialmente si su sitio emplea "
+"módulos de terceros o módulos personalizados adicionales."
 
 #: modules/system/system.install:84
 msgid ""
@@ -18125,9 +18131,10 @@ msgid ""
 "configuration-file and then restart your web server (or contact your system "
 "administrator or hosting provider for assistance)."
 msgstr ""
-"Incremente el límite de memoria editando el parámentro memory_limit en el "
-"archivo %configuration-file y restaure su servidor web (o contacte con el "
-"administrador de su sistema o proveedor de alojamiento para que le ayude)"
+"Aumente el límite de memoria editando el parámetro memory_limit en el "
+"archivo %configuration-file y luego reinicialice su servidor web (o póngase "
+"en contacto con su administrador de sistemas o con su proveedor de hospedaje "
+"para que le brinden asistencia)."
 
 #: modules/system/system.install:87
 msgid ""
@@ -18154,8 +18161,8 @@ msgstr ""
 "posiblemente debido a problemas con los permisos. Para proceder con la "
 "instalación deberá crear el directorio y establecer los permisos de forma "
 "manual o asegurarse de que el instalador automático tiene los permisos "
-"necesarios. Si desea más inforamción, pro favor lea el archivo INSTALL.txt o "
-"el <a href=\"@handbook_url\">manual on-line </a>."
+"necesarios. Si desea más inforamción, por favor lea el archivo INSTALL.txt o "
+"el <a href=\"@handbook_url\">manual en línea</a>."
 
 #: modules/translation/translation.module:44
 msgid ""
@@ -18170,11 +18177,11 @@ msgstr ""
 
 #: modules/trigger/trigger.admin.inc:192
 msgid "The action you chose is already assigned to that trigger."
-msgstr "La opción elegida ya ha sido asignada a ese umbral."
+msgstr "La acción que ha elegido ya se ha asignado a ese disparador."
 
 #: modules/update/update.compare.inc:258
 msgid "Project not secure"
-msgstr "Este proyecto no es seguro"
+msgstr "Proyecto no seguro"
 
 #: modules/update/update.compare.inc:259
 msgid ""
@@ -18197,12 +18204,12 @@ msgid ""
 "Disabling everything included by this project is strongly recommended!"
 msgstr ""
 "Este proyecto ha sido revocado y ya no estará disponible para su descarga. "
-"Es altamente recomendable desactivar todo lo que forma parte de este "
+"¡Es altamente recomendable desactivar todo lo que forma parte de este "
 "proyecto!"
 
 #: modules/update/update.compare.inc:281
 msgid "Project not supported"
-msgstr "No hay mantenimiento para el proyecto"
+msgstr "Proyecto no soportado"
 
 #: modules/update/update.compare.inc:282
 msgid ""
@@ -18210,13 +18217,13 @@ msgid ""
 "download. Disabling everything included by this project is strongly "
 "recommended!"
 msgstr ""
-"Para este proyecto ya no hay mantenimiento, y tampoco estará disponible para "
-"su descarga. Es altamente recomendable deshabilitar todo lo incluido por "
-"este proyecto."
+"Para este proyecto ya no hay soporte, y tampoco estará disponible para su "
+"descarga. ¡Es altamente recomendable deshabilitar todo lo incluido por este "
+"proyecto!"
 
 #: modules/update/update.compare.inc:365
 msgid "Release revoked"
-msgstr "Versión rechazada"
+msgstr "Versión revocada"
 
 #: modules/update/update.compare.inc:366
 msgid ""
@@ -18230,7 +18237,7 @@ msgstr ""
 
 #: modules/update/update.compare.inc:377
 msgid "Release not supported"
-msgstr "Para esta edición no hay mantenimiento"
+msgstr "Versión no soportada"
 
 #: modules/update/update.compare.inc:378
 msgid ""
@@ -18238,9 +18245,9 @@ msgid ""
 "available for download. Disabling everything included in this release or "
 "upgrading is strongly recommended!"
 msgstr ""
-"Para la edición de su  instalación actual ya no hay mantenimiento, y tampoco "
-"estará  disponible para su descarga. Es altamente recomendable que "
-"deshabilite o actualice todo lo que forma parte de esta edición."
+"Para la versión de su  instalación actual ya no hay soporte, y tampoco "
+"estará  disponible para su descarga. ¡Es altamente recomendable que "
+"deshabilite o actualice todo lo que forma parte de esta edición!"
 
 #: modules/update/update.report.inc:30
 msgid "Last checked: @time ago"
@@ -18330,9 +18337,9 @@ msgid ""
 "Drupal root directory."
 msgstr ""
 "Dependiendo del entorno de su servidor, estas opciones podrían cambiarse en "
-"el archivo php.ini de sus sistema, en el archivo php.ini del directorio "
+"el archivo php.ini de su sistema, en el archivo php.ini del directorio "
 "principal de su instalación de Drupal, en el archivo settings.php de su "
-"Drupal o en el archivo .htaccess en el directorio principal de su "
+"sitio Drupal o en el archivo .htaccess en el directorio principal de su "
 "instalación de Drupal."
 
 #: modules/user/user.pages.inc:108
@@ -18358,33 +18365,32 @@ msgid ""
 "The block %info was assigned to the invalid region %region and has been "
 "disabled."
 msgstr ""
-"El bloque %info fue asignado a la región %region no válida y ha sido "
-"deshabilitado."
+"El bloque %info se asignó a la región %region no válida y se ha desactivado."
 
 #: modules/blog/blog.pages.inc:41
 msgid "You have not created any blog entries."
-msgstr "Usted no ha creado ninguna entrada de blog."
+msgstr "Usted no ha creado ninguna entrada en la bitácora."
 
 #: modules/blog/blog.pages.inc:44
 msgid "!author has not created any blog entries."
-msgstr "!author no ha creado ninguna entrada de blog."
+msgstr "!author no ha creado ninguna entrada en la bitácora."
 
 #: modules/blog/blog.pages.inc:62
 msgid "Create new blog entry."
-msgstr "Crear una nueva entrada de blog."
+msgstr "Crear una nueva entrada en la bitácora."
 
 #: modules/blog/blog.pages.inc:79
 msgid "No blog entries have been created."
-msgstr "No se han creado entradas de blog."
+msgstr "No se han creado entradas en la bitácora."
 
 #: modules/blogapi/blogapi.module:715
 msgid ""
 "Blog API module is not configured to support the %type content type, or you "
 "don't have sufficient permissions to post this type of content."
 msgstr ""
-"El módulo Blog API no está configurado para soportar el tipo de contenido %"
-"type , o usted no tiene suficientes permisos para utilizar este tipo de "
-"contenido."
+"El módulo API de bitácoras no está configurado para soportar el tipo de "
+"contenido %type, o usted no tiene suficientes permisos para utilizar este "
+"tipo de contenido."
 
 #: modules/filter/filter.module:38
 msgid ""
@@ -18405,7 +18411,7 @@ msgstr ""
 
 #: modules/menu/menu.admin.inc:619
 msgid "Source for the primary links"
-msgstr "Origen para los enlaces primarios"
+msgstr "Origen de los enlaces primarios"
 
 #: modules/menu/menu.admin.inc:623
 msgid "Select what should be displayed as the primary links."
@@ -18421,7 +18427,7 @@ msgstr ""
 "Seleccione qué debería ser mostrado como enlaces secundarios. Puede elegir "
 "el mismo menú para los enlaces secundarios como para los enlaces primarios "
 "(actualmente %primary). Si hace esto, los submenús del menú de enlaces "
-"primarios se mostrará como enlaces secundarios."
+"primarios se mostrarán como enlaces secundarios."
 
 #: modules/menu/menu.install:12
 msgid ""
@@ -18461,10 +18467,10 @@ msgid ""
 "this name begin with a capital letter and contain only letters, numbers, and "
 "<strong>spaces</strong>. This name must be unique."
 msgstr ""
-"El nombre legible de este tipo de contenido. Este texto será mostrado como "
-"parte de una lista en la página <em>Crear Contenido</em>. Es recomendable "
-"que este nombre comience con mayúsculas y sólo contenga letras, números y "
-"<strong>Espacios</strong>. Este nombre debe ser único."
+"El nombre legible por humanos de este tipo de contenido. Este texto será "
+"mostrado como parte de una lista en la página <em>Crear Contenido</em>. Es "
+"recomendable que este nombre comience con mayúsculas y sólo contenga letras, "
+"números y <strong>espacios</strong>. Este nombre debe ser único."
 
 #: modules/node/content_types.inc:239
 msgid "Invalid machine-readable name. Please enter a name other than %invalid."
@@ -18562,5 +18568,5 @@ msgid ""
 "post is created or updated."
 msgstr ""
 "Aquí debajo puede asignar acciones a ejecutarse cuando ocurren determinados "
-"disparadores relacionados con contenido. Por ejemplo, puede enviar un e-mail "
-"a un administrador cuando se cree o actualice un elemento."
+"disparadores relacionados con contenido. Por ejemplo, puede enviar un correo "
+"electrónico a un administrador cuando se cree o actualice una entrada."
