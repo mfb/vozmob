@@ -19,5 +19,19 @@ function gizmo_mailsave_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
       $node->body = '';
       $node->teaser = node_teaser($node->body);
     }
+    $node->title = t('Voice message');
+    // For any attached WAV files, try to match the caller with an
+    // existing user; remove phone number from filename and title.
+    foreach ($node->mailsave_attachments as $index => $file) {
+      $pattern = '/^[0-9]+/';
+      if ($file['filemime'] == 'audio/x-wav' && preg_match($pattern, $file['filename'], $matches)) {
+        $sms_message['from'] = $matches[0];
+        sms_user_sms_receive($node, $sms_message);
+        if ($node->uid) {
+          mailhandler_switch_user($node->uid);
+        }
+        $node->mailsave_attachments[$index]['filename'] = preg_replace($pattern, 'unknown', $file['filename']);
+      }
+    }
   }
 }
