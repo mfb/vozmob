@@ -3,7 +3,7 @@
 /**
  * Return a form for editing or creating an individual mailbox.
  */
-function mailhandler_add_edit_mailbox($form_state, $mid) {
+function mailhandler_add_edit_mailbox($form_state, $mid, $clone = FALSE) {
 
   $edit = $mid ? mailhandler_get_mailbox($mid) : array(
     'mail' => '',
@@ -24,6 +24,10 @@ function mailhandler_add_edit_mailbox($form_state, $mid) {
     'enabled' => 1,
     'format' => FILTER_FORMAT_DEFAULT,
   );
+
+  if ($clone) {
+    unset($mid);
+  }
 
   if (empty($edit['folder'])) {
     $edit['folder'] = 'INBOX';
@@ -301,9 +305,10 @@ function mailhandler_list_mailboxes() {
     $rows[] = array(
       '<a href="mailto:'. $mailbox->mail .'">'. $mailbox->mail .'</a>',
       $mailbox->folder ? check_plain($mailbox->folder) : '',
-      l(t('retrieve'), 'admin/content/mailhandler/retrieve/'.$mailbox->mid, array('title' => t('Retrieve and process pending e-mails in this mailbox'))),
-      l(t('edit'), 'admin/content/mailhandler/edit/'.$mailbox->mid, array('title' => t('Edit this mailbox configuration'))),
-      l(t('delete'), 'admin/content/mailhandler/delete/'.$mailbox->mid, array('title' => t('Delete this mailbox'))),
+      l(t('Retrieve'), 'admin/content/mailhandler/retrieve/'.$mailbox->mid, array('title' => t('Retrieve and process pending e-mails in this mailbox'))),
+      l(t('Edit'), 'admin/content/mailhandler/edit/'.$mailbox->mid, array('title' => t('Edit this mailbox configuration'))),
+      l(t('Clone'), 'admin/content/mailhandler/clone/'.$mailbox->mid, array('title' => t('Add a new mailbox, using this mailbox configuration as a template'))),
+      l(t('Delete'), 'admin/content/mailhandler/delete/'.$mailbox->mid, array('title' => t('Delete this mailbox'))),
     );
   }
 

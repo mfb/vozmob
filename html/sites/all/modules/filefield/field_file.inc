@@ -1,5 +1,5 @@
 <?php
-// $Id: field_file.inc,v 1.18 2008/10/10 00:59:10 drewish Exp $
+// $Id: field_file.inc,v 1.21 2008/11/16 07:13:23 dopry Exp $
 /**
  * @file
  * Common functionality for file handling CCK field modules.
@@ -86,6 +86,10 @@ function field_file_save_upload($source, $validators = array(), $dest = FALSE, $
   if (!$file = file_save_upload($source, $validators, $dest, $replace)) {
     return 0;
   }
+  if (!@chmod($file->filepath, 0664)) {
+    watchdog('filefield', 'Could not set permissons on destination file: %file', array('%file' => $file->filepath));
+  }
+  
   // Let modules add additional properties to the yet barebone file object.
   foreach (module_implements('file_insert') as $module) {
     $function =  $module .'_file_insert';
@@ -175,8 +179,8 @@ function field_file_save_file($filepath, $validators = array(), $dest = FALSE, $
   }
 
   if (!file_copy($file, $file->destination, FILE_EXISTS_RENAME)) {
-    form_set_error($source, t('File upload error. Could not move uploaded file.'));
-    watchdog('file', 'Upload error. Could not move file %file to destination %destination.', array('%file' => $file->filename, '%destination' => $file->filepath));
+    form_set_error($file->source, t('File upload error. Could not move uploaded file.'));
+    watchdog('file', 'Upload error. Could not move file %file to destination %destination.', array('%file' => $file->filename, '%destination' => $file->destination));
     return 0;
   }
 

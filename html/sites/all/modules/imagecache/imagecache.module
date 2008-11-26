@@ -1,5 +1,5 @@
 <?php
-// $Id: imagecache.module,v 1.89 2008/10/08 01:38:11 drewish Exp $
+// $Id: imagecache.module,v 1.92 2008/10/31 17:52:14 drewish Exp $
 
 /**
  * @file
@@ -414,14 +414,8 @@ function _imagecache_apply_action($action, &$image) {
  */
 
 function imagecache_transfer($path) {
-  if (function_exists('mime_content_type')) {
-    $mime = mime_content_type($path);
-  }
-  else {
-    $size = getimagesize($path);
-    $mime = $size['mime'];
-  }
-  $headers = array('Content-Type: '. mime_header_encode($mime));
+  $size = getimagesize($path);
+  $headers = array('Content-Type: '. mime_header_encode($size['mime']));
 
   if ($fileinfo = stat($path)) {
     $headers[] = 'Content-Length: '. $fileinfo[7];
@@ -510,7 +504,7 @@ function imagecache_build_derivative($actions, $src, $dst) {
 
   if (!imageapi_image_close($image, $dst)) {
     if (file_exists($dst)) {
-      watchdog('imagecache', 'Cached image file already exists. There is an issue with your Rewrite configuration.', WATCHDOG_ERROR);
+      watchdog('imagecache', 'Cached image file %dst already exists. There may be an issue with your rewrite configuration.', array('%dst' => $dst), WATCHDOG_ERROR);
     }
     return false;
   }
@@ -706,6 +700,7 @@ function _imagecache_recursive_delete($path) {
       $entry_path = $path .'/'. $entry;
       _imagecache_recursive_delete($entry_path);
     }
+    $d->close();
     rmdir($path);
   }
   else {

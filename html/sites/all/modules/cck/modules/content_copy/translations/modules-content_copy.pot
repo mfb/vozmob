@@ -1,16 +1,17 @@
-# $Id: modules-content_copy.pot,v 1.1.2.7 2008/08/25 20:49:00 hass Exp $
+# $Id: modules-content_copy.pot,v 1.1.2.9 2008/11/05 12:24:00 hass Exp $
 #
 # LANGUAGE translation of Drupal (modules-content_copy)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  content_copy.module,v 1.27.2.3 2008/08/22 16:11:09 yched
+#  content_copy_export_form.tpl.php,v 1.1.2.2 2008/10/28 02:11:49 yched
+#  content_copy.module,v 1.27.2.16 2008/10/28 02:29:21 yched
 #  content_copy.info,v 1.6 2008/04/23 18:01:48 dww
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-08-25 22:44+0200\n"
+"POT-Creation-Date: 2008-11-05 12:54+0100\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -19,99 +20,95 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: modules/content_copy/content_copy.module:80
-msgid "This form will process a content type and one or more fields from that type and export the settings. The export created by this process can be copied and pasted as an import into the current or any other database. The import will add the fields to into an existing content type or create a new content type that includes the selected fields."
-msgstr ""
-
-#: modules/content_copy/content_copy.module:85
-msgid "Types"
-msgstr ""
-
-#: modules/content_copy/content_copy.module:89
-msgid "Select the content type to export."
-msgstr ""
-
-#: modules/content_copy/content_copy.module:100
-msgid "Groups"
-msgstr ""
-
-#: modules/content_copy/content_copy.module:104
-msgid "Select the group definitions to export from %type."
-msgstr ""
-
-#: modules/content_copy/content_copy.module:114
-msgid "Select the field definitions to export from %type."
-msgstr ""
-
-#: modules/content_copy/content_copy.module:123
-msgid "Export data"
-msgstr ""
-
-#: modules/content_copy/content_copy.module:128
-msgid "Copy the export text and paste it into another content type using the import function."
-msgstr ""
-
-#: modules/content_copy/content_copy.module:136;38
+#: modules/content_copy/content_copy_export_form.tpl.php:9 modules/content_copy/content_copy.module:187;38
 msgid "Export"
 msgstr ""
 
-#: modules/content_copy/content_copy.module:213
+#: modules/content_copy/content_copy.module:97
+msgid "This form will process a content type and one or more fields from that type and export the settings. The export created by this process can be copied and pasted as an import into the current or any other database. The import will add the fields to into an existing content type or create a new content type that includes the selected fields."
+msgstr ""
+
+#: modules/content_copy/content_copy.module:103
+msgid "Types"
+msgstr ""
+
+#: modules/content_copy/content_copy.module:107
+msgid "Select the content type to export."
+msgstr ""
+
+#: modules/content_copy/content_copy.module:171
+msgid "Export data"
+msgstr ""
+
+#: modules/content_copy/content_copy.module:176
+msgid "Copy the export text and paste it into another content type using the import function."
+msgstr ""
+
+#: modules/content_copy/content_copy.module:180
+msgid "Content types"
+msgstr ""
+
+#: modules/content_copy/content_copy.module:299
 msgid "This form will import field definitions exported from another content type or another database.<br/>Note that fields cannot be duplicated within the same content type, so imported fields will be added only if they do not already exist in the selected type."
 msgstr ""
 
-#: modules/content_copy/content_copy.module:216
+#: modules/content_copy/content_copy.module:302
 msgid "<Create>"
 msgstr ""
 
-#: modules/content_copy/content_copy.module:218
+#: modules/content_copy/content_copy.module:304
 msgid "Content type"
 msgstr ""
 
-#: modules/content_copy/content_copy.module:219
+#: modules/content_copy/content_copy.module:305
 msgid "Select the content type to import these fields into.<br/>Select &lt;Create&gt; to create a new content type to contain the fields."
 msgstr ""
 
-#: modules/content_copy/content_copy.module:224
+#: modules/content_copy/content_copy.module:310
 msgid "Import data"
 msgstr ""
 
-#: modules/content_copy/content_copy.module:226
+#: modules/content_copy/content_copy.module:312
 msgid "Paste the text created by a content export into this field."
 msgstr ""
 
-#: modules/content_copy/content_copy.module:230;46
+#: modules/content_copy/content_copy.module:316;46
 msgid "Import"
 msgstr ""
 
-#: modules/content_copy/content_copy.module:256
+#: modules/content_copy/content_copy.module:324
+msgid "A file has been pre-loaded for import."
+msgstr ""
+
+#: modules/content_copy/content_copy.module:350
 msgid "The import data is not valid import text."
 msgstr ""
 
-#: modules/content_copy/content_copy.module:304
+#: modules/content_copy/content_copy.module:399
 msgid "The following modules must be enabled for this import to work: %modules."
 msgstr ""
 
-#: modules/content_copy/content_copy.module:312
+#: modules/content_copy/content_copy.module:407
 msgid "The content type %type already exists in this database."
 msgstr ""
 
-#: modules/content_copy/content_copy.module:319
+#: modules/content_copy/content_copy.module:414
 msgid "Exiting. No import performed."
 msgstr ""
 
-#: modules/content_copy/content_copy.module:343
+#: modules/content_copy/content_copy.module:438
 msgid "An error has occurred adding the content type %type.<br/>Please check the errors displayed for more details."
 msgstr ""
 
-#: modules/content_copy/content_copy.module:369
+#: modules/content_copy/content_copy.module:463
 msgid "The imported field %field_label (%field_name) was not added to %type because that field already exists in %type."
 msgstr ""
 
-#: modules/content_copy/content_copy.module:378
+#: modules/content_copy/content_copy.module:472
 msgid "The field %field_label (%field_name) was added to the content type %type."
 msgstr ""
 
-#: modules/content_copy/content_copy.module:492
+#: modules/content_copy/content_copy.module:553
 msgid "An error occurred when exporting the 'display settings' data for the field %field_name.<br/>The db error is: '%db_err'."
 msgstr ""
 

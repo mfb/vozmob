@@ -1,5 +1,5 @@
 <?php
-// $Id: fieldgroup.install,v 1.34.2.15 2008/10/09 21:49:22 karens Exp $
+// $Id: fieldgroup.install,v 1.34.2.16 2008/10/16 14:05:52 yched Exp $
 
 /**
  * @file
@@ -268,12 +268,15 @@ function fieldgroup_update_6004() {
   return $ret;
 }
 
+/**
+ * Add the 'exclude from $content' display setting to all existing groups.
+ */
 function fieldgroup_update_6005() {
   $ret = array();
   $result = db_query("SELECT *  FROM {content_group}");
   while ($type = db_fetch_array($result)) {
     $new_settings = array();
-    $settings = unserialize($type['settings']);  
+    $settings = unserialize($type['settings']);
     $new_settings = $settings;
     $display_settings = !empty($settings['display']) ? $settings['display'] : array();
     if (!empty($display_settings)) {

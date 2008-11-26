@@ -1,5 +1,5 @@
 <?php
-// $Id: content_handler_relationship.inc,v 1.1.2.2 2008/10/04 13:14:21 karens Exp $
+// $Id: content_handler_relationship.inc,v 1.1.2.3 2008/10/24 12:31:58 yched Exp $
 
 /**
  * @file
@@ -7,6 +7,14 @@
  * values by allowing the views administrator to select deltas.
  */
 class content_handler_relationship extends views_handler_relationship {
+  var $content_field;
+
+  function construct() {
+    parent::construct();
+
+    $this->content_field = content_fields($this->definition['content_field_name']);
+  }
+
   function option_definition() {
     $options = parent::option_definition();
     $options['delta'] = array('default' => -1);
@@ -15,14 +23,16 @@ class content_handler_relationship extends views_handler_relationship {
   }
 
   /**
-   * Add a delta selector if multiple is TRUE.
+   * Add a delta selector for multiple fields.
    */
   function options_form(&$form, &$form_state) {
+    $field = $this->content_field;
     parent::options_form($form, $form_state);
 
-    // Only add the form gadget if the field specifies.
-    if (!empty($this->definition['multiple'])) {
-      $max_delta = $this->definition['multiple'];
+    // Only add the form gadget if the field is multiple.
+    if ($field['multiple']) {
+      $max_delta = $field['multiple'];
+      // 1 means unlimited.
       if ($max_delta == 1) {
         $max_delta = 10;
       }
@@ -47,10 +57,11 @@ class content_handler_relationship extends views_handler_relationship {
       if (!isset($join->extra)) {
         $join->extra = array();
       }
-      if ($this->options['delta'] != -1) {
+      $delta = isset($this->options['delta']) ? $this->options['delta'] : -1;
+      if ($delta != -1) {
         $join->extra[] = array(
           'field' => 'delta',
-          'value' => $this->options['delta'],
+          'value' => $delta,
           'numeric' => TRUE,
         );
       }

@@ -1,7 +1,11 @@
-// $Id: README.txt,v 1.12.2.3 2008/09/12 14:24:35 yched Exp $
+// $Id: README.txt,v 1.12.2.4 2008/10/28 01:42:48 yched Exp $
 
 Content Construction Kit
 ------------------------
+
+NOTE: Install the advanced_help module (http://drupal.org/project/advanced_help)
+to access more help (writing still in progress...)
+
 To install, place the entire CCK folder into your modules directory.
 Go to Administer -> Site building -> Modules and enable the Content module and one or
 more field type modules:
@@ -23,11 +27,6 @@ in fieldsets to help organize them.
 
 A comprehensive guide to using CCK is available as a CCK Handbook
 at http://drupal.org/node/101723.
-
-Custom theming
---------------
-
-See the /theme/README.txt file.
 
 Known incompatibilitie
 ----------------------

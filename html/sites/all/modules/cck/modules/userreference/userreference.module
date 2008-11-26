@@ -1,5 +1,5 @@
 <?php
-// $Id: userreference.module,v 1.106.2.21 2008/10/07 10:17:51 karens Exp $
+// $Id: userreference.module,v 1.106.2.29 2008/11/07 15:18:39 yched Exp $
 
 /**
  * @file
@@ -44,36 +44,14 @@ function userreference_theme() {
 }
 
 /**
- * Implementation of hook_views_api().
- */
-function userreference_views_api() {
-  return array(
-    'api' => 2,
-    'path' => drupal_get_path('module', 'userreference') . '/includes/views',
-  );
-}
-
-/**
  * Implementation of hook_field_info().
- *
- * Here we indicate that the content module will use its default
- * handling for the view of this field.
- *
- * Callbacks can be omitted if default handing is used.
- * They're included here just so this module can be used
- * as an example for custom modules that might do things
- * differently.
  */
 function userreference_field_info() {
   return array(
     'userreference' => array(
       'label' => t('User reference'),
       'description' => t('Store the ID of a related user as an integer value.'),
-      'callbacks' => array(
-        'tables' => CONTENT_CALLBACK_DEFAULT,
-        'arguments' => CONTENT_CALLBACK_DEFAULT,
-        ),
-      ),
+    ),
   );
 }
 
@@ -155,16 +133,18 @@ function userreference_field_settings($op, $field) {
       $db_info = content_database_info($field);
       $table_alias = content_views_tablename($field);
 
-      // Swap the filter handler to the 'in' operator.
+      // Filter : swap the handler to the 'in' operator.
       $data[$table_alias][$field['field_name'] .'_uid']['filter']['handler'] = 'content_handler_filter_many_to_one';
-
-      // Add a relationship for related user.
+      // Argument: use users.name for summaries.
+      $data[$table_alias][$field['field_name'] .'_nid']['argument']['name table'] = 'node';
+      $data[$table_alias][$field['field_name'] .'_nid']['argument']['name field'] = 'title';
+      // Relationship: Add a relationship for related user.
       $data[$table_alias][$field['field_name'] .'_uid']['relationship'] = array(
         'base' => 'users',
         'field' => $db_info['columns']['uid']['column'],
         'handler' => 'content_handler_relationship',
         'label' => t($field['widget']['label']),
-        'multiple' => $field['multiple'],
+        'content_field_name' => $field['field_name'],
       );
       return $data;
 
@@ -177,16 +157,24 @@ function userreference_field_settings($op, $field) {
 function userreference_field($op, &$node, $field, &$items, $teaser, $page) {
   switch ($op) {
     case 'validate':
+      // Extract uids to check.
+      $ids = array();
+      foreach ($items as $delta => $item) {
+        if (is_array($item) && !empty($item['uid']) && is_numeric($item['uid'])) {
+          $ids[] = $item['uid'];
+        }
+      }
+      $refs = _userreference_potential_references($field, '', NULL, $ids);
       foreach ($items as $delta => $item) {
         if (is_array($item)) {
           $error_element = isset($item['_error_element']) ? $item['_error_element'] : '';
           if (is_array($item) && isset($item['_error_element'])) unset($item['_error_element']);
-          if (!empty($item['uid']) && !array_key_exists($item['uid'], _userreference_potential_references($field, '', $item['uid']))) {
+          if (!empty($item['uid']) && !isset($refs[$item['uid']])) {
             form_set_error($error_element, t('%name: invalid user.', array('%name' => t($field['widget']['label']))));
           }
         }
       }
-      return;
+      return $items;
   }
 }
 
@@ -320,22 +308,36 @@ function userreference_elements() {
 /**
  * Implementation of hook_widget_settings().
  */
-function userreference_widget_settings($op, $field) {
+function userreference_widget_settings($op, $widget) {
   switch ($op) {
     case 'form':
       $form = array();
+      $match = isset($widget['autocomplete_match']) ? $widget['autocomplete_match'] : 'contains';
+      if ($widget['type'] == 'userreference_autocomplete') {
+        $form['autocomplete_match'] = array(
+          '#type' => 'select',
+          '#title' => t('Autocomplete matching'),
+          '#default_value' => $match,
+          '#options' => array(
+            'starts_with' => t('Starts with'),
+            'contains' => t('Contains'),
+          ),
+          '#description' => t('Select the method used to collect autocomplete suggestions. Note that <em>Contains</em> can cause performance issues on sites with thousands of users.'),
+        );
+      }
+      else {
+        $form['autocomplete_match'] = array('#type' => 'hidden', '#value' => $match);
+      }
       $form['reverse_link'] = array(
         '#type' => 'checkbox',
         '#title' => t('Reverse link'),
-        '#default_value' => isset($field['reverse_link']) ? $field['reverse_link'] : 0,
+        '#default_value' => isset($widget['reverse_link']) ? $widget['reverse_link'] : 0,
         '#description' => t('If selected, a reverse link back to the referencing node will displayed on the referenced user record.'),
       );
       return $form;
-      break;
 
     case 'save':
-      return array('reverse_link');
-      break;
+      return array('autocomplete_match', 'reverse_link');
   }
 }
 
@@ -533,8 +535,9 @@ function userreference_autocomplete_process($element, $edit, $form_state, $form)
  */
 function userreference_optionwidgets_validate($element, &$form_state) {
   $field_key  = $element['#columns'][0];
-  $new_parents = array();
+
   $value = $form_state['values'];
+  $new_parents = array();
   foreach ($element['#parents'] as $parent) {
     $value = $value[$parent];
     // Use === to be sure we get right results if parent is a zero (delta) value.
@@ -555,11 +558,20 @@ function userreference_optionwidgets_validate($element, &$form_state) {
  * back to its original location, 'field-name-0-uid'.
  */
 function userreference_autocomplete_validate($element, &$form_state) {
-  $field_key  = $element['#columns'][0];
-  $user = $element['#value'][$field_key];
+  $field_name = $element['#field_name'];
+  $type_name = $element['#type_name'];
+  $field = content_fields($field_name, $type_name);
+  $field_key = $element['#columns'][0];
+  $value = $element['#value'][$field_key];
   $uid = NULL;
-  if (!empty($user)) {
-    $uid = db_result(db_query("SELECT uid FROM {users} WHERE name = '%s'", $user));
+  if (!empty($value)) {
+    $reference = _userreference_potential_references($field, $value, 'equals', NULL, 1);
+    if (empty($reference)) {
+      form_error($element[$field_key], t('%name: found no valid user with that name.', array('%name' => t($field['widget']['label']))));
+    }
+    else {
+      $uid = key($reference);
+    }
   }
   form_set_value($element, $uid, $form_state);
 }
@@ -574,7 +586,7 @@ function userreference_allowed_values($field) {
   foreach ($references as $key => $value) {
     // Views theming runs check_plain (htmlentities) on the values.
     // We reverse that with html_entity_decode.
-    $options[$key] = html_entity_decode(strip_tags($value['rendered']));
+    $options[$key] = html_entity_decode(strip_tags($value['rendered']), ENT_QUOTES);
   }
   return $options;
 }
@@ -591,12 +603,18 @@ function userreference_allowed_values($field) {
  * @param $field
  *   The field description.
  * @param $string
- *   Optional string to filter titles on (used by autocomplete)
- * @param $exact_string
- *   Optional: should the title filter be an exact match.
+ *   Optional string to filter usernames on (used by autocomplete)
+ * @param $match
+ *   Operator to match filtered name against, can be any of:
+ *   'contains', 'equals', 'starts_with'
+ * @param $ids
+ *   Optional user ids to lookup (the $string and $match arguments will be
+ *   ignored).
+ * @param $limit
+ *   If non-zero, limit the size of the result set.
  *
  * @return
- *   An array of valid nodes in the form:
+ *   An array of valid users in the form:
  *   array(
  *     uid => array(
  *       'title' => The user name,
@@ -605,38 +623,40 @@ function userreference_allowed_values($field) {
  *     ...
  *   )
  */
-function _userreference_potential_references($field, $string = '', $uid = NULL) {
+function _userreference_potential_references($field, $string = '', $match = 'contains', $ids = array(), $limit = NULL) {
   static $results = array();
 
-  if (!isset($results[$field['field_name']][$string][$uid])) {
+  // Create unique id for static cache.
+  $cid = $field['field_name'] .':'. $match .':'. ($string !== '' ? $string : implode('-', $ids)) .':'. $limit;
+  if (!isset($results[$cid])) {
     $references = FALSE;
     if (module_exists('views') && !empty($field['advanced_view']) && $field['advanced_view'] != '--') {
-      $references = _userreference_potential_references_views($field, $string, $uid);
+      $references = _userreference_potential_references_views($field, $string, $match, $ids, $limit);
     }
     // If the view doesn't exist, we got FALSE, and fallback to the regular 'standard mode'.
 
     if ($references === FALSE) {
-      $references = _userreference_potential_references_standard($field, $string, $uid);
+      $references = _userreference_potential_references_standard($field, $string, $match, $ids, $limit);
     }
 
     // Store the results.
-    $results[$field['field_name']][$string][$uid] = $references;
+    $results[$cid] = $references;
   }
 
-  return $results[$field['field_name']][$string][$uid];
+  return $results[$cid];
 }
 
 /**
  * Helper function for _userreference_potential_references():
  * case of Views-defined referenceable users.
  */
-function _userreference_potential_references_views($field, $string = '', $uid = NULL) {
+function _userreference_potential_references_views($field, $string = '', $match = 'contains', $ids = array(), $limit = NULL) {
   $view_name = $field['advanced_view'];
 
   if ($view = views_get_view($view_name)) {
     // We add a display, and let it derive from the 'default' display.
     // TODO: We should let the user pick a display in the fields settings - sort of requires AHAH...
-    $display = $view->add_display('content_simple');
+    $display = $view->add_display('content_references');
     $view->set_display($display);
 
     // TODO from merlinofchaos on IRC : arguments using summary view can defeat the style setting.
@@ -646,6 +666,26 @@ function _userreference_potential_references_views($field, $string = '', $uid = 
     // Used in content_plugin_style_php_array::render(), to get
     // the 'field' to be used as title.
     $view->display_handler->set_option('content_title_field', 'name');
+
+    // Additional options to let content_plugin_display_references::query()
+    // narrow the results.
+    $options = array(
+      'table' => 'users',
+      'field_string' => 'name',
+      'string' => $string,
+      'match' => $match,
+      'field_id' => 'uid',
+      'ids' => $ids,
+    );
+    $view->display_handler->set_option('content_options', $options);
+
+    // TODO : for consistency, a fair amount of what's below
+    // should be moved to content_plugin_display_references
+
+    // Limit result set size.
+    if (isset($limit)) {
+      $view->display_handler->set_option('items_per_page', $limit);
+    }
 
     // Get arguments for the view.
     if (!empty($field['advanced_view_args'])) {
@@ -660,11 +700,6 @@ function _userreference_potential_references_views($field, $string = '', $uid = 
     $fields = $view->get_items('field', $display);
     if (!isset($fields['name'])) {
       $view->add_item($display, 'field', 'users', 'name');
-    }
-    if ($string !== '') {
-      // Add an instance of the 'name' filter.
-      $options = array('value' => $string, 'operator' => 'starts');
-      $id = $view->add_item($display, 'filter', 'users', 'name', $options);
     }
 
     // If not set, make all fields inline and define a separator.
@@ -694,17 +729,23 @@ function _userreference_potential_references_views($field, $string = '', $uid = 
  * Helper function for _userreference_potential_references():
  * referenceable users defined by user role and status
  */
-function _userreference_potential_references_standard($field, $string = '', $uid = NULL) {
+function _userreference_potential_references_standard($field, $string = '', $match = 'contains', $ids = array(), $limit = NULL) {
   $where = array();
   $args = array();
   $join = array();
 
   if ($string !== '') {
-    $where[] = "LOWER(name) LIKE LOWER('%s%%')";
+    $match_operators = array(
+      'contains' => "LIKE '%%%s%%'",
+      'equals' => "= '%s'",
+      'starts_with' => "LIKE '%s%%'",
+    );
+    $where[] = 'u.name '. (isset($match_operators[$match]) ? $match_operators[$match] : $match_operators['contains']);
     $args[] = $string;
   }
-  elseif (!empty($uid) && is_numeric($uid)) {
-    $where[] = "u.uid = $uid";
+  elseif ($ids) {
+    $where[] = 'u.uid IN (' . db_placeholders($ids) . ')';
+    $args = array_merge($args, $ids);
   }
   else {
     $where[] = "u.uid > 0";
@@ -735,7 +776,8 @@ function _userreference_potential_references_standard($field, $string = '', $uid
   }
 
   $users = array();
-  $result = db_query('SELECT u.name, u.uid FROM {users} u '. implode(' ', $join) .' WHERE '. implode(' AND ', $where) .' ORDER BY u.name ASC', $args);
+  $where_clause = $where ? 'WHERE ('. implode(') AND (', $where) .')' : '';
+  $result = db_query('SELECT u.name, u.uid FROM {users} u '. implode(' ', $join) ." $where_clause ORDER BY u.name ASC", $args);
   while ($user = db_fetch_object($result)) {
     $users[$user->uid] = array(
       'title' => $user->name,
@@ -751,9 +793,10 @@ function _userreference_potential_references_standard($field, $string = '', $uid
 function userreference_autocomplete($field_name, $string = '') {
   $fields = content_fields();
   $field = $fields[$field_name];
+  $match = isset($field['widget']['autocomplete_match']) ? $field['widget']['autocomplete_match'] : 'contains';
   $matches = array();
 
-  $references = _userreference_potential_references($field, $string);
+  $references = _userreference_potential_references($field, $string, $match, array(), 10);
   foreach ($references as $id => $row) {
     // Add a class wrapper for a few required CSS overrides.
     $matches[$row['title']] = '<div class="reference-autocomplete">'. $row['rendered'] . '</div>';
@@ -818,7 +861,7 @@ function userreference_user($type, &$edit, &$account) {
           if (isset($values[$node_type])) {
             $additions[] = array(
               '#type' => 'user_profile_item',
-              '#title' => $node_types[$node_type]['name'],
+              '#title' => check_plain($node_types[$node_type]['name']),
               '#value' => theme('item_list', $values[$node_type]),
             );
           }

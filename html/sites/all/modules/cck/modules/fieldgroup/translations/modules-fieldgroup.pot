@@ -1,16 +1,17 @@
-# $Id: modules-fieldgroup.pot,v 1.1.2.7 2008/08/25 20:49:00 hass Exp $
+# $Id: modules-fieldgroup.pot,v 1.1.2.10 2008/11/05 12:24:00 hass Exp $
 #
 # LANGUAGE translation of Drupal (modules-fieldgroup)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  fieldgroup.module,v 1.79.2.11 2008/08/25 15:46:11 yched
-#  fieldgroup.info,v 1.6 2008/04/23 18:01:58 dww
+#  fieldgroup.panels.inc,v 1.1.2.4 2008/10/06 17:21:51 karens
+#  fieldgroup.info,v 1.6.2.1 2008/09/22 18:25:21 karens
+#  fieldgroup.module,v 1.79.2.39 2008/11/01 14:10:37 yched
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-08-25 22:44+0200\n"
+"POT-Creation-Date: 2008-11-05 12:54+0100\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -19,79 +20,123 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: modules/fieldgroup/fieldgroup.module:103
-msgid "Add"
+#: modules/fieldgroup/fieldgroup.panels.inc:10;66
+msgid "Content fieldgroup"
 msgstr ""
 
-#: modules/fieldgroup/fieldgroup.module:128
+#: modules/fieldgroup/fieldgroup.panels.inc:47
+msgid "Content fieldgroup content goes here."
+msgstr ""
+
+#: modules/fieldgroup/fieldgroup.panels.inc:69
+msgid "All fields from a fieldgroup on the referenced node."
+msgstr ""
+
+#: modules/fieldgroup/fieldgroup.panels.inc:90
+msgid "@group_label (@group_type_name)"
+msgstr ""
+
+#: modules/fieldgroup/fieldgroup.panels.inc:99 modules/fieldgroup/fieldgroup.info:0
+msgid "Fieldgroup"
+msgstr ""
+
+#: modules/fieldgroup/fieldgroup.panels.inc:108
+msgid "Text to display if group has no data. Note that title will not display unless overridden."
+msgstr ""
+
+#: modules/fieldgroup/fieldgroup.panels.inc:123
+msgid "\"@s\" fieldgroup @name"
+msgstr ""
+
+#: modules/fieldgroup/fieldgroup.module:121
 msgid "Form settings"
 msgstr ""
 
-#: modules/fieldgroup/fieldgroup.module:129
+#: modules/fieldgroup/fieldgroup.module:122
 msgid "These settings apply to the group in the node editing form."
 msgstr ""
 
-#: modules/fieldgroup/fieldgroup.module:133
+#: modules/fieldgroup/fieldgroup.module:126
 msgid "Style"
 msgstr ""
 
-#: modules/fieldgroup/fieldgroup.module:136
+#: modules/fieldgroup/fieldgroup.module:129
 msgid "always open"
 msgstr ""
 
-#: modules/fieldgroup/fieldgroup.module:137
+#: modules/fieldgroup/fieldgroup.module:130
 msgid "collapsible"
 msgstr ""
 
-#: modules/fieldgroup/fieldgroup.module:138
+#: modules/fieldgroup/fieldgroup.module:131
 msgid "collapsed"
 msgstr ""
 
-#: modules/fieldgroup/fieldgroup.module:146
+#: modules/fieldgroup/fieldgroup.module:139
 msgid "Instructions to present to the user on the editing form."
 msgstr ""
 
-#: modules/fieldgroup/fieldgroup.module:151
+#: modules/fieldgroup/fieldgroup.module:144
 msgid "Display settings"
 msgstr ""
 
-#: modules/fieldgroup/fieldgroup.module:152
+#: modules/fieldgroup/fieldgroup.module:145
 msgid "These settings apply to the group on node display."
 msgstr ""
 
-#: modules/fieldgroup/fieldgroup.module:159
+#: modules/fieldgroup/fieldgroup.module:152
 msgid "A description of the group."
 msgstr ""
 
-#: modules/fieldgroup/fieldgroup.module:194
-msgid "The group name %name already exists."
-msgstr ""
-
-#: modules/fieldgroup/fieldgroup.module:198
-msgid "The group name %name is invalid."
-msgstr ""
-
-#: modules/fieldgroup/fieldgroup.module:233
+#: modules/fieldgroup/fieldgroup.module:197
 msgid "Are you sure you want to remove the group %label?"
 msgstr ""
 
-#: modules/fieldgroup/fieldgroup.module:235
+#: modules/fieldgroup/fieldgroup.module:199
 msgid "This action cannot be undone."
 msgstr ""
 
-#: modules/fieldgroup/fieldgroup.module:244
+#: modules/fieldgroup/fieldgroup.module:208
 msgid "The group %group_name has been removed."
 msgstr ""
 
-#: modules/fieldgroup/fieldgroup.module:293
-msgid "none"
+#: modules/fieldgroup/fieldgroup.module:350
+msgid "You need to provide a label."
 msgstr ""
 
-#: modules/fieldgroup/fieldgroup.module:29
-msgid "Add group"
+#: modules/fieldgroup/fieldgroup.module:355
+msgid "You need to provide a group name."
 msgstr ""
 
-#: modules/fieldgroup/fieldgroup.module:37;44
+#: modules/fieldgroup/fieldgroup.module:369
+msgid "The group name %group_name is invalid. The name must include only lowercase unaccentuated letters, numbers, and underscores."
+msgstr ""
+
+#: modules/fieldgroup/fieldgroup.module:372
+msgid "The group name %group_name is too long. The name is limited to 32 characters, including the 'group_' prefix."
+msgstr ""
+
+#: modules/fieldgroup/fieldgroup.module:378
+msgid "The group name %group_name already exists."
+msgstr ""
+
+#: modules/fieldgroup/fieldgroup.module:397;400
+msgid "Add new group:"
+msgstr ""
+
+#: modules/fieldgroup/fieldgroup.module:415
+msgid "Add new group: you need to provide a label."
+msgstr ""
+
+#: modules/fieldgroup/fieldgroup.module:416
+msgid "Add new group: you need to provide a group name."
+msgstr ""
+
+#: modules/fieldgroup/fieldgroup.module:644
+msgid "Standard group"
+msgstr ""
+
+#: modules/fieldgroup/fieldgroup.module:39;46
 msgid "Edit group"
 msgstr ""
 
@@ -100,10 +145,6 @@ msgid "fieldgroup"
 msgstr ""
 
 #: modules/fieldgroup/fieldgroup.info:0
-msgid "Fieldgroup"
-msgstr ""
-
-#: modules/fieldgroup/fieldgroup.info:0
-msgid "Create field groups for CCK fields."
+msgid "Create display groups for CCK fields."
 msgstr ""
 

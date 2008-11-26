@@ -1,5 +1,5 @@
 <?php
-// $Id: token.module,v 1.7.4.8 2008/07/14 19:15:10 greggles Exp $
+// $Id: token.module,v 1.7.4.9 2008/08/29 15:21:40 eaton Exp $
 
 /**
  * @file
@@ -84,7 +84,21 @@ function token_token_values($type, $object = NULL) {
       $values['site-slogan']  = variable_get('site_slogan', '');
       $values['site-mission'] = filter_xss_admin(variable_get('site_mission', ''));
       $values['site-mail']    = variable_get('site_mail', '');
-      $values['site-date']    = format_date(time(), 'short', '', variable_get('date_default_timezone', 0));
+      $time = time(); $tz = variable_get('date_default_timezone', 0);
+      $values['site-date']       = format_date($time, 'short',   '', $tz);
+      // Date parts, similar to dates in node_token.inc#node_token_values().
+      $values['site-date-yyyy']  = format_date($time, 'custom', 'Y', $tz);
+      $values['site-date-yy']    = format_date($time, 'custom', 'y', $tz);
+      $values['site-date-month'] = format_date($time, 'custom', 'F', $tz);
+      $values['site-date-mon']   = format_date($time, 'custom', 'M', $tz);
+      $values['site-date-mm']    = format_date($time, 'custom', 'm', $tz);
+      $values['site-date-m']     = format_date($time, 'custom', 'n', $tz);
+      $values['site-date-ww']    = format_date($time, 'custom', 'W', $tz);
+      $values['site-date-date']  = format_date($time, 'custom', 'N', $tz);
+      $values['site-date-day']   = format_date($time, 'custom', 'l', $tz);
+      $values['site-date-ddd']   = format_date($time, 'custom', 'D', $tz);
+      $values['site-date-dd']    = format_date($time, 'custom', 'd', $tz);
+      $values['site-date-d']     = format_date($time, 'custom', 'j', $tz);
       break;
   }
   return $values;
@@ -114,6 +128,19 @@ function token_token_list($type = 'all') {
   $tokens['global']['site-mission'] = t('The mission of the current Drupal website.');
   $tokens['global']['site-mail']    = t('The contact email address for the current Drupal website.');
   $tokens['global']['site-date']    = t("The current date on the site's server.");
+  // Date parts, similar to dates in node_token.inc#node_token_values().
+  $tokens['global']['site-date-yyyy']  = t('The current year (four digit)');
+  $tokens['global']['site-date-yy']    = t('The current year (two digit)');
+  $tokens['global']['site-date-month'] = t('The current month (full word)');
+  $tokens['global']['site-date-mon']   = t('The current month (abbreviated)');
+  $tokens['global']['site-date-mm']    = t('The current month (two digit, zero padded)');
+  $tokens['global']['site-date-m']     = t('The current month (one or two digit)');
+  $tokens['global']['site-date-ww']    = t('The current week (two digit)');
+  $tokens['global']['site-date-date']  = t('The current date (day of month)');
+  $tokens['global']['site-date-day']   = t('The current day (full word)');
+  $tokens['global']['site-date-ddd']   = t('The current day of week (abbreviation)');
+  $tokens['global']['site-date-dd']    = t('The current day (two digit, zero-padded)');
+  $tokens['global']['site-date-d']     = t('The current day (one or two digit)');
   return $tokens;
 }
 

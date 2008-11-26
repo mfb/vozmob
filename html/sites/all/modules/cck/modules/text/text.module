@@ -1,5 +1,5 @@
 <?php
-// $Id: text.module,v 1.95.2.20 2008/10/01 17:04:31 karens Exp $
+// $Id: text.module,v 1.95.2.26 2008/11/05 19:40:19 yched Exp $
 
 /**
  * @file
@@ -34,26 +34,14 @@ function text_theme() {
 
 /**
  * Implementation of hook_field_info().
- *
- * Here we indicate that the content module will use its default
- * handling for the view of this field.
- *
- * Callbacks can be omitted if default handing is used.
- * They're included here just so this module can be used
- * as an example for custom modules that might do things
- * differently.
  */
 function text_field_info() {
   return array(
     'text' => array(
       'label' => t('Text'),
       'description' => t('Store text in the database.'),
-      'callbacks' => array(
-        'tables' => CONTENT_CALLBACK_DEFAULT,
-        'arguments' => CONTENT_CALLBACK_DEFAULT,
-        ),
-      ),
-    );
+    ),
+  );
 }
 
 /**
@@ -138,8 +126,13 @@ function text_field_settings($op, $field) {
         $db_info = content_database_info($field);
         $table_alias = content_views_tablename($field);
 
-        // Swap the filter handler to the 'in' operator.
-        $data[$table_alias][$field['field_name'] .'_value']['filter']['handler'] = 'content_handler_filter_many_to_one';
+        // Filter: Add a 'many to one' filter.
+        $copy = $data[$table_alias][$field['field_name'] .'_value'];
+        $copy['title'] = t('@label (!name) - Allowed values', array('@label' => t($field['widget']['label']), '!name' => $field['field_name']));
+        $copy['filter']['handler'] = 'content_handler_filter_many_to_one';
+        unset($copy['field'], $copy['argument'], $copy['sort']);
+        $data[$table_alias][$field['field_name'] .'_value_many_to_one'] = $copy;
+        // Argument : swap the handler to the 'many to one' operator.
         $data[$table_alias][$field['field_name'] .'_value']['argument']['handler'] = 'content_handler_argument_many_to_one';
         return $data;
       }
@@ -167,7 +160,7 @@ function text_field($op, &$node, $field, &$items, $teaser, $page) {
           }
         }
       }
-      break;
+      return $items;
 
     case 'sanitize':
       foreach ($items as $delta => $item) {

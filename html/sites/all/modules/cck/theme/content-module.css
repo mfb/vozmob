@@ -1,4 +1,4 @@
-/* $Id: content-module.css,v 1.1.2.1 2008/10/07 13:13:17 karens Exp $ */
+/* $Id: content-module.css,v 1.1.2.5 2008/10/27 16:58:38 yched Exp $ */
 
 /* Node display */
 .field .field-label,
@@ -56,7 +56,8 @@
   margin: 4px 4px 0 0;
 }
 #content-field-overview-form .label-group,
-#content-display-overview-form .label-group {
+#content-display-overview-form .label-group,
+#content-copy-export-form .label-group {
   font-weight: bold;
 }
 table#content-field-overview .label-add-new-field,
@@ -76,9 +77,21 @@ table#content-field-overview .content-new {
 }
 
 /* 'Advanced help' pages */
-.advanced-help-topic dt {
-  font-weight: bold;
+.advanced-help-topic h3,
+.advanced-help-topic h4,
+.advanced-help-topic h5,
+.advanced-help-topic h6  {
+  margin:1em 0 .5em 0;
 }
 .advanced-help-topic dd {
-  margin-bottom: 1em;
+  margin-bottom: .5em;
+}
+.advanced-help-topic span.code {
+  background-color:#EDF1F3;
+  font-family:"Bitstream Vera Sans Mono",Monaco,"Lucida Console",monospace;
+  font-size:0.9em;
+  padding:1px;
+}
+.advanced-help-topic .content-border {
+  border:1px solid #AAA
 }

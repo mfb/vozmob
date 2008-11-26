@@ -1,4 +1,4 @@
-# $Id: modules-content_permissions.de.po,v 1.2.2.6 2008/08/26 06:44:28 hass Exp $
+# $Id: modules-content_permissions.de.po,v 1.2.2.7 2008/11/05 12:24:00 hass Exp $
 # German translation of CCK
 # Copyright 2006 Lukas Gangoly <lukas.gangoly@univie.ac.at>
 # Copyright 2006 Jakob Petsovits <jpetso@gmx.at>
@@ -16,9 +16,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: German translation of CCK\n"
-"POT-Creation-Date: 2008-08-25 22:44+0200\n"
-"PO-Revision-Date: 2008-08-26 08:20+0100\n"
-"Last-Translator: Alexander Hass\n"
+"POT-Creation-Date: 2008-11-05 12:54+0100\n"
+"PO-Revision-Date: 2008-11-05 13:18+0100\n"
+"Last-Translator: Alexander Haß\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -47,7 +47,7 @@ msgstr ""
 msgid "content_permissions"
 msgstr "Inhaltsberechtigungen"
 
-#: modules/content_permissions/content_permissions.install:7
+#: modules/content_permissions/content_permissions.install:9
 msgid "Please <a href=\"!url\">configure your field permissions</a> immediately. All fields are inaccessible by default."
 msgstr "Bitte umgehend die <a href=\"!url\">Feldberechtigungen konfigurieren</a>. Alle Felder sind standardmäßig gesperrt."
 

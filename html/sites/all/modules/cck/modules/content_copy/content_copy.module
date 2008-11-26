@@ -1,5 +1,5 @@
 <?php
-// $Id: content_copy.module,v 1.27.2.14 2008/10/09 01:21:36 karens Exp $
+// $Id: content_copy.module,v 1.27.2.19 2008/11/07 14:37:50 yched Exp $
 
 /**
  *  @file
@@ -54,6 +54,18 @@ function content_copy_menu() {
 }
 
 /**
+ * Implementation of hook_theme().
+ */
+function content_copy_theme() {
+  return array(
+    'content_copy_export_form' => array(
+      'template' => 'content_copy_export_form',
+      'arguments' => array('form' => NULL),
+    ),
+  );
+}
+
+/**
  *  A form to export field definitions.
  */
 function content_copy_export_form(&$form_state) {
@@ -63,24 +75,30 @@ function content_copy_export_form(&$form_state) {
   $form_values = isset($form_state['values']) ? $form_state['values'] : array();
   $step = isset($form_state['storage']['step']) ? $form_state['storage']['step'] + 1 : 1;
 
-  $type_name = isset($form_values['type_name']) ? $form_values['type_name'] : '';
-  $types  = content_copy_types();
-  $fields = content_copy_fields($type_name);
+  $exportable_fields = array();
+  $groups = array();
 
-  if (module_exists('fieldgroup')) {
-    $groups = content_copy_groups($type_name);
+  $type_name = isset($form_values['type_name']) ? $form_values['type_name'] : '';
+  if ($type_name) {
+    $type = content_types($type_name);
+    $exportable_fields = content_copy_fields($type_name);
+    if (module_exists('fieldgroup')) {
+      $groups = fieldgroup_groups($type_name);
+    }
   }
 
   // If a content type has been selected and there are no fields or groups to select,
   // jump straight to export.
-  if ($step == 2 && !($groups) && !($fields)) {
+  if ($step == 2 && !($groups) && !($exportable_fields)) {
     $step = 3;
   }
 
+  $form['#step'] = $step;
   $form['#prefix'] = t('This form will process a content type and one or more fields from that type and export the settings. The export created by this process can be copied and pasted as an import into the current or any other database. The import will add the fields to into an existing content type or create a new content type that includes the selected fields.');
 
   switch ($step) {
     case 1: // Select a content type.
+      $types  = content_copy_types();
       $form['type_name'] = array(
         '#title' => t('Types'),
         '#type' => 'radios',
@@ -95,26 +113,60 @@ function content_copy_export_form(&$form_state) {
         '#type' => 'hidden',
         '#value' => $type_name,
       );
-      if (module_exists('fieldgroup') && !empty($groups)) {
-        $form['groups'] = array(
-          '#title' => t('Groups'),
-          '#type' => 'checkboxes',
-          '#multiple' => TRUE,
-          '#options' => $groups,
-          '#description' => t('Select the group definitions to export from %type.', array(
-            '%type' => node_get_types('name', $type_name)
-          )),
+
+      $form += array(
+        '#fields' => $exportable_fields,
+        '#groups' => array_keys($groups),
+      );
+
+      $fields_options = $groups_options = array();
+
+      // Fields.
+      foreach ($exportable_fields as $field_name) {
+        $field = content_fields($field_name, $type_name);
+        $fields_options[$field_name] = '';
+        $weight = $field['widget']['weight'];
+        $form[$field_name] = array(
+          'human_name' => array('#value' => check_plain($field['widget']['label'])),
+          'field_name' => array('#value' => $field['field_name']),
+          'type' => array('#value' => $field['type']),
+          'weight' => array('#type' => 'value', '#value' => $weight),
+          'parent' => array('#type' => 'value', '#value' => ''),
+          '#row_type' => 'field',
         );
       }
       $form['fields'] = array(
-        '#title' => t('Fields'),
         '#type' => 'checkboxes',
         '#multiple' => TRUE,
-        '#options' => $fields,
-        '#description' => t('Select the field definitions to export from %type.', array(
-          '%type' => node_get_types('name', $type_name)
-        )),
+        '#options' => $fields_options,
+        '#default_value' => array_keys($fields_options),
       );
+
+      // Groups.
+      foreach ($groups as $name => $group) {
+        $groups_options[$name] = '';
+        $weight = $group['weight'];
+        $form[$name] = array(
+          'human_name' => array('#value' => check_plain($group['label'])),
+          'group_name' => array('#value' => $group['group_name']),
+          'weight' => array('#type' => 'value', '#value' => $weight),
+          '#row_type' => 'group',
+        );
+        foreach ($group['fields'] as $field_name => $field) {
+          // Do nothing for non-exportable (inactive) fields.
+          if (isset($form[$field_name])) {
+            $form[$field_name]['parent']['#value'] = $name;
+          }
+        }
+      }
+      if ($groups) {
+        $form['groups'] = array(
+          '#type' => 'checkboxes',
+          '#multiple' => TRUE,
+          '#options' => $groups_options,
+          '#default_value' => array_keys($groups_options),
+        );
+      }
       break;
 
     case 3: // Display the export macro.
@@ -167,7 +219,6 @@ function content_copy_export($form_values) {
   module_load_include('inc', 'node', 'content_types');
   drupal_execute('node_type_form', $node_state, node_get_types('type', $form_values['type_name']));
 
-  // TODO : also export "extra" fields weights.
   module_load_include('inc', 'content', 'includes/content.admin');
   module_load_include('inc', 'content', 'includes/content.crud');
 
@@ -212,7 +263,14 @@ function content_copy_export($form_values) {
   }
 
   // Convert the macro array into formatted text.
-  return content_copy_get_macro();
+  $output = content_copy_get_macro();
+
+  // Add weights of non-CCK fields.
+  if ($extra = variable_get('content_extra_weights_'. $form_values['type_name'], array())) {
+    $output .= "\$content[extra]  = ". var_export((array) $extra, TRUE) .";\n";
+  }
+
+  return $output;
 }
 
 /**
@@ -280,7 +338,7 @@ function content_copy_import_form(&$form_state, $type_name = '') {
  */
 function content_copy_import_form_submit($form, &$form_state) {
   $form_values = $form_state['values'];
-  
+
   // Get the content type we are importing into.
   $type_name = $form_values['type_name'];
   $type_label = node_get_types('name', $type_name);
@@ -308,7 +366,7 @@ function content_copy_import_form_submit($form, &$form_state) {
 
   // It is allowed to import a type with no fields,
   // so the fields array could be empty and must be cast as an array.
-  $imported_fields = (array) $content['fields'];
+  $imported_fields = isset($content['fields']) ? $content['fields'] : array();
 
   // Perform more pre-import error trapping.
   // If there are potential problems, exit without doing the import.
@@ -316,6 +374,7 @@ function content_copy_import_form_submit($form, &$form_state) {
 
   // The groups array could be empty and still valid, make sure to cast it as an array.
   // If there are groups in the import, make sure the fieldgroup module is enabled.
+  $imported_groups = array();
   if (isset($content['groups']) && module_exists('fieldgroup')) {
     $imported_groups = (array) $content['groups'];
   }
@@ -385,11 +444,10 @@ function content_copy_import_form_submit($form, &$form_state) {
             )));
        return;
     }
-    // TODO : also import "extra" fields weights.
   }
 
   // Create the groups for this type, if they don't already exist.
-  if (module_exists('fieldgroup') && isset($imported_groups)) {
+  if (module_exists('fieldgroup') && $imported_groups) {
     foreach ($imported_groups as $group) {
       $group_name = $group['group_name'];
       fieldgroup_save_group($type_name, $group);
@@ -404,10 +462,10 @@ function content_copy_import_form_submit($form, &$form_state) {
     // Make sure the field doesn't already exist in the type.
     // If so, do nothing, fields can't be duplicated within a content type.
     $field_name   = $field['field_name'];
-      
+
     if (!empty($field['field_name']) && isset($content_info['content types'][$type_name]['fields'][$field_name])) {
       drupal_set_message(t('The imported field %field_label (%field_name) was not added to %type because that field already exists in %type.', array(
-        '%field_label' => $field['label'], '%field_name' => $field_name, '%type' => $type_name)));
+        '%field_label' => $field['label'], '%field_name' => $field_name, '%type' => $type_label)));
     }
     else {
 
@@ -423,6 +481,11 @@ function content_copy_import_form_submit($form, &$form_state) {
       }
     }
   }
+
+  // Import weights of non-CCK fields.
+  if (isset($content['extra'])) {
+    variable_set('content_extra_weights_'. $type_name, $content['extra']);
+  }
 }
 
 /**
@@ -437,7 +500,7 @@ function content_copy_form_alter(&$form, &$form_state, $form_id) {
 }
 
 /**
- *  Get all the fields for a content type.
+ * Get all the *active* fields for a content type.
  */
 function content_copy_fields($type_name) {
   $fields = array();
@@ -454,25 +517,10 @@ function content_copy_fields($type_name) {
     $widget_module = $widget_types[$field['widget']['type']]['module'];
 
     if (!$field['locked'] && !empty($field_module) && module_exists($field_module) && !empty($widget_module) && module_exists($widget_module)) {
-      $fields[$field_name] = $field['widget']['label'] .' ('. $field['field_name'] .')';
+      $fields[] = $field_name;
     }
   }
   return $fields;
-}
-
-/**
- *  Get all the groups for a content type.
- */
-function content_copy_groups($type_name = '') {
-  $groups = array();
-  if (!$type_name || !module_exists('fieldgroup')) {
-    return $groups;
-  }
-  $data = fieldgroup_groups($type_name);
-  foreach ($data as $group_name => $group) {
-    $groups[$group_name] = $group['label'] .' ('. $group['group_name'] .')';
-  }
-  return $groups;
 }
 
 /**
@@ -482,7 +530,7 @@ function content_copy_types() {
   $types = array();
   $content_info = _content_type_info();
   foreach ($content_info['content types'] as $type_name => $val) {
-    $types[$type_name] = $val['name'] .' ('. $type_name .')';
+    $types[$type_name] = check_plain($val['name']) .' ('. $type_name .')';
   }
   return $types;
 }
@@ -562,4 +610,32 @@ function content_copy_get_macro() {
     }
     return $string;
   }
+}
+
+function template_preprocess_content_copy_export_form($vars) {
+  $form = &$vars['form'];
+
+  if ($form['#step'] == 2) {
+    $order = _content_overview_order($form, $form['#fields'], $form['#groups']);
+
+    $rows = array();
+    foreach ($order as $key) {
+      $element = &$form[$key];
+      $row = new stdClass();
+
+      $row->row_type = $element['#row_type'];
+      $checkbox_key = $element['#row_type'] == 'field' ? 'fields' : 'groups';
+      $row->checkbox = drupal_render($form[$checkbox_key][$key]);
+      foreach (element_children($element) as $child) {
+        $row->{$child} = drupal_render($element[$child]);
+      }
+      $row->label_class = in_array($key, $form['#groups']) ? 'label-group' : 'label-field';
+      $row->indentation = theme('indentation', isset($element['#depth']) ? $element['#depth'] : 0);
+
+      $rows[] = $row;
+    }
+    $vars['rows'] = $rows;
+  }
+
+  $vars['submit'] = drupal_render($form);
 }

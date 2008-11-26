@@ -1,5 +1,5 @@
 <?php
-// $Id: admin_menu.inc,v 1.11.2.10 2008/09/12 16:21:22 pwolanin Exp $
+// $Id: admin_menu.inc,v 1.11.2.16 2008/11/02 22:22:43 sun Exp $
 
 /**
  * The key function that builds the menu links whenever there is a menu rebuild.
@@ -110,14 +110,6 @@ function admin_menu_admin_menu(&$deleted) {
   $links = array();
   $icon_path = '<front>';
 
-  // Add 'administer' item to the icon menu.
-  $links[] = array(
-    'title' => 'Administer',
-    'path' => 'admin',
-    'weight' => 10,
-    'parent_path' => $icon_path,
-  );
-
   // Add system update links.
   $links[] = array(
     'title' => 'Run cron',
@@ -213,19 +205,36 @@ function admin_menu_admin_menu(&$deleted) {
     }
   }
 
+  // Add clear-cache.
+  $links[] = array(
+    'title' => 'Flush all caches',
+    'path' => 'admin_menu/flush-cache',
+    'query' => 'destination',
+    'weight' => 20,
+    'parent_path' => $icon_path,
+  );
+  $caches = array(
+    'admin_menu' => 'Administration menu',
+    'cache' => 'Cache tables',
+    'menu' => 'Menu',
+    'requisites' => 'Page requisites',
+    'theme' => 'Theme registry',
+  );
+  foreach ($caches as $name => $title) {
+    $links[] = array(
+      'title' => $title,
+      'path' => 'admin_menu/flush-cache/' . $name,
+      'query' => 'destination',
+      'parent_path' => 'admin_menu/flush-cache',
+    );
+  }
+
   // Add devel module links
   if (module_exists('devel')) {
     // Add variable editor.
     $links[] = array(
       'title' => 'Variable editor',
       'path' => 'devel/variable',
-      'weight' => 20,
-      'parent_path' => $icon_path,
-    );
-    // Add clear-cache.
-    $links[] = array(
-      'title' => 'Empty cache',
-      'path' => 'devel/cache/clear',
       'weight' => 20,
       'parent_path' => $icon_path,
     );
@@ -236,7 +245,7 @@ function admin_menu_admin_menu(&$deleted) {
           $links[] = array(
             'title' => $match[4],
             'description' => $match[3],
-            'path' => $match[1],
+            'path' => urldecode($match[1]),
             'weight' => 20,
             'query' => 'destination',
             'parent_path' => 'logout',
@@ -292,15 +301,14 @@ function admin_menu_adjust_items(&$menu_links, &$sort) {
       unset($menu_links[$path], $sort[$path]);
     }
   }
-  $icon_link = array(
+  // Add the icon containing special links.
+  $links[] = array(
     'title' => theme('admin_menu_icon'),
     'path' => '<front>',
     'weight' => -100,
     'parent_path' => '<root>',
     'options' => array('extra class' => 'admin-menu-icon', 'html' => TRUE),
   );
-  // Add the icon containing special links.
-  $links[] = $icon_link;
   // Add link to show current authenticated/anonymous users - we will add the
   // data dynamically in the _alter hook.
   $links[] = array(
@@ -339,6 +347,12 @@ function admin_menu_theme_settings() {
     '#default_value' => variable_get('admin_menu_margin_top', 1),
     '#description' => t('If enabled, the output of this site will be shifted for approx. 20 pixels from the top of the viewport to make room for the Administration Menu. If this setting is disabled, some absolute or fixed positioned page elements at the top of the viewport may be covered by Administration Menu.'),
   );
+  $form['admin_menu_position_fixed'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Use fixed instead of absolute positioning'),
+    '#default_value' => variable_get('admin_menu_position_fixed', 0),
+    '#description' => t('If enabled, the administration menu will always stay at the top of the browser viewport, even if you scroll down the page.') .'<br />'. t('<strong>Note:</strong> In some browsers this setting might cause malformed page contents, a disappearing cursor and not editable select lists in forms. If such effects occur, this setting should be disabled.'),
+  );
   $form['tweaks'] = array(
     '#type' => 'fieldset',
     '#title' => t('Drupal Administration Tweaks'),
@@ -352,6 +366,12 @@ function admin_menu_theme_settings() {
   if (module_exists('util')) {
     $form['tweaks']['admin_menu_tweak_modules']['#description'] .= '<br /><strong>'. t('If you installed Utility module for this purpose, you can safely uninstall it now!') .'</strong>';
   }
+  $form['tweaks']['admin_menu_tweak_tabs'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Move page tabs into administration menu'),
+    '#default_value' => variable_get('admin_menu_tweak_tabs', 0),
+    '#description' => t('If enabled, tabs of the current page (usually displayed next or below the page title) will be moved into the administration menu. This feature requires that the theme is using the CSS classes <code>tabs primary</code> and <code>tabs secondary</code> for tabs (like Garland).'),
+  );
   $form = system_settings_form($form);
   $form['wipe description'] = array(
     '#type' => 'item',
@@ -453,5 +473,54 @@ function admin_menu_toggle_modules() {
     actions_synchronize();
   }
   drupal_goto('');
+}
+
+/**
+ * Flush all caches or a specific one.
+ *
+ * @param $name
+ *   (optional) Name of cache to flush.
+ */
+function admin_menu_flush_cache($name = NULL) {
+  switch ($name) {
+    case 'admin_menu':
+      admin_menu_wipe();
+      break;
+
+    case 'cache':
+      // Don't clear cache_form - in-progress form submissions may break.
+      // Ordered so clearing the page cache will always be the last action.
+      $core = array('cache', 'cache_block', 'cache_filter', 'cache_page');
+      $cache_tables = array_merge(module_invoke_all('flush_caches'), $core);
+      foreach ($cache_tables as $table) {
+        cache_clear_all('*', $table, TRUE);
+      }
+      break;
+
+    case 'menu':
+      module_invoke('menu', 'rebuild');
+      break;
+
+    case 'requisites':
+      // Change query-strings on css/js files to enforce reload for all users.
+      _drupal_flush_css_js();
+
+      drupal_clear_css_cache();
+      drupal_clear_js_cache();
+      break;
+
+    case 'theme':
+      module_invoke('system', 'theme_data');
+      drupal_rebuild_theme_registry();
+      break;
+
+    default:
+      // Flush all caches; no need to re-implement this.
+      module_load_include('inc', 'system', 'system.admin');
+      $form_state = array();
+      system_clear_cache_submit($form_state, NULL);
+      break;
+  }
+  drupal_goto();
 }
 

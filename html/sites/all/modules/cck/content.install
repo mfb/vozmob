@@ -1,5 +1,5 @@
 <?php
-// $Id: content.install,v 1.85.2.25 2008/10/09 21:49:21 karens Exp $
+// $Id: content.install,v 1.85.2.30 2008/11/07 16:24:58 yched Exp $
 
 function content_requirements($phase) {
   $requirements = array();
@@ -94,6 +94,10 @@ function content_uninstall() {
   // The variable is used during the uninstall process,
   // so we removed it at the very end.
   variable_del('content_schema_version');
+  // Remove extra weights.
+  foreach (node_get_types('names') as $type_name) {
+    variable_del("content_extra_weights_$type_name");
+  }
 }
 
 /**
@@ -236,8 +240,8 @@ function content_check_update($module = NULL) {
     }
     // The requested module is not enabled, which may be intentional.
     // Just let the user know there are updates to be processed if enabled later.
-    elseif ($module) {
-      $query_message = t('!module.module has updates and is available in the modules folder but is not enabled.<br />If and when it is enabled, you will need to re-run the update script. You will continue to see this message until the module is enabled and updates are run.', array('!module' => $module));
+    else {
+      $query_message = t('!module.module has updates and is available in the modules folder but is not enabled.<br />If and when it is enabled, you will need to re-run the update script. You will continue to see this message until the module is enabled and updates are run.', array('!module' => $module ? $module : 'content'));
     }
     $ret['#abort'] = array('success' => FALSE, 'query' => $query_message);
     return $ret;
@@ -247,6 +251,16 @@ function content_check_update($module = NULL) {
     drupal_set_message(t('Some updates are still pending. Please return to <a href="@update-php">update.php</a> and run the remaining updates.', array('@update-php' => base_path() .'update.php?op=selection')), 'warning', FALSE);
     $ret['#abort'] = array('success' => FALSE, 'query' => t('Some updates are still pending.<br/>Please re-run the update script.'));
     return $ret;
+  }
+  // If everything is OK and updates are not aborted, make sure
+  // content_associate_fields() gets run. With all the complexity of
+  // the dependent updates, it can get missed when an update is aborted.
+  // It won't hurt anything to do this more than once in order to be sure
+  // it doesn't get skipped. Without this step, we can end up with
+  // field modules that are enabled and updated, but not marked as active
+  // in the content_node_field table.
+  if ($module and module_exists($module)) {
+    content_associate_fields($module);
   }
 }
 
@@ -472,6 +486,9 @@ function content_update_6008() {
   return array();
 }
 
+/**
+ * Add the 'exclude from $content' display setting to all existing field instances.
+ */
 function content_update_6009() {
   if ($abort = content_check_update()) {
     return $abort;
@@ -481,7 +498,7 @@ function content_update_6009() {
   $result = db_query("SELECT *  FROM {content_node_field_instance}");
   while ($type = db_fetch_array($result)) {
     $new_settings = array();
-    $display_settings = unserialize($type['display_settings']);  
+    $display_settings = unserialize($type['display_settings']);
     if (!empty($display_settings)) {
       foreach ($display_settings as $key => $val) {
         $new_settings[$key] = $val;

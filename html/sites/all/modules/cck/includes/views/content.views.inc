@@ -1,5 +1,5 @@
 <?php
-// $Id: content.views.inc,v 1.1.2.9 2008/10/04 13:14:21 karens Exp $
+// $Id: content.views.inc,v 1.1.2.18 2008/11/05 19:40:19 yched Exp $
 
 /**
  * @file
@@ -52,7 +52,8 @@ function content_views_handlers() {
         'parent' => 'views_handler_filter_numeric',
       ),
       'content_handler_filter_float' => array(
-        'parent' => 'views_handler_filter_float',
+        // views_handler_filter_float is defined in views_handler_filter_numeric.inc
+        'parent' => 'views_handler_filter_numeric',
       ),
       'content_handler_filter_many_to_one' => array(
         'parent' => 'views_handler_filter_many_to_one',
@@ -88,6 +89,20 @@ function content_views_plugins() {
         'title' => 'Simple', // TODO: better name ? (currently not displayed anyway)
         'help' => 'Destination-agnostic display. Mostly useful for programmatic views.',
         'handler' => 'content_plugin_display_simple',
+        'no ui' => TRUE, // Programmatic use only.
+        'uses hook menu' => FALSE,
+        'use ajax' => FALSE,
+        'use pager' => FALSE,
+        'accept attachments' => FALSE,
+      ),
+      'content_references' => array(
+        'path' => drupal_get_path('module', 'content') . '/includes/views/handlers',
+        // Those strings are not translated for now.
+        // We'll need to change that if / when we remove 'no ui'
+        'title' => 'Simple - for reference fields', // TODO: better name ? (currently not displayed anyway)
+        'help' => 'Destination-agnostic display. Mostly useful for programmatic views.',
+        'parent' => 'content_simple',
+        'handler' => 'content_plugin_display_references',
         'no ui' => TRUE, // Programmatic use only.
         'uses hook menu' => FALSE,
         'use ajax' => FALSE,
@@ -154,6 +169,7 @@ function content_views_field_views_data($field) {
     $types = array();
     foreach (content_types() as $type) {
       if (isset($type['fields'][$field['field_name']])) {
+        // TODO : run check_plain here instead of on the imploded string below ?
         $types[] = $type['name'];
       }
     }
@@ -185,7 +201,7 @@ function content_views_field_views_data($field) {
           break;
         case 'numeric':
         case 'float':
-          $filters[] = class_exists('views_handler_filter_float') ? 'content_handler_filter_float' : 'content_handler_filter_numeric';
+          $filters[] = 'content_handler_filter_float';
           $arguments[] = 'content_handler_argument_numeric';
           break;
 
@@ -204,7 +220,8 @@ function content_views_field_views_data($field) {
 
     $data[$columns[0]] = array(
       'group' => t('Content'),
-      'title' => t($field_types[$field['type']]['label']) .': '. t($field['widget']['label']) . ' ('. $field['field_name'] .')',
+      'title' => t('@label - (!name)', array('@label' => t($field['widget']['label']), '!name' => $field['field_name'])),
+      'title_short' => check_plain(t($field['widget']['label'])),
       'help' =>  t($field_types[$field['type']]['label']) .' - '. t('Appears in: @types', array('@types' => implode(', ', $types))),
       'field' => array(
         'field' => $columns[0],
@@ -213,7 +230,6 @@ function content_views_field_views_data($field) {
         'click sortable' => $sorts[0],
         'additional fields' => $additional_fields,
         'content_field_name' => $field['field_name'],
-        'allow empty' => TRUE,
         // Access control modules should implement content_views_access_callback().
         'access callback' => 'content_views_access_callback',
         'access arguments' => array($field),
@@ -222,16 +238,12 @@ function content_views_field_views_data($field) {
         'field' => $columns[0],
         'table' => $db_info['table'],
         'handler' => $arguments[0],
-        'click sortable' => $sorts[0], // TODO used in once place in node.views.inc, should we use it here?
-        'name field' => '', // TODO
         'additional fields' => $additional_fields,
         'content_field_name' => $field['field_name'],
         'empty field name' => t('<No value>'),
-        'allow empty' => TRUE,
       ),
       'filter' => array(
         'field' => $columns[0],
-        'title' => t($field['widget']['label']),
         'table' => $db_info['table'],
         'handler' => $filters[0],
         'additional fields' => $additional_fields,
@@ -239,8 +251,6 @@ function content_views_field_views_data($field) {
         'allow empty' => TRUE,
       ),
     );
-    // TODO do we need different handling for sorts with Views 2,
-    // especially when relationships are involved?
     if (!empty($sorts[0])) {
       $data[$columns[0]]['sort'] = array(
         'field' => $columns[0],
@@ -248,7 +258,6 @@ function content_views_field_views_data($field) {
         'handler' => 'content_handler_sort',
         'additional fields' => $additional_fields,
         'content_field_name' => $field['field_name'],
-        'allow empty' => TRUE,
       );
     }
     // TODO: provide automatic filters, sorts, and arguments for each column, not just the first?

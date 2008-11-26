@@ -1,0 +1,112 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: admin_menu v1.x\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: 2008-10-20 11:18-0500\n"
+"Last-Translator: Dimar Anez <dimar@wiseconnexion.com>\n"
+"Language-Team: Dimar Anez <dimar@wiseconnexion.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Poedit-Language: Spanish\n"
+"X-Poedit-Country: UNITED STATES\n"
+"X-Poedit-SourceCharset: utf-8\n"
+
+#: admin_menu.inc:126
+msgid "Administer"
+msgstr "Administrar"
+
+#: admin_menu.inc:143
+msgid "Run cron"
+msgstr "Correr automatizador de tareas"
+
+#: admin_menu.inc:145
+msgid "Run updates"
+msgstr "Actualizar"
+
+#: admin_menu.inc:150
+msgid "Drupal.org"
+msgstr "Drupal.org"
+
+#: admin_menu.inc:151
+msgid "Drupal issue queue"
+msgstr "Drupal issue query"
+
+#: admin_menu.inc:162
+msgid "@title issue queue"
+msgstr "@title issue query"
+
+#: admin_menu.inc:170
+msgid "Logout @name"
+msgstr "Logout @name"
+
+#: admin_menu.inc:180
+msgid "Add !title"
+msgstr "Adicionar !title"
+
+#: admin_menu.module:20
+msgid "Renders the administer menu tree as dropdown menu at the top of the window."
+msgstr "Transforma el menu de administración de un arbol a un dropdown en la parte superior de la ventana."
+
+#: admin_menu.module:299
+msgid "Current anonymous / authenticated users"
+msgstr "Usuarios anónimos / autenticados"
+
+#: admin_menu.module:322
+msgid "Administration Menu settings"
+msgstr "Configuración del Menu de Administración"
+
+#: admin_menu.module:327
+msgid "None"
+msgstr "Ninguno"
+
+#: admin_menu.module:327
+#, fuzzy
+msgid "Id"
+msgstr "ID"
+
+#: admin_menu.module:327
+msgid "Weight"
+msgstr "Peso"
+
+#: admin_menu.module:327
+msgid "Parent id"
+msgstr "ID Padre"
+
+#: admin_menu.module:330
+msgid "Display extra information for menu items in Drupal Administration Menu"
+msgstr "Muestra información adicional de los elementos del menu en el Menu de Administración de Drupal"
+
+#: admin_menu.module:333
+msgid "If enabled, the chosen information will appear next to each menu item link."
+msgstr "Si se habilita, la información seleccionada aparecerá al lado de cada enlace de elemento del menu."
+
+#: admin_menu.module:337
+msgid "Display all menu items"
+msgstr "Mostrar todos los elementos del menu"
+
+#: admin_menu.module:339
+msgid "Enable this option to disable user access checks for menu items, i.e. every menu item in the visible menu tree will be displayed to every user regardless of access permissions."
+msgstr "Seleccione esta opción para desabilitar chequeo de acceso de los usuarios a los elementos del menu. Ej: cada elemento del arbol del menú será mostrado a todos los usuarios sin importar sus permisos de accesos."
+
+#: admin_menu.module:365
+msgid "Variable editor"
+msgstr "Editor de Variables"
+
+#: admin_menu.module:371
+msgid "Empty cache"
+msgstr "Vaciar la caché"
+
+#: admin_menu.info:0
+msgid "Administration Menu"
+msgstr "Menu de Administración"
+
+#: admin_menu.info:0
+msgid "Renders a menu tree for administrative purposes as dropdown menu at the top of the window."
+msgstr "Muestra un arbol del menu para propósitos administrativos como un menu dropdown en la parte superior de la ventana."
+
+#: admin_menu.info:0
+msgid "Administration"
+msgstr "Administración"
+

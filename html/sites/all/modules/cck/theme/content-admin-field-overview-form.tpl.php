@@ -1,5 +1,5 @@
 <?php
-// $Id: content-admin-field-overview-form.tpl.php,v 1.1.2.4 2008/09/27 14:08:09 karens Exp $
+// $Id: content-admin-field-overview-form.tpl.php,v 1.1.2.5 2008/10/16 14:40:54 yched Exp $
 ?>
 <div>
   <?php print $help; ?>
@@ -81,7 +81,7 @@
           <td>
             <?php print $row->indentation; ?>
             <div class="<?php print $row->label_class; ?>">
-              <div class="content-new"><?php print $row->title; ?></div>
+              <div class="content-new"><?php print theme('advanced_help_topic', 'content', 'add-new-group') . t('New group'); ?></div>
               <?php print $row->label; ?>
             </div>
           </td>

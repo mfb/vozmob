@@ -1,4 +1,4 @@
-<?php  // $Id: filefield.module,v 1.151 2008/10/09 22:13:26 drewish Exp $
+<?php  // $Id: filefield.module,v 1.157 2008/11/16 08:17:07 dopry Exp $
 
 /**
  * @file
@@ -8,13 +8,15 @@
  * and Drupal's {files} table to store the actual file data.
  */
 
+include_once('field_file.inc');
+
 /**
  * Implementation of hook_init().
  */
 function filefield_init() {
   // file hooks and callbacks.
   module_load_include('inc', 'filefield', 'filefield_file');
-  module_load_include('inc', 'filefield', 'field_file');
+  module_load_include('inc', 'filefield', 'filefield_widget');
 
   drupal_add_js(drupal_get_path('module', 'filefield') .'/filefield.js');
   drupal_add_css(drupal_get_path('module', 'filefield') .'/filefield.css');
@@ -122,7 +124,7 @@ function filefield_file_download($file) {
   // and node it belongs to. Required for later access checking.
   $cck_files = array();
   foreach (content_fields() as $field) {
-    if ($field['type'] == 'filefield') {
+    if ($field['type'] == 'filefield' || $field['type'] == 'image') {
       $db_info = content_database_info($field);
       $table = $db_info['table'];
       $fid_column = $db_info['columns']['fid']['column'];
@@ -234,7 +236,6 @@ function filefield_field_settings($op, $field) {
  */
 function filefield_field($op, $node, $field, &$items, $teaser, $page) {
   module_load_include('inc', 'filefield', 'filefield_field');
-  module_load_include('inc', 'filefield', 'field_file');
   $op = str_replace(' ', '_', $op);
   // add filefield specific handlers...
   $function = 'filefield_field_'. $op;
@@ -247,7 +248,6 @@ function filefield_field($op, $node, $field, &$items, $teaser, $page) {
  * Implementation of CCK's hook_widget_settings().
  */
 function filefield_widget_settings($op, $widget) {
-  module_load_include('inc', 'filefield', 'filefield_widget');
   $return = array();
   // load our widget settings callbacks..
   $op =  str_replace(' ', '_', $op);
@@ -277,7 +277,6 @@ function filefield_widget_settings($op, $widget) {
  * Implementation of hook_widget().
  */
 function filefield_widget(&$form, &$form_state, $field, $items, $delta = 0) {
-  module_load_include('inc', 'filefield', 'filefield_widget');
   // CCK doesn't give a validate callback at the field level...
   // and FAPI's #require is naieve to complex structures...
   // we validate at the field level ourselves.
@@ -288,12 +287,6 @@ function filefield_widget(&$form, &$form_state, $field, $items, $delta = 0) {
     $form['#submit'][] = 'filefield_node_form_submit';
   }
 
-
-
-  $default =  array('fid' => 0, 'list' => 0, 'data' => array('description' => ''));
-  // assign defaults..
-  if (empty($items[$delta])) $items[$delta] = $default;
-
   module_load_include('inc', 'filefield', 'field_widget');
 
   $form['#attributes'] = array('enctype' => 'multipart/form-data');
@@ -301,7 +294,7 @@ function filefield_widget(&$form, &$form_state, $field, $items, $delta = 0) {
   $element = array(
     '#title' => $field['widget']['label'],
     '#type' => $field['widget']['type'],
-    '#default_value' => array_merge($default, $items[$delta]),
+    '#default_value' => array_merge(_filefield_default_value($field), $items[$delta]),
     '#upload_validators' => filefield_widget_upload_validators($field),
   );
   module_load_include('inc', $field['widget']['module'], $field['widget']['module'] .'_widget');
@@ -472,9 +465,6 @@ function filefield_js($type_name, $field_name, $delta) {
     $form[$field_name][$delta] = $delta_element;
   }
 
-  // Write the (unbuilt, updated) form back to the form cache.
-  form_set_cache($form_build_id, $form, $form_state);
-
   // Render the form for output.
   $form += array(
     '#post' => $_POST,
@@ -520,7 +510,7 @@ function filefield_default_value(&$form, &$form_state, $field, $delta) {
       $max = 1;
       break;
     case 1:
-      $max =  isset($form_state['item_count'][$field_name]) ? $form_state['item_count'][$field_name] : 2;
+      $max =  isset($form_state['item_count'][$field_name]) ? $form_state['item_count'][$field_name] : 1;
       break;
     default:
       $max = $field['multiple'];
@@ -670,6 +660,6 @@ function filefield_validate_is_image(&$file) {
 }
 
 
-function filefield_validate_is_image_help() {
+function filefield_validate_is_image_help($arguments = null) {
   return t('Must be a JPEG, PNG or GIF image');
 }

@@ -1,5 +1,5 @@
 <?php
-// $Id: content.rules.inc,v 1.1.2.2 2008/10/06 15:02:03 karens Exp $
+// $Id: content.rules.inc,v 1.1.2.4 2008/10/24 11:11:48 fago Exp $
 
 /**
  * @file
@@ -56,6 +56,11 @@ function content_rules_action_populate_field_form($settings, &$form, &$form_stat
       '#description' => t('Select the machine-name of the field.'),
       '#required' => TRUE,
     );
+    // Hide some form elements in the first step.
+    $form['negate']['#access'] = FALSE;
+    $form['input_help']['#access'] = FALSE;
+    $form['weight']['#access'] = FALSE;
+
     // Replace the usual submit handlers with a own handler.
     $form['submit']['#submit'] = array('content_rules_action_populate_field_form_step_submit');
     $form['submit']['#value'] = t('Continue');
@@ -173,7 +178,7 @@ function content_rules_action_populate_field_submit(&$settings, $form, &$form_st
  * Label callback: Improve the label of the action.
  */
 function content_rules_action_populate_field_label($settings, $argument_labels) {
-  return t("Populate @node's @field", array('@field' => $settings['field_name']) + $argument_labels);
+  return t("Populate @node's field '@field'", array('@field' => $settings['field_name']) + $argument_labels);
 }
 
 function workflow_ng_action_populate_field_upgrade(&$element) {
@@ -241,7 +246,7 @@ function content_rules_field_has_value_submit(&$settings, $form, &$form_state) {
 }
 
 function content_rules_field_has_value_label($settings, $argument_labels) {
-  return t("@node's @field has value", array('@field' => $settings['field_name']) + $argument_labels);
+  return t("@node's field '@field' has value", array('@field' => $settings['field_name']) + $argument_labels);
 }
 
 /**
@@ -267,7 +272,7 @@ function content_rules_field_changed_form($settings, &$form, &$form_state) {
 }
 
 function content_rules_field_changed_label($settings, $argument_labels) {
-  return t("@node's @field has changed", array('@field' => $settings['field_name']) + $argument_labels);
+  return t("@node's field '@field' has been changed", array('@field' => $settings['field_name']) + $argument_labels);
 }
 
 

@@ -1,5 +1,5 @@
 <?php
-// $Id: admin_menu.module,v 1.43.2.7 2008/09/09 14:39:01 sun Exp $
+// $Id: admin_menu.module,v 1.43.2.12 2008/11/02 22:22:43 sun Exp $
 
 /**
  * @file
@@ -75,6 +75,12 @@ function admin_menu_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'admin_menu.inc',
   );
+  $items['admin_menu/flush-cache'] = array(
+    'page callback' => 'admin_menu_flush_cache',
+    'access arguments' => array('administer site configuration'),
+    'type' => MENU_CALLBACK,
+    'file' => 'admin_menu.inc',
+  );
   return $items;
 }
 
@@ -93,7 +99,15 @@ function admin_menu_init() {
     // Performance: Defer execution.
     drupal_add_js($path .'/admin_menu.js', 'module', 'header', TRUE);
 
-    drupal_add_js(array('admin_menu' => array('margin_top' => variable_get('admin_menu_margin_top', 1))), 'setting');
+    if ($setting = variable_get('admin_menu_margin_top', 1)) {
+      drupal_add_js(array('admin_menu' => array('margin_top' => $setting)), 'setting');
+    }
+    if ($setting = variable_get('admin_menu_position_fixed', 0)) {
+      drupal_add_js(array('admin_menu' => array('position_fixed' => $setting)), 'setting');
+    }
+    if ($setting = variable_get('admin_menu_tweak_tabs', 0)) {
+      drupal_add_js(array('admin_menu' => array('tweak_tabs' => $setting)), 'setting');
+    }
     if ($_GET['q'] == 'admin/build/modules') {
       drupal_add_js(array('admin_menu' => array('tweak_modules' => variable_get('admin_menu_tweak_modules', 0))), 'setting');
     }
@@ -163,10 +177,8 @@ function admin_menu_tree_output($tree) {
 
   foreach ($tree as $data) {
     $extra_class = isset($data['link']['localized_options']['extra class']) ? $data['link']['localized_options']['extra class'] : NULL;
-    // Omit alias lookups.
-    $data['link']['localized_options']['alias'] = TRUE;
+    $link = admin_menu_item_link($data['link']);
 
-    $link = theme('menu_item_link', $data['link']);
     if ($data['below']) {
       $output .= theme('admin_menu_item', $link, $data['link']['has_children'], admin_menu_tree_output($data['below']), $data['link']['in_active_trail'], $extra_class);
     }
@@ -175,6 +187,18 @@ function admin_menu_tree_output($tree) {
     }
   }
   return $output ? "\n<ul>". $output .'</ul>' : '';
+}
+
+/**
+ * High-performance implementation of theme_menu_item_link().
+ *
+ * This saves us a theme() call and does only the absolute minimum to get
+ * the admin menu links rendered.
+ */
+function admin_menu_item_link($link) {
+  // Omit alias lookups.
+  $link['localized_options']['alias'] = TRUE;
+  return '<a href="'. check_url(url($link['href'], $link['localized_options'])) .'">'. (!empty($link['localized_options']['html']) ? $link['title'] : check_plain($link['title'])) .'</a>';
 }
 
 /**
@@ -204,7 +228,6 @@ function theme_admin_menu_item($link, $has_children, $menu = '', $in_active_trai
   }
   return '<li'. (!empty($class) ? ' class="'. $class .'"' : '') .'>'. $link . $menu .'</li>';
 }
-
 
 /**
  * Implementation of hook_form_[form_id]_alter().
@@ -237,6 +260,7 @@ function admin_menu_menu_alter() {
  * as the current page path or the number of users.
  */
 function admin_menu_translated_menu_link_alter(&$item, $map) {
+  global $user, $base_url;
   static $access_all;
 
   if (!isset($access_all)) {
@@ -257,14 +281,19 @@ function admin_menu_translated_menu_link_alter(&$item, $map) {
   if (!$item['access']) {
     return;
   }
+  if ($item['link_path'] == $base_url . '/update.php' && $user->uid != 1) {
+    $item['access'] = FALSE;
+    return;
+  }
+  if ($item['link_path'] == 'http://drupal.org' && !user_access('display drupal links')) {
+    $item['access'] = FALSE;
+    return;
+  }
   // Fix destination query strings
   if (isset($item['localized_options']['query'])) {
     if ($item['localized_options']['query'] == 'destination') {
       $item['localized_options']['query'] = drupal_get_destination();
     }
-  }
-  if (($item['link_path'] == 'http://drupal.org') && !user_access('display drupal links')) {
-    $item['access'] = FALSE;
   }
   if ($extra = variable_get('admin_menu_display', 0)) {
     $item['title'] .= ' '. $extra[0] .': '. $item[$extra];

@@ -1,16 +1,24 @@
 <?php
-// $Id: content.devel.inc,v 1.4.2.2 2008/10/06 15:11:38 karens Exp $
+// $Id: content.devel.inc,v 1.4.2.5 2008/11/05 12:00:21 karens Exp $
 
 /**
  * @file
  * Functions needed for Devel module integration.
+ * 
+ * TODO
+ * This is not really working correctly yet. It is getting called once
+ * for every field and then generating every field each time. But if
+ * you only process one field at a time the earlier ones lose their values.
+ * The current method works to create values, but is overly processor-
+ * intensive and needs to be reworked in a way that each field is 
+ * only processed once and all values are retained.
  */
 
 /**
  * Enrich the $node that is about to be saved with arbitrary
  * information in each of its CCK fields.
  **/
-function content_generate_fields(&$node) {
+function content_generate_fields(&$node, $field) {
   $type_name = $node->type;
   $type = content_types($type_name);
   $field_types = _content_field_types();
@@ -19,8 +27,8 @@ function content_generate_fields(&$node) {
     foreach ($type['fields'] as $field) {
       $node_field = array();
       // If module handles own multiples, then only call its hook once.
-      if (content_callback('field', 'multiple values', $field) != CONTENT_CALLBACK_DEFAULT) {
-        $max = 1;
+      if (content_handle('widget', 'multiple values', $field) == CONTENT_HANDLE_MODULE) {
+        $max = 0;
       }
       else {
         switch ($field['multiple']) {
@@ -50,7 +58,7 @@ function content_generate_fields(&$node) {
           }
         }
       }
-      $node->$field['field_name'] = $node_field;
+      $node->{$field['field_name']} = $node_field;
     }
   }
 }
@@ -94,7 +102,7 @@ if (module_exists('text')) {
 
   function _text_content_generate($node, $field) {
     $node_field = array();
-    if ($field['widget']['rows'] > 1) {
+    if ($field['widget']['type'] == 'text_textarea') {
       $format = $field['text_processing'] ? rand(0, 3) : 0;
       $node_field['value'] = devel_create_content($format);
       $node_field['format'] = $format;

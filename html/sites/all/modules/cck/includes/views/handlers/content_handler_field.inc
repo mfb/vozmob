@@ -1,5 +1,5 @@
 <?php
-// $Id: content_handler_field.inc,v 1.1.2.8 2008/10/09 14:31:15 karens Exp $
+// $Id: content_handler_field.inc,v 1.1.2.10 2008/11/11 00:26:53 yched Exp $
 
 /**
  * @file
@@ -16,6 +16,16 @@ class content_handler_field extends views_handler_field_node {
   function construct() {
     parent::construct();
     $this->content_field = content_fields($this->definition['content_field_name']);
+  }
+
+  function init(&$view, $options) {
+    $field = $this->content_field;
+    parent::init($view, $options);
+    if ($field['multiple']) {
+      $this->additional_fields['delta'] = 'delta';
+    }
+    // We'll need the node type to render the results.
+    $this->additional_fields['type'] = array('table' => 'node', 'field' => 'type');
   }
 
   function options(&$options) {
@@ -76,13 +86,13 @@ class content_handler_field extends views_handler_field_node {
     );
   }
 
-  
+
   /**
    * Make sure some value is stored as a label.
-   * 
-   * Don't use t(), since Views' views_handler_field already has 
+   *
+   * Don't use t(), since Views' views_handler_field already has
    * $this->options['label'] marked as a translatable field.
-   * 
+   *
    * @see http://drupal.org/node/285470
    */
   function options_submit($form, &$form_state) {
@@ -97,14 +107,14 @@ class content_handler_field extends views_handler_field_node {
   }
 
   /**
-   * @TODO 
-   * Now that we save the label in the submit process above we could 
-   * get rid of this function. Leave it here for now to be sure the 
+   * @TODO
+   * Now that we save the label in the submit process above we could
+   * get rid of this function. Leave it here for now to be sure the
    * label works for fields that haven't been updated since this
-   * change was made, since $this->options['label'] will be missing a 
+   * change was made, since $this->options['label'] will be missing a
    * value until it is updated in the view.
-   * 
-   * Don't use t(), since Views' views_handler_field already has 
+   *
+   * Don't use t(), since Views' views_handler_field already has
    * $this->options['label'] marked as a translatable field.
    */
   function label() {
@@ -138,16 +148,23 @@ class content_handler_field extends views_handler_field_node {
     $options = $this->options;
     $db_info = content_database_info($field);
 
-    // $values will be used as a fake $node object;
-    // we provide a build_mode for rendering.
-    $values->build_mode = NODE_BUILD_NORMAL;
+    // Build a pseudo-node from the retrieved values.
+    $node = drupal_clone($values);
+    // TODO : is nid always correct ?
+    // content_format and formatters will need a 'type'.
+    $node->type = $values->{$this->aliases['type']};
+    // Some formatters need to behave differently depending on the build_mode
+    // (for instance: preview), so we provide one.
+    $node->build_mode = NODE_BUILD_NORMAL;
 
     $item = array();
     foreach ($db_info['columns'] as $column => $attributes) {
-      $item[$column] = $values->{$this->table_alias .'_'. $attributes['column']};
+      $item[$column] = $values->{$this->aliases[$attributes['column']]};
     }
-    $item['#delta'] = !empty($values->{$this->table_alias . '_delta'}) ? $values->{$this->table_alias . '_delta'} : 0;
-    return $this->render_link(content_format($field, $item, $options['format'], $values), $values);
+
+    $item['#delta'] = $field['multiple'] ?  $values->{$this->aliases['delta']} : 0;
+
+    return $this->render_link(content_format($field, $item, $options['format'], $node), $values);
   }
 
 }

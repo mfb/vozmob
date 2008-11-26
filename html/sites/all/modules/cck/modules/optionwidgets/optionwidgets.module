@@ -1,5 +1,5 @@
 <?php
-// $Id: optionwidgets.module,v 1.69.2.18 2008/10/06 15:11:39 karens Exp $
+// $Id: optionwidgets.module,v 1.69.2.21 2008/10/25 02:04:44 yched Exp $
 
 /**
  * @file
@@ -304,16 +304,28 @@ function optionwidgets_onoff_process($element, $edit, &$form_state, $form) {
 
 /**
  * FAPI function to validate optionwidgets element.
- *
- * Transpose selections from field => delta to delta => field,
- * turning multiple selected options into multiple parent elements.
- * Immediate parent is the delta, need to get back to parent's parent
- * to create multiple elements.
  */
 function optionwidgets_validate($element, &$form_state) {
+  // Transpose selections from field => delta to delta => field,
+  // turning multiple selected options into multiple parent elements.
+  // Immediate parent is the delta, need to get back to parent's parent
+  // to create multiple elements.
   $field = $form_state['#field_info'][$element['#field_name']];
-  $updated = optionwidgets_form2data($element, $field);
-  form_set_value($element, $updated, $form_state);
+  $items = optionwidgets_form2data($element, $field);
+  form_set_value($element, $items, $form_state);
+
+  // Check we don't exceed the allowed number of values.
+  if ($field['multiple'] >= 2) {
+    // Filter out 'none' value (if present, will always be in key 0)
+    $field_key = $element['#columns'][0];
+    if (isset($items[0][$field_key]) && $items[0][$field_key] === '') {
+      unset($items[0]);
+    }
+    if (count($items) > $field['multiple']) {
+      $field_key  = $element['#columns'][0];
+      form_error($element[$field_key], t('%name: this field cannot hold more that @count values.', array('%name' => t($field['widget']['label']), '@count' => $field['multiple'])));
+    }
+  }
 }
 
 /**
@@ -378,9 +390,11 @@ function optionwidgets_options($field) {
   // Add an empty choice for :
   // - non required radios
   // - non required selects
-  if (($field['widget']['type'] == 'optionwidgets_buttons' && !$field['required'] && !$field['multiple'])
-    || (in_array($field['widget']['type'], array('optionwidgets_select', 'nodereference_select', 'nodereference_buttons', 'userreference_select', 'userreference_buttons')) && !$field['required'])) {
-    $options = array('' => theme('optionwidgets_none', $field)) + $options;
+  if (!$field['required']) {
+    if ((in_array($field['widget']['type'], array('optionwidgets_buttons', 'nodereference_buttons', 'userreference_buttons')) && !$field['multiple'])
+      || (in_array($field['widget']['type'], array('optionwidgets_select', 'nodereference_select', 'userreference_select')))) {
+      $options = array('' => theme('optionwidgets_none', $field)) + $options;
+    }
   }
   return $options;
 }

@@ -1,5 +1,5 @@
 <?php
-// $Id: mailhandler.module,v 1.96.2.2 2008/08/09 11:54:43 weitzman Exp $
+// $Id: mailhandler.module,v 1.96.2.3 2008/10/26 21:43:24 zstolar Exp $
 
 
 /**
@@ -56,6 +56,15 @@ function mailhandler_menu() {
     'page arguments' => array('mailhandler_add_edit_mailbox', NULL),
     'access arguments' => array('administer mailhandler'),
     'type' => MENU_LOCAL_TASK,
+    'file' => 'mailhandler.admin.inc',
+  );
+
+  $items['admin/content/mailhandler/clone/%'] = array(
+    'title' => t('Add mailbox'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mailhandler_add_edit_mailbox', 4, TRUE),
+    'access arguments' => array('administer mailhandler'),
+    'type' => MENU_CALLBACK,
     'file' => 'mailhandler.admin.inc',
   );
 

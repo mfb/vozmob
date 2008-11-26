@@ -1,5 +1,5 @@
 <?php
-// $Id: content.module,v 1.301.2.72 2008/10/10 20:35:56 karens Exp $
+// $Id: content.module,v 1.301.2.85 2008/11/10 15:56:35 yched Exp $
 /**
  * @file
  * Allows administrators to associate custom fields to content types.
@@ -317,7 +317,7 @@ function content_delete_revision(&$node) {
 }
 
 /**
- * Implementataion of hook_nodeapi 'view' op.
+ * Implementation of hook_nodeapi 'view' op.
  *
  * Generate field render arrays.
  */
@@ -328,25 +328,55 @@ function content_view(&$node, $teaser = FALSE, $page = FALSE) {
   // Merge fields.
   $additions = _content_field_invoke_default('view', $node, $teaser, $page);
   $node->content = array_merge((array) $node->content, $additions);
+}
 
-  // Adjust weights for non-CCK fields.
-  $type = content_types($node->type);
+/**
+ * Render a single field, fully themed with label and multiple values.
+ *
+ * To be used by third-party code (Views, Panels...) that needs to output
+ * an isolated field. Do *not* use inside node templates, use the
+ * $FIELD_NAME_rendered variables instead.
+ *
+ * By default, the field is displayed using the settings defined for the
+ * 'full node' or 'teaser' contexts (depending on the value of the $teaser param).
+ * Set $node->build_mode to a different value to use a different context.
+ *
+ * Different settings can be specified by adjusting $field['display_settings'].
+ *
+ * @param $field
+ *   The field definition.
+ * @param $node
+ *   The node containing the field to display. Can be a 'pseudo-node', containing
+ *   at least 'type', 'nid', 'vid', and the field data.
+ * @param $teaser
+ * @param $page
+ *   Similar to hook_nodeapi('view')
+ * @return
+ *   The themed output for the field.
+ */
+function content_view_field($field, $node, $teaser = FALSE, $page = FALSE) {
+  $output = '';
+  if (isset($node->$field['field_name'])) {
+    $items = $node->$field['field_name'];
 
-  // Could be unset in the unusual situation where you have created
-  // CCK content and then delete the content type without deleting
-  // the node, since core does not delete the nodes in that case.
-  if (isset($type['extra'])) {
-    foreach ($type['extra'] as $key => $value) {
-      // Some core 'fields' use a different key in node forms and in 'view'
-      // render arrays.
-      if (isset($value['view']) && isset($node->content[$value['view']])) {
-        $node->content[$value['view']]['#weight'] = $value['weight'];
-      }
-      elseif (isset($node->content[$key])) {
-        $node->content[$key]['#weight'] = $value['weight'];
-      }
+    // Use 'full'/'teaser' if not specified otherwise.
+    $node->build_mode = isset($node->build_mode) ? $node->build_mode : NODE_BUILD_NORMAL;
+
+    // One-field equivalent to _content_field_invoke('sanitize').
+    $field_types = _content_field_types();
+    $module = $field_types[$field['type']]['module'];
+    $function = $module .'_field';
+    if (function_exists($function)) {
+      $function('sanitize', $node, $field, $items, $teaser, $page);
+      $node->$field['field_name'] = $items;
     }
+
+    $view = content_field('view', $node, $field, $items, $teaser, $page);
+    // content_field('view') adds a wrapper to handle variables and 'excluded'
+    // fields for node templates. We bypass it and render the actual field.
+    $output = drupal_render($view[$field['field_name']]['field']);
   }
+  return $output;
 }
 
 /**
@@ -367,7 +397,8 @@ function content_alter(&$node, $teaser = FALSE, $page = FALSE) {
 function content_prepare_translation(&$node) {
   $default_additions = _content_field_invoke_default('prepare translation', $node);
   $additions = _content_field_invoke('prepare translation', $node);
-  // Merge module additions after the default ones to enable overriding of field values.
+  // Merge module additions after the default ones to enable overriding
+  // of field values.
   $node = (object) array_merge((array) $node, $default_additions, $additions);
 }
 
@@ -375,11 +406,30 @@ function content_prepare_translation(&$node) {
  * Implementation of hook_nodeapi().
  */
 function content_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
-  $type = content_types($node->type);
-  if (!empty($type['fields'])) {
-    $callback = 'content_'. str_replace(' ', '_', $op);
-    if (function_exists($callback)) {
-      $callback($node, $a3, $a4);
+  // Prevent against invalid 'nodes' built by broken 3rd party code.
+  if (isset($node->type)) {
+    $type = content_types($node->type);
+    // Save cycles if the type has no CCK fields.
+    if (!empty($type['fields'])) {
+      $callback = 'content_'. str_replace(' ', '_', $op);
+      if (function_exists($callback)) {
+        $callback($node, $a3, $a4);
+      }
+    }
+
+    // Special case for 'view' op, we want to adjust weights of non-cck fields
+    // even if there are no actual fields for this type.
+    if ($op == 'view') {
+      foreach ($type['extra'] as $key => $value) {
+        // Some core 'fields' use a different key in node forms and in 'view'
+        // render arrays.
+        if (isset($value['view']) && isset($node->content[$value['view']])) {
+          $node->content[$value['view']]['#weight'] = $value['weight'];
+        }
+        elseif (isset($node->content[$key])) {
+          $node->content[$key]['#weight'] = $value['weight'];
+        }
+      }
     }
   }
 }
@@ -394,12 +444,11 @@ function content_form_alter(&$form, $form_state, $form_id) {
       module_load_include('inc', 'content', 'includes/content.node_form');
       // Merge field widgets.
       $form = array_merge($form, content_form($form, $form_state));
-      // Adjust weights for non-CCK fields.
-      $type = content_types($form['type']['#value']);
-      foreach ($type['extra'] as $key => $value) {
-        if (isset($form[$key])) {
-          $form[$key]['#weight'] = $value['weight'];
-        }
+    }
+    // Adjust weights for non-CCK fields.
+    foreach ($type['extra'] as $key => $value) {
+      if (isset($form[$key])) {
+        $form[$key]['#weight'] = $value['weight'];
       }
     }
   }
@@ -505,7 +554,7 @@ function content_notify($op, $module) {
     case 'disable':
       // When CCK modules are disabled before content module's update is run
       // to add the active column, we can't do this.
-      if (!variable_get('content_schema_version', -1) >= 6007) {
+      if (variable_get('content_schema_version', -1) < 6007) {
         return FALSE;
       }
       db_query("UPDATE {". content_field_tablename() ."} SET active=0 WHERE module='%s'", $module);
@@ -524,7 +573,7 @@ function content_notify($op, $module) {
 function content_associate_fields($module) {
   // When CCK modules are enabled before content module's update is run,
   // to add module and active columns, we can't do this.
-  if (!variable_get('content_schema_version', -1) >= 6007) {
+  if (variable_get('content_schema_version', -1) < 6007) {
     return FALSE;
   }
   $module_fields = module_invoke($module, 'field_info');
@@ -635,7 +684,8 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
     case 'presave':
       if (!empty($node->devel_generate)) {
         include_once('./'. drupal_get_path('module', 'content') .'/includes/content.devel.inc');
-        content_generate_fields($node);
+        content_generate_fields($node, $field);
+        $items = $node->{$field['field_name']};
       }
 
       // Manual node_save calls might not have all fields filled in.
@@ -654,13 +704,14 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
       // TODO: is it still needed ?
       unset($items[$field['field_name'] .'_add_more']);
 
-      // Filter out empty values.
-      $items = content_set_empty($field, $items);
-
       if (content_handle('widget', 'multiple values', $field) == CONTENT_HANDLE_CORE) {
         // Reorder items to account for drag-n-drop reordering.
         $items = _content_sort_items($field, $items);
       }
+
+      // Filter out empty values.
+      $items = content_set_empty($field, $items);
+
       break;
 
     case 'view':
@@ -668,13 +719,13 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
 
       // Previewed nodes bypass the 'presave' op, so we need to some massaging.
       if ($node->build_mode == NODE_BUILD_PREVIEW && content_handle('widget', 'multiple values', $field) == CONTENT_HANDLE_CORE) {
-        // Filter out empty values.
-        $items = content_set_empty($field, $items);
-
         if (content_handle('widget', 'multiple values', $field) == CONTENT_HANDLE_CORE) {
           // Reorder items to account for drag-n-drop reordering.
           $items = _content_sort_items($field, $items);
         }
+
+        // Filter out empty values.
+        $items = content_set_empty($field, $items);
       }
 
       // NODE_BUILD_NORMAL is 0, and ('whatever' == 0) is TRUE, so we need a ===.
@@ -685,26 +736,23 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
         $context = $node->build_mode;
       }
 
-      $field_types = _content_field_types();
-      $formatters = $field_types[$field['type']]['formatters'];
       $formatter_name = isset($field['display_settings'][$context]['format']) ? $field['display_settings'][$context]['format'] : 'default';
-
-      if (!isset($formatters[$formatter_name]) && $formatter_name != 'hidden') {
-        // This might happen when the selected formatter has been renamed in the
-        // module, or if the module has been disabled since then.
-        $formatter_name = 'default';
-      }
-
-      if (isset($formatters[$formatter_name])) {
-        $formatter = $formatters[$formatter_name];
+      if ($formatter = _content_get_formatter($formatter_name, $field['type'])) {
         $theme = $formatter['module'] .'_formatter_'. $formatter_name;
         $single = (content_handle('formatter', 'multiple values', $formatter) == CONTENT_HANDLE_CORE);
+
+        $label_display = isset($field['display_settings']['label']['format']) ? $field['display_settings']['label']['format'] : 'above';
+        // Do not include field labels when indexing content.
+        if ($context == NODE_BUILD_SEARCH_INDEX) {
+          $label_display = 'hidden';
+        }
 
         $element = array(
           '#type' => 'content_field',
           '#title' => check_plain(t($field['widget']['label'])),
           '#field_name' => $field['field_name'],
           '#access' => $formatter_name != 'hidden',
+          '#label_display' => $label_display,
           '#node' => $node,
           '#teaser' => $teaser,
           '#page' => $page,
@@ -826,34 +874,35 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
 }
 
 /**
- * Helper function to set NULL values and unset items where needed.
+ * Helper function to filter out empty values.
  *
- * If a specified number of multiple values was requested or this is
- * the zero delta, save even if empty and keep a NULL value for each
- * of its columns so there is a marker row in the database, otherwise
- * unset the item.
+ * On order to keep marker rows in the database, the function ensures
+ * that the right number of 'all columns NULL' values is kept.
  *
  * @param array $field
  * @param array $items
  * @return array
- *   returns emptied and adjusted item array
+ *   returns filtered and adjusted item array
  */
 function content_set_empty($field, $items) {
+  // Filter out empty values.
+  $filtered = array();
   $function = $field['module'] .'_content_is_empty';
-  $max_delta = $field['multiple'] > 1 ? $field['multiple'] : 0;
   foreach ((array) $items as $delta => $item) {
-    if ($function($item, $field)) {
-      if ($delta <= $max_delta) {
-        foreach (array_keys($field['columns']) as $column) {
-          $items[$delta][$column] = NULL;
-        }
-      }
-      else {
-        unset($items[$delta]);
-      }
+    if (!$function($item, $field)) {
+      $filtered[] = $item;
     }
   }
-  return $items;
+
+  // Make sure we store the right number of 'empty' values.
+  $empty = array();
+  foreach (array_keys($field['columns']) as $column) {
+    $empty[$column] = NULL;
+  }
+  $pad = $field['multiple'] > 1 ? $field['multiple'] : 1;
+  $filtered = array_pad($filtered, $pad, $empty);
+
+  return $filtered;
 }
 
 /**
@@ -903,7 +952,7 @@ function _content_sort_items_value_helper($a, $b) {
 function content_storage($op, $node) {
   // Don't try this before content module's update is run to add
   // the active and module columns.
-  if (!variable_get('content_schema_version', -1) >= 6007) {
+  if (variable_get('content_schema_version', -1) < 6007) {
     return FALSE;
   }
 
@@ -1257,7 +1306,7 @@ function content_types($type_name = NULL) {
       return $info['content types'][$type_name];
     }
   }
-  return array('tables' => array(), 'fields' => array());
+  return array('tables' => array(), 'fields' => array(), 'extra' => array());
 }
 
 /**
@@ -1307,6 +1356,23 @@ function _content_widget_types() {
 }
 
 /**
+ * Return the formatter description corresponding to a formatter name,
+ * defaulting to 'default' if none is found.
+ */
+function _content_get_formatter($formatter_name, $field_type) {
+  $field_types = _content_field_types();
+  $formatters = $field_types[$field_type]['formatters'];
+
+  if (!isset($formatters[$formatter_name]) && $formatter_name != 'hidden') {
+    // This might happen when the selected formatter has been renamed in the
+    // module, or if the module has been disabled since then.
+    $formatter_name = 'default';
+  }
+
+  return isset($formatters[$formatter_name]) ? $formatters[$formatter_name] : FALSE;
+}
+
+/**
  * Collate all information on content types, fields, and related structures.
  *
  * @param $reset
@@ -1323,7 +1389,7 @@ function _content_type_info($reset = FALSE) {
 
     // Don't try this before content module's update is run
     // to add module and active columns to the table.
-    if (!variable_get('content_schema_version', -1) >= 6007) {
+    if (variable_get('content_schema_version', -1) < 6007) {
       return array();
     }
 
@@ -1633,7 +1699,7 @@ function _content_filter_xss_display_allowed_tags() {
  * @param $item
  *   The field item(s) to be formatted (such as $node->field_foo[0],
  *   or $node->field_foo if the formatter handles multiple values itself)
- * @param $formatter
+ * @param $formatter_name
  *   The name of the formatter to use.
  * @param $node
  *   Optionally, the containing node object for context purposes and
@@ -1644,60 +1710,53 @@ function _content_filter_xss_display_allowed_tags() {
  *   It will have been passed through the necessary check_plain() or check_markup()
  *   functions as necessary.
  */
-function content_format($field, $item, $formatter = 'default', $node = NULL) {
+function content_format($field, $item, $formatter_name = 'default', $node = NULL) {
   if (!is_array($field)) {
     $field = content_fields($field);
   }
-  $field_types = _content_field_types();
-  $formatters = $field_types[$field['type']]['formatters'];
-  if (!isset($formatters[$formatter])) {
-    $formatter = 'default';
-  }
 
-  $formatter_name = $formatter;
-  $formatter = $formatters[$formatter_name];
-  $theme = $formatter['module'] .'_formatter_'. $formatter_name;
+  if ($formatter = _content_get_formatter($formatter_name, $field['type'])) {
+    $theme = $formatter['module'] .'_formatter_'. $formatter_name;
 
-  // A real node will have the type name in $node->type,
-  // a Views pseudo-node will have the type name in $node->node_type.
-  $element = array(
-    '#theme' => $theme,
-    '#field_name' => $field['field_name'],
-    '#type_name' => isset($node->type) ? $node->type : (isset($node->node_type) ? $node->node_type : ''),
-    '#formatter' => $formatter_name,
-    '#node' => $node,
-    '#delta' => isset($item['#delta']) ? $item['#delta'] : NULL,
-  );
+    $element = array(
+      '#theme' => $theme,
+      '#field_name' => $field['field_name'],
+      '#type_name' => isset($node->type) ? $node->type :'',
+      '#formatter' => $formatter_name,
+      '#node' => $node,
+      '#delta' => isset($item['#delta']) ? $item['#delta'] : NULL,
+    );
 
-  if (content_handle('formatter', 'multiple values', $formatter) == CONTENT_HANDLE_CORE) {
-    // Single value formatter.
+    if (content_handle('formatter', 'multiple values', $formatter) == CONTENT_HANDLE_CORE) {
+      // Single value formatter.
 
-    // hook_field('sanitize') expects an array of items, so we build one.
-    $items = array($item);
-    $function = $field['module'] .'_field';
-    if (function_exists($function)) {
-      $function('sanitize', $node, $field, $items, FALSE, FALSE);
+      // hook_field('sanitize') expects an array of items, so we build one.
+      $items = array($item);
+      $function = $field['module'] .'_field';
+      if (function_exists($function)) {
+        $function('sanitize', $node, $field, $items, FALSE, FALSE);
+      }
+
+      $element['#item'] = $items[0];
+    }
+    else {
+      // Multiple values formatter.
+      $items = $item;
+      $function = $field['module'] .'_field';
+      if (function_exists($function)) {
+        $function('sanitize', $node, $field, $items, FALSE, FALSE);
+      }
+
+      foreach ($items as $delta => $item) {
+        $element[$delta] = array(
+          '#item' => $item,
+          '#weight' => $delta,
+        );
+      }
     }
 
-    $element['#item'] = $items[0];
+    return theme($theme, $element);
   }
-  else {
-    // Multiple values formatter.
-    $items = $item;
-    $function = $field['module'] .'_field';
-    if (function_exists($function)) {
-      $function('sanitize', $node, $field, $items, FALSE, FALSE);
-    }
-
-    foreach ($items as $delta => $item) {
-      $element[$delta] = array(
-        '#item' => $item,
-        '#weight' => $delta,
-      );
-    }
-  }
-
-  return theme($theme, $element);
 }
 
 /**
@@ -1719,7 +1778,8 @@ function content_build_modes($selector = NULL) {
     $data = module_invoke_all('content_build_modes');
     $flat = array();
     foreach ($data as $tab) {
-      $flat = array_merge($flat, $tab['build modes']);
+      // Use the + operator to preserve numeric indexes (core build modes).
+      $flat += (array) $tab['build modes'];
     }
     $info = array('tabs' => $data, 'build modes' => $flat);
   }
@@ -2049,36 +2109,36 @@ function content_field_wrapper_post_render($content, $element) {
  * 'Theme' function for a field's addition to $content.
  *
  * Adapts the all-inclusive $content variable in node templates to allow
- * some field content to be excluded. This is a theme, so it can be
+ * some field content to be excluded. This is a theme function, so it can be
  * overridden in different themes to produce different results.
- * 
- * The html for individual fields and groups are available in the 
+ *
+ * The html for individual fields and groups are available in the
  * $FIELD_NAME_rendered and $GROUP_NAME_rendered variables.
- * 
+ *
  * This allows more flexibility in node templates : you can use custom markup
  * around a few specific fields, and print the rest of the node with $content.
  *
  * @param $content
  *    The themed content for this field or group.
- * 
+ *
  * @param $object
  *    The field or group array for this item.
  *    $object['#type_name'] holds the content type.
  *    $object['#field_name'] holds the field name (if a field).
  *    $object['#group_name'] holds the group name (if a group).
- *    $object['display_settings'] holds the display settings 
- *    for all contexts, in an array like: 
+ *    $object['display_settings'] holds the display settings
+ *    for all contexts, in an array like:
  *      $object['display_settings'] => array(
  *        'full' => array(
- *          'format' => 'default', 
+ *          'format' => 'default',
  *          'exclude' => 0,
  *         ),
  *        'teaser' => array(
- *          'format' => 'default', 
+ *          'format' => 'default',
  *          'exclude' => 1,
  *         ),
  *      );
- *      
+ *
  * @param $context
  *    The context for which the node is being rendered.
  *    Can be one of the following values :
@@ -2088,6 +2148,8 @@ function content_field_wrapper_post_render($content, $element) {
  *    - NODE_BUILD_SEARCH_RESULT
  *    - NODE_BUILD_RSS
  *    - NODE_BUILD_PRINT
+ *    - ... any other custom build mode exposed by 3rd party modules using
+ *      hook_content_build_modes().
  *
  * @return
  *   Whether or not content is to be added to $content in this context.
@@ -2095,8 +2157,8 @@ function content_field_wrapper_post_render($content, $element) {
  *   as set on the Manage fields screen.
  */
 function theme_content_exclude($content, $object, $context) {
-  if (empty($object['display_settings']) 
-    || !is_array($object['display_settings'][$context]) 
+  if (empty($object['display_settings'])
+    || !is_array($object['display_settings'][$context])
     || empty($object['display_settings'][$context]['exclude'])) {
     return FALSE;
   }
@@ -2127,11 +2189,6 @@ function content_preprocess_content_field(&$variables) {
   $variables['node'] = $element['#node'];
   $variables['field'] = $field;
   $variables['items'] = array();
-
-  // Do not include field labels when indexing content.
-  if ($element['#context'] == NODE_BUILD_SEARCH_INDEX) {
-    $field['display_settings']['label']['format'] = 'hidden';
-  }
 
   if ($element['#single']) {
     // Single value formatter.
@@ -2173,7 +2230,7 @@ function content_preprocess_content_field(&$variables) {
     'field_type_css' => strtr($field['type'], '_', '-'),
     'field_name_css' => strtr($field['field_name'], '_', '-'),
     'label' => check_plain(t($field['widget']['label'])),
-    'label_display' => isset($field['display_settings']['label']['format']) ? $field['display_settings']['label']['format'] : 'above',
+    'label_display' => $element['#label_display'],
     'field_empty' => $field_empty,
     'template_files' => array(
       'content-field',

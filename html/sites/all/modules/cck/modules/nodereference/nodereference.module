@@ -1,5 +1,5 @@
 <?php
-// $Id: nodereference.module,v 1.138.2.38 2008/10/06 15:11:39 karens Exp $
+// $Id: nodereference.module,v 1.138.2.45 2008/11/05 19:40:19 yched Exp $
 
 /**
  * @file
@@ -53,25 +53,13 @@ function nodereference_theme() {
 
 /**
  * Implementation of hook_field_info().
- *
- * Here we indicate that the content module will use its default
- * handling for the view of this field.
- *
- * Callbacks can be omitted if default handing is used.
- * They're included here just so this module can be used
- * as an example for custom modules that might do things
- * differently.
  */
 function nodereference_field_info() {
   return array(
     'nodereference' => array(
       'label' => t('Node reference'),
       'description' => t('Store the ID of a related node as an integer value.'),
-      'callbacks' => array(
-        'tables' => CONTENT_CALLBACK_DEFAULT,
-        'arguments' => CONTENT_CALLBACK_DEFAULT,
-        ),
-      ),
+    ),
   );
 }
 
@@ -87,7 +75,7 @@ function nodereference_field_settings($op, $field) {
         '#title' => t('Content types that can be referenced'),
         '#multiple' => TRUE,
         '#default_value' => is_array($field['referenceable_types']) ? $field['referenceable_types'] : array(),
-        '#options' => node_get_types('names'),
+        '#options' => array_map('check_plain', node_get_types('names')),
       );
       if (module_exists('views')) {
         $views = array('--' => '--');
@@ -148,16 +136,18 @@ function nodereference_field_settings($op, $field) {
       $db_info = content_database_info($field);
       $table_alias = content_views_tablename($field);
 
-      // Swap the filter handler to the 'in' operator.
+      // Filter: swap the handler to the 'in' operator.
       $data[$table_alias][$field['field_name'] .'_nid']['filter']['handler'] = 'content_handler_filter_many_to_one';
-
-      // Add a relationship for related node.
+      // Argument: use node.title for summaries.
+      $data[$table_alias][$field['field_name'] .'_nid']['argument']['name table'] = 'node';
+      $data[$table_alias][$field['field_name'] .'_nid']['argument']['name field'] = 'title';
+      // Relationship: add a relationship for related node.
       $data[$table_alias][$field['field_name'] .'_nid']['relationship'] = array(
         'base' => 'node',
         'field' => $db_info['columns']['nid']['column'],
         'handler' => 'content_handler_relationship',
         'label' => t($field['widget']['label']),
-        'multiple' => $field['multiple'],
+        'content_field_name' => $field['field_name'],
       );
       return $data;
   }
@@ -187,17 +177,22 @@ function nodereference_field($op, &$node, $field, &$items, $teaser, $page) {
         }
       }
       return $addition;
-      break;
+
     case 'validate':
-      $refs = _nodereference_potential_references($field);
+      // Extract nids to check.
+      $ids = array();
+      foreach ($items as $delta => $item) {
+        if (is_array($item) && !empty($item['nid']) && is_numeric($item['nid'])) {
+          $ids[] = $item['nid'];
+        }
+      }
+      $refs = _nodereference_potential_references($field, '', NULL, $ids);
       foreach ($items as $delta => $item) {
         if (is_array($item)) {
           $error_element = isset($item['_error_element']) ? $item['_error_element'] : '';
           if (is_array($item) && isset($item['_error_element'])) unset($item['_error_element']);
-          if (!empty($item['nid'])) {
-            if (!isset($refs[$item['nid']])) {
-              form_set_error($error_element, t("%name: this post can't be referenced.", array('%name' => t($field['widget']['label']))));
-            }
+          if (!empty($item['nid']) && !isset($refs[$item['nid']])) {
+            form_set_error($error_element, t("%name: this post can't be referenced.", array('%name' => t($field['widget']['label']))));
           }
         }
       }
@@ -383,6 +378,36 @@ function nodereference_elements() {
       '#autocomplete_path' => FALSE,
       ),
     );
+}
+
+/**
+ * Implementation of hook_widget_settings().
+ */
+function nodereference_widget_settings($op, $widget) {
+  switch ($op) {
+    case 'form':
+      $form = array();
+      $match = isset($widget['autocomplete_match']) ? $widget['autocomplete_match'] : 'contains';
+      if ($widget['type'] == 'nodereference_autocomplete') {
+        $form['autocomplete_match'] = array(
+          '#type' => 'select',
+          '#title' => t('Autocomplete matching'),
+          '#default_value' => $match,
+          '#options' => array(
+            'starts_with' => t('Starts with'),
+            'contains' => t('Contains'),
+          ),
+          '#description' => t('Select the method used to collect autocomplete suggestions. Note that <em>Contains</em> can cause performance issues on sites with thousands of nodes.'),
+        );
+      }
+      else {
+        $form['autocomplete_match'] = array('#type' => 'hidden', '#value' => $match);
+      }
+      return $form;
+
+    case 'save':
+      return array('autocomplete_match');
+  }
 }
 
 /**
@@ -581,7 +606,6 @@ function nodereference_autocomplete_process($element, $edit, $form_state, $form)
  * We use $form_state['values'] instead of $element['#value']
  * to be sure we have the most accurate value when other modules
  * like optionwidgets are using #element_validate to alter the value.
- *
  */
 function nodereference_optionwidgets_validate($element, &$form_state) {
   $field_key  = $element['#columns'][0];
@@ -626,8 +650,8 @@ function nodereference_autocomplete_validate($element, &$form_state) {
     }
     else {
       // No explicit nid.
-      $nids = _nodereference_potential_references($field, $value, TRUE);
-      if (empty($nids)) {
+      $reference = _nodereference_potential_references($field, $value, 'equals', NULL, 1);
+      if (empty($reference)) {
         form_error($element[$field_key], t('%name: found no valid post with that title.', array('%name' => t($field['widget']['label']))));
       }
       else {
@@ -635,12 +659,11 @@ function nodereference_autocomplete_validate($element, &$form_state) {
         // the best thing would be to present the user with an additional form,
         // allowing the user to choose between valid candidates with the same title
         // ATM, we pick the first matching candidate...
-        $nid = array_shift(array_keys($nids));
+        $nid = key($reference);
       }
     }
   }
   form_set_value($element, $nid, $form_state);
-  return $element;
 }
 
 /**
@@ -653,7 +676,7 @@ function nodereference_allowed_values($field) {
   foreach ($references as $key => $value) {
     // Views theming runs check_plain (htmlentities) on the values.
     // We reverse that with html_entity_decode.
-    $options[$key] = html_entity_decode(strip_tags($value['rendered']));
+    $options[$key] = html_entity_decode(strip_tags($value['rendered']), ENT_QUOTES);
   }
   return $options;
 }
@@ -670,9 +693,15 @@ function nodereference_allowed_values($field) {
  * @param $field
  *   The field description.
  * @param $string
- *   Optional string to filter titles on (used by autocomplete)
- * @param $exact_string
- *   Optional: should the title filter be an exact match.
+ *   Optional string to filter titles on (used by autocomplete).
+ * @param $match
+ *   Operator to match filtered name against, can be any of:
+ *   'contains', 'equals', 'starts_with'
+ * @param $ids
+ *   Optional node ids to lookup (the $string and $match arguments will be
+ *   ignored).
+ * @param $limit
+ *   If non-zero, limit the size of the result set.
  *
  * @return
  *   An array of valid nodes in the form:
@@ -684,38 +713,40 @@ function nodereference_allowed_values($field) {
  *     ...
  *   )
  */
-function _nodereference_potential_references($field, $string = '', $exact_string = FALSE) {
+function _nodereference_potential_references($field, $string = '', $match = 'contains', $ids = array(), $limit = NULL) {
   static $results = array();
 
-  if (!isset($results[$field['field_name']][$string][$exact_string])) {
+  // Create unique id for static cache.
+  $cid = $field['field_name'] .':'. $match .':'. ($string !== '' ? $string : implode('-', $ids)) .':'. $limit;
+  if (!isset($results[$cid])) {
     $references = FALSE;
     if (module_exists('views') && !empty($field['advanced_view']) && $field['advanced_view'] != '--') {
-      $references = _nodereference_potential_references_views($field, $string, $exact_string);
+      $references = _nodereference_potential_references_views($field, $string, $match, $ids, $limit);
     }
     // If the view doesn't exist, we got FALSE, and fallback to the regular 'standard mode'.
 
     if ($references === FALSE) {
-      $references = _nodereference_potential_references_standard($field, $string, $exact_string);
+      $references = _nodereference_potential_references_standard($field, $string, $match, $ids, $limit);
     }
 
     // Store the results.
-    $results[$field['field_name']][$string][$exact_string] = $references;
+    $results[$cid] = $references;
   }
 
-  return $results[$field['field_name']][$string][$exact_string];
+  return $results[$cid];
 }
 
 /**
  * Helper function for _nodereference_potential_references():
  * case of Views-defined referenceable nodes.
  */
-function _nodereference_potential_references_views($field, $string = '', $exact_string = FALSE) {
+function _nodereference_potential_references_views($field, $string = '', $match = 'contains', $ids = array(), $limit = NULL) {
   $view_name = $field['advanced_view'];
 
   if ($view = views_get_view($view_name)) {
     // We add a display, and let it derive from the 'default' display.
     // TODO: We should let the user pick a display in the fields settings - sort of requires AHAH...
-    $display = $view->add_display('content_simple');
+    $display = $view->add_display('content_references');
     $view->set_display($display);
 
     // TODO from merlinofchaos on IRC : arguments using summary view can defeat the style setting.
@@ -725,6 +756,26 @@ function _nodereference_potential_references_views($field, $string = '', $exact_
     // Used in content_plugin_style_php_array::render(), to get
     // the 'field' to be used as title.
     $view->display_handler->set_option('content_title_field', 'title');
+
+    // Additional options to let content_plugin_display_references::query()
+    // narrow the results.
+    $options = array(
+      'table' => 'node',
+      'field_string' => 'title',
+      'string' => $string,
+      'match' => $match,
+      'field_id' => 'nid',
+      'ids' => $ids,
+    );
+    $view->display_handler->set_option('content_options', $options);
+
+    // TODO : for consistency, a fair amount of what's below
+    // should be moved to content_plugin_display_references
+
+    // Limit result set size.
+    if (isset($limit)) {
+      $view->display_handler->set_option('items_per_page', $limit);
+    }
 
     // Get arguments for the view.
     if (!empty($field['advanced_view_args'])) {
@@ -739,11 +790,6 @@ function _nodereference_potential_references_views($field, $string = '', $exact_
     $fields = $view->get_items('field', $display);
     if (!isset($fields['title'])) {
       $view->add_item($display, 'field', 'node', 'title');
-    }
-    if ($string !== '') {
-      // Add an instance of the 'title' filter.
-      $options = array('value' => $string, 'operator' => $exact_string ? '=' : 'contains');
-      $id = $view->add_item($display, 'filter', 'node', 'title', $options);
     }
 
     // If not set, make all fields inline and define a separator.
@@ -773,30 +819,41 @@ function _nodereference_potential_references_views($field, $string = '', $exact_
  * Helper function for _nodereference_potential_references():
  * referenceable nodes defined by content types.
  */
-function _nodereference_potential_references_standard($field, $string = '', $exact_string = FALSE) {
+function _nodereference_potential_references_standard($field, $string = '', $match = 'contains', $ids = array(), $limit = NULL) {
   $related_types = array();
+  $where = array();
   $args = array();
 
   if (is_array($field['referenceable_types'])) {
     foreach (array_filter($field['referenceable_types']) as $related_type) {
-      $related_types[] = " n.type = '%s'";
+      $related_types[] = "n.type = '%s'";
       $args[] = $related_type;
     }
   }
 
-  $related_clause = implode(' OR ', $related_types);
+  $where[] = implode(' OR ', $related_types);
 
   if (!count($related_types)) {
     return array();
   }
 
   if ($string !== '') {
-    $string_clause = $exact_string ? " AND n.title = '%s'" : " AND n.title LIKE '%%%s%'";
-    $related_clause = "(". $related_clause .")". $string_clause;
+    $match_operators = array(
+      'contains' => "LIKE '%%%s%%'",
+      'equals' => "= '%s'",
+      'starts_with' => "LIKE '%s%%'",
+    );
+    $where[] = 'n.title '. (isset($match_operators[$match]) ? $match_operators[$match] : $match_operators['contains']);
     $args[] = $string;
   }
+  elseif ($ids) {
+    $where[] = 'n.nid IN (' . db_placeholders($ids) . ')';
+    $args = array_merge($args, $ids);
+  }
 
-  $result = db_query(db_rewrite_sql("SELECT n.nid, n.title AS node_title, n.type AS node_type FROM {node} n WHERE ". $related_clause ." ORDER BY n.title, n.type"), $args);
+  $where_clause = $where ? 'WHERE ('. implode(') AND (', $where) .')' : '';
+  $sql = db_rewrite_sql("SELECT n.nid, n.title AS node_title, n.type AS node_type FROM {node} n $where_clause ORDER BY n.title, n.type");
+  $result = $limit ? db_query_range($sql, $args, 0, $limit) : db_query($sql, $args);
   $references = array();
   while ($node = db_fetch_object($result)) {
     $references[$node->nid] = array(
@@ -814,9 +871,10 @@ function _nodereference_potential_references_standard($field, $string = '', $exa
 function nodereference_autocomplete($field_name, $string = '') {
   $fields = content_fields();
   $field = $fields[$field_name];
+  $match = isset($field['widget']['autocomplete_match']) ? $field['widget']['autocomplete_match'] : 'contains';
   $matches = array();
 
-  $references = _nodereference_potential_references($field, $string);
+  $references = _nodereference_potential_references($field, $string, $match, array(), 10);
   foreach ($references as $id => $row) {
     // Add a class wrapper for a few required CSS overrides.
     $matches[$row['title'] ." [nid:$id]"] = '<div class="reference-autocomplete">'. $row['rendered'] . '</div>';
@@ -884,7 +942,6 @@ function theme_nodereference_select($element) {
 function theme_nodereference_buttons($element) {
   return $element['#children'];
 }
-
 
 function theme_nodereference_autocomplete($element) {
   return $element['#children'];

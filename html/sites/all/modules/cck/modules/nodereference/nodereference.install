@@ -1,5 +1,5 @@
 <?php
-// $Id: nodereference.install,v 1.25.2.6 2008/10/04 13:14:22 karens Exp $
+// $Id: nodereference.install,v 1.25.2.7 2008/10/21 23:13:22 yched Exp $
 
 /**
  * @file
@@ -45,29 +45,61 @@ function nodereference_update_last_removed() {
 /**
  * All fields must allow NULL values to indicate empty fields.
  */
-function nodereference_update_6000() {
-  if ($abort = content_check_update('nodereference')) {
-    return $abort;
-  }
+function nodereference_update_6000(&$sandbox) {
+  include_once('./'. drupal_get_path('module', 'content') .'/content.install');
+  drupal_load('module', 'content');
 
   $ret = array();
 
-  drupal_load('module', 'content');
-  content_clear_type_cache();
-  include_once('./'. drupal_get_path('module', 'content') .'/content.install');
-  $types = content_types_install();
-  foreach ($types as $type_name => $fields) {
-    foreach ($fields as $field) {
-      switch ($field['type']) {
-        case 'nodereference':
-          $db_info = content_database_info($field);
-          $table = $db_info['table'];
-          $column = $db_info['columns']['nid']['column'] ;
-          db_change_field($ret, $table, $column, $column, array('type' => 'int', 'not null' => FALSE));
-          db_field_set_no_default($ret, $db_info['table'], $column);
-          $ret[] = update_sql("UPDATE {". $db_info['table'] ."} SET ". $column ." = NULL WHERE ". $column ." = 0");
+  if (!isset($sandbox['progress'])) {
+    if ($abort = content_check_update('nodereference')) {
+      return $abort;
+    }
+
+    // Get the latest cache values and schema.
+    content_clear_type_cache(TRUE, TRUE);
+    $types = content_types_install();
+
+    if (empty($types)) {
+      return $ret;
+    }
+
+    $sandbox['fields'] = array();
+    foreach ($types as $type_name => $fields) {
+      foreach ($fields as $field) {
+        if ($field['type'] == 'nodereference') {
+          $sandbox['fields'][] = $field;
+        }
       }
     }
+
+    if (empty($sandbox['fields'])) {
+      return $ret;
+    }
+
+    $sandbox['progress'] = 0;
+    $sandbox['visited'] = array();
   }
+
+  $field = $sandbox['fields'][$sandbox['progress']];
+
+  // We only want to process a field once -- if we hit it a second time,
+  // that means it's its own table and it should have already been updated.
+  if (!in_array($field['field_name'], $sandbox['visited'])) {
+    $db_info = content_database_info($field);
+    $table = $db_info['table'];
+    $attributes = $db_info['columns']['nid'];
+    $column = $attributes['column'];
+    $attributes['not null'] = FALSE;
+    db_change_field($ret, $table, $column, $column, array('type' => 'int', 'not null' => FALSE));
+    db_field_set_no_default($ret, $db_info['table'], $column);
+    $ret[] = update_sql("UPDATE {". $db_info['table'] ."} SET ". $column ." = NULL WHERE ". $column ." = 0");
+
+    $sandbox['visited'][] = $field['field_name'];
+  }
+
+  $sandbox['progress']++;
+  $ret['#finished'] = $sandbox['progress'] / count($sandbox['fields']);
+
   return $ret;
 }

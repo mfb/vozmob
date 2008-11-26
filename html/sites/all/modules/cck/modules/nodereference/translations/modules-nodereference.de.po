@@ -1,4 +1,4 @@
-# $Id: modules-nodereference.de.po,v 1.2.2.7 2008/08/26 06:44:27 hass Exp $
+# $Id: modules-nodereference.de.po,v 1.2.2.11 2008/11/05 12:24:01 hass Exp $
 # German translation of CCK
 # Copyright 2006 Lukas Gangoly <lukas.gangoly@univie.ac.at>
 # Copyright 2006 Jakob Petsovits <jpetso@gmx.at>
@@ -16,9 +16,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: German translation of CCK\n"
-"POT-Creation-Date: 2008-08-25 22:44+0200\n"
-"PO-Revision-Date: 2008-08-26 08:33+0100\n"
-"Last-Translator: Alexander Hass\n"
+"POT-Creation-Date: 2008-11-05 12:54+0100\n"
+"PO-Revision-Date: 2008-11-05 13:18+0100\n"
+"Last-Translator: Alexander Haß\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -28,64 +28,88 @@ msgstr ""
 "X-Poedit-Country: GERMANY\n"
 "X-Poedit-SourceCharset: utf-8\n"
 
-#: modules/nodereference/nodereference.module:68
+#: modules/nodereference/nodereference.rules.inc:15
+msgid "Load a referenced node"
+msgstr "Referenzierten Beitrag laden"
+
+#: modules/nodereference/nodereference.rules.inc:19
+msgid "Content containing the node reference field"
+msgstr "Der Inhalt der das Beitragsreferenzfeld enthält"
+
+#: modules/nodereference/nodereference.rules.inc:25
+msgid "Referenced content"
+msgstr "Referenzierter Inhalt"
+
+#: modules/nodereference/nodereference.rules.inc:29
+msgid "Note that if the field has multiple values, only the first content node will be loaded."
+msgstr "Sollte ein Feld mehrere Werte enthalten, wird nur der erste Beitrag geladen."
+
+#: modules/nodereference/nodereference.rules.inc:50
+msgid "There are no nodereference fields defined."
+msgstr "Es sind keine Beitragsreferenzfelder vorhanden."
+
+#: modules/nodereference/nodereference.module:60
 msgid "Node reference"
-msgstr "Beitragsverweis"
+msgstr "Beitragsreferenz"
 
-#: modules/nodereference/nodereference.module:69
+#: modules/nodereference/nodereference.module:61
 msgid "Store the ID of a related node as an integer value."
-msgstr "Speichert die ID des ählichen Beitrages als ganzzahligen Wert."
+msgstr "Speichert die ID des zugehörigen Beitrages als ganzzahligen Wert."
 
-#: modules/nodereference/nodereference.module:87
+#: modules/nodereference/nodereference.module:75
 msgid "Content types that can be referenced"
-msgstr "Inhaltstypen, auf die verwiesen werden kann."
+msgstr "Inhaltstypen, auf die referenziert werden kann"
 
-#: modules/nodereference/nodereference.module:110
+#: modules/nodereference/nodereference.module:98
 msgid "Advanced - Nodes that can be referenced (View)"
-msgstr "Erweitert - Beiträge, auf die verwiesen werden kann (Ansicht)"
+msgstr "Erweitert - Beiträge, auf die referenziert werden kann (Ansicht)"
 
-#: modules/nodereference/nodereference.module:116
+#: modules/nodereference/nodereference.module:104
 msgid "View used to select the nodes"
-msgstr "Die zur Auswahl von Beiträgen zu verwendende Ansicht"
+msgstr "Die zur Auswahl von Beiträgen verwendete Ansicht"
 
-#: modules/nodereference/nodereference.module:119
+#: modules/nodereference/nodereference.module:107
 #, fuzzy
 msgid "Choose the \"Views module\" view that selects the nodes that can be referenced.<br />Note:<ul><li>Only views that have fields will work for this purpose.</li><li>This will discard the \"Content types\" settings above. Use the view's \"filters\" section instead.</li><li>Use the view's \"fields\" section to display additional informations about candidate nodes on node creation/edition form.</li><li>Use the view's \"sort criteria\" section to determine the order in which candidate nodes will be displayed.</li></ul>"
-msgstr "Wähle die „Views-Modul“-Ansicht das die Beiträge auswählt, die Referenziert werden können.<br />Hinweis:<ul><li>Nur Ansichten mit Feldern werden für diesen Zweck nutzbar sein.</li><li>Dies wird die obigen Einstellungen der „Inhaltsttypen“ verwerfen. Stattdessen sollte hierfür der „Filter“-Bereich der Ansicht verwendet werden.</li><li>Um weitere Informationen über Beitragskandidaten für das Erstellungs-/Bearbeitungsformular anzuzeigen, kann das Ansichten-Feld verwendet werden.</li><li>Um die Reihenfolge der Beitragskandidaten festzulegen sollte „Sortierkriterium“ von Ansichten verwendet werden.</li></ul>"
+msgstr "Wähle die „Views-Modul“-Ansicht das die Beiträge auswählt, die Referenziert werden können.<br />Hinweis:<ul><li>Nur Ansichten mit Feldern werden für diesen Zweck nutzbar sein.</li><li>Dies wird die obigen Einstellungen der „Inhaltsttypen“ verwerfen. Stattdessen sollte hierfür der „Filter“-Bereich der Ansicht verwendet werden.</li><li>Um weitere Informationen über Beitragskandidaten für das Erstellungs-/Bearbeitungsformular anzuzeigen, kann das Ansichten-Feld verwendet werden.</li><li>Um die Reihenfolge der Beitragskandidaten festzulegen sollte das „Sortierkriterium“ von Ansichten verwendet werden.</li></ul>"
 
-#: modules/nodereference/nodereference.module:177
+#: modules/nodereference/nodereference.module:195
 msgid "%name: this post can't be referenced."
-msgstr "%name: Auf diesen Beitrag kann nicht verwiesen werden."
+msgstr "%name: Dieser Beitrag kann nicht referenziert werden."
 
-#: modules/nodereference/nodereference.module:202
+#: modules/nodereference/nodereference.module:219
 msgid "Title (link)"
-msgstr "Titel (Verweis)"
+msgstr "Titel (Link)"
 
-#: modules/nodereference/nodereference.module:207
+#: modules/nodereference/nodereference.module:224
 msgid "Title (no link)"
-msgstr "Titel (kein Verweis)"
+msgstr "Titel (kein Link)"
 
-#: modules/nodereference/nodereference.module:581
+#: modules/nodereference/nodereference.module:400
+msgid "Select the method used to collect autocomplete suggestions. Note that <em>Contains</em> can cause performance issues on sites with thousands of nodes."
+msgstr "Die Methode zur Sammlung von Autovervollständigungsvorschlägen auswählen. Dabei ist zu beachten, dass <em>Enthält</em> auf Websites mit tausenden von Beiträgen große Performanceprobleme verursachen kann."
+
+#: modules/nodereference/nodereference.module:648
 msgid "%name: title mismatch. Please check your selection."
-msgstr "%name: Titel falsch. Bitte die Auswahl überprüfen."
+msgstr "%name: Der Titel ist ungültig. Bitte die Auswahl überprüfen."
 
-#: modules/nodereference/nodereference.module:588
+#: modules/nodereference/nodereference.module:655
 msgid "%name: found no valid post with that title."
 msgstr "%name: Kein gültiger Beitrag mit diesem Titel gefunden."
 
 #: modules/nodereference/nodereference.module:15
 msgid "Nodereference autocomplete"
-msgstr "Autovervollständigung der Beitragsverweise"
+msgstr "Autovervollständigung der Beitragsreferenz"
 
 #: modules/nodereference/nodereference.module:0
 msgid "nodereference"
-msgstr "Beitragsverweis"
+msgstr "Beitragsreferenz"
 
 #: modules/nodereference/nodereference.info:0
 msgid "Node Reference"
-msgstr "Beitragsverweis"
+msgstr "Beitragsreferenz"
 
 #: modules/nodereference/nodereference.info:0
 msgid "Defines a field type for referencing one node from another."
-msgstr "Definiert einen Feldtyp für den Verweis von einem Beitrag zu einem anderen."
+msgstr "Definiert einen Feldtyp, um einen Beitrag von einem anderen zu referenzieren."
 

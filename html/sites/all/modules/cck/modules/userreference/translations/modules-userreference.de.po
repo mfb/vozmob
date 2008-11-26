@@ -1,4 +1,4 @@
-# $Id: modules-userreference.de.po,v 1.2.2.5 2008/08/10 09:20:58 hass Exp $
+# $Id: modules-userreference.de.po,v 1.2.2.10 2008/11/05 12:24:00 hass Exp $
 # German translation of CCK
 # Copyright 2006 Lukas Gangoly <lukas.gangoly@univie.ac.at>
 # Copyright 2006 Jakob Petsovits <jpetso@gmx.at>
@@ -16,9 +16,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: German translation of CCK\n"
-"POT-Creation-Date: 2008-08-10 10:22+0200\n"
-"PO-Revision-Date: 2008-08-10 11:17+0100\n"
-"Last-Translator: Alexander Hass\n"
+"POT-Creation-Date: 2008-11-05 12:54+0100\n"
+"PO-Revision-Date: 2008-11-05 13:21+0100\n"
+"Last-Translator: Alexander Haß\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -28,57 +28,98 @@ msgstr ""
 "X-Poedit-Country: GERMANY\n"
 "X-Poedit-SourceCharset: utf-8\n"
 
+#: modules/userreference/userreference.rules.inc:15
+msgid "Load a referenced user"
+msgstr "Einen referenzierten Benutzer laden"
+
+#: modules/userreference/userreference.rules.inc:19
+msgid "Content containing the user reference field"
+msgstr "Der Inhalt der das Benutzerreferenzfeld enthält"
+
+#: modules/userreference/userreference.rules.inc:25
+msgid "Referenced user"
+msgstr "Referenzierter Benutzer"
+
+#: modules/userreference/userreference.rules.inc:29
+msgid "Note that if the field has multiple values, only the first user will be loaded."
+msgstr "Sollte ein Feld mehrere Werte enthalten, wird nur der erste Benutzer geladen."
+
+#: modules/userreference/userreference.rules.inc:52
+msgid "There are no userreference fields defined."
+msgstr "Es sind keine Benutzerreferenzfelder vorhanden."
+
 #: modules/userreference/userreference.module:52
 msgid "User reference"
-msgstr "Benutzerverweis"
+msgstr "Benutzerreferenz"
 
 #: modules/userreference/userreference.module:53
 msgid "Store the ID of a related user as an integer value."
-msgstr "Speichert die ID eines ähnlichen Benutzers als ganzzahligen Wert."
+msgstr "Speichert die ID eines zugehörigen Benutzers als ganzzahligen Wert."
 
-#: modules/userreference/userreference.module:71
+#: modules/userreference/userreference.module:67
 msgid "User roles that can be referenced"
-msgstr "Benutzerrollen auf die verwiesen werden kann"
+msgstr "Benutzerrollen auf die referenziert werden kann"
 
-#: modules/userreference/userreference.module:77
+#: modules/userreference/userreference.module:73
 msgid "User status that can be referenced"
-msgstr "Benutzerstatus auf den verwiesen werden kann"
+msgstr "Benutzerstatus der referenziert werden kann"
 
-#: modules/userreference/userreference.module:79
+#: modules/userreference/userreference.module:75
 msgid "Active"
 msgstr "Aktiv"
 
-#: modules/userreference/userreference.module:79
+#: modules/userreference/userreference.module:75
 msgid "Blocked"
 msgstr "Gesperrt"
 
-#: modules/userreference/userreference.module:122
+#: modules/userreference/userreference.module:95
+msgid "Advanced - Users that can be referenced (View)"
+msgstr "Erweitert - Benutzer die referenziert werden können (Ansicht)"
+
+#: modules/userreference/userreference.module:101
+msgid "View used to select the users"
+msgstr "Die zur Auswahl von Benutzern verwendete Ansicht"
+
+#: modules/userreference/userreference.module:104
+#, fuzzy
+msgid "Choose the \"Views module\" view that selects the users that can be referenced.<br />Note:<ul><li>Only views that have fields will work for this purpose.</li><li>This will discard the \"Referenceable Roles\" and \"Referenceable Status\" settings above. Use the view's \"filters\" section instead.</li><li>Use the view's \"fields\" section to display additional informations about candidate users on user creation/edition form.</li><li>Use the view's \"sort criteria\" section to determine the order in which candidate users will be displayed.</li></ul>"
+msgstr "Wähle die „Views-Modul“-Ansicht das die Beiträge auswählt, die Referenziert werden können.<br />Hinweis:<ul><li>Nur Ansichten mit Feldern werden für diesen Zweck nutzbar sein.</li><li>Dies wird die obigen Einstellungen der „referenzierbaren Rollen“ und „referenzierbaren Status“ verwerfen. Stattdessen sollte hierfür der „Filter“-Bereich der Ansicht verwendet werden.</li><li>Um weitere Informationen über Beitragskandidaten für das Erstellungs-/Bearbeitungsformular anzuzeigen, kann das Ansichten-Feld verwendet werden.</li><li>Um die Reihenfolge der Beitragskandidaten festzulegen sollte das „Sortierkriterium“ von Ansichten verwendet werden.</li></ul>"
+
+#: modules/userreference/userreference.module:173
 msgid "%name: invalid user."
-msgstr "%name: ungültiger Benutzer."
+msgstr "%name: Der Benutzer ist ungültig."
 
-#: modules/userreference/userreference.module:253
+#: modules/userreference/userreference.module:325
+msgid "Select the method used to collect autocomplete suggestions. Note that <em>Contains</em> can cause performance issues on sites with thousands of users."
+msgstr "Die Methode zur Sammlung von Autovervollständigungsvorschlägen auswählen. Dabei ist zu beachten, dass <em>Enthält</em> auf Websites mit tausenden von Benutzern große Performanceprobleme verursachen kann."
+
+#: modules/userreference/userreference.module:333
 msgid "Reverse link"
-msgstr "‚Zurück‘-Verweis"
+msgstr "‚Zurück‘-Link"
 
-#: modules/userreference/userreference.module:255
+#: modules/userreference/userreference.module:335
 msgid "If selected, a reverse link back to the referencing node will displayed on the referenced user record."
-msgstr "Sobald ausgewählt, wird auf dem verwiesenen Benutzerdatensatz ein ‚Zurück‘-Verweis zu dem verweisenden Beitrag angezeigt."
+msgstr "Sobald ausgewählt, wird auf dem referenzierten Benutzerdatensatz ein ‚Zurück‘-Link zu dem referenzierten Beitrag angezeigt."
 
-#: modules/userreference/userreference.module:587
+#: modules/userreference/userreference.module:570
+msgid "%name: found no valid user with that name."
+msgstr "%name: Kein Benutzer mit diesem Namen gefunden."
+
+#: modules/userreference/userreference.module:873
 msgid "Related content"
-msgstr "Ähnlicher Inhalt"
+msgstr "Zugehöriger Inhalt"
 
 #: modules/userreference/userreference.module:15
 msgid "Userreference autocomplete"
-msgstr "Autovervollständigung der Benutzerverweise"
+msgstr "Autovervollständigung der Benutzerreferenzen"
 
 #: modules/userreference/userreference.module:0
 msgid "userreference"
-msgstr "Benutzerverweis"
+msgstr "Benutzerreferenz"
 
 #: modules/userreference/userreference.info:0
 msgid "User Reference"
-msgstr "Benutzerverweis"
+msgstr "Benutzerreferenz"
 
 #: modules/userreference/userreference.info:0
 msgid "Defines a field type for referencing a user from a node."

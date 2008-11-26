@@ -1,5 +1,5 @@
 <?php
-// $Id: content.panels.inc,v 1.1.2.2 2008/10/04 13:14:21 karens Exp $
+// $Id: content.panels.inc,v 1.1.2.6 2008/11/03 14:12:41 yched Exp $
 
 /**
  * @file
@@ -25,7 +25,7 @@ function content_panels_content_types() {
     'edit callback' => 'content_panels_edit_field',
     'render callback' => 'content_panels_render_field',
     'title callback' => 'content_panels_title_content',
-    );
+  );
   return $items;
 }
 
@@ -47,14 +47,14 @@ function content_panels_edit_field($id, $parents, $conf = array()) {
   $form['label'] = array(
     '#type' => 'select',
     '#title' => t('Label'),
-    '#default_value' => $conf['label'],
+    '#default_value' => isset($conf['label']) ? $conf['label'] : '',
     '#options' => array(
       'normal' => t('Block title'),
       'above' => t('Above'),
       'inline' => t('Inline'),
-      'hidden' => t('hidden'),
+      'hidden' => t('Hidden'),
     ),
-    '#description' => t('Configure how the label is going to be displayed'),
+    '#description' => t('Configure how the label is going to be displayed.'),
   );
   $options = array('' => '');
   $fields = content_fields();
@@ -71,7 +71,7 @@ function content_panels_edit_field($id, $parents, $conf = array()) {
   $form['field_formatter'] = array(
     '#type' => 'select',
     '#title' => t('Field / Formatter'),
-    '#default_value' => $conf['field_formatter'],
+    '#default_value' => isset($conf['field_formatter']) ? $conf['field_formatter'] : '',
     '#options' => $options,
     '#description' => t('Select a field and formatter.'),
     '#required' => TRUE,
@@ -82,7 +82,7 @@ function content_panels_edit_field($id, $parents, $conf = array()) {
 /**
  * 'Title' callback for the 'field' content type.
  */
-function content_panels_title_content($conf, $context) {
+function content_panels_title_content($subtype, $conf, $context) {
   $data = explode(':', $conf['field_formatter']);
   $field_name = $data[0];
   $formatter = $data[1];
@@ -92,44 +92,31 @@ function content_panels_title_content($conf, $context) {
   return t('"@s" field @name', array('@s' => $context->identifier, '@name' => $field_types[$field['type']]['label'] .': '. $field['widget']['label'] .' ('. $field['field_name'])) .')';
 }
 
-function content_panels_render_field($conf, $panel_args, $context) {
-  if (!empty($context) && empty($context->data)) {
-    return;
+function content_panels_render_field($subtype, $conf, $panel_args, $context) {
+  if (is_array($context)) {
+    $context = array_pop($context);
   }
   $node = isset($context->data) ? drupal_clone($context->data) : NULL;
-  $info = _content_type_info($id);
   $data = explode(':', $conf['field_formatter']);
   $field_name = $data[0];
   $formatter = $data[1];
 
-  $field = $info['fields'][$field_name];
-  $field_info = $info['field types'][$field['type']];
+  $field = content_fields($field_name);
 
+  // Force panel settings into the field's display settings.
   $field['display_settings']['label']['format'] = $conf['label'] == 'normal' ? 'hidden' : $conf['label'];
   $field['display_settings']['full']['format'] = $formatter;
+  $node->build_mode = NODE_BUILD_NORMAL;
+  // TODO : allow panel-specific template suggestions for content-field.tpl.php ?
+
+  $output = content_view_field($field, $node);
 
   $block->module = 'content';
-  $block->delta = $conf['field_name'];
-
+  $block->delta = $field_name;
   if ($conf['label'] == 'normal') {
     $block->title = $field['widget']['label'];
   }
-  $node_field = isset($node->$field['field_name']) ? $node->$field['field_name'] : array();
-  if (content_handle('field', 'view', $field) == CONTENT_CALLBACK_CUSTOM) {
-    $field_types = _content_field_types();
-    $module = $field_types[$field['type']]['module'];
-    $function = $module .'_field';
-    if (function_exists($function)) {
-      $value = $function('view', $node, $field, $node_field, 0, 0);
-    }
-  }
-  else {
-    foreach ($node_field as $delta => $item) {
-      $node_field[$delta]['view'] = content_format($field, $item, $formatter, $node);
-    }
-    $value = theme('field', $node, $field, $node_field, 0, 0);
-  }
-  $block->content = $value;
+  $block->content = $output;
 
   return $block;
 }

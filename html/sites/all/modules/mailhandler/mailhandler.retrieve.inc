@@ -292,7 +292,7 @@ function mailhandler_process_message($header, $body, $mailbox) {
       else if (substr($data[0], 0, 9) == 'taxonomy[' && substr($data[0], -1, 1) == ']'){
         // make sure a valid vid is passed in:
         $vid = substr($data[0], 9, -1);
-        $vocabulary = taxonomy_get_vocabulary($vid);
+        $vocabulary = taxonomy_vocabulary_load($vid);
         // if the vocabulary is not activated for that node type, unset $data[0], so the command will be ommited from $node
         // TODO: add an error message
         if (!in_array($node->type, $vocabulary->nodes)) {
@@ -340,8 +340,7 @@ function mailhandler_process_message($header, $body, $mailbox) {
       $node->title .= $subjectarr[$i]->text;
   }
 
-  $node->created = $header->udate;
-  $node->changed = $header->udate;
+  $node->date = format_date($header->udate, 'custom', 'Y-m-d H:i:s O');
   $node->format = $mailbox['format'];
 
   return $node;
@@ -443,8 +442,8 @@ function mailhandler_node_submit($node, $header, $mailbox, $origbody) {
   }
   else {
     unset($_SESSION['messages']['error']);
-  } 
-   
+  }
+
   if (!$error_messages) {
     // Prepare the node for save and allow modules make changes
     $node = node_submit($node);

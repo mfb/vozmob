@@ -1,8 +1,8 @@
 <?php
-// $Id: content-field.tpl.php,v 1.1.2.4 2008/08/27 15:11:24 yched Exp $
+// $Id: content-field.tpl.php,v 1.1.2.5 2008/11/03 12:46:27 yched Exp $
 
 /**
- * @file field.tpl.php
+ * @file content-field.tpl.php
  * Default theme implementation to display the value of a field.
  *
  * Available variables:

@@ -1,5 +1,5 @@
 <?php
-// $Id: theme.inc,v 1.415.2.13 2008/10/16 13:50:59 dries Exp $
+// $Id: theme.inc,v 1.415.2.15 2008/11/22 10:13:02 dries Exp $
 
 /**
  * @file
@@ -8,8 +8,7 @@
  * The theme system allows for nearly all output of the Drupal system to be
  * customized by user themes.
  *
- * @see <a href="http://drupal.org/node/171179">Theme guide</a>
- * @see themeable
+ * @ingroup themeable
  */
 
 /**
@@ -261,6 +260,7 @@ function drupal_rebuild_theme_registry() {
  * over how and when the preprocess functions are run.
  */
 function _theme_process_registry(&$cache, $name, $type, $theme, $path) {
+  $result = array();
   $function = $name .'_theme';
   if (function_exists($function)) {
     $result = $function($cache, $type, $theme, $path);
@@ -357,6 +357,26 @@ function _theme_process_registry(&$cache, $name, $type, $theme, $path) {
 
     // Merge the newly created theme hooks into the existing cache.
     $cache = array_merge($cache, $result);
+  }
+
+  // Let themes have preprocess functions even if they didn't register a template.
+  if ($type == 'theme' || $type == 'base_theme') {
+    foreach ($cache as $hook => $info) {
+      // Check only if it's a template and not registered by the theme or engine.
+      if (!empty($info['template']) && empty($result[$hook])) {
+        if (!isset($info['preprocess functions'])) {
+          $cache[$hook]['preprocess functions'] = array();
+        }
+        if (function_exists($name .'_preprocess')) {
+          $cache[$hook]['preprocess functions'][] = $name .'_preprocess';
+        }
+        if (function_exists($name .'_preprocess_'. $hook)) {
+          $cache[$hook]['preprocess functions'][] = $name .'_preprocess_'. $hook;
+        }
+        // Ensure uniqueness.
+        $cache[$hook]['preprocess functions'] = array_unique($cache[$hook]['preprocess functions']);
+      }
+    }
   }
 }
 

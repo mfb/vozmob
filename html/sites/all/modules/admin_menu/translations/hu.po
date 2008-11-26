@@ -1,64 +1,209 @@
-# translation of admin_menu-module.hu.po to Hungarian
-# Hungarian translation of Drupal (admin_menu.module)
+# Hungarian translation of admin_menu (6.x-1.1)
+# Copyright (c) 2008 by the Hungarian translation team
 # Generated from files:
-#  admin_menu.module,v 1.10.4.1 2007/03/31 14:20:05 sun
-#  admin_menu.info,v 1.3 2007/02/10 18:18:34 sun
+#  admin_menu.inc,v 1.11.2.10 2008/09/12 16:21:22 pwolanin
+#  admin_menu.info,v 1.5 2008/04/26 16:10:09 sun
+#  admin_menu.module,v 1.43.2.7 2008/09/09 14:39:01 sun
+#  admin_menu.install,v 1.4.2.4 2008/09/12 16:21:22 pwolanin
 #
-# Copyright FEHÉR János <feher.janos _at- mindworks.hu>, 2007.
 msgid ""
 msgstr ""
-"Project-Id-Version: admin_menu-module.hu\n"
-"POT-Creation-Date: 2007-05-09 19:04+0200\n"
-"PO-Revision-Date: 2007-05-09 19:15+0200\n"
-"Last-Translator: FEHÉR János <feher.janos _at- mindworks.hu>\n"
-"Language-Team: Hungarian <Drupal.hu Fordítási Csapat <forditas [at] drupal.hu>>\n"
+"Project-Id-Version: admin_menu (6.x-1.1)\n"
+"POT-Creation-Date: 2008-11-19 10:23-0600\n"
+"PO-Revision-Date: 2008-11-08 10:16-0600\n"
+"Language-Team: Hungarian\n"
 "MIME-Version: 1.0\n"
-"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: KBabel 1.11.4\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
 
-#: admin_menu.module:18
-msgid "Admin Menu Block"
-msgstr "Admin menü blokk"
-
-#: admin_menu.module:161
-msgid "Add !content-type"
-msgstr "!content-type hozzáadása"
-
-#: admin_menu.module:291
-msgid "Administration Menu settings"
-msgstr "Adminisztrációs menü beállításai"
-
-#: admin_menu.module:297
-msgid "Display menu item IDs in Drupal Administration Menu"
-msgstr "Megjeleníti a menüpont ID-ket a Drupal Adminisztrációs menüjében"
-
-#: admin_menu.module:299
-msgid "If enabled, the corresponding menu item id will appear next to each menu item link."
-msgstr "Segítségével az adott menüpont ID-je megjelenik menüpont linkje mellett."
-
-#: admin_menu.module:303
-msgid "Display all menu items"
-msgstr "Összes menüpont megjelenítése"
-
-#: admin_menu.module:305
-msgid "Enable this option to disable user access checks for menu items, i.e. every menu item in the visible menu tree will be displayed to every user regardless of access permissions."
-msgstr "Ezzel a beállítással minden felhasználónak megjelenik az összes menüpont, függetlenül attól, hogy van-e jogosultsága használni vagy sem."
-
-#: admin_menu.module:0
-msgid "admin_menu"
-msgstr "admin_menu"
-
-#: admin_menu.info:0
-msgid "Administration Menu"
-msgstr "Adminisztrációs menü"
+#: admin_menu.inc:395
+msgid "Weight"
+msgstr "Súly"
 
 #: admin_menu.info:0
 msgid "Administration"
 msgstr "Adminisztráció"
 
-#: admin_menu.module:7 admin_menu.info:0
-msgid "Renders the administer menu tree as dropdown menu at the top of the window."
-msgstr "A böngészőablak tetején jeleníti meg az adminisztrációs menüt"
+#: admin_menu.module:34
+msgid "User management"
+msgstr "Felhasználókezelés"
+
+#: admin_menu.inc:395
+msgid "None"
+msgstr "Nincs"
+
+#: admin_menu.inc:252
+msgid "Re-enable developer modules"
+msgstr "Fejlesztői modulok újra engedélyezése"
+
+#: admin_menu.inc:252
+msgid "Disable developer modules"
+msgstr "Fejlesztői modulok tiltása"
+
+#: admin_menu.inc:338
+msgid "Apply margin-top to page body"
+msgstr "Felső margó biztosítása az oldal törzsében"
+
+#: admin_menu.module:34,34
+msgid "Apply margin-top to page body"
+msgstr "Felső margó biztosítása az oldal törzsében"
+
+#: admin_menu.inc:340
+msgid ""
+"If enabled, the output of this site will be shifted for approx. 20 "
+"pixels from the top of the viewport to make room for the "
+"Administration Menu. If this setting is disabled, some absolute or "
+"fixed positioned page elements at the top of the viewport may be "
+"covered by Administration Menu."
+msgstr ""
+"Ha engedélyezett, akkor a webhely kimenete kb. 20 képponttal el lesz "
+"tolva lefelé, hogy helyet biztosítson az adminisztrációs menünek. "
+"Ha ez a beállítás tiltott, akkor némely abszolút, vagy fix helyre "
+"pozícionált elemet eltakarhat az adminisztrációs menü."
+
+#: admin_menu.inc:344
+msgid "Drupal Administration Tweaks"
+msgstr "Drupal adminisztrációs trükkök"
+
+#: admin_menu.inc:348
+msgid "Collapse fieldsets on modules page"
+msgstr "Mezőcsoportok összezárása a modulok oldalon"
+
+#: admin_menu.inc:350
+msgid ""
+"If enabled, fieldsets on the <a href=\"!modules-url\">Site building "
+"&raquo; Modules</a> page will be initially collapsed."
+msgstr ""
+"Ha engedélyezett, akkor kezdetben a mezőcsoportok a <a "
+"href=\"!modules-url\">Webhely építés » Modulok</a> oldalon "
+"összezárva jelennek meg."
+
+#: admin_menu.inc:353
+msgid ""
+"If you installed Utility module for this purpose, you can safely "
+"uninstall it now!"
+msgstr ""
+"Ha a <em>Utility</em> modul evvel a szándékkal van telepítve, most "
+"már biztonsággal eltávolítható!"
+
+#: admin_menu.inc:358
+msgid ""
+"If you are seeing a duplicated menu or other problems, you may use "
+"this button to delete everything in the menu and rebuild it."
+msgstr ""
+"Ha a menü duplán jelenik meg, vagy egyéb probléma merül fel vele, "
+"evvel a nyomógombbal lehet törölni és frissíteni mindent a "
+"menüben."
+
+#: admin_menu.inc:362
+msgid "Wipe and rebuild"
+msgstr "Töröl és frissít"
+
+#: admin_menu.inc:390
+msgid "Administration Menu settings"
+msgstr "Adminisztrációs menü beállításai"
+
+#: admin_menu.inc:395
+msgid "Menu link id"
+msgstr "Menü hivatkozás azonosítója"
+
+#: admin_menu.inc:395
+msgid "Parent link id"
+msgstr "Szülő hivatkozás azonosítója"
+
+#: admin_menu.inc:398
+msgid "Display extra information for menu items in Drupal Administration Menu"
+msgstr ""
+"Többlet információk megjelenítése az elemekről a Drupal "
+"adminisztációs menüjében"
+
+#: admin_menu.inc:401
+msgid ""
+"If enabled, the chosen information will appear next to each menu item "
+"link."
+msgstr ""
+"Ha ez engedélyezve van, a választott információ látható lesz "
+"minden menüelem hivatkozásában."
+
+#: admin_menu.inc:405
+msgid "Display all menu items"
+msgstr "Az összes menüpont megjelenítése"
+
+#: admin_menu.inc:407
+msgid ""
+"Enable this option to disable user access checks for menu items, i.e. "
+"every menu item in the visible menu tree will be displayed to every "
+"user regardless of access permissions."
+msgstr ""
+"Ezzel a beállítással minden felhasználónak megjelenik az összes "
+"menüpont, függetlenül attól, hogy van-e jogosultsága használni "
+"vagy sem."
+
+#: admin_menu.inc:424
+msgid "Re-enabled these modules: !module-list."
+msgstr "A következő modulok újra engedélyezése: !module-list."
+
+#: admin_menu.inc:436
+msgid "Disabled these modules: !module-list."
+msgstr "A következő modulok tiltása: !module-list."
+
+#: admin_menu.inc:440
+msgid "No developer modules are enabled."
+msgstr "A fejlesztői modulok nincsenek engedélyezve."
+
+#: admin_menu.module:16
+msgid ""
+"The Administration Menu will appear at the top of the page for users "
+"who have been given the \"access administration menu\" permission.  "
+"Customize appearance of the dropdown menu here."
+msgstr ""
+"Az Adminisztrációs menü megjelenik az oldal tetején minden olyan "
+"felhasználónak, aki rendelkezik az „adminisztrációs menü "
+"elérése” jogosultsággal. A legördülő menü megjelenésének "
+"testreszabása itt végezhető el."
+
+#: admin_menu.module:284
+msgid "Current anonymous / authenticated users"
+msgstr "Jelenlévő vendég / azonosított felhasználó"
+
+#: admin_menu.module:286
+msgid "@count-anon / @count-auth !icon"
+msgstr "@count-anon / @count-auth !icon"
+
+#: admin_menu.module:42
+msgid "access administration menu"
+msgstr "adminisztrációs menü elérése"
+
+#: admin_menu.module:42
+msgid "display drupal links"
+msgstr "drupal hivatkozások megjelenítése"
+
+#: admin_menu.module:65
+msgid "Administration Menu"
+msgstr "Adminisztrációs menü"
+
+#: admin_menu.info:0,0
+msgid "Administration Menu"
+msgstr "Adminisztrációs menü"
+
+#: admin_menu.module:66
+msgid "Adjust settings for the dropdown Administration Menu."
+msgstr "Az Adminisztrációs menü beállításai."
+
+#: admin_menu.module:0
+msgid "admin_menu"
+msgstr "admin_menu"
+
+#: admin_menu.install:41
+msgid "admin_menu links deleted for clean rebuild."
+msgstr "admin_menu hivatkozásai törölve egy tiszta frissítéshez."
+
+#: admin_menu.info:0
+msgid ""
+"Renders a menu tree for administrative purposes as dropdown menu at "
+"the top of the window."
+msgstr ""
+"Egy legördülő menüt hoz létre adminisztratív célokra az ablak "
+"tetején."
 

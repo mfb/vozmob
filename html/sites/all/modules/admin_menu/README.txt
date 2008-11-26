@@ -1,4 +1,4 @@
-/* $Id: README.txt,v 1.20.2.4 2008/07/14 21:44:13 sun Exp $ */
+/* $Id: README.txt,v 1.20.2.5 2008/10/24 07:37:27 sun Exp $ */
 
 -- SUMMARY --
 
@@ -43,6 +43,10 @@ None.
 * Customize module settings in Administer >> Site configuration >> Administration
   Menu.
 
+* Most probably you want to either hide the regular 'Navigation' menu block, or
+  move the 'Administer' menu item into a new/separate menu, so administrative
+  menu items are not displayed twice on all pages.
+
 
 -- CUSTOMIZATION --
 
@@ -60,8 +64,9 @@ body #admin-menu-icon { display: none; }
      according to your needs.
 
   Please bear in mind that admin_menu's output is cached. You need to clear your
-  site's cache (probably best using Devel module, or by manually truncating the
-  cache_menu database table) to see any changes of your theme override function.
+  site's cache (via administration menu's link to flush caches,
+  admin/settings/performance, or by using Devel module) to see any changes of
+  your theme override function.
 
 * You can override the font size by adding a line to your stylesheet in your
   theme like the following:
@@ -72,9 +77,11 @@ body #admin-menu { font-size: 10px; }
 
 -- TROUBLESHOOTING --
 
-* If admin menu is not displayed, check the following steps:
+* If the administration menu is not displayed, check the following steps:
 
-  - Is the 'access administration menu' permission enabled?
+  - Is admin_menu's "access administration menu" permission enabled?
+
+  - Is system's "access administration pages" permission enabled?
 
   - Does your theme output $closure? (See FAQ below for more info)
 

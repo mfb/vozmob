@@ -1,17 +1,17 @@
-# $Id: modules-content_permissions.pot,v 1.1.2.7 2008/08/25 20:49:00 hass Exp $
+# $Id: modules-content_permissions.pot,v 1.1.2.10 2008/11/05 12:24:00 hass Exp $
 #
 # LANGUAGE translation of Drupal (modules-content_permissions)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  content_permissions.module,v 1.5 2008/05/11 19:20:09 dopry
-#  content_permissions.install,v 1.1.2.1 2008/06/09 17:45:28 yched
+#  content_permissions.module,v 1.5.2.3 2008/10/29 19:29:26 yched
+#  content_permissions.install,v 1.1.2.2 2008/10/04 13:14:22 karens
 #  content_permissions.info,v 1.2 2008/04/23 18:01:52 dww
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-08-25 22:44+0200\n"
+"POT-Creation-Date: 2008-11-05 12:54+0100\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -36,7 +36,7 @@ msgstr ""
 msgid "content_permissions"
 msgstr ""
 
-#: modules/content_permissions/content_permissions.install:7
+#: modules/content_permissions/content_permissions.install:9
 msgid "Please <a href=\"!url\">configure your field permissions</a> immediately. All fields are inaccessible by default."
 msgstr ""
 

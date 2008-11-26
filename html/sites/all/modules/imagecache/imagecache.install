@@ -1,5 +1,5 @@
 <?php
-// $Id: imagecache.install,v 1.18 2008/08/07 16:54:26 drewish Exp $
+// $Id: imagecache.install,v 1.21 2008/11/04 20:55:32 drewish Exp $
 
  function imagecache_requirements($phase) {
   $requirements = array();
@@ -193,7 +193,7 @@ function imagecache_update_4() {
     case 'mysqli':
       $ret[] = update_sql("ALTER TABLE {imagecache_action} ADD COLUMN action varchar(255) not null default '' after weight");
     case 'pgsql':
-      // @todo: pgsql updates.
+      $ret[] = update_sql("ALTER TABLE {imagecache_action} ADD COLUMN action varchar(255) NOT NULL DEFAULT ''");
       break;
   }
 
@@ -228,4 +228,13 @@ function imagecache_update_4() {
   return $ret;
 }
 
+function imagecache_update_5() {
+  // enable image API.
+  module_rebuild_cache(); // make sure new modules are in the system table.
+  module_enable(array('imageapi', 'imageapi_gd', 'imageapi_imagemagick')); // enable our new module.
 
+  // @todo: update formatter names: http://cvs.drupal.org/viewvc.py/drupal/contributions/modules/imagecache/imagecache.module?r1=1.68&r2=1.68.2.8&pathrev=DRUPAL-5--2
+  // ln: 516 diff 511.
+
+  return array();
+}

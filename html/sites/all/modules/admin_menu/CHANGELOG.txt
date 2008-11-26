@@ -1,10 +1,25 @@
-// $Id: CHANGELOG.txt,v 1.33.2.21 2008/09/12 16:34:56 pwolanin Exp $
+// $Id: CHANGELOG.txt,v 1.33.2.34 2008/11/03 23:09:10 sun Exp $
 
 Admin Menu x.x-x.x, xxxx-xx-xx
 ------------------------------
 
+
 Admin Menu 6.x-1.x, xxxx-xx-xx
 ------------------------------
+#322731 by sun: Fixed improper use of t() in module install file.
+#282030 by sun: Fixed "Run updates" item visible for unprivileged users.
+#322877 by sun: Added tweak to move page tabs into administration menu.
+#287468 by sun: Fixed module paths directly below "admin" get the wrong parent.
+#310423 by sun: Added optional position: fixed configuration setting.
+#292657 by smk-ka: Improved rendering performance.
+#234149 by yhager, sun: Fixed RTL support for IE.
+#323726 by danez1972: Added Spanish translation.
+#325057 by sun: Updated README.txt.
+#234149 by yhager, levavie, sun: Added RTL support.
+#325057 by sun: Added links to flush specific caches.
+#324334 by AltaVida: Fixed usernames with spaces not in Devel user switch links.
+#319382 by betz: Added Dutch translation.
+
 
 Admin Menu 6.x-1.1, 2008-09-12
 ------------------------------

@@ -66,7 +66,9 @@ function filefield_field_settings_views_data($field) {
   $data[$table_alias][$field['field_name'] .'_fid']['relationship'] = array(
     'base' => 'files',
     'field' => $db_info['columns']['fid']['column'],
-    'handler' => 'views_handler_relationship',
+    'handler' => 'content_handler_relationship',
+    'label' => t($field['widget']['label']),
+    'content_field_name' => $field['field_name'],
   );
   return $data;
 }

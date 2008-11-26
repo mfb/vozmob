@@ -138,7 +138,9 @@ function mailhandler_uninstall() {
  * Update database hooks
  */
 function mailhandler_update_1() {
-  return _system_update_utf8(array('mailhandler'));
+  # This is no longer needed (D6), but it's probably better to leave this function in place
+  # so the sequence of future updates will not be broken.
+  //return _system_update_utf8(array('mailhandler'));
 }
 
 
