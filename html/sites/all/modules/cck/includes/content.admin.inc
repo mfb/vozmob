@@ -1,5 +1,5 @@
 <?php
-// $Id: content.admin.inc,v 1.181.2.59 2008/11/10 15:07:10 yched Exp $
+// $Id: content.admin.inc,v 1.181.2.61 2008/12/05 23:30:18 yched Exp $
 
 /**
  * @file
@@ -1828,4 +1828,34 @@ function content_field_replace($nid, $updates) {
   }
   node_save($node);
   return $node;
+}
+
+/**
+ * Helper form element validator : integer.
+ */
+function _element_validate_integer($element, &$form_state) {
+  $value = $element['#value'];
+  if ($value !== '' && (!is_numeric($value) || intval($value) != $value)) {
+    form_error($element, t('%name must be an integer.', array('%name' => $element['#title'])));
+  }
+}
+
+/**
+ * Helper form element validator : integer > 0.
+ */
+function _element_validate_integer_positive($element, &$form_state) {
+  $value = $element['#value'];
+  if ($value !== '' && (!is_numeric($value) || intval($value) != $value || $value <= 0)) {
+    form_error($element, t('%name must be a positive integer.', array('%name' => $element['#title'])));
+  }
+}
+
+/**
+ * Helper form element validator : number.
+ */
+function _element_validate_number($element, &$form_state) {
+  $value = $element['#value'];
+  if ($value != '' && !is_numeric($value)) {
+    form_error($element, t('%name must be a number.', array('%name' => $element['#title'])));
+  }
 }

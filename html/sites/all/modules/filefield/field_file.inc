@@ -1,5 +1,5 @@
 <?php
-// $Id: field_file.inc,v 1.21 2008/11/16 07:13:23 dopry Exp $
+// $Id: field_file.inc,v 1.22 2008/12/03 23:22:11 drewish Exp $
 /**
  * @file
  * Common functionality for file handling CCK field modules.
@@ -89,7 +89,7 @@ function field_file_save_upload($source, $validators = array(), $dest = FALSE, $
   if (!@chmod($file->filepath, 0664)) {
     watchdog('filefield', 'Could not set permissons on destination file: %file', array('%file' => $file->filepath));
   }
-  
+
   // Let modules add additional properties to the yet barebone file object.
   foreach (module_implements('file_insert') as $module) {
     $function =  $module .'_file_insert';
@@ -292,7 +292,7 @@ function _field_file_cache($file = NULL, $reset = FALSE) {
 
   // Cache the file by both fid and filepath.
   // Use non-copying objects to save memory.
-  if (isset($file)) {
+  if (!empty($file->fid)) {
     $files[$file->fid] = $file;
     $files[$file->filepath] = $file;
   }

@@ -1,5 +1,5 @@
 <?php
-// $Id: fieldgroup.install,v 1.34.2.16 2008/10/16 14:05:52 yched Exp $
+// $Id: fieldgroup.install,v 1.34.2.17 2008/12/02 02:43:50 yched Exp $
 
 /**
  * @file
@@ -296,5 +296,14 @@ function fieldgroup_update_6005() {
     }
     db_query("UPDATE {content_group} SET settings='%s' WHERE group_name='%s' AND type_name='%s'", serialize($new_settings), $type['group_name'], $type['type_name']);
   }
+  return $ret;
+}
+
+/**
+ * Remove orphaned fields (see http://drupal.org/node/339537).
+ */
+function fieldgroup_update_6006() {
+  $ret = array();
+  $ret[] = update_sql("DELETE FROM {content_group_fields} WHERE (field_name, type_name) NOT IN (SELECT field_name, type_name FROM content_node_field_instance)");
   return $ret;
 }

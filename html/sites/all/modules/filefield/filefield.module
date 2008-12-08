@@ -1,4 +1,4 @@
-<?php  // $Id: filefield.module,v 1.157 2008/11/16 08:17:07 dopry Exp $
+<?php  // $Id: filefield.module,v 1.159 2008/12/03 23:22:11 drewish Exp $
 
 /**
  * @file
@@ -15,7 +15,6 @@ include_once('field_file.inc');
  */
 function filefield_init() {
   // file hooks and callbacks.
-  module_load_include('inc', 'filefield', 'filefield_file');
   module_load_include('inc', 'filefield', 'filefield_widget');
 
   drupal_add_js(drupal_get_path('module', 'filefield') .'/filefield.js');
@@ -286,18 +285,22 @@ function filefield_widget(&$form, &$form_state, $field, $items, $delta = 0) {
   if (empty($form['#submit']) || !in_array('filefield_node_form_submit', $form['#submit'])) {
     $form['#submit'][] = 'filefield_node_form_submit';
   }
-
-  module_load_include('inc', 'filefield', 'field_widget');
-
   $form['#attributes'] = array('enctype' => 'multipart/form-data');
 
+  module_load_include('inc', 'filefield', 'field_widget');
+  module_load_include('inc', $field['widget']['module'], $field['widget']['module'] .'_widget');
+
+  $item = array('fid' => 0, 'list' => $field['list_default'], 'data' => array('description' => ''));
+  if (isset($items[$delta])) {
+    $item = array_merge($item, $items[$delta]);
+  }
   $element = array(
     '#title' => $field['widget']['label'],
     '#type' => $field['widget']['type'],
-    '#default_value' => array_merge(_filefield_default_value($field), $items[$delta]),
+    '#default_value' => $item,
     '#upload_validators' => filefield_widget_upload_validators($field),
   );
-  module_load_include('inc', $field['widget']['module'], $field['widget']['module'] .'_widget');
+
   return $element;
 }
 
@@ -518,14 +521,35 @@ function filefield_default_value(&$form, &$form_state, $field, $delta) {
   }
 
   for ($delta = 0; $delta < $max; $delta++) {
-    $items[$delta] = _filefield_default_value($field);
+    $items[$delta] = array('fid' => 0, 'list' => $field['list_default'], 'data' => array('description' => ''));
   }
   return $items;
 }
 
-function _filefield_default_value($field) {
-  return array('fid' => 0, 'list' => $field['list_default'], 'data' => array('description' => ''));
+
+
+/**
+ * Implementation of hook_file_references().
+ */
+function filefield_file_references($file) {
+  $references = 0;
+  foreach(content_fields() as $field) {
+    if ($field['type'] != 'file') {
+      continue;
+    }
+    $references += field_file_references($file, $field);
+  }
+  return array('filefield' => $references);
 }
+
+/**
+ * Implementation of hook_file_delete().
+ */
+function filefield_file_delete($file) {
+  // foreach  field... remove items referencing $file.
+}
+
+
 
 /**
  * Check that the filename ends with an allowed extension. This check is

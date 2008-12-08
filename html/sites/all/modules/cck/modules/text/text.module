@@ -1,5 +1,5 @@
 <?php
-// $Id: text.module,v 1.95.2.26 2008/11/05 19:40:19 yched Exp $
+// $Id: text.module,v 1.95.2.27 2008/12/05 23:27:57 yched Exp $
 
 /**
  * @file
@@ -63,6 +63,7 @@ function text_field_settings($op, $field) {
         '#title' => t('Maximum length'),
         '#default_value' => is_numeric($field['max_length']) ? $field['max_length'] : '',
         '#required' => FALSE,
+        '#element_validate' => array('_element_validate_integer_positive'),
         '#description' => t('The maximum length of the field in characters. Leave blank for an unlimited size.'),
       );
       $form['allowed_values_fieldset'] = array(
@@ -314,7 +315,7 @@ function text_widget_settings($op, $widget) {
           '#type' => 'textfield',
           '#title' => t('Size of textfield'),
           '#default_value' => $size,
-          '#element_validate' => array('_text_widget_settings_size_validate'),
+          '#element_validate' => array('_element_validate_integer_positive'),
           '#required' => TRUE,
         );
       }
@@ -323,7 +324,7 @@ function text_widget_settings($op, $widget) {
           '#type' => 'textfield',
           '#title' => t('Rows'),
           '#default_value' => $rows,
-          '#element_validate' => array('_text_widget_settings_row_validate'),
+          '#element_validate' => array('_element_validate_integer_positive'),
           '#required' => TRUE,
         );
         $form['size'] = array('#type' => 'hidden', '#value' => $size);
@@ -332,20 +333,6 @@ function text_widget_settings($op, $widget) {
 
     case 'save':
       return array('rows', 'size');
-  }
-}
-
-function _text_widget_settings_row_validate($element, &$form_state) {
-  $value = $form_state['values']['rows'];
-  if (!is_numeric($value) || intval($value) != $value || $value <= 0) {
-    form_error($element, t('"Rows" must be a positive integer.'));
-  }
-}
-
-function _text_widget_settings_size_validate($element, &$form_state) {
-  $value = $form_state['values']['size'];
-  if (!is_numeric($value) || intval($value) != $value || $value <= 0) {
-    form_error($element, t('"Size" must be a positive integer.'));
   }
 }
 

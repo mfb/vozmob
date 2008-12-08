@@ -1,5 +1,5 @@
 <?php
-// $Id: userreference.module,v 1.106.2.29 2008/11/07 15:18:39 yched Exp $
+// $Id: userreference.module,v 1.106.2.30 2008/12/04 00:40:41 yched Exp $
 
 /**
  * @file
@@ -136,8 +136,8 @@ function userreference_field_settings($op, $field) {
       // Filter : swap the handler to the 'in' operator.
       $data[$table_alias][$field['field_name'] .'_uid']['filter']['handler'] = 'content_handler_filter_many_to_one';
       // Argument: use users.name for summaries.
-      $data[$table_alias][$field['field_name'] .'_nid']['argument']['name table'] = 'node';
-      $data[$table_alias][$field['field_name'] .'_nid']['argument']['name field'] = 'title';
+      $data[$table_alias][$field['field_name'] .'_uid']['argument']['name table'] = 'users';
+      $data[$table_alias][$field['field_name'] .'_uid']['argument']['name field'] = 'name';
       // Relationship: Add a relationship for related user.
       $data[$table_alias][$field['field_name'] .'_uid']['relationship'] = array(
         'base' => 'users',

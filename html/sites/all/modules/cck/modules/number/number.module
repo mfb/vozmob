@@ -1,5 +1,5 @@
 <?php
-// $Id: number.module,v 1.91.2.30 2008/11/05 19:40:18 yched Exp $
+// $Id: number.module,v 1.91.2.31 2008/12/05 23:27:56 yched Exp $
 
 /**
  * @file
@@ -55,13 +55,13 @@ function number_field_settings($op, $field) {
       $form['min'] = array(
         '#type' => 'textfield',
         '#title' => t('Minimum'),
-        '#element_validate' => array('_number_widget_settings_min_validate'),
+        '#element_validate' => array('_element_validate_number'),
         '#default_value' => is_numeric($field['min']) ? $field['min'] : '',
       );
       $form['max'] = array(
         '#type' => 'textfield',
         '#title' => t('Maximum'),
-        '#element_validate' => array('_number_widget_settings_max_validate'),
+        '#element_validate' => array('_element_validate_number'),
         '#default_value' => is_numeric($field['max']) ? $field['max'] : '',
       );
       if ($field['type'] == 'number_decimal') {

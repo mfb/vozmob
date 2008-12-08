@@ -1,5 +1,5 @@
 <?php
-// $Id: fieldgroup.module,v 1.79.2.40 2008/11/10 15:56:35 yched Exp $
+// $Id: fieldgroup.module,v 1.79.2.41 2008/12/02 02:43:50 yched Exp $
 
 /**
  * @file
@@ -87,7 +87,7 @@ function fieldgroup_elements() {
  */
 function fieldgroup_content_fieldapi($op, $field) {
   switch ($op) {
-    case 'delete':
+    case 'delete instance':
       db_query("DELETE FROM {". fieldgroup_fields_tablename() ."} WHERE field_name = '%s'", $field['field_name']);
       break;
   }

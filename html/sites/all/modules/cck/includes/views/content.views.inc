@@ -1,5 +1,5 @@
 <?php
-// $Id: content.views.inc,v 1.1.2.18 2008/11/05 19:40:19 yched Exp $
+// $Id: content.views.inc,v 1.1.2.19 2008/12/04 00:40:40 yched Exp $
 
 /**
  * @file
@@ -221,7 +221,7 @@ function content_views_field_views_data($field) {
     $data[$columns[0]] = array(
       'group' => t('Content'),
       'title' => t('@label - (!name)', array('@label' => t($field['widget']['label']), '!name' => $field['field_name'])),
-      'title_short' => check_plain(t($field['widget']['label'])),
+      'title short' => check_plain(t($field['widget']['label'])),
       'help' =>  t($field_types[$field['type']]['label']) .' - '. t('Appears in: @types', array('@types' => implode(', ', $types))),
       'field' => array(
         'field' => $columns[0],

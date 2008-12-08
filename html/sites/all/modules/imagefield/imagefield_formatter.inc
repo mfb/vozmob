@@ -20,7 +20,7 @@ function theme_imagefield_formatter_image_plain($element) {
   if (empty($item['filepath']))  $item = array_merge($item, field_file_load($item['fid']));
 
   $class = 'imagefield imagefield-'. $field['field_name'];
-  return  theme('imagefield_image', $item, $item['alt'], $item['title'], array('class' => $class));
+  return  theme('imagefield_image', $item, $item['data']['alt'], $item['data']['title'], array('class' => $class));
 }
 
 function theme_imagefield_formatter_image_nodelink($element) {
