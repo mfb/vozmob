@@ -4,3 +4,4 @@ name = Gizmo mailsave
 description = Cleanup messages received from Gizmo.
 dependencies[] = mailsave
 core = 6.x
+package = Mailsave

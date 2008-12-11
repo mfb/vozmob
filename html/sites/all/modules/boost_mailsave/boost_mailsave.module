@@ -1,0 +1,41 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Cleanup messages received from boost.
+ */
+
+/**
+ * Implementation of hook_mailsave_clean().
+ */
+function boost_mailsave_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
+  // Check if this message was from boost.
+  if (preg_match('!@myboostmobile.com$!i', $header->fromaddress)) {
+    if (preg_match('!(http://mediamail\.boostmobile\.com/share\.do\?invite=.*)"!', $node->body, $matches)) {
+      // Boost sends HTTP 500 error if user agent is PHP, so we use Drupal :)
+      // Also, connect via HTTPS to (help) protect private data.
+      $message_view = drupal_http_request(str_replace('http://', 'https://', $matches[1]));
+      if (preg_match('!<strong>Subject:</strong> (.*)!', $message_view->data, $matches)) {
+        $node->title = $matches[1];
+      }
+    }
+    // There seems to be nothing useful in the body so we nuke it!
+    $node->body = '';
+    $node->teaser = node_teaser($node->body);
+  }
+  // @todo: Download high res image(s).
+  //   We will need to submit a POST request to
+  //   http://mediamail.boostmobile.com/mmsdownloadzip/
+  //   with post data such as:
+  //     type=zip
+  //     res=high
+  //     createDirectory=false
+  //     fileName=[subject]
+  //     invite=[alphanumeric invite id]
+  //     elementID=_001_025f14c7197355b_1_2
+  //     _001_025f14c7197355b_1_2ext=.jpg
+  //     externalMediaIds=_001_025f14c7197355b_1_2
+  //     2ext_mms=.jpg
+}
+
