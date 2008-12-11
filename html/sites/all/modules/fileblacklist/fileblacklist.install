@@ -1,0 +1,53 @@
+<?php
+// $Id$
+
+/**
+ * Implementation of hook_schema().
+ */
+function fileblacklist_schema() {
+  $schema['fileblacklist'] = array(
+    'description' => t('File blacklist.'),
+    'fields' => array(
+      'fid' => array(
+        'description' => t('File identifier.'),
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'sha256' => array(
+        'description' => t('The sha256 digest for this file.'),
+        'type' => 'varchar',
+        'length' => 64,
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'type' => array(
+        'description' => t('Type of denial action.'),
+        'type' => 'int',
+        'size' => 'tiny',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('fid'),
+    'unique keys' => array(
+      'sha256' => array('sha256'),
+    ),
+  );
+  return $schema;
+}
+
+/**
+ * Implementation of hook_install().
+ */
+function fileblacklist_install() {
+  drupal_install_schema('fileblacklist');
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function fileblacklist_uninstall() {
+  drupal_uninstall_schema('fileblacklist');
+}

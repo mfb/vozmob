@@ -1,0 +1,4 @@
+; $Id: advanced_help.info,v 1.2 2008/04/19 16:45:57 merlinofchaos Exp $
+name = Advanced help
+description = Allow advanced help and documentation.
+core = 6.x

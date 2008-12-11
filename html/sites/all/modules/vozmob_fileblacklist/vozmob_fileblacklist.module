@@ -1,0 +1,21 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Create a "blacklist" of files which are not permitted to be uploaded.
+ */
+
+/**
+ * Implementation of hook_perm().
+ */
+function vozmob_fileblacklist_nodeapi(&$node, $op, $form, $page) {
+  if ($op == 'validate' && empty($node->nid)) {
+    foreach ($node->field_image as $index => $field_image) {
+      if ($blacklist = fileblacklist_filepath_check($field_image['filepath'])) {
+        $node->field_image[$index] = NULL; 
+        field_file_delete($field_image);
+      }
+    }
+  }
+}

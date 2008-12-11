@@ -1,0 +1,58 @@
+<?php
+// $Id: performance.install,v 1.1.4.1 2008/10/20 22:10:35 kbahey Exp $
+
+// Copyright Khalid Baheyeldin 2008 of http://2bits.com
+
+function performance_schema() {
+  $schema = array();
+
+  $schema['performance_summary'] = array(
+    'fields' => array(
+      'path'            => array('type' => 'varchar', 'length' => '255', 'not null' => TRUE, 'default' => ''),
+      'last_access'     => array('type' => 'int', 'not null' => TRUE, 'default' => 0, 'disp-width' => '11'),
+      'bytes_max'       => array('type' => 'int', 'not null' => TRUE, 'default' => 0, 'disp-width' => '11'),
+      'bytes_avg'       => array('type' => 'int', 'not null' => TRUE, 'default' => 0, 'disp-width' => '11'),
+      'millisecs_max'   => array('type' => 'int', 'not null' => TRUE, 'default' => 0, 'disp-width' => '11'),
+      'millisecs_avg'   => array('type' => 'int', 'not null' => TRUE, 'default' => 0, 'disp-width' => '11'),
+      'query_count_max' => array('type' => 'int', 'not null' => TRUE, 'default' => 0, 'disp-width' => '11'),
+      'query_count_avg' => array('type' => 'int', 'not null' => TRUE, 'default' => 0, 'disp-width' => '11'),
+      'query_timer_max' => array('type' => 'int', 'not null' => TRUE, 'default' => 0, 'disp-width' => '11'),
+      'query_timer_avg' => array('type' => 'int', 'not null' => TRUE, 'default' => 0, 'disp-width' => '11'),
+      'num_accesses'    => array('type' => 'int', 'not null' => TRUE, 'default' => 0, 'disp-width' => '11'),
+      'title'             => array('type' => 'varchar', 'length' => '255', 'not null' => FALSE)),
+    'primary key' => array('path'),
+    'indexes' => array(
+      'last_access' => array('last_access')),
+  );
+
+  $schema['performance_detail'] = array(
+    'fields' => array(
+      'pid'         => array('type' => 'serial', 'not null' => TRUE, 'disp-width' => '11'),
+      'timestamp'   => array('type' => 'int', 'not null' => TRUE,  'default' => 0, 'disp-width' => '11'),
+      'bytes'       => array('type' => 'int', 'not null' => TRUE,  'default' => 0, 'disp-width' => '11'),
+      'millisecs'   => array('type' => 'int', 'not null' => TRUE,  'default' => 0, 'disp-width' => '11'),
+      'query_count' => array('type' => 'int', 'not null' => TRUE,  'default' => 0, 'disp-width' => '11'),
+      'query_timer' => array('type' => 'int', 'not null' => TRUE,  'default' => 0, 'disp-width' => '11'),
+      'anon'        => array('type' => 'int', 'not null' => FALSE, 'default' => 1, 'disp-width' => '1'),
+      'title'       => array('type' => 'varchar', 'length' => '255', 'not null' => FALSE),
+      'path'        => array('type' => 'varchar', 'length' => '255', 'not null' => FALSE)),
+    'primary key' => array('pid'),
+    'indexes' => array(
+      'timestamp' => array('timestamp')),
+  );
+
+  return $schema;
+}
+
+function performance_install() {
+  drupal_install_schema('performance');
+
+  // Set the weight so this module runs last
+  db_query("UPDATE {system} SET weight = 3000 WHERE name = 'performance'");
+}
+
+function performance_uninstall() {
+  db_query("DROP TABLE {performance_detail}");
+  db_query("DROP TABLE {performance_summary}");
+  db_query("DELETE FROM {variable} WHERE name LIKE 'performance%'");
+}
