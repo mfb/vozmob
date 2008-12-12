@@ -549,7 +549,12 @@ function filefield_file_delete($file) {
   // foreach  field... remove items referencing $file.
 }
 
-
+/**
+ * Set the default values for a filefield.
+ */
+function _filefield_default_value($field) {
+  return array('fid' => 0, 'list' => $field['list_default'], 'data' => array('description' => ''));
+}
 
 /**
  * Check that the filename ends with an allowed extension. This check is

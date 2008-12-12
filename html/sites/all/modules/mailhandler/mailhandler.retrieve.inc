@@ -188,18 +188,16 @@ function mailhandler_get_parts($stream, $msg_number, $max_depth = 10, $depth = 0
     return $parts;
   }
 
-  // convert text attachment to UTF-8.
-  if ($structure->type == TYPETEXT) {
-    $part->data = imap_utf8($part->data);
+  // Decode as necessary.
+  if ($structure->encoding == ENCBASE64) {
+    $part->data = imap_base64($part->data);
   }
-  else {
-    // If not text then decode as necessary
-    if ($structure->encoding == ENCBASE64) {
-      $part->data = imap_base64($part->data);
-    }
-    else if ($structure->encoding == ENCQUOTEDPRINTABLE) {
-      $part->data = quoted_printable_decode($part->data);
-    }
+  elseif ($structure->encoding == ENCQUOTEDPRINTABLE) {
+    $part->data = quoted_printable_decode($part->data);
+  }
+  // Convert text attachment to UTF-8.
+  elseif ($structure->type == TYPETEXT) {
+    $part->data = imap_utf8($part->data);
   }
 
   //always return an array to satisfy array_merge in recursion catch, and array return value.
@@ -260,6 +258,10 @@ function mailhandler_process_message($header, $body, $mailbox) {
 
   // Set a default type if none provided
   if (!$node->type) $node->type = mailhandler_default_type();
+
+  // Apply defaults to the $node object, and allow modules to add default values
+  require_once($base_path . 'modules/node/node.pages.inc');
+  node_object_prepare(&$node);
 
   // Reset $node->taxonomy
   $node->taxonomy = array();

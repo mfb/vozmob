@@ -311,7 +311,7 @@ function _mailsave_use_mailhandler_attachments($node) {
   $attachments = array();
 
   // Parse each mime part in turn
-  foreach ($node->mimeparts as $mimepart) {
+  foreach ($node->mimeparts as $key => $mimepart) {
 
     // Only return those parts that have a filename, or are non-text
     // This is try and prevent unnamed text parts getting treated as attachments
@@ -327,6 +327,7 @@ function _mailsave_use_mailhandler_attachments($node) {
         'filepath' => $filepath,
         'filemime' => strtolower($mimepart->filemime),
         'filesize' => strlen($mimepart->data),
+        'mimepart' => $key,
       );
     }
   }
