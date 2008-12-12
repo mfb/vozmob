@@ -1,4 +1,4 @@
-# $Id: README.txt,v 1.18.2.2.2.7 2008/10/01 16:43:13 designerbrent Exp $
+# $Id: README.txt,v 1.18.2.2.2.8 2008/12/08 14:08:15 designerbrent Exp $
 
 
 --- README  -------------------------------------------------------------
@@ -29,7 +29,7 @@ Requirements: Drupal 6.x
 
 --- FEATURES --------------------------------------------------------
 
-- uses Blueprint 0.7.1 CSS framework: http://www.blueprintcss.org/
+- uses Blueprint 0.8 CSS framework: http://www.blueprintcss.org/
 - normalizes Drupal's CSS to be consistent
 - properly aggregates all blueprint CSS files into a single file when this setting is enabled
 - put scripts at bottom of page for nice performance gains, read more: http://developer.yahoo.com/performance/rules.html#js_bottom
@@ -52,13 +52,14 @@ Requirements: Drupal 6.x
 
 Drupal 6 version:
 - Hover over blocks to reveal admin links to edit and configure the blocks as well as edit the menu blocks.
+- Support for sub-themes.
 
 --- INSTALLATION --------------------------------------------------------
 
 1. Place the blueprint folder in your themes directory.
 
 2. Download Blueprint http://www.blueprintcss.org/
-   a. Extract folder, creating something like joshuaclayton-blueprint-css-28c8aa9ae2686442e00a5c7f46dfe2de76b3bd83
+   a. Extract folder, creating something like "joshuaclayton-blueprint-css-28c8aa9ae2686442e00a5c7f46dfe2de76b3bd83"
    b. Rename to "blueprint"
    c. Ensure your path looks like themes/blueprint/blueprint/blueprint/screen.css
 
@@ -147,6 +148,10 @@ calculations work:
 
 
 --- CHANGELOG --------------------------------------------------------
+
+1.x, 2008-12-08
+----------------------
+- Fix sidebar variables so they don't build unnecessary nested divs when using sub-themes.
 
 1.x, 2008-10-01
 ----------------------

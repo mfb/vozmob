@@ -1,5 +1,5 @@
 <?php
-// $Id: template.php,v 1.15.2.1.2.11 2008/10/01 16:02:34 designerbrent Exp $
+// $Id: template.php,v 1.15.2.1.2.12 2008/12/08 14:08:15 designerbrent Exp $
 
 /**
  * Uncomment the following line during development to automatically
@@ -43,33 +43,30 @@ function phptemplate_preprocess_page(&$vars) {
   // determine layout
   // 3 columns
   if ($vars['layout'] == 'both') {
-    $vars['left'] = '<div class="col-left span-6">'. $vars['left'] .'</div>';
-    $vars['right'] = '<div class="col-right span-6 last">'. $vars['right'] .'</div>';
-    $vars['center'] = 'col-center span-12';
-    $vars['body_classes'] = 'col-3 '. $vars['body_classes'];
+    $vars['left_classes'] = 'col-left span-6';
+    $vars['right_classes'] = 'col-right span-6 last';
+    $vars['center_classes'] = 'col-center span-12';
+    $vars['body_classes'] .= ' col-3 ';
   }
   // 2 columns
   else if ($vars['layout'] != 'none') {
     // left column & center
     if ($vars['layout'] == 'left') {
-      $vars['left'] = '<div class="col-left span-6">'. $vars['left'] .'</div>';
-      $vars['right'] = '';
-      $vars['center'] = 'col-center span-18 last';
+      $vars['left_classes'] = 'col-left span-6';
+      $vars['center_classes'] = 'col-center span-18 last';
     }
     // right column & center
     else if ($vars['layout'] == 'right') {
-      $vars['left'] = '';
-      $vars['right'] = '<div class="col-right span-6 last">'. $vars['right'] .'</div>';
-      $vars['center'] = 'col-center span-18';
+      $vars['right_classes'] = 'col-right span-6 last';
+      $vars['center_classes'] = 'col-center span-18';
     }
-    $vars['body_classes'] = 'col-2 '. $vars['body_classes'];
+    $vars['body_classes'] .= ' col-2 ';
   }
   // 1 column
   else {
-    $vars['left'] = '';
-    $vars['right'] = '';
-    $vars['center'] = 'col-center span-24';
-    $vars['body_classes'] = 'col-1 '. $vars['body_classes'];
+
+    $vars['center_classes'] = 'col-center span-24';
+    $vars['body_classes'] .= ' col-1 ';
   }
 
   $vars['meta'] = '';
@@ -152,7 +149,7 @@ function phptemplate_preprocess_comment(&$vars) {
     $vars['title'] = '';
   }
   // if user has no picture, add in a filler
-  if ($vars['comment']->picture == '') {
+  if (empty($vars['comment']->picture)) {
     $vars['picture'] = '<div class="no-picture">&nbsp;</div>';
   }
 

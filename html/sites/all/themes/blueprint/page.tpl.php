@@ -1,4 +1,4 @@
-<?php // $Id: page.tpl.php,v 1.15.4.3 2008/10/28 18:28:11 designerbrent Exp $ ?>
+<?php // $Id: page.tpl.php,v 1.15.4.5 2008/12/09 05:11:31 designerbrent Exp $ ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
@@ -37,9 +37,11 @@
     <?php endif; ?>    
   </div>
 
-  <?php print $left; ?>
-
-  <div class="<?php print $center; ?>">
+  <?php if ($left): ?>
+    <div class="<?php print $left_classes; ?>"><?php print $left; ?></div>
+  <?php endif ?>
+  
+  <div class="<?php print $center_classes; ?>">
     <?php
       if ($breadcrumb != '') {
         print $breadcrumb;
@@ -75,7 +77,10 @@
     <?php endif; ?>
   </div>
 
-  <?php print $right; ?>
+  <?php if ($right): ?>
+    <div class="<?php print $right_classes; ?>"><?php print $right; ?></div>
+  <?php endif ?>
+  
 
   <?php print $scripts ?>
   <script type="text/javascript" src="http://mediaplayer.yahoo.com/js"></script>
