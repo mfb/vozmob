@@ -1,5 +1,5 @@
 <?php
-// $Id: theme.inc,v 1.415.2.15 2008/11/22 10:13:02 dries Exp $
+// $Id: theme.inc,v 1.415.2.17 2008/12/10 21:09:05 goba Exp $
 
 /**
  * @file
@@ -767,6 +767,12 @@ function drupal_find_theme_functions($cache, $prefixes) {
         $templates[$hook] = array(
           'function' => $prefix .'_'. $hook,
         );
+        // Ensure that the pattern is maintained from base themes to its sub-themes.
+        // Each sub-theme will have their functions scanned so the pattern must be
+        // held for subsequent runs.
+        if (isset($info['pattern'])) {
+          $templates[$hook]['pattern'] = $info['pattern'];
+        }
       }
     }
   }
@@ -831,6 +837,12 @@ function drupal_find_theme_templates($cache, $extension, $path) {
         'template' => $template,
         'path' => dirname($file->filename),
       );
+    }
+    // Ensure that the pattern is maintained from base themes to its sub-themes.
+    // Each sub-theme will have their templates scanned so the pattern must be
+    // held for subsequent runs.
+    if (isset($cache[$hook]['pattern'])) {
+      $templates[$hook]['pattern'] = $cache[$hook]['pattern'];
     }
   }
 
@@ -1429,10 +1441,10 @@ function theme_mark($type = MARK_NEW) {
  *   All other elements are treated as attributes of the list item element.
  * @param $title
  *   The title of the list.
- * @param $attributes
- *   The attributes applied to the list element.
  * @param $type
  *   The type of list to return (e.g. "ul", "ol")
+ * @param $attributes
+ *   The attributes applied to the list element.
  * @return
  *   A string containing the list output.
  */

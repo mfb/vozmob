@@ -1,5 +1,5 @@
 <?php
-// $Id: session.inc,v 1.44.2.4 2008/10/20 09:53:32 goba Exp $
+// $Id: session.inc,v 1.44.2.6 2008/12/11 00:29:34 goba Exp $
 
 /**
  * @file
