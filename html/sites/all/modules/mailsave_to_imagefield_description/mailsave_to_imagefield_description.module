@@ -23,8 +23,11 @@ function mailsave_to_imagefield_description_mailsave($node, $result, $i, $header
     if ($text && $image) {
       $mimepairs[] = array('image' => $key - 1, 'text' => $key);
     }
-    elseif ($text) {
-      // Add any other text parts to the body.
+    elseif ($text && $key > 1) {
+      // Add any text parts, aside from the initial parts, to the body.
+      // @todo: This is not really right. What if this text part was already
+      // added to the body? What if we threw away an initial text part that we
+      // actually wanted?
       $node->body .= "\n" . $mimepart->data;
     }
     $image = (strpos($mimepart->filemime, 'IMAGE/') === 0) ? TRUE : FALSE;
