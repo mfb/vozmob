@@ -1,4 +1,4 @@
-//$Id: CHANGELOG.txt,v 1.1.6.278 2008/12/08 01:02:50 yched Exp $
+//$Id: CHANGELOG.txt,v 1.1.6.283 2008/12/30 00:00:54 yched Exp $
 
 CCK 6.x-2.x
 ===========
@@ -13,6 +13,11 @@ CCK 6.x-2.x
 - Diff integration: refactored around a new hook_content_diff_values() to save contrib field modules the
 burden of implementing hook_diff. For most field types, the default content_field_content_diff_values()
 should be enough, though.
+- #344216 by dbabbage: Fix incorrect url to Schema module in tests descriptions.
+- #336174 Move actual field access check in content.module, with content_permission.module providing one permission-based implementation.
+- #336174 (followup) Make sure content_view_field() and content_format() both respect field access rules.
+- #351929 by lyricnz - Views integration: make sure formatters get a pseudo-node with enough info.
+- #131953 by markus_petrux - Views integration: expose additional db columns.
 
 CCK 6.x-2.1
 ===========

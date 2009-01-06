@@ -1,5 +1,5 @@
 <?php
-// $Id: views_bulk_operations_plugin_style.inc,v 1.1.2.15 2008/11/30 05:52:59 kratib Exp $
+// $Id: views_bulk_operations_plugin_style.inc,v 1.1.2.16 2008/12/25 20:46:45 kratib Exp $
 
 define('VBO_EXECUTION_DIRECT', 1);
 define('VBO_EXECUTION_BATCH', 2);
@@ -82,7 +82,7 @@ class views_bulk_operations_plugin_style extends views_plugin_style_table {
   function get_selected_operations() {
     $selected = array();
     foreach (array_filter($this->options['selected_operations']) as $key => $operation) {
-      $selected[$key] = $this->options['all_operations'][$key]['label'];
+      $selected[$key] = t($this->options['all_operations'][$key]['label']);
     }
     return $selected;
   }

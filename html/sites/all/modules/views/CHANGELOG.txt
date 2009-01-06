@@ -61,3 +61,8 @@ Views 2.2
    o #335613 by swentel: Add hook_views_api() setting to bulk export.
    o #339707 by nedjo: Add filter to show child translations.
    o #284768 by drewish: Proper templates for RSS feeds rather than format_rss_item().
+
+Views 2.3
+  Bugs fixed:
+    o #349739: Fix arguments not getting transmitted to attachment displays properly.
+    o #354707: Display attachment happened too early preventing default arguments from passing to the attachment.

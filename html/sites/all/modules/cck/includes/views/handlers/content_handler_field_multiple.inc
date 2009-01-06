@@ -1,5 +1,5 @@
 <?php
-// $Id: content_handler_field_multiple.inc,v 1.1.2.14 2008/11/20 12:22:13 karens Exp $
+// $Id: content_handler_field_multiple.inc,v 1.1.2.15 2008/12/29 23:34:35 yched Exp $
 
 /**
  * @file
@@ -21,10 +21,12 @@ class content_handler_field_multiple extends content_handler_field {
       // Grouped field: ditch the existing additional_fields (field columns + delta).
       // In the main query we'll only need:
       // - vid, which will be used to retrieve the actual values in pre_render,
-      // - node type, which wil be used to render the results.
+      // - node type and nid, which wil be used in the pseudo-node used when
+      // rendering.
       $this->additional_fields = array(
-        'vid' => array('table' => 'node', 'field' => 'vid'),
         'type' => array('table' => 'node', 'field' => 'type'),
+        'nid' => array('table' => 'node', 'field' => 'nid'),
+        'vid' => array('table' => 'node', 'field' => 'vid'),
       );
     }
   }
@@ -195,9 +197,12 @@ class content_handler_field_multiple extends content_handler_field {
       }
 
       // Build a pseudo-node from the retrieved values.
-      $node = $values;
+      $node = drupal_clone($values);
       // content_format and formatters will need a 'type'.
       $node->type = $values->{$this->aliases['type']};
+      $node->nid = $values->{$this->aliases['nid']};
+      $node->vid = $values->{$this->aliases['vid']};
+
       // Some formatters need to behave differently depending on the build_mode
       // (for instance: preview), so we provide one.
       $node->build_mode = NODE_BUILD_NORMAL;

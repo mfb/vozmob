@@ -1,5 +1,5 @@
 <?php
-// $Id: imagecache_actions.inc,v 1.17 2008/10/08 01:32:23 drewish Exp $
+// $Id: imagecache_actions.inc,v 1.18 2009/01/06 01:29:46 drewish Exp $
 
 /**
  * ImageCache Scale
@@ -69,20 +69,20 @@ function imagecache_deprecated_scale_form($data) {
     '#type' => 'select',
     '#title' => t('Scale to fit'),
     '#options' => array('inside' => t('Inside dimensions'), 'outside' => t('Outside dimensions')),
-    '#default_value' => $data['fit'],
+    '#default_value' => isset($data['fit']) ? $data['fit'] : NULL,
     '#weight' => 1,
     '#description' => $description,
   );
   $form['width'] = array(
     '#type' => 'textfield',
     '#title' => t('Width'),
-    '#default_value' => $data['width'],
+    '#default_value' => isset($data['width']) ? $data['width'] : '',
     '#description' => t('Enter a width in pixels or as a percentage. i.e. 500 or 80%.'),
   );
   $form['height'] = array(
     '#type' => 'textfield',
     '#title' => t('Height'),
-    '#default_value' => $data['height'],
+    '#default_value' => isset($data['height']) ? $data['height'] : '',
     '#description' => t('Enter a height in pixels or as a percentage. i.e. 500 or 80%.'),
   );
   return $form;

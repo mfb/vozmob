@@ -76,7 +76,7 @@ function devel_themer_ajax_variables($request_id, $call) {
 function devel_themer_toggle($action) {
   $function = $action == 'enable' ? 'module_enable' : 'module_disable';
   $$function('devel_themer');
-  drupal_set_message(t("Devel Themer module $action"));
+  drupal_set_message(t('Devel Themer module %action.', array('%action' => $action)));
   drupal_goto();
 }
 

@@ -1,5 +1,5 @@
 <?php
-// $Id: query.inc,v 1.32 2008/10/28 20:08:10 merlinofchaos Exp $
+// $Id: query.inc,v 1.33 2009/01/05 20:16:19 merlinofchaos Exp $
 /**
  * @file query.inc
  * Defines the query object which is the underlying layer in a View.
@@ -607,6 +607,7 @@ class views_query {
 
     $name = $alias ? $alias : $field;
 
+    // @todo FIXME -- $alias, then $name is inconsistent
     if (empty($this->fields[$alias])) {
       $this->fields[$name] = array(
         'field' => $field,
@@ -854,7 +855,6 @@ class views_query {
    *   Provide a countquery if this is true, otherwise provide a normal query.
    */
   function query($get_count = FALSE) {
-
     // Check query distinct value.
     if (empty($this->no_distinct) && $this->distinct && !empty($this->fields)) {
       if (!empty($this->fields[$this->base_field])) {

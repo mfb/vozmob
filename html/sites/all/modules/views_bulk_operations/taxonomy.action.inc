@@ -3,6 +3,17 @@
 define('TAXONOMY_ACTION_ADD', 0);
 define('TAXONOMY_ACTION_REPLACE', 1);
 define('TAXONOMY_ACTION_DELETE', 2);
+define('TAXONOMY_ACTION_REPLACE_VOCABULARY', 3);
+
+function taxonomy_action_info() {
+  if (!module_exists('taxonomy')) return array();
+  return array('taxonomy_action' => array(
+    'type' => 'node',
+    'description' => t('Modify node\'s taxonomy terms'),
+    'configurable' => TRUE,
+    'behavior' => array('changes_node_property'),
+  ));
+}
 
 function taxonomy_action(&$node, $context) {
   if (empty($context['terms']) && $context['do'] == TAXONOMY_ACTION_REPLACE) { // Just delete terms
@@ -38,6 +49,18 @@ function taxonomy_action(&$node, $context) {
       $terms = array_merge($terms, $existing_terms);
     }
   }
+  else if ($context['do'] == TAXONOMY_ACTION_REPLACE_VOCABULARY) {
+    $existing_terms = taxonomy_node_get_terms($node);
+    foreach ($existing_terms as $existing_term) {
+      foreach ($terms as $term) {
+        if ($term->vid == $existing_term->vid) {
+          unset($existing_terms[$existing_term->tid]);
+        }
+      }
+    }       
+    $terms = array_merge($terms, $existing_terms);
+  }
+
   $node->taxonomy = $terms;
 }
 
@@ -64,6 +87,7 @@ function taxonomy_action_form($context) {
     '#options' => array(
       TAXONOMY_ACTION_ADD => t('Add the selected terms'),
       TAXONOMY_ACTION_REPLACE => t('Replace existing terms with selected ones'),
+      TAXONOMY_ACTION_REPLACE_VOCABULARY => t('Replace terms within same vocabulary'),
       TAXONOMY_ACTION_DELETE => t('Delete selected terms')
     ),
     '#required' => TRUE,

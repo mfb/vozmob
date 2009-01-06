@@ -1,0 +1,62 @@
+# $Id: filefield_token.de.po,v 1.1 2008/12/14 21:01:25 hass Exp $
+#
+# German translation of Drupal (general)
+# Copyright 2008 <dvc@drupalcenter.de>
+# Generated from files:
+#  filefield.module,v 1.50.2.2 2007/09/25 16:06:07 jpetso
+#  filefield.info,v 1.5 2007/06/18 22:53:42 dww
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: 2008-12-14 20:56+0100\n"
+"PO-Revision-Date: 2008-12-14 21:55+0100\n"
+"Last-Translator: Alexander Haß\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n>1);\n"
+"X-Poedit-Language: German\n"
+"X-Poedit-Country: GERMANY\n"
+
+#: filefield_token/filefield_token.module:10
+msgid "File ID"
+msgstr "Datei-ID"
+
+#: filefield_token/filefield_token.module:11
+msgid "File description"
+msgstr "Dateibeschreibung"
+
+#: filefield_token/filefield_token.module:12
+msgid "File name"
+msgstr "Dateiname"
+
+#: filefield_token/filefield_token.module:14
+msgid "File MIME type"
+msgstr "MIME-Typ der Datei"
+
+#: filefield_token/filefield_token.module:15
+msgid "File size (in bytes)"
+msgstr "Dateigröße (in Bytes)"
+
+#: filefield_token/filefield_token.module:16
+msgid "File size (pretty printed)"
+msgstr "Dateigröße (schöner angezeigt)"
+
+#: filefield_token/filefield_token.module:17
+msgid "Fully formatted HTML file tag"
+msgstr "Vollständig formatierter HTML-Datei-Tag"
+
+#: filefield_token/filefield_token.module:0
+msgid "filefield_token"
+msgstr "filefield_token"
+
+#: filefield_token/filefield_token.info:0
+msgid "FileField Tokens"
+msgstr "Dateifeld-Tokens"
+
+#: filefield_token/filefield_token.info:0
+msgid "Token Integration for FileField."
+msgstr "Token-Integration für Dateifeld."
+

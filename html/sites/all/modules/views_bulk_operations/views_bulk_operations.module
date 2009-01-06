@@ -1,5 +1,5 @@
 <?php
-// $Id: views_bulk_operations.module,v 1.29.2.9.2.30 2008/12/10 05:51:24 kratib Exp $
+// $Id: views_bulk_operations.module,v 1.29.2.9.2.33 2009/01/05 20:16:04 kratib Exp $
 
 /**
  * @file 
@@ -15,8 +15,6 @@ define('VIEWS_BULK_OPS_STEP_SINGLE', 4);
 // Maximum number of node titles that will be displayed in operation
 // confirmation page.
 define('VIEWS_BULK_OPS_MAX_CONFIRM_NODES', 10);
-
-include_once(drupal_get_path('module', 'views_bulk_operations') .'/taxonomy_actions.inc');
 
 /**
  * Implementation of hook_views_api().
@@ -58,6 +56,7 @@ function views_bulk_operations_theme() {
  */
 function theme_views_node_selector($element) {
   drupal_add_js(drupal_get_path('module', 'views_bulk_operations').'/views_bulk_operations.js');
+  require_once(drupal_get_path('module', 'views').'/theme/theme.inc');
 
   $view = $element['#view'];
   $sets = $element['#sets'];
@@ -227,7 +226,7 @@ function views_bulk_operations_form($form_state, $plugin) {
           '#prefix' => '<div id="views-bulk-operations-select">',
           '#suffix' => '</div>',
         );
-        $form['select'] += _views_bulk_operations_action_form($operation);
+        $form['select'] += _views_bulk_operations_action_form($operation, $plugin->view);
       }
       $form['objects'] = array(
         '#type' => 'views_node_selector',
@@ -247,7 +246,7 @@ function views_bulk_operations_form($form_state, $plugin) {
     
     case VIEWS_BULK_OPS_STEP_CONFIG:
       $operation = $plugin->get_operation_info($form_state['storage'][VIEWS_BULK_OPS_STEP_VIEW]['operation']);
-      $form += _views_bulk_operations_action_form($operation);
+      $form += _views_bulk_operations_action_form($operation, $plugin->view);
       $form['execute'] = array(
         '#type' => 'submit',
         '#value' => t('Next'),
@@ -515,9 +514,9 @@ function _views_bulk_operations_batch_finished($success, $results, $operations, 
 /**
  * Let the configurable action provide its configuration form.
  */
-function _views_bulk_operations_action_form($action) {
+function _views_bulk_operations_action_form($action, $view) {
   $action_form = $action['callback'].'_form';
-  return call_user_func($action_form, array());
+  return call_user_func($action_form, array('view' => $view));
 }
 
 /**
@@ -569,28 +568,6 @@ function theme_views_bulk_operations_confirmation($objects, $view) {
     $output .= '</ul>';
   }
   return $output;
-}
-
-/**
- * Implementation of hook_node_operations().
- */
-function views_bulk_operations_node_operations() {
-  $operations = array(
-    'bulk_delete' => array(
-      'label' => t('Delete'),
-      'callback' => 'views_bulk_operations_delete_nodes',
-    ),
-  );
-  return $operations;
-}
-
-/**
- * Define node deletion operation.
- */
-function views_bulk_operations_delete_nodes($nodes) {
-  foreach ($nodes as $nid) {
-    node_delete($nid);
-  }
 }
 
 /**
@@ -686,14 +663,12 @@ function views_bulk_operations_requirements($phase) {
  */
 function views_bulk_operations_action_info() {
   $actions = array();
-  if (module_exists('taxonomy')) {
-    $actions['taxonomy_action'] = array(
-      'type' => 'node',
-      'description' => t('Modify node\'s taxonomy terms'),
-      'configurable' => TRUE,
-      'behavior' => array('changes_node_property'),
-      'hooks' => array(),
-    );
+  $files = file_scan_directory(drupal_get_path('module', 'views_bulk_operations'), '(.*).action.inc');
+  if ($files) foreach ($files as $file) {
+    require_once($file->filename);
+    $action_info_fn = str_replace('.', '_', basename($file->filename, '.inc')).'_info';
+    $action_info = call_user_func($action_info_fn);
+    if (is_array($action_info)) $actions += $action_info;
   }
   return $actions;
 }

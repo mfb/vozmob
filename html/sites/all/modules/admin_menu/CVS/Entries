@@ -1,12 +1,12 @@
-/admin_menu.info/1.5/Sat Apr 26 16:10:09 2008//TDRUPAL-6--1
 D/images////
 D/tests////
 D/translations////
-/CHANGELOG.txt/1.33.2.34/Wed Nov 26 01:33:02 2008//TDRUPAL-6--1
-/README.txt/1.20.2.5/Wed Nov 26 01:33:02 2008//TDRUPAL-6--1
 /admin_menu-rtl.css/1.1.2.3/Wed Oct 29 20:02:01 2008//TDRUPAL-6--1
 /admin_menu.css/1.25.2.4/Wed Nov 26 01:33:02 2008//TDRUPAL-6--1
-/admin_menu.inc/1.11.2.16/Wed Nov 26 01:33:02 2008//TDRUPAL-6--1
 /admin_menu.install/1.4.2.5/Wed Nov 26 01:33:02 2008//TDRUPAL-6--1
 /admin_menu.js/1.7.2.6/Wed Nov 26 01:33:02 2008//TDRUPAL-6--1
-/admin_menu.module/1.43.2.12/Wed Nov 26 01:33:02 2008//TDRUPAL-6--1
+/CHANGELOG.txt/1.33.2.41/Tue Jan  6 21:17:51 2009//TDRUPAL-6--1
+/README.txt/1.20.2.7/Tue Jan  6 21:17:51 2009//TDRUPAL-6--1
+/admin_menu.inc/1.11.2.20/Tue Jan  6 21:17:51 2009//TDRUPAL-6--1
+/admin_menu.info/1.5.2.1/Tue Jan  6 21:17:51 2009//TDRUPAL-6--1
+/admin_menu.module/1.43.2.16/Tue Jan  6 21:17:51 2009//TDRUPAL-6--1

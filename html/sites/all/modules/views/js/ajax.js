@@ -1,4 +1,4 @@
-// $Id: ajax.js,v 1.23 2008/10/08 00:14:01 merlinofchaos Exp $
+// $Id: ajax.js,v 1.24 2008/12/16 18:52:04 merlinofchaos Exp $
 /**
  * @file ajax_admin.js
  *
@@ -255,7 +255,7 @@ Drupal.behaviors.ViewsAjaxLinks = function() {
     // Turn on the hilite to indicate this is in use.
     $(this).addClass('hilite');
 
-    //Disable the save button.
+    // Disable the save button.
     $('#edit-save').attr('disabled', 'true');
     
     $(this).addClass('views-throbbing');

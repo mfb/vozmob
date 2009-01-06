@@ -1,4 +1,4 @@
-<?php  // $Id: filefield.module,v 1.159 2008/12/03 23:22:11 drewish Exp $
+<?php  // $Id: filefield.module,v 1.160 2009/01/05 22:38:26 drewish Exp $
 
 /**
  * @file
@@ -16,8 +16,6 @@ include_once('field_file.inc');
 function filefield_init() {
   // file hooks and callbacks.
   module_load_include('inc', 'filefield', 'filefield_widget');
-
-  drupal_add_js(drupal_get_path('module', 'filefield') .'/filefield.js');
   drupal_add_css(drupal_get_path('module', 'filefield') .'/filefield.css');
 }
 
@@ -547,13 +545,6 @@ function filefield_file_references($file) {
  */
 function filefield_file_delete($file) {
   // foreach  field... remove items referencing $file.
-}
-
-/**
- * Set the default values for a filefield.
- */
-function _filefield_default_value($field) {
-  return array('fid' => 0, 'list' => $field['list_default'], 'data' => array('description' => ''));
 }
 
 /**

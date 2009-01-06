@@ -1,5 +1,5 @@
 <?php
-// $Id: text.module,v 1.95.2.27 2008/12/05 23:27:57 yched Exp $
+// $Id: text.module,v 1.95.2.28 2008/12/30 00:00:54 yched Exp $
 
 /**
  * @file
@@ -110,13 +110,13 @@ function text_field_settings($op, $field) {
 
     case 'database columns':
       if (empty($field['max_length']) || $field['max_length'] > 255) {
-        $columns['value'] = array('type' => 'text', 'size' => 'big', 'not null' => FALSE, 'sortable' => TRUE);
+        $columns['value'] = array('type' => 'text', 'size' => 'big', 'not null' => FALSE, 'sortable' => TRUE, 'views' => TRUE);
       }
       else {
-        $columns['value'] = array('type' => 'varchar', 'length' => $field['max_length'], 'not null' => FALSE, 'sortable' => TRUE);
+        $columns['value'] = array('type' => 'varchar', 'length' => $field['max_length'], 'not null' => FALSE, 'sortable' => TRUE, 'views' => TRUE);
       }
       if (!empty($field['text_processing'])) {
-        $columns['format'] = array('type' => 'int', 'unsigned' => TRUE, 'not null' => FALSE);
+        $columns['format'] = array('type' => 'int', 'unsigned' => TRUE, 'not null' => FALSE, 'views' => FALSE);
       }
       return $columns;
 

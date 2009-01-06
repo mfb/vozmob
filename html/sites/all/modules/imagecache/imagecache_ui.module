@@ -1,5 +1,5 @@
 <?php
-// $Id: imagecache_ui.module,v 1.21 2008/08/08 17:39:58 drewish Exp $
+// $Id: imagecache_ui.module,v 1.24 2009/01/06 03:29:50 drewish Exp $
 
 /**
  * Administrative interface to imagecache.
@@ -155,7 +155,7 @@ function imagecache_ui_preset_add_form($form_state) {
     '#size' => '64',
     '#title' => t('Preset Namespace'),
     '#default_value' => '',
-    '#description' => t('The namespace is used in URL\'s for images to tell imagecache how to process an image. Please only use alphanumeric characters, underscores (_), and hyphens (-) for preset names.'),
+    '#description' => t('The namespace is used in URLs for images to tell imagecache how to process an image. Please only use alphanumeric characters, underscores (_), and hyphens (-) for preset names.'),
     '#validate' => array('imagecache_element_presetname_validate' => array()),
   );
   $form['submit'] = array(
@@ -181,7 +181,7 @@ function imagecache_element_presetname_validate($element) {
 
   // Check for illegal characters in preset names
   if (preg_match('/[^0-9a-zA-Z_\-]/', $element['#value'])) {
-    form_set_error($element['#name'], t('Please only use alphanumic characters, underscores (_), and hyphens (-) for preset names.'));
+    form_set_error($element['#name'], t('Please only use alphanumeric characters, underscores (_), and hyphens (-) for preset names.'));
   }
 }
 
@@ -253,7 +253,7 @@ function imagecache_ui_preset_form($form_state, $preset = array()) {
     '#size' => '64',
     '#title' => t('Preset Namespace'),
     '#default_value' => $preset['presetname'],
-    '#description' => t('The namespace is used in URL\'s for images to tell imagecache how to process an image. Please only use alphanumic characters, underscores (_), and hyphens (-) for preset names.'),
+    '#description' => t('The namespace is used in URL\'s for images to tell imagecache how to process an image. Please only use alphanumeric characters, underscores (_), and hyphens (-) for preset names.'),
     '#validate' => array('imagecache_element_presetname_validate' => array()),
   );
   $form['presetid'] = array(
@@ -369,6 +369,25 @@ function imagecache_ui_preset_form($form_state, $preset = array()) {
     '#type' => 'submit',
     '#value' => t('Update Preset'),
   );
+
+  // Display a preview image for this action. Put it below the submit button so
+  // users don't have to do a bunch of scrolling.
+  $preview_path = file_create_path('imagecache_sample.png');
+  if (!file_exists($preview_path)) {
+    // Copy of the image into the files directory so rather than generating it
+    // from the original so we don't end up creating subdirectories mirroring
+    // the path to the this module.
+    $preview_path = drupal_get_path('module', 'imagecache_ui') .'/sample.png';
+    file_copy($preview_path, 'imagecache_sample.png');
+  }
+  imagecache_image_flush($preview_path);
+  $imagecache_path = imagecache_create_url($preset['presetname'], $preview_path) .'?'. time();
+  $form['preview'] = array(
+    '#type' => 'item',
+    '#title' => t('Preview'),
+    '#value' => l($imagecache_path, $imagecache_path) .'<br />'. l("<img src='$imagecache_path' />", $imagecache_path, array('html' => true)),
+  );
+
   return $form;
 }
 

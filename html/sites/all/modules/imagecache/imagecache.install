@@ -1,5 +1,5 @@
 <?php
-// $Id: imagecache.install,v 1.21 2008/11/04 20:55:32 drewish Exp $
+// $Id: imagecache.install,v 1.25 2009/01/06 19:48:59 drewish Exp $
 
  function imagecache_requirements($phase) {
   $requirements = array();
@@ -120,6 +120,12 @@ function imagecache_install() {
  * Implementation of hook_uninstall().
  */
 function imagecache_uninstall() {
+  // Remove any cached images.
+  $path = file_directory_path() .'/imagecache/';
+  if (is_dir($path)) {
+    _imagecache_recursive_delete($path);
+  }
+
   drupal_uninstall_schema('imagecache');
 }
 
@@ -192,6 +198,7 @@ function imagecache_update_4() {
     case 'mysql':
     case 'mysqli':
       $ret[] = update_sql("ALTER TABLE {imagecache_action} ADD COLUMN action varchar(255) not null default '' after weight");
+       break;
     case 'pgsql':
       $ret[] = update_sql("ALTER TABLE {imagecache_action} ADD COLUMN action varchar(255) NOT NULL DEFAULT ''");
       break;
@@ -237,4 +244,66 @@ function imagecache_update_5() {
   // ln: 516 diff 511.
 
   return array();
+}
+
+/**
+ * Upgrade from Drupal 5 => Drupal 6.
+ *
+ * Use serial data type for primary keys.  Add module field and presetid index.
+ */
+function imagecache_update_6000() {
+  $ret = array();
+
+  // Our additions to the schema.
+  $schema['imagecache_preset'] = array(
+    'fields' => array(
+      'presetid' => array(
+        'description' => t('The primary identifier for an imagecache_preset.'),
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('presetid'),
+  );
+  $schema['imagecache_action'] = array(
+    'fields' => array(
+      'actionid' => array(
+        'description' => t('The primary identifier for an imagecache_action.'),
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+      ),
+      'module' => array(
+        'description' => t('The module that defined the action.'),
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE,
+        'initial' => 'imagecache',
+      ),
+    ),
+    'primary key' => array('actionid'),
+  );
+
+  // Update primary keys to serial type for Drupal 6
+  foreach ($schema as $table => $info) {
+    $field = $info['primary key'][0];
+    if (db_table_exists('sequences')) {
+      $ret[] = update_sql("DELETE FROM {sequences} WHERE name = '{{$table}}_{$field}'");
+    }
+    db_change_field($ret, $table, $field, $field, $info['fields'][$field]);
+  }
+
+  // Going to assume that if the table doesn't have a module column that
+  // it needs the index as well.
+  if (!db_column_exists('imagecache_action', 'module')) {
+    // Add 'module' column to action table.
+    db_add_field($ret, 'imagecache_action', 'module', $schema['imagecache_action']['fields']['module']);
+
+    // Add 'presetid' index to action table
+    db_add_index($ret, 'imagecache_action', 'presetid', array('presetid'));
+  }
+
+
+  return $ret;
 }

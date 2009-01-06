@@ -1,5 +1,5 @@
 <?php
-// $Id: content.crud.test,v 1.4.2.15 2008/10/06 14:55:16 karens Exp $
+// $Id: content.crud.test,v 1.4.2.16 2008/12/08 12:41:08 yched Exp $
 
 // TODO:
 // - Test search indexing
@@ -379,7 +379,7 @@ class ContentCrudBasicTest extends ContentCrudTestCase {
   function getInfo() {
     return array(
       'name' => t('CRUD - Basic API tests'),
-      'description' => t('Tests the field CRUD (create, read, update, delete) API. <strong>Requires <a href="@schema_link">Schema module</a>.</strong>', array('@schema_link' => 'http://www.drupal.org/projects/schema')),
+      'description' => t('Tests the field CRUD (create, read, update, delete) API. <strong>Requires <a href="@schema_link">Schema module</a>.</strong>', array('@schema_link' => 'http://www.drupal.org/project/schema')),
       'group' => t('CCK'),
     );
   }
@@ -435,7 +435,7 @@ class ContentCrudSingleToMultipleTest extends ContentCrudTestCase {
   function getInfo() {
     return array(
       'name' => t('CRUD - Single to multiple'),
-      'description' => t('Tests the field CRUD (create, read, update, delete) API by creating a single value field and changing it to a multivalue field, sharing it between several content types. <strong>Requires <a href="@schema_link">Schema module</a>.</strong>', array('@schema_link' => 'http://www.drupal.org/projects/schema')),
+      'description' => t('Tests the field CRUD (create, read, update, delete) API by creating a single value field and changing it to a multivalue field, sharing it between several content types. <strong>Requires <a href="@schema_link">Schema module</a>.</strong>', array('@schema_link' => 'http://www.drupal.org/project/schema')),
       'group' => t('CCK'),
     );
   }
@@ -510,7 +510,7 @@ class ContentCrudMultipleToSingleTest extends ContentCrudTestCase {
   function getInfo() {
     return array(
       'name' => t('CRUD - Multiple to single'),
-      'description' => t('Tests the field CRUD (create, read, update, delete) API by creating a multivalue field and changing it to a single value field, sharing it between several content types. <strong>Requires <a href="@schema_link">Schema module</a>.</strong>', array('@schema_link' => 'http://www.drupal.org/projects/schema')),
+      'description' => t('Tests the field CRUD (create, read, update, delete) API by creating a multivalue field and changing it to a single value field, sharing it between several content types. <strong>Requires <a href="@schema_link">Schema module</a>.</strong>', array('@schema_link' => 'http://www.drupal.org/project/schema')),
       'group' => t('CCK'),
     );
   }
@@ -644,7 +644,7 @@ class ContentUICrud extends ContentCrudTestCase {
   function getInfo() {
     return array(
       'name' => t('Admin UI'),
-      'description' => t('Tests the CRUD (create, read, update, delete) operations for content fields via the UI. <strong>Requires <a href="@schema_link">Schema module</a>.</strong>', array('@schema_link' => 'http://www.drupal.org/projects/schema')),
+      'description' => t('Tests the CRUD (create, read, update, delete) operations for content fields via the UI. <strong>Requires <a href="@schema_link">Schema module</a>.</strong>', array('@schema_link' => 'http://www.drupal.org/project/schema')),
       'group' => t('CCK'),
     );
   }

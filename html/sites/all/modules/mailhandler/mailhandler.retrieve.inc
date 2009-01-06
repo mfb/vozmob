@@ -531,7 +531,7 @@ function mailhandler_user_load($mail, $pass, $mailbox) {
  * If available, use the mail header specified in mailbox config. otherwise use From: header
  */
 function mailhandler_get_fromaddress($header, $mailbox) {
-  if ($fromheader = strtolower($mailbox['fromheader']) && isset($header->$fromheader)) {
+  if (($fromheader = strtolower($mailbox['fromheader'])) && isset($header->$fromheader)) {
     $from = $header->$fromheader;
   }
   else {

@@ -1,6 +1,8 @@
-; $Id: imageapi.info,v 1.3 2008/04/30 15:42:40 dopry Exp $
+; $Id: imageapi.info,v 1.4 2008/12/23 21:35:35 drewish Exp $
 name = ImageAPI
 description = ImageAPI supporting multiple toolkits.
 package = ImageCache
-core = 6.x
+core = 7.x
 php = 5.2
+files[] = imageapi.install
+files[] = imageapi.module

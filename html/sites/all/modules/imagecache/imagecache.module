@@ -1,5 +1,5 @@
 <?php
-// $Id: imagecache.module,v 1.92 2008/10/31 17:52:14 drewish Exp $
+// $Id: imagecache.module,v 1.96 2009/01/06 02:26:38 drewish Exp $
 
 /**
  * @file
@@ -396,11 +396,24 @@ function _imagecache_cache($presetname, $path) {
   exit;
 }
 
-function _imagecache_apply_action($action, &$image) {
+/**
+ * Apply an action to an image.
+ *
+ * @param $action
+ *   Action array
+ * @param $image
+ *   Image object
+ * @return
+ *   Boolean, true indicating success and false failure.
+ */
+function _imagecache_apply_action($action, $image) {
   $actions = imagecache_action_definitions();
 
   if ($definition = imagecache_action_definition($action['action'])) {
-    return call_user_func($action['action'] .'_image', $image, $action['data']);
+    $function = $action['action'] .'_image';
+    if (function_exists($function)) {
+      return $function($image, $action['data']);
+    }
   }
   // skip undefined actions.. module probably got uninstalled or disabled.
   watchdog('imagecache', 'non-existant action %action', array('%action' => $action['action']), WATCHDOG_NOTICE);
@@ -479,6 +492,11 @@ function imagecache_build_derivative($actions, $src, $dst) {
     return false;
   }
 
+  // Simply copy the file if there are no actions.
+  if (empty($actions)) {
+    return file_copy($src, $dst, FILE_EXISTS_REPLACE);
+  }
+
   if (!$image = imageapi_image_open($src)) {
     return false;
   }
@@ -521,7 +539,7 @@ function imagecache_user($op, &$edit, &$account, $category = NULL) {
     imagecache_image_flush($account->picture);
   }
 }
- 
+
 /**
  * Implementation of hook_imagefield_file().
  */
@@ -622,7 +640,7 @@ function imagecache_field_formatter($field, $item, $formatter, $node) {
         return imagecache_create_path($presetname, $item['filepath']);
 
       default:
-        return  theme('imagecache', $presetname, $item['filepath'], $item['data']['alt'], $item['data']['title']);
+        return theme('imagecache', $presetname, $item['filepath'], $item['data']['alt'], $item['data']['title'], array('class' => $class));
     }
   }
   return '<!-- imagecache formatter preset('. $presetname .') not found! -->';
@@ -817,8 +835,9 @@ function imagecache_presets($reset = false) {
     return $presets;
   }
 
-  // Grab from cache or build the array.
-  if ($cache = cache_get('imagecache:presets', 'cache')) {
+  // Grab from cache or build the array. To ensure that the Drupal 5 upgrade
+  // path works, we also check whether the presets list is an array.
+  if (($cache = cache_get('imagecache:presets', 'cache')) && is_array($cache->data)) {
     $presets = $cache->data;
   }
   else {

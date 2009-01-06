@@ -1,5 +1,5 @@
 <?php
-// $Id: macro.module,v 1.4.2.2 2008/06/13 03:11:21 weitzman Exp $
+// $Id: macro.module,v 1.4.2.3 2008/12/24 02:28:16 weitzman Exp $
 
 /**
  * @file
@@ -51,7 +51,7 @@ function macro_menu() {
     'type' => MENU_LOCAL_TASK,
   );
   $items['admin/build/macro/settings'] = array(
-    'title' => t('Configure'),
+    'title' => 'Configure',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
   );

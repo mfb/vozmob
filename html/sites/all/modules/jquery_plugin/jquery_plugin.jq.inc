@@ -1,5 +1,5 @@
 <?php
-// $Id: jquery_plugin.jq.inc,v 1.1.2.8 2008/09/17 07:51:44 mfb Exp $
+// $Id: jquery_plugin.jq.inc,v 1.1.2.9 2008/12/02 19:25:29 mfb Exp $
 
 /**
  * Implementation of hook_jq().
@@ -38,7 +38,7 @@ function jquery_plugin_jq($op, $plugin = NULL) {
       'cycle' => array(
         'name' => t('Cycle'),
         'description' => t('Easy to use light-weight slideshow implementation. It supports pause-on-hover, auto-stop, auto-fit, before/after callbacks, click triggers and many transition effects including fade, shuffle, scroll, turn and zoom. It also allows you to define and run your own custom transitions. In addition, it supports, but does not require, the Metadata Plugin and the Easing Plugin.'),
-        'version' => '2.26',
+        'version' => '2.30',
         'url' => 'http://plugins.jquery.com/project/cycle',
         'files' => array(
           'js' => array(
@@ -61,11 +61,24 @@ function jquery_plugin_jq($op, $plugin = NULL) {
         ),
         'invocation' => NULL,
       ),
+      'flashembed' => array(
+        'name' => t('Flash embed'),
+        'description' => t('A javascript tool that you can use to embed Flash objects to your website.'),
+        'version' => '0.34',
+        'url' => 'http://plugins.jquery.com/project/flashembed',
+        'files' => array(
+          'js' => array(
+            $path .'/jquery.flashembed.min.js',
+          ),
+          'css' => NULL,
+        ),
+        'invocation' => NULL,
+      ),
       'imgzoom' => array(
         'name' => t('Image zoom'),
         'description' => t('Opens links that point to images by zooming the image out into an imgzoom element. Requires the Dimensions plugin.'),
         'version' => '1.2',
-        'url' => 'http://exscale.se/archives/2008/02/11/jquery-image-zoom-plug-in/',
+        'url' => 'http://plugins.jquery.com/project/imgzoom',
         'files' => array(
           'js' => array(
             $path .'/jquery.imgzoom.min.js',
@@ -90,7 +103,7 @@ function jquery_plugin_jq($op, $plugin = NULL) {
       'validate' => array(
         'name' => t('Validate'),
         'description' => t('Setup powerful client-side form validation. From a protoype in a few minutes to heavily customized validation rules, methods and messages.'),
-        'version' => '1.4',
+        'version' => '1.5',
         'url' => 'http://plugins.jquery.com/project/validate',
         'files' => array(
           'js' => array(

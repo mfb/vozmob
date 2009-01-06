@@ -1,5 +1,5 @@
 <?php
-// $Id: content_handler_field.inc,v 1.1.2.10 2008/11/11 00:26:53 yched Exp $
+// $Id: content_handler_field.inc,v 1.1.2.11 2008/12/29 23:34:35 yched Exp $
 
 /**
  * @file
@@ -24,8 +24,11 @@ class content_handler_field extends views_handler_field_node {
     if ($field['multiple']) {
       $this->additional_fields['delta'] = 'delta';
     }
-    // We'll need the node type to render the results.
+    // Make sure we grab enough information to build a pseudo-node with enough
+    // credentials at render-time.
     $this->additional_fields['type'] = array('table' => 'node', 'field' => 'type');
+    $this->additional_fields['nid'] = array('table' => 'node', 'field' => 'nid');
+    $this->additional_fields['vid'] = array('table' => 'node', 'field' => 'vid');
   }
 
   function options(&$options) {
@@ -150,9 +153,9 @@ class content_handler_field extends views_handler_field_node {
 
     // Build a pseudo-node from the retrieved values.
     $node = drupal_clone($values);
-    // TODO : is nid always correct ?
-    // content_format and formatters will need a 'type'.
     $node->type = $values->{$this->aliases['type']};
+    $node->nid = $values->{$this->aliases['nid']};
+    $node->vid = $values->{$this->aliases['vid']};
     // Some formatters need to behave differently depending on the build_mode
     // (for instance: preview), so we provide one.
     $node->build_mode = NODE_BUILD_NORMAL;

@@ -1,5 +1,6 @@
 <?php
-// $Id: content_permissions.module,v 1.5.2.4 2008/11/10 15:56:35 yched Exp $
+// $Id: content_permissions.module,v 1.5.2.5 2008/12/27 22:22:55 yched Exp $
+
 /**
  *  Implementation of hook_perm().
  */
@@ -13,41 +14,15 @@ function content_permissions_perm() {
 }
 
 /**
- *  Implementation of hook_nodeapi(). Remove inaccessible fields from node display.
- */
-function content_permissions_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
-  if ($op == 'view') {
-    // Prevent against invalid 'nodes' built by broken 3rd party code.
-    if (isset($node->type)) {
-      $type = content_types($node->type);
-      foreach ($type['fields'] as $field_name => $field) {
-        if (isset($node->content[$field_name])) {
-          $node->content[$field_name]['#access'] = user_access('view '. $field_name);
-        }
-      }
-    }
-  }
-}
-
-/**
- *  Remove inaccessible fields from nodes.
+ * Implementation of hook_field_access().
  *
- * @see content_field_form().
+ * @see content_access().
  */
-function content_permissions_field_access($op, $field) {
+function content_permissions_field_access($op, $field, $account) {
   switch ($op) {
     case 'view':
     case 'edit':
-      return user_access($op .' '. $field['field_name']);
+      return user_access($op .' '. $field['field_name'], $account);
   }
   return TRUE;
-}
-
-/**
- *  The default field access callback. Remove inaccessible fields from Views.
- *
- * @see content_views_field_views_data().
- */
-function content_views_access_callback($field) {
-  return user_access('view '. $field['field_name']);
 }

@@ -1,5 +1,5 @@
 <?php
-// $Id: views_bulk_operations.views_default.inc,v 1.1.2.2 2008/10/10 03:36:58 kratib Exp $
+// $Id: views_bulk_operations.views_default.inc,v 1.1.2.3 2008/12/25 20:57:22 kratib Exp $
 
 function views_bulk_operations_views_default_views() {
   $view = new view;
@@ -82,6 +82,19 @@ function views_bulk_operations_views_default_views() {
       'id' => 'edit_node',
       'table' => 'node',
       'field' => 'edit_node',
+      'override' => array(
+        'button' => 'Override',
+      ),
+      'relationship' => 'none',
+    ),
+  ));
+  $handler->override_option('sorts', array(
+    'changed' => array(
+      'order' => 'DESC',
+      'granularity' => 'second',
+      'id' => 'changed',
+      'table' => 'node',
+      'field' => 'changed',
       'override' => array(
         'button' => 'Override',
       ),
@@ -174,9 +187,8 @@ function views_bulk_operations_views_default_views() {
     ),
   ));
   $handler->override_option('access', array(
-    'type' => 'none',
-    'role' => array(),
-    'perm' => '',
+    'type' => 'perm',
+    'perm' => 'administer nodes',
   ));
   $handler->override_option('title', 'Content');
   $handler->override_option('empty', 'There are no objects satisfying the filter settings. Try changing them to get some results.');
@@ -221,8 +233,20 @@ function views_bulk_operations_views_default_views() {
       ),
     ),
     'default' => '-1',
-    'use_batch' => 1,
+    'execution_type' => '1',
+    'display_type' => '0',
+    'skip_confirmation' => 0,
+    'display_result' => 1,
     'selected_operations' => array(
+      '7a9a34556136a4e6d403cacfe0573d64' => '7a9a34556136a4e6d403cacfe0573d64',
+      '2590ff43ab3648737ccd1865cd76084e' => '2590ff43ab3648737ccd1865cd76084e',
+      'd0746f09756440a699f4a721c7683290' => 'd0746f09756440a699f4a721c7683290',
+      'b26a99d8d89001e5998b3651fa7b10ba' => 'b26a99d8d89001e5998b3651fa7b10ba',
+      '339302ab7ef2adc1a3a9844e15e76967' => '339302ab7ef2adc1a3a9844e15e76967',
+      'e865a3ac236dc71e38301049a0f356e8' => 'e865a3ac236dc71e38301049a0f356e8',
+      '2fd6d151e013faf3099170a3bb1284d4' => '2fd6d151e013faf3099170a3bb1284d4',
+      'c775ce4cea01fb1d3491f61c7cb2c2b2' => 'c775ce4cea01fb1d3491f61c7cb2c2b2',
+      '44601207cad7f7db21f92437c9e84938' => '44601207cad7f7db21f92437c9e84938',
     ),
   ));
   $handler = $view->new_display('page', 'Page', 'page');
@@ -231,6 +255,7 @@ function views_bulk_operations_views_default_views() {
     'type' => 'none',
     'title' => '',
     'weight' => 0,
+    'name' => 'navigation',
   ));
   $handler->override_option('tab_options', array(
     'type' => 'none',

@@ -1,5 +1,5 @@
 <?php
-// $Id: imageapi.install,v 1.6 2008/08/08 16:52:41 drewish Exp $
+// $Id: imageapi.install,v 1.7 2008/12/21 23:08:39 drewish Exp $
 
 
 /**
@@ -23,7 +23,7 @@ function imageapi_requirements($phase) {
         'title' => $t('ImageAPI Toolkit'),
         'value' => $t('No ImageAPI toolkits available'),
         'severity' => REQUIREMENT_ERROR,
-        'description' => $t('ImageAPI requires a Toolkit such as ImageAPI GD or ImageAPI ImageMagick to function. Goto !modules and enable one of them.', array('!modules' => l('admin/build/modules', 'admin/build/modules'))),
+        'description' => $t('ImageAPI requires a Toolkit such as ImageAPI GD or ImageAPI ImageMagick to function. Go to !modules and enable one of them.', array('!modules' => l('admin/build/modules', 'admin/build/modules'))),
       );
     }
   }

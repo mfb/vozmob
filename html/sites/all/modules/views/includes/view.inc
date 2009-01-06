@@ -1,5 +1,5 @@
 <?php
-// $Id: view.inc,v 1.141 2008/11/19 22:33:55 merlinofchaos Exp $
+// $Id: view.inc,v 1.144 2009/01/06 04:45:39 merlinofchaos Exp $
 /**
  * @file view.inc
  * Provides the view object type and associated methods.
@@ -46,6 +46,8 @@ class view extends views_db_object {
   var $exposed_data = array();
   var $exposed_input = array();
 
+  // Used to store views that were previously running if we recurse.
+  var $old_view = array();
   /**
    * Constructor
    */
@@ -618,6 +620,9 @@ class view extends views_db_object {
     $this->build_info['query_args'] = $this->query->get_where_args();
     $this->built = TRUE;
     $this->build_time = views_microtime() - $start;
+
+    // Attach displays
+    $this->attach_displays();
     return TRUE;
   }
 
@@ -799,35 +804,21 @@ class view extends views_db_object {
       }
     }
 
-    $old_view = views_get_current_view();
-    views_set_current_view($this);
-
-    // Let modules modify the view just prior to executing it.
-    foreach (module_implements('views_pre_view') as $module) {
-      $function = $module . '_views_pre_view';
-      $function($this, $display_id, $args);
-    }
-
-    // Prepare the view with the information we have.
-    $this->set_arguments($args);
-
-    $this->attach_displays();
-
-    // Allow the display handler to set up for execution
-    $this->display_handler->pre_execute();
+    $this->pre_execute($args);
 
     // Execute the view
     $output = $this->display_handler->execute();
 
-    // unset current view so we can be properly destructed later on.
-    views_set_current_view(isset($old_view) ? $old_view : FALSE);
+    $this->post_execute();
     return $output;
   }
 
   /**
    * Preview the given display, with the given arguments.
-   * To be called externally, probably by an AJAX handler
-   * of some flavor.
+   *
+   * To be called externally, probably by an AJAX handler of some flavor.
+   * Can also be called when views are embedded, as this guarantees
+   * normalized output.
    */
   function preview($display_id = NULL, $args = array()) {
     if (empty($this->current_display) || $this->current_display != $display_id) {
@@ -836,7 +827,21 @@ class view extends views_db_object {
       }
     }
 
-    $old_view = views_get_current_view();
+    $this->preview = TRUE;
+    $this->pre_execute($args);
+    // Preview the view.
+    $output = $this->display_handler->preview();
+
+    $this->post_execute();
+    return $output;
+  }
+
+  /**
+   * Run attachments and let the display do what it needs to do prior
+   * to running.
+   */
+  function pre_execute($args = array()) {
+    $this->old_view[] = views_get_current_view();
     views_set_current_view($this);
 
     // Let modules modify the view just prior to executing it.
@@ -851,36 +856,46 @@ class view extends views_db_object {
       $this->set_arguments($args);
     }
 
-    $this->preview = TRUE;
-
-    $this->attach_displays();
+//    $this->attach_displays();
 
     // Allow the display handler to set up for execution
     $this->display_handler->pre_execute();
+  }
 
-    // Preview the view.
-    $output = $this->display_handler->preview();
-
+  /**
+   * Unset the current view, mostly.
+   */
+  function post_execute() {
     // unset current view so we can be properly destructed later on.
     // Return the previous value in case we're an attachment.
+
+    if ($this->old_view) {
+      $old_view = array_pop($this->old_view);
+    }
+
     views_set_current_view(isset($old_view) ? $old_view : FALSE);
-    return $output;
   }
 
   /**
    * Run attachment displays for the view.
    */
   function attach_displays() {
+    if (!empty($this->is_attachment)) {
+      return;
+    }
+
     if (!$this->display_handler->accept_attachments()) {
       return;
     }
 
+    $this->is_attachment = TRUE;
     // Give other displays an opportunity to attach to the view.
     foreach ($this->display as $id => $display) {
       if (!empty($this->display[$id]->handler)) {
         $this->display[$id]->handler->attach_to($this->current_display);
       }
     }
+    $this->is_attachment = FALSE;
   }
 
   /**
@@ -1388,7 +1403,7 @@ class view extends views_db_object {
   function clone_view() {
     $clone = version_compare(phpversion(), '5.0') < 0 ? $this : clone($this);
 
-    $keys = array('current_display', 'display_handler', 'build_info', 'built', 'executed', 'attachment_before', 'attachment_after');
+    $keys = array('current_display', 'display_handler', 'build_info', 'built', 'executed', 'attachment_before', 'attachment_after', 'field', 'argument', 'filter', 'sort', 'relationship', 'query', 'result', 'inited', 'style_plugin');
     foreach ($keys as $key) {
       if (isset($clone->$key)) {
         unset($clone->$key);

@@ -1,5 +1,5 @@
 <?php
-// $Id: performance.module,v 1.2.2.3 2008/10/21 17:15:40 kbahey Exp $
+// $Id: performance.module,v 1.2.2.5 2008/12/24 02:28:16 weitzman Exp $
 
 // Copyright Khalid Baheyeldin 2008 of http://2bits.com
 
@@ -10,30 +10,30 @@ function performance_menu() {
 
   $items = array();
   $items['admin/settings/performance_logging'] = array(
-    'title'            => t('Performance Logging'),
-    'description'      => t('Logs performance data: page generation times and memory usage.'),
+    'title'            => 'Performance Logging',
+    'description'      => 'Logs performance data: page generation times and memory usage.',
     'page callback'    => 'drupal_get_form',
     'page arguments'   => array('performance_settings'),
     'access arguments' => $access,
   );
 
   $items['admin/settings/performance_logging/apc_clear'] = array(
-    'title'            => t('Clear APC'),
-    'description'      => t('Clears performance statistics collected in APC.'),
+    'title'            => 'Clear APC',
+    'description'      => 'Clears performance statistics collected in APC.',
     'page callback'    => 'drupal_get_form',
     'page arguments'   => array('performance_clear_apc_confirm'),
     'access arguments' => $access,
   );
 
   $items['admin/reports/performance_logging/summary'] = array(
-    'title'            => t('Performance Logs: Summary'),
-    'description'      => t('View summary performance logs: page generation times and memory usage.'),
+    'title'            => 'Performance Logs: Summary',
+    'description'      => 'View summary performance logs: page generation times and memory usage.',
     'page callback'    => 'performance_view_summary',
     'access arguments' => $access,
   );
   $items['admin/reports/performance_logging/details'] = array(
-    'title'            => t('Performance Logs: Details'),
-    'description'      => t('View detailed, per page, performance logs: page generation times and memory usage.'),
+    'title'            => 'Performance Logs: Details',
+    'description'      => 'View detailed, per page, performance logs: page generation times and memory usage.',
     'page callback'    => 'performance_view_details',
     'access arguments' => $access,
   );
@@ -131,31 +131,6 @@ function performance_init() {
     // When page caching is off, we don't hook_exit(), instead
     // we register a function that runs as late as possible.
     register_shutdown_function('performance_shutdown');
-  }
-
-  global $user;
-  // Give a message on all admin pages, so they are warned.
-  if ( $user->uid && arg(0) == 'admin') {
-
-    if (variable_get('performance_detail', 0)) {
-      drupal_set_message(t('Performance detailed logging is !link. This can cause severe issues on live sites.', array('!link' => l(t('enabled'), 'admin/settings/performance_logging'))), 'error');
-    }
-
-    if (variable_get('dev_query', 0)) {
-      if (variable_get('performance_detail', 0) ||
-          variable_get('performance_summary_db', 0) ||
-          variable_get('performance_summary_apc', 0)) {
-        drupal_set_message(t('Query timing and count logging is !link. This can cause memory size per page to be larger than normal.', array('!link' => l(t('enabled'), 'admin/settings/performance_logging'))), 'error');
-      }
-    }
-
-    if (variable_get('performance_summary_apc', 0)) {
-      $shm_size = ini_get('apc.shm_size');
-      if ($shm_size < 48) {
-        drupal_set_message(t('APC has been configured for !size, which is less than the recommended 48 MB of memory. If you encounter errors when viewing the summary report, then try to increase that limit for APC.', array('!size' => $shm_size)), 'warning');
-      }
-    }
-
   }
 }
 

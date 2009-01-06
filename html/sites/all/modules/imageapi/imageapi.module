@@ -1,5 +1,5 @@
 <?php
-// $Id: imageapi.module,v 1.23 2008/11/16 07:16:11 dopry Exp $
+// $Id: imageapi.module,v 1.24 2008/12/23 21:35:35 drewish Exp $
 
 /**
  * @file
@@ -20,7 +20,12 @@
  * Implementation of hook_perm().
  */
 function imageapi_perm() {
-  return array('administer imageapi');
+  return array(
+    'administer imageapi' => array(
+      'title' => t('Administer ImageAPI'),
+      'description' => t('Select and configure ImageAPI toolkits.'),
+    ),
+  );
 }
 
 /**
@@ -76,7 +81,7 @@ function imageapi_settings() {
 
   switch (count($toolkits)) {
     case 0:
-      $form['imageapi_toolkits']['#value'] = t('There are no image toolkit modules enabled. Toolkit modules can be enabled from the <a href="!admin-build-modules">module configuration page</a>.', array('!admin-build-modules' => url('admin/build/modules')));
+      $form['imageapi_toolkits']['#markup'] = t('There are no image toolkit modules enabled. Toolkit modules can be enabled from the <a href="!admin-build-modules">module configuration page</a>.', array('!admin-build-modules' => url('admin/build/modules')));
       return $form;
 
     case 1:
@@ -85,7 +90,7 @@ function imageapi_settings() {
       // toolkits and disables the selected one they won't be able to select the
       // remaing toolkit.
       variable_set('imageapi_image_toolkit', $toolkit);
-      $form['imageapi_image_toolkit']['#value'] = t('The %toolkit module is the only enabled image toolkit. Drupal will use it for resizing, cropping and other image manipulations.', array('%toolkit' => $toolkits[$toolkit]['name']));
+      $form['imageapi_image_toolkit']['#markup'] = t('The %toolkit module is the only enabled image toolkit. Drupal will use it for resizing, cropping and other image manipulations.', array('%toolkit' => $toolkits[$toolkit]['name']));
       return $form;
 
     default:
@@ -199,7 +204,7 @@ function imageapi_image_scale(&$image, $width, $height, $upscale = false) {
   $aspect = $image->info['height'] / $image->info['width'];
   if (empty($height)) $height = $width / $aspect;
   if (empty($width)) $width = $height * $aspect;
-  
+
   // Don't scale up.
   if (!$upscale && round($width) >= $image->info['width'] && round($height) >= $image->info['height']) {
     return true;
@@ -239,7 +244,7 @@ function imageapi_image_scale(&$image, $width, $height, $upscale = false) {
 function imageapi_image_resize(&$image, $width, $height) {
   $width = (int) round($width);
   $height = (int) round($height);
-  
+
   return call_user_func($image->toolkit .'_image_resize', $image, $width, $height);
 }
 

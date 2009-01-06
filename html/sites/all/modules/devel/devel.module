@@ -1,5 +1,5 @@
 <?php
-// $Id: devel.module,v 1.258.2.38 2008/11/07 18:02:25 weitzman Exp $
+// $Id: devel.module,v 1.258.2.41 2008/12/31 02:19:19 weitzman Exp $
 
 // This module holds functions useful for Drupal development.
 // Please contribute!
@@ -112,6 +112,14 @@ function devel_menu() {
     'access arguments' => array('access devel information'),
     'menu_name' => 'devel',
   );
+  $items['devel/php'] = array(
+    'title' => 'Execute PHP Code',
+    'description' => 'Execute some PHP code',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('devel_execute_form'),
+    'access arguments' => array('execute php code'),
+    'menu_name' => 'devel',
+  );
   $items['devel/theme/registry'] = array(
     'title' => 'Theme registry',
     'description' => 'View a list of available theme functions across the whole site.',
@@ -163,6 +171,7 @@ function devel_menu() {
     'access callback' => 'user_access',
     'access arguments' => array('access devel information'),
     'type' => MENU_LOCAL_TASK,
+    'weight' => 100,
   );
   $items['node/%node/devel/render'] = array(
     'title' => 'Dev render',
@@ -171,6 +180,7 @@ function devel_menu() {
     'access callback' => 'user_access',
     'access arguments' => array('access devel information'),
     'type' => MENU_LOCAL_TASK,
+    'weight' => 100,
   );
   $items['user/%user/devel/load'] = array(
     'title' => 'Dev load',
@@ -179,6 +189,7 @@ function devel_menu() {
     'access callback' => 'user_access',
     'access arguments' => array('access devel information'),
     'type' => MENU_LOCAL_TASK,
+    'weight' => 100,
   );
   $items['user/%user/devel/render'] = array(
     'title' => 'Dev render',
@@ -187,6 +198,7 @@ function devel_menu() {
     'access callback' => 'user_access',
     'access arguments' => array('access devel information'),
     'type' => MENU_LOCAL_TASK,
+    'weight' => 100,
   );
   
   return $items;
@@ -256,6 +268,12 @@ function devel_theme() { // &$cache, $type, $theme, $path
   return array(
     'devel_variable_form' => array(
         'arguments' => array('form' => NULL)
+    ),
+    'devel_querylog' => array(
+      'arguments' => array('header' => array(), 'rows' => array()),
+    ),
+    'devel_querylog_row' => array(
+      'arguments' => array('row' => array()),
     ),
   );
 }
@@ -331,6 +349,10 @@ function devel_init() {
       $path = './'. drupal_get_path('module', 'devel') .'/FirePHPCore/lib/FirePHPCore/fb.php';
       if (file_exists($path)) {
         include_once $path;
+      }
+      // Add CSS for query log if should be displayed.
+      if (variable_get('devel_query_display', 0)) {
+        drupal_add_css(drupal_get_path('module', 'devel'). '/devel.css');
       }
     }
   }
@@ -693,21 +715,23 @@ function devel_shutdown_real() {
         $output .= '<div class="dev-query">';
         $output .= $query_summary;
         // calling theme() during shutdown is very bad if registry gets rebuilt like when making a change on  admin/build/modules
-        // so we check for presence of theme registry before calling theme('table'  )
+        // so we check for presence of theme registry before calling theme()
         if (function_exists('theme_get_registry') && theme_get_registry()) {
           $txt = t_safe(' Queries taking longer than @threshold ms and queries executed more than once, are <span class="marker">highlighted</span>.', array('@threshold' => variable_get('devel_execution', 5)));
           if (variable_get('dev_timer', 0)) {
             $txt .= devel_timer();
           }
-          $output .= $txt. devel_query_table($queries, $counts);
+          $output .= $txt;
+          $output .= '</div>';
+          $output .= devel_query_table($queries, $counts);
         }
         else {
           $output .= $txt;
+          $output .= '</div>';
           ob_start();
           dprint_r($queries);
           $output .= ob_get_clean();
         }
-        $output .= '</div>';
       }
 
       if (variable_get('dev_mem', FALSE) && function_exists('memory_get_usage')) {
@@ -1450,7 +1474,56 @@ function devel_query_table($queries, $counts) {
   if (variable_get('devel_query_sort', DEVEL_QUERY_SORT_BY_SOURCE)) {
     usort($cell, '_devel_table_sort');
   }
-  return theme('table', $header, $cell);
+  return theme('devel_querylog', $header, $cell);
+}
+
+function theme_devel_querylog_row($row) {
+  $i = 0;
+  $output = '';
+  foreach ($row as $cell) {
+    $i++;
+
+    if (is_array($cell)) {
+      $data = !empty($cell['data']) ? $cell['data'] : '';
+      unset($cell['data']);
+      $attr = $cell;
+    }
+    else {
+      $data = $cell;
+      $attr = array();
+    }
+
+    if (!empty($attr['class'])) {
+      $attr['class'] .= " cell cell-$i";
+    }
+    else {
+      $attr['class'] = "cell cell-$i";
+    }
+    $attr = drupal_attributes($attr);
+
+    $output .= "<div $attr>$data</div>";
+  }
+  return $output;
+}
+
+function theme_devel_querylog($header = array(), $rows = array()) {
+  $output = '';
+  if (!empty($header)) {
+    $output .= "<div class='devel-querylog devel-querylog-header clear-block'>";
+    $output .= theme('devel_querylog_row', $header);
+    $output .= "</div>";
+  }
+  if (!empty($rows)) {
+    $i = 0;
+    foreach ($rows as $row) {
+      $i++;
+      $zebra = ($i % 2) == 0 ? 'even' : 'odd';
+      $output .= "<div class='devel-querylog devel-querylog-$zebra clear-block'>";
+      $output .= theme('devel_querylog_row', $row);
+      $output .= "</div>";
+    }
+  }
+  return $output;
 }
 
 function _devel_table_sort($a, $b) {
