@@ -438,9 +438,10 @@ function _mailsave_sanitise_filename($filename) {
  */
 function mailsave_generate_filename(&$attachment) {
   $mapping = array(
-    'image/jpeg' => 'image.jpg',
+    'image/jpeg' => '.jpg',
   );
   if (isset($mapping[$attachment['filemime']])) {
-    $attachment['filename'] = $mapping[$attachment['filemime']];
+    // Generate a unique filename.
+    $attachment['filename'] = md5(uniqid(mt_rand(), TRUE)) . $mapping[$attachment['filemime']];
   }
 }
