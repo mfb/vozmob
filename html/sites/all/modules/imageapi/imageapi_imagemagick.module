@@ -1,4 +1,4 @@
-<?php  // $Id: imageapi_imagemagick.module,v 1.19 2009/01/05 22:58:52 drewish Exp $
+<?php  // $Id: imageapi_imagemagick.module,v 1.17.2.1 2009/01/05 23:01:17 drewish Exp $
 
 /**
  * @file
@@ -65,14 +65,14 @@ function _imageapi_imagemagick_build_version($form_element, $form_state) {
     // check here is primarily for pre-existing bad settings...
     // the #validate should prevent users from adding bad paths.
     $form_element['imageapi_imagemagick_binary'] = array(
-      '#markup' => '<p class="error">'. implode('<br />', $path_errors) .'</p>',
+      '#value' => '<p class="error">'. implode('<br />', $path_errors) .'</p>',
     );
   }
   else {
     _imageapi_imagemagick_convert_exec('-version', $output, $errors);
     $form_element['imageapi_imagemagick_binary']['version'] = array(
       '#title' => t('Version information'),
-      '#markup' => '<pre>'. check_plain(trim($output)) .'</pre>',
+      '#value' => '<pre>'. check_plain(trim($output)) .'</pre>',
       '#description' => t('The ImageMagick <kbd>convert</kbd> binary was located and return this version information.'),
     );
   }
