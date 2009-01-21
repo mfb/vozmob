@@ -253,7 +253,7 @@ function filefield_widget_process($element, $edit, &$form_state, $form) {
   }
 
   $element['#attributes']['id'] = $element['#id'] .'-ahah-wrapper';
-  $element['#attributes']['class'] .= ' filefield-ahah-wrapper';
+  $element['#attributes']['class'] = (isset($element['#attributes']['class']) ? $element['#attributes']['class'] : '') .' filefield-ahah-wrapper';
   $element['#prefix'] = '<div '. drupal_attributes($element['#attributes']) .'>';
   $element['#suffix'] = '</div>';
   $element['upload_btn'] = array(
