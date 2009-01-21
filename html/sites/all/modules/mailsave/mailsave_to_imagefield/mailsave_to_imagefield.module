@@ -82,12 +82,6 @@ function _mailsave_to_imagefield_attempt_image(&$node) {
   // Begin processing attachments
   foreach ($node->mailsave_attachments as $key => $file) {
 
-    // PHP imap sometimes fails to detect a filename for inline attached JPEG images.
-    // For these supposedly "unnamed" files, generate an appropriate filename.
-    if ($file['filename'] == MAILSAVE_UNNAMED_ATTACHMENT) {
-      mailsave_generate_filename($file);
-    }
-
     // Check to see if it's a image type that the imagefield will take
     // Note - current official release of imagefield doesn't include cck_image_extensions, this only appears in
     // branch 5--2 onwards. So we check that the extension list is empty, or the extension is otherwise allowed

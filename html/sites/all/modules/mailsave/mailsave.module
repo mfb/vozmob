@@ -142,13 +142,6 @@ function _mailsave_save_files(&$node) {
 
     global $user;
 
-    // Attachments in AT&T MMS messages show up as "unnamed" files (actually a
-    // filename is present in a Content-Location header but is not detected).
-    // Work around this by generating a filename based on the mimetype.
-    if ($attachment['filename'] == MAILSAVE_UNNAMED_ATTACHMENT) {
-      mailsave_generate_filename($attachment);
-    }
-
     $limits = _upload_file_limits($user);
     $validators = array(
       'file_validate_extensions' => array($limits['extensions']),
@@ -313,6 +306,13 @@ function _mailsave_use_mailhandler_attachments($node) {
   // Parse each mime part in turn
   foreach ($node->mimeparts as $key => $mimepart) {
 
+    // Inline attached files show up as "unnamed" files (a filename may be
+    // present in a Content-Location header but is not detected). Work around
+    // this by generating a filename based on the mimetype.
+    if ($mimepart->filename == MAILSAVE_UNNAMED_ATTACHMENT) {
+      mailsave_generate_filename($mimepart);
+    }
+
     // Only return those parts that have a filename, or are non-text
     // This is try and prevent unnamed text parts getting treated as attachments
     if ($mimepart->filename != MAILSAVE_UNNAMED_ATTACHMENT || ((strpos($mimepart->filemime, 'TEXT') === FALSE) && (strpos($mimepart->filemime, 'MULTIPART') === FALSE))) {
@@ -436,12 +436,12 @@ function _mailsave_sanitise_filename($filename) {
 /**
  * Take a raw unnamed mimepart and generate a filename based on the mimetype.
  */
-function mailsave_generate_filename(&$attachment) {
+function mailsave_generate_filename(&$mimepart) {
   $mapping = array(
-    'image/jpeg' => '.jpg',
+    'IMAGE/JPEG' => '.jpg',
   );
-  if (isset($mapping[$attachment['filemime']])) {
+  if (isset($mapping[$mimepart->filemime])) {
     // Generate a unique filename.
-    $attachment['filename'] = md5(uniqid(mt_rand(), TRUE)) . $mapping[$attachment['filemime']];
+    $mimepart->filename = md5(uniqid(mt_rand(), TRUE)) . $mapping[$mimepart->filemime];
   }
 }
