@@ -1,5 +1,5 @@
 <?php
-// $Id: imagefield.install,v 1.18 2009/01/06 04:26:16 drewish Exp $
+// $Id: imagefield.install,v 1.19 2009/01/08 17:48:44 drewish Exp $
 
 /**
  * Implementation of hook_install().
@@ -35,7 +35,6 @@ function imagefield_update_1() {
   include_once(drupal_get_path('module', 'content') .'/content_admin.inc');
 
 
-
   $fields = content_fields();
 
   foreach ($fields as $field) {
@@ -55,7 +54,6 @@ function imagefield_update_1() {
 /**
  * Schema change to enable alt and title tags.
  */
-
 function imagefield_update_2() {
   $ret = array();
 
@@ -82,6 +80,30 @@ function imagefield_update_2() {
   }
 
   db_query('DELETE FROM {cache}');
+  return $ret;
+}
+
+/**
+ * Change default formatter key from 'default' to 'imagefield_default'.
+ */
+function imagefield_update_3() {
+  $ret = array();
+  include_once(drupal_get_path('module', 'content') .'/content.module');
+  $result = db_query("SELECT field_name, type_name, display_settings FROM {node_field_instance} WHERE widget_type = 'image'");
+  while ($row = db_fetch_array($result)) {
+    $needs_update = FALSE;
+    $display_settings = unserialize($row['display_settings']);
+    foreach (_content_admin_display_contexts() as $context) {
+      if ($display_settings[$context]['format'] == 'default') {
+        $display_settings[$context]['format'] = 'imagefield_default';
+        $needs_update = TRUE;
+      }
+    }
+    if ($needs_update) {
+      db_query("UPDATE {node_field_instance} SET display_settings = '%s' WHERE type_name = '%s' AND field_name = '%s'", serialize($display_settings), $row['type_name'], $row['field_name']);
+    }
+  }
+  content_clear_type_cache();
   return $ret;
 }
 

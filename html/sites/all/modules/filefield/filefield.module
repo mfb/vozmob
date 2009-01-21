@@ -547,6 +547,8 @@ function filefield_file_delete($file) {
   // foreach  field... remove items referencing $file.
 }
 
+
+
 /**
  * Check that the filename ends with an allowed extension. This check is
  * enforced for the user #1.

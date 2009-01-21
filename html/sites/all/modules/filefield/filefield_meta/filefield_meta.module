@@ -1,10 +1,13 @@
 <?php
-// $Id: filefield_meta.module,v 1.6 2008/10/10 01:03:09 drewish Exp $
+// $Id: filefield_meta.module,v 1.7 2009/01/13 04:17:46 drewish Exp $
 /**
  * @file
  * FileField Meta: Add Video Support to File Field.
  */
 
+/**
+ * Implementation of hook_theme().
+ */
 function filefield_meta_theme() {
   return array(
     'filefield_meta_duration' => array(
@@ -38,17 +41,8 @@ function filefield_meta_file_delete($file) {
 }
 
 /**
- * Implementation of filefield's hook_file_load().
+ * Adds the width, height and duration to the file's data property.
  */
-function filefield_meta_file_load(&$file) {
-  if ($meta = db_fetch_array(db_query('SELECT * FROM {filefield_meta} WHERE fid = %d', $file->fid))) {
-    $file->data = is_array($file->data) ? array_merge($meta, $file->data) : $meta;
-  }
-  else {
-    filefield_meta_file_insert($file);
-  }
-}
-
 function filefield_meta(&$file) {
   $info = getid3_analyze($file->filepath);
   $file->data['width'] = $file->data['height'] = $file->data['duration'] = 0;

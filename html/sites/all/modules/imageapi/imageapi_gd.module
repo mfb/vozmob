@@ -1,4 +1,4 @@
-<?php // $Id: imageapi_gd.module,v 1.13 2008/12/15 21:38:52 drewish Exp $
+<?php // $Id: imageapi_gd.module,v 1.14 2009/01/07 01:36:57 drewish Exp $
 
 /**
  * @file
@@ -156,6 +156,11 @@ if (!function_exists('imagefilter')) {
  */
 function _gd_create_tmp($image, $width, $height) { 
   $res = imagecreatetruecolor($width, $height);
+
+  // Alpha settings have no negative effect on jpegs, 
+  // but do help them support layering better for in-between steps.
+  imagealphablending($res, FALSE);
+  imagesavealpha($res, TRUE);
   
   if ($image->info['extension'] == 'gif' || $image->info['extension'] == 'jpg') {
     // grab transparent color index from src.
@@ -178,11 +183,8 @@ function _gd_create_tmp($image, $width, $height) {
     }
   }
   elseif ($image->info['extension'] == 'png') {
-    imagealphablending($res, false);
     $transparency = imagecolorallocatealpha($res, 0, 0, 0, 127);
     imagefill($res, 0, 0, $transparency);
-    imagealphablending($res, true);
-    imagesavealpha($res, true);
   }
   return $res;
 }
