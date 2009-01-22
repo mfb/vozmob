@@ -9,7 +9,7 @@
 /**
  * Implementation of hook_mailsave_clean().
  */
-function gizmo_mailsave_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
+function gizmo_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
   // Check if this message was from Gizmo.
   if ($header->fromaddress == 'voicemail@gizmoproject.com') {
     // Check for "Voicemail from:" in case the format changes.
@@ -34,4 +34,17 @@ function gizmo_mailsave_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
       }
     }
   }
+}
+
+/**
+ * Report back module information when requested.
+ */
+function gizmo_mailsave_clean_info() {
+  $items['gizmo'] = array(
+    'provider'    => t('Gizmo'),
+    'country'     => 'US',
+    'author'      => 'Mark Burdett',
+    'description' => t('Clean up voice mail messages sent via the Gizmo service.'),
+  );
+  return $items;
 }
