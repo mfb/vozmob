@@ -25,8 +25,9 @@ function gizmo_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
     foreach ($node->mailsave_attachments as $index => $file) {
       $pattern = '/^[0-9]+/';
       if ($file['filemime'] == 'audio/x-wav' && preg_match($pattern, $file['filename'], $matches)) {
-        $sms_message['from'] = $matches[0];
-        sms_user_sms_receive($node, $sms_message);
+        if (module_exists('sms_user')) {
+          sms_mailsave_receive($node, $matches[0]);
+        }
         if ($node->uid) {
           mailhandler_switch_user($node->uid);
         }

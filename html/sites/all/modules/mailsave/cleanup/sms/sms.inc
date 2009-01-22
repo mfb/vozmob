@@ -43,17 +43,8 @@ function sms_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
     }
 
     $number = $from[0];
-    // Following comments and code are from the now-deprecated sms_user_sms_receive().
-    // how is this be handled with international numbers? do we need to remove +44 for UK?
-    // should be able to test when we get Chinese SIM card
-    if (substr($number, 0, 1) == '1') {// remove leading '1', sms_user doesn't store it...
-      $number = substr($number, 1);
-    }
 
-    $uid = sms_user_get_uid($number);
-    $account = user_load(array('uid' => $uid, 'status' => 1));
-    $node->uid = $account->uid;
-    $node->name = $account->name;
+    sms_mailsave_receive($node, $number);
 
     $sms_email_gateway_providers = sms_email_gateway_sms_email_gateway_providers();
     if (!$node->uid && isset($sms_email_gateway_providers[$from[1]])) {
@@ -84,4 +75,20 @@ function sms_mailsave_clean_info() {
     'description' => t('Authenticate users with the SMS framework and create new accounts when SMS messages are received.'),
   );
   return $items;
+}
+
+/**
+ * Given a number, search for an associated user account and set some node parameters.
+ */
+function sms_mailsave_receive(&$node, $number) {
+  // Following comments and code are from the now-deprecated sms_user_sms_receive().
+  // how is this be handled with international numbers? do we need to remove +44 for UK?
+  // should be able to test when we get Chinese SIM card
+  if (substr($number, 0, 1) == '1') {// remove leading '1', sms_user doesn't store it...
+    $number = substr($number, 1);
+  }
+  $uid = sms_user_get_uid($number);
+  $account = user_load(array('uid' => $uid, 'status' => 1));
+  $node->uid = $account->uid;
+  $node->name = $account->name;
 }
