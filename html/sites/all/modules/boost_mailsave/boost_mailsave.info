@@ -1,7 +1,0 @@
-; $Id$
-
-name = Boost mailsave
-description = Cleanup messages received from Boost.
-dependencies[] = mailsave
-core = 6.x
-package = Mailsave

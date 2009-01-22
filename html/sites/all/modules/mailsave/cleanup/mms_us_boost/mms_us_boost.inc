@@ -9,7 +9,7 @@
 /**
  * Implementation of hook_mailsave_clean().
  */
-function boost_mailsave_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
+function mms_us_boost_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
   // Check if this message was from boost.
   if (preg_match('!@myboostmobile.com$!i', $header->fromaddress)) {
     if (preg_match('!(http://mediamail\.boostmobile\.com/share\.do\?invite=.*)"!', $node->body, $matches)) {
@@ -39,3 +39,15 @@ function boost_mailsave_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
   //     2ext_mms=.jpg
 }
 
+/**
+ * Report back module information when requested
+ */
+function mms_us_boost_mailsave_clean_info() {
+  $items['mms_us_boost'] = array(
+    'provider'    => t('Boost'),
+    'country'     => 'US',
+    'author'      => 'Mark Burdett',
+    'description' => t('Clean up MMS messages sent via the Boost US network.'),
+  );
+  return $items;
+}
