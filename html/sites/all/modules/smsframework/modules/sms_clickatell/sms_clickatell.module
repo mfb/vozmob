@@ -1,5 +1,5 @@
 <?php
-// $Id: sms_clickatell.module,v 1.10 2008/10/07 17:21:38 diggersf Exp $
+// $Id: sms_clickatell.module,v 1.4.2.3 2008/10/09 17:26:25 diggersf Exp $
 
 /**
  * @file

@@ -1,6 +1,0 @@
-; $Id: sms_receive.info,v 1.3 2008/08/07 18:08:59 diggersf Exp $
-name = "SMS Receive"
-description = "Allows the SMS Framework to receive messages."
-package = SMS Framework
-dependencies[] = sms
-core = 6.x

@@ -1,4 +1,4 @@
-$Id: README.txt,v 1.2 2008/07/30 19:42:56 diggersf Exp $
+$Id: README.txt,v 1.2.2.1 2008/11/07 22:16:16 diggersf Exp $
 DESCRIPTION
 ===========
 Provides a pluggable API for Drupal to interact with SMS messages. 
@@ -7,9 +7,6 @@ Provides a pluggable API for Drupal to interact with SMS messages.
 * sms_blast.module - for sending a batch of messages
 * sms_clickatell.module - support for the Clickatell gateway (http://clickatell.com/)
 * sms_email_gateway.module - support for email gateways
-* sms_muse.module - support for the Muse gateway (http://mobilemuse.ca/)
-* sms_og.module - simple support for Organic Groups
-* sms_receive.module - support for receiving SMS messages
 * sms_sendtophone.module - input filter and node links for sending snippets of text
 * sms_user.module - provides integration with Drupal users
 

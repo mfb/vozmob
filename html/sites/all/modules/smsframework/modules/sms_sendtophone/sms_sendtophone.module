@@ -1,5 +1,5 @@
 <?php
-// $Id: sms_sendtophone.module,v 1.5 2008/09/05 20:21:27 diggersf Exp $
+// $Id: sms_sendtophone.module,v 1.4.2.2 2008/11/07 20:22:02 diggersf Exp $
 
 /**
  * Implementation of hook_menu().
@@ -10,7 +10,7 @@ function sms_sendtophone_menu() {
   $items['sms/sendtophone/%/%'] = array(
     'title' => 'Send to phone',
     'page callback' => 'sms_sendtophone_page',
-    'page arguments' => array(2,3),
+    'page arguments' => array(2, 3),
     'access arguments' => array('access content'),
     'type' => MENU_CALLBACK,
   );
@@ -74,7 +74,7 @@ function sms_sendtophone_page($type = NULL) {
     $form = drupal_get_form('sms_sendtophone_form', $type);
   }
   else {
-    if(empty($user->sms_user['0']['number']) && user_access('send to any number')) {
+    if (empty($user->sms_user['0']['number']) && user_access('send to any number')) {
       $register = array(
         '#value' => t('You need need to <a href="@setup">setup</a> your mobile phone to send messages.', array('@setup' => url('user/'. $user->uid .'/mobile')))
       );
@@ -411,8 +411,8 @@ function sms_sendtophone_link($type, $node = NULL, $teaser = FALSE) {
 }
 
 function sms_sendtophone_form_alter(&$form, $form_state, $form_id) {
-  if($form_id == 'sms_sendtophone_inline_form' || $form_id == 'sms_sendtophone_node_form' || $form_id == 'sms_sendtophone_cck_form') {
-    if(!user_access('send to any number')) {
+  if ($form_id == 'sms_sendtophone_inline_form' || $form_id == 'sms_sendtophone_node_form' || $form_id == 'sms_sendtophone_cck_form') {
+    if (!user_access('send to any number')) {
       // Makes number field plain text
       $form['sms']['number']['#type'] = 'item';
       $form['sms']['number']['#value'] = $form['sms']['number']['#default_value'];

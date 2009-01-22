@@ -28,8 +28,9 @@
  * If no match found and sender is a recognized SMS email gateway, 
  * create a user account.
  */
-function sms_mailsave_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
-  if (!$node->uid) {
+function sms_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
+  // The sms_user and sms_email_gateway modules are required.
+  if (!$node->uid && module_exists('sms_user') && module_exists('sms_email_gateway')) {
     list($from_address, $from_name) = mailhandler_get_fromaddress($header, $mailbox);
     $from = explode('@', $from_address);
     $email_gateway_aliases = array(
@@ -40,8 +41,20 @@ function sms_mailsave_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
     if (isset($email_gateway_aliases[$from[1]])) {
       $from[1] = $email_gateway_aliases[$from[1]];
     }
-    $sms_message['from'] = $from[0];    
-    sms_user_sms_receive($node, $sms_message);
+
+    $number = $from[0];
+    // Following comments and code are from the now-deprecated sms_user_sms_receive().
+    // how is this be handled with international numbers? do we need to remove +44 for UK?
+    // should be able to test when we get Chinese SIM card
+    if (substr($number, 0, 1) == '1') {// remove leading '1', sms_user doesn't store it...
+      $number = substr($number, 1);
+    }
+
+    $uid = sms_user_get_uid($number);
+    $account = user_load(array('uid' => $uid, 'status' => 1));
+    $node->uid = $account->uid;
+    $node->name = $account->name;
+
     $sms_email_gateway_providers = sms_email_gateway_sms_email_gateway_providers();
     if (!$node->uid && isset($sms_email_gateway_providers[$from[1]])) {
       $user = user_save(NULL, array(
@@ -58,4 +71,17 @@ function sms_mailsave_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
       mailhandler_switch_user($node->uid);
     }
   }
+}
+
+/**
+ * Report back module information when requested.
+ */
+function sms_mailsave_clean_info() {
+  $items['sms'] = array(
+    'provider'    => t('SMS framework'),
+    'country'     => 'US',
+    'author'      => 'Mark Burdett',
+    'description' => t('Authenticate users with the SMS framework and create new accounts when SMS messages are received.'),
+  );
+  return $items;
 }

@@ -1,7 +1,0 @@
-; $Id$
-
-name = SMS mailsave
-description = Allows users to register via an e-mailed SMS message.
-dependencies[] = mailsave
-dependencies[] = sms_user
-core = 6.x

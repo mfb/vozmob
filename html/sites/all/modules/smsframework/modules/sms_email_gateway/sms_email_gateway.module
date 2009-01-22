@@ -1,5 +1,5 @@
 <?php
-// $Id: sms_email_gateway.module,v 1.6 2008/09/05 20:49:49 diggersf Exp $
+// $Id: sms_email_gateway.module,v 1.4.2.2 2008/09/17 14:11:50 diggersf Exp $
 
 function sms_email_gateway_gateway_info() {
   return array(

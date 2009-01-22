@@ -1,5 +1,5 @@
 <?php
-// $Id: sms.module,v 1.14 2008/09/05 20:05:17 diggersf Exp $
+// $Id: sms.module,v 1.8.2.8 2008/12/09 18:19:08 diggersf Exp $
 
 /**
  * @file
@@ -212,7 +212,7 @@ function sms_admin_gateway_form_validate($form, &$form_state) {
   // Pass validation to gateway
   $function = $form_state['values']['gateway']['configure form'] .'_validate';
   if (function_exists($function)) {
-    $function($form, &$form_state);
+    $function($form, $form_state);
   }
 }
 
@@ -292,11 +292,14 @@ function sms_handle_result($result, $number, $message) {
   }
 }
 
-function sms_number_format($number) {
+/**
+ * Formats a number for display.
+ */
+function sms_format_number(&$number, $options = array()) {
   $gateway = sms_default_gateway();
   
-  if ($gateway['number_formatter'] && function_exists($gateway['number_formatter'])) {
-    return $gateway['number_formatter']($number_formatter);
+  if ($gateway['format number'] && function_exists($gateway['format number'])) {
+    return $gateway['format number']($number, $options);
   }
   else {
     return $number;
@@ -357,14 +360,18 @@ function sms_send_form_validate($form, &$form_state) {
   }
 }
 
-function sms_validate_number(&$number) {
-  if (!strlen($number) || !$number = sms_formatter($number)) {
+/**
+ * Validates a phone number. Passes number to active gateway for further
+ * validation if neccessary.
+ */
+function sms_validate_number(&$number, $options = array()) {
+  if (!strlen($number)) {
     return t('The phone number is invalid.');
   }
 
   // Allow the active gateway to provide number validation
   $gateway = sms_default_gateway();
-  if (function_exists($gateway['validate number']) && $error = $gateway['validate number']($number)) {
+  if (function_exists($gateway['validate number']) && $error = $gateway['validate number']($number, $options)) {
     return $error;
   }
 }
