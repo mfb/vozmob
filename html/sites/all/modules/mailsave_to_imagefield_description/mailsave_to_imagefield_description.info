@@ -1,7 +1,0 @@
-; $Id$
-name = Mailsave to CCK Imagefield description
-description = Process "slideshow" type messages with an image followed by a text part.
-dependencies[] = mailsave
-dependencies[] = imagefield
-core = 6.x
-package = Mailsave

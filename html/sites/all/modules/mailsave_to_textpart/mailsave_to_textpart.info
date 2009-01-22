@@ -1,0 +1,7 @@
+; $Id$
+name = Mailsave to text part
+description = Process "slideshow" messages with multiple text parts.
+dependencies[] = mailsave
+dependencies[] = imagefield
+core = 6.x
+package = Mailsave
