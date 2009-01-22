@@ -1,5 +1,5 @@
 <?php
-// $Id: devel.module,v 1.258.2.41 2008/12/31 02:19:19 weitzman Exp $
+// $Id: devel.module,v 1.258.2.45 2009/01/20 04:28:27 weitzman Exp $
 
 // This module holds functions useful for Drupal development.
 // Please contribute!
@@ -43,7 +43,7 @@ function devel_menu() {
     'access arguments' => array('access devel information'),
     'menu_name' => 'devel',
   );
-  
+
   $items['devel/queries'] = array(
     'title' => 'Database queries',
     'page callback' => 'devel_queries',
@@ -200,7 +200,7 @@ function devel_menu() {
     'type' => MENU_LOCAL_TASK,
     'weight' => 100,
   );
-  
+
   return $items;
 }
 
@@ -220,9 +220,9 @@ function devel_menu_link_alter(&$item, &$menu) {
 }
 
 /**
- * An implementation of hook_translated_menu_item_alter(). Append dynamic 
+ * An implementation of hook_translated_menu_item_alter(). Append dynamic
  * querystring 'destination' to several of our own menu items.
- * 
+ *
  **/
 function devel_translated_menu_link_alter(&$item) {
   if (in_array($item['href'], devel_menu_need_destination())) {
@@ -373,11 +373,11 @@ function has_krumo() {
 /**
  * Decide whether or not to print a debug variable using krumo().
  *
- * @param $input 
+ * @param $input
  * @return boolean
  */
 function merits_krumo($input) {
-  return (is_object($input) || is_array($input)) && has_krumo();
+  return (is_object($input) || is_array($input)) && has_krumo() && variable_get('devel_krumo_skin', '') != 'disabled';
 }
 
 /**
@@ -413,11 +413,11 @@ function devel_set_handler($handler) {
 function devel_silent() {
   // isset($_GET['q']) is needed on IIS when calling the front page. q is not set.
   // Don't interfere with private files/images.
-  return 
-    isset($GLOBALS['devel_shutdown']) || 
-    strstr($_SERVER['PHP_SELF'], 'update.php') || 
+  return
+    isset($GLOBALS['devel_shutdown']) ||
+    strstr($_SERVER['PHP_SELF'], 'update.php') ||
     (isset($_GET['q']) && (
-      in_array($_GET['q'], array('upload/js', 'admin/content/node-settings/rebuild')) || 
+      in_array($_GET['q'], array('upload/js', 'admin/content/node-settings/rebuild')) ||
       substr($_GET['q'], 0, strlen('system/files')) == 'system/files' ||
       substr($_GET['q'], 0, strlen('batch')) == 'batch')
     );
@@ -447,7 +447,7 @@ function devel_start() {
 function backtrace_error_handler($errno, $message, $filename, $line) {
   // Don't respond to the error if it was suppressed with a '@'
   if (error_reporting() == 0) return;
-  
+
   if ($errno & (E_ALL ^ E_NOTICE)) {
     $types = array(1 => 'error', 2 => 'warning', 4 => 'parse error', 8 => 'notice', 16 => 'core error', 32 => 'core warning', 64 => 'compile error', 128 => 'compile warning', 256 => 'user error', 512 => 'user warning', 1024 => 'user notice', 2048 => 'strict warning');
     $entry = $types[$errno] .': '. $message .' in '. $filename .' on line '. $line .'.';
@@ -666,6 +666,16 @@ function devel_exit($destination = NULL) {
   }
 }
 
+// Borrowed from Drush.
+function devel_verify_cli() {
+  if (php_sapi_name() == 'cgi') {
+    return (is_numeric($_SERVER['argc']) && $_SERVER['argc'] > 0);
+  }
+  
+  return (php_sapi_name() == 'cli');
+}
+
+
 /**
  * See devel_start() which registers this function as a shutdown function.
  */
@@ -689,7 +699,7 @@ function devel_shutdown_real() {
     // Try not to break non html pages.
     if (function_exists('drupal_get_headers')) {
       $headers = drupal_get_headers();
-      $formats = array('xml', 'javascript', 'json', 'plain', 'image', 'application', 'x-comma-separated-values');
+      $formats = array('xml', 'javascript', 'json', 'plain', 'image', 'application', 'csv', 'x-comma-separated-values');
       foreach ($formats as $format) {
         if (strstr($headers, $format)) {
           return;
@@ -698,7 +708,7 @@ function devel_shutdown_real() {
     }
 
     // don't append gunk to CLI scripts
-    if (empty($_SERVER['REQUEST_METHOD'])) {
+    if (devel_verify_cli()) {
       return;
     }
 
@@ -865,18 +875,18 @@ function devel_is_compatible_optimizer() {
      $major = $matches[1];
      $minor = $matches[2];
      $build = $matches[3];
-     
+
      if ($major >= 3) {
        if ($minor >= 3) {
          return TRUE;
-       } 
+       }
        elseif ($minor == 2 && $build >= 8) {
          return TRUE;
-       } 
+       }
        else {
          return FALSE;
        }
-    } 
+    }
     else {
       return FALSE;
     }
@@ -888,18 +898,18 @@ function devel_is_compatible_optimizer() {
 
 function devel_admin_settings() {
   $form['queries'] = array('#type' => 'fieldset', '#title' => t('Query log'));
-  
+
   $description = t("Collect query info. If disabled, no query log functionality will work.");
   if (!devel_is_compatible_optimizer()) {
     $description = t('You must disable or upgrade the php Zend Optimizer extension in order to enable this feature. The minimum required version is 3.2.8. Earlier versions of Zend Optimizer are <a href="!url">horribly buggy and segfault your Apache</a> ... ', array('!url' => url('http://drupal.org/node/126098'))). $description;
-  } 
+  }
   $form['queries']['dev_query'] = array('#type' => 'checkbox',
     '#title' => t('Collect query info'),
     '#default_value' => variable_get('dev_query', 0),
     '#disabled' => !devel_is_compatible_optimizer() ? TRUE : FALSE,
     '#description' => $description,
   );
-  
+
   $form['queries']['devel_query_display'] = array('#type' => 'checkbox',
     '#title' => t('Display query log'),
     '#default_value' => variable_get('devel_query_display', 0),
@@ -960,12 +970,12 @@ function devel_admin_settings() {
   if (has_krumo()) {
     $form['devel_error_handler']['#options'][DEVEL_ERROR_HANDLER_BACKTRACE] = t('Backtrace');
   }
-  
-  $options = drupal_map_assoc(array('blue', 'default', 'green', 'orange', 'schablon.com'));
+
+  $options = drupal_map_assoc(array('default', 'blue', 'green', 'orange', 'schablon.com', 'disabled'));
   $form['devel_krumo_skin'] = array(
    '#type' => 'radios',
-   '#title' => t('Krumo skin'),
-   '#description' => t('Select a skin for your debug messages'),
+   '#title' => t('Krumo display'),
+   '#description' => t('Select a skin for your debug messages or select <em>disabled</em> to display object and array output in standard PHP format.'),
    '#options' => $options,
    '#default_value' => variable_get('devel_krumo_skin', 'default'),
   );
@@ -1087,7 +1097,7 @@ function devel_theme_registry() {
 /**
  * Menu callback; display all variables.
  */
-function  devel_variable_page() {
+function devel_variable_page() {
   // we print our own page so as to avoid blocks
   $output = drupal_get_form('devel_variable_form');
   print theme('page', $output, FALSE);
@@ -1177,7 +1187,7 @@ function devel_variable_edit($form_state, $name) {
   );
   $form['value'] = array(
     '#type' => 'item',
-    '#title' => t('Old value'), 
+    '#title' => t('Old value'),
     '#value' => dpr($value, TRUE),
   );
   if (is_string($value) || is_numeric($value)) {
@@ -1341,9 +1351,9 @@ function _devel_print_object($obj, $prefix = NULL, $parents = NULL, $object = FA
   static $root_type, $out_format;
   // TODO: support objects with references. See http://drupal.org/node/234581.
   if (isset($obj->view)) {
-    return; 
+    return;
   }
-    
+
   if (!isset($root_type)) {
     $root_type = gettype($obj);
     if ($root_type == 'object') {
@@ -1572,7 +1582,7 @@ function drupal_debug($data, $label = NULL) {
     $out = $string;
   }
   $out .= "\n";
- 
+
   // The temp directory does vary across multiple simpletest instances.
   $file = file_directory_temp(). '/drupal_debug.txt';
   if (file_put_contents($file, $out, FILE_APPEND) === FALSE) {
@@ -1662,7 +1672,7 @@ function dprint_r($input, $return = FALSE, $name = NULL, $function = 'print_r', 
     else {
       $printed_value = '<pre>' . $name . $output . '</pre>';
     }
-    
+
     if ($return) {
       return $printed_value;
     }
@@ -1806,10 +1816,10 @@ function devel_rebuild_node_comment_statistics() {
   // Empty table
   $sql = "DELETE FROM {node_comment_statistics}";
   db_query($sql);
-  
+
   $sql = "INSERT INTO {node_comment_statistics} (nid, last_comment_timestamp, last_comment_name, last_comment_uid, comment_count) (select nid, c.timestamp, name, uid, comment_count FROM {comments} c INNER JOIN (SELECT MAX(timestamp) AS timestamp, COUNT(*) AS comment_count FROM {comments} WHERE status=%d GROUP BY nid) as c2 ON c.timestamp=c2.timestamp)";
   db_query($sql, COMMENT_PUBLISHED);
-  
+
   // Insert 0 count records into the node_comment_statistics for nodes that are missing. See comment_enable()
   db_query_temporary("SELECT n.nid, n.changed, n.uid FROM {node} n LEFT JOIN {node_comment_statistics} c ON n.nid = c.nid WHERE c.comment_count IS NULL", 'missing_nids');
   db_query("INSERT INTO {node_comment_statistics} (nid, last_comment_timestamp, last_comment_name, last_comment_uid, comment_count) SELECT n.nid, n.changed, NULL, n.uid, 0 FROM missing_nids n");

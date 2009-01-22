@@ -1,5 +1,5 @@
 <?php
-// $Id: views.install,v 1.42 2008/10/14 19:51:55 merlinofchaos Exp $
+// $Id: views.install,v 1.43 2009/01/07 19:58:47 merlinofchaos Exp $
 /**
  * @file views.install
  * Contains install and update functions for Views.
@@ -153,7 +153,8 @@ function views_schema_1() {
         'description' => t('The time this cache was created or updated.'),
       ),
       'data' => array(
-        'type' => 'blob',
+        'type' => 'text',
+        'size' => 'big',
         'description' => t('Serialized data being stored.'),
         'serialize' => TRUE,
       ),
@@ -201,6 +202,25 @@ function views_update_6001() {
     $new = strtr($block->delta, '$', '-');
     $ret[] = update_sql("UPDATE {blocks} SET delta = '" . db_escape_string($new) . "' WHERE module = 'views' AND delta = '" . db_escape_string($block->delta) . "'");
   }
+
+  return $ret;
+}
+
+/**
+ * Enlarge the views_object_cache.data column to prevent truncation and JS
+ * errors.
+ */
+function views_update_6002() {
+  $ret = array();
+
+  $new_field = array(
+    'type' => 'text',
+    'size' => 'big',
+    'description' => t('Serialized data being stored.'),
+    'serialize' => TRUE,
+  );
+
+  db_change_field($ret, 'views_object_cache', 'data', 'data', $new_field);
 
   return $ret;
 }

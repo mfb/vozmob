@@ -1,5 +1,5 @@
 <?php
-// $Id: views_bulk_operations.module,v 1.29.2.9.2.33 2009/01/05 20:16:04 kratib Exp $
+// $Id: views_bulk_operations.module,v 1.29.2.9.2.38 2009/01/20 21:28:02 kratib Exp $
 
 /**
  * @file 
@@ -82,10 +82,10 @@ function theme_views_node_selector($element) {
     
     $rows = array();
     foreach ($records as $num => $object) {
-      $row = array();
-      $row[] =  theme('checkbox', $element[$object->{$view->base_field}]);
+      $row = array('class' => 'rowclick', 'data' => array());
+      $row['data'][] =  theme('checkbox', $element[$object->{$view->base_field}]);
       foreach ($vars['rows'][$num] as $field => $content) {
-        $row[] = array('data' => $content, 'class' => "views-field views-field-{$vars['fields'][$field]}");
+        $row['data'][] = array('data' => $content, 'class' => "views-field views-field-{$vars['fields'][$field]}");
       }
       $rows[] = $row;
     }
@@ -137,9 +137,9 @@ function views_node_selector_process($element, $edit) {
  */
 function views_bulk_operations_form($form_state, $plugin) {
   drupal_add_css(drupal_get_path('module', 'views_bulk_operations') . '/views_bulk_operations.css', 'module');
-  drupal_add_js(array('vbo' => array('url' => $_GET['q'])), 'setting');
 
   if (!isset($form_state['storage']['step'])) {
+    drupal_add_js(array('vbo' => array('url' => $_GET['q'])), 'setting');
     if (count($plugin->get_selected_operations()) == 1) {
       $step = VIEWS_BULK_OPS_STEP_SINGLE;
     }
@@ -161,6 +161,7 @@ function views_bulk_operations_form($form_state, $plugin) {
       case VIEWS_BULK_OPS_STEP_SINGLE:
       case VIEWS_BULK_OPS_STEP_CONFIG:
         $step = VIEWS_BULK_OPS_STEP_CONFIRM;
+        break;
       }
   }
   $form['step'] = array(
@@ -463,18 +464,11 @@ function _views_bulk_operations_batch_process($operation, $oid, $params, &$conte
 function _views_bulk_operations_action_process($operation, $objects, $params, &$context) {
   $info = _views_bulk_operations_object_info_for_type($operation['object']);
   if (!$info) return;
-  if (!empty($operation['aggregate'])) { // Send all objects to the action
-    call_user_func($operation['callback'], $objects, $params);
-    $context['results']['log'][] = t('Performed %action on objects %oids.', array('%action' => $operation['label'], '%oids' => implode(',', $objects)));
-    $context['results']['rows'] += count($objects);
-  }
-  else { // One-by-one
-    foreach ($objects as $oid) {
-      $object = call_user_func($info['load'], $oid);
-      _views_bulk_operations_action_do($operation, $object, $params);
-      $context['results']['log'][] = t('Performed %action on object %title.', array('%action' => $operation['label'], '%title' => $object->{$info['title']}));
-      $context['results']['rows'] += 1;
-    }
+  foreach ($objects as $oid) {
+    $object = call_user_func($info['load'], $oid);
+    _views_bulk_operations_action_do($operation, $object, $params);
+    $context['results']['log'][] = t('Performed %action on object %title.', array('%action' => $operation['label'], '%title' => $object->{$info['title']}));
+    $context['results']['rows'] += 1;
   }
 }
 
@@ -561,7 +555,7 @@ function theme_views_bulk_operations_confirmation($objects, $view) {
         break;
       }
       if ($object = call_user_func($info['load'], $oid)) {
-        $output .= '<li>'. $object->{$info['title']} .'</li>';
+        $output .= '<li>'. check_plain($object->{$info['title']}) .'</li>';
         $count++;
       }
     }
@@ -625,8 +619,7 @@ function views_bulk_operations_object_info() {
 }
 
 function _views_bulk_operations_object_info_for_view($view) {
-  $objects = module_invoke_all('object_info');
-  foreach ($objects as $info) {
+  foreach (views_bulk_operations_get_object_info() as $info) {
     if ($info['base_table'] == $view->base_table) {
       return $info;
     }
@@ -636,7 +629,7 @@ function _views_bulk_operations_object_info_for_view($view) {
 }
 
 function _views_bulk_operations_object_info_for_type($type) {
-  $objects = module_invoke_all('object_info');
+  $objects = views_bulk_operations_get_object_info();
   if (!isset($objects[$type])) {
     watchdog('views_bulk_operations', 'Could not find object info for type @type.', array('@type' => $type), WATCHDOG_ERROR);
     return NULL;
@@ -682,5 +675,13 @@ function views_bulk_operations_action_info() {
  */
 function views_bulk_operations_ajax_data_alter(&$object, $type, $view) {
   $object->__callbacks[] = 'Drupal.vbo.ajaxViewResponse';
+}
+
+function views_bulk_operations_get_object_info($reset = FALSE) {
+  static $objects = array();
+  if ($reset || empty($objects)) {
+    $objects = module_invoke_all('object_info');
+  }
+  return $objects;
 }
 

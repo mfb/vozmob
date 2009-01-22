@@ -1,5 +1,5 @@
 <?php
-// $Id: cache.inc,v 1.21 2008/11/19 22:33:55 merlinofchaos Exp $
+// $Id: cache.inc,v 1.22 2009/01/07 19:58:47 merlinofchaos Exp $
 /**
  * @file cache.inc
  *
@@ -209,7 +209,7 @@ function views_object_cache_get($obj, $name, $skip_cache = FALSE) {
   if (!array_key_exists($key, $cache)) {
     $data = db_fetch_object(db_query("SELECT * FROM {views_object_cache} WHERE sid = '%s' AND obj = '%s' AND name = '%s'", session_id(), $obj, $name));
     if ($data) {
-      $cache[$key] = unserialize(db_decode_blob($data->data));
+      $cache[$key] = unserialize($data->data);
     }
   }
   return isset($cache[$key]) ? $cache[$key] : NULL;

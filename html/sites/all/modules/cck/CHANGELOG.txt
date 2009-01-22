@@ -1,8 +1,14 @@
-//$Id: CHANGELOG.txt,v 1.1.6.283 2008/12/30 00:00:54 yched Exp $
+//$Id: CHANGELOG.txt,v 1.1.6.296 2009/01/21 20:24:19 yched Exp $
 
 CCK 6.x-2.x
 ===========
 
+- #361311 Add poll settings forms to Manage fields screen.
+- Add book form to Manage fields screen.
+- Fix devel_generate for decimal and float values.
+- #358700 Can't use array_slice() on assoc array in PHP4.
+- #196421 Prefixed tables weren't getting queried correctly.
+- Don't assume display_settings[$context] always exists, newly enabled modules may add new contexts that weren't there when the field was last edited.
 - #339537 by markus_petrux: fix orphan fields in {content_group_fields} table when fields are removed.
 - Views integration: use shorter titles in Views admin summaries (see http://drupal.org/node/326034).
 - #334290 by drewish - Userreference: user names not displayed in Views summaries.
@@ -18,6 +24,13 @@ should be enough, though.
 - #336174 (followup) Make sure content_view_field() and content_format() both respect field access rules.
 - #351929 by lyricnz - Views integration: make sure formatters get a pseudo-node with enough info.
 - #131953 by markus_petrux - Views integration: expose additional db columns.
+- #355712 by fractile81 - Fieldgroup: fix extraneous cache clears.
+- #356666 by flobruit - fix 'exclude' display setting wrongly set across shared instances of a field.
+- Fix 'undefined variable' notice when submitting field settings form with 'php code for default value.
+- #353012 User reference - fix duplicate 'reverse links' on user profile pages when the same user is referenced by several userref fields in a node. Also improves performance.
+- #342427 Views integration - fix summaries for nodereference and userreference fields.
+- #349987 by Michelle - Panels integration for fieldgroups.
+- #362216 by markus_petrux - sort the admin/content/types/fields overview by field name.
 
 CCK 6.x-2.1
 ===========

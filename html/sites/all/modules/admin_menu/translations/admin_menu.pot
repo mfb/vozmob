@@ -1,17 +1,17 @@
-# $Id: admin_menu.pot,v 1.1.2.1 2008/12/02 01:19:22 sun Exp $
+# $Id: admin_menu.pot,v 1.1.2.2 2009/01/21 22:33:13 sun Exp $
 #
 # LANGUAGE translation of Drupal (general)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  admin_menu.inc,v 1.11.2.18 2008/12/02 00:46:08 sun
-#  admin_menu.module,v 1.43.2.13 2008/11/30 12:50:36 sun
+#  admin_menu.inc,v 1.11.2.20 2008/12/28 15:23:07 sun
+#  admin_menu.module,v 1.43.2.16 2008/12/28 15:23:07 sun
 #  admin_menu.info,v 1.5.2.1 2008/11/30 12:50:36 sun
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-12-02 02:13+0100\n"
+"POT-Creation-Date: 2009-01-21 22:28+0100\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -140,12 +140,16 @@ msgstr ""
 msgid "The menu items displayed in the administration menu depend upon the actual permissions of the viewer. First, the administration menu is only displayed to users in roles with the <em>Access administration menu</em> (admin_menu module) permission. Second, a user must be a member of a role with the <em>Access administration pages</em> (system module) permission to view administrative links. And, third, only currently permitted links are displayed; for example, if a user is not a member of a role with the permissions <em>Administer permissions</em> (user module) and <em>Administer users</em> (user module), the <em>User management</em> menu item is not displayed."
 msgstr ""
 
-#: admin_menu.module:302
+#: admin_menu.module:306
 msgid "Current anonymous / authenticated users"
 msgstr ""
 
-#: admin_menu.module:304
+#: admin_menu.module:308
 msgid "@count-anon / @count-auth !icon"
+msgstr ""
+
+#: admin_menu.module:321
+msgid "Home"
 msgstr ""
 
 #: admin_menu.module:31

@@ -1,5 +1,5 @@
 <?php
-// $Id: taxonomy.views.inc,v 1.49 2008/10/01 17:20:58 merlinofchaos Exp $
+// $Id: taxonomy.views.inc,v 1.50 2009/01/08 00:36:02 merlinofchaos Exp $
 /**
  * @file
  *
@@ -97,7 +97,11 @@ function taxonomy_views_data() {
     'help' => t('The taxonomy term ID'),
     'field' => array(
       'handler' => 'views_handler_field_numeric',
+      'click sortable' => TRUE,
       'skip base' => array('node', 'node_revision'),
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
     ),
     'argument' => array(
       'handler' => 'views_handler_argument_numeric',

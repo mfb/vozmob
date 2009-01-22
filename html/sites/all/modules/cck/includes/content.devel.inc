@@ -1,5 +1,5 @@
 <?php
-// $Id: content.devel.inc,v 1.4.2.5 2008/11/05 12:00:21 karens Exp $
+// $Id: content.devel.inc,v 1.4.2.6 2009/01/20 07:31:30 karens Exp $
 
 /**
  * @file
@@ -147,22 +147,25 @@ if (module_exists('number')) {
       switch ($field['type']) {
         case 'number_integer':
           $max = is_numeric($field['max']) ? $field['max'] : 10000;
+          $decimal = 0;
           $scale = 0;
           break;
 
         case 'number_decimal':
           $precision = is_numeric($field['precision']) ? $field['precision'] : 10;
           $scale = is_numeric($field['scale']) ? $field['scale'] : 2;
-          $max = is_numeric($field['max']) ? $field['max'] : pow(10, $precision);
+          $max = is_numeric($field['max']) ? $field['max'] : pow(10, ($precision - $scale));
+          $decimal = rand(0, (10 * $scale)) / 100;
           break;
 
         case 'number_float':
           $precision = rand(10, 32);
           $scale = rand(0, 2);
-          $max = is_numeric($field['max']) ? $field['max'] : pow(10, $precision);
+          $decimal = rand(0, (10 * $scale)) / 100;
+          $max = is_numeric($field['max']) ? $field['max'] : pow(10, ($precision - $scale));
           break;
       }
-      $node_field['value'] = round(rand($min, $max), $scale);
+      $node_field['value'] = round((rand($min, $max) + $decimal), $scale);
     }
     return $node_field;
   }

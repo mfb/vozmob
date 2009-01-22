@@ -1,5 +1,5 @@
 <?php
-// $Id: views.module,v 1.322 2008/12/16 18:52:04 merlinofchaos Exp $
+// $Id: views.module,v 1.324 2009/01/08 20:01:00 merlinofchaos Exp $
 /**
  * @file
  * Primarily Drupal hooks and global API functions to manipulate views.
@@ -23,7 +23,7 @@ function views_theme() {
   $path = drupal_get_path('module', 'views');
   require_once "./$path/theme/theme.inc";
 
-    // Some quasi clever array merging here.
+  // Some quasi clever array merging here.
   $base = array(
     'file' => 'theme.inc',
     'path' => "$path/theme",
@@ -899,6 +899,15 @@ function vpr_trace() {
  * Be sure that $view and $display are references.
  */
 function views_exposed_form(&$form_state) {
+  // Don't show the form when batch operations are in progress.
+  $batch =& batch_get();
+  if (!empty($batch)) {
+    return array(
+      // Set the theme callback to be nothing to avoid errors in template_preprocess_views_exposed_form().
+      '#theme' => '',
+    );
+  }
+
   // Make sure that we validate because this form might be submitted
   // multiple times per page.
   $form_state['must_validate'] = TRUE;

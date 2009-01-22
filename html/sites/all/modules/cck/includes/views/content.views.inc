@@ -1,5 +1,5 @@
 <?php
-// $Id: content.views.inc,v 1.1.2.21 2008/12/30 00:00:53 yched Exp $
+// $Id: content.views.inc,v 1.1.2.22 2009/01/14 13:19:47 karens Exp $
 
 /**
  * @file
@@ -196,9 +196,12 @@ function content_views_field_views_data($field) {
     // Pick up the first column when none has been explicitly enabled
     // (pre CCK 2.2 backwards compatibility).
     if (empty($db_columns)) {
-      $db_columns = array_slice($db_info['columns'], 0, 1, TRUE);
+      // Can't use array_slice(), it won't work in PHP4 for assoc array.
+      foreach ($db_info['columns'] as $column => $attributes) {
+        $db_columns[$column] = $attributes;
+        break;
+      }
     }
-
     $columns = array();
     $db_fields = array();
     $arguments = array();

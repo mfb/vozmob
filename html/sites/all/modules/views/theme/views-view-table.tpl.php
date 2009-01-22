@@ -1,5 +1,5 @@
 <?php
-// $Id: views-view-table.tpl.php,v 1.6 2008/06/25 22:05:11 merlinofchaos Exp $
+// $Id: views-view-table.tpl.php,v 1.7 2009/01/07 23:35:54 merlinofchaos Exp $
 /**
  * @file views-view-table.tpl.php
  * Template to display a view as a table.
@@ -28,7 +28,7 @@
   </thead>
   <tbody>
     <?php foreach ($rows as $count => $row): ?>
-      <tr class="<?php print ($count % 2 == 0) ? 'even' : 'odd';?>">
+      <tr class="<?php print ($count % 2 == 0) ? 'odd' : 'even';?>">
         <?php foreach ($row as $field => $content): ?>
           <td class="views-field views-field-<?php print $fields[$field]; ?>">
             <?php print $content; ?>

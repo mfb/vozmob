@@ -1,5 +1,5 @@
 <?php
-// $Id: content.admin.inc,v 1.181.2.61 2008/12/05 23:30:18 yched Exp $
+// $Id: content.admin.inc,v 1.181.2.63 2009/01/21 20:24:19 yched Exp $
 
 /**
  * @file
@@ -60,6 +60,9 @@ function theme_content_overview_links() {
 function content_fields_list() {
   $fields = content_fields();
   $field_types = _content_field_types();
+
+  // Sort fields by field name.
+  ksort($fields);
 
   $header = array(t('Field name'), t('Field type'), t('Used in'));
   $rows = array();
@@ -1207,6 +1210,7 @@ function content_field_edit_form_validate($form, &$form_state) {
 
     if (isset($form_values['default_value_php']) &&
     ($php = trim($form_values['default_value_php']))) {
+      $error = FALSE;
       ob_start();
       $return = eval($php);
       ob_end_clean();

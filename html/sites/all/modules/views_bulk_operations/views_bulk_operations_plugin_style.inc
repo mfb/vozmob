@@ -1,5 +1,5 @@
 <?php
-// $Id: views_bulk_operations_plugin_style.inc,v 1.1.2.16 2008/12/25 20:46:45 kratib Exp $
+// $Id: views_bulk_operations_plugin_style.inc,v 1.1.2.18 2009/01/09 10:18:02 kratib Exp $
 
 define('VBO_EXECUTION_DIRECT', 1);
 define('VBO_EXECUTION_BATCH', 2);
@@ -114,32 +114,21 @@ class views_bulk_operations_plugin_style extends views_plugin_style_table {
   private function populate_operations(&$options) {
     $operations = array();
 
-    $node_operations = module_invoke_all('node_operations');
-    foreach ($node_operations as $operation) {
-      if (empty($operation['callback'])) continue;
-      $key = md5($operation['callback'] . $operation['label']);
-      $operations[$key] = array(
-        'label'              => $operation['label'],
-        'callback'           => $operation['callback'],
-        'callback arguments' => isset($operation['callback arguments']) ? $operation['callback arguments'] : array(),
-        'configurable'       => isset($operation['configurable']) ? $operation['configurable'] : false,
-        'type'               => 'operation',
-        'object'             => 'node',
-      );
-    }
-    
-    $user_operations = module_invoke_all('user_operations');
-    foreach ($user_operations as $operation) {
-      if (empty($operation['callback'])) continue;
-      $key = md5($operation['callback'] . $operation['label']);
-      $operations[$key] = array(
-        'label'              => $operation['label'],
-        'callback'           => $operation['callback'],
-        'callback arguments' => isset($operation['callback arguments']) ? $operation['callback arguments'] : array(),
-        'configurable'       => isset($operation['configurable']) ? $operation['configurable'] : false,
-        'type'               => 'operation',
-        'object'             => 'user',
-      );
+    $objects = views_bulk_operations_get_object_info();
+    foreach ($objects as $object_type => $info) {
+      $hook_name = $object_type .'_operations';
+      foreach (module_invoke_all($hook_name) as $operation) {
+        if (empty($operation['callback'])) { continue; }
+        $key = md5($operation['callback'] . $operation['label']);
+        $operations[$key] = array(
+          'label'              => $operation['label'],
+          'callback'           => $operation['callback'],
+          'callback arguments' => isset($operation['callback arguments']) ? $operation['callback arguments'] : array(),
+          'configurable'       => isset($operation['configurable']) ? $operation['configurable'] : false,
+          'type'               => 'operation',
+          'object'             => $object_type,
+        );
+      }
     }
 
     $action_operations = actions_list() + $this->get_custom_actions();
@@ -149,10 +138,9 @@ class views_bulk_operations_plugin_style extends views_plugin_style_table {
         'label'              => $operation['description'],
         'callback'           => $callback,
         'callback arguments' => isset($operation['parameters']) ? $operation['parameters'] : array(),
-        'configurable'       => $operation['configurable'],
+        'configurable'       => isset($operation['configurable']) ? $operation['configurable'] : false,
         'type'               => 'action',
         'object'             => $operation['type'],
-        'aggregate'          => isset($operation['aggregate']) ? $operation['aggregate'] : FALSE,
         'modifies_object'    => isset($operation['behavior']) && in_array('changes_node_property', $operation['behavior']),
       );
     }
@@ -176,3 +164,4 @@ class views_bulk_operations_plugin_style extends views_plugin_style_table {
     return $actions;
   }
 }
+

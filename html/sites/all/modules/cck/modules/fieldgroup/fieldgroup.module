@@ -1,5 +1,5 @@
 <?php
-// $Id: fieldgroup.module,v 1.79.2.41 2008/12/02 02:43:50 yched Exp $
+// $Id: fieldgroup.module,v 1.79.2.43 2009/01/10 22:47:07 yched Exp $
 
 /**
  * @file
@@ -69,6 +69,9 @@ function fieldgroup_theme() {
     'fieldgroup_display_overview_form' => array(
       'arguments' => array('form' => NULL),
     ),
+    'fieldgroup_panel' => array(
+      'arguments' => array('vars' => NULL, 'nid' => NULL),
+    ),
   );
 }
 
@@ -89,9 +92,9 @@ function fieldgroup_content_fieldapi($op, $field) {
   switch ($op) {
     case 'delete instance':
       db_query("DELETE FROM {". fieldgroup_fields_tablename() ."} WHERE field_name = '%s'", $field['field_name']);
+      cache_clear_all('fieldgroup_data', content_cache_tablename());
       break;
   }
-  cache_clear_all('fieldgroup_data', content_cache_tablename());
 }
 
 function fieldgroup_group_edit_form(&$form_state, $type_name, $group_name) {

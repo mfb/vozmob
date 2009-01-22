@@ -1,4 +1,4 @@
-/* $Id: README.txt,v 1.20.2.7 2009/01/06 00:12:40 sun Exp $ */
+/* $Id: README.txt,v 1.20.2.8 2009/01/16 20:39:26 sun Exp $ */
 
 -- SUMMARY --
 
@@ -43,7 +43,7 @@ None.
   Note that the menu items displayed in the administration Menu depend on the
   actual permissions of the viewing user. For example, the "User management"
   menu item is not displayed to a user who is not a member of a role with the
-  "administer access control" and "administer users" permissions.
+  "administer permissions" and "administer users" permissions.
 
 * Customize the menu settings in Administer >> Site configuration >>
   Administration menu.
@@ -142,6 +142,19 @@ Q: Why are sub-menus not visible in Opera?
 A: In the Opera browser preferences under "web pages" there is an option to fit
    to width. By disabling this option, sub-menus in the administration menu
    should appear.
+
+
+Q: How can the administration menu be hidden on certain pages?
+
+A: You can suppress it by simply calling the following function in PHP:
+
+     module_invoke('admin_menu', 'suppress');
+
+   However, this needs to happen as early as possible in the page request, so
+   placing it in the theming layer (resp. a page template file) is too late.
+   Ideally, the function is called in hook_init() in a custom module.  If you do
+   not have a custom module, placing it into some conditional code at the top of
+   template.php may work out, too.
 
 
 -- CONTACT --

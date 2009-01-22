@@ -1,4 +1,4 @@
-/* $Id: views-list.css,v 1.9 2008/10/28 18:11:42 merlinofchaos Exp $ */
+/* $Id: views-list.css,v 1.10 2009/01/07 21:52:00 merlinofchaos Exp $ */
 
 table.views-entry {
   margin: 2px 0;
@@ -42,7 +42,8 @@ body form#views-ui-list-views-form {
   clear: left;
 }
 
-#edit-views-apply {
+#edit-views-apply,
+#edit-views-reset {
   margin-top: 1.65em;
   float: left;
 }

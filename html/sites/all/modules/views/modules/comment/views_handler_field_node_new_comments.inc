@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_node_new_comments.inc,v 1.3 2008/11/19 22:44:29 merlinofchaos Exp $
+// $Id: views_handler_field_node_new_comments.inc,v 1.4 2009/01/07 20:10:25 merlinofchaos Exp $
 
 /**
  * Field handler to display the number of new comments
@@ -7,7 +7,7 @@
 class views_handler_field_node_new_comments extends views_handler_field_numeric {
   function construct() {
     parent::construct();
-    $this->additional_fields['nid'] = 'nid';
+    $this->additional_fields = array('nid' => 'nid', 'type' => 'type');
   }
 
   function option_definition() {
@@ -71,7 +71,10 @@ class views_handler_field_node_new_comments extends views_handler_field_numeric 
 
   function render_link($data, $values) {
     if (!empty($this->options['link_to_comment']) && $data !== NULL && $data !== '') {
-      return l($data, "node/" . $values->{$this->aliases['nid']}, array('html' => TRUE, 'fragment' => "new"));
+      $node = new stdClass();
+      $node->nid = $values->{$this->aliases['nid']};
+      $node->type = $values->{$this->aliases['type']};
+      return l($data, 'node/'. $node->nid, array('html' => TRUE, 'query' => comment_new_page_count($values->node_comment_statistics_comment_count, $values->node_new_comments, $node), 'fragment' => 'new'));
     }
     else {
       return $data;

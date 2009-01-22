@@ -1,5 +1,5 @@
 <?php
-// $Id: theme.inc,v 1.65 2008/12/02 22:17:42 merlinofchaos Exp $
+// $Id: theme.inc,v 1.66 2009/01/07 19:21:34 merlinofchaos Exp $
 
 /**
  * @file theme.inc
@@ -38,6 +38,8 @@ function _views_theme_functions($hook, $view, $display = NULL) {
  * Preprocess the primary theme implementation for a view.
  */
 function template_preprocess_views_view(&$vars) {
+  global $base_path;
+
   $view = $vars['view'];
 
   $vars['rows']       = !empty($view->result) || !empty($view->style_plugin->definition['even empty']) ? $view->style_plugin->render($view->result) : '';
@@ -136,6 +138,8 @@ function template_preprocess_views_view(&$vars) {
             'view_display_id' => $view->current_display,
             'view_args' => implode('/', $view->args),
             'view_path' => $_GET['q'],
+            // Pass through URL to ensure we get e.g. language prefixes.
+            'view_base_path' => isset($view->display['page']) ? substr(url($view->display['page']->display_options['path']), strlen($base_path)) : '',
             'view_dom_id' => $vars['dom_id'],
             // To fit multiple views on a page, the programmer may have
             // overridden the display's pager_element.

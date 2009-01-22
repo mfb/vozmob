@@ -1,5 +1,5 @@
 <?php
-// $Id: fieldgroup.panels.inc,v 1.1.2.4 2008/10/06 17:21:51 karens Exp $
+// $Id: fieldgroup.panels.inc,v 1.1.2.5 2009/01/10 22:47:06 yched Exp $
 
 /**
  * Implementation of hook_panels_content_types()
@@ -19,45 +19,6 @@ function fieldgroup_panels_content_types() {
 }
 
 /**
- * 'Render' callback for the 'fieldgroup' panel.
- */
-function fieldgroup_panels_render_fieldgroup($conf, $panel_args, $context) {
-  $node = isset($context->data) ? drupal_clone($context->data) : NULL;
-  $block = new stdClass();
-  $block->module = 'fieldgroup';
-  if ($node) {
-    // Assemble the fields into groups
-    $node = node_build_content($node);
-    // Get the "machine name" of the group from the options
-    $groupname = $conf['group'];
-    // Print out the contents of the given group
-    // Note, not using drupal_render($node->content[$groupname]) here to avoid printing the fieldset
-    $vars = array();
-    if (is_array($node->content[$groupname])) {
-      foreach (element_children($node->content[$groupname]) as $key) {
-        $vars[$key] = drupal_render($node->content[$groupname][$key]);
-      }
-    }
-    $block->subject = $node->content[$groupname]['#title'];
-    $block->content = $vars ? theme('fieldgroup_panel', $vars, $node->nid) : $conf['empty'];
-    $block->delta = $node->nid;
-  }
-  else {
-    $block->subject = $conf['group'];
-    $block->content = t('Content fieldgroup content goes here.');
-    $block->delta = 'unknown';
-  }
-  return $block;
-}
-
-/**
- * Allows users to theme the panels group.
- */
-function theme_fieldgroup_panel($vars, $nid) {
-  return implode('', $vars);
-}
-
-/**
  * Return all fieldgroup panel types available.
  */
 function fieldgroup_panels_fieldgroup_content_types() {
@@ -74,6 +35,44 @@ function fieldgroup_panels_fieldgroup_content_types() {
 }
 
 /**
+ * 'Render' callback for the 'fieldgroup' panel.
+ */
+function fieldgroup_panels_render_fieldgroup($subtype, $conf, $panel_args, $context) {
+  $node = isset($context->data) ? drupal_clone($context->data) : NULL;
+  $block = new stdClass();
+  $block->module = 'fieldgroup';
+
+  if ($node) {
+    $groups = fieldgroup_groups($node->type);
+
+    if (isset($groups[$conf['group']])) {
+      $group = $groups[$conf['group']];
+      $output = array();
+
+      foreach ($group['fields'] as $field_name => $field) {
+        $field = content_fields($field_name, $node->type);
+        $field_view = content_view_field($field, $node);
+        if (!is_null($field_view)) {
+          $output[] = $field_view;
+        }
+      }
+
+      $block->subject = $group['label'];
+      $block->content = $output ? theme('fieldgroup_panel', $output, $node->nid) : $conf['empty'];
+      $block->delta = $node->nid;
+    }
+  }
+  else {
+    // Node context is not available. Don't print anything.
+    $block->subject = $conf['group'];
+    $block->content = '';
+    $block->delta = 'unknown';
+  }
+
+  return $block;
+}
+
+/**
  * 'Edit' callback for the 'fieldgroup' panel.
  */
 function fieldgroup_panels_edit_fieldgroup($id, $parents, $conf = array()) {
@@ -81,19 +80,23 @@ function fieldgroup_panels_edit_fieldgroup($id, $parents, $conf = array()) {
   if (empty($conf)) {
     $conf = array('title' => '', 'group' => '', 'empty' => '');
   }
+
   // Retrieve the list of all groups on all content types
   $group_list = array();
   $types = fieldgroup_groups(NULL, FALSE, FALSE);
+
   // Add each group to the list with the content type it is from in parentheses
   foreach ($types as $type) {
     foreach ($type as $group) {
       $group_list[$group['group_name']] = t('@group_label (@group_type_name)', array('@group_label' => $group['label'], '@group_type_name' => $group['type_name']));
     }
   }
+
   $form['type_name'] = array(
     '#type' => 'value',
     '#value' => $group['type_name'],
   );
+
   $form['group'] = array(
     '#type' => 'select',
     '#title' => t('Fieldgroup'),
@@ -102,6 +105,7 @@ function fieldgroup_panels_edit_fieldgroup($id, $parents, $conf = array()) {
     '#prefix' => '<div class="clear-block no-float">',
     '#suffix' => '</div>',
   );
+
   $form['empty'] = array(
     '#type' => 'textarea',
     '#title' => 'Empty text',
@@ -111,6 +115,7 @@ function fieldgroup_panels_edit_fieldgroup($id, $parents, $conf = array()) {
     '#prefix' => '<div class="clear-block no-float">',
     '#suffix' => '</div>',
   );
+
   return $form;
 }
 
@@ -121,4 +126,11 @@ function fieldgroup_panels_fieldgroup_title($conf, $context) {
   $types = fieldgroup_groups(NULL, FALSE, FALSE);
   $type = $types[$conf['type_name']][$conf['group']];
   return t('"@s" fieldgroup @name', array('@s' => $context->identifier, '@name' => $type['label']));
+}
+
+/**
+ * Allows users to theme the panels group.
+ */
+function theme_fieldgroup_panel($vars, $nid) {
+  return implode('', $vars);
 }

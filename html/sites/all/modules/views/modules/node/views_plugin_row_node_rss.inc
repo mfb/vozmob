@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_row_node_rss.inc,v 1.3 2008/12/02 22:17:42 merlinofchaos Exp $
+// $Id: views_plugin_row_node_rss.inc,v 1.4 2009/01/09 17:16:34 merlinofchaos Exp $
 /**
  * @file
  * Contains the node RSS row style plugin.
@@ -59,6 +59,21 @@ class views_plugin_row_node_rss extends views_plugin_row {
       // Allow modules to change $node->teaser before viewing.
       node_invoke_nodeapi($node, 'view', $teaser, FALSE);
     }
+
+    // Set the proper node part, then unset unused $node part so that a bad
+    // theme can not open a security hole.
+    $content = drupal_render($node->content);
+    if ($teaser) {
+      $node->teaser = $content;
+      unset($node->body);
+    }
+    else {
+      $node->body = $content;
+      unset($node->teaser);
+    }
+  
+    // Allow modules to modify the fully-built node.
+    node_invoke_nodeapi($node, 'alter', $teaser, FALSE);
 
     $item = new stdClass();
     $item->title = $node->title;

@@ -1,5 +1,5 @@
 <?php
-// $Id: content.module,v 1.301.2.89 2008/12/31 13:45:16 yched Exp $
+// $Id: content.module,v 1.301.2.95 2009/01/20 15:56:11 karens Exp $
 /**
  * @file
  * Allows administrators to associate custom fields to content types.
@@ -735,8 +735,9 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
       else {
         $context = $node->build_mode;
       }
-
-      $formatter_name = isset($field['display_settings'][$context]['format']) ? $field['display_settings'][$context]['format'] : 'default';
+      // The field may be missing info for $contexts added by modules
+      // enabled after the field was last edited.
+      $formatter_name = isset($field['display_settings'][$context]) && isset($field['display_settings'][$context]['format']) ? $field['display_settings'][$context]['format'] : 'default';
       if ($formatter = _content_get_formatter($formatter_name, $field['type'])) {
         $theme = $formatter['module'] .'_formatter_'. $formatter_name;
         $single = (content_handle('formatter', 'multiple values', $formatter) == CONTENT_HANDLE_CORE);
@@ -2127,8 +2128,7 @@ function content_access($op, $field, $account = NULL) {
  * Hide specified fields from the $content variable in node templates.
  */
 function content_field_wrapper_post_render($content, $element) {
-  $fields = content_fields();
-  $field = $fields[$element['#field_name']];
+  $field = content_fields($element['#field_name'], $element['#type_name']);
   if (theme('content_exclude', $content, $field, $element['#context'])) {
     return '';
   }
@@ -2188,7 +2188,10 @@ function content_field_wrapper_post_render($content, $element) {
  *   as set on the Manage fields screen.
  */
 function theme_content_exclude($content, $object, $context) {
+  // The field may be missing info for $contexts added by modules
+  // enabled after the field was last edited.
   if (empty($object['display_settings'])
+    || empty($object['display_settings'][$context])
     || !is_array($object['display_settings'][$context])
     || empty($object['display_settings'][$context]['exclude'])) {
     return FALSE;
@@ -2345,6 +2348,30 @@ function content_content_extra_fields($type_name) {
       'weight' => -3
     );
   }
+  if (module_exists('book')) {
+    $extra['book'] = array(
+      'label' => t('Book'),
+      'description' => t('Book module form.'),
+      'weight' => 10
+    );
+  }
+  if ($type_name == 'poll' && module_exists('poll')) {
+    $extra['title'] = array(
+      'label' => t('Poll title'),
+      'description' => t('Poll module title.'),
+      'weight' => -5
+    );
+    $extra['choice_wrapper'] = array(
+      'label' => t('Poll choices'),
+      'description' => t('Poll module choices.'),
+      'weight' => -4
+    );
+    $extra['settings'] = array(
+      'label' => t('Poll settings'),
+      'description' => t('Poll module settings.'),
+      'weight' => -3
+    );
+  }  
   if (module_exists('upload') && variable_get("upload_$type_name", TRUE)) {
     $extra['attachments'] = array(
       'label' => t('File attachments'),
@@ -2424,8 +2451,7 @@ function content_max_delta($field_name, $type_name = NULL) {
       if (empty($type_name) || $content_type['type'] == $type_name) {
         foreach ($content_type['fields'] as $field) {
           $db_info = content_database_info($field);
-          $table = $db_info['table'];
-          if (db_result(db_query("SELECT COUNT(*) FROM {$table}")) >= 1) {
+          if (db_result(db_query("SELECT COUNT(*) FROM {". $db_info['table'] ."}")) >= 1) {
             return 0;
           }
         }
@@ -2437,12 +2463,11 @@ function content_max_delta($field_name, $type_name = NULL) {
   // in the node table to limit the type.
   else {
     $db_info = content_database_info($field);
-    $table = $db_info['table'];
     if (!empty($type_name)) {
-      $delta = db_result(db_query("SELECT MAX(delta) FROM {$table} f LEFT JOIN {node} n ON f.vid = n.vid WHERE n.type = '%s'", $type_name));
+      $delta = db_result(db_query("SELECT MAX(delta) FROM {". $db_info['table'] ."} f LEFT JOIN {node} n ON f.vid = n.vid WHERE n.type = '%s'", $type_name));
     }
     else {
-      $delta = db_result(db_query("SELECT MAX(delta) FROM {$table}"));
+      $delta = db_result(db_query("SELECT MAX(delta) FROM {". $db_info['table'] ."}"));
     }
     if ($delta >= 0) {
       return $delta;

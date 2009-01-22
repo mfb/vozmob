@@ -1,5 +1,5 @@
 <?php
-// $Id: view.inc,v 1.144 2009/01/06 04:45:39 merlinofchaos Exp $
+// $Id: view.inc,v 1.146 2009/01/08 00:29:54 merlinofchaos Exp $
 /**
  * @file view.inc
  * Provides the view object type and associated methods.
@@ -796,6 +796,13 @@ class view extends views_db_object {
    * Execute the given display, with the given arguments.
    * To be called externally by whatever mechanism invokes the view,
    * such as a page callback, hook_block, etc.
+   *
+   * This function should NOT be used by anything external as this
+   * returns data in the format specified by the display. It can also
+   * have other side effects that are only intended for the 'proper'
+   * use of the display, such as setting page titles and breadcrumbs.
+   *
+   * If you simply want to view the display, use view::preview() instead.
    */
   function execute_display($display_id = NULL, $args = array()) {
     if (empty($this->current_display) || $this->current_display != $this->choose_display($display_id)) {
@@ -1083,7 +1090,9 @@ class view extends views_db_object {
           $base = FALSE;
           $title = t('Home');
         }
-        $breadcrumb[] = l($title, $path, array('html' => true));
+        if ($title) {
+          $breadcrumb[] = l($title, $path, array('html' => true));
+        }
       }
 
       if ($set) {

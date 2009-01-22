@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_display.inc,v 1.17 2008/12/02 20:23:21 merlinofchaos Exp $
+// $Id: views_plugin_display.inc,v 1.18 2009/01/07 23:31:13 merlinofchaos Exp $
 /**
  * @file
  * Contains the base display plugin.
@@ -1618,6 +1618,12 @@ class views_plugin_display extends views_plugin {
    */
   function get_style_type() { return 'normal'; }
 
+  /**
+   * Make sure the display and all associated handlers are valid.
+   *
+   * @return
+   *   Empty array if the display is valid; an array of error strings if it is not.
+   */
   function validate() {
     $errors = array();
     // Make sure displays that use fields HAVE fields.
@@ -1638,6 +1644,7 @@ class views_plugin_display extends views_plugin {
       $errors[] = t('Display "@display" uses a path but the path is undefined.', array('@display' => $this->display->display_title));
     }
 
+    // Validate style plugin
     $style = $this->get_plugin();
     if (empty($style)) {
       $errors[] = t('Display "@display" has an invalid style plugin.', array('@display' => $this->display->display_title));
@@ -1648,6 +1655,22 @@ class views_plugin_display extends views_plugin {
         $errors = array_merge($errors, $result);
       }
     }
+
+    // Validate handlers
+    foreach (views_object_types() as $type => $info) {
+      $plural = $info['plural'];
+      // Skip handlers which are defaulted as there is no point in
+      // validating them again.
+      if (!$this->is_defaulted($plural)) {
+        foreach ($this->get_handlers($type) as $handler) {
+          $result = $handler->validate();
+          if (!empty($result) && is_array($result)) {
+            $errors = array_merge($errors, $result);
+          }
+        }
+      }
+    }
+
     return $errors;
   }
 
