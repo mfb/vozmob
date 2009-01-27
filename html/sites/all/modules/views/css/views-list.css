@@ -1,8 +1,8 @@
-/* $Id: views-list.css,v 1.10 2009/01/07 21:52:00 merlinofchaos Exp $ */
+/* $Id: views-list.css,v 1.11 2009/01/27 19:04:43 merlinofchaos Exp $ */
 
 table.views-entry {
-  margin: 2px 0;
-  border: 1px solid #ccc;
+  margin: 3px 0;
+  border: 1px solid #ddd;
   background-color: white;
   color: #494949; /* matches garland */
   clear: left;
@@ -55,5 +55,30 @@ body form#views-ui-list-views-form {
 }
 
 table.view-disabled {
-  color: #aaa;
+  color: #999;
+}
+
+table.views-entry td {
+  line-height: 1.4;
+  padding-bottom: 10px;
+}
+table.view-disabled td {
+  line-height: 1.4;
+  padding-bottom: 10px;
+  background: none;
+}
+table.view-enabled td.view-name,
+table.view-enabled td.view-ops,
+table.view-disabled td.view-name,
+table.view-disabled td.view-ops {
+  line-height: 1.6;
+  padding-bottom: 0.3em;
+}
+table.views-entry td.view-name,
+table.views-entry td.view-ops {
+  background: #eee;
+}
+table.view-enabled td.view-name,
+table.view-enabled td.view-ops {
+  background: #E4F0F8; 
 }

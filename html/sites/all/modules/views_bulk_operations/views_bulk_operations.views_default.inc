@@ -1,5 +1,5 @@
 <?php
-// $Id: views_bulk_operations.views_default.inc,v 1.1.2.3 2008/12/25 20:57:22 kratib Exp $
+// $Id: views_bulk_operations.views_default.inc,v 1.1.2.4 2009/01/23 18:39:24 kratib Exp $
 
 function views_bulk_operations_views_default_views() {
   $view = new view;
@@ -237,6 +237,7 @@ function views_bulk_operations_views_default_views() {
     'display_type' => '0',
     'skip_confirmation' => 0,
     'display_result' => 1,
+    'merge_single_action' => 1,
     'selected_operations' => array(
       '7a9a34556136a4e6d403cacfe0573d64' => '7a9a34556136a4e6d403cacfe0573d64',
       '2590ff43ab3648737ccd1865cd76084e' => '2590ff43ab3648737ccd1865cd76084e',
@@ -245,8 +246,9 @@ function views_bulk_operations_views_default_views() {
       '339302ab7ef2adc1a3a9844e15e76967' => '339302ab7ef2adc1a3a9844e15e76967',
       'e865a3ac236dc71e38301049a0f356e8' => 'e865a3ac236dc71e38301049a0f356e8',
       '2fd6d151e013faf3099170a3bb1284d4' => '2fd6d151e013faf3099170a3bb1284d4',
-      'c775ce4cea01fb1d3491f61c7cb2c2b2' => 'c775ce4cea01fb1d3491f61c7cb2c2b2',
-      '44601207cad7f7db21f92437c9e84938' => '44601207cad7f7db21f92437c9e84938',
+      'c240117f80fc27a29633c29df38c3802' => 'c240117f80fc27a29633c29df38c3802',
+      'c1c34a331fb39c6ad9130862698bd354' => 'c1c34a331fb39c6ad9130862698bd354',
+      'd8fc611ebac486388a7f0bef1d4d8115' => 'd8fc611ebac486388a7f0bef1d4d8115',
     ),
   ));
   $handler = $view->new_display('page', 'Page', 'page');

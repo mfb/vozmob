@@ -1,4 +1,4 @@
-// $Id: CHANGELOG.txt,v 1.33.2.43 2009/01/19 23:08:38 sun Exp $
+// $Id: CHANGELOG.txt,v 1.33.2.45 2009/01/24 05:40:56 sun Exp $
 
 Admin Menu x.x-x.x, xxxx-xx-xx
 ------------------------------
@@ -6,6 +6,12 @@ Admin Menu x.x-x.x, xxxx-xx-xx
 
 Admin Menu 6.x-1.x, xxxx-xx-xx
 ------------------------------
+
+
+Admin Menu 6.x-1.3, 2009-01-24
+------------------------------
+#362454 by sun: Fixed Drupal.settings.admin_menu is undefined JS error in some
+  browsers.
 
 
 Admin Menu 6.x-1.2, 2009-01-20

@@ -1,5 +1,5 @@
 <?php
-// $Id: views_bulk_operations_plugin_style.inc,v 1.1.2.18 2009/01/09 10:18:02 kratib Exp $
+// $Id: views_bulk_operations_plugin_style.inc,v 1.1.2.20 2009/01/24 09:54:31 kratib Exp $
 
 define('VBO_EXECUTION_DIRECT', 1);
 define('VBO_EXECUTION_BATCH', 2);
@@ -13,6 +13,7 @@ class views_bulk_operations_plugin_style extends views_plugin_style_table {
     $options['display_type'] = 0;
     $options['skip_confirmation'] = FALSE;
     $options['display_result'] = TRUE;
+    $options['merge_single_action'] = TRUE;
     $this->populate_operations($options);
   }
 
@@ -51,6 +52,12 @@ class views_bulk_operations_plugin_style extends views_plugin_style_table {
       '#title' => t('Display processing result'),
       '#description' => t('Check this box to let Drupal display a message with the result of processing the selected objects.'),
       '#default_value' => $this->options['display_result'],
+    );
+    $form['merge_single_action'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Merge single action\'s form with node selection view'),
+      '#description' => t('In case only one action is selected *and* this action is configurable, display its action form along with the node selection view.'),
+      '#default_value' => $this->options['merge_single_action'],
     );
     $form['selected_operations'] = array(
       '#type' => 'checkboxes',
@@ -141,7 +148,7 @@ class views_bulk_operations_plugin_style extends views_plugin_style_table {
         'configurable'       => isset($operation['configurable']) ? $operation['configurable'] : false,
         'type'               => 'action',
         'object'             => $operation['type'],
-        'modifies_object'    => isset($operation['behavior']) && in_array('changes_node_property', $operation['behavior']),
+        'modifies object'    => isset($operation['behavior']) && in_array('changes_node_property', $operation['behavior']),
       );
     }
 
@@ -150,6 +157,7 @@ class views_bulk_operations_plugin_style extends views_plugin_style_table {
 
   private function get_custom_actions() {
     $actions = array();
+    $static_actions = actions_list();
     $result = db_query("SELECT * FROM {actions} WHERE parameters > ''");
     while ($action = db_fetch_object($result)) {
       $actions[$action->aid] = array(
@@ -158,7 +166,6 @@ class views_bulk_operations_plugin_style extends views_plugin_style_table {
         'configurable' => FALSE,
         'parameters' => $action->parameters,
       );
-      $static_actions = actions_list();
       $actions[$action->aid]['behavior'] = $static_actions[$action->callback]['behavior'];
     }
     return $actions;

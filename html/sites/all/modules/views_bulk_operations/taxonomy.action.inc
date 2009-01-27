@@ -5,9 +5,9 @@ define('TAXONOMY_ACTION_REPLACE', 1);
 define('TAXONOMY_ACTION_DELETE', 2);
 define('TAXONOMY_ACTION_REPLACE_VOCABULARY', 3);
 
-function taxonomy_action_info() {
+function views_bulk_operations_taxonomy_action_info() {
   if (!module_exists('taxonomy')) return array();
-  return array('taxonomy_action' => array(
+  return array('views_bulk_operations_taxonomy_action' => array(
     'type' => 'node',
     'description' => t('Modify node\'s taxonomy terms'),
     'configurable' => TRUE,
@@ -15,7 +15,7 @@ function taxonomy_action_info() {
   ));
 }
 
-function taxonomy_action(&$node, $context) {
+function views_bulk_operations_taxonomy_action(&$node, $context) {
   if (empty($context['terms']) && $context['do'] == TAXONOMY_ACTION_REPLACE) { // Just delete terms
     taxonomy_node_delete($node);
     $node->taxonomy = array();
@@ -64,7 +64,7 @@ function taxonomy_action(&$node, $context) {
   $node->taxonomy = $terms;
 }
 
-function taxonomy_action_form($context) {
+function views_bulk_operations_taxonomy_action_form($context) {
   foreach (taxonomy_get_vocabularies() as $vid => $vocabulary) {
     foreach (taxonomy_get_tree($vid) as $term) {
       $terms[$term->tid] = $vocabulary->name.': '.$term->name;
@@ -96,14 +96,14 @@ function taxonomy_action_form($context) {
   return $form;
 }
 
-function taxonomy_action_submit($form, $form_state) {
+function views_bulk_operations_taxonomy_action_submit($form, $form_state) {
   return array(
     'do' => $form_state['values']['do'], 
     'terms' => $form_state['values']['terms'],
   );
 }
 
-function taxonomy_action_validate($form, $form_state) {
+function views_bulk_operations_taxonomy_action_validate($form, $form_state) {
   if ($form_state['values']['do'] != TAXONOMY_ACTION_REPLACE && empty($form_state['values']['terms'])) {
     form_set_error('terms', t('You did not select any term nor did you choose to replace existing terms. Please select one or more terms or choose to replace the terms.'));
   }

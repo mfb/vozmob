@@ -1,4 +1,4 @@
-<?php  // $Id: filefield.module,v 1.160 2009/01/05 22:38:26 drewish Exp $
+<?php  // $Id: filefield.module,v 1.161 2009/01/25 17:53:25 drewish Exp $
 
 /**
  * @file
@@ -213,7 +213,10 @@ function filefield_field_settings($op, $field) {
   // add filefield specific handlers...
   $function = 'filefield_field_settings_'. $op;
   if (function_exists($function)) {
-    $return = $function($field);
+    $result = $function($field);
+    if (isset($result) && is_array($result)) {
+      $return = $result;
+    }
   }
 
   // dynamically load widgets file and callbacks for other fields utilizing
@@ -221,7 +224,10 @@ function filefield_field_settings($op, $field) {
   module_load_include('inc', $field['module'], $field['type'] .'_field');
   $function = $field['module'] .'_'. $field['type'] .'_field_settings_'. $op;
   if (function_exists($function)) {
-    $return = array_merge($return, $function($field));
+    $result = $function($field);
+    if (isset($result) && is_array($result)) {
+      $return = array_merge($return, $result);
+    }
   }
 
   return $return;
@@ -250,7 +256,10 @@ function filefield_widget_settings($op, $widget) {
   $op =  str_replace(' ', '_', $op);
   $function = 'filefield_widget_settings_'. $op;
   if (function_exists($function)) {
-    $return = $function($widget);
+    $result = $function($widget);
+    if (isset($result) && is_array($result)) {
+      $return = $result;
+    }
   }
 
   // sometimes widget_settings is called with widget, sometimes with field.
@@ -264,7 +273,10 @@ function filefield_widget_settings($op, $widget) {
 
   $function = $widget_type .'_widget_settings_'. $op;
   if (function_exists($function)) {
-    $return = array_merge($return, $function($widget));
+    $result = $function($widget);
+    if (isset($result) && is_array($result)) {
+      $return = array_merge($return, $result);
+    }
   }
 
   return $return;

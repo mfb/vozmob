@@ -1,8 +1,8 @@
-/* $Id: admin_menu.js,v 1.7.2.6 2008/11/02 21:36:22 sun Exp $ */
+/* $Id: admin_menu.js,v 1.7.2.7 2009/01/24 04:59:22 sun Exp $ */
 
 $(document).ready(function() {
   // Apply margin-top if enabled; directly applying marginTop doesn't work in IE.
-  if ($('#admin-menu').size()) {
+  if ($('#admin-menu').size() && Drupal.settings.admin_menu) {
     if (Drupal.settings.admin_menu.margin_top) {
       $('body').addClass('admin-menu');
     }
@@ -19,7 +19,7 @@ $(document).ready(function() {
   }
 
   // Collapse fieldsets on Modules page. For why multiple selectors see #111719.
-  if (Drupal.settings.admin_menu.tweak_modules) {
+  if (Drupal.settings.admin_menu && Drupal.settings.admin_menu.tweak_modules) {
     $('#system-modules fieldset:not(.collapsed), #system-modules-1 fieldset:not(.collapsed)').addClass('collapsed');
   }
 

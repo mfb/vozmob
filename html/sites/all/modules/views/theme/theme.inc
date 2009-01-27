@@ -1,5 +1,5 @@
 <?php
-// $Id: theme.inc,v 1.66 2009/01/07 19:21:34 merlinofchaos Exp $
+// $Id: theme.inc,v 1.67 2009/01/27 19:38:27 merlinofchaos Exp $
 
 /**
  * @file theme.inc
@@ -582,7 +582,14 @@ function theme_views_mini_pager($tags = array(), $limit = 10, $element = 0, $par
 
 
   $li_previous = theme('pager_previous', (isset($tags[1]) ? $tags[1] : t('‹‹')), $limit, $element, 1, $parameters);
+  if (empty($li_previous)) {
+    $li_previous = "&nbsp;";
+  }
+
   $li_next = theme('pager_next', (isset($tags[3]) ? $tags[3] : t('››')), $limit, $element, 1, $parameters);
+  if (empty($li_next)) {
+    $li_next = "&nbsp;";
+  }
 
   if ($pager_total[$element] > 1) {
     $items[] = array(

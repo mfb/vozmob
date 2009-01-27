@@ -1,5 +1,5 @@
 <?php
-// $Id: content.module,v 1.301.2.95 2009/01/20 15:56:11 karens Exp $
+// $Id: content.module,v 1.301.2.96 2009/01/26 14:45:34 yched Exp $
 /**
  * @file
  * Allows administrators to associate custom fields to content types.
@@ -2408,6 +2408,7 @@ function content_extra_field_weight($type_name, $pseudo_field_name) {
   // information for 'extra' fields hasn't been refreshed yet.
   if (!isset($type['extra'][$pseudo_field_name])) {
     content_clear_type_cache();
+    $type = content_types($type_name);
   }
 
   if (isset($type['extra'][$pseudo_field_name])) {

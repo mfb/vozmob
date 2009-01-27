@@ -139,6 +139,10 @@ function filefield_field_sanitize($node, $field, &$items, $teaser, $page) {
     if (!empty($item['fid']) && empty($item['filepath'])) {
       $items[$delta] = array_merge($item, field_file_load($item['fid']));
     }
+    // Extract data array from serialized string.
+    if (is_string($item['data'])){
+      $items[$delta]['data'] = unserialize($item['data']);
+    }
     // Add nid so formatters can create a link to the node.
     $items[$delta]['nid'] = $node->nid;
   }

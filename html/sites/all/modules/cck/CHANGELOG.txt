@@ -1,4 +1,4 @@
-//$Id: CHANGELOG.txt,v 1.1.6.296 2009/01/21 20:24:19 yched Exp $
+//$Id: CHANGELOG.txt,v 1.1.6.297 2009/01/26 14:45:34 yched Exp $
 
 CCK 6.x-2.x
 ===========
@@ -31,6 +31,7 @@ should be enough, though.
 - #342427 Views integration - fix summaries for nodereference and userreference fields.
 - #349987 by Michelle - Panels integration for fieldgroups.
 - #362216 by markus_petrux - sort the admin/content/types/fields overview by field name.
+- #363456 by dww - Fix some cases of bogus d-n-d reordering of 'pseudo-fields'.
 
 CCK 6.x-2.1
 ===========

@@ -85,9 +85,12 @@ Views 2.3
     o #321332 with help from brahms: views_handler_field_markup only worked if format was named "format".
     o #348322 by Darren Oh: Fix missing /code in api plugins help.
     o #353090 by eaton: RSS feeds were not using all of the Drupal hooks to ensure full compatibility with core feeds.
+    o #293832 by drewish: Allow menu items to have administrative description.
+    o #345528: Mini-pager generated invalid HTML with empty li tags.
 
   Other changes:
     o #288801 by drewish and eaton: Aggregator item support! Make views of feeds!
     o #335647 by markus_petrux: Add memory and a reset button to the Views list page.
     o #343047 by alienbrain: Allow all handlers to participate in view validation.
     o #339223 by greggles: Allow taxonomy term tid to be sortable.
+    o #324378 by eigentor: CSS improvements to the view list page.
