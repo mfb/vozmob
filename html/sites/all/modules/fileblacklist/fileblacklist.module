@@ -6,6 +6,9 @@
  * Create a "blacklist" of files which are not permitted to be uploaded.
  */
 
+define('FILEBLACKLIST_ACTION_REMOVE', 0);
+define('FILEBLACKLIST_ACTION_ADD', 1);
+
 /**
  * Implementation of hook_perm().
  */
@@ -15,40 +18,24 @@ function fileblacklist_perm() {
 }
 
 /**
- * Implementation of hook_menu().
- */
-function fileblacklist_menu() {
-  $items['admin/settings/fileblacklist'] = array(
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('fileblacklist_settings'),
-    'access arguments' => array('administer file blacklist'),
-    'type' => MENU_CALLBACK,
-    'file' => 'fileblacklist.inc',
-  );
-  $items['admin/content/fileblacklist'] = array(
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('fileblacklist_list'),
-    'access arguments' => array('administer file blacklist'),
-    'type' => MENU_CALLBACK,
-    'file' => 'fileblacklist.inc',
-  );
-  return $items;
-}
-
-/**
  * Check whether or not a file is listed in the blacklist.
  *
  * @param $filepath A string containing a file path.
- * @param $form_item An optional string containing the name of a form item that
- *   any errors will be attached to. 
  * @return FALSE if file is not denied, or fileblacklist object if file is denied.
  */
-function fileblacklist_filepath_check($filepath, $form_item = NULL) {
-  $blacklist = db_fetch_object(db_query("SELECT * FROM {fileblacklist} WHERE sha256 = '%s'", hash_file('sha256', $filepath)));
-  if ($blacklist && $blacklist->type && $form_item) {
-    form_set_error($form_item, t('The file is not permitted.'));
-  }
-  return $blacklist;
+function fileblacklist_filepath_check($filepath) {
+  return db_fetch_object(db_query("SELECT * FROM {fileblacklist} WHERE sha256 = '%s'", hash_file('sha256', $filepath)));
+}
+
+/**
+ * Remove a file from the file blacklist.
+ *
+ * @param $file A file object.
+ */
+function fileblacklist_file_remove($file) {
+  db_query('DELETE FROM {fileblacklist} WHERE fid = %d', $file->fid);
+  db_query('DELETE FROM {files} WHERE fid = %d', $file->fid);
+  file_delete($file->filepath);
 }
 
 /**
@@ -64,29 +51,21 @@ function fileblacklist_file_add($old_file, $type = NULL) {
   // Calculate the SHA256 and check if the file is already listed.
   $filepath = $old_file->filepath;
   $sha256 = hash_file('sha256', $filepath);
-  if ($file = db_fetch_object(db_query("SELECT * FROM {fileblacklist} WHERE sha256 = '%s' LIMIT 1", $sha256))) {
-    drupal_set_message(t('File is already listed in blacklist.'));
+  if ($file = db_fetch_object(db_query("SELECT * FROM {fileblacklist} WHERE sha256 = '%s'", $sha256))) {
+    drupal_set_message(t('File is already blacklisted.'));
     return $file;
   }
 
   // We'll be creating a new file object so let's clone the original file object.
   $file = clone($old_file);
 
-  // Create directories.
-  $path_parts = array(
-    file_create_path('blacklist'),
-    gmdate('Y', $_SERVER['REQUEST_TIME']),
-    gmdate('m', $_SERVER['REQUEST_TIME']),
-    gmdate('d', $_SERVER['REQUEST_TIME']),
-  );
-  foreach ($path_parts as $path_part) {
-    $path = (isset($path) ? $path . '/' : '') . $path_part;
-    file_check_directory($path, FILE_CREATE_DIRECTORY);
-  }
+  // Create directory.
+  $path = file_create_path('blacklist');
+  file_check_directory($path, FILE_CREATE_DIRECTORY);
 
   // Generate a unique filename
   $path_parts = pathinfo($filepath);
-  $filename = hash('sha256', microtime() . $sha256 . drupal_get_secret_key()) . '.' . $path_parts['extension'];
+  $filename = hash('sha256', uniqid(mt_rand(), TRUE)) . '.' . $path_parts['extension'];
 
   // Copy file into fileblacklist directory.
   $destination = file_destination($path . '/' . $filename, FILE_EXISTS_RENAME);
@@ -108,4 +87,58 @@ function fileblacklist_file_add($old_file, $type = NULL) {
   drupal_write_record('fileblacklist', $file);
 
   return $file;
+}
+
+/**
+ * Implementation of hook_action_info().
+ */
+function fileblacklist_action_info() {
+  return array(
+    'fileblacklist_file_add_action' => array(
+      'type' => 'file',
+      'description' => t('Add file to blacklist'),
+    ),
+    'fileblacklist_file_remove_action' => array(
+      'type' => 'file',
+      'description' => t('Remove file from blacklist'),
+    ),
+  );
+}
+
+function fileblacklist_file_remove_action(&$file) {
+  return fileblacklist_file_remove($file);
+}
+
+function fileblacklist_file_add_action(&$file) {
+  return fileblacklist_file_add($file);
+}
+
+/**
+ * Provide a missing Drupal core API function.
+ */
+function fileblacklist_file_load($fid) {
+  return db_fetch_object(db_query('SELECT * FROM {files} WHERE fid = %d', $fid));
+}
+
+/**
+ * Implementation of hook_views_bulk_operations_object_info()
+ */
+function fileblacklist_views_bulk_operations_object_info() {
+  return array(
+    'file' => array(
+      'type' => 'file',
+      'base_table' => 'files',
+      'load' => 'fileblacklist_file_load',
+      'title' => 'filename',
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_views_api().
+ */
+function fileblacklist_views_api() {
+  return array(
+    'api' => 2,
+  );
 }

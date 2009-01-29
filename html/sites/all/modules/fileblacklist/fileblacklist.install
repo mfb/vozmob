@@ -6,24 +6,24 @@
  */
 function fileblacklist_schema() {
   $schema['fileblacklist'] = array(
-    'description' => t('File blacklist.'),
+    'description' => 'File blacklist.',
     'fields' => array(
       'fid' => array(
-        'description' => t('File identifier.'),
+        'description' => 'File identifier.',
         'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE,
         'default' => 0,
       ),
       'sha256' => array(
-        'description' => t('The sha256 digest for this file.'),
+        'description' => 'The sha256 digest for this file.',
         'type' => 'varchar',
         'length' => 64,
         'not null' => TRUE,
         'default' => '',
       ),
       'type' => array(
-        'description' => t('Type of denial action.'),
+        'description' => 'Type of denial action (currently unused).',
         'type' => 'int',
         'size' => 'tiny',
         'not null' => TRUE,
