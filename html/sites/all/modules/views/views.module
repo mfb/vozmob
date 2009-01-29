@@ -1,5 +1,5 @@
 <?php
-// $Id: views.module,v 1.325 2009/01/27 19:04:43 merlinofchaos Exp $
+// $Id: views.module,v 1.326 2009/01/27 21:32:45 merlinofchaos Exp $
 /**
  * @file
  * Primarily Drupal hooks and global API functions to manipulate views.
@@ -59,6 +59,12 @@ function views_theme() {
           'path' => $def['theme path'],
           'arguments' => $arguments[$type],
         );
+
+        $include = './' . $def['theme path'] . '/' . $def['theme file'];
+        if (file_exists($include)) {
+          require_once $include;
+        }
+
         if (!function_exists('theme_' . $def['theme'])) {
           $hooks[$def['theme']]['template'] = views_css_safe($def['theme']);
         }
@@ -76,6 +82,7 @@ function views_theme() {
             'path' => $def['theme path'],
             'arguments' => $arguments[$theme_type],
           );
+
           if (!function_exists('theme_' . $theme)) {
             $hooks[$theme]['template'] = views_css_safe($theme);
           }

@@ -87,6 +87,11 @@ Views 2.3
     o #353090 by eaton: RSS feeds were not using all of the Drupal hooks to ensure full compatibility with core feeds.
     o #293832 by drewish: Allow menu items to have administrative description.
     o #345528: Mini-pager generated invalid HTML with empty li tags.
+    o #351745: Exposed taxonomy term autocomplete filter failed if term existed in multiple vocabularies.
+    o #353002: tracker view had wrong argument and was not picking up comments by the selected user.
+    o Case sensitivity on string filter checkmark was backward.
+    o #355919: views_theme() needed to include plugin theme files to detect functions.
+    o #353515: Many characters could get incorrectly translated in exposed filters combined with ajax tablesorting.
 
   Other changes:
     o #288801 by drewish and eaton: Aggregator item support! Make views of feeds!
@@ -94,3 +99,5 @@ Views 2.3
     o #343047 by alienbrain: Allow all handlers to participate in view validation.
     o #339223 by greggles: Allow taxonomy term tid to be sortable.
     o #324378 by eigentor: CSS improvements to the view list page.
+    o #354736 by Shai: Clarification on exposed filter text.
+    o #364637 by moshe and dww: Allow preprocessors to add row classes to table style.
