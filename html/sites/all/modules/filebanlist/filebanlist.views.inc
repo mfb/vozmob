@@ -3,30 +3,30 @@
 
 /**
  * @file
- * Provide views data and handlers for fileblacklist table.
+ * Provide views data and handlers for filebanlist table.
  */
 
 /**
  * Implementation of hook_views_data()
  */
-function fileblacklist_views_data() {
-  $data['fileblacklist']['table']['group']  = t('File blacklist');
-  $data['fileblacklist']['table']['join'] = array(
+function filebanlist_views_data() {
+  $data['filebanlist']['table']['group']  = t('File ban list');
+  $data['filebanlist']['table']['join'] = array(
     'files' => array(
       'left_field' => 'fid',
       'field' => 'fid',
     ),
   );
-  $data['fileblacklist']['sha256'] = array(
-    'title' => t('Blacklist'),
-    'help' => t('Whether or not the file is blacklisted.'),
+  $data['filebanlist']['sha256'] = array(
+    'title' => t('Ban list'),
+    'help' => t('Whether or not the file is banned.'),
     'field' => array(
       'handler' => 'views_handler_field_boolean',
       'click sortable' => TRUE,
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_boolean_operator',
-      'label' => t('Blacklist'),
+      'label' => t('Ban list'),
       'type' => 'yes-no',
     ),
   );

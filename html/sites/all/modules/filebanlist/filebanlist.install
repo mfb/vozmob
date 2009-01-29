@@ -4,9 +4,9 @@
 /**
  * Implementation of hook_schema().
  */
-function fileblacklist_schema() {
-  $schema['fileblacklist'] = array(
-    'description' => 'File blacklist.',
+function filebanlist_schema() {
+  $schema['filebanlist'] = array(
+    'description' => 'File ban list.',
     'fields' => array(
       'fid' => array(
         'description' => 'File identifier.',
@@ -41,13 +41,13 @@ function fileblacklist_schema() {
 /**
  * Implementation of hook_install().
  */
-function fileblacklist_install() {
-  drupal_install_schema('fileblacklist');
+function filebanlist_install() {
+  drupal_install_schema('filebanlist');
 }
 
 /**
  * Implementation of hook_uninstall().
  */
-function fileblacklist_uninstall() {
-  drupal_uninstall_schema('fileblacklist');
+function filebanlist_uninstall() {
+  drupal_uninstall_schema('filebanlist');
 }

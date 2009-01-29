@@ -3,13 +3,13 @@
 
 /**
  * @file
- * Contains default views on behalf of the fileblacklist module.
+ * Contains default views on behalf of the filebanlist module.
  */
 
 /**
  * Implementation of hook_views_default_views().
  */
-function fileblacklist_views_default_views() {
+function filebanlist_views_default_views() {
   // The following lines aren't indented but should be...
 
 $view = new view;
@@ -67,12 +67,12 @@ $handler->override_option('fields', array(
     'relationship' => 'none',
   ),
   'sha256' => array(
-    'label' => 'Blacklist',
+    'label' => 'Ban list',
     'type' => 'yes-no',
     'not' => 0,
     'exclude' => 0,
     'id' => 'sha256',
-    'table' => 'fileblacklist',
+    'table' => 'filebanlist',
     'field' => 'sha256',
     'relationship' => 'none',
   ),
@@ -100,7 +100,7 @@ $handler->override_option('filters', array(
 ));
 $handler->override_option('access', array(
   'type' => 'perm',
-  'perm' => 'administer file blacklist',
+  'perm' => 'administer file ban list',
 ));
 $handler->override_option('use_ajax', TRUE);
 $handler->override_option('items_per_page', 20);
@@ -157,8 +157,8 @@ $handler->override_option('style_options', array(
   'display_result' => 1,
   'merge_single_action' => 1,
   'selected_operations' => array(
-    '5b44003d561df6e1d3e4198e98c5f46a' => '5b44003d561df6e1d3e4198e98c5f46a',
-    '7808bf6cf1c8f08bef2975e3b0d9cf32' => '7808bf6cf1c8f08bef2975e3b0d9cf32',
+    'd43ffcb316c846d7446f776ecf48b44a' => 'd43ffcb316c846d7446f776ecf48b44a',
+    'ebb056ea879a18f8b7fe696f1a442622' => 'ebb056ea879a18f8b7fe696f1a442622',
     'e52c7d4b8ccc8fd7b8f7a59ca8e0e013' => 0,
     'e620912b6bfc590784848cf00c05b42f' => 0,
     'ffd4dd7c59102655f73303c040b08914' => 0,

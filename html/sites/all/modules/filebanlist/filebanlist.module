@@ -3,56 +3,53 @@
 
 /**
  * @file
- * Create a "blacklist" of files which are not permitted to be uploaded.
+ * Create a "ban list" of files which are not permitted to be uploaded.
  */
-
-define('FILEBLACKLIST_ACTION_REMOVE', 0);
-define('FILEBLACKLIST_ACTION_ADD', 1);
 
 /**
  * Implementation of hook_perm().
  */
-function fileblacklist_perm() {
-  $perms = array('administer file blacklist', 'add files to blacklist');
+function filebanlist_perm() {
+  $perms = array('administer file ban list', 'add files to ban list');
   return $perms;
 }
 
 /**
- * Check whether or not a file is listed in the blacklist.
+ * Check whether or not a file is listed in the ban list.
  *
  * @param $filepath A string containing a file path.
- * @return FALSE if file is not denied, or fileblacklist object if file is denied.
+ * @return FALSE if file is not denied, or filebanlist object if file is denied.
  */
-function fileblacklist_filepath_check($filepath) {
-  return db_fetch_object(db_query("SELECT * FROM {fileblacklist} WHERE sha256 = '%s'", hash_file('sha256', $filepath)));
+function filebanlist_filepath_check($filepath) {
+  return db_fetch_object(db_query("SELECT * FROM {filebanlist} WHERE sha256 = '%s'", hash_file('sha256', $filepath)));
 }
 
 /**
- * Remove a file from the file blacklist.
+ * Remove a file from the file ban list.
  *
  * @param $file A file object.
  */
-function fileblacklist_file_remove($file) {
-  db_query('DELETE FROM {fileblacklist} WHERE fid = %d', $file->fid);
+function filebanlist_file_remove($file) {
+  db_query('DELETE FROM {filebanlist} WHERE fid = %d', $file->fid);
   db_query('DELETE FROM {files} WHERE fid = %d', $file->fid);
   file_delete($file->filepath);
 }
 
 /**
- * Add a file to the file blacklist.
+ * Add a file to the file ban list.
  *
  * @param $file A file object.
- * @return A blacklisted file object if file was added successfully 
- *   or was already listed in the blacklist.
+ * @return A banned file object if file was added successfully 
+ *   or was already listed in the ban list.
  */
-function fileblacklist_file_add($old_file, $type = NULL) {
+function filebanlist_file_add($old_file, $type = NULL) {
   global $user;
 
   // Calculate the SHA256 and check if the file is already listed.
   $filepath = $old_file->filepath;
   $sha256 = hash_file('sha256', $filepath);
-  if ($file = db_fetch_object(db_query("SELECT * FROM {fileblacklist} WHERE sha256 = '%s'", $sha256))) {
-    drupal_set_message(t('File is already blacklisted.'));
+  if ($file = db_fetch_object(db_query("SELECT * FROM {filebanlist} WHERE sha256 = '%s'", $sha256))) {
+    drupal_set_message(t('File is already banned.'));
     return $file;
   }
 
@@ -60,14 +57,14 @@ function fileblacklist_file_add($old_file, $type = NULL) {
   $file = clone($old_file);
 
   // Create directory.
-  $path = file_create_path('blacklist');
+  $path = file_create_path('ban list');
   file_check_directory($path, FILE_CREATE_DIRECTORY);
 
   // Generate a unique filename
   $path_parts = pathinfo($filepath);
   $filename = hash('sha256', uniqid(mt_rand(), TRUE)) . '.' . $path_parts['extension'];
 
-  // Copy file into fileblacklist directory.
+  // Copy file into filebanlist directory.
   $destination = file_destination($path . '/' . $filename, FILE_EXISTS_RENAME);
   if (!file_copy($filepath, $destination, FILE_EXISTS_RENAME)) {
     drupal_set_message(t('Error detected while copying file.'));
@@ -82,9 +79,9 @@ function fileblacklist_file_add($old_file, $type = NULL) {
   $file->timestamp = $_SERVER['REQUEST_TIME'];
   drupal_write_record('files', $file);
 
-  // Add entry to fileblacklist table.
+  // Add entry to filebanlist table.
   $file->sha256 = $sha256;
-  drupal_write_record('fileblacklist', $file);
+  drupal_write_record('filebanlist', $file);
 
   return $file;
 }
@@ -92,43 +89,43 @@ function fileblacklist_file_add($old_file, $type = NULL) {
 /**
  * Implementation of hook_action_info().
  */
-function fileblacklist_action_info() {
+function filebanlist_action_info() {
   return array(
-    'fileblacklist_file_add_action' => array(
+    'filebanlist_file_add_action' => array(
       'type' => 'file',
-      'description' => t('Add file to blacklist'),
+      'description' => t('Add file to ban list'),
     ),
-    'fileblacklist_file_remove_action' => array(
+    'filebanlist_file_remove_action' => array(
       'type' => 'file',
-      'description' => t('Remove file from blacklist'),
+      'description' => t('Remove file from ban list'),
     ),
   );
 }
 
-function fileblacklist_file_remove_action(&$file) {
-  return fileblacklist_file_remove($file);
+function filebanlist_file_remove_action(&$file) {
+  return filebanlist_file_remove($file);
 }
 
-function fileblacklist_file_add_action(&$file) {
-  return fileblacklist_file_add($file);
+function filebanlist_file_add_action(&$file) {
+  return filebanlist_file_add($file);
 }
 
 /**
  * Provide a missing Drupal core API function.
  */
-function fileblacklist_file_load($fid) {
+function filebanlist_file_load($fid) {
   return db_fetch_object(db_query('SELECT * FROM {files} WHERE fid = %d', $fid));
 }
 
 /**
  * Implementation of hook_views_bulk_operations_object_info()
  */
-function fileblacklist_views_bulk_operations_object_info() {
+function filebanlist_views_bulk_operations_object_info() {
   return array(
     'file' => array(
       'type' => 'file',
       'base_table' => 'files',
-      'load' => 'fileblacklist_file_load',
+      'load' => 'filebanlist_file_load',
       'title' => 'filename',
     ),
   );
@@ -137,7 +134,7 @@ function fileblacklist_views_bulk_operations_object_info() {
 /**
  * Implementation of hook_views_api().
  */
-function fileblacklist_views_api() {
+function filebanlist_views_api() {
   return array(
     'api' => 2,
   );

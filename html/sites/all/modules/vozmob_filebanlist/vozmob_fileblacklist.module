@@ -3,16 +3,16 @@
 
 /**
  * @file
- * Check files received via e-mail against a "blacklist".
+ * Check files received via e-mail against a "ban list".
  */
 
 /**
  * Implementation of hook_mailsave_clean().
  */
-function vozmob_fileblacklist_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
+function vozmob_filebanlist_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
   foreach ((array) $node->mailsave_attachments as $key => $mailsave_attachment) {
-    // fileblacklist_filepath_check() returns FALSE if not found.
-    if ($blacklist = fileblacklist_filepath_check($mailsave_attachment['filepath'])) {
+    // filebanlist_filepath_check() returns FALSE if not found.
+    if (filebanlist_filepath_check($mailsave_attachment['filepath'])) {
       // Delete file from tmp directory.
       file_delete($mailsave_attachment['filepath']);
       // Unset file from $node object.

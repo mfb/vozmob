@@ -1,4 +1,0 @@
-; $Id$
-name = VozMob file blacklist
-description = Custom config for the file blacklist module.
-core = 6.x

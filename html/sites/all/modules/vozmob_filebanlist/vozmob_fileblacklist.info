@@ -1,0 +1,4 @@
+; $Id$
+name = VozMob file ban list
+description = Custom config for the file ban list module.
+core = 6.x
