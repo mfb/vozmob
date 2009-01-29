@@ -57,7 +57,7 @@ function filebanlist_file_add($old_file, $type = NULL) {
   $file = clone($old_file);
 
   // Create directory.
-  $path = file_create_path('ban list');
+  $path = file_create_path('banlist');
   file_check_directory($path, FILE_CREATE_DIRECTORY);
 
   // Generate a unique filename

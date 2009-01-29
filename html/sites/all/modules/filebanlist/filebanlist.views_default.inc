@@ -87,11 +87,11 @@ $handler->override_option('filters', array(
       'use_operator' => 0,
       'operator' => 'filepath_op',
       'identifier' => 'filepath',
-      'label' => 'File: Path',
+      'label' => 'Filter by file path substring',
       'optional' => 1,
       'remember' => 0,
     ),
-    'case' => 1,
+    'case' => 0,
     'id' => 'filepath',
     'table' => 'files',
     'field' => 'filepath',
@@ -102,6 +102,7 @@ $handler->override_option('access', array(
   'type' => 'perm',
   'perm' => 'administer file ban list',
 ));
+$handler->override_option('title', 'File manager');
 $handler->override_option('use_ajax', TRUE);
 $handler->override_option('items_per_page', 20);
 $handler->override_option('use_pager', '1');
@@ -172,7 +173,7 @@ $handler->override_option('path', 'admin/content/file');
 $handler->override_option('menu', array(
   'type' => 'normal',
   'title' => 'File manager',
-  'description' => '',
+  'description' => 'Manage file ban list.',
   'weight' => '0',
   'name' => 'navigation',
 ));
