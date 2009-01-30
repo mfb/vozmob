@@ -213,8 +213,9 @@ function imageapi_image_scale(&$image, $width, $height, $upscale = false) {
     $width = $height / $aspect;
   }
 
-  $width = (int) round($width);
-  $height = (int) round($height);
+  // Width and height must be at least one pixel.
+  $width = max(1, (int) round($width));
+  $height = max(1, (int) round($height));
 
   return call_user_func($image->toolkit .'_image_resize', $image, $width, $height);
 }
