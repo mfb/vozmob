@@ -17,6 +17,7 @@ function mms_us_boost_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
       $url = str_replace('http://', 'https://', $matches[1]);
       // Boost sends HTTP 500 error if user agent is PHP, so we use Drupal :)
       $message_view = drupal_http_request($url);
+      // Get the message subject.
       if (preg_match('!<strong>Subject:</strong> (.*)!', $message_view->data, $matches)) {
         $node->title = $matches[1];
       }
@@ -33,30 +34,34 @@ function mms_us_boost_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
             $url .= '&' . $matches[1] . 'ext_mms=' . $attachment->input[1]->attributes()->value;
           }
           // Retrieve the ZIP file, currently by reading the entire file into a variable!
-          // User agent seems to matter :(
+          // Use a working user agent header.
           $attachments = drupal_http_request($url, array('User-Agent' => 'Wget/1.11.2'));
           $temp_file = tempnam(file_directory_temp(), 'boost');
           $filepath = file_save_data($attachments->data, $temp_file);
-          if (($zip = zip_open($filepath)) && (is_resource($zip))) {
+          $zip = zip_open($filepath);
+          if (is_resource($zip)) {
             // We got a zip file, let's nuke the (should be just one) low-res attachment.
             // Hopefully we aren't losing any text or anything else of importance here..?
             $node->mailsave_attachments = array();
             while ($zip_entry = zip_read($zip)) {
               if (zip_entry_open($zip, $zip_entry)) {
+                // Get the file and metadata.
                 $filename = basename(zip_entry_name($zip_entry));
                 $filesize = zip_entry_filesize($zip_entry);
                 // Save the data to temporary file
                 $temp_file = tempnam(file_directory_temp(), 'mail');
                 $filepath = file_save_data(zip_entry_read($zip_entry, $filesize), $temp_file);
-                // Add the item to the attachments array, and sanitise filename.
+                // Add the file to the attachments array, and sanitise filename.
                 $node->mailsave_attachments[] = array(
                   'filename' => _mailsave_sanitise_filename($filename),
                   'filepath' => $filepath,
                   'filemime' => file_get_mimetype($filename),
                   'filesize' => $filesize,
                 );
+                zip_entry_close($zip_entry);
               }
             }
+            zip_close($zip);
           }
         }
       }
