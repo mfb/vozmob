@@ -13,30 +13,58 @@ function mms_us_boost_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
   // Check if this message was from boost.
   if (preg_match('!@myboostmobile.com$!i', $header->fromaddress)) {
     if (preg_match('!(http://mediamail\.boostmobile\.com/share\.do\?invite=.*)"!', $node->body, $matches)) {
+      // Connect via HTTPS to (help) protect private data.
+      $url = str_replace('http://', 'https://', $matches[1]);
       // Boost sends HTTP 500 error if user agent is PHP, so we use Drupal :)
-      // Also, connect via HTTPS to (help) protect private data.
-      $message_view = drupal_http_request(str_replace('http://', 'https://', $matches[1]));
+      $message_view = drupal_http_request($url);
       if (preg_match('!<strong>Subject:</strong> (.*)!', $message_view->data, $matches)) {
         $node->title = $matches[1];
+      }
+      $url = str_replace('share.do', 'guest/downloadMedia.do', $url);
+      $attachment_view = drupal_http_request($url);
+      if (preg_match('!<ul id="ul_items">.*?</ul>!s', $attachment_view->data, $matches)) {
+        // Fix some bad XHTML.
+        $html = str_replace(array('&', 'border=0'), array('&amp;', 'border="0"'), $matches[0]);
+        if ($attachment_view = simplexml_load_string($html)) {
+          $url = str_replace('guest/downloadMedia.do', 'mmsdownloadzip/', $url);
+          foreach ($attachment_view->li as $attachment) {
+            $url .= '&externalMediaIds=' . $attachment->input[0]->attributes()->value;
+            preg_match('/_([0-9]+)$/', $attachment->input[0]->attributes()->value, $matches);
+            $url .= '&' . $matches[1] . 'ext_mms=' . $attachment->input[1]->attributes()->value;
+          }
+          // Retrieve the ZIP file, currently by reading the entire file into a variable!
+          // User agent seems to matter :(
+          $attachments = drupal_http_request($url, array('User-Agent' => 'Wget/1.11.2'));
+          $temp_file = tempnam(file_directory_temp(), 'boost');
+          $filepath = file_save_data($attachments->data, $temp_file);
+          if (($zip = zip_open($filepath)) && (is_resource($zip))) {
+            // We got a zip file, let's nuke the (should be just one) low-res attachment.
+            // Hopefully we aren't losing any text or anything else of importance here..?
+            $node->mailsave_attachments = array();
+            while ($zip_entry = zip_read($zip)) {
+              if (zip_entry_open($zip, $zip_entry)) {
+                $filename = basename(zip_entry_name($zip_entry));
+                $filesize = zip_entry_filesize($zip_entry);
+                // Save the data to temporary file
+                $temp_file = tempnam(file_directory_temp(), 'mail');
+                $filepath = file_save_data(zip_entry_read($zip_entry, $filesize), $temp_file);
+                // Add the item to the attachments array, and sanitise filename.
+                $node->mailsave_attachments[] = array(
+                  'filename' => _mailsave_sanitise_filename($filename),
+                  'filepath' => $filepath,
+                  'filemime' => file_get_mimetype($filename),
+                  'filesize' => $filesize,
+                );
+              }
+            }
+          }
+        }
       }
     }
     // There seems to be nothing useful in the body so we nuke it!
     $node->body = '';
     $node->teaser = node_teaser($node->body);
   }
-  // @todo: Download high res image(s).
-  //   We will need to submit a POST request to
-  //   http://mediamail.boostmobile.com/mmsdownloadzip/
-  //   with post data such as:
-  //     type=zip
-  //     res=high
-  //     createDirectory=false
-  //     fileName=[subject]
-  //     invite=[alphanumeric invite id]
-  //     elementID=_001_025f14c7197355b_1_2
-  //     _001_025f14c7197355b_1_2ext=.jpg
-  //     externalMediaIds=_001_025f14c7197355b_1_2
-  //     2ext_mms=.jpg
 }
 
 /**
