@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_upload_fid.inc,v 1.3 2008/11/19 22:44:30 merlinofchaos Exp $
+// $Id: views_handler_field_upload_fid.inc,v 1.4 2009/01/30 00:01:42 merlinofchaos Exp $
 /**
  * Field handler to provide a list of roles.
  */
@@ -59,10 +59,9 @@ class views_handler_field_upload_fid extends views_handler_field_prerender_list 
    */
   function render_link($data, $values) {
     if (!empty($this->options['link_to_file']) && $data !== NULL && $data !== '') {
-      return l($data, file_create_url($values->filepath), array('html' => TRUE));
+      $this->options['alter']['make_link'] = TRUE;
+      $this->options['alter']['path'] = file_create_url($values->filepath);
     }
-    else {
-      return $data;
-    }
+    return $data;
   }
 }

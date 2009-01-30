@@ -92,6 +92,11 @@ Views 2.3
     o Case sensitivity on string filter checkmark was backward.
     o #355919: views_theme() needed to include plugin theme files to detect functions.
     o #353515: Many characters could get incorrectly translated in exposed filters combined with ajax tablesorting.
+    o #359818: Delete button should say Revert when reverting a view to default.
+    o #359132 by grugnog: CSS files should be marked conditional so they don't impact the CSS cache.
+    o #360637: Extra slash in theme includes could cause some systems to fail.
+    o #363081: Disabled views could still provide blocks.
+    o #366666 by Deadmonk also yched: File size field should not try to print a size on NULL values.
 
   Other changes:
     o #288801 by drewish and eaton: Aggregator item support! Make views of feeds!
@@ -101,3 +106,4 @@ Views 2.3
     o #324378 by eigentor: CSS improvements to the view list page.
     o #354736 by Shai: Clarification on exposed filter text.
     o #364637 by moshe and dww: Allow preprocessors to add row classes to table style.
+    o #349178 by agentrickard: Add generic link handling plus a custom text field. Also automatic trimming.

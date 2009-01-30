@@ -1,5 +1,5 @@
 <?php
-// $Id: admin.inc,v 1.150 2009/01/07 21:52:00 merlinofchaos Exp $
+// $Id: admin.inc,v 1.151 2009/01/30 00:20:34 merlinofchaos Exp $
 /**
  * @file admin.inc
  * Provides the Views' administrative interface.
@@ -645,17 +645,19 @@ function views_ui_delete_confirm(&$form_state, $view) {
   if ($view->type == t('Overridden')) {
     $title = t('Are you sure you want to revert the view %name?', array('%name' => $view->name));
     $desc = t('Reverting the view will delete the view that is in the database, reverting it to the original default view. Any changes you have made will be lost and cannot be recovered.');
+    $button = t('Revert');
   }
   else {
     $title = t('Are you sure you want to delete the view %name?', array('%name' => $view->name));
     $desc = t('Deleting a view cannot be undone.');
+    $button = t('Delete');
   }
 
   return confirm_form($form,
                   $title,
                   $cancel,
                   $desc,
-                  t('Delete'),
+                  $button,
                   t('Cancel'));
 }
 

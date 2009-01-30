@@ -1,5 +1,5 @@
 <?php
-// $Id: views.module,v 1.326 2009/01/27 21:32:45 merlinofchaos Exp $
+// $Id: views.module,v 1.328 2009/01/30 01:26:55 merlinofchaos Exp $
 /**
  * @file
  * Primarily Drupal hooks and global API functions to manipulate views.
@@ -302,6 +302,11 @@ function views_block($op = 'list', $delta = 0, $edit = array()) {
       $items = array();
       $views = views_get_all_views();
       foreach ($views as $view) {
+        // disabled views get nothing.
+        if (!empty($view->disabled)) {
+          continue;
+        }
+
         $view->init_display();
         foreach ($view->display as $display_id => $display) {
 
@@ -547,7 +552,11 @@ function views_get_module_apis() {
  * Include views .css files.
  */
 function views_add_css($file) {
-  drupal_add_css(drupal_get_path('module', 'views') . "/css/$file.css");
+  // We set preprocess to FALSE because we are adding the files conditionally,
+  // and we don't want to generate duplicate cache files.
+  // TODO: at some point investigate adding some files unconditionally and
+  // allowing preprocess.
+  drupal_add_css(drupal_get_path('module', 'views') . "/css/$file.css", 'module', 'all', FALSE);
 }
 
 /**
