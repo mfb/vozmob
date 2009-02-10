@@ -1,0 +1,84 @@
+<?php
+// $Id: contemplate.install,v 1.5.2.2 2008/02/28 19:05:38 jrglasgow Exp $
+
+function contemplate_install() {
+  switch ($GLOBALS['db_type']) {
+  case 'mysql':
+  case 'mysqli':
+    db_query("CREATE TABLE {contemplate} (
+      type varchar(32) NOT NULL default '',
+      teaser text NOT NULL,
+      body text NOT NULL,
+      rss text NOT NULL,
+      enclosure varchar(128) NOT NULL,
+      flags int(8) unsigned NOT NULL default '7',
+      KEY type (type)
+      ) /*!40100 DEFAULT CHARACTER SET utf8 */;");
+    db_query("CREATE TABLE {contemplate_files} (
+      site varchar(255) NOT NULL,
+      `data` longblob NOT NULL,
+      UNIQUE KEY site (site(255))
+      ) /*!40100 DEFAULT CHARACTER SET utf8 */;");
+    db_query("UPDATE {system} SET weight = 10 WHERE name = 'contemplate'");
+    break;
+  case 'pgsql':
+    db_query("CREATE TABLE {contemplate} (
+      type varchar(32) NOT NULL default '',
+      teaser text NOT NULL,
+      body text NOT NULL,
+      rss text NOT NULL,
+      enclosure varchar(128) NOT NULL,
+      flags int_unsigned NOT NULL default '0',
+      PRIMARY KEY (type)
+      );");
+
+    db_query("CREATE TABLE {contemplate_files} (
+      site varchar(255) NOT NULL,
+      data bytea NOT NULL
+      );");  // This code is untested. Please post a fix to the issue queue if incorrect
+
+    db_query("CREATE UNIQUE INDEX {contemplate_files}_site_idx ON {contemplate_files} (site)");
+    db_query("UPDATE {system} SET weight = 10 WHERE name = 'contemplate'");
+    break;
+  }
+   drupal_set_message(t('Database tables for ConTemplate module have been installed.'));
+ }
+
+function contemplate_update_1() {
+  $ret = array();
+
+  switch ($GLOBALS['db_type']) {
+    case 'mysql':
+    case 'mysqli':
+      $ret[] = update_sql('ALTER TABLE {contemplate} ADD rss text NOT NULL');
+      $ret[] = update_sql('ALTER TABLE {contemplate} ADD enclosure varchar(128) NOT NULL');
+      $ret[] = update_sql("ALTER TABLE {contemplate} ADD flags int(8) unsigned NOT NULL default '7'");
+      break;
+    }
+
+  return $ret;
+}
+
+function contemplate_update_2() {
+  $ret = array();
+
+  switch ($GLOBALS['db_type']) {
+    case 'mysql':
+    case 'mysqli':
+      $ret[] = update_sql('CREATE TABLE {contemplate_files} (
+      site varchar(255) NOT NULL,
+      data longblob NOT NULL,
+      UNIQUE KEY site (site(255))
+      ) /*!40100 DEFAULT CHARACTER SET utf8 */;');
+      break;
+    }
+
+  return $ret;
+
+}
+
+function contemplate_uninstall() {
+  db_query('DROP TABLE {contemplate}');
+  db_query('DROP TABLE {contemplate_files}');
+  drupal_set_message(t('The ConTemplate tables have been removed from the database'));
+}

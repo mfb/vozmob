@@ -1,0 +1,11 @@
+// $Id: CHANGELOG.txt,v 1.2 2008/06/23 23:41:40 webchick Exp $
+
+jQuery UI 6.x-1.2, 2008-06-23
+-----------------------------
+- Updated to work with jQuery UI 1.5 release.
+- Uses jQuery Update's compression settings rather than its own.
+
+jQuery UI 6.x-1.1, 2008-03-27
+-----------------------------
+- Initial release of jQuery UI.
+- Works with jQuery UI 1.5b4.

@@ -1,0 +1,36 @@
+// $Id: changelog.txt,v 1.6.2.7 2008/08/28 01:47:17 aaron Exp $
+
+August 2008
+-----------
+ * Change default class from .filefield-item to .filefield-file (aaron).
+ * Change case of package 'User interface' (aaron).
+
+July 2008
+---------
+ * Move classes settings below nodes & pages (aaron).
+ * Remove a.media from defaults (aaron).
+
+June 2008
+---------
+ * Add automatic support for File Field (aaron).
+ * Fix menus with mangled d6 release (aaron).
+ * Port to d6 (aaron).
+ * Remove jquery.blockUI.js (as mediabox is no longer supported) (aaron).
+ * Update jquery.media.js to 0.81 (06/05/2008) (aaron).
+
+April 2008
+----------
+ * allow automatic invocation of plugin per node type (aaron).
+ * add flashvars and params (aaron).
+ * rebuild menu on update (to grab new help text & create dynamic js) (aaron).
+ * fix up help (aaron).
+ * set proper headers for dynamic js file (aaron).
+ * add settings (aaron).
+ * allow overriding defaults on invocation (aaron).
+ * separate functionality into include files (aaron).
+ * create dynamic js file (aaron).
+
+March 2008
+----------
+ * install file: clear jq plugin cache (aaron).
+ * create wrapper for jquery_media (aaron).

@@ -1,0 +1,8 @@
+<?php
+// $Id: jq_bridge.module,v 1.5.2.1 2008/05/04 19:06:16 aaron Exp $
+
+define('JQ_BRIDGE_JCAROUSEL_SKIN_DEFAULT', 'tango');
+
+/**
+ *  See jq_bridge.jq.inc, which implements hook_jq, and is called when needed.
+ */

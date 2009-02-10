@@ -1,0 +1,20 @@
+// $Id: changelog.txt,v 1.4.2.2 2008/08/27 14:31:15 aaron Exp $
+
+August 2008
+-----------
+ * Change case of package 'User interface' (aaron).
+
+May 2008
+--------
+ * port to d6.x (aaron).
+
+February 2008
+-------------
+ * check for module_hook('module', 'jq') before adding hook (aaron).
+ * add support for jquery_form (aaron).
+
+January 2008
+------------
+ * added support for cluetip (aaron).
+ * cleaned installation (aaron).
+ * add support for jcarousel (aaron).

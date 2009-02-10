@@ -1,0 +1,13 @@
+@CHARSET "UTF-8";
+
+/* $Id: ffmpeg_converter.css,v 1.1 2009/01/26 17:12:41 zoo33 Exp $ */
+
+.ffmpeg-converter-snapshot-selection .form-radios .form-item {
+  width: 140px;
+  margin-right: 10px;
+  float: left;
+}
+
+.ffmpeg-converter-snapshot-selection .description {
+  clear: both;
+}

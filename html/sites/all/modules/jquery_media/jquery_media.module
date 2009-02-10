@@ -1,0 +1,97 @@
+<?php
+// $Id: jquery_media.module,v 1.5.2.4 2008/08/28 01:47:17 aaron Exp $
+
+/**
+ * @file
+ * A wrapper module for the jQuery Media plugin.
+ *
+ * jQuery Media allows the display of embedded media, converting them automatically from links directly to the files.
+ * See http://malsup.com/jquery/media/ for more information.
+ */
+
+define('JQUERY_MEDIA_BGCOLOR_DEFAULT', '#ffffff');
+define('JQUERY_MEDIA_AUTOPLAY_DEFAULT', 0);
+define('JQUERY_MEDIA_FLVPLAYER_DEFAULT', 'mediaplayer.swf');
+define('JQUERY_MEDIA_MP3PLAYER_DEFAULT', 'mediaplayer.swf');
+define('JQUERY_MEDIA_CLASS_MEDIA_DEFAULT', '.filefield-file a');
+define('JQUERY_MEDIA_CLASS_MEDIA_AUTOINVOKE_DEFAULT', TRUE);
+define('JQUERY_MEDIA_MEDIA_WIDTH_DEFAULT', '');
+define('JQUERY_MEDIA_MEDIA_HEIGHT_DEFAULT', '');
+define('JQUERY_MEDIA_USE_DEFAULT_JS_FILE', FALSE);
+define('JQUERY_MEDIA_DEFAULT_JS_FILEPATH', 'jquery_media.defaults.js');
+
+function jquery_media_menu() {
+  $items['admin/settings/jquery_media'] = array(
+    'file' => 'jquery_media.settings.inc',
+    'title' => 'jQuery Media',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('_jquery_media_settings'),
+    'access arguments' => array('administer jquery media'),
+  );
+  $items[JQUERY_MEDIA_DEFAULT_JS_FILEPATH] = array(
+    'file' => 'jquery_media.jq.inc',
+    'type' => MENU_CALLBACK,
+    'access arguments' => array('access content'),
+    'page callback' => '_jquery_media_default_js_file',
+  );
+  return $items;
+}
+
+/**
+ *  Implements hook_perm
+ */
+function jquery_media_perm() {
+  return array('administer jquery media');
+}
+
+/**
+ *  Implements hook_help
+ */
+function jquery_media_help($section) {
+  module_load_include('inc', 'jquery_media', 'jquery_media.settings');
+  return _jquery_media_help($section);
+}
+
+/**
+ *  Attempt to go through jQ first. Then add our files manually.
+ */
+function jquery_media_add($options = array()) {
+  static $installed = FALSE;
+  if (module_exists('jq')) {
+    return module_invoke('jq', 'add', 'jquery_media');
+  }
+  if (!$installed) {
+    drupal_add_js(drupal_get_path('module', 'jquery_media') .'/js/jquery.media.js');
+  }
+  module_load_include('inc', 'jquery_media', 'jquery_media.jq');
+  _jquery_media_add($options);
+  return TRUE;
+}
+
+/**
+ *  Invoke the plugin if we support it for this node type.
+ */
+function jquery_media_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  if ($op == 'view') {
+    if (in_array($node->type, variable_get('jquery_media_node_types', array()))) {
+      jquery_media_add();
+    }
+  }
+}
+
+/**
+ *  Invoke the plugin on any page listed from the configuration page.
+ *  Code swiped from block_list
+ */
+function jquery_media_footer() {
+  $path = drupal_get_path_alias($_GET['q']);
+  $regexp = '/^('. preg_replace(array('/(\r\n?|\n)/', '/\\\\\*/', '/(^|\|)\\\\<front\\\\>($|\|)/'), array('|', '.*', '\1'. preg_quote(variable_get('site_frontpage', 'node'), '/') .'\2'), preg_quote(variable_get('jquery_media_pages', ''), '/')) .')$/';
+  // Compare with the internal and path alias (if any).
+  $page_match = preg_match($regexp, $path);
+  if ($path != $_GET['q']) {
+    $page_match = $page_match || preg_match($regexp, $_GET['q']);
+  }
+  if ($page_match) {
+    jquery_media_add();
+  }
+}

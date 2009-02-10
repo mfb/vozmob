@@ -1,0 +1,12 @@
+; $Id: jquery_ui.info,v 1.1 2008/05/21 05:14:51 webchick Exp $
+name = jQuery UI
+description = Provides the jQuery UI plug-in to other Drupal modules.
+core = 6.x
+dependencies[] = jquery_update
+
+; Information added by drupal.org packaging script on 2008-06-23
+version = "6.x-1.2"
+core = "6.x"
+project = "jquery_ui"
+datestamp = "1214264715"
+
