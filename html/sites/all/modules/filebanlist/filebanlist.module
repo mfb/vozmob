@@ -1,0 +1,156 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Create a "ban list" of files which are not permitted to be uploaded.
+ */
+
+/**
+ * Implementation of hook_perm().
+ */
+function filebanlist_perm() {
+  $perms = array('administer file ban list', 'add files to ban list');
+  return $perms;
+}
+
+/**
+ * Check whether or not a file is listed in the ban list.
+ *
+ * @param $filepath A string containing a file path.
+ * @return FALSE if file is not denied, or filebanlist object if file is denied.
+ */
+function filebanlist_filepath_check($filepath) {
+  return db_fetch_object(db_query("SELECT * FROM {filebanlist} WHERE sha256 = '%s'", hash_file('sha256', $filepath)));
+}
+
+/**
+ * Remove a file from the file ban list.
+ *
+ * @param $file A file object.
+ */
+function filebanlist_file_remove($file) {
+  db_query('DELETE FROM {filebanlist} WHERE fid = %d', $file->fid);
+  db_query('DELETE FROM {files} WHERE fid = %d', $file->fid);
+  file_delete($file->filepath);
+}
+
+/**
+ * Add a file to the file ban list.
+ *
+ * @param $file A file object.
+ * @return A banned file object if file was added successfully 
+ *   or was already listed in the ban list.
+ */
+function filebanlist_file_add($old_file, $type = NULL) {
+  global $user;
+
+  // Calculate the SHA256 and check if the file is already listed.
+  $filepath = $old_file->filepath;
+  $sha256 = hash_file('sha256', $filepath);
+  if ($file = db_fetch_object(db_query("SELECT * FROM {filebanlist} WHERE sha256 = '%s'", $sha256))) {
+    drupal_set_message(t('File is already banned.'));
+    return $file;
+  }
+
+  // We'll be creating a new file object so let's clone the original file object.
+  $file = clone($old_file);
+
+  // Create directory.
+  $path = file_create_path('banlist');
+  file_check_directory($path, FILE_CREATE_DIRECTORY);
+
+  // Generate a unique filename
+  $path_parts = pathinfo($filepath);
+  $filename = hash('sha256', uniqid(mt_rand(), TRUE)) . '.' . $path_parts['extension'];
+
+  // Copy file into filebanlist directory.
+  $destination = file_destination($path . '/' . $filename, FILE_EXISTS_RENAME);
+  if (!file_copy($filepath, $destination, FILE_EXISTS_RENAME)) {
+    drupal_set_message(t('Error detected while copying file.'));
+    return FALSE;
+  }
+
+  // Add entry to files table.
+  $file->fid = NULL;
+  $file->uid = $user->uid;
+  $file->filepath = $filepath;
+  $file->status = FILE_STATUS_PERMANENT;
+  $file->timestamp = $_SERVER['REQUEST_TIME'];
+  drupal_write_record('files', $file);
+
+  // Add entry to filebanlist table.
+  $file->sha256 = $sha256;
+  drupal_write_record('filebanlist', $file);
+
+  return $file;
+}
+
+/**
+ * Implementation of hook_action_info().
+ */
+function filebanlist_action_info() {
+  return array(
+    'filebanlist_file_add_action' => array(
+      'type' => 'file',
+      'description' => t('Add file to ban list'),
+    ),
+    'filebanlist_file_remove_action' => array(
+      'type' => 'file',
+      'description' => t('Remove file from ban list'),
+    ),
+  );
+}
+
+function filebanlist_file_remove_action(&$file) {
+  return filebanlist_file_remove($file);
+}
+
+function filebanlist_file_add_action(&$file) {
+  return filebanlist_file_add($file);
+}
+
+/**
+ * Provide a missing Drupal core API function.
+ */
+function filebanlist_file_load($fid) {
+  return db_fetch_object(db_query('SELECT * FROM {files} WHERE fid = %d', $fid));
+}
+
+/**
+ * Implementation of hook_views_bulk_operations_object_info()
+ */
+function filebanlist_views_bulk_operations_object_info() {
+  return array(
+    'file' => array(
+      'type' => 'file',
+      'base_table' => 'files',
+      'load' => 'filebanlist_file_load',
+      'title' => 'filename',
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_views_api().
+ */
+function filebanlist_views_api() {
+  return array(
+    'api' => 2,
+  );
+}
+
+/**
+ * Implementation of hook_mailsave_clean().
+ */
+function filebanlist_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
+  foreach ((array) $node->mailsave_attachments as $key => $mailsave_attachment) {
+    // filebanlist_filepath_check() returns FALSE if not found.
+    if (filebanlist_filepath_check($mailsave_attachment['filepath'])) {
+      // Delete file from tmp directory.
+      file_delete($mailsave_attachment['filepath']);
+      // Unset file from $node object.
+      unset($node->mailsave_attachments[$key]);
+    }
+  }
+}

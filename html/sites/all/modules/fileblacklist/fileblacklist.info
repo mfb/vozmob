@@ -1,4 +1,0 @@
-; $Id$
-name = File blacklist
-description = Create a "blacklist" of files which are not permitted to be uploaded.
-core = 6.x

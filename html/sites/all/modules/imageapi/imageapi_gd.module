@@ -169,7 +169,7 @@ function _gd_create_tmp($image, $width, $height) {
     // if indexed transparency, lets preserve it.
     if ($transparent >= 0) {
       // get color(r,g,b) for index;
-      $transparent = imagecolorsforindex($image->res, $transparent);
+      $color = imagecolorsforindex($image->res, $transparent);
       // allocate to new image and get new index.
       $transparent =  (isset($color['alpha'])) 
         ? imagecolorallocatealpha($res, $color['red'], $color['green'], $color['blue'], $color['alpha'])

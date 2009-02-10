@@ -1,5 +1,5 @@
 <?php
-// $Id: theme.inc,v 1.67 2009/01/27 19:38:27 merlinofchaos Exp $
+// $Id: theme.inc,v 1.69 2009/01/30 00:01:43 merlinofchaos Exp $
 
 /**
  * @file theme.inc
@@ -201,7 +201,7 @@ function template_preprocess_views_view_fields(&$vars) {
  * this: @code { $row->{$field->field_alias} @endcode
  */
 function theme_views_view_field($view, $field, $row) {
-  return $field->render($row);
+  return $field->advanced_render($row);
 }
 
 /**
@@ -209,10 +209,10 @@ function theme_views_view_field($view, $field, $row) {
  *
  * This preprocess function isn't normally run, as a function is used by
  * default, for performance. However, by creating a template, this
- * preprocess should get pickedup.
+ * preprocess should get picked up.
  */
 function template_preprocess_views_view_field(&$vars) {
-  $vars['output'] = $vars['field']->render($vars['row']);
+  $vars['output'] = $vars['field']->advanced_render($vars['row']);
 }
 
 /**
@@ -351,6 +351,10 @@ function template_preprocess_views_view_table(&$vars) {
         $vars['rows'][$num][$column] .= $field_output;
       }
     }
+  }
+
+  foreach ($vars['rows'] as $num => $row) {
+    $vars['row_classes'][$num][] = ($num % 2 == 0) ? 'odd' : 'even';
   }
 
   $vars['class'] = 'views-table';

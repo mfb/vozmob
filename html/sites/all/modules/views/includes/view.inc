@@ -1,5 +1,5 @@
 <?php
-// $Id: view.inc,v 1.147 2009/01/27 19:04:43 merlinofchaos Exp $
+// $Id: view.inc,v 1.149 2009/01/30 00:01:41 merlinofchaos Exp $
 /**
  * @file view.inc
  * Provides the view object type and associated methods.
@@ -504,6 +504,9 @@ class view extends views_db_object {
       $this->build_info['title'] = str_replace(array_keys($substitutions), $substitutions, $title);
     }
 
+    // Store the arguments for later use.
+    $this->build_info['substitutions'] = $substitutions;
+
     return $status;
   }
 
@@ -790,6 +793,15 @@ class view extends views_db_object {
     }
     $this->render_time = views_microtime() - $start;
     return $output;
+  }
+
+  /**
+   * Render a specific field via the field ID and the row #.
+   */
+  function render_field($field, $row) {
+    if (isset($this->field[$field]) && isset($this->result[$row])) {
+      return $this->field[$field]->advanced_render($this->result[$row]);
+    }
   }
 
   /**
@@ -1412,7 +1424,7 @@ class view extends views_db_object {
   function clone_view() {
     $clone = version_compare(phpversion(), '5.0') < 0 ? $this : clone($this);
 
-    $keys = array('current_display', 'display_handler', 'build_info', 'built', 'executed', 'attachment_before', 'attachment_after', 'field', 'argument', 'filter', 'sort', 'relationship', 'query', 'result', 'inited', 'style_plugin', 'plugin_name');
+    $keys = array('current_display', 'display_handler', 'build_info', 'built', 'executed', 'attachment_before', 'attachment_after', 'field', 'argument', 'filter', 'sort', 'relationship', 'query', 'result', 'inited', 'style_plugin', 'plugin_name', 'exposed_data', 'exposed_input');
     foreach ($keys as $key) {
       if (isset($clone->$key)) {
         unset($clone->$key);

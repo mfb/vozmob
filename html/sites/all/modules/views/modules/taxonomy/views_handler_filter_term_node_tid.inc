@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_filter_term_node_tid.inc,v 1.5 2008/10/20 21:32:28 merlinofchaos Exp $
+// $Id: views_handler_filter_term_node_tid.inc,v 1.6 2009/01/27 20:13:27 merlinofchaos Exp $
 
 /**
  * Filter by term id
@@ -245,7 +245,10 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
       return;
     }
 
-    $result = db_query("SELECT * FROM {term_data} WHERE name IN (" . implode(', ', $placeholders) . ")", $args);
+    // add the taxonomy vid to the argument list.
+    $args[] = $this->options['vid'];
+
+    $result = db_query("SELECT * FROM {term_data} WHERE name IN (" . implode(', ', $placeholders) . ") AND vid = %d", $args);
     while ($term = db_fetch_object($result)) {
       unset($missing[strtolower($term->name)]);
       $tids[] = $term->tid;

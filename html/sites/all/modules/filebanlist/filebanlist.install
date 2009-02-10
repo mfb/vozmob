@@ -4,26 +4,26 @@
 /**
  * Implementation of hook_schema().
  */
-function fileblacklist_schema() {
-  $schema['fileblacklist'] = array(
-    'description' => t('File blacklist.'),
+function filebanlist_schema() {
+  $schema['filebanlist'] = array(
+    'description' => 'File ban list.',
     'fields' => array(
       'fid' => array(
-        'description' => t('File identifier.'),
+        'description' => 'File identifier.',
         'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE,
         'default' => 0,
       ),
       'sha256' => array(
-        'description' => t('The sha256 digest for this file.'),
+        'description' => 'The sha256 digest for this file.',
         'type' => 'varchar',
         'length' => 64,
         'not null' => TRUE,
         'default' => '',
       ),
       'type' => array(
-        'description' => t('Type of denial action.'),
+        'description' => 'Type of denial action (currently unused).',
         'type' => 'int',
         'size' => 'tiny',
         'not null' => TRUE,
@@ -41,13 +41,13 @@ function fileblacklist_schema() {
 /**
  * Implementation of hook_install().
  */
-function fileblacklist_install() {
-  drupal_install_schema('fileblacklist');
+function filebanlist_install() {
+  drupal_install_schema('filebanlist');
 }
 
 /**
  * Implementation of hook_uninstall().
  */
-function fileblacklist_uninstall() {
-  drupal_uninstall_schema('fileblacklist');
+function filebanlist_uninstall() {
+  drupal_uninstall_schema('filebanlist');
 }

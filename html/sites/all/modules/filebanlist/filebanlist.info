@@ -1,0 +1,6 @@
+; $Id$
+name = File ban list
+description = Create a ban list of files which are not permitted to be uploaded.
+core = 6.x
+dependencies[] = views
+dependencies[] = views_bulk_operations
