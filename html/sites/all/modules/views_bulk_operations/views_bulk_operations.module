@@ -1,5 +1,5 @@
 <?php
-// $Id: views_bulk_operations.module,v 1.29.2.9.2.44 2009/01/29 00:29:03 kratib Exp $
+// $Id: views_bulk_operations.module,v 1.29.2.9.2.47 2009/02/12 08:53:15 kratib Exp $
 
 /**
  * @file 
@@ -146,6 +146,10 @@ function views_bulk_operations_form($form_state, $plugin) {
     else {
       $step = VIEWS_BULK_OPS_STEP_VIEW;
     }
+    $form['filters'] = array(
+      '#type' => 'value',
+      '#value' => $plugin->view->get_exposed_input(),
+    );
   } 
   else {
     switch ($form_state['storage']['step']) {
@@ -273,6 +277,7 @@ function views_bulk_operations_form($form_state, $plugin) {
   // Use views_bulk_operations_form_submit() for form submit, regardless of form_id.
   $form['#submit'][] = 'views_bulk_operations_form_submit';
   $form['#validate'][] = 'views_bulk_operations_form_validate';
+  $form['#cache'] = true;
   return $form;
 }
 
@@ -324,7 +329,7 @@ function views_bulk_operations_form_submit($form, &$form_state) {
   case VIEWS_BULK_OPS_STEP_VIEW:
       $form_state['storage']['step'] = $form_state['values']['step'];
       $form_state['storage'][VIEWS_BULK_OPS_STEP_VIEW] = $form_state['values'];
-      _views_bulk_operations_adjust_selection($form_state['storage'][VIEWS_BULK_OPS_STEP_VIEW]['objects'], $plugin);
+      _views_bulk_operations_adjust_selection($form_state['storage'][VIEWS_BULK_OPS_STEP_VIEW]['objects'], $form_state['storage'][VIEWS_BULK_OPS_STEP_VIEW]['filters'], $plugin);
       $operation = $plugin->get_operation_info($form_state['storage'][VIEWS_BULK_OPS_STEP_VIEW]['operation']);
       if (!$operation['configurable'] && $plugin->options['skip_confirmation']) {
         break; // Go directly to execution
@@ -333,7 +338,7 @@ function views_bulk_operations_form_submit($form, &$form_state) {
     case VIEWS_BULK_OPS_STEP_SINGLE:
       $form_state['storage']['step'] = $form_state['values']['step'];
       $form_state['storage'][VIEWS_BULK_OPS_STEP_VIEW] = $form_state['values'];
-      _views_bulk_operations_adjust_selection($form_state['storage'][VIEWS_BULK_OPS_STEP_VIEW]['objects'], $plugin);
+      _views_bulk_operations_adjust_selection($form_state['storage'][VIEWS_BULK_OPS_STEP_VIEW]['objects'], $form_state['storage'][VIEWS_BULK_OPS_STEP_VIEW]['filters'], $plugin);
       $form_state['storage'][VIEWS_BULK_OPS_STEP_CONFIG] = $form_state['values'];
       if ($plugin->options['skip_confirmation']) {
         break; // Go directly to execution
@@ -412,7 +417,7 @@ function views_bulk_operations_form_submit($form, &$form_state) {
   $form_state['redirect'] = $_GET['q'];
 }
 
-function _views_bulk_operations_adjust_selection(&$objects, $plugin) {
+function _views_bulk_operations_adjust_selection(&$objects, $filters, $plugin) {
   $objects = array_filter($objects);
   if ($objects['select_all']) {
     $objects = array();
@@ -420,6 +425,7 @@ function _views_bulk_operations_adjust_selection(&$objects, $plugin) {
     $plugin->view->pager['items_per_page'] = 0;
     $plugin->view->executed = FALSE;
     $plugin->view->built = FALSE;
+    $plugin->view->set_arguments($filters);
     $plugin->view->execute();
     foreach ($plugin->view->result as $result) {
       $objects[$result->{$plugin->view->base_field}] = $result->{$plugin->view->base_field};

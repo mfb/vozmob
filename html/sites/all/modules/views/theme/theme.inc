@@ -1,5 +1,5 @@
 <?php
-// $Id: theme.inc,v 1.69 2009/01/30 00:01:43 merlinofchaos Exp $
+// $Id: theme.inc,v 1.70 2009/02/06 21:13:04 merlinofchaos Exp $
 
 /**
  * @file theme.inc
@@ -164,10 +164,12 @@ function template_preprocess_views_view_fields(&$vars) {
   $inline = FALSE;
   $vars['fields'] = array(); // ensure it's at least an empty array.
   foreach ($view->field as $id => $field) {
+    // render this even if set to exclude so it can be used elsewhere.
+    $field_output = $view->field[$id]->theme($vars['row']);
     if (empty($field->options['exclude'])) {
       $object = new stdClass();
 
-      $object->content = $view->field[$id]->theme($vars['row']);
+      $object->content = $field_output;
       if (isset($view->field[$id]->field_alias) && isset($vars['row']->{$view->field[$id]->field_alias})) {
         $object->raw = $vars['row']->{$view->field[$id]->field_alias};
       }
@@ -293,6 +295,15 @@ function template_preprocess_views_view_table(&$vars) {
     $query = '&' . $query;
   }
 
+  // Fields must be rendered in order as of Views 2.3, so we will pre-render
+  // everything.
+  $renders = array();
+  foreach ($result as $count => $row) {
+    foreach ($view->field as $id => $field) {
+      $renders[$count][$id] = $view->field[$id]->theme($row);
+    }
+  }
+
   foreach ($columns as $field => $column) {
     // render the header labels
     if ($field == $column && empty($fields[$field]->options['exclude'])) {
@@ -331,7 +342,7 @@ function template_preprocess_views_view_table(&$vars) {
     // Render each field into its appropriate column.
     foreach ($result as $num => $row) {
       if (!empty($fields[$field]) && empty($fields[$field]->options['exclude'])) {
-        $field_output = $fields[$field]->theme($row);
+        $field_output = $renders[$num][$field];
 
         // Don't bother with separators and stuff if the field does not show up.
         if (!isset($field_output) && isset($vars['rows'][$num][$column])) {

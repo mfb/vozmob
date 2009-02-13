@@ -1,5 +1,5 @@
 <?php
-// $Id: field_file.inc,v 1.22 2008/12/03 23:22:11 drewish Exp $
+// $Id: field_file.inc,v 1.23 2009/02/04 00:42:50 dopry Exp $
 /**
  * @file
  * Common functionality for file handling CCK field modules.
@@ -75,15 +75,11 @@ function field_file_load($fid, $reset = NULL) {
  * @param $dest
  *   A string containing the directory $source should be copied to. If this is
  *   not provided or is not writable, the temporary directory will be used.
- * @param $replace
- *   A boolean indicating whether an existing file of the same name in the
- *   destination directory should overwritten. A false value will generate a
- *   new, unique filename in the destination directory.
  * @return
  *   An array containing the file information, or 0 in the event of an error.
  */
-function field_file_save_upload($source, $validators = array(), $dest = FALSE, $replace = FILE_EXISTS_RENAME) {
-  if (!$file = file_save_upload($source, $validators, $dest, $replace)) {
+function field_file_save_upload($source, $validators = array(), $dest = FALSE) {
+  if (!$file = file_save_upload($source, $validators, $dest, FILE_EXISTS_RENAME)) {
     return 0;
   }
   if (!@chmod($file->filepath, 0664)) {
@@ -112,15 +108,11 @@ function field_file_save_upload($source, $validators = array(), $dest = FALSE, $
  * @param $dest
  *   A string containing the directory $source should be copied to. If this is
  *   not provided or is not writable, the temporary directory will be used.
- * @param $replace
- *   A boolean indicating whether an existing file of the same name in the
- *   destination directory should overwritten. A false value will generate a
- *   new, unique filename in the destination directory.
  * @return
  *   An array containing the file information, or 0 in the event of an error.
  *
  */
-function field_file_save_file($filepath, $validators = array(), $dest = FALSE, $replace = FILE_EXISTS_RENAME) {
+function field_file_save_file($filepath, $validators = array(), $dest = FALSE) {
   global $user;
 
   // Add in our check of the the file name length.
@@ -155,7 +147,7 @@ function field_file_save_file($filepath, $validators = array(), $dest = FALSE, $
   }
 
   $file->source = 'field_file_save_file';
-  $file->destination = file_destination(file_create_path($dest .'/'. $file->filename), $replace);
+  $file->destination = file_destination(file_create_path($dest .'/'. $file->filename), FILE_EXISTS_RENAME);
   $file->filesize = filesize($filepath);
 
   // Call the validation functions.
@@ -187,6 +179,7 @@ function field_file_save_file($filepath, $validators = array(), $dest = FALSE, $
   // If we made it this far it's safe to record this file in the database.
   $file->status = FILE_STATUS_TEMPORARY;
   $file->timestamp = time();
+  // Insert new record to the database.
   drupal_write_record('files', $file);
 
   // Let modules add additional properties to the yet barebone file object.

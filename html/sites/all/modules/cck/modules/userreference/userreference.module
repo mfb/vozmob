@@ -1,5 +1,5 @@
 <?php
-// $Id: userreference.module,v 1.106.2.32 2009/01/10 03:46:32 yched Exp $
+// $Id: userreference.module,v 1.106.2.33 2009/01/31 20:40:27 yched Exp $
 
 /**
  * @file
@@ -89,19 +89,20 @@ function userreference_field_settings($op, $field) {
           }
         }
 
+        $form['advanced'] = array(
+           '#type' => 'fieldset',
+           '#title' => t('Advanced - Users that can be referenced (View)'),
+           '#collapsible' => TRUE,
+           '#collapsed' => !isset($field['advanced_view']) || $field['advanced_view'] == '--',
+         );
         if (count($views) > 1) {
-          $form['advanced'] = array(
-             '#type' => 'fieldset',
-             '#title' => t('Advanced - Users that can be referenced (View)'),
-             '#collapsible' => TRUE,
-             '#collapsed' => !isset($field['advanced_view']) || $field['advanced_view'] == '--',
-           );
           $form['advanced']['advanced_view'] = array(
             '#type' => 'select',
             '#title' => t('View used to select the users'),
             '#options' => $views,
             '#default_value' => isset($field['advanced_view']) ? $field['advanced_view'] : '--',
-            '#description' => t('Choose the "Views module" view that selects the users that can be referenced.<br />Note:<ul><li>Only views that have fields will work for this purpose.</li><li>This will discard the "Referenceable Roles" and "Referenceable Status" settings above. Use the view\'s "filters" section instead.</li><li>Use the view\'s "fields" section to display additional informations about candidate users on user creation/edition form.</li><li>Use the view\'s "sort criteria" section to determine the order in which candidate users will be displayed.</li></ul>'),
+            '#description' =>  t('<p>Choose the "Views module" view that selects the users that can be referenced.<br />Note:</p>') .
+              t('<ul><li>Only views that have fields will work for this purpose.</li><li>This will discard the "Referenceable Roles" and "Referenceable Status" settings above. Use the view\'s "filters" section instead.</li><li>Use the view\'s "fields" section to display additional informations about candidate users on user creation/edition form.</li><li>Use the view\'s "sort criteria" section to determine the order in which candidate users will be displayed.</li></ul>'),
           );
           $form['advanced']['advanced_view_args'] = array(
             '#type' => 'textfield',
@@ -109,6 +110,12 @@ function userreference_field_settings($op, $field) {
             '#default_value' => isset($field['advanced_view_args']) ? $field['advanced_view_args'] : '',
             '#required' => FALSE,
             '#description' => t('Provide a comma separated list of arguments to pass to the view.'),
+          );
+        }
+        else {
+          $form['advanced']['no_view_help'] = array(
+            '#value' => t('<p>The list of user that can be referenced can be based on a "Views module" view but no appropriate views were found. <br />Note:</p>') .
+              t('<ul><li>Only views that have fields will work for this purpose.</li><li>This will discard the "Referenceable Roles" and "Referenceable Status" settings above. Use the view\'s "filters" section instead.</li><li>Use the view\'s "fields" section to display additional informations about candidate users on user creation/edition form.</li><li>Use the view\'s "sort criteria" section to determine the order in which candidate users will be displayed.</li></ul>'),
           );
         }
       }

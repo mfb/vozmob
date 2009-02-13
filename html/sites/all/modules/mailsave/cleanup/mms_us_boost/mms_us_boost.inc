@@ -45,8 +45,9 @@ function mms_us_boost_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
             $node->mailsave_attachments = array();
             while ($zip_entry = zip_read($zip)) {
               if (zip_entry_open($zip, $zip_entry)) {
-                // Get the file and metadata.
-                $filename = basename(zip_entry_name($zip_entry));
+                // File name is just a digit, so generate a more unique file name.
+                $path_parts = pathinfo(zip_entry_name($zip_entry));
+                $filename = md5(uniqid(mt_rand(), TRUE)) . '.' . $path_parts['extension'];
                 $filesize = zip_entry_filesize($zip_entry);
                 // Save the data to temporary file
                 $temp_file = tempnam(file_directory_temp(), 'mail');

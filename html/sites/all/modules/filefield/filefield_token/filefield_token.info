@@ -1,7 +1,8 @@
-; $Id: filefield_token.info,v 1.1 2008/10/10 17:13:23 drewish Exp $
+; $Id: filefield_token.info,v 1.2 2009/02/04 02:55:05 dopry Exp $
 name = FileField Tokens
 description = Token Integration for FileField.
 dependencies[] = filefield
+dependencies[] = token
 package = CCK
 core = 6.x
 php = 5.2

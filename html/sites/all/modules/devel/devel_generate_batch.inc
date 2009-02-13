@@ -1,5 +1,5 @@
 <?php
-// $Id: devel_generate_batch.inc,v 1.1.2.4 2008/11/07 20:37:51 weitzman Exp $
+// $Id: devel_generate_batch.inc,v 1.1.2.5 2009/02/02 21:00:52 drewish Exp $
 
 /**
  * Devel Generate batch handling functions using the BatchAPI
@@ -40,7 +40,7 @@ function devel_batch_generate_content($form_state) {
  * Create Content Batch Functions:
  */
 
-function devel_batch_generate_content_kill(&$context) {
+function devel_generate_batch_content_kill(&$context) {
   require_once('devel_generate.inc');
   devel_generate_content_kill($context['results']);
 }
@@ -52,7 +52,7 @@ function devel_generate_batch_content_pre_node($vars, &$context) {
   devel_generate_content_pre_node($context['results']);
 }
 
-function devel_batch_generate_content_add_node(&$context) {
+function devel_generate_batch_content_add_node(&$context) {
   require_once('devel_generate.inc');
   devel_generate_content_add_node($context['results']);
   $context['results']['num_nids'] ++;

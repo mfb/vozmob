@@ -1,5 +1,5 @@
 <?php
-// $Id: comment.views.inc,v 1.28 2008/12/02 22:17:41 merlinofchaos Exp $
+// $Id: comment.views.inc,v 1.30 2009/02/06 20:58:18 merlinofchaos Exp $
 /**
  * @file
  * Provide views data and handlers for comment.module
@@ -363,12 +363,18 @@ function comment_views_data_alter(&$data) {
 
   $data['node']['uid_touch'] = array(
     'title' => t('User posted or commented'),
-    'help' => t('Display comments only if a user posted the node or commented on the node.'),
+    'help' => t('Display nodes only if a user posted the node or commented on the node.'),
     'argument' => array(
       'field' => 'uid',
       'name table' => 'users',
       'name field' => 'name',
       'handler' => 'views_handler_argument_comment_user_uid',
+    ),
+    'filter' => array(
+      'field' => 'uid',
+      'name table' => 'users',
+      'name field' => 'name',
+      'handler' => 'views_handler_filter_comment_user_uid'
     ),
   );
 
@@ -465,14 +471,14 @@ function comment_views_handlers() {
       'views_handler_filter_ncs_last_updated' => array(
         'parent' => 'views_handler_filter_date',
       ),
-      'views_handler_filter_ncs_last_updated' => array(
-        'parent' => 'views_handler_filter_in_operator',
-      ),
-
-      // argument handlers
       'views_handler_filter_node_comment' => array(
         'parent' => 'views_handler_filter_in_operator',
       ),
+      'views_handler_filter_comment_user_uid' => array(
+        'parent' => 'views_handler_filter_user_name',
+      ),
+
+      // argument handlers
       'views_handler_argument_comment_user_uid' => array(
         'parent' => 'views_handler_argument',
       ),

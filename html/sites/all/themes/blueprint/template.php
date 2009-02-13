@@ -1,5 +1,5 @@
 <?php
-// $Id: template.php,v 1.15.2.1.2.12 2008/12/08 14:08:15 designerbrent Exp $
+// $Id: template.php,v 1.15.2.1.2.15 2008/12/23 03:40:02 designerbrent Exp $
 
 /**
  * Uncomment the following line during development to automatically

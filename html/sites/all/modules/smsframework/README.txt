@@ -1,5 +1,6 @@
-$Id: README.txt,v 1.2.2.1 2008/11/07 22:16:16 diggersf Exp $
-DESCRIPTION
+$Id: README.txt,v 1.2.2.2 2009/02/05 23:50:07 diggersf Exp $
+
+Description
 ===========
 Provides a pluggable API for Drupal to interact with SMS messages. 
 
@@ -14,14 +15,21 @@ Also integrates well with the Messaging module (http://drupal.org/project/messag
 
 More information is available from the groups homepage at: http://groups.drupal.org/sms-framework
 
-INSTALLATION
+Installation
 ============
 1. Drop into your preferred modules directory
 2. Enable the modules you want to use from admin/build/modules
 3. Set and configure your default gateway at admin/smsframework/gateways
 4. Check out the settings pages at admin/smsframework
 
-CREDITS
+Documentation
+=============
+Documentation for site builders and developers is available in the handbook
+pages on Drupal.org at the following URL:
+
+http://drupal.org/node/362258
+
+Credits
 =======
 Will White of Development Seed (http://drupal.org/user/32237)
 Tylor Sherman of Raincity Studios (http://drupal.org/user/143420)

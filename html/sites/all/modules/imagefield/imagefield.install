@@ -1,5 +1,5 @@
 <?php
-// $Id: imagefield.install,v 1.19 2009/01/08 17:48:44 drewish Exp $
+// $Id: imagefield.install,v 1.20 2009/02/10 20:06:58 drewish Exp $
 
 /**
  * Implementation of hook_install().
@@ -89,6 +89,7 @@ function imagefield_update_2() {
 function imagefield_update_3() {
   $ret = array();
   include_once(drupal_get_path('module', 'content') .'/content.module');
+  include_once(drupal_get_path('module', 'content') .'/content_admin.inc');
   $result = db_query("SELECT field_name, type_name, display_settings FROM {node_field_instance} WHERE widget_type = 'image'");
   while ($row = db_fetch_array($result)) {
     $needs_update = FALSE;

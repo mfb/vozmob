@@ -1,5 +1,5 @@
 <?php
-// $Id: imagefield.module,v 1.71 2008/08/27 15:03:06 drewish Exp $
+// $Id: imagefield.module,v 1.74 2009/02/05 02:07:43 dopry Exp $
 
 /**
  * @file
@@ -105,6 +105,20 @@ function imagefield_elements() {
   return $elements;
 }
 
+/**
+ * Implementation of hook_file_download.
+ */
+function imagefield_file_download($filepath) {
+  // return headers for admin thumbnails if private files are enabled.
+  $path = str_replace('.thumb.jpg', '', $filepath);
+  $path = file_create_path($path);
+  if (file_exists($path)) {
+    return array(
+      'Content-Type: image/jpeg',
+      'Content-Length: ' . filesize($path)
+    );
+  }
+}
 
 /**
  * Implementation of CCK's hook_field_info().
@@ -282,7 +296,7 @@ function theme_imagefield_image($file, $alt = '', $title = '', $attributes = nul
     $attributes = drupal_attributes($attributes);
     $alt = empty($alt) ? $file['alt'] : $alt;
     $title = empty($title) ? $file['title'] : $title;
-    $url = file_create_url($file['filepath']);
+    $url = file_create_url($file['filepath']) . '?' . $file['timestamp'];
     return '<img src="'. check_url($url) .'" alt="'.
         check_plain($alt) .'" title="'. check_plain($title) .'" '. $image_attributes . $attributes .' />';
   }

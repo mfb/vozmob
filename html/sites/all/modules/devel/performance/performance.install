@@ -1,5 +1,5 @@
 <?php
-// $Id: performance.install,v 1.1.4.2 2008/12/22 21:45:47 kbahey Exp $
+// $Id: performance.install,v 1.1.4.5 2009/02/08 19:52:15 kbahey Exp $
 
 // Copyright Khalid Baheyeldin 2008 of http://2bits.com
 
@@ -19,7 +19,7 @@ function performance_schema() {
       'query_timer_max' => array('type' => 'int', 'not null' => TRUE, 'default' => 0, 'disp-width' => '11'),
       'query_timer_avg' => array('type' => 'int', 'not null' => TRUE, 'default' => 0, 'disp-width' => '11'),
       'num_accesses'    => array('type' => 'int', 'not null' => TRUE, 'default' => 0, 'disp-width' => '11'),
-      'title'             => array('type' => 'varchar', 'length' => '255', 'not null' => FALSE)),
+    ),
     'primary key' => array('path'),
     'indexes' => array(
       'last_access' => array('last_access')),
@@ -34,8 +34,8 @@ function performance_schema() {
       'query_count' => array('type' => 'int', 'not null' => TRUE,  'default' => 0, 'disp-width' => '11'),
       'query_timer' => array('type' => 'int', 'not null' => TRUE,  'default' => 0, 'disp-width' => '11'),
       'anon'        => array('type' => 'int', 'not null' => FALSE, 'default' => 1, 'disp-width' => '1'),
-      'title'       => array('type' => 'varchar', 'length' => '255', 'not null' => FALSE),
-      'path'        => array('type' => 'varchar', 'length' => '255', 'not null' => FALSE)),
+      'path'        => array('type' => 'varchar', 'length' => '255', 'not null' => FALSE),
+    ),
     'primary key' => array('pid'),
     'indexes' => array(
       'timestamp' => array('timestamp')),
@@ -52,8 +52,7 @@ function performance_install() {
 }
 
 function performance_uninstall() {
-  db_query("DROP TABLE {performance_detail}");
-  db_query("DROP TABLE {performance_summary}");
+  drupal_uninstall_schema('performance');
   db_query("DELETE FROM {variable} WHERE name LIKE 'performance%'");
 }
 
@@ -68,7 +67,7 @@ function performance_requirements($phase) {
      $requirements['performance_detail'] = array(
        'title'       => t('Performance logging details'),
        'value'       => 'Enabled',
-       'severity'    => REQUIREMENT_ERROR,
+       'severity'    => REQUIREMENT_WARNING,
        'description' => t('Performance detailed logging is !link. This can cause severe issues on live sites.', array('!link' => l(t('enabled'), 'admin/settings/performance_logging'))),
      );
    }
@@ -80,7 +79,7 @@ function performance_requirements($phase) {
        $requirements['performance_query'] = array(
          'title'       => t('Performance logging query'),
          'value'       => 'Enabled',
-         'severity'    => REQUIREMENT_ERROR,
+         'severity'    => REQUIREMENT_WARNING,
          'description' => t('Query timing and count logging is !link. This can cause memory size per page to be larger than normal.', array('!link' => l(t('enabled'), 'admin/settings/performance_logging'))),
        );
      }
@@ -100,7 +99,7 @@ function performance_requirements($phase) {
      $requirements['performance_apc_mem'] = array(
        'title'       => t('Performance logging APC memory size'),
        'value'       => $shm_size,
-       'severity'    => REQUIREMENT_ERROR,
+       'severity'    => REQUIREMENT_WARNING,
        'description' => t('APC has been configured for !size, which is less than the recommended 48 MB of memory. If you encounter errors when viewing the summary report, then try to increase that limit for APC.', array('!size' => $shm_size)),
      );
   }

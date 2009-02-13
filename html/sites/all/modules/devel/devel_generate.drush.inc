@@ -1,5 +1,5 @@
 <?php
-// $Id: devel_generate.drush.inc,v 1.1.2.3 2009/01/05 04:16:55 weitzman Exp $
+// $Id: devel_generate.drush.inc,v 1.1.2.4 2009/02/06 05:28:01 weitzman Exp $
 
 /**
  * @file
@@ -12,11 +12,11 @@
 function devel_generate_drush_help($section) {
   switch ($section) {
     case 'drush:generate users':
-      return dt('Usage: drush [options] generate users <number_users> <kill>. <kill> is optional, type "kill" if you want to delete the users first.');
+      return dt('Usage: drush [options] generate users <number_users> <kill>. <kill> is optional, Specify "kill" if you want to delete the users first.');
     case 'drush:generate taxonomy':
-      return dt('Usage: drush [options] generate tax <number_vocab> <number_terms> <kill>. <kill> is optional, type "kill" if you want to delete all taxonomy first.');
+      return dt('Usage: drush [options] generate tax <number_vocab> <number_terms> <kill>. <kill> is optional; specify "kill" if you want to delete all taxonomy first.');
     case 'drush:generate content':
-      return dt('Usage: drush [options] generate content <number_nodes> <number_comments>. <kill> is optional, type "kill" if you want to delete all content first.');
+      return dt('Usage: drush [options] generate content <number_nodes> <number_comments>. <kill> is optional; specify "kill" if you want to delete all content first.');
   }
 }
 
@@ -26,15 +26,35 @@ function devel_generate_drush_help($section) {
 function devel_generate_drush_command() {
   $items['generate users'] = array(
     'callback' => 'drush_generate_users',
-    'description' => 'Creates users.'
+    'description' => 'Creates users.',
+    'arguments' => array(
+      'n' => 'Number of users to generate.',
+    ),
+    'options' => array(
+      'kill' => 'Specify \'kill\' to delete all users before generating new ones.',
+    ),
   );
   $items['generate taxonomy'] = array(
     'callback' => 'drush_generate_tax',
-    'description' => 'Creates taxonomy.'
+    'description' => 'Creates taxonomy.',
+    'arguments' => array(
+      'n' => 'Vocabulary ID into which new terms will be inserted.',
+    ),
+    'options' => array(
+      'kill' => 'Specify \'kill\' to delete all terms in specified vocab before generating.'
+    ),
+    
   );
   $items['generate content'] = array(
     'callback' => 'drush_generate_nodescontent',
-    'description' => 'Creates content.'
+    'description' => 'Creates content.',
+    'arguments' => array(
+      'n' => 'Number of nodes to generate.',
+      'c' => 'Number of comments to generate.',
+    ),
+    'options' => array(
+      'kill' => 'Specify \'kill\' to delete all content before generating new content.'
+    ),
   );
   return $items;
 }
@@ -43,41 +63,39 @@ function devel_generate_drush_command() {
 /**
  * Command callback. Generate a number of users.
  */
-function drush_generate_users($num_users = NULL, $kill = '') {
+function drush_generate_users($num_users = NULL) {
   if (drush_generate_is_number($num_users) == FALSE) {
-    drush_error(t('No valid number given as argument.'));
+    drush_error(t('Invalid number of users.'));
   }
-  $kill = ($kill == 'kill') ? $kill = '1' : $kill = '';
   drush_generate_include_devel();
-  devel_create_users($num_users, $kill);
+  devel_create_users($num_users, drush_get_option('kill'));
   drush_print(t('Generated @number users.', array('@number' => $num_users)));
 }
 
 /**
  * Command callback. Generate a number of taxonomy.
  */
-function drush_generate_tax($num_vocab = NULL, $num_terms = NULL, $kill = '') {
+function drush_generate_tax($num_vocab = NULL, $num_terms = NULL) {
   if (drush_generate_is_number($num_vocab) == FALSE) {
-    drush_error(t('No valid vocab number given as argument.'));
+    drush_error(t('Invalid vocabulary ID.'));
   }
   if (drush_generate_is_number($num_terms) == FALSE) {
-    drush_error(t('No valid term number given as argument.'));
+    drush_error(t('Invalid number of terms.'));
   }
-  $kill = ($kill == 'kill') ? $kill = '1' : $kill = '';
   drush_generate_include_devel();
-  devel_generate_taxonomy_data($num_vocab, $num_terms, '12', $kill);
+  devel_generate_taxonomy_data($num_vocab, $num_terms, '12', drush_get_option('kill'));
   drush_print(t('Generated @num_vocab vocabulary, @num_terms terms', array('@num_vocab' => $num_vocab, '@num_terms' => $num_terms)));
 }
 
 /**
  * Command callback. Generate a number of content.
  */
-function drush_generate_nodescontent($num_nodes = NULL, $num_comments = NULL, $kill = '') {
+function drush_generate_nodescontent($num_nodes = NULL, $num_comments = NULL) {
   if (drush_generate_is_number($num_nodes) == FALSE) {
-    drush_error(t('No valid node number given as argument.'));
+    drush_error(t('Invalid number of nodes'));
   }
-  if (drush_generate_is_number($num_comments) == FALSE) {
-    drush_error(t('No valid comment number given as argument.'));
+  if (!empty($num_comments) && drush_generate_is_number($num_comments) == FALSE) {
+    drush_error(t('Invalid number of comments.'));
   }
 
   // Let's load user 1, seems to be need for creating comments.

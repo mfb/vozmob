@@ -1,5 +1,5 @@
 <?php
-// $Id: cache.inc,v 1.22 2009/01/07 19:58:47 merlinofchaos Exp $
+// $Id: cache.inc,v 1.23 2009/01/31 18:08:48 merlinofchaos Exp $
 /**
  * @file cache.inc
  *
@@ -113,6 +113,8 @@ function _views_discover_default_views() {
       foreach ($defaults as $name => $view) {
         // Only views with a sufficiently high api version are eligible.
         if (isset($view->api_version) && $view->api_version >= 2) {
+          // Do not cache dead handlers.
+          $view->destroy();
           $cache[$name] = $view;
         }
       }

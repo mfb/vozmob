@@ -102,12 +102,34 @@ function filefield_field_insert($node, $field, &$items, $teaser, $page) {
 }
 
 function filefield_field_update($node, $field, &$items, $teaser, $page) {
+
+  // Accumulator to gather current fid to compare with the original node
+  // for deleting replaced files.
+  $curfids = array();
   foreach ($items as $delta => $item) {
     $items[$delta] = field_file_save($node, $item);
     // Remove items from the array if they have been deleted.
     if (empty($items[$delta])) unset($items[$delta]);
+    $curfids[] = $item['fid'];
   }
   $items = array_values($items); // compact deltas
+
+
+  // if this is a new node... there are no
+  // old items to worry about.
+  if ($node->is_new) {
+    return;
+  } 
+
+  // try to delete items from original node 
+  $orig = node_load($node->nid); 
+  // if there are, figure out which ones must go.
+  foreach($orig->$field['field_name'] as $oitem) {
+    if (!in_array($oitem['fid'], $curfids))  {
+      field_file_delete($oitem); 
+    }
+  }
+  
 }
 
 function filefield_field_delete_revision($node, $field, &$items, $teaser, $page) {

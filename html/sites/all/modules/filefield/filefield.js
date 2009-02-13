@@ -1,15 +1,15 @@
-// $Id: filefield.js,v 1.12 2008/12/03 21:50:52 drewish Exp $
+// $Id: filefield.js,v 1.13 2009/01/31 17:56:22 dopry Exp $
 
 /**
  * Auto-attach standard client side file input validation.
  */
 Drupal.behaviors.filefieldValidateAutoAttach = function(context) {
-  $("input[@type='file'][accept]", context).change( function() {
+  $("input[type='file'][accept]", context).change( function() {
     // Remove any previous errors.
     $('.file-upload-js-error').remove();
 
     /**
-     * Add client side validation for the input[@file] accept attribute.
+     * Add client side validation for the input[type=file] accept attribute.
      */
     var accept = this.accept.replace(/,\s*/g, '|');
     if (accept.length > 1) {

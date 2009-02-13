@@ -1,5 +1,5 @@
 <?php
-// $Id: performance.module,v 1.2.2.6 2009/01/06 21:39:12 kbahey Exp $
+// $Id: performance.module,v 1.2.2.21 2009/02/12 19:55:30 kbahey Exp $
 
 // Copyright Khalid Baheyeldin 2008 of http://2bits.com
 
@@ -9,7 +9,7 @@ function performance_menu() {
   $items = array();
 
   $items['admin/settings/performance_logging'] = array(
-    'title'            => 'Performance Logging',
+    'title'            => 'Performance logging',
     'description'      => 'Logs performance data: page generation times and memory usage.',
     'page callback'    => 'drupal_get_form',
     'page arguments'   => array('performance_settings'),
@@ -47,11 +47,11 @@ function performance_settings() {
     1 => t('Enabled'),
   );
 
-  if (function_exists('apc_store')) {
-    drupal_set_message(t('APC is enabled. It is reasonably safe to enable summary logging on live sites.'));
+  if (function_exists('apc_cache_info')) {
+    drupal_set_message(t('APC is enabled. It is reasonably safe to enable summary logging on live sites.'), 'status', FALSE);
   }
   else {
-    drupal_set_message(t('APC is not enabled. It is <strong>not</strong> safe to enable summary logging to the database on live sites.'), 'error');
+    drupal_set_message(t('APC is not enabled. It is <strong>not</strong> safe to enable summary logging to the database on live sites.'), 'error', FALSE);
   }
 
   $form['mode'] = array(
@@ -77,7 +77,7 @@ function performance_settings() {
   );
 
   $disabled = TRUE;
-  if (function_exists('apc_store')) {
+  if (function_exists('apc_cache_info')) {
     $disabled = FALSE;
   }
 
@@ -94,17 +94,6 @@ function performance_settings() {
     '#type'  => 'fieldset',
     '#title' => t('Other'),
     '#collapsible' => TRUE,
-  );
-
-  $form['other']['performance_titles'] = array(
-    '#type'          => 'select',
-    '#title'         => t('Show titles instead of URLs'),
-    '#default_value' => variable_get('performance_titles', 0),
-    '#options'       => array(
-      0 => t('URLs only'),
-      1 => t('URLs and Titles as hyperlinks'),
-    ),
-    '#description'   => t('In the reports, show path titles hyperlinked to the URLs, or just the path URLs.'),
   );
 
   $form['other']['dev_query'] = array(
@@ -127,27 +116,25 @@ function performance_settings() {
   return system_settings_form($form);
 }
 
-function performance_init() {
-  if (!variable_get('cache', 0)) {
-    // When page caching is off, we don't hook_exit(), instead
-    // we register a function that runs as late as possible.
-    register_shutdown_function('performance_shutdown');
-  }
-}
-
-function performance_exit() {
-  if (variable_get('cache', 0)) {
-    // Page caching is on, so we run the shutdown function directly
-    performance_shutdown();
-  }
+function performance_boot() {
+  register_shutdown_function('performance_shutdown');
 }
 
 function performance_shutdown() {
   global $queries;
 
+  if ($_GET['q']) {
+    // q= has a value, use that for the path
+    $path = $_GET['q'];
+  }
+  else {
+    // q= is empty, use whatever the site_frontpage is set to
+    $path = variable_get('site_frontpage', 'node');
+  }
+
   $params = array(
     'timer' => timer_read('page'),
-    'path'  => $_GET['q'],
+     'path'  => $path,
   );
 
   // Memory
@@ -183,7 +170,7 @@ function performance_shutdown() {
   }
 
   if (variable_get('performance_summary_apc', 0)) {
-    if (function_exists('apc_store')) {
+    if (function_exists('apc_cache_info')) {
       performance_log_summary_apc($params);
     }
   }
@@ -204,12 +191,10 @@ function performance_log_summary_apc($params = array()) {
       'query_count_max' => max($params['query_count'], $data['query_count_max']),
       'query_count_avg' => ($data['query_count_avg'] + $params['query_count']) / 2,
       'num_accesses'    => $data['num_accesses'] + 1,
-      'title'           => $data['title'],
     );
   }
   else {
     $data = array(
-      'title'           => strip_tags(drupal_get_title()),
       'path'            => $params['path'],
       'bytes_max'       => $params['mem'], 
       'bytes_avg'       => $params['mem'],
@@ -255,12 +240,11 @@ function performance_log_summary_db($params = array()) {
   else {
     // First time we log this path, write fresh values
     db_query("INSERT INTO {performance_summary}
-      (title, path, last_access, num_accesses,
+      (path, last_access, num_accesses,
       bytes_max, bytes_avg, millisecs_max, millisecs_avg,
       query_count_max, query_count_avg, query_timer_max, query_timer_avg)
       VALUES 
-      ('%s', '%s', %d, %d, %d, %d, %d, %d, %d, %d, %d, %d)",
-      strip_tags(drupal_get_title()),
+      ('%s', %d, %d, %d, %d, %d, %d, %d, %d, %d, %d)",
       $params['path'],
       time(),
       1,
@@ -279,8 +263,7 @@ function performance_log_summary_db($params = array()) {
 function performance_log_details($params = array()) {
   global $user;
   $anon = ($user->uid) ? FALSE : TRUE;
-  db_query("INSERT INTO {performance_detail} (title, path, anon, bytes, millisecs, timestamp, query_timer, query_count) VALUES ('%s', '%s', %d, %d, %d, %d, %d, %d)",
-    strip_tags(drupal_get_title()),
+  db_query("INSERT INTO {performance_detail} (path, anon, bytes, millisecs, timestamp, query_timer, query_count) VALUES ('%s', %d, %d, %d, %d, %d, %d)",
     $params['path'],
     $anon,
     $params['mem'],
@@ -345,7 +328,7 @@ function performance_view_summary() {
     // Get the data form the database table
     $sql = "SELECT * FROM {performance_summary}";
     $tablesort = tablesort_sql($header);
-    $result = pager_query($sql . $tablesort, 5000);
+    $result = pager_query($sql . $tablesort, 50);
     while($row = db_fetch_array($result)) {
       $data_list[] = $row;
     }
@@ -365,7 +348,7 @@ function performance_view_summary() {
 
     if ($data['num_accesses'] > $threshold) {
       $shown++;
-      $row_data[] = performance_url($data['path'], $data['title']);
+      $row_data[] = $data['path'];
       $row_data[] = format_date($data['last_access'], 'small');
       $row_data[] = $data['num_accesses'];
       $row_data[] = number_format($data['bytes_max']/1024/1024, 2);
@@ -445,7 +428,7 @@ function performance_view_details() {
 
     $row_data[] = $data['pid'];
     $row_data[] = format_date($data['timestamp'], 'small');
-    $row_data[] = performance_url($data['path'], $data['title']);
+    $row_data[] = $data['path'];
     $row_data[] = number_format($data['bytes']/1024/1024, 2);
     $row_data[] = $data['millisecs'];
     $row_data[] = ($data['anon']) ? t('Yes') : t('No');
@@ -469,18 +452,25 @@ function performance_view_details() {
 }
 
 function performance_cron() {
-  performance_cron_apc_prune();
+  // One day ago ...
+  $timestamp = time() - 24*60*60;
+
+  performance_cron_db_prune($timestamp);
+  performance_cron_apc_prune($timestamp);
 }
 
-function performance_cron_apc_prune() {
-  // Remove entries from apc cache that has less than so many accesses
-  // to prevent clutter
-  $threshold = variable_get('performance_threshold_accesses', 0);
-  if (!$threshold) {
-    // Threshold not set
+function performance_cron_db_prune($timestamp = 0) {
+  // Remove rows which have not been accessed since a certain timestamp
+  db_query("DELETE FROM {performance_summary} WHERE last_access <= %d", $timestamp);
+}
+
+function performance_cron_apc_prune($timestamp = 0) {
+  if (!function_exists('apc_cache_info')) {
+    // APC not enabled, nothing to do ...
     return;
   }
 
+  // Get all entries in APC's user cache
   $list = performance_apc_list_all();
   if (!count($list)) {
     // Nothing stored yet
@@ -489,7 +479,7 @@ function performance_cron_apc_prune() {
 
   foreach($list as $key) {
     if ($data = apc_fetch($key)) {
-      if ($data['num_accesses'] <= $threshold) {
+      if ($data['last_access'] <= $timestamp) {
         apc_delete($key);
       }
     }
@@ -510,6 +500,12 @@ function performance_clear_apc_confirm() {
 }
 
 function performance_clear_apc_confirm_submit($form_id, &$form) {
+  if (!function_exists('apc_cache_info')) {
+    drupal_set_message(t('APC is not enabled. Nothing to do ...'), 'status', FALSE);
+    drupal_goto('admin/settings/performance');
+    return;
+  }
+
   $list = performance_apc_list_all();
   if (!count($list)) {
     // Nothing stored yet
@@ -522,18 +518,136 @@ function performance_clear_apc_confirm_submit($form_id, &$form) {
     }
   }
 
-  drupal_set_message(t('Performance statistics collected in APC has been cleared.'));
+  drupal_set_message(t('Performance statistics collected in APC has been cleared.'), 'status', FALSE);
   drupal_goto('admin/settings/performance');
 }
 
-function performance_url($path = '', $title = '') {
-  if (variable_get('performance_titles', 0)) {
-    // Show titles
-    $ret = ($title) ? l($title, $path) : l($path, $path);
-    return $ret;
+/**
+ * Implementation of hook_nagios_info()
+ */
+function performance_nagios_info() {
+  return array(
+    'name'   => 'Performance logging',
+    'id'     => 'PERF',
+  );
+}
+
+/**
+ * Implementation of hook_nagios()
+ */
+function performance_nagios() {
+  $info = performance_nagios_info();
+  $id = $info['id']; 
+
+  // Find out if we have what we need enabled
+  $sum = array();
+
+  $sum[] = variable_get('performance_summary_db', 0);
+  $sum[] = variable_get('performance_summary_apc', 0);
+  $go = array_sum($sum);
+
+  if (!$go) {
+    return array(
+      $id => array(
+        'status' => NAGIOS_STATUS_UNKNOWN,
+        'text'   => t('Performance logging is not enabled'),
+      ),
+    );
+  }
+
+  // Initialize variables
+  $total_rows = $total_bytes = $total_millisecs = $total_accesses = $total_query_time = $total_query_count = 0;
+
+  // Check which data store to use
+  if (variable_get('performance_summary_apc', 0) && function_exists('apc_cache_info')) {
+    // Get the data from the APC cache
+    foreach(performance_apc_list_all() as $key) {
+      $data_list[] = apc_fetch($key);
+    }
   }
   else {
-    // Show URLs only
-    return $path;
+    // Get the data form the database table for URLs that have been accessed in the last 15 minutes
+    $result = db_query("SELECT * FROM {performance_summary} WHERE last_access >= %d", time() - 15*60);
+    while($row = db_fetch_array($result)) {
+      $data_list[] = $row;
+    }
   }
+
+  foreach($data_list as $data) {
+    $total_rows++;
+
+    // Calculate running averages
+    $total_bytes       += $data['bytes_avg'];
+    $total_millisecs   += $data['millisecs_avg'];
+    $total_accesses    += $data['num_accesses'];
+    $total_query_time  += $data['query_timer_avg'];
+    $total_query_count += $data['query_count_avg'];
+  }
+
+  // Protect against divide by zero
+  if ($total_rows > 0) {
+    $ms_avg      = number_format($total_millisecs   / $total_rows, 1, '.', '');
+    $ms_query    = number_format($total_query_time  / $total_rows, 1, '.', '');
+    $query_count = number_format($total_query_count / $total_rows, 2, '.', '');
+    $mb_avg      = number_format($total_bytes       / $total_rows/1024/1024, 1);
+  }
+  else {
+    $ms_avg = '-';
+    $ms_query = '-';
+    $mb_avg = '-';
+    $query_count = '-';
+  }
+
+  $status = NAGIOS_STATUS_OK;
+  $mb_thresh = variable_get('performance_nagios_mb', 8);
+  $ms_thresh = variable_get('performance_nagios_ms', 500);
+  $query_count_thresh = variable_get('performance_nagios_qc', 400);
+  // Check if any of the following conditions is met:
+  //
+  // - page execution average milliseconds is greater than threshold
+  // - page memory usage average megabytes is greater than threshold
+  // - query count average is greater than threshold
+  // - query time is more than half the total page execution time
+  if ($ms_avg      > $ms_thresh ||
+      $mb_avg      > $mb_thresh ||
+      $query_count > $query_count_thresh ||
+      $ms_query    > ($ms_avg/2)) {
+    // Raise a critical alert
+    $status = NAGIOS_STATUS_CRITICAL;
+  }
+
+  return array(
+    $id => array(
+      'status' => $status,
+      'text'   => $total_accesses . '/' .  $ms_avg . 'ms/' . $mb_avg . 'MB/' . $query_count . '/' .  $ms_query . 'ms',
+    ),
+  );
 }
+
+/**
+ * Implementation of hook_nagios_settings()
+ */
+function performance_nagios_settings() {
+  $form['performance_nagios_ms'] = array(
+    '#type'          => 'textfield',
+    '#title'         => t('Critical page generation time (milliseconds)'),
+    '#default_value' => variable_get('performance_nagios_ms', 500),
+    '#description'   => t('Number of milliseconds (average) considered critical.')
+  );
+
+  $form['performance_nagios_qc'] = array(
+    '#type'          => 'textfield',
+    '#title'         => t('Critical number of queries'),
+    '#default_value' => variable_get('performance_nagios_qc', 400),
+    '#description'   => t('Number of queries per page load that is considered critical.')
+  );
+
+  $form['performance_nagios_mb'] = array(
+    '#type'          => 'textfield',
+    '#title'         => t('Critical memory (MB)'),
+    '#default_value' => variable_get('performance_nagios_mb', 8),
+    '#description'   => t('Number of megabytes (average) considered critical.')
+  );
+  return $form;
+}
+

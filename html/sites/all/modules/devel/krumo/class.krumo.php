@@ -10,7 +10,7 @@
 * @license http://opensource.org/licenses/lgpl-license.php GNU Lesser General Public License Version 2.1
 *
 * @package Krumo
-* @version $Id: class.krumo.php,v 1.1.2.3 2008/06/11 18:58:25 weitzman Exp $
+* @version $Id: class.krumo.php,v 1.1.2.4 2009/02/11 04:01:01 weitzman Exp $
 */
 
 //////////////////////////////////////////////////////////////////////////////
@@ -577,7 +577,7 @@ This is a list of all the values from the <code><b><?php echo realpath($ini_file
 		// the content
 		//
 		?>
-<div class="krumo-root">
+<div class="krumo-root" dir="ltr">
 	<ul class="krumo-node krumo-first">
 		<?php echo krumo::_dump($data);?>
 		<li class="krumo-footnote">

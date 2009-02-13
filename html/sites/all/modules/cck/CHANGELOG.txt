@@ -1,4 +1,4 @@
-//$Id: CHANGELOG.txt,v 1.1.6.297 2009/01/26 14:45:34 yched Exp $
+//$Id: CHANGELOG.txt,v 1.1.6.300 2009/02/09 23:00:08 yched Exp $
 
 CCK 6.x-2.x
 ===========
@@ -32,6 +32,9 @@ should be enough, though.
 - #349987 by Michelle - Panels integration for fieldgroups.
 - #362216 by markus_petrux - sort the admin/content/types/fields overview by field name.
 - #363456 by dww - Fix some cases of bogus d-n-d reordering of 'pseudo-fields'.
+- #366935 by drewish - Make the 'Views mode' feature in noderef / ueserref visible even if no usable View exists yet.
+- #371306 fix duplicate HTML when using the JS-'add more' button.
+- #370004 by dopry - Fix JS-'add more' button breaking fielfield's AHAH upload.
 
 CCK 6.x-2.1
 ===========

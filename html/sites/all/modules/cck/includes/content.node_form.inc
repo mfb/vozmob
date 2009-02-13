@@ -1,5 +1,5 @@
 <?php
-// $Id: content.node_form.inc,v 1.7.2.15 2008/12/27 22:22:56 yched Exp $
+// $Id: content.node_form.inc,v 1.7.2.18 2009/02/10 22:53:04 yched Exp $
 
 /**
  * @file
@@ -239,10 +239,10 @@ function content_multiple_value_form(&$form, &$form_state, $field, $items) {
     );
 
     // Add wrappers for the fields and 'more' button.
-    // TODO: could be simplified ?
-    $form_element['#prefix'] = '<div class="clear-block" id="'. $field_name_css .'-add-more-wrapper"><div id="'. $field_name_css .'-items">';
-    $form_element[$field_name .'_add_more']['#prefix'] = '<div class="content-add-more">';
-    $form_element[$field_name .'_add_more']['#suffix'] =  '</div></div></div>';
+    $form_element['#prefix'] = '<div id="'. $field_name_css .'-items">';
+    $form_element['#suffix'] = '</div>';
+    $form_element[$field_name .'_add_more']['#prefix'] = '<div class="content-add-more clear-block">';
+    $form_element[$field_name .'_add_more']['#suffix'] =  '</div>';
   }
   return $form_element;
 }
@@ -351,6 +351,8 @@ function content_add_more_js($type_name_url, $field_name) {
   // We add a div around the new content to receive the ahah effect.
   $field_form[$delta]['#prefix'] = '<div class="ahah-new-content">'. (isset($field_form[$delta]['#prefix']) ? $field_form[$delta]['#prefix'] : '');
   $field_form[$delta]['#suffix'] = (isset($field_form[$delta]['#suffix']) ? $field_form[$delta]['#suffix'] : '') .'</div>';
+  // Prevent duplicate wrapper.
+  unset($field_form['#prefix'], $field_form['#suffix']);
 
   // If a newly inserted widget contains AHAH behaviors, they normally won't
   // work because AHAH doesn't know about those - it just attaches to the exact
@@ -361,6 +363,11 @@ function content_add_more_js($type_name_url, $field_name) {
   $output_js = isset($javascript['setting']) ? '<script type="text/javascript">jQuery.extend(Drupal.settings, '. drupal_to_js(call_user_func_array('array_merge_recursive', $javascript['setting'])) .');</script>' : '';
 
   $output = theme('status_messages') . drupal_render($field_form) . $output_js;
-  drupal_json(array('status' => TRUE, 'data' => $output));
+
+  // Using drupal_json() breaks filefield's file upload, because the jQuery
+  // Form plugin handles file uploads in a way that is not compatible with
+  // 'text/javascript' response type.
+  $_GLOBALS['devel_shutdown'] =  FALSE;
+  print drupal_to_js(array('status' => TRUE, 'data' => $output));
   exit;
 }

@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_filter_in_operator.inc,v 1.5 2009/01/27 21:08:15 merlinofchaos Exp $
+// $Id: views_handler_filter_in_operator.inc,v 1.6 2009/01/31 19:38:59 merlinofchaos Exp $
 /**
  * Simple filter to handle matching of multiple options selectable via checkboxes
  *
@@ -145,8 +145,8 @@ class views_handler_filter_in_operator extends views_handler_filter {
     }
 
     // If this is single and optional, this says that yes this filter will
-    // participate, but using the default settings.
-    if (!empty($this->options['expose']['single']) && !empty($this->options['expose']['optional'])) {
+    // participate, but using the default settings, *if* 'limit is true.
+    if (!empty($this->options['expose']['single']) && !empty($this->options['expose']['optional']) && !empty($this->options['expose']['limit'])) {
       $identifier = $this->options['expose']['identifier'];
       if ($input[$identifier] == 'All') {
         return TRUE;

@@ -1,5 +1,5 @@
 <?php
-// $Id: imagecache_actions.inc,v 1.18 2009/01/06 01:29:46 drewish Exp $
+// $Id: imagecache_actions.inc,v 1.19 2009/02/06 11:41:27 drewish Exp $
 
 /**
  * ImageCache Scale

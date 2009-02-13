@@ -1,5 +1,5 @@
 <?php
-// $Id: view.inc,v 1.149 2009/01/30 00:01:41 merlinofchaos Exp $
+// $Id: view.inc,v 1.150 2009/01/31 19:48:31 merlinofchaos Exp $
 /**
  * @file view.inc
  * Provides the view object type and associated methods.
@@ -862,6 +862,7 @@ class view extends views_db_object {
   function pre_execute($args = array()) {
     $this->old_view[] = views_get_current_view();
     views_set_current_view($this);
+    $display_id = $this->current_display;
 
     // Let modules modify the view just prior to executing it.
     foreach (module_implements('views_pre_view') as $module) {

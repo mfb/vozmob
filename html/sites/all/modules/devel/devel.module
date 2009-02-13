@@ -1,5 +1,5 @@
 <?php
-// $Id: devel.module,v 1.258.2.45 2009/01/20 04:28:27 weitzman Exp $
+// $Id: devel.module,v 1.258.2.47 2009/02/11 04:11:46 weitzman Exp $
 
 // This module holds functions useful for Drupal development.
 // Please contribute!
@@ -356,6 +356,15 @@ function devel_init() {
       }
     }
   }
+  if (variable_get('devel_rebuild_theme_registry', FALSE)) {
+    drupal_rebuild_theme_registry();
+    if (flood_is_allowed('devel_rebuild_registry_warning', 1)) {
+      flood_register_event('devel_rebuild_registry_warning');
+      if (!devel_silent() && user_access('access devel information')) {
+        drupal_set_message(t('The theme registry is being rebuilt on every request. Remember to <a href="!url">turn off</a> this feature on production websites.', array("!url" => url('admin/settings/devel'))));
+      }
+    }
+  }
 }
 
 // return boolean. no need for cache here.
@@ -671,7 +680,7 @@ function devel_verify_cli() {
   if (php_sapi_name() == 'cgi') {
     return (is_numeric($_SERVER['argc']) && $_SERVER['argc'] > 0);
   }
-  
+
   return (php_sapi_name() == 'cli');
 }
 
@@ -778,12 +787,7 @@ function devel_store_queries() {
         $qids[$hash] = db_result(devel_db_query("SELECT qid FROM {devel_queries} WHERE hash = '%s'", $hash));
         if (!$qids[$hash]) {
           devel_db_query("INSERT INTO {devel_queries} (query, function, hash) VALUES ('%s', '%s', '%s')", $query, $function, $hash);
-          if($db_type=='pgsql') {
-            $qids[$hash] = db_result(db_query("SELECT lastval();"));
-          }
-          else {
-            $qids[$hash] = db_last_insert_id();
-          }
+          db_last_insert_id('devel_queries', 'qid');
         }
       }
       $fields[] = "(%d, '%f')";
@@ -996,6 +1000,13 @@ function devel_admin_settings() {
     '#title' => t('SMTP library'),
     '#options' => $smtp_options,
     '#default_value' => variable_get('smtp_library', ''),
+  );
+
+  $form['devel_rebuild_theme_registry'] = array(
+   '#type' => 'checkbox',
+   '#title' => t('Rebuild the theme registry on every page load'),
+   '#description' => t('While creating new templates and theme_ overrides the theme registry needs to be rebuilt.'),
+   '#default_value' => variable_get('devel_rebuild_theme_registry', FALSE),
   );
 
   return system_settings_form($form);

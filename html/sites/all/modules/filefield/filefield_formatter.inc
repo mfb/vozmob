@@ -1,5 +1,5 @@
 <?php
-// $Id: filefield_formatter.inc,v 1.5 2008/07/31 05:25:11 dopry Exp $
+// $Id: filefield_formatter.inc,v 1.7 2009/02/04 02:18:27 dopry Exp $
 /**
  * @file
  * FileField: Defines a CCK file field type.
@@ -61,6 +61,11 @@ function filefield_file_listed($file, $field) {
 function theme_filefield_file($file) {
   $path = $file['filepath'];
   $url = file_create_url($path);
-  $icon = theme('filefield_icon', $file);
-  return '<div class="filefield-file clear-block">'. $icon . l($file['filename'], $url) .'</div>';
+  $icon = theme('filefield_icon', $file); // . '<pre>' .  print_r($file,1) . '</pre>';
+  // set options as per anchor format described on http://microformats.org/wiki/file-format-examples
+  // until I move to the more complex microformat described 
+  // @ http://darrelopry.com/story/microformats-and-media-rfc-if-you-js-or-css
+  $options = array('attributes' => array('type' => $file['filemime'], 'length' => $file['filesize']));
+  $options['attributes']['title'] =  (isset($file['data']['description'])) ? $file['data']['description'] : $file['filename'];
+  return '<div class="filefield-file clear-block">'. $icon . l($file['filename'], $url, $options) .'</div>';
 }

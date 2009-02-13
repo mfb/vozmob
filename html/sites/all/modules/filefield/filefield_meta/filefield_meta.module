@@ -1,5 +1,5 @@
 <?php
-// $Id: filefield_meta.module,v 1.7 2009/01/13 04:17:46 drewish Exp $
+// $Id: filefield_meta.module,v 1.10 2009/02/05 19:53:16 dopry Exp $
 /**
  * @file
  * FileField Meta: Add Video Support to File Field.
@@ -13,8 +13,25 @@ function filefield_meta_theme() {
     'filefield_meta_duration' => array(
       'arguments' => array('duration' => NULL),
     ),
+    'filefield_meta_samplerate' => array(
+      'arguments' => array('samplerate' => NULL),
+    ),
+    'filefield_meta_bitrate' => array(
+      'arguments' => array('bitrate' => NULL),
+    ),
   );
 }
+
+/**
+ * Implementation of hook_cron(). 
+ */
+function filefield_meta_cron() {
+  $result = db_query('SELECT fm.fid FROM {filefield_meta} fm LEFT JOIN {files} f ON fm.fid=f.fid WHERE f.fid IS NULL');
+  while ($file = db_fetch_object($result)) {
+    db_query('DELETE FROM {filefield_meta} WHERE fid = %d', $file->fid);
+  }
+}
+
 
 /**
  * Implementation of filefield's hook_file_insert().
@@ -45,6 +62,7 @@ function filefield_meta_file_delete($file) {
  */
 function filefield_meta(&$file) {
   $info = getid3_analyze($file->filepath);
+
   $file->data['width'] = $file->data['height'] = $file->data['duration'] = 0;
   if (isset($info['video']['resolution_x'])) {
     $file->data['width'] = $info['video']['resolution_x'];
@@ -56,7 +74,22 @@ function filefield_meta(&$file) {
       $file->data['height'] = max($file->data['height'], $stream['resolution_y']);
     }
   }
-  $file->data['duration'] = $info['playtime_seconds'];
+
+  if (isset($info['playtime_seconds']))  {
+    $file->data['duration'] = $info['playtime_seconds'];
+  }
+
+  // initialize fields. 
+  $file->data['audio_format'] = $file->data['audio_channel_mode'] = $file->data['audio_bitrate_mode'] = '';
+  $file->data['audio_sample_rate'] = $file->data['audio_bitrate'] = 0;
+ 
+  if (isset($info['audio']))  { 
+    $file->data['audio_format'] = $info['audio']['dataformat']; //e.g. mp3
+    $file->data['audio_sample_rate'] = $info['audio']['sample_rate']; //e.g. 44100
+    $file->data['audio_channel_mode'] = $info['audio']['channelmode']; // e.g. mono
+    $file->data['audio_bitrate'] = $info['audio']['bitrate']; //e.g. 64000
+    $file->data['audio_bitrate_mode'] = $info['audio']['bitrate_mode']; //e.g. cbr
+  }
 };
 
 /**
@@ -72,4 +105,19 @@ function theme_filefield_meta_duration($duration) {
       $minutes++;
   }
   return intval($minutes).':'.str_pad($seconds, 2, 0, STR_PAD_LEFT);
+}
+
+
+/**
+ * Formats audio sample rate.
+ */
+function theme_filefield_meta_samplerate($samplerate) {
+  return sprintf("%.1f kHz", $samplerate/1000);
+}
+ 
+/**
+ * Formats audio bit rate.
+ */
+function theme_filefield_meta_bitrate($bitrate) {
+  return sprintf("%d Kbps", $bitrate/1000);
 }

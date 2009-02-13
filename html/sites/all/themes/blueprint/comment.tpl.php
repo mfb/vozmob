@@ -1,5 +1,4 @@
 <div class="clear-block comment<?php print ($comment->new) ? ' comment-new' : ''; print(isset($comment->status) && $comment->status == COMMENT_NOT_PUBLISHED) ? ' comment-unpublished' : ''; if (isset($author_comment)) print ' author'; print ' '. $zebra; ?>">
-
   <div class="picture span-3">
     <?php print $picture ?>
   </div>

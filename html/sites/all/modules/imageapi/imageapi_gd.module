@@ -1,4 +1,4 @@
-<?php // $Id: imageapi_gd.module,v 1.13.2.1 2009/01/07 01:37:31 drewish Exp $
+<?php // $Id: imageapi_gd.module,v 1.13.2.2 2009/02/06 09:27:48 drewish Exp $
 
 /**
  * @file

@@ -1,4 +1,4 @@
-<?php // $Id: page.tpl.php,v 1.15.4.5 2008/12/09 05:11:31 designerbrent Exp $ ?>
+<?php // $Id: page.tpl.php,v 1.15.4.7 2008/12/23 03:40:02 designerbrent Exp $ ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
 	"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 

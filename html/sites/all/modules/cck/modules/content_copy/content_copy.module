@@ -1,5 +1,5 @@
 <?php
-// $Id: content_copy.module,v 1.27.2.19 2008/11/07 14:37:50 yched Exp $
+// $Id: content_copy.module,v 1.27.2.20 2009/01/30 20:13:49 yched Exp $
 
 /**
  *  @file
@@ -303,7 +303,7 @@ function content_copy_import_form(&$form_state, $type_name = '') {
   $form['#prefix'] = t('This form will import field definitions exported from another content type or another database.<br/>Note that fields cannot be duplicated within the same content type, so imported fields will be added only if they do not already exist in the selected type.');
   $form['type_name'] = array(
     '#type' => 'select',
-    '#options' => array('<create>' => t('<Create>')) + node_get_types('names'),
+    '#options' => array('<create>' => t('<Create>')) + content_copy_types(),
     '#default_value' => $type_name,
     '#title' => t('Content type'),
     '#description' => t('Select the content type to import these fields into.<br/>Select &lt;Create&gt; to create a new content type to contain the fields.'),

@@ -1,5 +1,5 @@
 <?php
-// $Id: imagecache_ui.module,v 1.24 2009/01/06 03:29:50 drewish Exp $
+// $Id: imagecache_ui.module,v 1.26 2009/02/07 19:36:29 drewish Exp $
 
 /**
  * Administrative interface to imagecache.
@@ -156,7 +156,7 @@ function imagecache_ui_preset_add_form($form_state) {
     '#title' => t('Preset Namespace'),
     '#default_value' => '',
     '#description' => t('The namespace is used in URLs for images to tell imagecache how to process an image. Please only use alphanumeric characters, underscores (_), and hyphens (-) for preset names.'),
-    '#validate' => array('imagecache_element_presetname_validate' => array()),
+    '#required' => TRUE,
   );
   $form['submit'] = array(
     '#type' => 'submit',
@@ -172,16 +172,19 @@ function  imagecache_ui_preset_add_form_submit($form, &$form_state) {
   $form_state['redirect'] = 'admin/build/imagecache/'. $preset['presetid'];
 }
 
-function imagecache_element_presetname_validate($element) {
+function imagecache_ui_preset_add_form_validate($form, &$form_state) {
+  $values = $form_state['values'];
   // Check for duplicates
-  $presets = imagecache_presets();
-  if (in_array($element['#value'], $presets)) {
-    form_set_error($element['#name'], t('The namespace you have chosen is already in use.'));
+  foreach(imagecache_presets() as $preset) {
+    if (in_array($values['presetname'], $preset)) {
+      form_set_error('presetname', t('The namespace you have chosen is already in use.'));
+      break;
+    }
   }
 
   // Check for illegal characters in preset names
-  if (preg_match('/[^0-9a-zA-Z_\-]/', $element['#value'])) {
-    form_set_error($element['#name'], t('Please only use alphanumeric characters, underscores (_), and hyphens (-) for preset names.'));
+  if (preg_match('/[^0-9a-zA-Z_\-]/', $values['presetname'])) {
+    form_set_error('presetname', t('Please only use alphanumeric characters, underscores (_), and hyphens (-) for preset names.'));
   }
 }
 
@@ -249,12 +252,8 @@ function imagecache_ui_preset_form($form_state, $preset = array()) {
 
   $form = array();
   $form['presetname'] = array(
-    '#type' => 'textfield',
-    '#size' => '64',
-    '#title' => t('Preset Namespace'),
-    '#default_value' => $preset['presetname'],
-    '#description' => t('The namespace is used in URL\'s for images to tell imagecache how to process an image. Please only use alphanumeric characters, underscores (_), and hyphens (-) for preset names.'),
-    '#validate' => array('imagecache_element_presetname_validate' => array()),
+    '#type' => 'value',
+    '#value' => $preset['presetname'],
   );
   $form['presetid'] = array(
     '#type' => 'value',

@@ -97,6 +97,10 @@ Views 2.3
     o #360637: Extra slash in theme includes could cause some systems to fail.
     o #363081: Disabled views could still provide blocks.
     o #366666 by Deadmonk also yched: File size field should not try to print a size on NULL values.
+    o #367203: Improper caching of default views caused incomplete handlers that could WSOD.
+    o #365283: views_handler_filter_ncs_last_updated improperly registered causing fatal errors trying to use it.
+    o #365712: select list exposed filters were trying to limit to list when selecting "All" even when "limit" was not selected.
+    o #357196 by Grugnog: hook_views_pre_view not getting $display_id sent properly.
 
   Other changes:
     o #288801 by drewish and eaton: Aggregator item support! Make views of feeds!
@@ -107,3 +111,17 @@ Views 2.3
     o #354736 by Shai: Clarification on exposed filter text.
     o #364637 by moshe and dww: Allow preprocessors to add row classes to table style.
     o #349178 by agentrickard: Add generic link handling plus a custom text field. Also automatic trimming.
+    o #368234 by dww and neclimdul: Allow the "Anonymous" user to have a different (or no) name in User: name field.
+    o #368754 by dww: User ID validator, with role testing.
+    o #369505 by dww: Add helper function to get the value of a view argument.
+    o #353002 by neclimdul: Provide a filter for user posted or commented on to complement the argument with the same functionality.
+
+  2.3 API Notes:
+    A minor change in the API now requires that styles that render fields MUST 
+    render them in order, first by row and then by field ID. Not doing so will
+    cause the token expansion to fail.
+
+Views 2.4
+  Bugs fixed:
+    o #371466 by dereine: Fix incorrect link to comments.
+    o #371923 by noahb: Summaries could be distinct even when they should not be.
