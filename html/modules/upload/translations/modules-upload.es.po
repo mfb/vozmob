@@ -1,19 +1,19 @@
-# Spanish translation of drupal (6.0)
-# Copyright (c) 2008 by the Spanish translation team
+# Spanish translation of drupal (6.9)
+# Copyright (c) 2009 by the Spanish translation team
 # Generated from files:
 #  upload.admin.inc,v 1.7 2008/01/10 20:22:57 goba
-#  upload.module,v 1.197.2.1 2008/02/11 15:08:09 goba
-#  upload.install,v 1.6.2.1 2008/02/08 18:01:14 goba
+#  upload.module,v 1.197.2.4 2009/01/12 15:30:23 goba
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: drupal (6.0)\n"
-"POT-Creation-Date: 2008-03-30 17:19+0200\n"
-"PO-Revision-Date: 2008-03-18 14:01+0100\n"
+"Project-Id-Version: drupal (6.9)\n"
+"POT-Creation-Date: 2009-01-31 16:23+0100\n"
+"PO-Revision-Date: 2008-10-17 05:53+0200\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
 
 #: modules/upload/upload.admin.inc:10
 msgid ""
@@ -30,7 +30,7 @@ msgstr ""
 
 #: modules/upload/upload.admin.inc:21,24,31
 msgid "default"
-msgstr "predefinido"
+msgstr "predeterminado"
 
 #: modules/upload/upload.admin.inc:31,49
 msgid ""
@@ -54,6 +54,10 @@ msgid ""
 "If an <a href=\"!image-toolkit-link\">image toolkit</a> is installed, files "
 "exceeding this value will be scaled down to fit."
 msgstr ""
+"El tamaño máximo permitido para las imágenes; por ejemplo: 640 × 480. Déjelo "
+"en 0 si no quiere limitarlo. Si tiene instalado algún juego de <a href=\"!"
+"image-toolkit-link\">herramientas de imagen</a>, las imágenes que excedan "
+"esas dimensiones se reducirán para ajustarse."
 
 #: modules/upload/upload.admin.inc:74
 msgid "WIDTHxHEIGHT"
@@ -65,23 +69,7 @@ msgstr "Mostrar los archivos de forma predefinida"
 
 #: modules/upload/upload.admin.inc:81
 msgid "Display attached files when viewing a post."
-msgstr ""
-
-#: modules/upload/upload.admin.inc:86
-msgid "Default permitted file extensions"
-msgstr "Extensiones de archivos permitidas predefinidas"
-
-#: modules/upload/upload.admin.inc:89
-msgid ""
-"Default extensions that users can upload. Separate extensions with a space "
-"and do not include the leading dot."
-msgstr ""
-"Las extensiones predefinidas que los usuarios pueden cargar. Las extensiones "
-"se deben separar con un espacio y no deben incluir el punto inicial."
-
-#: modules/upload/upload.admin.inc:93
-msgid "Default maximum file size per upload"
-msgstr "Tamaño máximo predefinido de archivo por carga"
+msgstr "Mostrar los archivos adjuntos al ver una entrada."
 
 #: modules/upload/upload.admin.inc:97
 msgid ""
@@ -89,42 +77,9 @@ msgid ""
 "a maximum resolution is set, the size will be checked after the file has "
 "been resized."
 msgstr ""
-
-#: modules/upload/upload.admin.inc:102
-msgid "Default total file size per user"
-msgstr "Tamaño total de archivos predefinido por usuario"
-
-#: modules/upload/upload.admin.inc:106
-msgid "The default maximum size of all files a user can have on the site."
-msgstr ""
-"El tamaño máximo predefinidos de todos los archivos que un usuario puede "
-"tener en el sitio."
-
-#: modules/upload/upload.admin.inc:17,110
-msgid "Your PHP settings limit the maximum file size per upload to %size."
-msgstr ""
-"Su configuración de PHP limita el tamaño máximo por subida de archivo a %"
-"size MB."
-
-#: modules/upload/upload.admin.inc:118
-msgid "Settings for @role"
-msgstr "Opciones para @role"
-
-#: modules/upload/upload.admin.inc:124
-msgid "Permitted file extensions"
-msgstr "Extensiones de archivos permitidas"
-
-#: modules/upload/upload.admin.inc:127
-msgid ""
-"Extensions that users in this role can upload. Separate extensions with a "
-"space and do not include the leading dot."
-msgstr ""
-"Las extensiones que los usuarios de este rol pueden cargar. Las extensiones "
-"se deben separar con un espacio y no deben incluir el punto inicial."
-
-#: modules/upload/upload.admin.inc:131
-msgid "Maximum file size per upload"
-msgstr "Tamaño máximo del archivo por carga"
+"El tamaño máximo de archivos que los usuarios pueden subir. Si se sube una "
+"imagen y se ha establecido una resolución máxima, se comprobará el tamaño "
+"después de redimensionar el archivo."
 
 #: modules/upload/upload.admin.inc:135
 msgid ""
@@ -132,14 +87,15 @@ msgid ""
 "maximum resolution is set, the size will be checked after the file has been "
 "resized."
 msgstr ""
-
-#: modules/upload/upload.admin.inc:140
-msgid "Total file size per user"
-msgstr "Tamaño total de archivos por usuario"
+"El tamaño máximo de un archivo que un usuario puede subir. Si se sube una "
+"imagen y se ha establecido un máximo de resolución, se comprobará el tamaño "
+"después de que el archivo se haya redimensionado."
 
 #: modules/upload/upload.admin.inc:144
 msgid "The maximum size of all files a user can have on the site."
 msgstr ""
+"El tamaño máximo de todos los archivos que un usuario puede tener en el "
+"sitio."
 
 #: modules/upload/upload.module:16
 msgid ""
@@ -148,6 +104,10 @@ msgid ""
 "It is also useful to administrators who want to keep uploaded files "
 "connected to posts."
 msgstr ""
+"El módulo de subidas permite a los usuarios subir documentos al sitio. La "
+"habilidad de subir archivos es importante para miembros de la comunidad que "
+"quieren compartir trabajos. También es útil para administradores que quieren "
+"mantener archivos subidos conectados a las entradas."
 
 #: modules/upload/upload.module:17
 msgid ""
@@ -167,6 +127,8 @@ msgid ""
 "For more information, see the online handbook entry for <a href=\"@upload"
 "\">Upload module</a>."
 msgstr ""
+"Para más información, consulte la entrada del manual sobre el <a href="
+"\"@upload\">Módulo de Subidas</a>."
 
 #: modules/upload/upload.module:21
 msgid ""
@@ -186,15 +148,15 @@ msgstr ""
 msgid "Read full article to view attachments."
 msgstr "Lea el artículo completo para ver los adjuntos."
 
-#: modules/upload/upload.module:212
+#: modules/upload/upload.module:213
 msgid "Attachments"
 msgstr "Adjuntos"
 
-#: modules/upload/upload.module:225
+#: modules/upload/upload.module:226
 msgid "File attachments"
 msgstr "Archivos adjuntos"
 
-#: modules/upload/upload.module:228
+#: modules/upload/upload.module:229
 msgid ""
 "Changes made to the attachments are not permanent until you save this post. "
 "The first \"listed\" file will be included in RSS feeds."
@@ -202,7 +164,7 @@ msgstr ""
 "Los cambios que se hacen a los adjuntos no son permanentes hasta que guarda "
 "el envío. El primer archivo de la lista se incluye en los orígenes RSS."
 
-#: modules/upload/upload.module:246
+#: modules/upload/upload.module:247
 msgid ""
 "File attachments are disabled. The file directories have not been properly "
 "configured."
@@ -210,7 +172,7 @@ msgstr ""
 "Los anexos de archivo están inactivados. Los directorios de archivos no han "
 "sido configurados apropiadamente."
 
-#: modules/upload/upload.module:248
+#: modules/upload/upload.module:249
 msgid ""
 "Please visit the <a href=\"@admin-file-system\">file system configuration "
 "page</a>."
@@ -218,45 +180,43 @@ msgstr ""
 "Puede visitar la <a href=\"@admin-file-system\">página de configuración del "
 "sistema de archivos</a>."
 
-#: modules/upload/upload.module:251
+#: modules/upload/upload.module:252
 msgid "Please contact the site administrator."
 msgstr "Puede ponerse en contacto con el administrador del sitio."
 
-#: modules/upload/upload.module:353
+#: modules/upload/upload.module:344
 msgid "Attachment"
 msgstr "Adjunto"
 
-#: modules/upload/upload.module:353,530
+#: modules/upload/upload.module:344,517
 msgid "Size"
 msgstr "Tamaño"
 
-#: modules/upload/upload.module:502
+#: modules/upload/upload.module:491
 msgid "Attach new file"
 msgstr "Adjuntar un archivo nuevo"
 
-#: modules/upload/upload.module:504
+#: modules/upload/upload.module:493
 msgid "Images are larger than %resolution will be resized. "
-msgstr ""
+msgstr "Imágenes más grandes que %resolution serán redimensionadas. "
 
-#: modules/upload/upload.module:504
+#: modules/upload/upload.module:493
 msgid ""
 "The maximum upload size is %filesize. Only files with the following "
 "extensions may be uploaded: %extensions. "
 msgstr ""
+"El tamaño máximo de subida es %filesize. Sólo se pueden subir archivos con "
+"las siguientes extensiones: %extensions. "
 
-#: modules/upload/upload.module:508
+#: modules/upload/upload.module:497
 msgid "Attach"
 msgstr "Adjuntar"
 
-#: modules/upload/upload.module:513
+#: modules/upload/upload.module:502
 msgid "Please wait..."
-msgstr ""
+msgstr "Espere, por favor..."
 
-#: modules/upload/upload.module:530
-msgid "List"
-msgstr "Lista"
-
-#: modules/upload/upload.module:65,318
+#: modules/upload/upload.module:65,309
 msgid "1 attachment"
 msgid_plural "@count attachments"
 msgstr[0] "1 adjunto"
@@ -264,7 +224,7 @@ msgstr[1] "@count adjuntos"
 
 #: modules/upload/upload.module:46
 msgid "upload files"
-msgstr "cargar archivos"
+msgstr "subir archivos"
 
 #: modules/upload/upload.module:46
 msgid "view uploaded files"
@@ -274,33 +234,13 @@ msgstr "ver archivos cargados"
 msgid "upload"
 msgstr "cargar"
 
-#: modules/upload/upload.install:29
-msgid "Stores uploaded file information and table associations."
-msgstr ""
+#: modules/upload/upload.module:86
+msgid "File uploads"
+msgstr "Descargas de archivos"
 
-#: modules/upload/upload.install:36
-msgid "Primary Key: The {files}.fid."
-msgstr ""
-
-#: modules/upload/upload.install:43
-msgid "The {node}.nid associated with the uploaded file."
-msgstr ""
-
-#: modules/upload/upload.install:50
-msgid "Primary Key: The {node}.vid associated with the uploaded file."
-msgstr ""
-
-#: modules/upload/upload.install:57
-msgid "Description of the uploaded file."
-msgstr ""
-
-#: modules/upload/upload.install:65
-msgid "Whether the file should be visibly listed on the node: yes(1) or no(0)."
-msgstr ""
-
-#: modules/upload/upload.install:72
-msgid "Weight of this upload in relation to other uploads in this node."
-msgstr ""
+#: modules/upload/upload.module:87
+msgid "Control how files may be attached to content."
+msgstr "Controla cómo se adjuntan los archivos al contenido."
 
 #: modules/upload/upload.admin.inc:18
 msgid ""
@@ -309,3 +249,8 @@ msgid ""
 "your Drupal site's settings.php file, or in the .htaccess file in your "
 "Drupal root directory."
 msgstr ""
+"Dependiendo del entorno de su servidor, estas opciones podrían cambiarse en "
+"el archivo php.ini de su sistema, en el archivo php.ini del directorio "
+"principal de su instalación de Drupal, en el archivo settings.php de su "
+"sitio Drupal o en el archivo .htaccess en el directorio principal de su "
+"instalación de Drupal."

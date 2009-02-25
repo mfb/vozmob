@@ -1,19 +1,19 @@
-# Spanish translation of drupal (6.0)
-# Copyright (c) 2008 by the Spanish translation team
+# Spanish translation of drupal (6.9)
+# Copyright (c) 2009 by the Spanish translation team
 # Generated from files:
 #  statistics.admin.inc,v 1.6 2008/01/08 10:35:42 goba
 #  statistics.module,v 1.272 2008/01/04 09:31:48 goba
-#  statistics.install,v 1.13 2007/12/18 12:59:22 dries
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: drupal (6.0)\n"
-"POT-Creation-Date: 2008-11-16 19:34+0100\n"
+"Project-Id-Version: drupal (6.9)\n"
+"POT-Creation-Date: 2009-01-31 16:23+0100\n"
 "PO-Revision-Date: 2008-09-24 05:12+0200\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
 
 #: modules/statistics/statistics.admin.inc:50,79,115
 msgid "Hits"
@@ -58,10 +58,6 @@ msgstr "Url"
 #: modules/statistics/statistics.admin.inc:117
 msgid "Last visit"
 msgstr "Última visita"
-
-#: modules/statistics/statistics.admin.inc:188
-msgid "Access log settings"
-msgstr "Opciones del registro de acceso"
 
 #: modules/statistics/statistics.admin.inc:191
 msgid "Enable access log"
@@ -339,42 +335,46 @@ msgstr "ver contador de accesos al envío"
 msgid "statistics"
 msgstr "estadísticas"
 
-#: modules/statistics/statistics.install:52
-msgid "Stores site access information for statistics."
-msgstr "Almacena información sobre los accesos al sitio para estadísticas."
+#: modules/statistics/statistics.module:97
+msgid "Recent hits"
+msgstr "Visitas recientes"
 
-#: modules/statistics/statistics.install:57
-msgid "Primary Key: Unique accesslog ID."
-msgstr "Clave primaria: ID única del registro de accesos."
+#: modules/statistics/statistics.module:98
+msgid "View pages that have recently been visited."
+msgstr "Ve las páginas que se han visitado recientemente."
 
-#: modules/statistics/statistics.install:64
-msgid "Browser session ID of user that visited page."
-msgstr "ID de la sesión del navegador del usuario que visitó la página."
+#: modules/statistics/statistics.module:104
+msgid "Top pages"
+msgstr "Páginas principales"
 
-#: modules/statistics/statistics.install:70
-msgid "Title of page visited."
-msgstr "Título de la página visitada."
+#: modules/statistics/statistics.module:105
+msgid "View pages that have been hit frequently."
+msgstr "Ve las páginas que se visitan con frecuencia."
 
-#: modules/statistics/statistics.install:76
-msgid "Internal path to page visited (relative to Drupal root.)"
-msgstr "Ruta interna a la página visitada (relativa a la raíz de Drupal.)"
+#: modules/statistics/statistics.module:112
+msgid "Top visitors"
+msgstr "Visitantes principales"
 
-#: modules/statistics/statistics.install:82
-msgid "Referrer URI."
-msgstr "URI del referente."
+#: modules/statistics/statistics.module:113
+msgid "View visitors that hit many pages."
+msgstr "Ver los visitantes que visitan muchas páginas."
 
-#: modules/statistics/statistics.install:88
-msgid "Hostname of user that visited the page."
-msgstr "Nombre del servidor del usuario que visitó la página"
+#: modules/statistics/statistics.module:120
+msgid "Top referrers"
+msgstr "Referentes principales"
 
-#: modules/statistics/statistics.install:95
-msgid "User {users}.uid that visited the page."
-msgstr "El {users}.uid del usuario que visitó la página."
+#: modules/statistics/statistics.module:121
+msgid "View top referrers."
+msgstr "Ve los referentes principales."
 
-#: modules/statistics/statistics.install:102
-msgid "Time in milliseconds that the page took to load."
-msgstr "Tiempo en milisegundos que tardó la página en cargarse."
+#: modules/statistics/statistics.module:128
+msgid "View access log."
+msgstr "Ve el registro de acceso."
 
-#: modules/statistics/statistics.install:109
-msgid "Timestamp of when the page was visited."
-msgstr "Marca de tiempo del momento en que la página fue visitada."
+#: modules/statistics/statistics.module:137
+msgid "Control details about what and how your site logs."
+msgstr "Controla los detalles de qué se registra y cómo se hace en el sitio."
+
+#: modules/statistics/statistics.module:146
+msgid "Track page visits"
+msgstr "Sigue las visitas a páginas"

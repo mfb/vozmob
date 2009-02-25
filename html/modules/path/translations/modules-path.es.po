@@ -1,18 +1,19 @@
-# Spanish translation of drupal (6.0)
-# Copyright (c) 2008 by the Spanish translation team
+# Spanish translation of drupal (6.9)
+# Copyright (c) 2009 by the Spanish translation team
 # Generated from files:
-#  path.admin.inc,v 1.7 2008/01/08 10:35:42 goba
-#  path.module,v 1.138 2008/02/03 19:20:35 goba
+#  path.admin.inc,v 1.7.2.1 2008/11/22 10:49:15 dries
+#  path.module,v 1.138.2.3 2008/11/22 10:49:15 dries
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: drupal (6.0)\n"
-"POT-Creation-Date: 2008-03-30 17:19+0200\n"
-"PO-Revision-Date: 2008-02-20 04:28+0100\n"
+"Project-Id-Version: drupal (6.9)\n"
+"POT-Creation-Date: 2009-01-31 16:23+0100\n"
+"PO-Revision-Date: 2008-09-17 18:36+0200\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
 
 #: modules/path/path.admin.inc:30
 msgid "Alias"
@@ -59,7 +60,7 @@ msgstr "Actualizar alias"
 
 #: modules/path/path.admin.inc:121
 msgid "Create new alias"
-msgstr "Crear alias nuevo"
+msgstr "Crear nuevo alias"
 
 #: modules/path/path.admin.inc:139
 msgid "The alias %alias is already in use in this language."
@@ -164,19 +165,19 @@ msgstr ""
 "Introduzca la ruta para la que desea crear un alias, seguida por el nombre "
 "del nuevo alias."
 
-#: modules/path/path.module:80
+#: modules/path/path.module:82
 msgid "The alias has been deleted."
 msgstr "Se ha eliminado el alias."
 
-#: modules/path/path.module:140
+#: modules/path/path.module:143
 msgid "The path is already in use."
 msgstr "La ruta ya está en uso."
 
-#: modules/path/path.module:182
+#: modules/path/path.module:186
 msgid "URL path settings"
 msgstr "Opciones de ruta URL"
 
-#: modules/path/path.module:194
+#: modules/path/path.module:198
 msgid ""
 "Optionally specify an alternative URL by which this node can be accessed. "
 "For example, type \"about\" when writing an about page. Use a relative path "
@@ -187,14 +188,34 @@ msgstr ""
 "sobre los autores.  Use una ruta relativa y no añada el carácter de barra al "
 "final, o no funcionará el alias del URL."
 
-#: modules/path/path.module:209
+#: modules/path/path.module:213
 msgid "create url aliases"
-msgstr "crear alias de url"
+msgstr "crear alias de URL"
 
-#: modules/path/path.module:209
+#: modules/path/path.module:213
 msgid "administer url aliases"
 msgstr "administrar alias de url"
 
 #: modules/path/path.module:0
 msgid "path"
 msgstr "ruta"
+
+#: modules/path/path.module:40
+msgid "URL aliases"
+msgstr "Alias de URL"
+
+#: modules/path/path.module:41
+msgid "Change your site's URL paths by aliasing them."
+msgstr "Cambia las rutas de URLs del sitio mediante alias."
+
+#: modules/path/path.module:47
+msgid "Edit alias"
+msgstr "Editar alias"
+
+#: modules/path/path.module:54
+msgid "Delete alias"
+msgstr "Eliminar alias"
+
+#: modules/path/path.module:67
+msgid "Add alias"
+msgstr "Añadir alias"

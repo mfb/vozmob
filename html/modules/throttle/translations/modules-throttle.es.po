@@ -1,18 +1,19 @@
-# Spanish translation of drupal (6.0)
-# Copyright (c) 2008 by the Spanish translation team
+# Spanish translation of drupal (6.9)
+# Copyright (c) 2009 by the Spanish translation team
 # Generated from files:
 #  throttle.admin.inc,v 1.2 2008/01/08 10:35:43 goba
 #  throttle.module,v 1.83 2007/12/14 18:08:49 goba
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: drupal (6.0)\n"
-"POT-Creation-Date: 2008-03-30 17:19+0200\n"
-"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Project-Id-Version: drupal (6.9)\n"
+"POT-Creation-Date: 2009-01-31 16:23+0100\n"
+"PO-Revision-Date: 2008-07-07 20:05+0200\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
 
 #: modules/throttle/throttle.admin.inc:21
 msgid "Auto-throttle on anonymous users"
@@ -31,10 +32,10 @@ msgstr ""
 "La regulación del control de congestión se puede activar automáticamente "
 "cuando el número de usuarios anónimos que estén visitando su sitio exceda el "
 "umbral especificado. Por ejemplo, para iniciar la regulación cuando su sitio "
-"tenga 250 usuarios anónimos conectados simultáneamente, introduzca \"250\" "
-"en este campo. Déjelo vacío o defínalo como \"0\" si no quiere regulación "
+"tenga 250 usuarios anónimos conectados simultáneamente, introduzca '250' en "
+"este campo. Déjelo vacío o defínalo como '0' si no quiere regulación "
 "automática sobre los usuarios anónimos.  Puede inspeccionar el número actual "
-"de usuarios anónimos en el bloque \"En línea\"."
+"de usuarios anónimos en el bloque «En línea»."
 
 #: modules/throttle/throttle.admin.inc:29
 msgid "Auto-throttle on authenticated users"
@@ -54,10 +55,10 @@ msgstr ""
 "cuando el número de usuarios autenticados que estén visitando actualmente su "
 "sitio exceda el umbral especificado. Por ejemplo, para iniciar la regulación "
 "cuando su sitio alcance los 50 usuarios registrados conectados "
-"simultáneamente, introduzca \"50\" en este campo. Déjelo vacío o defínalo "
-"como \"0\" si no desea aplicar la regulación automática a los usuarios "
+"simultáneamente, introduzca '50' en este campo. Déjelo vacío o defínalo como "
+"'0' si no desea aplicar la regulación automática a los usuarios "
 "autenticados. Puede inspeccionar el número de usuarios autenticados "
-"actualmente en el bloque \"En línea\"."
+"actualmente en el bloque «En línea»."
 
 #: modules/throttle/throttle.admin.inc:37
 msgid "Auto-throttle probability limiter"
@@ -85,8 +86,8 @@ msgid ""
 "%value is not a valid auto-throttle setting. Please enter a positive numeric "
 "value."
 msgstr ""
-"%value no es una opción válida para la regulación automática. Haga el favor "
-"de introducir un número positivo."
+"%value no es una opción válida para la regulación automática. Por favor "
+"introduzca un número positivo."
 
 #: modules/throttle/throttle.module:121
 msgid ""
@@ -99,6 +100,17 @@ msgid ""
 "module, modules may choose to disable resource-intensive blocks or the code "
 "within the site theme may temporarily disable user pictures in posts."
 msgstr ""
+"El módulo de regulación («throttle») proporciona un mecanismo de control de "
+"congestión que se ajusta automáticamente a un aumento en el tráfico. Si su "
+"sitio es enlazado desde otro sitio muy popular o experimenta un ataque de "
+"denegación de servicio (DoS), su servidor web podría verse colapsado. Los "
+"otros módulos pueden usar este mecanismo de regulación para desactivar "
+"temporalmente características que requieran el uso intensivo de la unidad "
+"central de procesamiento, lo que incrementa el rendimiento. Por ejemplo, a "
+"través del módulo de regulación los módulos pueden escoger que se desactiven "
+"bloques que usen recursos intensivamente o el código dentro del tema gráfico "
+"del sitio puede desactivar temporalmente las imágenes de los usuarios en las "
+"entradas."
 
 #: modules/throttle/throttle.module:122
 msgid ""
@@ -106,12 +118,17 @@ msgid ""
 "of anonymous or authenticated users currently visiting the site exceeds a "
 "specified threshold."
 msgstr ""
+"La regulación para controlar congestionamientos se puede activar "
+"automáticamente cuando el número de usuarios anónimos que visitan el sitio "
+"excede un umbral específico."
 
 #: modules/throttle/throttle.module:123
 msgid ""
 "For more information, see the online handbook entry for <a href=\"@throttle"
 "\">Throttle module</a>."
 msgstr ""
+"Para más información, vea la entrada del manual en línea para el <a href="
+"\"@throttle\">Módulo de regulación</a>."
 
 #: modules/throttle/throttle.module:126
 msgid ""
@@ -122,6 +139,13 @@ msgid ""
 "mechanism is utilized by modules to temporarily disable CPU-intensive "
 "functionality, increasing performance."
 msgstr ""
+"El módulo de regulación («throttle») proporciona un mecanismo de control que "
+"se ajusta automáticamente a un aumento en el tráfico. Si su sitio es "
+"enlazado desde otro sitio muy popular experimenta un ataque de denegación de "
+"servicio (DoS), su servidor podría verse colapsado. Los otros módulos pueden "
+"usar este mecanismo de regulación para desactivar temporalmente "
+"características que requieran el uso intensivo de la unidad central de "
+"procesamiento, lo que incrementa el rendimiento."
 
 #: modules/throttle/throttle.module:110,0
 msgid "throttle"
@@ -130,8 +154,8 @@ msgstr "regulación"
 #: modules/throttle/throttle.module:87
 msgid "1 user accessing site; throttle enabled."
 msgid_plural "@count users accessing site; throttle enabled."
-msgstr[0] "1 usuario accediendo al sitio. Regulación activada."
-msgstr[1] "@count usuarios accediendo al sitio. Regulación activada."
+msgstr[0] "1 usuario en el sitio; regulación activada."
+msgstr[1] "@count usuarios en el sitio; regulación activada."
 
 #: modules/throttle/throttle.module:95
 msgid "1 guest accessing site; throttle enabled."
@@ -144,3 +168,12 @@ msgid "1 guest accessing site; throttle disabled"
 msgid_plural "@count guests accessing site; throttle disabled"
 msgstr[0] "1 invitado accediendo al sitio. Regulación desactivada."
 msgstr[1] "@count invitados accediendo al sitio. Regulación desactivada."
+
+#: modules/throttle/throttle.module:12
+msgid "Control how your site cuts out content during heavy load."
+msgstr ""
+"Controla el comportamiento del sitio cuando se ve sometido a picos de carga."
+
+#: modules/throttle/throttle.module:110
+msgid "Throttle: %message"
+msgstr ""

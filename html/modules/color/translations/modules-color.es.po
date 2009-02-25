@@ -1,18 +1,19 @@
-# Spanish translation of drupal (6.0)
-# Copyright (c) 2008 by the Spanish translation team
+# Spanish translation of drupal (6.9)
+# Copyright (c) 2009 by the Spanish translation team
 # Generated from files:
 #  color.module,v 1.39 2008/01/23 09:43:25 goba
 #  color.install,v 1.2 2006/12/05 05:49:50 dries
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: drupal (6.0)\n"
-"POT-Creation-Date: 2008-03-30 17:19+0200\n"
-"PO-Revision-Date: 2008-02-16 14:14+0100\n"
+"Project-Id-Version: drupal (6.9)\n"
+"POT-Creation-Date: 2009-01-31 16:23+0100\n"
+"PO-Revision-Date: 2008-09-24 03:38+0200\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
 
 #: modules/color/color.module:10
 msgid ""
@@ -24,6 +25,13 @@ msgid ""
 "elements. Color module requires that your <a href=\"@url\">file download "
 "method</a> be set to public."
 msgstr ""
+"El módulo color permite a un administrador del sitio cambiar los esquemas de "
+"color de forma rápida y sencilla en algunos temas. Aunque no todos los temas "
+"admiten su uso, Garland (el tema predefinido) y Minelli están pensados para "
+"beneficiarse de sus posibilidades. Al usar el módulo Color co un tema que lo "
+"admita, podrá cambiar fácilmente los colores de los enlaces, textos, fondos "
+"y otros elementos. El módulo Color necesita que el <a href=\"@url\">método "
+"de descarga</a> se haya fijado como público."
 
 #: modules/color/color.module:11
 msgid ""
@@ -34,6 +42,13 @@ msgid ""
 "generated version of the stylesheets in the files directory to be recreated "
 "using the new version of the original file."
 msgstr ""
+"Es importante recordar que el módulo color, guarda una copia modificada de "
+"las hojas de estilo del tema sobre el que esta trabajando en el directorio "
+"files. Esto quiere decir que si haces cualquier cambio manual en estas hojas "
+"de  estilo, debes volver a guardar la configuracion de colores, aunque no "
+"hayan cambiado. Esto se debe a que el color asignado para el modulo por las "
+"hojas de estilo en el directorio files, es regenerado usando una nueva "
+"version desde su archivo original."
 
 #: modules/color/color.module:12
 msgid ""
@@ -41,6 +56,8 @@ msgid ""
 "\" link for the theme on the <a href=\"@themes\">themes administration page</"
 "a>."
 msgstr ""
+"Para cambiar la configuración de colores en un tema compatible, seleciona "
+"\"configurar\" en <a href=\"@themes\">Administración de temas</a>"
 
 #: modules/color/color.module:13
 msgid ""
@@ -123,10 +140,10 @@ msgid ""
 "The GD library for PHP is missing or outdated. Please check the <a href="
 "\"@url\">PHP image documentation</a> for information on how to correct this."
 msgstr ""
-"La biblioteca GD para PHP no se encuentra o está desfasada. En la <a href="
-"\"@url\">documentación de imágenes de PHP</a> tiene información para "
+"La biblioteca GD para PHP no se encuentra o está desactualizada. En la <a "
+"href=\"@url\">documentación de imágenes de PHP</a> tiene información para "
 "corregir esto."
 
 #: modules/color/color.install:31
 msgid "GD library"
-msgstr "Biblioteca GD"
+msgstr "Librería GD"

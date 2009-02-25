@@ -1,19 +1,20 @@
-# Spanish translation of drupal (6.0)
-# Copyright (c) 2008 by the Spanish translation team
+# Spanish translation of drupal (6.9)
+# Copyright (c) 2009 by the Spanish translation team
 # Generated from files:
 #  menu.admin.inc,v 1.26.2.3 2008/02/11 15:12:53 goba
-#  menu.module,v 1.157.2.1 2008/02/11 15:12:53 goba
-#  menu.install,v 1.9 2008/01/30 20:27:28 goba
+#  menu.module,v 1.157.2.3 2008/05/10 06:53:53 dries
+#  menu.install,v 1.9.2.1 2009/01/06 15:46:37 goba
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: drupal (6.0)\n"
-"POT-Creation-Date: 2008-07-14 10:36+0200\n"
-"PO-Revision-Date: 2008-07-13 22:54+0200\n"
+"Project-Id-Version: drupal (6.9)\n"
+"POT-Creation-Date: 2009-01-31 16:23+0100\n"
+"PO-Revision-Date: 2008-09-24 03:57+0200\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
 
 #: modules/menu/menu.admin.inc:54
 msgid "There are no menu items yet."
@@ -247,11 +248,11 @@ msgstr ""
 msgid "Enter the title and path for your new menu item."
 msgstr "Escriba el título y ruta de su nuevo elemento de menú."
 
-#: modules/menu/menu.module:372
+#: modules/menu/menu.module:380
 msgid "Delete this menu item."
 msgstr "Borrar este elemento de menú"
 
-#: modules/menu/menu.module:387
+#: modules/menu/menu.module:395
 msgid ""
 "The link text corresponding to this item that should appear in the menu. "
 "Leave blank if you do not wish to add this post to the menu."
@@ -263,28 +264,42 @@ msgstr ""
 msgid "administer menu"
 msgstr "administrar menú"
 
-#: modules/menu/menu.install:31
+#: modules/menu/menu.module:48
+msgid "Menus"
+msgstr "Menús"
+
+#: modules/menu/menu.module:49
 msgid ""
-"Holds definitions for top-level custom menus (for example, Primary Links)."
+"Control your site's navigation menu, primary links and secondary links. as "
+"well as rename and reorganize menu items."
 msgstr ""
-"Tiene definiciones de menús personalizados de primer nivel (por ejemplo, "
-"Enlaces Principales)."
+"Controla el menú de navegación del sitio, los enlaces primarios y los "
+"enlaces secundarios, así como el cambio de nombre y la reorganización de las "
+"opciones del menú."
 
-#: modules/menu/menu.install:38
-msgid ""
-"Primary Key: Unique key for menu. This is used as a block delta so length is "
-"32."
-msgstr ""
-"Clave primaria: Clave única para el menu. Esta es usada como un bloque delta "
-"de longitud 32"
+#: modules/menu/menu.module:120
+msgid "Edit menu item"
+msgstr "Editar opción de menú"
 
-#: modules/menu/menu.install:45
-msgid "Menu title; displayed at top of block."
-msgstr "Título del menú. Se muestra en la cabecera del bloque."
+#: modules/menu/menu.module:128
+msgid "Reset menu item"
+msgstr "Restablecer opción de menú"
 
-#: modules/menu/menu.install:50
-msgid "Menu description."
-msgstr "Descripción del menú."
+#: modules/menu/menu.module:136
+msgid "Delete menu item"
+msgstr "Eliminar opción de menú"
+
+#: modules/menu/menu.module:63
+msgid "Add menu"
+msgstr "Añadir menú"
+
+#: modules/menu/menu.module:104
+msgid "Edit menu"
+msgstr "Editar menú"
+
+#: modules/menu/menu.module:112
+msgid "Delete menu"
+msgstr "Eliminar menú"
 
 #: modules/menu/menu.admin.inc:616
 msgid "No primary links"
@@ -294,9 +309,17 @@ msgstr "Sin enlaces primarios"
 msgid "No secondary links"
 msgstr "Sin enlaces secundarios"
 
+#: modules/menu/menu.admin.inc:575
+msgid "Deleted menu item %title."
+msgstr "Eliminada la opción de menú %title."
+
+#: modules/menu/menu.module:96
+msgid "Add item"
+msgstr "Añadir elemento"
+
 #: modules/menu/menu.admin.inc:619
 msgid "Source for the primary links"
-msgstr "Origen para los enlaces primarios"
+msgstr "Origen de los enlaces primarios"
 
 #: modules/menu/menu.admin.inc:623
 msgid "Select what should be displayed as the primary links."
@@ -312,7 +335,7 @@ msgstr ""
 "Seleccione qué debería ser mostrado como enlaces secundarios. Puede elegir "
 "el mismo menú para los enlaces secundarios como para los enlaces primarios "
 "(actualmente %primary). Si hace esto, los submenús del menú de enlaces "
-"primarios se mostrará como enlaces secundarios."
+"primarios se mostrarán como enlaces secundarios."
 
 #: modules/menu/menu.install:12
 msgid ""
@@ -344,3 +367,29 @@ msgstr ""
 "Los enlaces secundarios se utilizan normalmente para páginas como "
 "información legal, noticias, contacto, detalles y otros elementos de "
 "navegación secundaria, no tan importantes como los enlaces primarios."
+
+#: modules/menu/menu.admin.inc:493
+msgid "Deleted custom menu %title and all its menu items."
+msgstr ""
+
+#: modules/menu/menu.admin.inc:457
+msgid ""
+"<strong>Warning:</strong> There is currently 1 menu item in %title. It will "
+"be deleted (system-defined items will be reset)."
+msgid_plural ""
+"<strong>Warning:</strong> There are currently @count menu items in %title. "
+"They will be deleted (system-defined items will be reset)."
+msgstr[0] ""
+msgstr[1] ""
+
+#: modules/menu/menu.module:57
+msgid "List menus"
+msgstr ""
+
+#: modules/menu/menu.module:80
+msgid "Customize menu"
+msgstr ""
+
+#: modules/menu/menu.module:90
+msgid "List items"
+msgstr ""

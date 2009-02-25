@@ -1,34 +1,35 @@
-# Spanish translation of drupal (6.0)
-# Copyright (c) 2008 by the Spanish translation team
+# Spanish translation of drupal (6.9)
+# Copyright (c) 2009 by the Spanish translation team
 # Generated from files:
-#  translation.pages.inc,v 1.2 2008/01/07 13:18:40 goba
-#  translation.module,v 1.23 2008/01/28 11:38:58 goba
+#  translation.pages.inc,v 1.2.2.1 2008/09/30 10:50:43 goba
+#  translation.module,v 1.23.2.4 2009/01/14 23:34:07 goba
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: drupal (6.0)\n"
-"POT-Creation-Date: 2008-03-30 17:19+0200\n"
-"PO-Revision-Date: 2008-02-17 20:15+0100\n"
+"Project-Id-Version: drupal (6.9)\n"
+"POT-Creation-Date: 2009-01-31 16:23+0100\n"
+"PO-Revision-Date: 2008-07-01 21:20+0200\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
 
 #: modules/translation/translation.pages.inc:41
 msgid "outdated"
-msgstr ""
+msgstr "desactualizado"
 
 #: modules/translation/translation.pages.inc:50
 msgid "add translation"
-msgstr ""
+msgstr "agregar traducción"
 
 #: modules/translation/translation.pages.inc:52
 msgid "Not translated"
-msgstr ""
+msgstr "Sin traducir"
 
 #: modules/translation/translation.pages.inc:57
 msgid "Translations of %title"
-msgstr ""
+msgstr "Traducciones de %title"
 
 #: modules/translation/translation.module:34
 msgid ""
@@ -38,22 +39,34 @@ msgid ""
 "interface), the content translation module is key to creating and "
 "maintaining translated site content."
 msgstr ""
+"El módulo de traducción del contenido permite la traducción del contenido a "
+"distintos idiomas. Junto con el <a href=\"@locale\">módulo de "
+"regionalización</a> (que gestiona los idiomas activos y proporciona la "
+"traducción de la interfaz del sitio), el módulo de traducción es un elemento "
+"clave para crear y mantener el contenido traducido del sitio."
 
 #: modules/translation/translation.module:35
 msgid "Configuring content translation and translation-enabled content types:"
 msgstr ""
+"Configurando la traducción del contenido y de los tipos de contenidos para "
+"los que se ha activado la traducción."
 
 #: modules/translation/translation.module:36
 msgid ""
 "Assign the <em>translate content</em> permission to the appropriate user "
 "roles at the <a href=\"@permissions\">Permissions configuration page</a>."
 msgstr ""
+"Asignar el permiso para <em>traducir contenido</em> a los roles de usuarios "
+"apropiados en la <a href=\"@permissions\">Página de configuración de "
+"permisos</a>."
 
 #: modules/translation/translation.module:37
 msgid ""
 "Add and enable desired languages at the <a href=\"@languages\">Languages "
 "configuration page</a>."
 msgstr ""
+"Agregue y active los idiomas deseados en la <a href=\"@languages\">página de "
+"configuración de idiomas</a>"
 
 #: modules/translation/translation.module:38
 msgid ""
@@ -64,16 +77,25 @@ msgid ""
 "located within <em>Workflow settings</em>.) Be sure to save each content "
 "type after enabling multilingual support."
 msgstr ""
+"Determinar qué <a href=\"@content-types\">tipos de contenido</a> deben "
+"soportar características de traducción. Para habilitar el soporte de "
+"traducción para un tipo de contenido, edite el tipo de contenido y en la "
+"lista desplegable de <em>Soporte multilingüe</em> seleccione <em>Activado, "
+"con traducción</em>. (<em>Soporte multilingüe</em> está ubicado dentro de "
+"<em>Configuración de flujo de trabajo</em>.) Asegúrese de guardar cada tipo "
+"de contenido antes de activar el soporte multilingüe."
 
 #: modules/translation/translation.module:39
 msgid "Working with translation-enabled content types:"
-msgstr ""
+msgstr "Trabajando con tipos de contenido con la traducción activada:"
 
 #: modules/translation/translation.module:40
 msgid ""
 "Use the <em>Language</em> drop down to select the appropriate language when "
 "creating or editing posts."
 msgstr ""
+"Use la lista desplegable de <em>Idiomas</em> para seleccionar el idioma "
+"apropiado al crear o editar entradas."
 
 #: modules/translation/translation.module:41
 msgid ""
@@ -83,6 +105,12 @@ msgid ""
 "be added or edited using a specialized editing form that also displays the "
 "content being translated."
 msgstr ""
+"Proporcionar nuevas traducciones o editar las actuales para entradas "
+"existentes a través de la pestaña de <em>Traducción</em>. Sólo visible "
+"cuando se ve una entrada como un usuario con el permiso de <em>traducir "
+"contenido</em>, esta pestaña permite agregar o editar traducciones usando un "
+"formulario de edición especializado que también muestra el contenido que se "
+"está traduciendo."
 
 #: modules/translation/translation.module:42
 msgid ""
@@ -111,12 +139,17 @@ msgid ""
 "displays the language of each post, and also allows filtering by language or "
 "translation status."
 msgstr ""
+"La <a href=\"@content-node\">página de administraciónd de contenido</a> "
+"muestra el idioma de cada entrada y también permite filtrar por idioma o por "
+"estado de traducción."
 
 #: modules/translation/translation.module:45
 msgid ""
 "For more information, see the online handbook entry for <a href="
 "\"@translation\">Translation module</a>."
 msgstr ""
+"Para más información, vea la entrada del manual en línea para el <a href="
+"\"@translation\">módulo de Traducción («,Translation»)</a>."
 
 #: modules/translation/translation.module:48
 msgid ""
@@ -126,12 +159,18 @@ msgid ""
 "tracked to be up to date or outdated based on whether the source post was "
 "modified significantly."
 msgstr ""
+"Las traducciones de un fragmento de contenido son administradas con grupos "
+"de traducción. Cada grupo de traducción tiene una entrada fuente y un número "
+"variable de traducciones en cualquiera de los <a href=\"!languages\">idiomas "
+"activados</a>. Todas las traducciones son rastreadas para indicar si están "
+"actualizadas u obsoletas, sobre la base de si la entrada fuente se modificó "
+"de manera importante."
 
-#: modules/translation/translation.module:102
+#: modules/translation/translation.module:99
 msgid "Enabled, with translation"
 msgstr "Habilitado, con traducción"
 
-#: modules/translation/translation.module:104
+#: modules/translation/translation.module:101
 msgid ""
 "Enable multilingual support for this content type. If enabled, a language "
 "selection field will be added to the editing form, allowing you to select "
@@ -141,32 +180,40 @@ msgid ""
 "with the default language. Existing content will not be affected by changing "
 "this option."
 msgstr ""
+"Activar el soporte multilengüe para este tipo de contenido. Si se activa, se "
+"agregará un campo de selección de lenguaje al formulario de edición, lo que "
+"le permitirá seleccionar uno de los <a href=\"!languages\">idiomas "
+"activados</a>. También puede activar la traducción para este tipo de "
+"contenido, lo que le permite tener contenido traducido a cualquiera de los "
+"idiomas activados. Si se desactiva, las entradas nuevas serán guardadas en "
+"el idioma predeterminado. Cambiar esta opción no afectará el contenido "
+"existente."
 
-#: modules/translation/translation.module:127
+#: modules/translation/translation.module:124
 msgid "Translation settings"
-msgstr ""
+msgstr "Opciones de traducción"
 
-#: modules/translation/translation.module:138
+#: modules/translation/translation.module:135
 msgid "Flag translations as outdated"
-msgstr ""
+msgstr "Marcar traducciones como desactualizadas"
 
-#: modules/translation/translation.module:140
+#: modules/translation/translation.module:137
 msgid ""
 "If you made a significant change, which means translations should be "
 "updated, you can flag all translations of this post as outdated. This will "
 "not change any other property of those posts, like whether they are "
 "published or not."
 msgstr ""
-"Si realizó un cambio importante, lo cual significa que deben actualizarse "
-"las traducciones, puede marcar todas las traducciones de este mensaje como "
-"obsoletas. Esto no cambiará otras propiedades de estos mensajes, como si "
-"están publicados o no."
+"Si realizó un cambio importante, que significa que deben actualizarse las "
+"traducciones, puede marcar todas las traducciones de esta entrada como "
+"desactualizadas. Esto no cambiará otras propiedades de estas entradas, como "
+"si están publicados o no."
 
-#: modules/translation/translation.module:147
+#: modules/translation/translation.module:144
 msgid "This translation needs to be updated"
 msgstr "Esta traducción necesita ser actualizada"
 
-#: modules/translation/translation.module:149
+#: modules/translation/translation.module:146
 msgid ""
 "When this option is checked, this translation needs to be updated because "
 "the source post has changed. Uncheck when the translation is up to date "
@@ -176,13 +223,13 @@ msgstr ""
 "el mensaje fuente ha cambiado. Desmárquela cuando la traducción vuelva a "
 "estar actualizada."
 
-#: modules/translation/translation.module:89
+#: modules/translation/translation.module:86
 msgid "translate content"
-msgstr ""
+msgstr "traducir contenido"
 
 #: modules/translation/translation.module:0
 msgid "translation"
-msgstr ""
+msgstr "traducción"
 
 #: modules/translation/translation.module:44
 msgid ""
@@ -194,3 +241,11 @@ msgstr ""
 "módulo locale, para permitir a los usuarios seleccionar su idioma. Si está "
 "disponible, tanto la interfaz del sitio y su contenido se mostrarán en el "
 "idioma seleccionado."
+
+#: modules/translation/translation.module:59
+msgid "Translate"
+msgstr ""
+
+#: modules/translation/translation.pages.inc:43
+msgid "<strong>@language_name</strong> (source)"
+msgstr "strong>@language_name</strong> (fuente)"

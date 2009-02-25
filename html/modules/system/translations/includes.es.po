@@ -1,38 +1,35 @@
-# Spanish translation of drupal (6.0)
-# Copyright (c) 2008 by the Spanish translation team
+# Spanish translation of drupal (6.9)
+# Copyright (c) 2009 by the Spanish translation team
 # Generated from files:
-#  actions.inc,v 1.8 2007/12/31 14:51:04 goba
+#  actions.inc,v 1.8.2.6 2009/01/06 17:02:58 goba
 #  batch.inc,v 1.14 2007/12/20 11:57:20 goba
-#  common.inc,v 1.756.2.4 2008/02/13 14:25:42 goba
-#  database.pgsql.inc,v 1.68.2.1 2008/02/07 10:17:26 goba
-#  file.inc,v 1.121.2.1 2008/02/07 18:20:37 goba
-#  form.inc,v 1.265.2.4 2008/02/11 14:45:57 goba
+#  common.inc,v 1.756.2.42 2009/01/14 23:34:07 goba
+#  database.pgsql.inc,v 1.68.2.3 2008/11/17 10:31:41 goba
+#  file.inc,v 1.121.2.5 2008/10/20 09:42:31 goba
+#  form.inc,v 1.265.2.17 2009/01/12 16:07:23 goba
 #  image.gd.inc,v 1.4 2008/01/15 10:17:42 goba
-#  install.inc,v 1.56.2.2 2008/02/11 15:10:26 goba
-#  install.mysql.inc,v 1.9 2008/01/23 09:59:29 goba
-#  install.mysqli.inc,v 1.12 2008/01/23 09:59:29 goba
-#  install.pgsql.inc,v 1.6 2007/10/22 15:22:39 dries
-#  locale.inc,v 1.174 2008/01/09 21:36:13 goba
-#  mail.inc,v 1.8 2008/01/25 17:04:00 goba
-#  menu.inc,v 1.255.2.7 2008/02/12 22:33:51 goba
+#  locale.inc,v 1.174.2.7 2009/01/06 15:36:51 goba
+#  mail.inc,v 1.8.2.4 2008/10/06 11:04:08 dries
+#  menu.inc,v 1.255.2.27 2008/11/10 17:30:39 goba
 #  module.inc,v 1.115 2007/12/27 12:31:05 goba
 #  pager.inc,v 1.63 2007/12/06 09:58:30 goba
 #  tablesort.inc,v 1.47 2008/01/04 09:31:48 goba
-#  theme.inc,v 1.415 2008/01/27 19:47:06 goba
-#  theme.maintenance.inc,v 1.10 2008/01/24 09:42:50 goba
+#  theme.inc,v 1.415.2.17 2008/12/10 21:09:05 goba
 #  unicode.inc,v 1.29 2007/12/28 12:02:50 dries
-#  xmlrpc.inc,v 1.47 2008/01/09 21:52:43 goba
-#  xmlrpcs.inc,v 1.24 2007/12/31 08:54:36 dries
+#  xmlrpc.inc,v 1.47.2.5 2009/01/14 21:36:16 goba
+#  xmlrpcs.inc,v 1.24.2.1 2008/04/28 10:04:52 dries
+#  image.inc,v 1.24 2008/01/28 16:05:17 goba
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: drupal (6.0)\n"
-"POT-Creation-Date: 2008-03-30 17:19+0200\n"
-"PO-Revision-Date: 2008-03-18 14:01+0100\n"
+"Project-Id-Version: drupal (6.9)\n"
+"POT-Creation-Date: 2009-01-31 16:23+0100\n"
+"PO-Revision-Date: 2009-01-13 23:01+0100\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
 
 #: includes/actions.inc:301
 msgid "Remove orphaned actions"
@@ -62,55 +59,31 @@ msgstr "Acceso denegado"
 msgid "You are not authorized to access this page."
 msgstr "Usted no está autorizado para visitar esta página."
 
-#: includes/common.inc:430
-msgid "The server can't issue HTTP requests"
-msgstr "El servidor no puede formular solicitudes HTTP"
-
-#: includes/common.inc:1087
+#: includes/common.inc:1198
 msgid "KB"
 msgstr "KB"
 
-#: includes/common.inc:1092
+#: includes/common.inc:1203
 msgid "@size @suffix"
 msgstr "@size @suffix"
 
-#: includes/common.inc:1124
+#: includes/common.inc:1235
 msgid "0 sec"
 msgstr "0 seg"
 
-#: includes/common.inc:3465
-msgid "emergency"
-msgstr "emergencia"
-
-#: includes/common.inc:3466
-msgid "alert"
-msgstr "alerta"
-
-#: includes/common.inc:3467
-msgid "critical"
-msgstr "crítico"
-
-#: includes/common.inc:3470
+#: includes/common.inc:3582
 msgid "notice"
 msgstr "aviso"
 
-#: includes/common.inc:3471
+#: includes/common.inc:3583
 msgid "info"
 msgstr "información"
 
-#: includes/common.inc:3472
+#: includes/common.inc:3584
 msgid "debug"
 msgstr "depurar"
 
-#: includes/common.inc:344
-msgid "page not found"
-msgstr "página no encontrada"
-
-#: includes/common.inc:373
-msgid "access denied"
-msgstr "acceso denegado"
-
-#: includes/common.inc:2521,2528,2543,2559
+#: includes/common.inc:2632,2639,2654,2670
 msgid "cron"
 msgstr "cron"
 
@@ -162,17 +135,18 @@ msgstr ""
 "Su servidor PostgreSQL es demasiado antiguo. Drupal requiere al menos "
 "PostgreSQL %version."
 
-#: includes/database.pgsql.inc:405
+#: includes/database.pgsql.inc:406
 msgid ""
 "Your PostgreSQL database is set up with the wrong character encoding (%"
 "encoding). It is possible it will not work as expected. It is advised to "
 "recreate it with UTF-8/Unicode encoding. More information can be found in "
 "the <a href=\"@url\">PostgreSQL documentation</a>."
 msgstr ""
-"Su base de datos PostgreSQL está configurada con una codificación de "
-"caracteres errónea (%encoding). Es posible que no funcione como espera. Debe "
-"volver a crearlo con una codificación UTF-8/Unicode. Tiene más información "
-"en la <a href=\"@url\">documentación de PostgreSQL</a>."
+"Su base de datos PostgreSQL se instaló con una codificación de caracteres "
+"equivocada (%enconding). Es posible que no funcione conforme a lo esperado. "
+"Se recomienda volver a crearla con codificación UTF-8/Unicode. Puede "
+"encontrar más información en la <a href=\"@url\">documentación de "
+"PostgreSQL</a>."
 
 #: includes/file.inc:104
 msgid "The directory %directory has been created."
@@ -190,7 +164,7 @@ msgstr ""
 msgid "The directory %directory is not writable"
 msgstr "No es posible escribir en el directorio %directory."
 
-#: includes/file.inc:135
+#: includes/file.inc:135,136
 msgid ""
 "Security warning: Couldn't write .htaccess file. Please create a .htaccess "
 "file in your %directory directory which contains the following lines: <code>!"
@@ -205,17 +179,16 @@ msgid ""
 "The selected file %file could not be uploaded, because the destination %"
 "directory is not properly configured."
 msgstr ""
-"El archivo seleccionado %file no se pudo actualizar, porque el destino %"
-"directory no está configurado correctamente."
+"El archivo seleccionado %file no se pudo subir, porque el  %directory al que "
+"va destinado, no está correctamente configurado."
 
 #: includes/file.inc:241
 msgid ""
 "The selected file %file could not be copied, because no file by that name "
 "exists. Please check that you supplied the correct filename."
 msgstr ""
-"El archivo seleccionado %file no se pudo copiar, porque no existe ningún "
-"archivo con ese nombre. Compruebe que ha suministrado un nombre de archivo "
-"correcto."
+"El archivo seleccionado %file no se pudo copiar, porque no existe un archivo "
+"con ese nombre. Por favor cerciórese de haber puesto el nombre correcto."
 
 #: includes/file.inc:254,305
 msgid ""
@@ -223,11 +196,11 @@ msgid ""
 "already exists in the destination."
 msgstr ""
 "El archivo seleccionado %file no se pudo copiar, porque ya existe un archivo "
-"con el mismo nombre el el destino."
+"con ese nombre en su destino."
 
 #: includes/file.inc:259
 msgid "The selected file %file could not be copied."
-msgstr "El archivo %file seleccionado no se pudo copiar."
+msgstr "El archivo seleccionado %file no se pudo copiar."
 
 #: includes/file.inc:339
 msgid "The removal of the original file %file has failed."
@@ -235,20 +208,22 @@ msgstr "Ha fallado la eliminación del archivo original %file."
 
 #: includes/file.inc:380
 msgid "For security reasons, your upload has been renamed to %filename."
-msgstr "Por razones de seguridad, su archivo ha sido renombrado como %filename"
+msgstr ""
+"Por razones de seguridad, el archivo que ha subido ha sido renombrado como %"
+"filename."
 
 #: includes/file.inc:504
 msgid ""
 "The file %file could not be saved, because it exceeds %maxsize, the maximum "
 "allowed size for uploads."
 msgstr ""
-"El archivo %file no pudo ser guardado porque excede de %maxsize, el máximo "
-"tamaño permitido para cargas."
+"El archivo %file no se pudo guardar, porque es mayor que %maxsize, el tamaño "
+"máximo permitido para subidas."
 
 #: includes/file.inc:509
 msgid "The file %file could not be saved, because the upload did not complete."
 msgstr ""
-"El archivo %file no se pudo salvar, porque el proceso de subirlo no se "
+"El archivo %file no se pudo guardar, porque el proceso de subirlo no se "
 "completó."
 
 #: includes/file.inc:514
@@ -257,25 +232,24 @@ msgstr "El archivo %file no se pudo guardar. Ha ocurrido un error desconocido."
 
 #: includes/file.inc:558
 msgid "The selected file %name could not be uploaded."
-msgstr "El archivo selecctionado %name no ha podido ser transferido."
+msgstr "El archivo seleccionado %name no se pudo subir."
 
 #: includes/file.inc:573
 msgid "File upload error. Could not move uploaded file."
-msgstr "Error al publicar el archivo. No se puede mover el archivo subido."
+msgstr "Error al subir el archivo. No se puede mover el archivo subido."
 
 #: includes/file.inc:603
 msgid ""
 "Its name exceeds the 255 characters limit. Please rename the file and try "
 "again."
 msgstr ""
-"Ese nombre excede el límite de 255 caracteres. Por favor renombre el archivo "
-"e inténtelo de nuevo."
+"El nombre excede el límite de 255 caracteres. Por favor, cambie el nombre e "
+"inténtelo de nuevo."
 
 #: includes/file.inc:628
 msgid "Only files with the following extensions are allowed: %files-allowed."
 msgstr ""
-"Solo los ficheros con las siguientes extensiones son permitidos: %files-"
-"allowed"
+"Sólo se permiten archivos con las siguientes extensiones: %files-allowed."
 
 #: includes/file.inc:657
 msgid "The file is %filesize exceeding the maximum file size of %maxsize."
@@ -286,12 +260,12 @@ msgstr ""
 #: includes/file.inc:662
 msgid "The file is %filesize which would exceed your disk quota of %quota."
 msgstr ""
-"El tamaño del fichero es %filesize que hará que rebase su cuota de disco de %"
-"quota."
+"El tamaño del archivo ocupa %filesize lo que puede provocar que exceda el "
+"espacio que tiene adjudicado en el disco que es de %quota."
 
 #: includes/file.inc:681
 msgid "Only JPEG, PNG and GIF images are allowed."
-msgstr "Solo se permiten imágenes JPEG, PNG y GIF."
+msgstr "Sólo se permiten imágenes en los formatos JPEG, PNG y GIF."
 
 #: includes/file.inc:716
 msgid ""
@@ -317,35 +291,27 @@ msgstr "No se pudo crear el archivo."
 msgid "file"
 msgstr "archivo"
 
-#: includes/form.inc:567
-msgid ""
-"Validation error, please try again. If this error persists, please contact "
-"the site administrator."
-msgstr ""
-"Error de validación. Haga el favor de volver a intentarlo. Si el error "
-"persiste, debería ponerse en contacto con el administrador del sitio."
-
-#: includes/form.inc:1575
+#: includes/form.inc:1597
 msgid "Confirm password"
 msgstr "Confirmar contraseña"
 
-#: includes/form.inc:1598
+#: includes/form.inc:1620
 msgid "The specified passwords do not match."
 msgstr "Las contraseñas que ha indicado no coinciden."
 
-#: includes/form.inc:1602
+#: includes/form.inc:1624
 msgid "Password field is required."
 msgstr "El campo contraseña es necesario."
 
-#: includes/form.inc:1683
+#: includes/form.inc:1705
 msgid "The specified date is invalid."
 msgstr "La fecha indicada no es válida."
 
-#: includes/form.inc:672
+#: includes/form.inc:679
 msgid "!name field is required."
-msgstr "El campo !name es necesario."
+msgstr "El campo !name es obligatorio."
 
-#: includes/form.inc:677
+#: includes/form.inc:684
 msgid ""
 "!name cannot be longer than %max characters but is currently %length "
 "characters long."
@@ -353,37 +319,37 @@ msgstr ""
 "!name no puede superar los %max caracteres, pero actualmente tiene una "
 "longitud de %length."
 
-#: includes/form.inc:2161
+#: includes/form.inc:2192
 msgid "This field is required."
 msgstr "Este campo es obligatorio."
 
-#: includes/form.inc:2166,2169
+#: includes/form.inc:2197,2200
 msgid "!title: !required"
 msgstr "!title: !required"
 
-#: includes/form.inc:2407
+#: includes/form.inc:2438
 msgid "Initializing."
 msgstr "Inicializando."
 
-#: includes/form.inc:2408
+#: includes/form.inc:2439
 msgid "Remaining @remaining of @total."
 msgstr "Quedan @remaining de @total."
 
-#: includes/form.inc:2409
+#: includes/form.inc:2440
 msgid "An error has occurred."
 msgstr "Ha ocurrido un error."
 
-#: includes/form.inc:2482
+#: includes/form.inc:2513
 msgid "Please continue to <a href=\"@error_url\">the error page</a>"
 msgstr "Por favor, continue a <a href=\"@error_url\">la página de error</a>"
 
 #: includes/image.gd.inc:18
 msgid "GD2 image manipulation toolkit"
-msgstr "Toolkit de manipulación de imagen GD2"
+msgstr "Juego de herramienas GD2 para la manipulación de imágenes"
 
 #: includes/image.gd.inc:28
 msgid "The GD toolkit is installed and working properly."
-msgstr "El toolkti GD está instalado y funciona correctamente."
+msgstr "El juego de herramientas GD está instalado y funciona apropiadamente."
 
 #: includes/image.gd.inc:33
 msgid "JPEG quality"
@@ -408,138 +374,9 @@ msgid ""
 "configured properly. For more information see <a href=\"@url\">PHP's image "
 "documentation</a>."
 msgstr ""
-"El toolkit de imagen GD requiere que el modulo GD para PHP esté instalado y "
-"configurado correctamente. Para más información vea la <a href=\"@url"
-"\">documentación de imagen en PHP</a>."
-
-#: includes/install.inc:237
-msgid "Failed to modify %settings, please verify the file permissions."
-msgstr "Fallo al modificar %settings. Debe comprobar los permisos del archivo."
-
-#: includes/install.inc:241
-msgid "Failed to open %settings, please verify the file permissions."
-msgstr "Fallo al abrir %settings. Debe comprobar los permisos del archivo."
-
-#: includes/install.inc:295
-msgid ""
-"The %module module is required but was not found. Please move it into the "
-"<em>modules</em> subdirectory."
-msgstr ""
-"El módulo %module es necesario, pero no se encuentra. Debe moverlo al "
-"subdirectorio <em>modules</em>."
-
-#: includes/install.mysql.inc:24
-msgid "PHP MySQL support not enabled."
-msgstr "El soporte para MySQL no está activado en PHP."
-
-#: includes/install.mysqli.inc:24
-msgid "PHP MySQLi support not enabled."
-msgstr "El soporte para MySQLi no está activado en PHP."
-
-#: includes/install.pgsql.inc:24
-msgid "PHP PostgreSQL support not enabled."
-msgstr "El soporte para PostgreSQL no está activado en PHP."
-
-#: includes/install.pgsql.inc:51
-msgid ""
-"Failed to connect to your PostgreSQL database server. PostgreSQL reports the "
-"following message: %error.<ul><li>Are you sure you have the correct username "
-"and password?</li><li>Are you sure that you have typed the correct database "
-"hostname?</li><li>Are you sure that the database server is running?</"
-"li><li>Are you sure you typed the correct database name?</li></ul>For more "
-"help, see the <a href=\"http://drupal.org/node/258\">Installation and "
-"upgrading handbook</a>. If you are unsure what these terms mean you should "
-"probably contact your hosting provider."
-msgstr ""
-"Ha fallado la conexión a su servidor de base de datos PostgreSQL. El mensaje "
-"de PostgreSQL es: %error.<ul><li>¿Está seguro de que tiene el nombre de "
-"usuario y contraseña correctos?</li><li>¿Está seguro de haber escrito "
-"correctamente el nombre del servidor de bases de datos?</li></ul>¿Está "
-"seguro de que el servidor de bases de datos está funcionando?</li><li>¿Está "
-"seguro de haber escrito bien el nombre de la base de datos?</li></ul>Para "
-"buscar más ayuda lea el <a href=\"http://drupal.org/node/258\">Manual de "
-"instalación y actualización</a>. Si no está seguro del significado es éstos "
-"términos probablemente debería ponerse en contacto con su proveedor de web "
-"hosting."
-
-#: includes/install.pgsql.inc:61
-msgid ""
-"Failed to create a test table on your PostgreSQL database server with the "
-"command %query. PostgreSQL reports the following message: %error.<ul><li>Are "
-"you sure the configured username has the necessary PostgreSQL permissions to "
-"create tables in the database?</li></ul>For more help, see the <a href="
-"\"http://drupal.org/node/258\">Installation and upgrading handbook</a>. If "
-"you are unsure what these terms mean you should probably contact your "
-"hosting provider."
-msgstr ""
-"No se ha podido crear una tabla de prueba en su servidor de bases de datos "
-"PostgreSQL con el comando %query. PostgreSQL arroja el siguiente mensaje: %"
-"error.<ul><li>¿Está seguro de que el nombre de usuario elegido tiene "
-"suficientes privilegios PostgreSQL como para crear tablas en la base de "
-"datos?</li></ul>Para buscar más ayuda lea el <a href=\"http://drupal.org/"
-"node/258\">Manual de instalación y actualización</a>. Si no está seguro del "
-"significado es éstos términos podría quizás ponerse en contacto con su "
-"proveedor de alojamiento."
-
-#: includes/install.pgsql.inc:72
-msgid ""
-"Failed to insert a value into a test table on your PostgreSQL database "
-"server. We tried inserting a value with the command %query and PostgreSQL "
-"reported the following error: %error."
-msgstr ""
-"No se ha podido insertar un valor en una tabla de prueba en su servidor de "
-"bases de datos PostgreSQL. Se intentó cargar un valor con el comando %query "
-"y PostgreSQL arrojó el siguiente mensaje: %error."
-
-#: includes/install.pgsql.inc:83
-msgid ""
-"Failed to update a value in a test table on your PostgreSQL database server. "
-"We tried updating a value with the command %query and PostgreSQL reported "
-"the following error: %error."
-msgstr ""
-"No se ha podido modificar un valor en una tabla de prueba en su servidor de "
-"bases de datos PostgreSQL. Se intentó modificar un valor con el comando %"
-"query y PostgreSQL arrojó el siguiente mensaje: %error."
-
-#: includes/install.pgsql.inc:94
-msgid ""
-"Failed to lock a test table on your PostgreSQL database server. We tried "
-"locking a table with the command %query and PostgreSQL reported the "
-"following error: %error."
-msgstr ""
-"No se ha podido bloquear una tabla de prueba en su servidor de bases de "
-"datos PostgreSQL. Se intentó bloquearla con el comando %query y PostgreSQL "
-"arrojó el siguiente error: %error."
-
-#: includes/install.pgsql.inc:105
-msgid ""
-"Failed to unlock a test table on your PostgreSQL database server. We tried "
-"unlocking a table with the command %query and PostgreSQL reported the "
-"following error: %error."
-msgstr ""
-"No se ha podido desbloquear una tabla de prueba en su servidor de bases de "
-"datos PostgreSQL. Se intentó desbloquearla con el comando %query y "
-"PostgreSQL arrojó el siguiente error: %error."
-
-#: includes/install.pgsql.inc:116
-msgid ""
-"Failed to delete a value from a test table on your PostgreSQL database "
-"server. We tried deleting a value with the command %query and PostgreSQL "
-"reported the following error: %error."
-msgstr ""
-"No se ha podido eliminar una valor de una tabla de prueba en su servidor de "
-"bases de datos PostgreSQL. Se intentó borrarlo con el comando %query y "
-"PostgreSQL arrojó el siguiente error: %error."
-
-#: includes/install.pgsql.inc:127
-msgid ""
-"Failed to drop a test table from your PostgreSQL database server. We tried "
-"dropping a table with the command %query and PostgreSQL reported the "
-"following error %error."
-msgstr ""
-"No se ha podido eliminar una tabla de prueba de su servidor de bases de "
-"datos PostgreSQL. Se intentó eliminarla con el comando %query y PostgreSQL "
-"arrojó el siguiente error: %error."
+"EL juego de herramientas de imagen GD requiere que esté instalado y "
+"configurado apropiadamente el módulo GD para PHP. Para más información vea "
+"la <a href=\"@url\">documentación de imagen de PHP</a>."
 
 #: includes/locale.inc:90
 msgid "Code"
@@ -565,7 +402,7 @@ msgstr "Configuración guardada."
 msgid "Predefined language"
 msgstr "Idioma predefinido"
 
-#: includes/locale.inc:161,710
+#: includes/locale.inc:161,711
 msgid "Language name"
 msgstr "Nombre del idioma"
 
@@ -576,12 +413,8 @@ msgid ""
 "appear in this list.)"
 msgstr ""
 "Elija el idioma deseado y pulse el botón <em>Agregar idioma</em>. (Use las "
-"opciones de <em>Idioma personalizado</em> si el idioma deseado no aparece en "
-"esta lista.)"
-
-#: includes/locale.inc:166
-msgid "Add language"
-msgstr "Agregar idioma"
+"opciones de <em>Idioma personalizado</em> si el idioma que desea no figura "
+"en esta lista.)"
 
 #: includes/locale.inc:176
 msgid "Custom language"
@@ -593,7 +426,7 @@ msgstr "Añadir idioma personalizado"
 
 #: includes/locale.inc:203
 msgid "Save language"
-msgstr "Grabar idioma"
+msgstr "Guardar idioma"
 
 #: includes/locale.inc:229,239
 msgid "Language code"
@@ -645,16 +478,15 @@ msgid ""
 "environment.</strong> <em>Example: Specifying \"deutsch\" as the path prefix "
 "for German results in URLs in the form \"www.example.com/deutsch/node\".</em>"
 msgstr ""
-"Código del idioma u otra cadena personalizada para identificación de "
-"patrones dentro de la ruta. Si la gestión del idioma se fija en <em>Sólo "
-"prefijo de la ruta</em> o en <em>Prefijo de la ruta con retorno a idioma</"
-"em>, el sitio se presenta en este idioma cuando el valor del prefijo de ruta "
-"corresponde al de un elemento en la ruta. Para el idioma predeterminado, "
-"este valor se puede dejar en blanco. <strong>Modificar este valor destruirá "
-"los URL existentes, y debe usarse con precaución en un ambiente de "
-"producción.</strong> <em>Ejemplo: Especificar \"deutsch\" como el prefijo de "
-"ruta para el alemán produce URL que tienen la forma \"www.example.com/"
-"deutsch/node\".</em>"
+"Código de idioma u otra cadena personalizada para el empate de patrones "
+"dentro de la ruta. Si la negociación de idioma se estableció como <em>Sólo "
+"prefijo de ruta</em> o como <em>Prefijo de ruta con retorno a idioma</em>, "
+"este sitio es presentado en este idioma cuando el valor del prefijo de ruta "
+"empata con un elemento en la ruta. Para la página predeterminada, este valor "
+"se puede dejar en blanco. <strong>Modificar este valor romperá los enlaces "
+"existente y debe usarse con precaución en un ambiente de producción.</"
+"strong> <em>Ejemplo: Especificar \"deutsch\" como el prefijo de ruta para el "
+"alemán produce URL de la forma \"www.example.com/deutsch/node\".</em>"
 
 #: includes/locale.inc:269
 msgid "Language domain"
@@ -671,14 +503,15 @@ msgid ""
 "in the forms \"http://example.de/node\" and \"http://de.example.com/node\", "
 "respectively.</em>"
 msgstr ""
-"URL específico para el idioma, incluyendo el protocolo. Si la gestión del "
-"idioma se fija en <em>Sólo nombre del dominio</em>, el sitio es presentado "
-"en este idioma cuando el URL que accede al sitio alude a este dominio. Para "
-"el idioma predeterminado este valor puede dejarse en blanco. <strong>Este "
-"valor debe incluir un protocolo como parte de la cadena.</strong> "
-"<em>Ejemplo: Especificar \"http://example.de\" o \"http://de.example.com\" "
-"como dominios de idioma para el alemán produce URL con las formas \"http://"
-"example.de/node\" y \"http://de.example.com/node\", respectivamente.</em>"
+"URL específico del idioma, con protocolo. Con la negociación de idioma "
+"establecida en <em>Sólo nombre de dominio</em>, el sitio es presentado en "
+"este idioma cuando el URL que está accediendo al sitio hace referencia a "
+"este dominio. Para la página predeerminada, este valor puede dejarse en "
+"blanco. <strong>Este valor debe incluir un protocolo como parte de la cadena."
+"</strong> <em>Ejemplo: Especificar \"http://example.de\" o \"http://de."
+"example.com\" como dominios de idioma para el alemán resultará en URL de las "
+"formas \"http://example.de/node\" y \"http://de.example.com/node\", "
+"respectivamente.</em>"
 
 #: includes/locale.inc:277
 msgid "Direction that text in this language is presented."
@@ -705,8 +538,8 @@ msgid ""
 "The language %language has been created and can now be used. More "
 "information is available on the <a href=\"@locale-help\">help screen</a>."
 msgstr ""
-"Se ha creado el idioma %language y ahora puede usarse. Hay más información "
-"disponible en la <a href=\"@locale-help\">pantalla de ayuda</a>."
+"El idioma %language ha sido creado y ahora puede usarse. Hay más información "
+"disponible en la &lt;a href=\"@locale-help\"&gt;pantalla de ayuda&lt;/a&gt;."
 
 #: includes/locale.inc:339
 msgid "Domain and path prefix values should not be set at the same time."
@@ -747,10 +580,10 @@ msgid ""
 "action cannot be undone."
 msgstr ""
 "Borrar un idioma retirará todas las traducciones de la interfaz asociadas a "
-"él, y los mensajes escritos en este idioma serán fijados para ser neutros "
-"idiomáticamente. Esta acción es irreversible."
+"él, y las entradas escritos en este idioma serán fijados para ser neutras "
+"lingüisticamente. Esta acción es irreversible."
 
-#: includes/locale.inc:422
+#: includes/locale.inc:422,423
 msgid "The language %locale has been removed."
 msgstr "Se ha eliminado el idioma %locale."
 
@@ -862,7 +695,7 @@ msgstr ""
 "Elija a qué idioma desea agregar cadenas. Si elige un idioma que todavía no "
 "está incluido, se agregará."
 
-#: includes/locale.inc:623,715,734,1970
+#: includes/locale.inc:623,716,735,2033
 msgid "Text group"
 msgstr "Grupo de texto"
 
@@ -886,15 +719,11 @@ msgstr ""
 "Las cadenas existentes se deben mantener y sólo se deben añadir las cadenas "
 "nuevas"
 
-#: includes/locale.inc:636
-msgid "Import"
-msgstr "Importar"
-
 #: includes/locale.inc:655
 msgid "The language %language has been created."
 msgstr "El idioma %language ha sido creado."
 
-#: includes/locale.inc:661
+#: includes/locale.inc:661,662
 msgid "The translation import of %filename failed."
 msgstr "Fallo al importar la traducción de %filename."
 
@@ -902,11 +731,11 @@ msgstr "Fallo al importar la traducción de %filename."
 msgid "File to import not found."
 msgstr "No se encontró el archivo a importar."
 
-#: includes/locale.inc:706
+#: includes/locale.inc:707
 msgid "Export translation"
 msgstr "Exportar traducción"
 
-#: includes/locale.inc:712
+#: includes/locale.inc:713
 msgid ""
 "Select the language to export in Gettext Portable Object (<em>.po</em>) "
 "format."
@@ -914,15 +743,11 @@ msgstr ""
 "Elija a qué idioma exportar en el formato Gettext Portable Object (<em>.po</"
 "em>)."
 
-#: includes/locale.inc:719,738
-msgid "Export"
-msgstr "Exportar"
-
-#: includes/locale.inc:729
+#: includes/locale.inc:730
 msgid "Export template"
 msgstr "Exportar plantilla"
 
-#: includes/locale.inc:731
+#: includes/locale.inc:732
 msgid ""
 "Generate a Gettext Portable Object Template (<em>.pot</em>) file with all "
 "strings from the Drupal locale database."
@@ -930,38 +755,38 @@ msgstr ""
 "Generar un archivo en formato Plantilla Gettext Portable Object (<em>.pot</"
 "em>) con todas las cadenas de la base de datos de localización de Drupal."
 
-#: includes/locale.inc:773
+#: includes/locale.inc:774
 msgid "String not found."
 msgstr "Cadena no encontrada."
 
-#: includes/locale.inc:781
+#: includes/locale.inc:782
 msgid "Original text"
 msgstr "Texto original"
 
-#: includes/locale.inc:823
+#: includes/locale.inc:824
 msgid "Save translations"
 msgstr "Guardar las traducciones"
 
-#: includes/locale.inc:853
+#: includes/locale.inc:885
 msgid "The string has been saved."
 msgstr "Se ha guardado la cadena."
 
-#: includes/locale.inc:879
+#: includes/locale.inc:932
 msgid "The string has been removed."
 msgstr "La cadena ha sido eliminada."
 
-#: includes/locale.inc:973
+#: includes/locale.inc:1026
 msgid "The language selected for import is not supported."
 msgstr "El idioma elegido para importar no está admitido"
 
-#: includes/locale.inc:988
+#: includes/locale.inc:1041
 msgid ""
 "The translation file %filename appears to have a missing or malformed header."
 msgstr ""
 "El archivo de traducción %filename parece tener un encabezado perdido o mal "
 "formado."
 
-#: includes/locale.inc:998
+#: includes/locale.inc:1051
 msgid ""
 "The translation was successfully imported. There are %number newly created "
 "translated strings, %update strings were updated and %delete strings were "
@@ -971,7 +796,7 @@ msgstr ""
 "reciente creación, %update cadenas fueron actualizadas y %delete cadenas "
 "fueron eliminadas."
 
-#: includes/locale.inc:1374
+#: includes/locale.inc:1437
 msgid ""
 "The translation file %filename contains an error: the plural formula could "
 "not be parsed."
@@ -979,21 +804,21 @@ msgstr ""
 "El archivo de traducción %filename contiene un error: no se pudo analizar la "
 "fórmula de plural."
 
-#: includes/locale.inc:1970
+#: includes/locale.inc:2033
 msgid "String"
 msgstr "Cadena"
 
-#: includes/locale.inc:1996
+#: includes/locale.inc:2059
 msgid "No strings found for your search."
 msgstr "No se han encontrado cadenas de texto que coincidan con su busqueda."
 
-#: includes/locale.inc:1021
+#: includes/locale.inc:1079
 msgid ""
 "The translation import failed, because the file %filename could not be read."
 msgstr ""
 "Fallo al importar la traducción, porque no se pudo leer el archivo %filename."
 
-#: includes/locale.inc:1050
+#: includes/locale.inc:1108
 msgid ""
 "The translation file %filename contains an error: \"msgstr\" was expected "
 "but not found on line %line."
@@ -1001,7 +826,7 @@ msgstr ""
 "El archivo de traducción %filename contiene un error: se esperaba «msgstr», "
 "pero no se encontró en la línea %line."
 
-#: includes/locale.inc:1056
+#: includes/locale.inc:1114
 msgid ""
 "The translation file %filename contains an error: \"msgid_plural\" was "
 "expected but not found on line %line."
@@ -1009,13 +834,13 @@ msgstr ""
 "El archivo de traducción %filename contiene un error: se esperaba "
 "«msgid_plural», pero no se encontró en la línea %line."
 
-#: includes/locale.inc:1062,1080,1092,1100,1114,1123
+#: includes/locale.inc:1120,1138,1150,1158,1172,1181
 msgid "The translation file %filename contains a syntax error on line %line."
 msgstr ""
 "El archivo de traducción %filename contiene un error de sintaxis en la línea "
 "%line."
 
-#: includes/locale.inc:1074
+#: includes/locale.inc:1132
 msgid ""
 "The translation file %filename contains an error: \"msgid\" is unexpected on "
 "line %line."
@@ -1023,7 +848,7 @@ msgstr ""
 "El archivo de traducción %filename contiene un error: no se esperaba «msgid» "
 "en la línea %line."
 
-#: includes/locale.inc:1088
+#: includes/locale.inc:1146
 msgid ""
 "The translation file %filename contains an error: \"msgstr[]\" is unexpected "
 "on line %line."
@@ -1031,15 +856,15 @@ msgstr ""
 "El archivo de traducción %filename contiene un error: no se esperaba «msgstr"
 "[]» en la línea %line."
 
-#: includes/locale.inc:1108
+#: includes/locale.inc:1166
 msgid ""
 "The translation file %filename contains an error: \"msgstr\" is unexpected "
 "on line %line."
 msgstr ""
-"El archivo de traducción %filename contiene un error: no se esperaba "
-"«msgstr» en la línea %line."
+"El archivo de traducción %filename contiene un error: no se esperaba «msgstr» "
+"en la línea %line."
 
-#: includes/locale.inc:1136
+#: includes/locale.inc:1194
 msgid ""
 "The translation file %filename contains an error: there is an unexpected "
 "string on line %line."
@@ -1047,40 +872,42 @@ msgstr ""
 "El archivo de traducción %filename contiene un error: no se esperaba una "
 "cadena en la línea %line."
 
-#: includes/locale.inc:1147
+#: includes/locale.inc:1205
 msgid "The translation file %filename ended unexpectedly at line %line."
 msgstr ""
 "El archivo de traducción %filename terminó de forma inesperada en la línea %"
 "line."
 
-#: includes/locale.inc:2514
+#: includes/locale.inc:2577
 msgid "Importing interface translations"
 msgstr "Importando traducciones del interfaz"
 
-#: includes/locale.inc:2515
+#: includes/locale.inc:2578
 msgid "Starting import"
 msgstr "Empezando la importación"
 
-#: includes/locale.inc:2516
+#: includes/locale.inc:2579
 msgid "Error importing interface translations"
 msgstr "Error al importar las traducciones del interfaz"
 
-#: includes/locale.inc:2554
+#: includes/locale.inc:2617
 msgid "One translation file imported for the newly installed modules."
 msgid_plural ""
 "@count translation files imported for the newly installed modules."
 msgstr[0] ""
-"Se importó un archivo de traducción para los módulos recién instalados."
+"Se ha importado un documento de traducción para los módulos recien "
+"instalados."
 msgstr[1] ""
-"Se importaron @count archivos de traducción para los módulos recién "
+"Se ha importado @count documentos de traducción para los módulos recien "
 "instalados."
 
-#: includes/locale.inc:2564
+#: includes/locale.inc:2627
 msgid "One translation file imported for the enabled modules."
 msgid_plural "@count translation files imported for the enabled modules."
-msgstr[0] "Se importó un archivo de traducción para los módulos habilitados."
+msgstr[0] ""
+"Se han importado 1 documento de traducción para los módulos activados."
 msgstr[1] ""
-"Se importaron @count archivos de traducción para los módulos habilitados."
+"Se han importado @count documentos de traducción para los módulos activados."
 
 #: includes/mail.inc:135
 msgid ""
@@ -1090,7 +917,7 @@ msgstr ""
 "No fue posible enviar el correo. Por favor póngase en contacto con el "
 "administrador del sitio si el problema persiste."
 
-#: includes/menu.inc:2362
+#: includes/menu.inc:2423
 msgid "Operating in off-line mode."
 msgstr "Funcionando en modo desconectado."
 
@@ -1134,79 +961,41 @@ msgstr "Ir a la página @number"
 msgid "sort by @s"
 msgstr "ordenar por @s"
 
-#: includes/theme.inc:1339,1342
+#: includes/theme.inc:1387,1390
 msgid "sort icon"
 msgstr "ordenar por icono"
 
-#: includes/theme.inc:1339
+#: includes/theme.inc:1387
 msgid "sort ascending"
 msgstr "ordenar ascendente"
 
-#: includes/theme.inc:1342
+#: includes/theme.inc:1390
 msgid "sort descending"
 msgstr "orden descendente"
 
-#: includes/theme.inc:1380
+#: includes/theme.inc:1428
 msgid "updated"
 msgstr "actualizado"
 
-#: includes/theme.inc:1452
+#: includes/theme.inc:1500
 msgid "[<a href=\"@link\">more help...</a>]"
 msgstr "[<a href=\"@link\">más ayuda...</a>]"
 
-#: includes/theme.inc:1465,1465
+#: includes/theme.inc:1513
 msgid "XML feed"
 msgstr "Hilo XML"
 
-#: includes/theme.inc:1479
+#: includes/theme.inc:1527
 msgid "Syndicate content"
 msgstr "Distribuir contenido"
 
-#: includes/theme.inc:1493
+#: includes/theme.inc:1541
 msgid "<a href=\"@link\" title=\"@title\">more</a>"
 msgstr "<a href=\"@link\" title=\"@title\">más</a>"
 
-#: includes/theme.inc:1573
+#: includes/theme.inc:1621
 msgid "not verified"
 msgstr "no verificado"
-
-#: includes/theme.maintenance.inc:122
-msgid ""
-"The following errors must be resolved before you can continue the "
-"installation process"
-msgstr ""
-"Se deben resolver los errores siguientes antes de seguir con el proceso de "
-"instalación."
-
-#: includes/theme.maintenance.inc:122
-msgid ""
-"The following error must be resolved before you can continue the "
-"installation process"
-msgstr ""
-"Se debe resolver el error siguiente antes de seguir con el proceso de "
-"instalación."
-
-#: includes/theme.maintenance.inc:125
-msgid "Please check the error messages and <a href=\"!url\">try again</a>."
-msgstr ""
-"Por favor comprueba los mensajes de eror y <a href=\"!url\">prueba de nuevo</"
-"a>."
-
-#: includes/theme.maintenance.inc:137
-msgid ""
-"The following installation warnings should be carefully reviewed, but in "
-"most cases may be safely ignored"
-msgstr ""
-"Se deben revisar atentamente las siguientes advertencias de la instalación, "
-"pero en la mayor parte de los casos, se pueden ignorar."
-
-#: includes/theme.maintenance.inc:137
-msgid ""
-"The following installation warning should be carefully reviewed, but in most "
-"cases may be safely ignored"
-msgstr ""
-"Se debe revisar atentamente la siguiente advertencia de la instalación, pero "
-"en la mayor parte de los casos, se pueden ignorar."
 
 #: includes/unicode.inc:48
 msgid ""
@@ -1215,7 +1004,7 @@ msgid ""
 "make sure you are using the PCRE library supplied by PHP. Please refer to "
 "the <a href=\"@url\">PHP PCRE documentation</a> for more information."
 msgstr ""
-"La biblioteca PCRE de su instalación de PHP está obsoleta. Esto puede "
+"La biblioteca PCRE de su instalación de PHP está desactualizada. Esto puede "
 "provocar problemas con la gestión del texto Unicode. Si está trabajando con "
 "PHP 4.3.3 o posterior, debe asegurarse de que está usando la biblioteca PCRE "
 "suministrada por PHP. Tiene más información en la<a href=\"@url"
@@ -1287,7 +1076,7 @@ msgstr "Extensión Mbstring de PHP"
 msgid "Unicode library"
 msgstr "Biblioteca Unicode"
 
-#: includes/xmlrpc.inc:451
+#: includes/xmlrpc.inc:454
 msgid "Parse error. Not well formed"
 msgstr "Error al analizar. No está bien formado"
 
@@ -1301,10 +1090,6 @@ msgstr ""
 "Error del servidor. XML-RPC no válido. La petición puede ser la llamada a "
 "unmétodo."
 
-#: includes/xmlrpcs.inc:152,291
-msgid "Server error. Requested method %methodname not specified."
-msgstr "Error del servidor. No se indicó el método solicitado, %methodname."
-
 #: includes/xmlrpcs.inc:163
 msgid "Server error. Wrong number of method parameters."
 msgstr "Error del servidor. Número incorrecto de parámetros del método."
@@ -1312,10 +1097,6 @@ msgstr "Error del servidor. Número incorrecto de parámetros del método."
 #: includes/xmlrpcs.inc:200
 msgid "Server error. Invalid method parameters."
 msgstr "Error del servidor. Parámetros del método no válidos."
-
-#: includes/xmlrpcs.inc:206
-msgid "Server error. Requested function %method does not exist."
-msgstr "Error del servidor. La función solicitada, %method, no existe."
 
 #: includes/xmlrpcs.inc:219
 msgid "Invalid syntax for system.multicall."
@@ -1325,22 +1106,917 @@ msgstr "Sintaxis no válida para system.multicall."
 msgid "Recursive calls to system.multicall are forbidden."
 msgstr "Las llamadas recursivas a system.multicall están prohibidas."
 
-#: includes/xmlrpcs.inc:294
-msgid "Server error. Requested method %methodname signature not specified."
-msgstr ""
-"Error del servidor. No existe la firma del método solicitado %methodname."
-
 #: includes/image.gd.inc:57
 msgid "JPEG quality must be a number between 0 and 100."
+msgstr "La calidad JPEG debe ser un número entre 0 y 100"
+
+#: includes/common.inc:609
+msgid "%message in %file on line %line."
+msgstr "%message en %file en la línea %line."
+
+#: includes/common.inc:2632
+msgid "Cron has been running for more than an hour and is most likely stuck."
+msgstr ""
+"Cron ha estado ejecutándose durante más de una hora y parece estar atascado."
+
+#: includes/common.inc:2639
+msgid "Attempting to re-run cron while it is already running."
+msgstr "Intentando ejecutar cron cuando ya está corriendo."
+
+#: includes/common.inc:2654
+msgid "Cron run completed."
+msgstr "Ejecución de cron terminada."
+
+#: includes/common.inc:2670
+msgid "Cron run exceeded the time limit and was aborted."
+msgstr "La ejecución de cron excedió su límite de tiempo y fue abortada."
+
+#: includes/common.inc:1194
+msgid "1 byte"
+msgid_plural "@count bytes"
+msgstr[0] "1 byte"
+msgstr[1] "@count bytes"
+
+#: includes/file.inc:122
+msgid ""
+"The directory %directory is not writable, because it does not have the "
+"correct permissions set."
+msgstr ""
+"No se puede escribir en la carpeta %directory, porque no tiene definidos los "
+"permisos correctos."
+
+#: includes/file.inc:226
+msgid ""
+"The selected file %file could not be uploaded, because the destination %"
+"directory could not be found, or because its permissions do not allow the "
+"file to be written."
+msgstr ""
+"El archivo seleccionado %file no se pudo subir, porque la carpeta destino %"
+"directory no se pudo encontrar, o porque sus permisos no permiten escribir "
+"en ella el archivo."
+
+#: includes/form.inc:699
+msgid "Illegal choice %choice in !name element."
+msgstr "Opción inválida %choice en el elemento !name."
+
+#: includes/image.inc:95
+msgid ""
+"The selected image handling toolkit %toolkit can not correctly process %"
+"function."
+msgstr ""
+"El juego de herramientas de manejo de imagen %toolkit seleccionado no puede "
+"procesar correctamente %function."
+
+#: includes/locale.inc:1879
+msgid "Exported %locale translation file: %filename."
+msgstr ""
+"Se exportó el archivo de traducción de %locale con el nombre %filename."
+
+#: includes/locale.inc:1883
+msgid "Exported translation file: %filename."
+msgstr "Se exportó el archivo de traducción: %filename."
+
+#: includes/locale.inc:2299
+msgid "Afar"
+msgstr "Afarense"
+
+#: includes/locale.inc:2300
+msgid "Abkhazian"
+msgstr "Abjasio"
+
+#: includes/locale.inc:2301
+msgid "Avestan"
+msgstr "Avéstico"
+
+#: includes/locale.inc:2302
+msgid "Afrikaans"
+msgstr "Afrikáans"
+
+#: includes/locale.inc:2303
+msgid "Akan"
+msgstr "Akan"
+
+#: includes/locale.inc:2304
+msgid "Amharic"
+msgstr "Amhárico"
+
+#: includes/locale.inc:2305
+msgid "Arabic"
+msgstr "Árabe"
+
+#: includes/locale.inc:2306
+msgid "Assamese"
+msgstr "Asamés"
+
+#: includes/locale.inc:2307
+msgid "Avar"
+msgstr "Avar"
+
+#: includes/locale.inc:2308
+msgid "Aymara"
+msgstr "Aymara"
+
+#: includes/locale.inc:2309
+msgid "Azerbaijani"
+msgstr "Azerbaiyano"
+
+#: includes/locale.inc:2310
+msgid "Bashkir"
+msgstr "Bashkir"
+
+#: includes/locale.inc:2311
+msgid "Belarusian"
+msgstr "Bielorruso"
+
+#: includes/locale.inc:2312
+msgid "Bulgarian"
+msgstr "Búlgaro"
+
+#: includes/locale.inc:2313
+msgid "Bihari"
+msgstr "Biharí"
+
+#: includes/locale.inc:2314
+msgid "Bislama"
+msgstr "Bislama"
+
+#: includes/locale.inc:2315
+msgid "Bambara"
+msgstr "Bambara"
+
+#: includes/locale.inc:2316
+msgid "Bengali"
+msgstr "Bengalí"
+
+#: includes/locale.inc:2317
+msgid "Tibetan"
+msgstr "Tibetano"
+
+#: includes/locale.inc:2318
+msgid "Breton"
+msgstr "Bretón"
+
+#: includes/locale.inc:2319
+msgid "Bosnian"
+msgstr "Bosnio"
+
+#: includes/locale.inc:2320
+msgid "Catalan"
+msgstr "Catalán"
+
+#: includes/locale.inc:2321
+msgid "Chechen"
+msgstr "Checheno"
+
+#: includes/locale.inc:2322
+msgid "Chamorro"
+msgstr "Chamorro"
+
+#: includes/locale.inc:2323
+msgid "Corsican"
+msgstr "Corso"
+
+#: includes/locale.inc:2324
+msgid "Cree"
+msgstr "Cree"
+
+#: includes/locale.inc:2325
+msgid "Czech"
+msgstr "Checo"
+
+#: includes/locale.inc:2326
+msgid "Old Slavonic"
+msgstr "Eslavo antiguo"
+
+#: includes/locale.inc:2327
+msgid "Chuvash"
+msgstr "Chuvasio"
+
+#: includes/locale.inc:2328
+msgid "Welsh"
+msgstr "Galés"
+
+#: includes/locale.inc:2329
+msgid "Danish"
+msgstr "Danés"
+
+#: includes/locale.inc:2330
+msgid "German"
+msgstr "Alemán"
+
+#: includes/locale.inc:2331
+msgid "Maldivian"
+msgstr "Maldivo"
+
+#: includes/locale.inc:2332
+msgid "Bhutani"
+msgstr "Butanés"
+
+#: includes/locale.inc:2333
+msgid "Ewe"
+msgstr "Eue"
+
+#: includes/locale.inc:2334
+msgid "Greek"
+msgstr "Griego"
+
+#: includes/locale.inc:2335
+msgid "English"
+msgstr "Inglés"
+
+#: includes/locale.inc:2336
+msgid "Esperanto"
+msgstr "Esperanto"
+
+#: includes/locale.inc:2337
+msgid "Spanish"
+msgstr "Español"
+
+#: includes/locale.inc:2338
+msgid "Estonian"
+msgstr "Estonio"
+
+#: includes/locale.inc:2339
+msgid "Basque"
+msgstr "Vasco"
+
+#: includes/locale.inc:2340
+msgid "Persian"
+msgstr "Farsi"
+
+#: includes/locale.inc:2341
+msgid "Fulah"
+msgstr "Fulah"
+
+#: includes/locale.inc:2342
+msgid "Finnish"
+msgstr "Finlandés"
+
+#: includes/locale.inc:2343
+msgid "Fiji"
+msgstr "Fijiano"
+
+#: includes/locale.inc:2344
+msgid "Faeroese"
+msgstr "Feroés"
+
+#: includes/locale.inc:2345
+msgid "French"
+msgstr "Francés"
+
+#: includes/locale.inc:2346
+msgid "Frisian"
+msgstr "Frisio"
+
+#: includes/locale.inc:2347
+msgid "Irish"
+msgstr "Gaélico de Irlanda"
+
+#: includes/locale.inc:2348
+msgid "Scots Gaelic"
+msgstr "Gálico escocés"
+
+#: includes/locale.inc:2349
+msgid "Galician"
+msgstr "Gallego"
+
+#: includes/locale.inc:2350
+msgid "Guarani"
+msgstr "Guaraní"
+
+#: includes/locale.inc:2351
+msgid "Gujarati"
+msgstr "Gujarati"
+
+#: includes/locale.inc:2352
+msgid "Manx"
+msgstr "Manx"
+
+#: includes/locale.inc:2353
+msgid "Hausa"
+msgstr "Hausa"
+
+#: includes/locale.inc:2354
+msgid "Hebrew"
+msgstr "Hebreo"
+
+#: includes/locale.inc:2355
+msgid "Hindi"
+msgstr "Hindi"
+
+#: includes/locale.inc:2356
+msgid "Hiri Motu"
+msgstr "Hiri Motu"
+
+#: includes/locale.inc:2357
+msgid "Croatian"
+msgstr "Croata"
+
+#: includes/locale.inc:2358
+msgid "Hungarian"
+msgstr "Húngaro"
+
+#: includes/locale.inc:2359
+msgid "Armenian"
+msgstr "Armenio"
+
+#: includes/locale.inc:2360
+msgid "Herero"
+msgstr "Herero"
+
+#: includes/locale.inc:2361
+msgid "Interlingua"
+msgstr "Interlingua"
+
+#: includes/locale.inc:2362
+msgid "Indonesian"
+msgstr "Indonesio"
+
+#: includes/locale.inc:2363
+msgid "Interlingue"
+msgstr "Interlingua"
+
+#: includes/locale.inc:2364
+msgid "Igbo"
+msgstr "Igbo"
+
+#: includes/locale.inc:2365
+msgid "Inupiak"
+msgstr "Inupiak"
+
+#: includes/locale.inc:2366
+msgid "Icelandic"
+msgstr "Islandés"
+
+#: includes/locale.inc:2367
+msgid "Italian"
+msgstr "Italiano"
+
+#: includes/locale.inc:2368
+msgid "Inuktitut"
+msgstr "Inuktitut"
+
+#: includes/locale.inc:2369
+msgid "Japanese"
+msgstr "Japonés"
+
+#: includes/locale.inc:2370
+msgid "Javanese"
+msgstr "Javanés"
+
+#: includes/locale.inc:2371
+msgid "Georgian"
+msgstr "Georgiano"
+
+#: includes/locale.inc:2372
+msgid "Kongo"
+msgstr "Congolés"
+
+#: includes/locale.inc:2373
+msgid "Kikuyu"
+msgstr "Kikuyu"
+
+#: includes/locale.inc:2374
+msgid "Kwanyama"
+msgstr "Kwanyama"
+
+#: includes/locale.inc:2375
+msgid "Kazakh"
+msgstr "Kazajo"
+
+#: includes/locale.inc:2376
+msgid "Greenlandic"
+msgstr "Groenlandés"
+
+#: includes/locale.inc:2377
+msgid "Cambodian"
+msgstr "Camboyano"
+
+#: includes/locale.inc:2378
+msgid "Kannada"
+msgstr "Kanada"
+
+#: includes/locale.inc:2379
+msgid "Korean"
+msgstr "Coreano"
+
+#: includes/locale.inc:2380
+msgid "Kanuri"
+msgstr "Kanuri"
+
+#: includes/locale.inc:2381
+msgid "Kashmiri"
+msgstr "Cachemirí"
+
+#: includes/locale.inc:2382
+msgid "Kurdish"
+msgstr "Kurdo"
+
+#: includes/locale.inc:2383
+msgid "Komi"
+msgstr "Komi"
+
+#: includes/locale.inc:2384
+msgid "Cornish"
+msgstr "Córnico"
+
+#: includes/locale.inc:2385
+msgid "Kirghiz"
+msgstr "Kirguís"
+
+#: includes/locale.inc:2386
+msgid "Latin"
+msgstr "Latín"
+
+#: includes/locale.inc:2387
+msgid "Luxembourgish"
+msgstr "Luxemburgués"
+
+#: includes/locale.inc:2388
+msgid "Luganda"
+msgstr "Luganda"
+
+#: includes/locale.inc:2389
+msgid "Lingala"
+msgstr "Lingala"
+
+#: includes/locale.inc:2390
+msgid "Laothian"
+msgstr "Laosiano"
+
+#: includes/locale.inc:2391
+msgid "Lithuanian"
+msgstr "Lituano"
+
+#: includes/locale.inc:2392
+msgid "Latvian"
+msgstr "Letón"
+
+#: includes/locale.inc:2393
+msgid "Malagasy"
+msgstr "Malgache"
+
+#: includes/locale.inc:2394
+msgid "Marshallese"
+msgstr "Marsellés"
+
+#: includes/locale.inc:2395
+msgid "Maori"
+msgstr "Maorí"
+
+#: includes/locale.inc:2396
+msgid "Macedonian"
+msgstr "Macedonio"
+
+#: includes/locale.inc:2397
+msgid "Malayalam"
+msgstr "Malayalam"
+
+#: includes/locale.inc:2398
+msgid "Mongolian"
+msgstr "Mongol"
+
+#: includes/locale.inc:2399
+msgid "Moldavian"
+msgstr "Moldavo"
+
+#: includes/locale.inc:2400
+msgid "Marathi"
+msgstr "Márata"
+
+#: includes/locale.inc:2401
+msgid "Malay"
+msgstr "Malayo"
+
+#: includes/locale.inc:2402
+msgid "Maltese"
+msgstr "Maltés"
+
+#: includes/locale.inc:2403
+msgid "Burmese"
+msgstr "Birmano"
+
+#: includes/locale.inc:2404
+msgid "Nauru"
+msgstr "Nauruano"
+
+#: includes/locale.inc:2405
+msgid "North Ndebele"
+msgstr "Ndebele (Norte)"
+
+#: includes/locale.inc:2406
+msgid "Nepali"
+msgstr "Nepalí"
+
+#: includes/locale.inc:2407
+msgid "Ndonga"
+msgstr "Ndonga"
+
+#: includes/locale.inc:2408
+msgid "Dutch"
+msgstr "Holandés"
+
+#: includes/locale.inc:2409
+msgid "Norwegian Bokmål"
+msgstr "Noruego Bokmål"
+
+#: includes/locale.inc:2410
+msgid "Norwegian Nynorsk"
+msgstr "Noruego Nynorsk"
+
+#: includes/locale.inc:2411
+msgid "South Ndebele"
+msgstr "Ndebele (Sur)"
+
+#: includes/locale.inc:2412
+msgid "Navajo"
+msgstr "Navajo"
+
+#: includes/locale.inc:2413
+msgid "Chichewa"
+msgstr "Chichewa"
+
+#: includes/locale.inc:2414
+msgid "Occitan"
+msgstr "Occitano"
+
+#: includes/locale.inc:2415
+msgid "Oromo"
+msgstr "Oromo"
+
+#: includes/locale.inc:2416
+msgid "Oriya"
+msgstr "Oriya"
+
+#: includes/locale.inc:2417
+msgid "Ossetian"
+msgstr "Oseto"
+
+#: includes/locale.inc:2418
+msgid "Punjabi"
+msgstr "Punjabí"
+
+#: includes/locale.inc:2419
+msgid "Pali"
+msgstr "Pali"
+
+#: includes/locale.inc:2420
+msgid "Polish"
+msgstr "Polaco"
+
+#: includes/locale.inc:2421
+msgid "Pashto"
+msgstr "Pashto"
+
+#: includes/locale.inc:2422
+msgid "Portuguese, Portugal"
+msgstr "Portugués, Portugal"
+
+#: includes/locale.inc:2423
+msgid "Portuguese, Brazil"
+msgstr "Portugués, Brasil"
+
+#: includes/locale.inc:2424
+msgid "Quechua"
+msgstr "Quechua"
+
+#: includes/locale.inc:2425
+msgid "Rhaeto-Romance"
+msgstr "Retorrománico"
+
+#: includes/locale.inc:2426
+msgid "Kirundi"
+msgstr "Kirundi"
+
+#: includes/locale.inc:2427
+msgid "Romanian"
+msgstr "Rumano"
+
+#: includes/locale.inc:2428
+msgid "Russian"
+msgstr "Ruso"
+
+#: includes/locale.inc:2429
+msgid "Kinyarwanda"
+msgstr "Kinyarwanda"
+
+#: includes/locale.inc:2430
+msgid "Sanskrit"
+msgstr "Sánscrito"
+
+#: includes/locale.inc:2431
+msgid "Sardinian"
+msgstr "Sardo"
+
+#: includes/locale.inc:2432
+msgid "Sindhi"
+msgstr "Sindino"
+
+#: includes/locale.inc:2433
+msgid "Northern Sami"
+msgstr "Sami (Norte)"
+
+#: includes/locale.inc:2434
+msgid "Sango"
+msgstr "Sango"
+
+#: includes/locale.inc:2435
+msgid "Serbo-Croatian"
+msgstr "Serbocroata"
+
+#: includes/locale.inc:2436
+msgid "Singhalese"
+msgstr "Cingalés"
+
+#: includes/locale.inc:2437
+msgid "Slovak"
+msgstr "Eslovaco"
+
+#: includes/locale.inc:2438
+msgid "Slovenian"
+msgstr "Esloveno"
+
+#: includes/locale.inc:2439
+msgid "Samoan"
+msgstr "Samoano"
+
+#: includes/locale.inc:2440
+msgid "Shona"
+msgstr "Sonés"
+
+#: includes/locale.inc:2441
+msgid "Somali"
+msgstr "Somalí"
+
+#: includes/locale.inc:2442
+msgid "Albanian"
+msgstr "Albanés"
+
+#: includes/locale.inc:2443
+msgid "Serbian"
+msgstr "Serbio"
+
+#: includes/locale.inc:2444
+msgid "Siswati"
+msgstr "Suazilandés"
+
+#: includes/locale.inc:2445
+msgid "Sesotho"
+msgstr "Sesotés"
+
+#: includes/locale.inc:2446
+msgid "Sudanese"
+msgstr "Sudanés"
+
+#: includes/locale.inc:2447
+msgid "Swedish"
+msgstr "Sueco"
+
+#: includes/locale.inc:2448
+msgid "Swahili"
+msgstr "Suajili"
+
+#: includes/locale.inc:2449
+msgid "Tamil"
+msgstr "Tamil"
+
+#: includes/locale.inc:2450
+msgid "Telugu"
+msgstr "Telugo"
+
+#: includes/locale.inc:2451
+msgid "Tajik"
+msgstr "Tayiko"
+
+#: includes/locale.inc:2452
+msgid "Thai"
+msgstr "Tailandés"
+
+#: includes/locale.inc:2453
+msgid "Tigrinya"
+msgstr "Tigriñés"
+
+#: includes/locale.inc:2454
+msgid "Turkmen"
+msgstr "Turcomano"
+
+#: includes/locale.inc:2455
+msgid "Tagalog"
+msgstr "Tagalo"
+
+#: includes/locale.inc:2456
+msgid "Setswana"
+msgstr "Sechuanés"
+
+#: includes/locale.inc:2457
+msgid "Tonga"
+msgstr "Tongués"
+
+#: includes/locale.inc:2458
+msgid "Turkish"
+msgstr "Turco"
+
+#: includes/locale.inc:2459
+msgid "Tsonga"
+msgstr "Tsonga"
+
+#: includes/locale.inc:2460
+msgid "Tatar"
+msgstr "Tártaro"
+
+#: includes/locale.inc:2461
+msgid "Twi"
+msgstr "Tui"
+
+#: includes/locale.inc:2462
+msgid "Tahitian"
+msgstr "Tahitiano"
+
+#: includes/locale.inc:2463
+msgid "Uighur"
+msgstr "Uighur"
+
+#: includes/locale.inc:2464
+msgid "Ukrainian"
+msgstr "Ucraniano"
+
+#: includes/locale.inc:2465
+msgid "Urdu"
+msgstr "Urdu"
+
+#: includes/locale.inc:2466
+msgid "Uzbek"
+msgstr "Uzbeko"
+
+#: includes/locale.inc:2467
+msgid "Venda"
+msgstr "Venda"
+
+#: includes/locale.inc:2468
+msgid "Vietnamese"
+msgstr "Vietnamita"
+
+#: includes/locale.inc:2469
+msgid "Wolof"
+msgstr "Uolof"
+
+#: includes/locale.inc:2470
+msgid "Xhosa"
+msgstr "Xhosa"
+
+#: includes/locale.inc:2471
+msgid "Yiddish"
+msgstr "Yidish"
+
+#: includes/locale.inc:2472
+msgid "Yoruba"
+msgstr "Yoruba"
+
+#: includes/locale.inc:2473
+msgid "Zhuang"
+msgstr "Zhuang"
+
+#: includes/locale.inc:2474
+msgid "Chinese, Simplified"
+msgstr "Chino, simplificado"
+
+#: includes/locale.inc:2475
+msgid "Chinese, Traditional"
+msgstr "Chino, tradicional"
+
+#: includes/locale.inc:2476
+msgid "Zulu"
+msgstr "Zulú"
+
+#: includes/unicode.inc:151
+msgid "Could not convert XML encoding %s to UTF-8."
+msgstr "No fue posible convertir la codificación de XML %s a UTF-8."
+
+#: includes/unicode.inc:184
+msgid ""
+"Unsupported encoding %s. Please install iconv, GNU recode or mbstring for "
+"PHP."
+msgstr ""
+"Codificación %s no admitida. Haga el favor de instalar iconv, GNU recode o "
+"mbstring para PHP."
+
+#: includes/actions.inc:46
+msgid ""
+"Stack overflow: too many calls to actions_do(). Aborting to prevent infinite "
+"recursion."
+msgstr ""
+"Desbordamiento de pila: muchas llamadas a actions_do(). Abortando para "
+"prevenir una recursión infinita."
+
+#: includes/actions.inc:275
+msgid "Action '%action' added."
+msgstr "Action '%action' agregada"
+
+#: includes/actions.inc:297
+msgid "Removed orphaned action '%action' from database."
+msgstr "Eliminada de la base de datos la acción huérfana '%action'."
+
+#: includes/actions.inc:329
+msgid "Action %action saved."
+msgstr "Acción %action guardada."
+
+#: includes/actions.inc:337
+msgid "Action %action created."
+msgstr "Acción %action creada."
+
+#: includes/actions.inc:303
+msgid "One orphaned action (%orphans) exists in the actions table. !link"
+msgid_plural ""
+"@count orphaned actions (%orphans) exist in the actions table. !link"
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/file.inc:574
+msgid ""
+"Upload error. Could not move uploaded file %file to destination %destination."
+msgstr ""
+"Error de subida. No se ha podido mover el archivo %file al destino %"
+"destination."
+
+#: includes/locale.inc:995
+msgid "The %language language (%code) has been created."
+msgstr "El idioma %language (%code) ha sido creado."
+
+#: includes/locale.inc:1052
+msgid ""
+"Imported %file into %locale: %number new strings added, %update updated and %"
+"delete removed."
+msgstr ""
+"Se ha importado %file en %locale: %number nuevas cadenas añadidas, %update "
+"actualizadas y %delete borradas."
+
+#: includes/locale.inc:2224
+msgid "Updated JavaScript translation file for the language %language."
+msgstr ""
+"Archivo de traducción de JavaScript actualizado para el idioma %language."
+
+#: includes/locale.inc:2227
+msgid "Created JavaScript translation file for the language %language."
+msgstr "Creado archivo de traducción JavaScript para el idioma %language."
+
+#: includes/locale.inc:2230
+msgid ""
+"Removed JavaScript translation file for the language %language, because no "
+"translations currently exist for that language."
+msgstr ""
+"Borrado archivo de traducción JavaScript para el idioma %language, porque "
+"actualmente no existen traducciones para ese idioma."
+
+#: includes/locale.inc:2233
+msgid ""
+"An error occurred during creation of the JavaScript translation file for the "
+"language %language."
+msgstr ""
+"Ocurrió un error durante la creación de la traducción de un archivo "
+"JavaScript para el idioma %language."
+
+#: includes/mail.inc:134
+msgid "Error sending e-mail (from %from to %to)."
+msgstr "Error enviando correo electrónico (de %from para %to)."
+
+#: includes/locale.inc:852
+msgid "The submitted string contains disallowed HTML: %string"
 msgstr ""
 
-#: includes/theme.maintenance.inc:130
-msgid "The following installation warnings should be carefully reviewed"
+#: includes/locale.inc:920
+msgid "Are you sure you want to delete the string \"%source\"?"
 msgstr ""
-"Los siguiente avisos en la instalación deberían ser examinados "
-"cuidadosamente."
 
-#: includes/theme.maintenance.inc:130
-msgid "The following installation warning should be carefully reviewed"
+#: includes/locale.inc:920
+msgid ""
+"Deleting the string will remove all translations of this string in all "
+"languages. This action cannot be undone."
 msgstr ""
-"El siguiente aviso en la instalación debería ser examinado cuidadosamente."
+
+#: includes/locale.inc:853
+msgid ""
+"Attempted submission of a translation string with disallowed HTML: %string"
+msgstr ""
+
+#: includes/locale.inc:1054
+msgid "One translation string was skipped because it contains disallowed HTML."
+msgid_plural ""
+"@count translation strings were skipped because they contain disallowed HTML."
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/menu.inc:2284
+msgid "Menu router rebuild failed - some paths may not work correctly."
+msgstr ""
+
+#: includes/xmlrpcs.inc:152,291
+msgid "Server error. Requested method @methodname not specified."
+msgstr ""
+
+#: includes/xmlrpcs.inc:206
+msgid "Server error. Requested function @method does not exist."
+msgstr ""
+
+#: includes/xmlrpcs.inc:294
+msgid "Server error. Requested method @methodname signature not specified."
+msgstr ""

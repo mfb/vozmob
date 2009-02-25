@@ -1,22 +1,22 @@
-# Spanish translation of drupal (6.0)
-# Copyright (c) 2008 by the Spanish translation team
+# Spanish translation of drupal (6.9)
+# Copyright (c) 2009 by the Spanish translation team
 # Generated from files:
 #  aggregator-feed-source.tpl.php,v 1.1 2007/09/13 08:02:38 goba
 #  aggregator-summary-items.tpl.php,v 1.1 2007/09/13 08:02:38 goba
-#  aggregator.admin.inc,v 1.7 2008/01/10 22:47:17 goba
-#  aggregator.pages.inc,v 1.12 2008/01/08 10:35:40 goba
-#  aggregator.module,v 1.374 2008/01/15 08:06:32 dries
-#  aggregator.install,v 1.14 2007/12/18 12:59:20 dries
+#  aggregator.admin.inc,v 1.7.2.1 2008/04/25 21:11:57 goba
+#  aggregator.pages.inc,v 1.12.2.1 2008/08/16 21:13:48 dries
+#  aggregator.module,v 1.374.2.4 2009/01/14 21:36:16 goba
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: drupal (6.0)\n"
-"POT-Creation-Date: 2008-03-30 17:19+0200\n"
-"PO-Revision-Date: 2008-02-26 13:00+0100\n"
+"Project-Id-Version: drupal (6.9)\n"
+"POT-Creation-Date: 2009-01-31 16:23+0100\n"
+"PO-Revision-Date: 2008-10-17 06:14+0200\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
 
 #: modules/aggregator/aggregator-feed-source.tpl.php:30
 msgid "URL:"
@@ -194,51 +194,43 @@ msgstr "La categoría %category ha sido borrada."
 msgid "The category %category has been added."
 msgstr "La categoría %category ha sido agregada."
 
-#: modules/aggregator/aggregator.pages.inc:68
+#: modules/aggregator/aggregator.pages.inc:67
 msgid "aggregator - @title"
 msgstr "agregador: @title"
 
-#: modules/aggregator/aggregator.pages.inc:175
+#: modules/aggregator/aggregator.pages.inc:174
 msgid "Save categories"
 msgstr "Guardar las categorías"
 
-#: modules/aggregator/aggregator.pages.inc:185
+#: modules/aggregator/aggregator.pages.inc:184
 msgid "You are not allowed to categorize this feed item."
 msgstr "No tiene permisos para categorizar este elemento de hilo."
 
-#: modules/aggregator/aggregator.pages.inc:203
+#: modules/aggregator/aggregator.pages.inc:202
 msgid "The categories have been saved."
 msgstr "Se han salvado las categorías."
 
-#: modules/aggregator/aggregator.pages.inc:228
-msgid "Categorize"
-msgstr "Categorizar"
-
-#: modules/aggregator/aggregator.pages.inc:262
+#: modules/aggregator/aggregator.pages.inc:261
 msgid "%ago ago"
 msgstr "Hace %ago"
 
-#: modules/aggregator/aggregator.pages.inc:293
-msgid "OPML feed"
-msgstr "Hilo OPML"
-
-#: modules/aggregator/aggregator.pages.inc:377
+#: modules/aggregator/aggregator.pages.inc:376
 msgid "@site_name - aggregated feeds in category @title"
 msgstr "@ Site_name - feeds agregados en la categoría @ title"
 
-#: modules/aggregator/aggregator.pages.inc:377
+#: modules/aggregator/aggregator.pages.inc:376
 msgid "@site_name - aggregated feeds"
 msgstr "@site_name - feeds agregados"
 
-#: modules/aggregator/aggregator.pages.inc:381
+#: modules/aggregator/aggregator.pages.inc:380
 msgid "@site_name aggregator"
 msgstr "Agregador de @site_name"
 
-#: modules/aggregator/aggregator.pages.inc:459
+#: modules/aggregator/aggregator.pages.inc:458
 msgid "%age old"
 msgstr "Edad: %age"
 
-#: modules/aggregator/aggregator.pages.inc:477
+#: modules/aggregator/aggregator.pages.inc:476
 msgid "!title feed"
 msgstr "Feed !title"
 
@@ -251,13 +243,13 @@ msgid ""
 "XML-based formats. Formats supported by the aggregator include <a href=\"@rss"
 "\">RSS</a>, <a href=\"@rdf\">RDF</a>, and <a href=\"@atom\">Atom</a>."
 msgstr ""
-"El integrador es un poderoso sindicador y lector de noticias en línea que "
-"recupera contenido fresco de hilos de tipo RSS, RDF y Atom disponibles en la "
-"red. Miles de sitios (en particular sitios de noticias y blogs) publican sus "
-"titulares y mensajes más recientes en hilos, usando varios formatos "
-"estandarizados basados en XML. Los formatos que soporta el integrador "
-"incluyen <a href=\"@rss\">RSS</a>, <a href=\"@rdf\">RDF</a> y <a href=\"@atom"
-"\">Atom</a>."
+"El agregador es un potente sindicador y lector de noticias que recopila "
+"noticias recién publicadas desde canales basados en RSS, RDF, y Atom "
+"disponibles en la web. Miles de sitios (particularmente sitios de noticias y "
+"bitácoras) publican sus titulares y entradas en canales, utilizando varios "
+"formatos estandarizados basados en XML. Los formatos que soporta el "
+"agregador son  <a href=\"@rss\">RSS</a>, <a href=\"@rdf\">RDF</a>, y <a href="
+"\"@atom\">Atom</a>"
 
 #: modules/aggregator/aggregator.module:16
 msgid ""
@@ -273,26 +265,26 @@ msgid ""
 "available. A correctly configured <a href=\"@cron\">cron maintenance task</"
 "a> is required to update feeds automatically."
 msgstr ""
-"Los hilos o feeds contienen elementos, es decir, mensajes individuales "
-"publicados por el sitio que contribuye el hilo. Los hilos se pueden agrupar "
-"en categorías, generalmente por tópico. Los usuarios ven los elementos del "
-"hilo en la <a href=\"@aggregator\">pantalla principal del integrador</a> o "
-"bien <a href=\"@aggregator-sources\">por fuente</a>. Los administradores "
-"pueden <a href=\"@feededit\">agregar, editar y borrar hilos</a> además de "
-"elegir cuán a menudo revisar cada hilo en busca de elementos actualizados. "
-"Los elementos más recientes de un hilo o una categoría se pueden desplegar "
-"en un bloque a través de la <a href=\"@admin-block\">página de "
-"administración de bloques</a>. Hay disponibles un <a href=\"@aggregator-opml"
-"\">archivo OPML legible para máquinas</a> que contiene todos los hilos. Se "
-"requiere una <a href=\"@cron\">tarea de mantenimiento de cron</a> "
-"correctamente configurada para actualizar los hilos automáticamente."
+"Los canales o «feeds» contienen elementos o entradas individuales publicadas "
+"por el sitio que proporciona el canal. Los canales se pueden agrupar en "
+"categorías, generalmente por tema. Los usuarios ven los elementos del canal "
+"en la <a href=\"@aggregator\">página principal del agregador</a> o por <a "
+"href=\"@aggregator-sources\">su fuente</a>. Los administradores pueden <a "
+"href=\"@feededit\">agregar, editar y borrar canales</a> además de elegir "
+"cuán a menudo comprobar cada canal en busca de elementos actualizados. Los "
+"elementos más recientes de un canal o una categoría se pueden mostrar en un "
+"bloque a través de la <a href=\"@admin-block\">página de administración de "
+"bloques</a>. Hay disponibles un <a href=\"@aggregator-opml\">archivo OPML "
+"legible para máquinas</a> que contiene todos los canales. Se requiere una <a "
+"href=\"@cron\">tarea de mantenimiento de cron</a> correctamente configurada "
+"para actualizar los canales automáticamente."
 
 #: modules/aggregator/aggregator.module:17
 msgid ""
 "For more information, see the online handbook entry for <a href=\"@aggregator"
 "\">Aggregator module</a>."
 msgstr ""
-"Para más información, vea la entrada del manual en línea para el <a href="
+"Para más información, vea en el manual en línea la entrada para el <a href="
 "\"@aggregator\">Módulo Integrador (Aggregator)</a>."
 
 #: modules/aggregator/aggregator.module:20
@@ -302,9 +294,9 @@ msgid ""
 "formats. Formats supported by the aggregator include <a href=\"@rss\">RSS</"
 "a>, <a href=\"@rdf\">RDF</a>, and <a href=\"@atom\">Atom</a>."
 msgstr ""
-"Miles de sitios, en particular sitios noticiosos y blogs, publican sus "
-"titulares y mensajes más recientes en hilos, usando varios formatos "
-"estandarizados basados en XML. Los formatos que soporta el integrador "
+"Miles de sitios, en particular sitios noticiosos y bitácoras, publican sus "
+"titulares y entradas más recientes en canales, usando varios formatos "
+"estandarizados basados en XML. Los formatos que soporta el agregador "
 "incluyen <a href=\"@rss\">RSS</a>, <a href=\"@rdf\">RDF</a> y <a href=\"@atom"
 "\">Atom</a>."
 
@@ -314,10 +306,10 @@ msgid ""
 "added</a>. For each feed or feed category, the <em>latest items</em> block "
 "may be enabled at the <a href=\"@block\">blocks administration page</a>."
 msgstr ""
-"En seguida se enlistan los hilos actuales, y es posible <a href=\"@addfeed"
-"\">agregar nuevos hilos</a>. Para cada hilo o categoría d ehilos, el bloque "
-"con los <em>elementos más recientes</em> puede configurarse en la <a href="
-"\"@block\">página de administración de bloques</a>."
+"A continuación se listan los origenes externos activos. Además se pueden <a "
+"href=\"@addfeed\">añadir otros nuevos</a>. A cada origen o categoría de "
+"orígenes, se le puede activar su bloque de elementos más recientes en la <a "
+"href=\"@block\">página de administración de bloques</a>."
 
 #: modules/aggregator/aggregator.module:24
 msgid "Add a feed in RSS, RDF or Atom format. A feed may only have one entry."
@@ -342,212 +334,134 @@ msgstr ""
 "los listados de elementos de hilos). Cada categoría ofrece su propia página "
 "de hilos y su bloque."
 
-#: modules/aggregator/aggregator.module:305
+#: modules/aggregator/aggregator.module:306
 msgid "!title category latest items"
 msgstr "Elementos más recientes de la categoría !title"
 
-#: modules/aggregator/aggregator.module:309
+#: modules/aggregator/aggregator.module:310
 msgid "!title feed latest items"
 msgstr "Elementos más recientes del hilo !title"
 
-#: modules/aggregator/aggregator.module:320
+#: modules/aggregator/aggregator.module:321
 msgid "Number of news items in block"
-msgstr "Número de elementos noticiosos en el bloque"
+msgstr "Número de noticias en el bloque"
 
-#: modules/aggregator/aggregator.module:339
+#: modules/aggregator/aggregator.module:340
 msgid "View this feed's recent news."
 msgstr "Ver las noticias recientes de este hilo."
 
-#: modules/aggregator/aggregator.module:347
+#: modules/aggregator/aggregator.module:348
 msgid "View this category's recent news."
 msgstr "Ver las noticias recientes de esta categoría."
 
-#: modules/aggregator/aggregator.module:457
+#: modules/aggregator/aggregator.module:462
 msgid "The news items from %site have been removed."
 msgstr "Los elementos noticiosos d e%site han sido borrados."
 
-#: modules/aggregator/aggregator.module:598
+#: modules/aggregator/aggregator.module:603
 msgid "There is no new syndicated content from %site."
 msgstr "No hay nuevo contenido RSS desde %site."
 
-#: modules/aggregator/aggregator.module:637
+#: modules/aggregator/aggregator.module:642,641
 msgid "There is new syndicated content from %site."
 msgstr "Hay nuevo contenido sindicado de %site."
 
-#: modules/aggregator/aggregator.module:640
+#: modules/aggregator/aggregator.module:645
 msgid "feed not parseable"
 msgstr "feed no analizable"
 
-#: modules/aggregator/aggregator.module:644
+#: modules/aggregator/aggregator.module:649
 msgid "The feed from %site seems to be broken, because of error \"%error\"."
-msgstr "El hilo de %site parece estar roto, debido al error \"%error\"."
+msgstr "El hilo de %site parece estar roto debido al error \"%error\"."
 
-#: modules/aggregator/aggregator.module:714
+#: modules/aggregator/aggregator.module:718
 msgid ""
 "The feed from %site seems to be broken, because of error \"%error\" on line %"
 "line."
 msgstr ""
-"El hilo de %site parece estar roto, debido al error \"%error\" en la línea %"
+"El hilo de %site parece estar roto debido al error \"%error\" en la línea %"
 "line."
 
-#: modules/aggregator/aggregator.module:891,891
+#: modules/aggregator/aggregator.module:895
 msgid "blog it"
-msgstr "bloguear"
+msgstr "Añadir a la bitácora"
 
-#: modules/aggregator/aggregator.module:892
+#: modules/aggregator/aggregator.module:896
 msgid "Comment on this news item in your personal blog."
 msgstr "Comentar esta noticia en su bitácora personal."
 
-#: modules/aggregator/aggregator.module:280
+#: modules/aggregator/aggregator.module:281
 msgid "administer news feeds"
 msgstr "administrar orígenes de noticias"
 
-#: modules/aggregator/aggregator.module:280
+#: modules/aggregator/aggregator.module:281
 msgid "access news feeds"
 msgstr "acceder a orígenes de noticias"
 
-#: modules/aggregator/aggregator.install:30
-msgid "Stores categories for aggregator feeds and feed items."
-msgstr ""
-"Almacena categorías para los orígenes del agregador y los artículos del "
-"origen."
-
-#: modules/aggregator/aggregator.install:35
-msgid "Primary Key: Unique aggregator category ID."
-msgstr "Llave primaria: ID único de categoría de integrador."
-
-#: modules/aggregator/aggregator.install:42
-msgid "Title of the category."
-msgstr "Título de la categoría."
-
-#: modules/aggregator/aggregator.install:48
-msgid "Description of the category"
-msgstr "Descripción de la categoría"
-
-#: modules/aggregator/aggregator.install:55
-msgid "The number of recent items to show within the category block."
-msgstr ""
-"El número de elementos recientes a mostrar dentro del bloque de la categoría."
-
-#: modules/aggregator/aggregator.install:63
-msgid "Bridge table; maps feeds to categories."
-msgstr "Tabla puente; relaciona hilos con categorías."
-
-#: modules/aggregator/aggregator.install:69
-msgid "The feed's {aggregator_feed}.fid."
-msgstr "El {aggregator_feed}.fid del hilo."
-
-#: modules/aggregator/aggregator.install:75
-msgid "The {aggregator_category}.cid to which the feed is being assigned."
-msgstr "El {aggregator_category}.cid al que se está asignando el hilo."
-
-#: modules/aggregator/aggregator.install:83
-msgid "Bridge table; maps feed items to categories."
-msgstr ""
-
-#: modules/aggregator/aggregator.install:89
-msgid "The feed item's {aggregator_item}.iid."
-msgstr "El {aggregator_item}.iid del elemento de hilo."
-
-#: modules/aggregator/aggregator.install:95
-msgid "The {aggregator_category}.cid to which the feed item is being assigned."
-msgstr ""
-
-#: modules/aggregator/aggregator.install:103
-msgid "Stores feeds to be parsed by the aggregator."
-msgstr ""
-
-#: modules/aggregator/aggregator.install:108
-msgid "Primary Key: Unique feed ID."
-msgstr "Clave primaria: ID único del hilo."
-
-#: modules/aggregator/aggregator.install:115
-msgid "Title of the feed."
-msgstr "Título del feed."
-
-#: modules/aggregator/aggregator.install:122
-msgid "URL to the feed."
-msgstr "URL del origen de noticias"
-
-#: modules/aggregator/aggregator.install:128
-msgid "How often to check for new feed items, in seconds."
-msgstr ""
-
-#: modules/aggregator/aggregator.install:134
-msgid "Last time feed was checked for new items, as Unix timestamp."
-msgstr ""
-
-#: modules/aggregator/aggregator.install:141
+#: modules/aggregator/aggregator.module:84
 msgid ""
-"The parent website of the feed; comes from the <link> element in the feed."
+"Configure which content your site aggregates from other sites, how often it "
+"polls them, and how they're categorized."
 msgstr ""
+"Configure qué contenido agrega su sitio desde otros sitios, la frecuencia de "
+"actualización y su categorización."
 
-#: modules/aggregator/aggregator.install:147
+#: modules/aggregator/aggregator.module:90
+msgid "Add feed"
+msgstr "Agregar hilo"
+
+#: modules/aggregator/aggregator.module:116
+msgid "Update items"
+msgstr "Actualizar elementos"
+
+#: modules/aggregator/aggregator.module:145
+msgid "Sources"
+msgstr "Fuentes"
+
+#: modules/aggregator/aggregator.module:231
+msgid "Edit feed"
+msgstr "Editar hilo"
+
+#: modules/aggregator/aggregator.module:239
+msgid "Edit category"
+msgstr "Editar categoría"
+
+#: modules/aggregator/aggregator.admin.inc:325
+msgid "Category %category deleted."
+msgstr "Categoría %category borrada."
+
+#: modules/aggregator/aggregator.admin.inc:338
+msgid "Category %category added."
+msgstr "Categoría %category agregada."
+
+#: modules/aggregator/aggregator.admin.inc:161
+msgid "Feed %feed deleted."
+msgstr "Origen %feed borrado."
+
+#: modules/aggregator/aggregator.admin.inc:174
+msgid "Feed %feed added."
+msgstr "Origen %feed añadido."
+
+#: modules/aggregator/aggregator.module:607
+msgid "Updated URL for feed %title to %url."
+msgstr "URL actualizado a %url para el origen %title."
+
+#: modules/aggregator/aggregator.module:648
+msgid "The feed from %site seems to be broken, due to \"%error\"."
+msgstr "El origen RSS de %site parece estar roto debido a \"%error\"."
+
+#: modules/aggregator/aggregator.module:717
 msgid ""
-"The parent website's description; comes from the <description> element in "
-"the feed."
+"The feed from %site seems to be broken, due to an error \"%error\" on line %"
+"line."
 msgstr ""
-"La descripción del sitio web padre; proviene del elemento <description> del "
-"hilo."
-
-#: modules/aggregator/aggregator.install:153
-msgid "An image representing the feed."
-msgstr "Una imagen que representa al hilo."
-
-#: modules/aggregator/aggregator.install:160
-msgid "Entity tag HTTP response header, used for validating cache."
-msgstr ""
-"Cabecera de respuesta HTTP para etiqueta de entidad, usada para validar el "
-"caché."
-
-#: modules/aggregator/aggregator.install:166
-msgid "When the feed was last modified, as a Unix timestamp."
-msgstr "Última modificación del origen de noticias, como marca de tiempo Unix."
-
-#: modules/aggregator/aggregator.install:173
-msgid "Number of items to display in the feed's block."
-msgstr "Número de elementos a desplegar en el bloque del hilo."
-
-#: modules/aggregator/aggregator.install:184
-msgid "Stores the individual items imported from feeds."
-msgstr "Almacena los elementos individuales importados de hilos."
-
-#: modules/aggregator/aggregator.install:189
-msgid "Primary Key: Unique ID for feed item."
-msgstr "Clave primaria: ID único para el elemento del hilo."
-
-#: modules/aggregator/aggregator.install:195
-msgid "The {aggregator_feed}.fid to which this item belongs."
-msgstr "El {aggregator_feed}.fid al que pertenece este elemento."
-
-#: modules/aggregator/aggregator.install:202
-msgid "Title of the feed item."
-msgstr "Título del elemento de hilo."
-
-#: modules/aggregator/aggregator.install:209
-msgid "Link to the feed item."
-msgstr "Enlace al elemento de hilo."
-
-#: modules/aggregator/aggregator.install:216
-msgid "Author of the feed item."
-msgstr "Autor del elemento de hilo."
-
-#: modules/aggregator/aggregator.install:222
-msgid "Body of the feed item."
-msgstr "Cuerpo del elemento de origen de noticias"
-
-#: modules/aggregator/aggregator.install:227
-msgid "Post date of feed item, as a Unix timestamp."
-msgstr ""
-
-#: modules/aggregator/aggregator.install:233
-msgid "Unique identifier for the feed item."
-msgstr "Identificador único del elemento del hilo."
-
-#: modules/aggregator/aggregator.admin.inc:190
-msgid "Remove items"
-msgstr "Remover elementos"
+"El origen RSS de %site parece estar roto debido a un error \"%error\" en la "
+"línea %line."
 
 #: modules/aggregator/aggregator.admin.inc:187
 msgid "Are you sure you want to remove all items from the feed %feed?"
 msgstr "¿Está seguro de que quiere eliminar todo los elementos del hilo %feed?"
+
+#: modules/aggregator/aggregator.module:83,138
+msgid "Feed aggregator"
+msgstr ""

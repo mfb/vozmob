@@ -1,21 +1,22 @@
-# Spanish translation of drupal (6.0)
-# Copyright (c) 2008 by the Spanish translation team
+# Spanish translation of drupal (6.9)
+# Copyright (c) 2009 by the Spanish translation team
 # Generated from files:
 #  book-navigation.tpl.php,v 1.1 2007/11/04 14:29:09 goba
-#  book.admin.inc,v 1.8 2008/01/08 10:35:41 goba
-#  book.pages.inc,v 1.5 2007/12/22 23:24:24 goba
-#  book.module,v 1.454.2.2 2008/02/13 11:20:47 goba
-#  book.install,v 1.20 2008/01/10 18:13:42 goba
+#  book.admin.inc,v 1.8.2.3 2008/10/22 19:26:01 goba
+#  book.pages.inc,v 1.5.2.1 2008/08/13 23:59:13 drumm
+#  book.module,v 1.454.2.5 2008/07/03 06:38:46 dries
+#  book.install,v 1.20.2.1 2009/01/06 15:46:36 goba
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: drupal (6.0)\n"
-"POT-Creation-Date: 2008-03-30 17:19+0200\n"
-"PO-Revision-Date: 2008-03-14 00:47+0100\n"
+"Project-Id-Version: drupal (6.9)\n"
+"POT-Creation-Date: 2009-01-31 16:23+0100\n"
+"PO-Revision-Date: 2009-01-06 21:22+0100\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
 
 #: modules/book/book-navigation.tpl.php:40
 msgid "‹ "
@@ -35,11 +36,11 @@ msgstr " ›"
 
 #: modules/book/book.admin.inc:15
 msgid "edit order and titles"
-msgstr ""
+msgstr "editar orden y títulos"
 
 #: modules/book/book.admin.inc:33
 msgid "Allowed book outline types"
-msgstr ""
+msgstr "Tipos de esquema de libro permitidos"
 
 #: modules/book/book.admin.inc:36
 msgid ""
@@ -67,11 +68,11 @@ msgstr ""
 msgid "Save book pages"
 msgstr "Guardar las páginas de libro"
 
-#: modules/book/book.admin.inc:116
+#: modules/book/book.admin.inc:128
 msgid "Title changed from %original to %current."
 msgstr "El titulo ha sido cambiado de %original a %current."
 
-#: modules/book/book.admin.inc:123
+#: modules/book/book.admin.inc:135
 msgid "Updated book %title."
 msgstr "Actualizado el libro %title."
 
@@ -100,6 +101,8 @@ msgid ""
 "The post has been added to the selected book. You may now position it "
 "relative to other pages."
 msgstr ""
+"Esta entrada ha sido añadida al libro seleccionado. Ahora puede ordenarlo en "
+"relación con otras páginas."
 
 #: modules/book/book.pages.inc:173
 msgid "The book outline has been updated."
@@ -129,7 +132,7 @@ msgstr ""
 
 #: modules/book/book.pages.inc:199
 msgid "Are you sure you want to remove %title from the book hierarchy?"
-msgstr ""
+msgstr "¿Está seguro de que desea eliminar %title del índice del libro?"
 
 #: modules/book/book.pages.inc:199
 msgid "Remove"
@@ -233,6 +236,9 @@ msgid ""
 "%title is part of a book outline, and has associated child pages. If you "
 "proceed with deletion, the child pages will be relocated automatically."
 msgstr ""
+"%title es parte de la tabla de contenidos de un libro y tiene páginas "
+"subordinadas. Si procede a borrar, dichas páginas serán reubicadas "
+"automáticamente."
 
 #: modules/book/book.module:1006
 msgid ""
@@ -259,6 +265,13 @@ msgid ""
 "<em>book navigation block</em> on the <a href=\"@admin-block\">blocks "
 "administration page</a>."
 msgstr ""
+"Las páginas de la jerarquía del libro ofrecen elementos de navegación en la "
+"parte inferior de la página para desplazarse a través del texto. Estos "
+"enlaces conducen a las páginas anterior y siguiente, así como al nivel "
+"superior de la página actual en la estructura del libro. Es posible "
+"proporcionar una navegación más completa habilitando el <em>bloque de "
+"navegación de libro</em> en la <a href=\"@admin-block\">página de "
+"administración de bloques</a>."
 
 #: modules/book/book.module:1008
 msgid ""
@@ -277,6 +290,10 @@ msgid ""
 "editing the post or by using the interface available on the post's "
 "<em>outline</em> tab."
 msgstr ""
+"Los usuarios con permiso para <em>administrar esquemas de libro</em> pueden "
+"añadir un artículo de cualquier tipo de contenido a un libro, seleccionando "
+"el libro correspondiente mientras editan el artículo, o bien empleando la "
+"interfaz disponible en el <em>esquema</em> de artículos."
 
 #: modules/book/book.module:1010
 msgid ""
@@ -284,6 +301,10 @@ msgid ""
 "\">book administration page</a>. The <em>Outline</em> page for each book "
 "allows section titles to be edited or rearranged."
 msgstr ""
+"Los administradores pueden ver una lista de todos los libros en la <a href="
+"\"@admin-node-book\">página de administración de libros</a>. La página "
+"<em>Esquema</em> de cada libro permite la edición o reorganización de "
+"títulos de sección."
 
 #: modules/book/book.module:1011
 msgid ""
@@ -300,6 +321,11 @@ msgid ""
 "links to adjacent book pages, providing a simple navigation system for "
 "creating and reviewing structured content."
 msgstr ""
+"El módulo de libros ofrece un medio de organizar una colección de artículos "
+"relacionados, conocidos colectivamente como un libro. Al ser visualizados, "
+"estos artículos muestran automáticamente enlaces a las páginas del libro "
+"adyacentes, proporcionando un sistema de navegación simple para la creación "
+"y revisión de contenido estructurado."
 
 #: modules/book/book.module:1016
 msgid ""
@@ -307,6 +333,9 @@ msgid ""
 "\">book hierarchy</a>, as well as move them within the hierarchy or to <a "
 "href=\"@book-admin\">reorder an entire book</a>."
 msgstr ""
+"La característica esquema permite la inclusión de artículos en la <a href="
+"\"@book\">jerarquía del libro</a>, así como su recolocación dentro de la "
+"jerarquía o la <a href=\"@book-admin\">reordenación de un libro completo</a>."
 
 #: modules/book/book.module:43
 msgid "create new books"
@@ -331,21 +360,39 @@ msgid ""
 "automatically displays links to adjacent pages, providing a simple "
 "navigation system for organizing and reviewing structured content."
 msgstr ""
+"Una <em>página de libro</em> es una página de contenido organizada en una "
+"colección de entradas relacionadas entre sí, que se conocen como <em>libro</"
+"em>. Una <em>página de libro</em> muestra automáticamente enlaces a páginas "
+"adyacentes, proporcionando un sistema simple de organizar y revisar "
+"contenido de forma estructurada."
 
-#: modules/book/book.install:254
+#: modules/book/book.module:79,108
+msgid "Books"
+msgstr "Libros"
+
+#: modules/book/book.module:122
+msgid "Outline"
+msgstr "Índice"
+
+#: modules/book/book.admin.inc:130
+msgid "book: updated %title."
+msgstr ""
+
+#: modules/book/book.module:80
+msgid "Manage your site's book outlines."
+msgstr ""
+
+#: modules/book/book.module:99
+msgid "Re-order book pages and change titles"
+msgstr ""
+
+#: modules/book/book.module:132
+msgid "Remove from outline"
+msgstr ""
+
+#: modules/book/book.admin.inc:90
 msgid ""
-"Stores book outline information. Uniquely connects each node in the outline "
-"to a link in {menu_links}"
+"This book has been modified by another user, the changes could not be saved."
 msgstr ""
-
-#: modules/book/book.install:261
-msgid "The book page's {menu_links}.mlid."
-msgstr ""
-
-#: modules/book/book.install:268
-msgid "The book page's {node}.nid."
-msgstr "El {node}.nid de la página del libro."
-
-#: modules/book/book.install:275
-msgid "The book ID is the {book}.nid of the top-level page."
-msgstr ""
+"Este libro ha sido modificado por otro usuario, los cambios no se pudieron "
+"guardar."

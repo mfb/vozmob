@@ -1,20 +1,20 @@
-# Spanish translation of drupal (6.0)
-# Copyright (c) 2008 by the Spanish translation team
+# Spanish translation of drupal (6.9)
+# Copyright (c) 2009 by the Spanish translation team
 # Generated from files:
 #  search.admin.inc,v 1.4 2008/01/08 10:35:42 goba
 #  search.pages.inc,v 1.4 2007/12/06 09:51:01 goba
-#  search.module,v 1.250.2.1 2008/02/07 16:42:03 goba
-#  search.install,v 1.14 2007/12/28 10:53:27 dries
+#  search.module,v 1.250.2.4 2008/09/17 06:42:20 goba
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: drupal (6.0)\n"
-"POT-Creation-Date: 2008-03-30 17:19+0200\n"
-"PO-Revision-Date: 2008-02-18 19:09+0100\n"
+"Project-Id-Version: drupal (6.9)\n"
+"POT-Creation-Date: 2009-01-31 16:23+0100\n"
+"PO-Revision-Date: 2008-09-24 05:10+0200\n"
 "Language-Team: Spanish\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
 
 #: modules/search/search.admin.inc:13
 msgid "Are you sure you want to re-index the site?"
@@ -54,7 +54,7 @@ msgstr "Regulación de la indexación"
 
 #: modules/search/search.admin.inc:58
 msgid "Number of items to index per cron run"
-msgstr ""
+msgstr "Número de elementos a indexar en cada ejecución de cron"
 
 #: modules/search/search.admin.inc:58
 msgid ""
@@ -62,6 +62,10 @@ msgid ""
 "maintenance task</a>. If necessary, reduce the number of items to prevent "
 "timeouts and memory errors while indexing."
 msgstr ""
+"El número máximo de elementos indexados en cada ejecución de una <a href="
+"\"@cron\">tarea de mantenimiento cron</a>. De ser necesario, reduzca el "
+"número de elementos para evitar tiempos agotados y errores de memoria "
+"durante la indexación."
 
 #: modules/search/search.admin.inc:60
 msgid "Indexing settings"
@@ -128,7 +132,7 @@ msgstr "Resultados de la búsqueda"
 
 #: modules/search/search.pages.inc:38
 msgid "Your search yielded no results"
-msgstr "Su búsqueda no produjo ningún resultado"
+msgstr "Su búsqueda no produjo resultados"
 
 #: modules/search/search.pages.inc:123
 msgid "Please enter some keywords."
@@ -140,6 +144,10 @@ msgid ""
 "is often the only practical way to find content on a large site, and is "
 "useful for finding both users and posts."
 msgstr ""
+"El módulo de búsqueda añade la capacidad de buscar dentro del contenido "
+"usando palabras claves. La búsqueda suele ser el método más práctico de "
+"encontrar contenido en un sitio grande y es útil para encontrar usuarios o "
+"entradas."
 
 #: modules/search/search.module:100
 msgid ""
@@ -152,6 +160,14 @@ msgid ""
 "\"@cron\">cron maintenance task</a>. If necessary, reduce this number to "
 "prevent timeouts and memory errors when indexing."
 msgstr ""
+"Para poder buscar por palabras claves, el motor de búsqueda mantiene un "
+"índice de palabras en el contenido del sitio. Para construir y mantener este "
+"índice es necesario tener correctamente configurada una <a href=\"@cron"
+"\">tarea de mantenimiento cron</a>. La indexación se puede ajustar a través "
+"de la <a href=\"@searchsettings\">página de opciones de búsqueda</a>; por "
+"ejemplo, el <em>Número de elementos que se indexan en cada ejecución de "
+"cron</em>. Si fuera necesario, reduzca esta cifra para impedir errores de "
+"memoria o de superación de tiempo («timeouts») al indexar."
 
 #: modules/search/search.module:101
 msgid ""
@@ -168,6 +184,11 @@ msgid ""
 "\">cron maintenance task</a> is required. Indexing behavior can be adjusted "
 "using the settings below."
 msgstr ""
+"El motor de búsqueda mantiene un índice de las palabras encontradas en el "
+"contenido de su sitio. Para construir y mantener este índice, se requiere "
+"una <a href=\"@cron\">tarea de mantenimiento cron</a> correctamente "
+"configurada. La conducta del indexamiento puede ajustarse usando las "
+"siguientes opciones."
 
 #: modules/search/search.module:106
 msgid ""
@@ -192,28 +213,30 @@ msgstr ""
 msgid "Search form"
 msgstr "Formulario de búsqueda"
 
-#: modules/search/search.module:917
+#: modules/search/search.module:919
 msgid ""
 "You must include at least one positive keyword with @count characters or "
 "more."
 msgstr ""
 "Debe incluir al menos una palabra clave positiva con @count caracteres o más."
 
-#: modules/search/search.module:921
+#: modules/search/search.module:923
 msgid ""
 "Search for either of the two terms with uppercase <strong>OR</strong>. For "
 "example, <strong>cats OR dogs</strong>."
 msgstr ""
+"Busque cualquiera de los dos términos usando la palabra <strong>OR</strong>, "
+"con mayúsculas. Por ejemplo, <strong>gatos OR perros</strong>."
 
-#: modules/search/search.module:1028
+#: modules/search/search.module:1030
 msgid "Enter your keywords"
 msgstr "Introduzca las palabras clave."
 
-#: modules/search/search.module:1062
+#: modules/search/search.module:1064
 msgid "Search this site"
-msgstr ""
+msgstr "Buscar en este sitio"
 
-#: modules/search/search.module:1066
+#: modules/search/search.module:1068
 msgid "Enter the terms you wish to search for."
 msgstr "Introduzca los términos que quiera buscar."
 
@@ -227,86 +250,30 @@ msgstr "usar búsqueda avanzada"
 
 #: modules/search/search.module:144
 msgid "administer search"
-msgstr "administrar la búsqueda"
+msgstr "administrar búsqueda"
 
-#: modules/search/search.install:29
-msgid "Stores items that will be searched."
-msgstr ""
+#: modules/search/search.module:176
+msgid "Search settings"
+msgstr "Opciones de búsqueda"
 
-#: modules/search/search.install:36
-msgid "Search item ID, e.g. node ID for nodes."
+#: modules/search/search.module:177
+msgid "Configure relevance settings for search and other indexing options"
 msgstr ""
+"Configura las opciones de relevancia para la búsqueda y otras opciones de "
+"indexación"
 
-#: modules/search/search.install:42
-msgid "Type of item, e.g. node."
-msgstr ""
+#: modules/search/search.module:185
+msgid "Clear index"
+msgstr "Limpiar índice"
 
-#: modules/search/search.install:48
-msgid "List of space-separated words from the item."
-msgstr ""
+#: modules/search/search.module:193
+msgid "Top search phrases"
+msgstr "Frases principales en las búsquedas"
 
-#: modules/search/search.install:55
-msgid "Set to force node reindexing."
-msgstr ""
+#: modules/search/search.module:194
+msgid "View most popular search phrases."
+msgstr "Ver las frases más populares en las búsquedas."
 
-#: modules/search/search.install:62
-msgid "Stores the search index, associating words, items and scores."
-msgstr ""
-
-#: modules/search/search.install:69
-msgid "The {search_total}.word that is associated with the search item."
-msgstr ""
-
-#: modules/search/search.install:76
-msgid ""
-"The {search_dataset}.sid of the searchable item to which the word belongs."
-msgstr ""
-
-#: modules/search/search.install:82
-msgid ""
-"The {search_dataset}.type of the searchable item to which the word belongs."
-msgstr ""
-
-#: modules/search/search.install:87
-msgid "The numeric score of the word, higher being more important."
-msgstr ""
-
-#: modules/search/search.install:98
-msgid "Stores search totals for words."
-msgstr ""
-
-#: modules/search/search.install:101
-msgid "Primary Key: Unique word in the search index."
-msgstr ""
-
-#: modules/search/search.install:108
-msgid ""
-"The count of the word in the index using Zipf's law to equalize the "
-"probability distribution."
-msgstr ""
-
-#: modules/search/search.install:138
-msgid "The {node}.nid that this item links to."
-msgstr ""
-
-#: modules/search/search.install:144
-msgid "The text used to link to the {node}.nid."
-msgstr ""
-
-#: modules/search/search.install:117
-msgid ""
-"Stores items (like nodes) that link to other nodes, used to improve search "
-"scores for nodes that are frequently linked to."
-msgstr ""
-
-#: modules/search/search.install:124
-msgid ""
-"The {search_dataset}.sid of the searchable item containing the link to the "
-"node."
-msgstr ""
-
-#: modules/search/search.install:131
-msgid ""
-"The {search_dataset}.type of the searchable item containing the link to the "
-"node."
-msgstr ""
+#: modules/search/search.pages.inc:29
+msgid "%keys (@type)."
+msgstr "%keys (@type)."
