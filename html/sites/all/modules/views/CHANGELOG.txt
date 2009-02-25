@@ -125,3 +125,21 @@ Views 2.4
   Bugs fixed:
     o #371466 by dereine: Fix incorrect link to comments.
     o #371923 by noahb: Summaries could be distinct even when they should not be.
+    o #368764: Fix User ID validator to actually have proper dependencies.
+    o #375342 by dww: node_comment_statistics should be INNER joined because there is always 1:1 reference.
+    o #372959: Archive view should not use AJAX by default.
+    o #373155: Not clearing "many to one" data breaks some attachment displays.
+    o #375000 by elcuco: View name should always be LTR.
+    o #378534 by dww: Validators do not fire if argument === 0 due to PHP loose type conversions.
+    o #378164 by yched: Unexposed taxonomy filter could accidentally stop working.
+    o #371923 by David_Rothstein: Another DISTINCT fix related to summaries.
+    o #365831 by tomiyana: Fix typos in help.
+    o #357368 by Pasquale: schema descriptions should not be translated.
+    o #379602 by dww: Add a second "time ago" variant to dates to allow NOT printing the word "ago".
+    o #379354 by neochief: Add an extra regex to remove mangled HTML entities in output rewriting.
+    o #362830: Search was mostly broken, especially score but also searching on multiple terms.
+
+  Other changes:
+    o #375182 by vaish: Allow a reset parameter to views_get_all_views().
+    o #356276 by nedjo: Locale support.
+    o #316556 by Darren Oh: Better Views 1.x upgrades.

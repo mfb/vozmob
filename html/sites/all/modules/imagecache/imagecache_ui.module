@@ -1,17 +1,26 @@
 <?php
-// $Id: imagecache_ui.module,v 1.26 2009/02/07 19:36:29 drewish Exp $
+// $Id: imagecache_ui.module,v 1.28 2009/02/17 21:57:31 drewish Exp $
 
 /**
  * Administrative interface to imagecache.
  *
  */
 
+/**
+ * Implementation of hook_help().
+ */
 function imagecache_ui_help($path, $arg) {
   switch($path) {
-    case 'admin/build/imagecache': return t('Manage ImageCache presets.');
+    case 'admin/build/imagecache':
+      return t('Manage ImageCache presets.');
+    case 'admin/build/imagecache/%/export':
+      return t('Place the following snippet in your module as part of <code>hook_imagecache_default_presets()</code>.');
   }
 }
 
+/**
+ * Implementation of hook_menu().
+ */
 function imagecache_ui_menu() {
   $items = array();
   $items['admin/build/imagecache'] = array(
@@ -56,6 +65,22 @@ function imagecache_ui_menu() {
     'page callback' => 'drupal_get_form',
     'page arguments' => array('imagecache_ui_preset_flush_form', 3),
     'access arguments' => array('flush imagecache'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['admin/build/imagecache/%imagecache_ui_preset/export'] = array(
+    'title callback' => 'imagecache_preset_title_callback',
+    'title arguments' => array('Export preset: !presetname', 3),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('imagecache_ui_preset_export_form', 3),
+    'access arguments' => array('administer imagecache'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['admin/build/imagecache/%imagecache_ui_preset/override'] = array(
+    'title callback' => 'imagecache_preset_title_callback',
+    'title arguments' => array('Override preset: !presetname', 3),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('imagecache_ui_preset_form', 3, TRUE),
+    'access arguments' => array('administer imagecache'),
     'type' => MENU_CALLBACK,
   );
 
@@ -129,22 +154,39 @@ function imagecache_ui_preset_load($preset_id) {
 /**
  * Preset Admin callbacks and required functions.
  */
-
 function imagecache_ui_presets() {
-  $header = array(t('Preset Name'), t('Actions'));
+  $header = array(t('Preset Name'), t('Storage'), t('Actions'));
   $rows = array();
-  foreach (imagecache_presets() as $preset) {
+  // Always clear the preset cache on this display.
+  foreach (imagecache_presets(TRUE) as $preset) {
     $row = array();
     $row[] = l($preset['presetname'], 'admin/build/imagecache/'. $preset['presetid']);
     $links = array();
-    $links[] = l(t('Edit'), 'admin/build/imagecache/'. $preset['presetid']);
-    $links[] = l(t('Delete'), 'admin/build/imagecache/'. $preset['presetid'] .'/delete');
-    $links[] = l(t('Flush'), 'admin/build/imagecache/'. $preset['presetid'] .'/flush' );
+    switch ($preset['storage']) {
+      case IMAGECACHE_STORAGE_DEFAULT:
+        $row[] = t('Default');
+        $links[] = l(t('View'), 'admin/build/imagecache/'. $preset['presetid']);
+        $links[] = l(t('Flush'), 'admin/build/imagecache/'. $preset['presetid'] .'/flush' );
+        break;
+      case IMAGECACHE_STORAGE_OVERRIDE:
+        $row[] = t('Override');
+        $links[] = l(t('Edit'), 'admin/build/imagecache/'. $preset['presetid']);
+        $links[] = l(t('Revert'), 'admin/build/imagecache/'. $preset['presetid'] .'/delete');
+        $links[] = l(t('Flush'), 'admin/build/imagecache/'. $preset['presetid'] .'/flush' );
+        $links[] = l(t('Export'), 'admin/build/imagecache/'. $preset['presetid'] .'/export' );
+        break;
+      case IMAGECACHE_STORAGE_NORMAL:
+        $row[] = t('Normal');
+        $links[] = l(t('Edit'), 'admin/build/imagecache/'. $preset['presetid']);
+        $links[] = l(t('Delete'), 'admin/build/imagecache/'. $preset['presetid'] .'/delete');
+        $links[] = l(t('Flush'), 'admin/build/imagecache/'. $preset['presetid'] .'/flush' );
+        $links[] = l(t('Export'), 'admin/build/imagecache/'. $preset['presetid'] .'/export' );
+        break;
+    }
     $row[] = implode('&nbsp;&nbsp;&nbsp;&nbsp;', $links);
     $rows[] = $row;
   }
   $output = theme('table', $header, $rows);
-
   return $output;
 }
 
@@ -175,8 +217,8 @@ function  imagecache_ui_preset_add_form_submit($form, &$form_state) {
 function imagecache_ui_preset_add_form_validate($form, &$form_state) {
   $values = $form_state['values'];
   // Check for duplicates
-  foreach(imagecache_presets() as $preset) {
-    if (in_array($values['presetname'], $preset)) {
+  foreach (imagecache_presets() as $preset) {
+    if ($values['presetname'] == $preset['presetname']) {
       form_set_error('presetname', t('The namespace you have chosen is already in use.'));
       break;
     }
@@ -240,7 +282,40 @@ function imagecache_ui_preset_flush_form_submit($form, &$form_state) {
   $form_state['redirect'] = 'admin/build/imagecache';
 }
 
+/**
+ * Imagecache preset export form.
+ */
+function imagecache_ui_preset_export_form(&$form_state, $preset = array()) {
+  if (empty($preset)) {
+    drupal_set_message(t('The specified preset was not found'), 'error');
+    $form_state['redirect'] = 'admin/build/imagecache';
+  }
 
+  if (isset($preset['presetid'])) {
+    unset($preset['presetid']);
+  }
+  if (isset($preset['storage'])) {
+    unset($preset['storage']);
+  }
+  foreach ($preset['actions'] as $id => $action) {
+    unset($preset['actions'][$id]['actionid']);
+    unset($preset['actions'][$id]['presetid']);
+  }
+  $exported = '$presets = array();';
+  $exported .= "\n";
+  $exported .= '$presets[\''. $preset['presetname'] .'\'] = ';
+  $exported .= var_export($preset, TRUE) .';';
+  $rows = substr_count($exported, "\n") + 1;
+
+  $form = array();
+  $form['export'] = array(
+    '#type' => 'textarea',
+    '#default_value' => $exported,
+    '#rows' => $rows,
+    '#resizable' => FALSE,
+  );
+  return $form;
+}
 
 
 
@@ -251,10 +326,32 @@ function imagecache_ui_preset_form($form_state, $preset = array()) {
   }
 
   $form = array();
-  $form['presetname'] = array(
-    '#type' => 'value',
-    '#value' => $preset['presetname'],
-  );
+  // @TODO: for some reason, simply setting '#disabled' on the normal presetname
+  // textfield fails to pass the values successfully to the submit handler.
+  if ($preset['storage'] === IMAGECACHE_STORAGE_DEFAULT) {
+    $form['presetname'] = array(
+      '#type' => 'value',
+      '#value' => $preset['presetname'],
+    );
+    $form['presetname_display'] = array(
+      '#type' => 'textfield',
+      '#size' => '64',
+      '#title' => t('Preset Namespace'),
+      '#default_value' => $preset['presetname'],
+      '#disabled' => TRUE,
+    );
+  }
+  else {
+    $form['presetname'] = array(
+      '#type' => 'textfield',
+      '#size' => '64',
+      '#title' => t('Preset Namespace'),
+      '#default_value' => $preset['presetname'],
+      '#description' => t('The namespace is used in URL\'s for images to tell imagecache how to process an image. Please only use alphanumeric characters, underscores (_), and hyphens (-) for preset names.'),
+      '#validate' => array('imagecache_element_presetname_validate' => array()),
+    );
+  }
+
   $form['presetid'] = array(
     '#type' => 'value',
     '#value' => $preset['presetid'],
@@ -301,12 +398,15 @@ function imagecache_ui_preset_form($form_state, $preset = array()) {
     $action_form['weight'] = array(
       '#type' => 'weight',
       '#default_value' => $action['weight'],
+      '#access' => $preset['storage'] !== IMAGECACHE_STORAGE_DEFAULT,
     );
     $action_form['configure'] = array(
       '#value' => l(t('Configure'), 'admin/build/imagecache/'. $action['presetid'] .'/'. $action['actionid'] ),
+      '#access' => $preset['storage'] !== IMAGECACHE_STORAGE_DEFAULT,
     );
     $action_form['remove'] = array(
       '#value' => l(t('Delete'), 'admin/build/imagecache/'. $action['presetid'] .'/'. $action['actionid'] .'/delete'),
+      '#access' => $preset['storage'] !== IMAGECACHE_STORAGE_DEFAULT,
     );
     $form['actions'][$i] = $action_form;
   }
@@ -317,6 +417,7 @@ function imagecache_ui_preset_form($form_state, $preset = array()) {
     '#title' => t('New Actions'),
     '#collapsible' => true,
     '#collapsed' => count($preset['actions']) > 0,
+    '#access' => $preset['storage'] !== IMAGECACHE_STORAGE_DEFAULT,
   );
 
 
@@ -366,7 +467,7 @@ function imagecache_ui_preset_form($form_state, $preset = array()) {
 
   $form['submit'] = array(
     '#type' => 'submit',
-    '#value' => t('Update Preset'),
+    '#value' => $preset['storage'] === IMAGECACHE_STORAGE_DEFAULT ? t('Override Defaults') : t('Update Preset'),
   );
 
   // Display a preview image for this action. Put it below the submit button so
@@ -396,19 +497,37 @@ function theme_imagecache_admin_title($element) {
 }
 
 function theme_imagecache_ui_preset_actions($form) {
-  $header = array(t('Action'), t('Settings'), t('Weight'), '','');
+  $header = array(t('Action'), t('Settings'));
+  // $header = array(, t('Weight'), '','');
   $rows = array();
   foreach(element_children($form) as $key) {
     if (!is_numeric($key)) {
       continue;
     }
     $row = array();
-    $form[$key]['weight']['#attributes']['class'] = 'imagecache-action-order-weight';
     $row[] = drupal_render($form[$key]['name']);
     $row[] = drupal_render($form[$key]['settings']);
-    $row[] = drupal_render($form[$key]['weight']);
-    $row[] = drupal_render($form[$key]['configure']);
-    $row[] = drupal_render($form[$key]['remove']);
+
+    // Check for form access before rendering these portions of the table / header
+    if (!empty($form[$key]['weight']['#access'])) {
+      if (empty($header['weight'])) {
+        $header['weight'] = t('Weight');
+      }
+      $form[$key]['weight']['#attributes']['class'] = 'imagecache-action-order-weight';
+      $row[] = drupal_render($form[$key]['weight']);
+    }
+    if (!empty($form[$key]['configure']['#access'])) {
+      if (empty($header['configure'])) {
+        $header['configure'] = '';
+      }
+      $row[] = drupal_render($form[$key]['configure']);
+    }
+    if (!empty($form[$key]['remove']['#access'])) {
+      if (empty($header['remove'])) {
+        $header['remove'] = '';
+      }
+      $row[] = drupal_render($form[$key]['remove']);
+    }
     $rows[] = array(
       'data' => $row,
       'class' => 'draggable',
@@ -421,13 +540,24 @@ function theme_imagecache_ui_preset_actions($form) {
 }
 
 function imagecache_ui_preset_form_submit($form, &$form_state) {
+  // Save the preset first to retrieve the presetid when overriding
+  $preset = imagecache_preset_save($form_state['values']);
+
+  // Populate the presetid as needed for overrides
   if (isset($form_state['values']['actions'])) {
     foreach($form_state['values']['actions'] as $action) {
+      if (empty($action['presetid'])) {
+        $action['presetid'] = $preset['presetid'];
+      }
       imagecache_action_save($action);
     }
   }
-  imagecache_preset_save($form_state['values']);
-  $form_state['redirect'] = 'admin/build/imagecache/'. $form_state['values']['presetid'];
+
+  // Push back to the preset form
+  $form_state['redirect'] = 'admin/build/imagecache/'. $preset['presetid'];
+
+  // Clear preset cache
+  imagecache_presets(TRUE);
 }
 
 function imagecache_ui_action_form($form_state, $preset, $action) {

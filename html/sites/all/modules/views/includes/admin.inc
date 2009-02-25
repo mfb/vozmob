@@ -1,5 +1,5 @@
 <?php
-// $Id: admin.inc,v 1.151 2009/01/30 00:20:34 merlinofchaos Exp $
+// $Id: admin.inc,v 1.152 2009/02/18 02:01:03 merlinofchaos Exp $
 /**
  * @file admin.inc
  * Provides the Views' administrative interface.
@@ -552,6 +552,7 @@ function views_ui_add_form(&$form_state) {
     '#required' => TRUE,
     '#maxlength' => 32,
     '#default_value' => $view ? $view->name : '',
+    '#attributes' => array('dir'=>'ltr'),
   );
 
   $form['description'] = array(

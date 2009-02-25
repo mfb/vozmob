@@ -1,5 +1,5 @@
 <?php
-// $Id: query.inc,v 1.37 2009/02/10 22:07:54 merlinofchaos Exp $
+// $Id: query.inc,v 1.41 2009/02/24 20:13:12 merlinofchaos Exp $
 /**
  * @file query.inc
  * Defines the query object which is the underlying layer in a View.
@@ -773,9 +773,7 @@ class views_query {
   }
 
   /**
-   * Add multiple an orderby's. Right now I'm not sure why this function
-   * is separate from add_orderby above; I don't think it needs to
-   * be.
+   * Add an ORDER BY clause to the query.
    *
    * @param $table
    *   The table this field is part of. If a formula, enter NULL.
@@ -824,7 +822,7 @@ class views_query {
    * added.
    */
   function add_groupby($clause) {
-    // Only add it if it's already in there.
+    // Only add it if it's not already in there.
     if (!in_array($clause, $this->groupby)) {
       $this->groupby[] = $clause;
     }
@@ -880,7 +878,7 @@ class views_query {
     $fields_array = $this->fields;
     if ($get_count && !$this->groupby) {
       foreach ($fields_array as $field) {
-        if (isset($field['distinct'])) {
+        if (!empty($field['distinct'])) {
           $get_count_optimized = FALSE;
           break;
         }
@@ -913,6 +911,7 @@ class views_query {
         $string .= $field['table'] . '.';
       }
       $string .= $field['field'];
+
       // store for use with non-aggregates below
       $fieldname = (!empty($field['alias']) ? $field['alias'] : $string);
 
@@ -921,6 +920,9 @@ class views_query {
       }
       if (!empty($field['count'])) {
         $string = "COUNT($string)";
+        $has_aggregate = TRUE;
+      }
+      else if (!empty($field['aggregate'])) {
         $has_aggregate = TRUE;
       }
       else {

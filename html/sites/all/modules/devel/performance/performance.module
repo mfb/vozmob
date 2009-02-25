@@ -1,5 +1,5 @@
 <?php
-// $Id: performance.module,v 1.2.2.21 2009/02/12 19:55:30 kbahey Exp $
+// $Id: performance.module,v 1.2.2.23 2009/02/21 20:02:36 kbahey Exp $
 
 // Copyright Khalid Baheyeldin 2008 of http://2bits.com
 
@@ -550,6 +550,7 @@ function performance_nagios() {
     return array(
       $id => array(
         'status' => NAGIOS_STATUS_UNKNOWN,
+        'type'   => 'perf',
         'text'   => t('Performance logging is not enabled'),
       ),
     );
@@ -592,62 +593,40 @@ function performance_nagios() {
     $mb_avg      = number_format($total_bytes       / $total_rows/1024/1024, 1);
   }
   else {
-    $ms_avg = '-';
-    $ms_query = '-';
-    $mb_avg = '-';
-    $query_count = '-';
+    $ms_avg = '';
+    $ms_query = '';
+    $mb_avg = '';
+    $query_count = '';
   }
 
   $status = NAGIOS_STATUS_OK;
-  $mb_thresh = variable_get('performance_nagios_mb', 8);
-  $ms_thresh = variable_get('performance_nagios_ms', 500);
-  $query_count_thresh = variable_get('performance_nagios_qc', 400);
-  // Check if any of the following conditions is met:
-  //
-  // - page execution average milliseconds is greater than threshold
-  // - page memory usage average megabytes is greater than threshold
-  // - query count average is greater than threshold
-  // - query time is more than half the total page execution time
-  if ($ms_avg      > $ms_thresh ||
-      $mb_avg      > $mb_thresh ||
-      $query_count > $query_count_thresh ||
-      $ms_query    > ($ms_avg/2)) {
-    // Raise a critical alert
-    $status = NAGIOS_STATUS_CRITICAL;
-  }
 
   return array(
-    $id => array(
+    'ACC' => array(
       'status' => $status,
-      'text'   => $total_accesses . '/' .  $ms_avg . 'ms/' . $mb_avg . 'MB/' . $query_count . '/' .  $ms_query . 'ms',
+      'type'   => 'perf',
+      'text'   => $total_accesses,
+    ),
+    'MS' => array(
+      'status' => $status,
+      'type'   => 'perf',
+      'text'   => $ms_avg,
+    ),
+    'MMB' => array(
+      'status' => $status,
+      'type'   => 'perf',
+      'text'   => $mb_avg,
+    ),
+    'QRC' => array(
+      'status' => $status,
+      'type'   => 'perf',
+      'text'   => $query_count,
+    ),
+    'QRT' => array(
+      'status' => $status,
+      'type'   => 'perf',
+      'text'   => $ms_query,
     ),
   );
-}
-
-/**
- * Implementation of hook_nagios_settings()
- */
-function performance_nagios_settings() {
-  $form['performance_nagios_ms'] = array(
-    '#type'          => 'textfield',
-    '#title'         => t('Critical page generation time (milliseconds)'),
-    '#default_value' => variable_get('performance_nagios_ms', 500),
-    '#description'   => t('Number of milliseconds (average) considered critical.')
-  );
-
-  $form['performance_nagios_qc'] = array(
-    '#type'          => 'textfield',
-    '#title'         => t('Critical number of queries'),
-    '#default_value' => variable_get('performance_nagios_qc', 400),
-    '#description'   => t('Number of queries per page load that is considered critical.')
-  );
-
-  $form['performance_nagios_mb'] = array(
-    '#type'          => 'textfield',
-    '#title'         => t('Critical memory (MB)'),
-    '#default_value' => variable_get('performance_nagios_mb', 8),
-    '#description'   => t('Number of megabytes (average) considered critical.')
-  );
-  return $form;
 }
 

@@ -1,5 +1,5 @@
 <?php
-// $Id: views_bulk_operations_plugin_style.inc,v 1.1.2.21 2009/02/05 20:53:59 kratib Exp $
+// $Id: views_bulk_operations_plugin_style.inc,v 1.1.2.22 2009/02/24 05:31:04 kratib Exp $
 
 define('VBO_EXECUTION_DIRECT', 1);
 define('VBO_EXECUTION_BATCH', 2);
@@ -166,7 +166,7 @@ class views_bulk_operations_plugin_style extends views_plugin_style_table {
         'configurable' => FALSE,
         'parameters' => unserialize($action->parameters),
       );
-      $actions[$action->aid]['behavior'] = $static_actions[$action->callback]['behavior'];
+      $actions[$action->aid]['behavior'] = isset($static_actions[$action->callback]['behavior']) ? $static_actions[$action->callback]['behavior'] : null;
     }
     return $actions;
   }

@@ -1,5 +1,5 @@
 <?php
-// $Id: comment.views.inc,v 1.30 2009/02/06 20:58:18 merlinofchaos Exp $
+// $Id: comment.views.inc,v 1.31 2009/02/18 17:32:09 merlinofchaos Exp $
 /**
  * @file
  * Provide views data and handlers for comment.module
@@ -259,6 +259,7 @@ function comment_views_data() {
   $data['node_comment_statistics']['table']['join'] = array(
     //...to the node table
     'node' => array(
+      'type' => 'INNER',      
       'left_field' => 'nid',
       'field' => 'nid',
      ),

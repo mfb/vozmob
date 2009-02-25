@@ -1,5 +1,5 @@
 <?php
-// $Id: convert.inc,v 1.12 2008/10/08 00:14:01 merlinofchaos Exp $
+// $Id: convert.inc,v 1.13 2009/02/23 18:58:18 merlinofchaos Exp $
 /**
  * @file convert.inc
  *
@@ -122,6 +122,7 @@ function views_ui_delete1_confirm_submit(&$form, &$form_state) {
  * Convert a Views 1 view to a Views 2 view.
  */
 function views1_import($imported) {
+  views_include_handlers();
   views_module_include('views_convert.inc');
 
   $view = views_new_view();
@@ -231,10 +232,7 @@ function views1_import($imported) {
   // then see if any other modules want to adapt it using hook_views_convert().
 
   foreach ($imported->field as $field) {
-    $id = NULL;
-    if (views_get_handler($field['tablename'], $field['field'], 'field')) {
-      $id = $view->add_item('default', 'field', $field['tablename'], $field['field']);
-    }
+    $id = $view->add_item('default', 'field', $field['tablename'], $field['field']);
     if ($view->display_handler->get_option('style_plugin') == 'table') {
       $options = $view->display_handler->get_option('style_options');
       if (!empty($field['defaultsort'])) {
@@ -331,7 +329,7 @@ function views1_convert_style(&$view, &$handler, $type) {
     default:
       // Ask around if anybody else knows.
       foreach (module_implements('views_convert') as $module) {
-        module_invoke($module, 'views_convert', $handler->id, 'style', $view, $type);
+        module_invoke($module, 'views_convert', $handler->display->id, 'style', $view, $type);
       }
   }
 }

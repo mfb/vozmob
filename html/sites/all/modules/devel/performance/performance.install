@@ -1,5 +1,5 @@
 <?php
-// $Id: performance.install,v 1.1.4.5 2009/02/08 19:52:15 kbahey Exp $
+// $Id: performance.install,v 1.1.4.6 2009/02/13 03:59:37 kbahey Exp $
 
 // Copyright Khalid Baheyeldin 2008 of http://2bits.com
 
@@ -105,4 +105,11 @@ function performance_requirements($phase) {
   }
 
   return $requirements;
+}
+
+function performance_update_1() {
+  $ret = array();
+  db_drop_field($ret, 'performance_detail', 'title');
+  db_drop_field($ret, 'performance_summary', 'title');
+  return $ret;
 }

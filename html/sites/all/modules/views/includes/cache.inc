@@ -1,5 +1,5 @@
 <?php
-// $Id: cache.inc,v 1.23 2009/01/31 18:08:48 merlinofchaos Exp $
+// $Id: cache.inc,v 1.24 2009/02/17 23:31:05 merlinofchaos Exp $
 /**
  * @file cache.inc
  *
@@ -230,7 +230,7 @@ function views_object_cache_get($obj, $name, $skip_cache = FALSE) {
  */
 function views_object_cache_set($obj, $name, $cache) {
   views_object_cache_clear($obj, $name);
-  db_query("INSERT INTO {views_object_cache} (sid, obj, name, data, updated) VALUES ('%s', '%s', '%s', %b, %d)", session_id(), $obj, $name, serialize($cache), time());
+  db_query("INSERT INTO {views_object_cache} (sid, obj, name, data, updated) VALUES ('%s', '%s', '%s', '%s', %d)", session_id(), $obj, $name, serialize($cache), time());
 }
 
 /**

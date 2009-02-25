@@ -1,5 +1,5 @@
 <?php
-// $Id: views.module,v 1.328 2009/01/30 01:26:55 merlinofchaos Exp $
+// $Id: views.module,v 1.330 2009/02/20 23:02:09 merlinofchaos Exp $
 /**
  * @file
  * Primarily Drupal hooks and global API functions to manipulate views.
@@ -786,11 +786,16 @@ function views_get_applicable_views($type) {
 
 /**
  * Return an array of all views as fully loaded $view objects.
+ *
+ * @param $reset
+ *   If TRUE, reset the static cache forcing views to be reloaded.
  */
-function views_get_all_views() {
+function views_get_all_views($reset = FALSE) {
   static $views = array();
 
-  if (empty($views)) {
+  if (empty($views) || $reset) {
+    $views = array();
+
     // First, get all applicable views.
     views_include('view');
     $views = view::load_views();
@@ -1038,6 +1043,7 @@ function drupal_build_form($form_id, &$form_state) {
 function views_views_query_substitutions($view) {
   global $language;
   return array(
+    '***CURRENT_VERSION***' => VERSION,
     '***CURRENT_TIME***' => time(),
     '***CURRENT_LANGUAGE***' => $language->language,
     '***DEFAULT_LANGUAGE***' => language_default('language'),

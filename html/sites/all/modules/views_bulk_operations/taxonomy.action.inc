@@ -65,7 +65,16 @@ function views_bulk_operations_taxonomy_action(&$node, $context) {
 }
 
 function views_bulk_operations_taxonomy_action_form($context) {
-  foreach (taxonomy_get_vocabularies() as $vid => $vocabulary) {
+  $vocabularies = array();
+  $result = db_query("SELECT DISTINCT v.vid FROM {vocabulary_node_types} v LEFT JOIN {node} n ON v.type = n.type WHERE n.nid IN (%s)", implode(',', $context['selection']));
+  while ($v = db_fetch_object($result)) {
+    $vocabularies[$v->vid] = taxonomy_vocabulary_load($v->vid);
+  }
+  if (empty($vocabularies)) {
+    drupal_set_message(t('The selected nodes are not associated with any vocabulary. Please select other nodes and try again.'), 'error');
+    return array();
+  }
+  foreach ($vocabularies as $vid => $vocabulary) {
     foreach (taxonomy_get_tree($vid) as $term) {
       $terms[$term->tid] = $vocabulary->name.': '.$term->name;
     }

@@ -1,5 +1,5 @@
 <?php
-// $Id: imagecache.module,v 1.97 2009/02/06 11:43:45 drewish Exp $
+// $Id: imagecache.module,v 1.98 2009/02/17 21:36:18 drewish Exp $
 
 /**
  * @file
@@ -30,6 +30,21 @@
  *
  */
 
+/**
+ * Imagecache preset storage constant for user-defined presets in the DB.
+ */
+define('IMAGECACHE_STORAGE_NORMAL', 0);
+
+/**
+ * Imagecache preset storage constant for module-defined presets in code.
+ */
+define('IMAGECACHE_STORAGE_DEFAULT', 1);
+
+/**
+ * Imagecache preset storage constant for user-defined presets that override
+ * module-defined presets.
+ */
+define('IMAGECACHE_STORAGE_OVERRIDE', 2);
 
 /*********************************************************************************************
  * Drupal Hooks
@@ -68,6 +83,12 @@ function imagecache_menu() {
   return $items;
 }
 
+/**
+ * Clear imagecache presets cache on admin/build/modules form.
+ */
+function imagecache_form_system_modules_alter(&$form, $form_state) {
+  imagecache_presets(TRUE);
+}
 
 /**
  * Implementation of hook_theme().
@@ -841,11 +862,40 @@ function imagecache_presets($reset = false) {
     $presets = $cache->data;
   }
   else {
+    $normal_presets = array();
+
     $result = db_query('SELECT * FROM {imagecache_preset} ORDER BY presetname');
     while ($preset = db_fetch_array($result)) {
       $presets[$preset['presetid']] = $preset;
       $presets[$preset['presetid']]['actions'] = imagecache_preset_actions($preset);
+      $presets[$preset['presetid']]['storage'] = IMAGECACHE_STORAGE_NORMAL;
+
+      // Collect normal preset names so we can skip defaults and mark overrides accordingly
+      $normal_presets[$preset['presetname']] = $preset['presetid'];
     }
+
+    // Collect default presets and allow modules to modify them before they
+    // are cached.
+    $default_presets = module_invoke_all('imagecache_default_presets');
+    drupal_alter('imagecache_default_presets', $default_presets);
+
+    // Add in default presets if they don't conflict with any normal presets.
+    // Mark normal presets that take the same preset namespace as overrides.
+    foreach ($default_presets as $preset) {
+      if (!empty($preset['presetname'])) {
+        if (!isset($normal_presets[$preset['presetname']])) {
+          $preset['storage'] = IMAGECACHE_STORAGE_DEFAULT;
+          // Use a string preset identifier
+          $preset['presetid'] = $preset['presetname'];
+          $presets[$preset['presetname']] = $preset;
+        }
+        else {
+          $presetid = $normal_presets[$preset['presetname']];
+          $presets[$presetid]['storage'] = IMAGECACHE_STORAGE_OVERRIDE;
+        }
+      }
+    }
+
     cache_set('imagecache:presets', $presets);
   }
   return $presets;

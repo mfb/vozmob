@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field.inc,v 1.7 2009/01/30 19:21:12 merlinofchaos Exp $
+// $Id: views_handler_field.inc,v 1.8 2009/02/22 00:24:38 merlinofchaos Exp $
 /**
  * @defgroup views_field_handlers Views' field handlers
  * @{
@@ -431,7 +431,8 @@ class views_handler_field extends views_handler {
 
     if (!empty($this->options['alter']['word_boundary'])) {
       if (preg_match ("/(.*)\b.+/u", $value, $matches)) {
-        $value = $matches[1];
+        // Remove scraps of HTML entities from the end of a strings
+        $value = preg_replace('/(?:<(?!.+>)|&(?!.+;)).{1,10}$/us', '', $matches[1]);
         // Strip spare space at the end.
         $value = rtrim($value);
       }

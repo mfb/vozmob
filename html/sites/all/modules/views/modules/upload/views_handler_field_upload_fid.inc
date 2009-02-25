@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_upload_fid.inc,v 1.4 2009/01/30 00:01:42 merlinofchaos Exp $
+// $Id: views_handler_field_upload_fid.inc,v 1.5 2009/02/17 23:46:35 merlinofchaos Exp $
 /**
  * Field handler to provide a list of roles.
  */
@@ -34,7 +34,6 @@ class views_handler_field_upload_fid extends views_handler_field_prerender_list 
     $vids = array();
     $this->items = array();
 
-    $data = array();
     foreach ($values as $result) {
       $vids[] = $result->{$this->field_alias};
     }

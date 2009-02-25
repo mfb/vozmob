@@ -1,5 +1,5 @@
 <?php
-// $Id: devel_node_access.module,v 1.15.2.11 2009/01/25 12:57:21 salvis Exp $
+// $Id: devel_node_access.module,v 1.15.2.12 2009/02/19 11:05:37 salvis Exp $
 /**
  * @file
  *
@@ -242,14 +242,16 @@ function devel_node_access_block($op = 'list', $delta = 0) {
             $output = theme('table', $headers, $rows, array('style' => 'text-align: left'));
           }
           else {
-            $variable = array('!na' => 'node_access');
+            $tr = 't';
+            $tokens = array('!na' => '{node_access}');
             $states = array(
-              'ok'           => array(t('ok'),           'ok',      t('Highest priority grant, in !na.', $variable)),
-              'ignored'      => array(t('ignored'),      'warning', t('Lower priority grant, not in !na and thus ignored.', $variable)),
-              'empty'        => array(t('empty'),        'warning', t('Does not grant any access, but could block lower priority grants.', $variable)),
-              'missing'      => array(t('missing'),      'error',   t("Should be in !na but isn't; run Rebuild Permissions to fix this!", $variable)),
-              'illegitimate' => array(t('illegitimate'), 'error',   t('Should NOT be in !na because of lower priority!', $variable)),
-              'alien'        => array(t('alien'),        'error',   t('Should NOT be in !na because of unknown origin!', $variable)),
+              'default'      => array(t('default'),      'ok',      t('Default grant supplied by core in the absence of any other non-empty grants, in !na.', $tokens)),
+              'ok'           => array(t('ok'),           'ok',      t('Highest priority grant, in !na.', $tokens)),
+              'ignored'      => array(t('ignored'),      'warning', t('Lower priority grant, not in !na and thus ignored.', $tokens)),
+              'empty'        => array(t('empty'),        'warning', t('Does not grant any access, but could block lower priority grants; not in !na.', $tokens)),
+              'missing'      => array(t('missing'),      'error',   t("Should be in !na but isn't!", $tokens)),
+              'illegitimate' => array(t('illegitimate'), 'error',   t('Should NOT be in !na because of lower priority!', $tokens)),
+              'alien'        => array(t('alien'),        'error',   t('Should NOT be in !na because of unknown origin!', $tokens)),
             );
             $headers = array(t('node'), t('prio'), t('status'), t('realm'), t('gid'), t('view'), t('update'), t('delete'), t('explained'));
             $active_grants = array();
@@ -292,26 +294,39 @@ function devel_node_access_block($op = 'list', $delta = 0) {
               if (isset($active_grants[$nid])) {
                 foreach ($active_grants[$nid] as $realm => $active_grants_realm) {
                   foreach ($active_grants_realm as $gid => $active_grant) {
+                    $count_nonempty_grants = 0;
                     foreach ($acquired_grants_nid as $priority => $acquired_grants_nid_priority) {
                       if (isset($acquired_grants_nid_priority[$realm][$gid])) {
                         $found = TRUE;
                       }
                     }
-                    if (count($acquired_grants_nid) == 0 && $realm == 'all' && $gid == 0 ) {
-                      $all_grants[] = ((array) $active_grant) + array(
+                    if ($acquired_grants_nid_priority = reset($acquired_grants_nid)) { // highest priority only
+                      foreach ($acquired_grants_nid_priority as $acquired_grants_nid_priority_realm) {
+                        foreach ($acquired_grants_nid_priority_realm as $acquired_grants_nid_priority_realm_gid) {
+                          $count_nonempty_grants += (!empty($acquired_grants_nid_priority_realm_gid['grant_view']) || !empty($acquired_grants_nid_priority_realm_gid['grant_update']) || !empty($acquired_grants_nid_priority_realm_gid['grant_delete']));
+                        }
+                      }
+                    }
+                    if ($count_nonempty_grants == 0 && $realm == 'all' && $gid == 0 ) {
+                      $fixed_grant = ((array) $active_grant) + array(
                         'priority' => '&ndash;',
-                        'state'    => 'ok',
-                        'nid'      => $nid,
-                        '#title'   => ($node->title ? check_plain($node->title) : $node->nid),
+                        'state'    => 'default',
                       );
                     }
                     elseif (!$found) {
-                      $all_grants[] = ((array) $active_grant) + array(
+                      $fixed_grant = ((array) $active_grant) + array(
                         'priority' => '?',
                         'state'    => 'alien',
-                        'nid'      => $nid,
                       );
                     }
+                    else {
+                      continue;
+                    }
+                    $fixed_grant += array(
+                      'nid'      => $nid,
+                      '#title'   => (isset($node->title) ? check_plain($node->title) : $node->nid),
+                    );
+                    $all_grants[] = $fixed_grant;
                   }
                 }
               }
@@ -347,6 +362,7 @@ function devel_node_access_block($op = 'list', $delta = 0) {
             }
             // fill in the table rows
             $rows = array();
+            $error_count = 0;
             foreach ($all_grants as $grant) {
               $row = new stdClass();
               $row->nid = $grant['nid'];
@@ -361,6 +377,7 @@ function devel_node_access_block($op = 'list', $delta = 0) {
               $row->explained = implode('; ', module_invoke_all('node_access_explain', $row));
               unset($row->title);
               $class = $states[$grant['state']][1];
+              $error_count += ($class == 'error');
               $row = (array) $row;
               foreach (array('view', 'update', 'delete') as $op) {
                 $row["grant_$op"] = array('data' => $row["grant_$op"]);
@@ -383,6 +400,11 @@ function devel_node_access_block($op = 'list', $delta = 0) {
             $output = theme_table($headers, $rows, array('class' => 'system-status-report', 'style' => 'text-align: left'));
 
             $output .= theme_item(array('#value' => '', '#description' => '(Some of the table elements provide additional information if you hover your mouse over them.)'));
+
+            if ($error_count > 0) {
+              $tokens['!Rebuild_permissions'] = '<a href="'. url('admin/content/node-settings/rebuild') .'">'. $tr('Rebuild permissions') .'</a>';
+              $output .= theme_item(array('#value' => '<div class="error">'. t("You have errors in your !na table! You may be able to fix these for now by running !Rebuild_permissions, but this is likely to destroy the evidence and make it impossible to identify the underlying issues. If you don't fix those, the errors will probably come back again. <br /> DON'T do this just yet if you intent to ask for help with this situation.", $tokens) .'</div>'));
+            }
 
             // explain how access is granted (code from node_access())
             $t = 't';

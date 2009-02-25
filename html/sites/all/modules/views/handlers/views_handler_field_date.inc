@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_date.inc,v 1.1 2008/09/03 19:21:28 merlinofchaos Exp $
+// $Id: views_handler_field_date.inc,v 1.2 2009/02/21 23:36:42 merlinofchaos Exp $
 /**
  * A handler to provide proper displays for dates.
  *
@@ -27,7 +27,8 @@ class views_handler_field_date extends views_handler_field {
         'medium' => format_date($time, 'medium'),
         'large' => format_date($time, 'large'),
         'custom' => t('Custom'),
-        'time ago' => t('Time ago'),
+        'raw time ago' => t('Time ago'),
+        'time ago' => t('Time ago (with "ago" appended)'),
       ),
       '#default_value' => isset($this->options['date_format']) ? $this->options['date_format'] : 'small',
     );
@@ -37,18 +38,20 @@ class views_handler_field_date extends views_handler_field {
       '#description' => t('If "Custom", see <a href="http://us.php.net/manual/en/function.date.php" target="_blank">the PHP docs</a> for date formats. If "Time ago" this is the the number of different units to display, which defaults to two.'),
       '#default_value' => isset($this->options['custom_date_format']) ? $this->options['custom_date_format'] : '',
       '#process' => array('views_process_dependency'),
-      '#dependency' => array('edit-options-date-format' => array('custom', 'time ago')),
+      '#dependency' => array('edit-options-date-format' => array('custom', 'time ago', 'raw time ago')),
     );
   }
 
   function render($values) {
     $value = $values->{$this->field_alias};
     $format = $this->options['date_format'];
-    if ($format == 'custom' || $format == 'time ago') {
+    if ($format == 'custom' || $format == 'time ago' || $format == 'raw time ago') {
       $custom_format = $this->options['custom_date_format'];
     }
 
     switch ($format) {
+      case 'raw time ago':
+        return $value ? format_interval(time() - $value, is_numeric($custom_format) ? $custom_format : 2) : theme('views_nodate');
       case 'time ago':
         return $value ? t('%time ago', array('%time' => format_interval(time() - $value, is_numeric($custom_format) ? $custom_format : 2))) : theme('views_nodate');
       case 'custom':

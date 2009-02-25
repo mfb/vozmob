@@ -1,68 +1,91 @@
-// $Id: views_bulk_operations.js,v 1.1.4.10 2009/01/29 00:29:03 kratib Exp $
+// $Id: views_bulk_operations.js,v 1.1.4.14 2009/02/20 23:16:49 kratib Exp $
+(function ($) {
+// START jQuery
 
 Drupal.vbo = Drupal.vbo || {};
 
 Drupal.vbo.selectAll = function() {
   var table = this;
-  var form = jQuery(table).parents('form');
+  var form = $(table).parents('form');
 
-  var thSelectAll = jQuery('th.select-all', table).click(function() {
+  var select = $('th.select-all', table).click(function() {
     setSelectAll(false);
   });
-  jQuery('input#vbo-select-all-pages', table).click(function() {
+  $('input#vbo-select-all-pages', table).click(function() {
     setSelectAll(true);
   });
-  jQuery('input#vbo-select-this-page', table).click(function() {
+  $('input#vbo-select-this-page', table).click(function() {
     setSelectAll(false);
   });
-  jQuery('td input:checkbox', table).click(function() {
-    setSelectAll(jQuery('input#edit-objects-select-all', form).attr('value') == 1);
+  var checkboxes = $('td input:checkbox', table).click(function() {
+    setSelectAll($('input#edit-objects-select-all', form).val() == 1);
+  }).each(function() {
+    $(this).parents('tr:first')[ this.checked ? 'addClass' : 'removeClass' ]('selected');
   });
 
-  function setSelectAll(all) {
-    cbSelectAll = jQuery('input.form-checkbox', thSelectAll)[0];
-    if (cbSelectAll.checked) {
-      tdSelectAll = jQuery('td.view-field-select-all', table).css('display', jQuery.browser.msie ? 'inline-block' : 'table-cell');
-      if (all) {
-        jQuery('span#vbo-this-page', tdSelectAll).css('display', 'none');
-        jQuery('span#vbo-all-pages', tdSelectAll).css('display', 'inline');
-        jQuery('input#edit-objects-select-all', form).attr('value', 1);
+  var setSelectAll = function(all) {
+    $('input#edit-objects-select-all', form).val(all ? 1 : 0);
+    $('th.select-all input:checkbox', table).each(function() {
+      if (this.checked) {
+        $('td.view-field-select-all', table).css('display', $.browser.msie ? 'inline-block' : 'table-cell');
+        $('span#vbo-this-page', table).css('display', all ? 'none' : 'inline');
+        $('span#vbo-all-pages', table).css('display', all ? 'inline' : 'none');
       }
       else {
-        jQuery('span#vbo-this-page', tdSelectAll).css('display', 'inline');
-        jQuery('span#vbo-all-pages', tdSelectAll).css('display', 'none');
-        jQuery('input#edit-objects-select-all', form).attr('value', 0);
+        $('td.view-field-select-all', table).css('display', 'none');
       }
-    }
-    else {
-      jQuery('td.view-field-select-all', table).css('display', 'none');
-      jQuery('input#edit-objects-select-all', form).attr('value', all ? 1 : 0);
-    }
+    });
   }
+
+  var strings = { 'selectAll': Drupal.t('Select all rows in this table'), 'selectNone': Drupal.t('Deselect all rows in this table') };
+  var updateSelectAll = function(state) {
+    $('th.select-all input:checkbox', table).each(function() {
+      $(this).attr('title', state ? strings.selectNone : strings.selectAll);
+      this.checked = state;
+      setSelectAll($('input#edit-objects-select-all', form).val() == 1);
+    });
+  };
+
+  // Update UI based on initial values.
+  updateSelectAll(checkboxes.length == $(checkboxes).filter(':checked').length);
 }
 
 Drupal.vbo.startUp = function(context) {
-  jQuery('form table th.select-all', context).parents('table').each(Drupal.vbo.selectAll);
-  jQuery('tr.rowclick', context).click(function(event) {
+  // Reset the form action that Views Ajax might destroy.
+  $('form[id^=views-bulk-operations-form]').each(function() {
+    $(this).attr('action', Drupal.settings.vbo.url);
+  });
+
+  // Set up the VBO table for select-all functionality.
+  $('form table:has(th.select-all)', context).each(this.selectAll);
+
+  // Set up the ability to click anywhere on the row to select it.
+  $('tr.rowclick', context).click(function(event) {
     if (event.target.type !== 'checkbox') {
-      checkbox = jQuery(':checkbox', this)[0];
-      checked = checkbox.checked;
-      // trigger() toggles the checkmark *after* the event is set, 
-      // whereas manually clicking the checkbox toggles it *beforehand*.
-      // that's why we manually set the checkmark first, then trigger the
-      // event (so that listeners get notified), then re-set the checkmark
-      // which the trigger will have toggled. yuck!
-      checkbox.checked = !checked;
-      jQuery(checkbox).trigger('click');
-      checkbox.checked = !checked;
+      $(':checkbox', this).each(function() {
+        var checked = this.checked;
+        // trigger() toggles the checkmark *after* the event is set, 
+        // whereas manually clicking the checkbox toggles it *beforehand*.
+        // that's why we manually set the checkmark first, then trigger the
+        // event (so that listeners get notified), then re-set the checkmark
+        // which the trigger will have toggled. yuck!
+        this.checked = !checked;
+        $(this).trigger('click');
+        this.checked = !checked;
+      });
     }
   });
 }
 
 Drupal.behaviors.vbo = function(context) {
-  jQuery('form[id^=views-bulk-operations-form]').each(function() {
-    jQuery(this).attr('action', Drupal.settings.basePath + Drupal.settings.vbo.url);
-  });
+  // Force Firefox to reload the page if Back is hit.
+  // https://developer.mozilla.org/en/Using_Firefox_1.5_caching
+  window.onunload = function(){}
+
+  // Set up VBO UI.
   Drupal.vbo.startUp(context);
 }
+
+// END jQuery
+})(jQuery);
 

@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_argument.inc,v 1.6 2009/02/06 20:56:29 merlinofchaos Exp $
+// $Id: views_handler_argument.inc,v 1.7 2009/02/20 20:12:38 merlinofchaos Exp $
 
 /**
  * @defgroup views_argument_handlers Handlers for arguments
@@ -74,7 +74,7 @@ class views_handler_argument extends views_handler {
       $arg = $this->argument;
     }
 
-    return !empty($this->options['wildcard']) && $this->options['wildcard'] == $arg;
+    return !empty($this->options['wildcard']) && $this->options['wildcard'] === $arg;
   }
 
   function wildcard_title() {

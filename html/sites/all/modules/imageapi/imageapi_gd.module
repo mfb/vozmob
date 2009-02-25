@@ -1,4 +1,4 @@
-<?php // $Id: imageapi_gd.module,v 1.13.2.2 2009/02/06 09:27:48 drewish Exp $
+<?php // $Id: imageapi_gd.module,v 1.13.2.3 2009/02/13 02:30:24 drewish Exp $
 
 /**
  * @file
@@ -97,6 +97,8 @@ function imageapi_gd_image_rotate(&$image, $degrees, $bgcolor) {
   $res = imagerotate($image->res, 360 - $degrees, $bgcolor);
   imagedestroy($image->res);
   $image->res = $res;
+  $image->info['width'] = imagesx($res);
+  $image->info['height'] = imagesy($res);
   return true;
 } 
 

@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_filter_term_node_tid.inc,v 1.6 2009/01/27 20:13:27 merlinofchaos Exp $
+// $Id: views_handler_filter_term_node_tid.inc,v 1.7 2009/02/20 20:35:37 merlinofchaos Exp $
 
 /**
  * Filter by term id
@@ -178,6 +178,10 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
   }
 
   function accept_exposed_input($input) {
+    if (empty($this->options['exposed'])) {
+      return TRUE;
+    }
+
     // If it's optional and there's no value don't bother filtering.
     if ($this->options['expose']['optional'] && empty($this->validated_exposed_input)) {
       return FALSE;

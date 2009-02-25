@@ -1,5 +1,5 @@
 <?php
-// $Id: views.install,v 1.43 2009/01/07 19:58:47 merlinofchaos Exp $
+// $Id: views.install,v 1.44 2009/02/20 22:57:19 merlinofchaos Exp $
 /**
  * @file views.install
  * Contains install and update functions for Views.
@@ -28,13 +28,13 @@ function views_schema() {
  */
 function views_schema_1() {
   $schema['views_view'] = array(
-    'description' => t('Stores the general data for a view.'),
+    'description' => 'Stores the general data for a view.',
     'fields' => array(
       'vid' => array(
         'type' => 'serial',
         'unsigned' => TRUE,
         'not null' => TRUE,
-        'description' => t('The view ID of the field, defined by the database.'),
+        'description' => 'The view ID of the field, defined by the database.',
         'no export' => TRUE,
       ),
       'name' => array(
@@ -42,36 +42,36 @@ function views_schema_1() {
         'length' => '32',
         'default' => '',
         'not null' => TRUE,
-        'description' => t('The unique name of the view. This is the primary field views are loaded from, and is used so that views may be internal and not necessarily in the database. May only be alphanumeric characters plus underscores.'),
+        'description' => 'The unique name of the view. This is the primary field views are loaded from, and is used so that views may be internal and not necessarily in the database. May only be alphanumeric characters plus underscores.',
       ),
       'description' => array(
         'type' => 'varchar',
         'length' => '255',
         'default' => '',
-        'description' => t('A description of the view for the admin interface.'),
+        'description' => 'A description of the view for the admin interface.',
       ),
       'tag' => array(
         'type' => 'varchar',
         'length' => '255',
         'default' => '',
-        'description' => t('A tag used to group/sort views in the admin interface'),
+        'description' => 'A tag used to group/sort views in the admin interface',
       ),
       'view_php' => array(
         'type' => 'blob',
-        'description' => t('A chunk of PHP code that can be used to provide modifications to the view prior to building.'),
+        'description' => 'A chunk of PHP code that can be used to provide modifications to the view prior to building.',
       ),
       'base_table' => array(
         'type' => 'varchar',
         'length' => '32',
         'default' => '',
         'not null' => TRUE,
-        'description' => t('What table this view is based on, such as node, user, comment, or term.'),
+        'description' => 'What table this view is based on, such as node, user, comment, or term.',
       ),
       'is_cacheable' => array(
         'type' => 'int',
         'default' => 0,
         'size' => 'tiny',
-        'description' => t('A boolean to indicate whether or not this view may have its query cached.'),
+        'description' => 'A boolean to indicate whether or not this view may have its query cached.',
       ),
     ),
     'primary key' => array('vid'),
@@ -79,14 +79,14 @@ function views_schema_1() {
   );
 
   $schema['views_display'] = array(
-    'description' => t('Stores information about each display attached to a view.'),
+    'description' => 'Stores information about each display attached to a view.',
     'fields' => array(
       'vid' => array(
         'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE,
         'default' => 0,
-        'description' => t('The view this display is attached to.'),
+        'description' => 'The view this display is attached to.',
         'no export' => TRUE,
       ),
       'id' => array(
@@ -94,30 +94,30 @@ function views_schema_1() {
         'length' => '64',
         'default' => '',
         'not null' => TRUE,
-        'description' => t('An identifier for this display; usually generated from the display_plugin, so should be something like page or page_1 or block_2, etc.'),
+        'description' => 'An identifier for this display; usually generated from the display_plugin, so should be something like page or page_1 or block_2, etc.',
       ),
       'display_title' => array(
         'type' => 'varchar',
         'length' => '64',
         'default' => '',
         'not null' => TRUE,
-        'description' => t('The title of the display, viewable by the administrator.'),
+        'description' => 'The title of the display, viewable by the administrator.',
       ),
       'display_plugin' => array(
         'type' => 'varchar',
         'length' => '64',
         'default' => '',
         'not null' => TRUE,
-        'description' => t('The type of the display. Usually page, block or embed, but is pluggable so may be other things.'),
+        'description' => 'The type of the display. Usually page, block or embed, but is pluggable so may be other things.',
       ),
       'position' => array(
         'type' => 'int',
         'default' => 0,
-        'description' => t('The order in which this display is loaded.'),
+        'description' => 'The order in which this display is loaded.',
       ),
       'display_options' => array(
         'type' => 'blob',
-        'description' => t('A serialized array of options for this display; it contains options that are generally only pertinent to that display plugin type.'),
+        'description' => 'A serialized array of options for this display; it contains options that are generally only pertinent to that display plugin type.',
         'serialize' => TRUE,
         'serialized default' => 'a:0:{}',
       ),
@@ -128,34 +128,34 @@ function views_schema_1() {
   $schema['cache_views'] = drupal_get_schema_unprocessed('system', 'cache');
 
   $schema['views_object_cache'] = array(
-    'description' => t('A special cache used to store objects that are being edited; it serves to save state in an ordinarily stateless environment.'),
+    'description' => 'A special cache used to store objects that are being edited; it serves to save state in an ordinarily stateless environment.',
     'fields' => array(
       'sid' => array(
         'type' => 'varchar',
         'length' => '64',
-        'description' => t('The session ID this cache object belongs to.'),
+        'description' => 'The session ID this cache object belongs to.',
       ),
       'name' => array(
         'type' => 'varchar',
         'length' => '32',
-        'description' => t('The name of the view this cache is attached to.'),
+        'description' => 'The name of the view this cache is attached to.',
       ),
       'obj' => array(
         'type' => 'varchar',
         'length' => '32',
-        'description' => t('The name of the object this cache is attached to; this essentially represents the owner so that several sub-systems can use this cache.'),
+        'description' => 'The name of the object this cache is attached to; this essentially represents the owner so that several sub-systems can use this cache.',
       ),
       'updated' => array(
         'type' => 'int',
         'unsigned' => TRUE,
         'not null' => TRUE,
         'default' => 0,
-        'description' => t('The time this cache was created or updated.'),
+        'description' => 'The time this cache was created or updated.',
       ),
       'data' => array(
         'type' => 'text',
         'size' => 'big',
-        'description' => t('Serialized data being stored.'),
+        'description' => 'Serialized data being stored.',
         'serialize' => TRUE,
       ),
     ),
@@ -216,7 +216,7 @@ function views_update_6002() {
   $new_field = array(
     'type' => 'text',
     'size' => 'big',
-    'description' => t('Serialized data being stored.'),
+    'description' => 'Serialized data being stored.',
     'serialize' => TRUE,
   );
 

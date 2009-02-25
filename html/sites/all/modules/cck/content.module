@@ -1,5 +1,5 @@
 <?php
-// $Id: content.module,v 1.301.2.96 2009/01/26 14:45:34 yched Exp $
+// $Id: content.module,v 1.301.2.97 2009/02/14 01:16:53 yched Exp $
 /**
  * @file
  * Allows administrators to associate custom fields to content types.
@@ -420,16 +420,8 @@ function content_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
     // Special case for 'view' op, we want to adjust weights of non-cck fields
     // even if there are no actual fields for this type.
     if ($op == 'view') {
-      foreach ($type['extra'] as $key => $value) {
-        // Some core 'fields' use a different key in node forms and in 'view'
-        // render arrays.
-        if (isset($value['view']) && isset($node->content[$value['view']])) {
-          $node->content[$value['view']]['#weight'] = $value['weight'];
-        }
-        elseif (isset($node->content[$key])) {
-          $node->content[$key]['#weight'] = $value['weight'];
-        }
-      }
+      $node->content['#pre_render'][] = 'content_alter_extra_weights';
+      $node->content['#content_extra_fields'] = $type['extra'];
     }
   }
 }
@@ -445,13 +437,28 @@ function content_form_alter(&$form, $form_state, $form_id) {
       // Merge field widgets.
       $form = array_merge($form, content_form($form, $form_state));
     }
-    // Adjust weights for non-CCK fields.
-    foreach ($type['extra'] as $key => $value) {
-      if (isset($form[$key])) {
-        $form[$key]['#weight'] = $value['weight'];
+    $form['#pre_render'][] = 'content_alter_extra_weights';
+    $form['#content_extra_fields'] = $type['extra'];
+  }
+}
+
+/**
+ * Pre-render callback to adjust weights of non-CCK fields.
+ */
+function content_alter_extra_weights($elements) {
+  if (isset($elements['#content_extra_fields'])) {
+    foreach ($elements['#content_extra_fields'] as $key => $value) {
+      // Some core 'fields' use a different key in node forms and in 'view'
+      // render arrays. Check we're not on a form first.
+      if (!isset($elements['#build_id']) && isset($value['view']) && isset($elements[$value['view']])) {
+        $elements[$value['view']]['#weight'] = $value['weight'];
+      }
+      elseif (isset($elements[$key])) {
+        $elements[$key]['#weight'] = $value['weight'];
       }
     }
   }
+  return $elements;
 }
 
 /**
