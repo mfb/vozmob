@@ -1,5 +1,5 @@
 <?php
-// $Id: jquery_plugin.jq.inc,v 1.1.2.10 2009/02/06 07:49:07 mfb Exp $
+// $Id: jquery_plugin.jq.inc,v 1.1.2.11 2009/02/26 06:22:43 mfb Exp $
 
 /**
  * Implementation of hook_jq().
@@ -38,7 +38,7 @@ function jquery_plugin_jq($op, $plugin = NULL) {
       'cycle' => array(
         'name' => t('Cycle'),
         'description' => t('Easy to use light-weight slideshow implementation. It supports pause-on-hover, auto-stop, auto-fit, before/after callbacks, click triggers and many transition effects including fade, shuffle, scroll, turn and zoom. It also allows you to define and run your own custom transitions. In addition, it supports, but does not require, the Metadata Plugin and the Easing Plugin.'),
-        'version' => '2.34',
+        'version' => '2.54',
         'url' => 'http://plugins.jquery.com/project/cycle',
         'files' => array(
           'js' => array(
@@ -64,7 +64,7 @@ function jquery_plugin_jq($op, $plugin = NULL) {
       'flashembed' => array(
         'name' => t('Flash embed'),
         'description' => t('A javascript tool that you can use to embed Flash objects to your website.'),
-        'version' => '1.0',
+        'version' => '1.0.1',
         'url' => 'http://plugins.jquery.com/project/flashembed',
         'files' => array(
           'js' => array(
