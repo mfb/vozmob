@@ -12,7 +12,7 @@ function mms_us_verizon_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
 
     // Build a regex to extract message body
     // This regex identifies the actual message text in the email
-    $end_pattern = preg_quote('This message was sent using PIX-FLIX Messaging service from Verizon Wireless!');
+    $end_pattern = preg_quote('This message was sent using ');
     $pattern = '@^(.*)' . $end_pattern . '@Us';
 
     // Check for regex success in case the provider changes their format
