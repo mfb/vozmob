@@ -1,0 +1,20 @@
+/* $Id: printlinks-rtl.css,v 1.1.2.2 2008/08/21 22:03:40 jcnventura Exp $ */
+
+.print-link {
+  float:left;
+  margin-left: 0;
+  margin-right: 1em;
+}
+
+.print-syslink {
+  margin-right: 0;
+  margin-left: 1em;
+}
+
+img.print-icon-margin {
+  margin-left: 4px;
+}
+
+label.printmail-label {
+  float: right;
+}

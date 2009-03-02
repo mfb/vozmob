@@ -1,3 +1,0 @@
-1) Copy printpdf.module to the modules directory of your site.
-2) Enable the module in site configuration page.
-3) Set access permission.
