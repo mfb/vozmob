@@ -1,0 +1,7 @@
+; $Id: printpdf.info,v 1.1 
+name = Printpdf
+description = Enables users to print nodes as PDF.
+
+version = "1.0"
+project = "printpdf"
+
