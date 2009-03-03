@@ -1,0 +1,26 @@
+<?php
+// $Id: notifications_content.install,v 1.1.2.2 2008/10/29 12:10:50 jareyero Exp $
+
+/**
+ * Implementation of hook_install().
+ */
+function notifications_content_install() {
+  // Module weight. It must run after most modules, to make sure they've done
+  // their work before we add the notifications queries.
+  db_query("UPDATE {system} SET weight = 100 WHERE name = 'notifications_content' AND type = 'module'");
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function notifications_content_uninstall() {
+  drupal_set_message(t('Content notifications uninstallation script complete.'));
+}
+
+/**
+ * Update module weight
+ */
+function notifications_content_update_6000() {
+  notifications_content_install();
+  return array();
+}

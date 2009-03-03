@@ -1,0 +1,490 @@
+<?php
+// $Id: messaging_notify.module,v 1.1.2.5 2009/02/21 18:38:36 jareyero Exp $
+/**
+ * @file
+ * Subscriptions to messaging events
+ */
+
+/**
+ * Implementation of hook_menu()
+ */
+function messaging_notify_menu() {
+  $items['admin/messaging/settings/notify'] = array(
+    'title' => 'Notifications',
+    'description' => 'Configure notifications for messages',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('messaging_notify_admin_settings'),
+    'access arguments' => array('administer messaging'),
+    'type' => MENU_LOCAL_TASK,
+  );
+  return $items;
+}
+
+/**
+ * Admin settings, configure defaults for sending methods
+ */
+function messaging_notify_admin_settings() {
+  // To what you can subscribe using what
+  $form['allowed'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Method permissions')
+  );
+  $form['allowed']['messaging_notify_subscribe'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Allowed subscriptions'),
+    '#options' => messaging_method_list(),
+    '#default_value' => variable_get('messaging_notify_subscribe', array()),
+    '#description' => t('Check the sending methods a user can subscribe to.'),  
+  );
+  $form['allowed']['messaging_notify_receive'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Allowed sending methods'),
+    '#options' => messaging_method_list(),
+    '#default_value' => variable_get('messaging_notify_receive', array()),
+    '#description' => t('Check the sending methods that can be used for notifications.'),  
+  );
+  /*
+  $form['allowed']['update_permissions'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Update all existing accounts'),
+    '#default_value' => FALSE,
+  );
+  */
+  // Default settings for new accounts
+  $form['update_methods'] = array(
+    '#tree' => TRUE,
+  );
+  
+  
+  foreach (messaging_method_info() as $method => $info) {
+    $key = 'messaging_notify_default_' . $method;
+    $settings = variable_get($key, array());
+    $method_list = array('' => '') + messaging_method_list();    
+    unset($method_list[$method]);
+    
+    $form[$key] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Defaults for %name', array('%name' => $info['name'])),
+      '#collapsible' => TRUE,
+      '#collapsed' => empty($settings['method']),
+      '#tree' => TRUE,      
+    );
+    $form[$key]['method'] = array(
+      '#title' => t('Default send method'),
+      '#type' => 'select',
+      '#options' => $method_list,
+      '#default_value' => !empty($settings['method']) ? $settings['method'] : '',
+    );
+    $form[$key]['interval'] = array(
+      '#title' => t('Default send interval'),
+      '#type' => 'select',
+      '#options' => _notifications_send_intervals(),
+      '#default_value' => !empty($settings['interval']) ? $settings['interval'] : 0,
+    );
+    $form[$key]['update'] = array(
+      '#title' => t('Update all existing accounts.'),
+      '#type' => 'checkbox', 
+      '#default_value' => 0,
+      '#parents' => array('update_methods', $method),
+    );
+  }
+  $form['buttons']['submit'] = array('#type' => 'submit', '#value' => t('Save configuration') );
+  $form['buttons']['reset'] = array('#type' => 'submit', '#value' => t('Reset to defaults') );
+  $form['buttons']['update'] = array('#type' => 'submit', '#value' => t('Update user accounts') );
+  return $form;
+}
+
+/**
+ * Submit admin settings
+ */
+function messaging_notify_admin_settings_submit(&$form, &$form_state) {
+  $op = isset($form_state['values']['op']) ? $form_state['values']['op'] : '';
+  //dsm($form_state['values']);
+  // Update existing accounts
+  if ($op == t('Update user accounts')) {
+    $count = 0;
+    $update = array_filter($form_state['values']['update_methods']);
+    foreach (array_keys($update) as $method) {
+      // Delete all existing subscriptions for this method
+      notifications_delete_subscriptions(array('type' => 'messaging'), array('method' => $method));
+      if ($send_method = $form_state['values']['messaging_notify_default_' . $method]['method']) {
+        $interval = $form_state['values']['messaging_notify_default_' . $method]['interval'];
+        // Create a new subscription for each user, speed it up with some query tricks
+        db_query("INSERT INTO {notifications} (uid, type, event_type, module, status, conditions, send_method, send_interval) SELECT u.uid, 'messaging', 'message', 'messaging', 7, 1, '%s', %d FROM {users} u WHERE u.status = 1", $send_method, $interval);
+        db_query("INSERT INTO {notifications_fields} (sid, field, value) SELECT n.sid, 'method', '%s' FROM {notifications} n WHERE n.status = 7", $method);
+        
+      }
+      $count += db_result(db_query("SELECT COUNT(*) FROM {notifications} WHERE status = 7"));
+      
+    }
+    if ($count) {
+      db_query("UPDATE {notifications} SET status = 1 WHERE status = 7");
+      drupal_set_message(t('Updated or created %count subscriptions', array('%count' => $count)));
+    }
+  }
+  // Remove update values and post to settings submission
+  unset($form_state['values']['update_permissions']);
+  unset($form_state['values']['update_methods']);
+  return system_settings_form_submit($form, $form_state);
+
+}
+
+/**
+ * Implementation of hook_perm().
+ */
+function messaging_notify_perm() {
+  return array('subscribe to messages');
+}
+
+/**
+ * Implementation of hook_notifications()
+ */
+function messaging_notify_notifications($op, &$arg0, $arg1 = NULL, $arg2 = NULL) {
+  switch ($op) {
+    case 'names':
+      $subs = &$arg0;
+      if ($subs->event_type == 'message') {
+        $subs->type_name = t('Messaging');
+        if (!empty($subs->fields['method'])) {
+          $subs->names['method'] = t('Method: %name', array('%name' => messaging_method_info($subs->fields['method'], 'name')));
+        }
+      }
+      break;
+    case 'subscription types':
+      $types['messaging'] = array(
+        'event_type' => 'message',
+        'title' => t('Thread'),
+        'access' => 'subscribe to messages',
+        'fields' => array('method'),
+      );
+      return $types;
+    case 'subscription fields':
+      // Information about available fields for subscriptions
+      $fields['method'] = array(
+        'name' => t('Sending method'),
+        'field' => 'method',
+        'type' => 'string',
+      );
+      return $fields;
+
+    case 'query':
+      // This one will handle only single destinations. $arg2 is $event array.
+      if ($arg0 == 'event' && $arg1 == 'message' && ($message = $arg2->message) && is_numeric($message->destination) && $message->uid) {
+        $query[] = array(
+          'fields' => array('method' => $message->method),
+          'where' => array('s.uid' => $message->uid),
+        );
+        return $query;
+      }
+      break;
+    case 'event load': // $arg0 is event
+      $event = &$arg0;
+      if ($event->type == 'message') {
+        if (!empty($event->params['mqid'])) {
+          $message = messaging_message_load($event->params['mqid']);
+          $event->objects['message'] = $message;
+          $event->objects['author'] = $message->sender_account;
+        }
+      }
+      break;
+    case 'event types':
+      // Node inserts are not grouped by node but all together. The digest will look like:
+      //   New content has been submitted
+      //   - Story Title1 by Author1
+      //   - Event Title2 by Author2
+      $types[] = array(
+        'type' => 'message',
+        'action' => 'sent',
+        'name' => t('New message from [method-name]'),
+        'line' => t('[type-name] [title] by [author-name]'),
+        'digest' => array('message', 'method'),
+        'description' => t('Message received'),
+      );
+      return $types;
+
+   }
+}
+
+/**
+ * Implementation of hook_messaging()
+ */
+function messaging_notify_messaging($op, $arg1 = NULL, $arg2 = NULL, $arg3 = NULL, $arg4 = NULL) {
+  switch ($op) {
+    case 'message groups':
+      $help = t('The header and footer will default to the ones from Notification events');
+      // Generic notifications event
+      $info['notifications-event-message'] = array(
+        'module' => 'messaging_notify',
+        'name' => t('Message notifications'),
+        'description' => t('Notifications for messages. When a message is sent through some channel (I.e. a private message), you may want to be notified through a different one (I.e. a daily email digest).'),
+        'help' => $help,
+        'fallback' => 'notifications-event',
+      );
+      // Node group digests, will have specific help text in hook_help()
+      $info['notifications-digest-message-method'] = array(
+        'module' => 'messaging_notify',
+        'name' => t('Message digests per method'),
+        'description' => t('Digested message events grouping by sending method.'),
+        'fallback' => 'notifications-digest',
+      );
+      return $info;
+
+    case 'message keys':      
+      $type = $arg1;
+      switch ($type) {
+        case 'notifications-event-message':
+          // Some parts may be re-used from 'notifications-event' group
+          // So we specify only subject and main message
+          return array(
+            'subject' => t('Subject'),
+            'main' => t('Content'),
+            'digest' => t('Digest line'),
+            'footer' => t('Footer')
+          );
+        case 'notifications-digest-message-method':
+          $parts['title'] = t('Group title');
+          $parts['footer'] = t('Group footer');
+          return $parts;
+      }
+      break;
+    case 'messages':
+      $type = $arg1;
+      // Event notifications
+      switch ($type) {
+        case 'notifications-event-message':
+          return array(  
+            'subject' => t('New message from [message-author-name]'),
+            'main' => array(
+              '[message-subject]',
+              '[message-body]'
+            ),
+            'digest' => t('Message from [message-author-name]: [message-subject]'),
+          );
+        case 'notifications-digest-message-method':
+          return array(
+            'subject' => t('New messages for [user]'),
+            'header' => t("Greetings, [user].\n\nThese are your messages"),
+          );
+      }
+      break;
+    case 'tokens':
+      $tokens = array();
+      switch ($arg1) {
+        case 'notifications-event-message':        
+          $tokens[] = 'author';
+          $tokens[] = 'message';
+          break;
+        case 'notifications-digest-message-method':
+          $tokens[] = array('message', 'message-method');
+          break;
+      }
+      return $tokens;
+  }
+}
+
+/**
+ * Implementation of hook_messaging_methods_alter()
+ */
+function messaging_notify_messaging_methods_alter(&$info) {
+  // If debug enabled, replace all send callbacks
+  if ($settings = variable_get('messaging_notify_subscribe', array())) {
+    foreach (array_keys($info) as $method) {
+      if (!empty($settings[$method])) {
+        _messaging_callback_add($info[$method], 'aftersend', _messaging_callback('messaging_notify_aftersend'));
+      }
+    }
+  }
+}
+
+/**
+ * Messaging aftersend callback
+ */
+function messaging_notify_aftersend($message, $info) {
+  // Make sure the message is stored
+  $message = messaging_message_store($message);
+
+  // Now trigger notifications event
+  $event = array(
+    'uid' => $message->sender,
+    'oid' => $message->mqid,
+    'type' => 'message',
+    'action' => 'sent',
+    'message' => $message,
+    'params' => array('mqid' => $message->mqid),      
+  );
+
+  notifications_event($event);
+
+  return $message;     
+}
+
+/**
+ * Implementation of hook_token_list(). Documents the individual
+ * tokens handled by the module.
+ */
+function messaging_notify_token_list($type = 'all') {
+  $tokens = array();
+  if ($type == 'message' || $type == 'all') {
+    $tokens['message']['message-subject']    = t('The message subject.');
+    $tokens['message']['message-body']    = t('The message body.');
+    $tokens['message']['message-author-name'] = t('The message\'s author name.');
+    $tokens['message']['message-method'] = t('The message\'s method name.');
+    $tokens['message']['message-date'] = t('The message\'s sending date.');
+  }
+  return $tokens;
+}
+
+/**
+ * Implementation of hook_token_values()
+ */
+function messaging_notify_token_values($type, $object = NULL, $options = array()) {
+  switch ($type) {
+    case 'message':
+      if ($message = $object) {
+        $values['message-subject'] = check_plain($message->subject);
+        $values['message-body'] = check_markup($message->body);
+        $sender = messaging_load_user($message->sender);
+        $values['message-author-name'] = check_plain($sender->name);
+        $tokens['message-method'] = messaging_method_info($message->method, 'name');
+        $tokens['message-date'] = format_date($message->sent);
+        return $values;
+      }
+      break;
+  }
+}
+
+/**
+ * Form to set up multiple notifications for a sending method
+ * 
+ * @param $account
+ *   User account
+ * @param $method
+ *   Messaging method to subscribe to
+ * @param $defaults
+ *   Override defaults for the subscription
+ * @param $max
+ *   Maximum number of subscriptions allowed
+ */
+function messaging_notify_user_form(&$form_state, $account, $method, $defaults = array(), $max = 0) {
+  $form['account'] = array('#type' => 'value', '#value' => $account);
+  $form['method'] = array('#type' => 'value', '#value' => $method);
+  $form['defaults'] = array('#type' => 'value', '#value' => $defaults);
+  
+  $names = array('%method-name' => messaging_method_info($method, 'name'));
+  $form['subscriptions'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Notifications for %method-name', $names),
+    '#description' => t('How you want to get notifications for %method-name. Uncheck the ones you want to be deleted.', $names),
+    '#theme' => 'messaging_subscriptions_table',
+    '#tree' => TRUE,
+  );
+  // Get subscriptions for this method
+  $subscriptions = notifications_get_subscriptions(array('uid' => $account->uid, 'type' => 'messaging'), array('method' => $method));
+  // Add template for new one
+  if (!$max || count($subscriptions) < $max) {
+    $subscriptions['new'] = (object)array(
+      'method' => '',
+      'interval' => 0,
+    );
+  }
+  
+  $method_list = array('' => '') + messaging_method_list($account);
+  unset($method_list[$method]);
+  
+  foreach ($subscriptions as $sid => $subs) {
+    $form['subscriptions']['check'][$sid] = array(
+      '#type' => 'checkbox', 
+      '#default_value' => TRUE,
+    );
+    $form['subscriptions']['method'][$sid] = array(
+      '#type' => 'select',
+      '#options' => $method_list,
+      '#default_value' => $subs->send_method,
+    );
+    $form['subscriptions']['interval'][$sid] = array(
+      '#type' => 'select',
+      '#options' => _notifications_send_intervals(),
+      '#default_value' => $subs->send_interval,
+    );
+  }
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Update'),
+  );
+  return $form;
+}
+
+/**
+ * Form submission
+ */
+function messaging_notify_user_form_submit($form, &$form_state) {
+  $update = $delete = 0;
+  $subscriptions = $form_state['values']['subscriptions'];
+  
+  foreach (array_keys($subscriptions['method']) as $key) {
+    $subs = $form_state['values']['defaults'] + array(
+      'sid' => $key == 'new' ? 0 : $key,
+      'type' => 'messaging',
+      'event_type' => 'message',
+      'send_method' => $subscriptions['method'][$key],
+      'send_interval' => $subscriptions['interval'][$key],
+      'fields' => array('method' => $form_state['values']['method']),
+      'uid' => $form_state['values']['account']->uid,
+      'module' => 'messaging',
+    );
+    $subs = (object)$subs;
+    if ($subs->sid) {
+      if ($subscriptions['check'][$key] && $subs->send_method) {
+        $update++;
+        notifications_save_subscription($subs);
+      } else {
+        $delete++;
+        notifications_delete_subscription($subs->sid);
+      }
+    } elseif ($subscriptions['check'][$key] && $subs->send_method) {
+      drupal_set_message(t('A new subscription has been created.'));
+      notifications_save_subscription($subs);
+    }
+  }
+  if ($update) drupal_set_message(format_plural($update, 'A subscription has been updated.', '%count subscriptions have been updated.'));
+  if ($delete) drupal_set_message(format_plural($delete, 'A subscription has been deleted.', '%count subscriptions have been deleted.'));
+
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function messaging_notify_theme() {
+  return array(
+    'messaging_subscriptions_table' => array(
+      'arguments' => array('form' => NULL),
+    ),
+    /*
+    'messaging_users_reader' => array(
+      'arguments' => array('form' => NULL),
+      'file' => 'messaging_users.pages.inc',
+    ),
+    */
+ );
+}
+
+/**
+ * Theme subscriptions table
+ */
+function theme_messaging_subscriptions_table(&$form) {
+  $output = '';
+  $rows = array();
+  foreach (element_children($form['check']) as $key) {
+    $rows[] = array(
+      drupal_render($form['check'][$key]),
+      drupal_render($form['method'][$key]),
+      drupal_render($form['interval'][$key]),
+    );
+  }
+  if ($rows) {
+    $header = array(theme('table_select_header_cell'), t('Send method'), t('Interval'));
+    $output .= theme('table', $header, $rows);
+  }
+  $output .= drupal_render($form);
+  return $output;
+}

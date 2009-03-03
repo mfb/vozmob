@@ -1,0 +1,5 @@
+; $Id: twitter.info,v 1.3.2.1 2008/09/26 15:59:21 eaton Exp $
+name = Twitter
+description = Adds integration with the Twitter microblogging service.
+php = 5.1
+core = 6.x

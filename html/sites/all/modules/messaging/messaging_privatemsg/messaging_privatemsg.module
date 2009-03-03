@@ -1,0 +1,64 @@
+<?php
+/**
+ * @file
+ * Simple mail using Drupal API. Messaging method plug-in
+ * 
+ * @ TO DO Review filtering
+ */
+
+/**
+ * Implementation of hook_messaging
+ */
+function messaging_privatemsg_messaging($op) {
+  switch($op) {
+    case 'send methods':
+      $info['privatemsg'] = array(
+        'title' => 'Privatemsg',
+        'name' => t('Private message'),
+        'group' => 'web',
+        'type' => MESSAGING_TYPE_PUSH,
+        'access' => 'access private messages',
+        'glue' => "\n",
+        'description' => t('Send messages through Privatemsg'),
+        'send callback' => 'messaging_privatemsg_send_msg', // Sending callback
+        'destination' => 'uid',
+      );
+      return $info;  
+  }
+}
+
+/**
+ * Send mail message to user accounts
+ * 
+ * Fake form submission till they provide a decent API, see http://drupal.org/node/288183
+ * 
+ * @param $destination
+ *   User account
+ */
+function messaging_privatemsg_send_msg($uid, $message) {
+  // Fake form submission, parmeter mapping
+  if (!empty($message['sender_account'])) {
+    $sender = $message['sender_account'];
+  } elseif (!empty($message['sender'])) {
+    $sender = messaging_load_user($message['sender']);
+  }
+  $form_state['validate_built_message'] = array(
+    'subject' => $message['subject'],
+    'author' => !empty($sender) ? $sender : drupal_anonymous_user() ,
+    'body' => $message['body'],
+    'timestamp' => !empty($message['sent']) ? $message['sent'] : time(),
+    'recipients' => messaging_load_user($uid),
+  );
+  
+  pm_send(NULL, $form_state);
+  
+  // @ TO DO How to check for success?
+  return 1;
+}
+
+/**
+ * Implementation of hook_disable()
+ */
+function messaging_privatemsg_disable() {
+  messaging_method_disable('privatemsg');
+}

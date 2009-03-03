@@ -1,0 +1,5 @@
+; $Id: notifications_feed.info,v 1.1 2008/01/26 12:57:38 jareyero Exp $
+name = FeedAPI Subscriptions
+description = Allows users to subscribe to feeds and be notified when they are updated
+package = "Notifications"
+dependencies = notifications feedapi

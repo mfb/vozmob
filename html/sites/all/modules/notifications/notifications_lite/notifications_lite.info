@@ -1,0 +1,5 @@
+; $Id: notifications_lite.info,v 1.1.4.2 2008/04/29 10:03:06 jareyero Exp $
+name = "Notifications Lite"
+description = "Extra Simple Notifications API. Enable only when required by other modules."
+package = Notifications
+core = 6.x

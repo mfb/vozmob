@@ -1,0 +1,7 @@
+; $Id: og_actions.info,v 1.2 2008/10/29 20:01:46 dww Exp $
+name = Organic groups actions
+description = Provides actions for use with Organic Groups and Trigger.
+package = "Organic groups"
+dependencies[] = og
+dependencies[] = trigger
+core = 6.x

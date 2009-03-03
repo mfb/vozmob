@@ -1,0 +1,293 @@
+<?php
+// $Id: notifications_feed.module,v 1.2.2.4.2.1 2008/08/03 00:12:47 jareyero Exp $
+/**
+ * @file
+ * Subscriptions to FeedAPI feeds
+ * 
+ * This module defines 
+ * - Event types: feed
+ * - Subscription type: feed
+ * 
+ */
+
+// Max number of feeds per page
+define('NOTIFICATIONS_FEED_PAGER', 20);
+
+/**
+ * Implementation of hook_menu_()
+ */
+function notifications_feed_menu($may_cache) {
+  global $user;  // we need the user to to build some urls
+  $items = array();
+  
+  if ($may_cache) {
+    /*
+    $items[] = array(
+      'path' => 'admin/notifications/settings/taxonomy',
+      'title' => t('Taxonomy'),
+      'type' => MENU_LOCAL_TASK,
+      'callback' => 'drupal_get_form',
+      'callback arguments' => array('notifications_tags_settings_form'),
+    );
+    */
+  }
+  else {
+    if ($user->uid && arg(0) == 'user' && is_numeric(arg(1)) && arg(2) == 'notifications' && ($user->uid == arg(1) || user_access('administer notifications'))) {
+      $account = ($user->uid == arg(1)) ? $user : user_load(array('uid' => arg(1)));
+      $items[] = array(
+        'path' => 'user/'. $account->uid .'/notifications/feeds',
+        'type' => MENU_LOCAL_TASK,
+        'access' => user_access('subscribe to feeds'),
+        'title' => t('Feeds'),
+        'callback' => 'notifications_feed_user_page',
+        'callback arguments' => array($account),
+        'weight' => 10,
+      );
+    }
+  }
+  return $items;
+}
+
+/**
+ * Implementation of hook_perm()
+ */
+function notifications_feed_perm() {
+  return array('subscribe to feeds');
+}
+
+/**
+ * Implementation of hook_notifications().
+ */
+function notifications_feed_notifications($op, &$arg0, $arg1 = NULL, $arg2 = NULL) {
+  switch ($op) {
+    case 'names':
+      $subs = &$arg0;
+      if ($subs->event_type == 'feed') {
+        if (!empty($subs->fields['feed-nid'])) {
+          $feed = node_load($subs->fields['feed-nid']);
+          $subs->names['feed-nid'] = t('Feed: %name', array('%name' => $feed->title));
+        }
+      }
+      break;
+    case 'subscription types':
+      $types['feed'] = array(
+        'event_type' => 'feed',
+        'title' => t('Feed'),
+        'access' => 'subscribe to feeds',
+        'fields' => array('feed-nid'),
+      );
+      return $types;    
+    case 'query':
+      if ($arg0 == 'event' && $arg1 == 'feed' && ($node = $arg2->feed) ||
+          $arg0 == 'user' && $arg1 == 'feed' && ($node = $arg2)) {
+        $query[]['fields'] = array('feed-nid' => $node->nid);
+        return $query;
+      }
+      break;
+    case 'event types':
+      $types[] = array(
+        'type' => 'feed',
+        'action' => 'update',
+        'name' => '[type-name]: [title]',
+        'line' => "The feed [title] has been updated\n[feed-updated-items]",
+        'digest' => array('feed', 'nid'), 
+      );
+      return $types;
+    case 'event load':
+      $event = &$arg0;
+      if ($event->type == 'feed') {
+        if (!empty($event->params['nid'])) {
+          // For practical reasons like tokens we pass it as node too
+          $event->objects['node'] = $feed = node_load($event->params['nid']);
+          // Add some more data and we have the feed
+          $feed->items_new = $event->params['items_new'];
+          $feed->items_updated = $event->params['items_updated'];
+          $event->objects['feed'] = $feed;
+        }
+      }
+      break;
+    case 'node options':
+      return _notifications_feed_node_options($arg0, $arg1);
+  }
+}
+
+function _notifications_feed_node_options($account, $node) {
+  // If node is a feed type
+  if ($node->feed) {
+    $options[] = array(
+      'name' => t('To items in this feed'),
+      'type' => 'feed',
+      'fields' => array('feed-nid' => $node->nid),
+    );
+    return $options;
+  }  
+}
+
+/**
+ * Implementation of hook_nodeapi()
+ */
+function notifications_feed_nodeapi(&$node, $op, $arg = 0) {
+  switch ($op) {
+    case 'delete':
+      // Remove all feed subscriptions for this node
+      notifications_delete_subscriptions(array('type' => 'feed'), array('feed-nid' => $node->nid));
+  }
+}
+
+/**
+ * Implementation of hook_messaging()
+ */
+function notifications_feed_messaging($op, $arg1 = NULL, $arg2 = NULL, $arg3 = NULL, $arg4 = NULL) {
+  switch ($op) {
+    case 'message groups':
+      // Generic notifications event
+      $info['notifications-event-feed'] = array(
+        'module' => 'notifications_content',
+        'name' => t('Notifications for feed events'),
+      );
+      return $info;
+    case 'message keys':      
+      $type = $arg1;
+      switch ($type) {
+        case 'notifications-event-feed':
+          // Some parts will be re-used from 'notifications-event' group
+          // So we specify only subject and main message
+          return array(
+            'subject' => t('Subject'),
+            'main' => t('Content'),
+          );
+        break;
+      }
+      break;
+    case 'messages':
+      $type = $arg1;
+      // Event notifications
+      switch ($type) {
+        case 'notifications-event-feed':
+          return array(
+            'subject' => t('Feed updated: [title]'),
+            'main' => array(
+              t('Some feed items have been updated:'),
+              '[feed-items-refresh]',
+              t('Read more [feed-url]'),
+            ),
+          );
+      }
+      break;
+    case 'tokens':
+      if ($arg1 == 'notifications-event-feed') {
+        return array('feed');
+      }
+      break;
+  }
+}
+/**
+ * Implementation of hook_feedapi_after_refresh()
+ * 
+ * We use the is_new and is_updated for each item
+ */
+function notifications_feed_feedapi_after_refresh($feed) {
+  $updated = $new = array();
+  foreach ($feed->items as $index => $item) {
+    if ($item->is_new) {
+      $new[$index] = $item->title;
+    }
+    if ($item->is_updated) {
+      $updated[$index] = $item->title;
+    }
+  }
+  if ($new || $updated) {
+    $event = array(
+      'module' => 'notifications_feed',
+      'uid' => 0,
+      'oid' => $feed->nid,
+      'type' => 'feed',
+      'action' => 'items',
+      'feed' => $feed,
+      'params' => array('nid' => $feed->nid, 'items_new' => $new, 'items_updated' => $updated),      
+    );
+ 
+    notifications_event($event);
+  }
+}
+
+/**
+ * Implementation of hook_token_list(). Documents the individual
+ * tokens handled by the module.
+ */
+function notifications_feed_token_list($type = 'all') {
+  $tokens = array();
+  if ($type == 'feed' || $type == 'all') {
+    $tokens['feed']['feed-name'] = t('The feed name');
+    $tokens['feed']['feed-teaser']    = t('The feed teaser.');
+    $tokens['feed']['feed-url'] = t('The URL for the feed');
+    $tokens['feed']['feed-items-refresh']    = t('The list of refreshed (new and updated) items.');
+    $tokens['feed']['feed-items-updated']    = t('The list of updated feed items.');
+    $tokens['feed']['feed-items-new'] = t('The list of new feed items');
+  }
+  return $tokens;
+}
+
+/**
+ * Implementation of hook_token_values()
+ */
+function notifications_feed_token_values($type, $object = NULL, $options = array()) {
+  switch ($type) {
+    case 'feed':
+      if ($feed = $object) {
+        $values['feed-name'] = check_plain($feed->title);
+        $values['feed-teaser'] = $feed->teaser ? check_markup($feed->teaser, $feed->format, FALSE) : '';
+        // We may need to use a different link here
+        $values['feed-url'] = url('node/'. $feed->nid, NULL, NULL, TRUE);
+        // Item lists
+        $updated = array_map('check_plain', $feed->items_updated);
+        $new = array_map('check_plain', $feed->items_new);;
+        $refreshed = array();
+        foreach ($new as $item) {
+          $refreshed[] = t('New: !title', array('!title' => $item));
+        }
+        foreach ($updated as $item) {
+          $refreshed[] = t('Updated: !title', array('!title' => $item));
+        }
+        $values['feed-items-updated'] = $updated ? implode("\n- ", $updated) : t('no updated items');
+        $values['feed-items-new'] = $new ? '- '. implode("\n- ", $new) : t('no new items');
+        $values['feed-items-refresh'] = implode("\n", $refreshed); 
+     
+        return $values;
+      }
+      break;
+  }
+}
+
+/**
+ * Menu callback. User subscriptions to groups.
+ */
+function notifications_feed_user_page($account = NULL) {
+  global $user;
+  $account = $account ? $account : $user;
+
+  // query string for feed subscriptions
+  $query = "SELECT s.*, f.value AS nid, n.type AS node_type, n.title FROM {notifications} s 
+    INNER JOIN {notifications_fields} f ON s.sid = f.sid LEFT JOIN {node} n ON f.value = CAST(n.nid AS CHAR)
+    WHERE s.uid = %d AND s.type = 'feed' AND s.event_type = 'feed' AND s.conditions = 1 AND f.field = 'feed-nid'
+    ORDER BY node_type, n.title";
+  $results = pager_query($query, NOTIFICATIONS_FEED_PAGER, 0, NULL, $account->uid);
+
+  $subscriptions = $list = array();
+  $content_types = notifications_content_types('name');
+  while ($sub = db_fetch_object($results)) {
+    $subscriptions[$sub->nid] = $sub;
+    $list[$sub->nid] = l($sub->title, 'node/'. $sub->nid);
+  }  
+
+  if (!$subscriptions) {
+    $output = t('There are no active feed subscriptions.');    
+  }
+  else {
+    $defaults = array('type' => 'feed', 'event_type' => 'feed');
+    $options = array('title' => t('Feed'));
+    $output = drupal_get_form('notifications_user_form', $account, 'feed', $subscriptions, $list, $defaults, $options);
+    $output .= theme('pager', NOTIFICATIONS_FEED_PAGER);
+  }
+  return $output;
+}

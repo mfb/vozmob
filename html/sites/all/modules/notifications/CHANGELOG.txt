@@ -1,0 +1,183 @@
+// $Id: CHANGELOG.txt,v 1.1.2.11.2.36 2009/02/21 18:38:00 jareyero Exp $
+
+TO DO
+------
+* Add CAN-SPAM complicance, 'Unsubscribe from all'..
+* Use actions and triggers instead of old notifications' events, see http://drupal.org/node/260100
+* Streamline the UI. Replace the user account tabs with a single page using collapsible fieldsets providing some more global options for each type (method, interval for each subscription type)
+* Move some left parts of the UI provided by modules into the notifications_ui module so we can have a drop-in replacement to provide a yet more simple UI.
+* Support for persistent notifications that will be triggered with a given interval until the user takes some action. Look into the subscription system to see whether this is currently possible with a plug-in or we need some api extensions.
+* Support for notifications in multiple languages, depending on user language
+
+6.x-1.1 to .....
+-----------------
+- Fixed wrong placeholders for subscription names, #376298
+- Fixed typo in node comment template, by bas.hr, #374725
+- Added fallback information for message templates, some better help texts.
+- Fixed notifications for unpublished nodes, #369633
+- New plug-in notifications_views, by Young Hahn and David Goode, #260435
+
+6.x-1.0 to 6.x-1.1
+-----------------
+- Reworked notifications_save_subscription(): allow similar subscriptions and return status value
+- Vocabularies default to disabled for tag subscriptions, #329208
+- Fixed: PHP notices, by sun, #366391
+- Fixed some more issues with per module queue processing, by Scott Reynolds, #362766
+- Added 'fields sql' parameter for queries so we can actually speed up queries.
+- Store field values as integer to speed up table joins, #364734
+- Some fixes to the query builder, 'join args' was not initialized
+- Added destination field to notifications and queue tables, to be used.
+- Added event tracking to keep events table under limits, #333296
+- Fixed: Per module queue processing not working, by Scott Reynolds, #362766
+- Hide "Disable Notifications" checkbox for when notifications are disabled, by yhahn, #359507
+- Fixed: missing defaults for digest messages in notifications content, by Scott Reynolds, #362242
+- Replaced notifications_text_replace() by messaging_text_replace()
+- Global tokens now added in by messaging module
+- Improved query builder, added sql generator, added some tests.
+- Added Italian translation, by Drein, #338513
+- Fixed two notifications for the same comment, by rcourtna, #340082
+- Fixed issues with subscriptions admin forms, #331928
+- Added logging option and capabilities using new query builder
+- Fixed multiple missing module parameter in queue processing
+- Fixed typo 'inmediate' -> 'immediate', by rcourtna, #340316
+- Fixed issues with new messages as objects instead of arrays.
+
+6.x-1.0-rc1 to 6.x-1.0
+-----------------------------
+- Performance improvements, do not run process if no rows in queue
+- Improved queue status and administration pages.
+- Implemented full adiministration pages for subscriptions
+- Moved some stuff to notifications.pages.inc
+
+6.x-1.0-beta4 to 6.x-1.0-rc1
+-----------------------------
+- Added support for updating sending methods from messaging.
+- Digesting options per interval and support for digesting plug-ins.
+- New digest format, 'Long', to print out the whole event.
+- Reworked message templating and digesting, added tests.
+- Performance improvements for taxonomy subscriptions (and groups).
+- Improved query builder to support fields with array values.
+- Added field information in hook_notifications() for contentg and tags.
+- Allow aditional parameters for notifications_lite, by Frando, #304220
+- Disable notifications on content events, by Darren Fergusson, #331061
+
+6.x-1.0-beta3 to 6.x-1.0-beta4
+------------------------------
+- Fixed wrong token, by truelove-nl, #319945
+- Fixed some slow queries, scalability issues, by Scott Reynolds, #318810 and #318248
+- Set module weight for notifications_content, by Zen, #316353
+- Fixed blocking issue with notifications queue, by Scott Reynolds, #318248
+- Added german translation, by rastatt, #311403
+- Fixed: Subscriptions allowed for disallowed content types, #295646
+
+6.x-1.0-beta2 to 6.x-1.0-beta3
+------------------------------
+- Link generation update, needs signed urls skip confirmation form
+- Updated tests to latest simpletest (6.x-2.3) and added some new ones.
+- Code clean up: Removed notifications_pull_pending(), obsoleted
+- Fixed Hook form alter in autosubscribe has wrong parameters, by darren.ferguson, #309174
+- Fixed notices and code readability, by Zen, #310598
+- Fixed concatenationsyntax error, by Zen, #310594
+- Implemented: configurable events to trigger or not notification, #255402
+- Added some variable removal to uninstall hook, more may be needed.
+- Fixed formatting issues with intervals table, #295656
+- Fixed: Empty subscriptions block showing, #295563
+- Fixed missing registration for digest theme function, by mrtoner, #300953 
+- Moved developer documentation to online handbook, http://drupal.org/node/253102
+
+6.x-1.0-beta1 to 6.x-1.0-beta2
+------------------------------
+- Hiding sending methods for user pages if only one, by jaydub, #250161
+- Spin off notifications_mail2web to it's own package, http://drupal.org/project/mail2web
+- Fixed multiple strings across all modules, by rastatt, #290063
+- Implemented hook_requirements for checking enabled sending methods
+- Fixed node subform parameters in notifications_ui_form_alter
+- Fixed typo in notifications_autosubscribe form text
+- Added inline documentation about the messaging/notifications API
+- Removed obsoleted 'pull' operation in notifications_messaging()
+- Better query building and more flexibility in notifications_user_get_subscriptions()
+
+6.x-1.0-dev to 6.x-1.0-beta1
+------------------------------
+- Fixed untranslatable strings, not wrappend in t(), #274049
+- Using node_access instead of user switching, by moshe, #284444
+- Better description for autosubscribe option, by wallan, #247616
+- Fixed: Old node data sent upon node update, david_g, #278530
+- Fixed: several limit cases with cron processing, #276370, #270324
+- Updated unit tests for latest change in notifications_get_link() return values.
+
+- Ported latest bug fixes from 5.x version.
+- Fixed incomplete upgrade of notifications_tags, by fab65, #269725
+- Fixed bug with notifications_ui block, incomplete upgrade of form functions, #256775
+- Fixed: Notifications queued when send interval is 'Never', by Scott Reinolds, #268662
+- Added: PHP4 compatibility function, by phonydream2, #261902
+- Added event/hook support for not saving/queueing some event types, #255402
+- Removed "Duplicated subscription found and updated message", #260436
+- Theme username for notifications by author list, by jaydub, #253989
+- Fixed Wrong redirection and user message not showing up after subscribing, #251979
+- Reworked subscribe/unsubscribe pages, added confirmation for unsubscribe.
+- Ported critical bug fix from Beta3, http://drupal.org/node/253401
+- Upgraded mail2web module for Drupal 6
+- Ported latest features from 5.x branch
+- Main Drupal 6 upgrade
+
+5.x-1.0-alpha2 to 5.x-1.0-beta1
+--------------------------------
+- Code clean up, compliance with coding standards
+- Fixed Notifications cron processing records ignoring module name by Brian Neisler, http://drupal.org/node/244571
+- Implemented notifications sender option, see http://drupal.org/node/227377
+- Resolved naming conflict with other modules by Lynn, http://drupal.org/node/232610
+- Rewritten notifications_load_user() to use messaging_load_user() so they share caching
+- Added back 'Never' send interval.
+- Subscriptions fields not mandatory anymore, http://drupal.org/node/237972
+- Improved digesting format for new posts, http://drupal.org/node/218745
+- Delete node/feed/group subscriptions when they don't apply anymore, http://drupal.org/node/236194
+- Removed handling of pull messaging, moved that feature to messaging module [message queueing].
+
+5.x-1.0-alpha1 to 5.x-1.0-alpha2
+--------------------------------
+- Added pager to user subscriptions (threads, authors, feeds), http://drupal.org/node/226867
+- Reworked content type UI settings, now allows multiple display options
+- Added new block for notifications UI, and new 'comment' option
+- Added nice UI for administering send intervals. Gone 'Never' that didnt make too much sense
+
+- Changed auto subscribe option in form, fixed UI issues, see http://drupal.org/node/230035
+- Fixed error when no query conditions retrieved for the query, http://drupal.org/node/230770
+- Added select all/none checkboxes to user subscription pages, by jaydub, http://drupal.org/node/227837
+- Removed notifications_mixed module that was not working and confusing people
+
+- Added notifications_alter() hooks
+  hook_alter_notifications_event_types()
+	hook_alter_notifications_subscription_types()
+- Extended notifications_delete_subscriptions() with fields parameter, from Brian Neisler's patch
+- Added themeable function for notifications_digest_body()
+
+- Added parameters into the messaging array so other modules can use them
+- Polished and grouped settings page
+- Changed 'omitted' settings to 'allowed', update scripts
+- Added one more test for permissions/content types
+- Fixed several minor bugs with UI options (Jeff)
+
+16/02/07 - 28/02/07
+--------------------
+- Delete subscriptions when user deleted
+- Added links to nodes from subscriptions list, patch by jaydub, http://drupal.org/node/226861
+- One more pgsql compatibility patch by jaydub, http://drupal.org/node/223670
+- Fixed inconsistent link in notifications_tags
+- Fixed bug with taxonomy subscriptions and multiple vocabularies, http://drupal.org/node/226931
+- Added support for other modules in queue processing (notifications_callback)
+- Added pgsql support (untested), by jaydub, http://drupal.org/node/223670
+- Fixed db query error on unsubscribe, by chirale, http://drupal.org/node/222640
+
+06/02/07 - 15/02/07
+---------------------
+- Fixed issue with group name on form confirmation
+- Implemented access permission for group subscriptions
+- Added module field to allow other modules to handle data in notifications tables
+- Added status field to allow disabled subscriptions on the table
+- UI Type for nodes defaults to 'links'
+- Added simpletest for basic API, detected a pair bugs on notifications_get_subscriptions :-)
+- Added simpletest for content notifications. Needs more cases.
+- Fixed buggy url generation (destination not working on cron)
+- Improved page workflow and fixed bug in confirmation form (send_method)
+ 

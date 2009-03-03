@@ -1,0 +1,1137 @@
+<?php
+// $Id: messaging.module,v 1.7.2.8.2.24 2009/03/01 16:45:48 jareyero Exp $
+/**
+ * Drupal Messaging Framework
+ *
+ * This is a messaging framework to allow message sending in a channel independent way
+ * It will provide a common API for sending while allowing plugins for multiple channels
+ * 
+ * If enabled the html_to_text module, a new filter will be available
+ * 
+ * By Development Seed, http://wwww.developmentseed.org
+ */
+
+// Method with push delivery. Messages will be pushed to the user using messaging sending methods.
+define('MESSAGING_TYPE_PUSH', 1);
+// Method type with pull delivery. Messages will be pulled using messaging pull methods
+define('MESSAGING_TYPE_PULL', 2);
+// Special string for empty text part
+define('MESSAGING_EMPTY', '<none>');
+
+/**
+ * Implementation of hook_help().
+ */
+function messaging_help($path, $arg) {
+  switch ($path) {
+    case 'admin/help#messaging':
+      $output = '<p>' . t('The messaging module is the engine that handles outgoing messages and message queueing for different sending methods.') . '</p>';
+      $output .= '<p>' . t('You need to enable one or more of the included plug-ins to be able to actually take advantage of it.') . '</p>';
+      return $output;
+    default:
+      if ($arg[0] == 'admin') {
+        if ($arg[1] == 'settings' && $arg[2] == 'filters') {
+          return '<p>'. t('Filters are used also for messaging. If the input format is to be used only for messaging you don\'t need to allow any role for it.') .'</p>';
+        }        
+        if ($arg[1] == 'messaging') {
+          require_once drupal_get_path('module', 'messaging') .'/messaging.admin.inc';
+          return messaging_admin_help($path, $arg);
+        }
+      }
+  }
+}
+
+/**
+ * Implementation of hook_menu()
+ */
+function messaging_menu() {
+  $items['admin/messaging'] = array(
+    'title' => 'Messaging',
+    'access arguments' => array('administer messaging'),
+    'description' => 'Administer and configure messaging',
+    'page callback' => 'system_admin_menu_block_page',
+    'file' => 'system.admin.inc',
+    'file path' => drupal_get_path('module', 'system'),
+  );
+  $items['admin/messaging/settings'] = array(
+    'title' => 'Messaging settings',
+    'description' => 'Configuration of messaging framework',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('messaging_admin_settings'),
+    'access arguments' => array('administer messaging'),
+    'file' => 'messaging.admin.inc',
+  );
+  $items['admin/messaging/settings/overview'] = array(
+    'title' => 'Messaging settings',
+    'description' => 'Configuration of sending methods',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+  $items['admin/messaging/template'] = array(
+    'title' => 'Message templates',
+    'description' => 'Configuration of message templates',
+    'page callback' => 'messaging_admin_template',
+    'access arguments' => array('administer messaging'),
+    'file' => 'messaging.admin.inc',
+  );
+  $items['admin/messaging/template/edit'] = array(
+    'title' => 'Message templates',
+    'page callback' => 'messaging_admin_template_edit',
+    'type' => MENU_CALLBACK,
+    'access arguments' => array('administer messaging'),
+    'file' => 'messaging.admin.inc',
+  );
+
+
+  return $items;
+}
+
+/**
+ * Implementation of hook_perm()
+ */
+function messaging_perm() {
+  return array('administer messaging');
+}
+
+/**
+ * Implementation of hook_user().
+ *
+ * Adds fieldset and default sending method setting.
+ */
+function messaging_user($type, $edit, &$user, $category = NULL) {
+  switch ($type) {
+    case 'form':
+      if ($category == 'account' && ($list = messaging_method_list($user))) {
+        $form['messaging'] = array(
+          '#type'        => 'fieldset',
+          '#title'       => t('Messaging settings'),
+          '#weight'      => 5,
+          '#collapsible' => TRUE,
+        );
+        $form['messaging']['messaging_default'] = array(
+          '#type'          => 'select',
+          '#title'         => t('Default send method'),
+          '#default_value' => messaging_method_default($user),
+          '#options' => $list,
+          '#description'   => t('Default sending method for getting messages from this system.'),
+          '#disabled' => count($list) == 1,
+        );
+        return $form;
+      }
+      break;
+  }
+}
+
+/** Messaging API **/
+
+/**
+ * Send message to user represented by account
+ *
+ * We are applying same output filter for everybody, depending on send method
+ *
+ * The final rendering of the message depends on send method too. I.e. a mail messaging
+ * method may want to insert '--' before the body footer.
+ *
+ * @ TODO Consider whether it makes sense to allow users decide on formatting
+ *
+ * @param $account
+ *   User object to recieve message.
+ * @param $message
+ *   Array of message parts that will be compiled depending on send method.
+ *   Mandatory message parts, which may have nexted parts are:
+ *   - 'type'
+ *   - 'subject'
+ *   - 'body'. The message body may have 'header', 'content', 'footer', 'etc'
+ * @param $method
+ *   Optional send method. Defaults to the user account predefined method
+ */
+function messaging_message_send_user($account, &$message, $method = NULL, $queue = 0) {
+  $message = (object)$message;
+  // Get default sending method, or default for this user account
+  $method = $method ? $method : messaging_method_default($account);
+  $message->account = $account;
+
+  // Send the message or, if no destination, abort the message sending
+  if ($destination = messaging_user_destination($account, $method, $message)) {
+    return messaging_message_send(array($destination), $message, $method, $queue);
+  } else {
+    // Save the message, let it there for further reference
+    $message->method = $method;
+    $info = messaging_method_info($method, NULL, array());
+    $message->destination = 'ERROR';
+    $message = messaging_message_prepare($message, $info);
+    $message = messaging_message_render($message, $info);
+    $message->cron = $message->queue = 0;
+    $message->log = 1;
+    $message->success = FALSE;
+    $message = messaging_store('save', $message);
+    return FALSE;
+  }
+}
+
+/**
+ * Get destination from user account
+ */
+function messaging_user_destination($account, $method, $message = NULL) {
+  if ($info = messaging_method_info($method)) {
+    if ($callback = _messaging_callback_get($info, 'destination')) {
+      // We have a mapping function
+      return _messaging_callback_invoke($callback, $account, $method, $message);
+    }
+    elseif ($property = messaging_method_info($method, 'destination')) {
+      // Get destination property from user account
+      return !empty($account->$property) ? $account->$property : NULL;
+    }
+  }
+}
+
+/**
+ * Send message to array of destinations. The message is rendered just once.
+ * 
+ * The $message array may have the following elements
+ *   'subject' => Message subject, may be already rendered or not
+ *   'body' => Message content, may be already rendered or not
+ *   'params' => Optional message params, indexed by sending method group
+ *      I.e. params for mail methods will be in $message['params']['mail']
+ *   'render' => Optional flag to mark the message subject and body as rendered
+ *   'sender' => Optional int to identify message sender, may be $user->uid
+ *   'sender_account' => Optional user account to use as message sender
+ * @param $destinations
+ *   Array of destinations for sending.
+ *   The element type depends on sending method so it can be a list of e-mail addresses, user accounts, etc
+ * @param $message
+ *   Message object or array, not rendered
+ * @param $method
+ *   Sending method. Unlike for messaging_message_send_user() for which the sending method may be user's default
+ *   it is not an optional parameter for this function.
+ * @param $queue
+ *   Optional flag, 0 for normal queueing, 1 to force queueing.
+ *   We may want to force queueing for bulk messaging. Otherwise it will depend on the sending method
+ *   wether to queue the messages (for pull methods) or not (push methods)
+ */
+function messaging_message_send($destinations, &$message, $method, $queue = 0) {
+
+  // Get default sending method, or default for this user account
+  $method = $method ? $method : messaging_method_default(NULL);
+  $info = messaging_method_info($method, NULL, array());
+  
+  // Convert into an object and add all the information into the message object
+  $message = (object)$message;
+  $message->method = $method;
+  $message->source['type'] = 'outgoing';
+  $message->destinations = $destinations;
+  $message->queue = $queue;
+  $message->sent = $message->queued = 0;
+
+  // Message preprocessing, before sending
+  $message->process = TRUE;
+  $message = messaging_message_callbacks(array('prepare', 'render', 'presend'), $message, $info);
+  
+  // If queue / send call the next hooks
+  if ($message->process) {
+    if ($message->queue) {
+      $callbacks = array('queue', 'afterqueue');
+    } else {
+      $callbacks = array('multisend', 'aftersend');
+    }
+    $message = messaging_message_callbacks($callbacks, $message, $info);
+  }
+ 
+  // This will return true if the message was sent or queued for delivery
+  if (!isset($message->success)) {
+    $message->success = $message->sent || $message->queued;
+  }
+  return $message->success;
+}
+
+/**
+ * Invoke callbacks
+ */
+function messaging_message_invoke($callback_list, $message, $info) {
+  if (is_string($callback_list)) {
+    $callback_list = array($callback_list);
+  }
+
+  // Any of the functions can 'swallow' the message and stop processing
+  while ($message->process && ($callback = array_shift($callback_list))) {
+    $message = _messaging_callback_invoke($callback, $message, $info);
+  }
+  return $message;  
+}
+
+/**
+ * Message default callback: preprocessing
+ * 
+ * Decide on queue, log, cron and send options, prepare parameters
+ */
+function messaging_message_prepare($message, $info) {
+  global $user;
+
+  // Set some default values if not already set
+  foreach (array('sent' => 0, 'queue' => 0, 'cron' => 0, 'log' => variable_get('messaging_log', 0), 'sender' => $user->uid) as $field => $value) {
+    if (!isset($message->$field)) {
+      $message->$field = $value;
+    }
+  }
+  // If the messaging method is of type push, cron processing will be enabled
+  if ($message->queue && ($info['type'] & MESSAGING_TYPE_PUSH)) {
+    $message->cron = 1;
+  }
+  // It will be queued always for pull methods, cron disabled though so it will wait till it's pulled
+  if (!$message->queue && ($info['type'] & MESSAGING_TYPE_PULL)) {
+    $message->queue = 1;
+    $message->cron = 0;
+  }
+  // Provides a hook for other modules to modify the message before sending  
+  foreach (module_implements('message_alter') as $module) {
+    $function = $module.'_message_alter';
+    $function($message, $info);
+  } 
+  return $message;
+}
+
+/**
+ * Message default callback: send iterating over all destinations
+ */
+function messaging_message_multisend($message, $info) {
+  $success = TRUE;
+  foreach ($message->destinations as $to) {
+    // Be careful with the order of function && value, so they both are evaluated
+    $success = messaging_message_send_out($to, $message, $message->method) && $success;
+  }
+  // If sent, set time. If failed force logging.
+  $success ? ($message->sent = time()) : ($message->log = 1);
+  $message->success = $success;
+  return $message;
+}
+
+/**
+ * Queue message for next delivery
+ * 
+ * @todo Improve storage so we can store only once but multiple rows for destinations
+ */
+function messaging_message_queue($message, $info = array()) {
+  $message->queued = 1;
+  return messaging_store('save', $message);
+}
+
+/**
+ * Store messages, custom delivery
+ */
+function messaging_message_store($message, $info = array()) {
+  $message->stored = 1;
+  if (empty($message->mqid)) {
+    $message = messaging_store('save', $message);
+  }
+  return $message;
+}
+
+/**
+ * Message default after send callback: store, log, etc..
+ */
+function messaging_message_aftersend($message, $info) {
+  // Depending on parameters and what's happened so far we make the final queue/log decision
+  if (empty($message->mqid) && $message->log) {
+    messaging_store('save', $message);
+  }
+  return $message;
+}
+
+/**
+ * Message logging callback
+ */
+function messaging_message_log($message, $info) {
+  if (empty($message->mqid)) {
+    messaging_store('save', $message);
+  }
+  return $message;
+}
+
+/**
+ * Send for real, finally invoking method's callback function
+ * 
+ * This sends messages one by one, so the callback function only need to support a single destination
+ * Specific parameters for this message group are processed here too
+ * 
+ * @param $destination
+ *   Single destination, may be email, user account, etc...
+ * @param $message
+ *   Message object
+ * @param $method
+ *   Sending method
+ * 
+ * @return boolean
+ *   Message successfully sent
+ */
+function messaging_message_send_out($destination, $message, $method) {
+  if ($callback = messaging_method_info($method, 'send callback')) {
+    // Check for specific parameters for this sending method
+    $group = messaging_method_info($method, 'group');
+    $params = (!empty($message->params[$group])) ? $message->params[$group] : array();    
+    return _messaging_callback_invoke($callback, $destination, $message, $params);
+  } else {
+    watchdog('messaging', 'Message could not be delivered for method %method', array('%method' => $method), WATCHDOG_ERROR);
+    return FALSE;
+  }  
+}
+
+/**
+ * Implementation of hook_cron()
+ * 
+ * Process queued messages for delivery
+ */
+function messaging_cron() {
+  messaging_store('queue_process');
+  messaging_store('queue_cleanup');
+}
+
+/**
+ * Pull pending messages for given methods and user accounts
+ *
+ * Each returned message will be an array with the following elements
+ * - 'uid', destination uid
+ * - 'sender', originating uid
+ * - 'subject', message subject to be rendered
+ * - 'body', message body to be rendered
+ * @param $method
+ *   Send method
+ * @param $users
+ *   User id or array of user id's
+ * @param $limit
+ *   Optional limit for number of messages
+ * @param $delete
+ *   Optional whether to delete messages when fetching
+ * @return array()
+ *   Array of pending messages.
+ */
+function messaging_pull_pending($method, $users = NULL, $limit = 0, $delete = TRUE) {
+  $params['method'] = $method;
+  $params['queue'] = 1;
+  if (!is_null($users)) {
+    $params['uid'] = $users; 
+  }
+  $messages = messaging_store_get($params);
+  // Not exactly delete but mark as sent
+  if ($messages && $delete) {
+    messaging_store('sent', array_keys($messages));
+  }
+  return $messages;  
+}
+
+/**
+ * Returns list of messaging methods for a type
+ *
+ * I.e. all messaging methods of pull type
+ */
+function messaging_method_type($type) {
+  $result = array();
+  foreach (messaging_method_info() as $method => $info) {
+    if ($info['type'] & $type) {
+      $result[$method] = $info;
+    }
+  }
+  return $result;
+}
+
+/**
+ * List sending methods
+ *
+ * @param $account
+ *   Optional user account, for checking permissions against this account
+ */
+function messaging_method_list($account = NULL) {
+  $info = messaging_method_info(NULL, 'name');
+  if ($account) {
+    foreach (array_keys($info) as $method) {
+      // Check access for each method and check destination
+      if (!messaging_method_permission($method, $account) || !messaging_user_destination($account, $method)) {
+        unset($info[$method]);
+      }
+    }
+  }
+  return $info;
+}
+
+/**
+ * Check permission for method and account
+ *
+ * @param $method
+ *   Sending method id
+ * @param $account
+ *   User account to check permission
+ */
+function messaging_method_permission($method, $account = NULL) {
+  $info = messaging_method_info($method);
+  // This sending method may be disabled
+  if (!$info) {
+    return FALSE;
+  } elseif (!empty($info['access'])) {
+    return user_access($info['access'], $account);
+  } else {
+    return TRUE;
+  }
+}
+
+/**
+ * Returns default messaging method
+ */
+function messaging_method_default($account = NULL) {
+  if ($account && !empty($account->messaging_default) && messaging_method_permission($account->messaging_default, $account)) {
+    return $account->messaging_default;
+  }
+  elseif ($method = variable_get('messaging_default_method', '')) {
+    return $method;
+  }
+  else {
+    return key(messaging_method_info());
+  }
+}
+
+/**
+ * Returns parts of messages, that may be formatted for each sending method
+ *
+ * @ TODO Review logic, optimizations, text pre-fetching
+ * @ TODO Glue text in a method-dependent way
+ *
+ * First checks for message, key, method
+ * Then checks for message, key for method 'default'
+ * Finally checks default values from modules and hook_messaging()
+ *
+ * @param $group
+ *   String, specified by the module where the message originates. ie 'subscriptions-event'.
+ * @param $key
+ *   String, key for the desired message part.
+ * @param $method
+ *   String the mailing method that should be used. OPTIONAL
+ * @param $getdefault
+ *   Boolean, whether to use the default if a specific message isn't available for the used method. OPTIONAL, Defaults to true.
+ *
+ * @return
+ *   Assembled text of a message part.
+ */
+function messaging_message_part($group, $key, $method = 'default', $getdefault = TRUE) {
+  static $cache;
+  if (isset($cache[$group][$key][$method])) {
+    $text_part = $cache[$group][$key][$method];
+  } else {
+    if ($method && ($text = db_result(db_query("SELECT message FROM {messaging_message_parts} WHERE type = '%s' AND msgkey = '%s' AND method = '%s'", $group, $key, $method)))){
+      $text_part = $text;
+    } elseif ($method == 'default' && ($text = messaging_message_info($group, $key))) {
+      // Retry with default but also set the cache for this method
+      $text_part = $text;
+    } elseif ($method != 'default' && $getdefault && ($text = messaging_message_part($group, $key, 'default'))) {
+      $text_part = $text;
+    } else {
+      $text_part = FALSE;
+    }
+    // Convert array into plain text
+    if ($text_part && is_array($text_part)) {
+      $text_part = implode("\n", $text_part);
+    }
+    $cache[$group][$key][$method] = $text_part;
+  }
+
+  return $text_part ? $text_part : '';
+}
+
+/**
+ * Returns parts of messages, that may be formatted for each sending method
+ *
+ * @param $group
+ *   Message group.
+ * @param $key
+ *   Optional message key inside the group. Returns all keys if null.
+ * @return array()
+ *   Depending on parameters, may be all message groups and keys or only a specific one.
+ */
+function messaging_message_info($group, $key = NULL) {
+  static $info;
+  
+  if (!isset($info[$group])) {
+    $info[$group] = module_invoke_all('messaging', 'messages', $group);
+  }
+  
+  return _messaging_info($info, $group, $key);
+}
+
+/**
+ * Returns information about message groups
+ *
+ * @param $group
+ *   Optional message group. Returns all groups if null.
+ * @param $key
+ *   Optional message key inside the group. Returns all keys if null.
+ * @return array()
+ *   Depending on parameters, may be all message groups and keys or only a specific one.
+ */
+function messaging_message_group($group = NULL, $key = NULL) {
+  static $info;
+  
+  if (!isset($info)) {
+    $info = module_invoke_all('messaging', 'message groups');
+  }
+  
+  return _messaging_info($info, $group, $key);
+}
+
+/**
+ * Returns messaging methods properties
+ *
+ * @param $method
+ *   Optional, Method to get properties for, none or NULL for all methods
+ * @param $property
+ *   Optional, Property to get, none or NULL for all properties
+ * @param $default
+ *   Optional default value to return when there's not that property for the method
+ */
+function messaging_method_info($method = NULL, $property = NULL, $default = NULL, $refresh = FALSE) {
+  static $info, $properties;
+  
+  if (!$info || $refresh) {
+    $info = module_invoke_all('messaging', 'send methods');
+    // Merge settings for each enabled method
+    foreach (array_keys($info) as $name) {
+      $info[$name] = array_merge($info[$name], variable_get('messaging_method_'.$name, array()));
+    }
+    // Allow altering by other modules
+    drupal_alter('messaging_methods', $info);
+  }
+
+  return _messaging_info($info, $method, $property, $default);
+}
+
+/** Message composition and rendering **/
+
+/**
+ * Renders full message with header and body
+ * 
+ * @param $message
+ *   Message object
+ * @param $info
+ *   Sending method info for rendering (glue and filter options)
+ */
+function messaging_message_render($message, $info) {
+  if (!empty($message->rendered)) {
+    return $message;
+  }
+  // Apply footer prefix if provided and the message has a footer element. 
+  // Note: If message body is a string the final isset($message['body']['footer']) will be true
+  if (!empty($info['footer']) && is_array($message->body) && isset($message->body['footer'])) {
+    $message->body['footer'] = array('#prefix' => $info['footer'], '#text' => $message->body['footer']);
+  }
+  // Render separately subject and body info, adding default parameters
+  $info += array('glue' => '', 'subject_glue' => '', 'filter' => NULL);
+  $message->subject = messaging_check_subject(messaging_text_render($message->subject, $info['subject_glue']));
+  $message->body = messaging_text_render($message->body, $info['glue'], $info['filter']); 
+  $message->rendered = 1;
+  return $message;
+}
+
+/**
+ * Composes message from different parts, recursively and applies filter
+ * 
+ * Filter is applied now only once
+ * 
+ * @param $text
+ *   Simple string or array of message parts
+ *   It may have named elements like #prefix and #text
+ *   or it may be single strings to render straight forward
+ * @param $glue
+ *   Text to glue all lines together
+ * @param $filter
+ *   Input format to apply to the results
+ */
+function messaging_text_render($text, $glue = '', $filter = NULL) {
+  $output = '';
+
+  if (is_array($text)) {
+    if (isset($text['#prefix'])) {
+      $output .= $text['#prefix'].$glue;
+      unset($text['#prefix']);
+    }
+    if (isset($text['#text'])) {
+      $output .= $text['#text'];
+      return $output;
+    }
+    foreach (element_children($text) as $key) {
+      // The filter is not passed along
+      $text[$key] = messaging_text_render($text[$key], $glue);
+    }
+    $output .= implode($glue, $text);
+  } else {
+    $output .= $text;
+  }
+  // The filter is applied now only once
+  if ($filter) {
+    $output = check_markup($output, $filter, FALSE);
+  }
+  return $output;
+}
+
+/**
+ * Implementation of hook_filter(). Contains a basic set of essential filters.
+ * - Plain text:
+ *     Strips out all html
+ *     Replaces html entities
+ * - HTML to text
+ *     Same with some text formatting
+ *     Relies on html_to_text module
+ */
+function messaging_filter($op, $delta = 0, $format = -1, $text = '') {
+  switch ($op) {
+    case 'list':
+      $info[0] = t('Plain text');
+      $info[1] = t('HTML to text');
+      return $info;
+
+    case 'no cache':
+      return TRUE; // No caching at all, at least for development
+
+    case 'description':
+      switch ($delta) {
+        case 0:
+          return t('Filters out all HTML tags and replaces HTML entities by characters.');
+        case 1:
+          return t('Replaces HTML tags and entities with plain text formatting, moving links at the end.');
+      }
+
+    case 'process':
+      switch ($delta) {
+        case 0:
+          return messaging_check_plain($text);       
+        case 1:
+          return drupal_html_to_text($text);
+        default:
+          return $text;
+      }
+
+    case 'settings':
+      return;
+
+    default:
+      return $text;
+  }
+}
+
+/**
+ * HTML to text simple filtering.
+ * 
+ * Just strip out all HTML tags and decode entities
+ */
+function messaging_check_plain($text) {
+  // This have to be done before the filtering because tag markers may have been previously parsed with check_plain
+  $text = str_replace(array('&lt;', '&gt;'), array('<', '>'), $text);
+  // Filters out all HTML tags
+  $text = filter_xss($text, array());  
+  // HTML entities to plain text conversion.
+  $text = decode_entities($text);  
+  return $text;
+}
+
+/**
+ * Converts strings to plain utf-8 single line
+ */
+function messaging_check_subject($text) {
+  $text = messaging_check_plain($text);
+  // taken from _sanitizeHeaders() in PEAR mail() : http://pear.php.net/package/Mail
+  $text = preg_replace('=((0x0A/%0A|0x0D/%0D|\\n|\\r)\S).*=i', NULL, $text);
+  return $text;
+}
+
+/**
+ * Entry point for the storage API
+ */
+function messaging_store() {
+  static $include;
+  if (!isset($include)) {
+    require_once drupal_get_path('module', 'messaging') .'/messaging.store.inc';
+    $include = TRUE;
+  }
+  $args = func_get_args();
+  $function = 'messaging_store_'. array_shift($args);
+  return call_user_func_array($function, $args);
+}
+
+/**
+ * Helper user loading function with static caching
+ */
+function messaging_load_user($uid) {
+  static $cache = array();
+  
+  if (!array_key_exists($uid, $cache)) {
+    $cache[$uid] = user_load(array('uid' => $uid));
+  }
+  return $cache[$uid];
+}
+
+/**
+ * Helper function for message loading from the store
+ * 
+ * @param $mqid
+ *   Message id
+ */
+function messaging_message_load($mqid, $refresh = FALSE) {
+  static $cache;
+
+  if (!isset($cache[$mqid]) || $refresh) {
+    if ($message = messaging_store('load', $mqid)) {
+      $cache[$mqid] = $message;
+    } else {
+      $cache[$mqid] = FALSE;
+    }
+  }
+
+  return $cache[$mqid];
+}
+
+/**
+ * Do token replacement. 
+ * 
+ * Uses token_logic if enabled, standard token replacement otherwise
+ */
+function messaging_text_replace($text, $objects) {
+  // Add some token types
+  $objects['global'] = NULL;  
+
+  if (module_exists('token_logic')) {
+    $text = token_logic_replace_multiple($text, $objects);
+  }
+
+  return token_replace_multiple($text, $objects);
+}
+
+/**
+ * Rebuild message in Drupal mail format
+ * 
+ * This is the only non method agnostic functionality in this module. As there are several plug-ins
+ * for mail sending, we add this helper function here so its available for all them.
+ * 
+ * @param $destination
+ *   Email destination
+ * @param $message
+ *   Message object
+ * @param $params
+ *   Aditional parameters
+ * @param $alter
+ *   Whether to run the mail_alter hook
+ */
+function messaging_mail_prepare($destination, $message, $params, $alter = TRUE) {
+
+  // The message 'from' will depend on message sender if present, otherwise default to site mail
+  $default_from = variable_get('site_mail', ini_get('sendmail_from'));
+  
+  if (empty($params['from'])) {
+    if (!empty($message->sender_account) && !empty($message->sender_account->mail)) {
+      $from = check_plain($message->sender_account->name) . ' <'.$message->sender_account->mail.'>';
+    } elseif(!empty($message->sender_name) && $default_from) {
+      $from = check_plain($message->sender_name) . ' <'.$default_from.'>';
+    } else {
+      $from = $default_from;
+    }
+    $params['from'] = $from;
+  } else {
+    $from = $params['from'];
+  }
+
+  // Build the mail object, mimic drupal_mail() format
+  $mail = array(
+    'id'       => 'messaging_'. (!empty($message->type) ? 'message-'.$message->type : 'message'),
+    'to'       => $destination,
+    'from'     => $from,
+    'language' => !empty($message->language) ? $message->language : language_default(),
+    'params'   => $params,
+    'subject'  => $message->subject,
+    'body'     => $message->body,
+    'headers'  => messaging_mail_headers($message, $params),
+  );  
+  
+  // Invoke hook_mail_alter() to allow all modules to alter the resulting e-mail.
+  if ($alter) {
+    drupal_alter('mail', $mail);
+  }
+  return $mail;
+}
+
+/**
+ * Get mail headers. Helper function for mail methods
+ * 
+ */
+function messaging_mail_headers($message, $params) {
+  
+  $headers = !empty($params['headers']) ? $params['headers'] : array();
+  
+  // Add some default headers
+  $headers += array(
+    'MIME-Version'              => '1.0',
+    'Content-Type'              => 'text/plain; charset=UTF-8; format=flowed; delsp=yes',
+    'Content-Transfer-Encoding' => '8Bit',
+    'X-Mailer'                  => 'Drupal'
+  );
+  
+  $default_from = variable_get('site_mail', ini_get('sendmail_from'));
+  $from = !empty($params['from']) ? $params['from'] : $default_from;
+
+  // Set default headers depending on data
+  $headers += array(
+    'From' => $from,
+    'Reply-To' => $from,
+  );
+  
+  if ($default_from) {
+    // To prevent e-mail from looking like spam, the addresses in the Sender and
+    // Return-Path headers should have a domain authorized to use the originating
+    // SMTP server. Errors-To is redundant, but shouldn't hurt.
+    $more_headers['Sender'] = $more_headers['Return-Path'] = $more_headers['Errors-To'] = $default_from;
+    $headers += $more_headers;
+  }  
+
+  return $headers;
+}
+
+/**
+ * Implementation of hook_requirements()
+ */
+function messaging_requirements($phase) {
+  $requirements = array();
+  // Ensure translations don't break at install time
+  $t = get_t();
+  if ($phase == 'runtime') {
+    $methods = messaging_method_list();
+    // Ensure that we have some sending methods available
+    if (!$methods) {
+      $requirements['messaging']  = array(
+         'title' => $t('Messaging sending methods'),
+         'value' => $t('No sending method plug-ins available. Please enable some Sending Method on the !admin-modules page.', array('!admin-modules' => l($t('Modules administration'), 'admin/build/modules'))),
+         'severity' => REQUIREMENT_ERROR,
+      );
+    }
+  }
+  return $requirements;
+}
+
+/**
+ * Process incoming message. This is the entry point for plug-in modules
+ * 
+ * This is just a wrapper for handling incoming in messaging_incoming module
+ */
+function messaging_message_in($method, $channel, $message, $params = array()) {
+  if (function_exists('messaging_processor_message_in')) {
+    return messaging_processor_message_in($method, $channel, $message, $params);
+  } else {
+    return FALSE;
+  }
+}
+
+/**
+ * Update messaging method.
+ * 
+ * When a messaging method is disabled, we need to update current settings for this and other modues 
+ */
+function messaging_method_disable($method) {
+  module_load_include('install', 'messaging');
+  if ($replace = messaging_update_method_replace($method)) {
+    messaging_update_method_disable($method, $replace);
+    drupal_set_message(t('Disabled messaging sending method %method and replaced by %replace', array('%method' => messaging_method_info($method, 'title'), '%replace' => messaging_method_info($replace, 'title'))));
+  } else {
+    // It seems all methods are disabled, print warning
+    drupal_set_message(t('Disabled messaging sending method but cannot find a replacement. Please, enable some other sending method.'), 'error');
+  }  
+}
+
+/**
+ * Build callback structure to be invoked later
+ * 
+ * @param $function
+ *   Function name 
+ * @param $arg1, $arg1, $arg3
+ */
+function _messaging_callback() {
+  $args = func_get_args();
+  if (count($args) > 1) {
+    // Array with function name, param1, param2..
+    return $args;
+  } else {
+    // Simple string with function name
+    return array_shift($args);
+  }
+}
+
+/**
+ * Invoke callback with variable arguments
+ * 
+ * We don't check whether the function exists so it will crash if it's missing
+ * 
+ * @param $callback
+ *   Function name or array(function, arg1, arg2..)
+ * @param $arg1, $arg2...
+ *   Variable number of arguments
+ */
+function _messaging_callback_invoke() {
+  $args = func_get_args();
+  $callback = array_shift($args);
+  
+  if (is_array($callback)) { // It is an array: function, arg1, arg2...
+    $function = array_shift($callback);
+    $params = $callback;
+  } else { // It is just a function name
+    $function = $callback;
+    $params = array();
+  }
+  // Merge parameters and go for it
+  $params = array_merge($params, $args);
+  return call_user_func_array($function, $params);
+}
+
+/**
+ * Invoke callback list
+ */
+function messaging_message_callbacks($callback_keys, $message, $info) {
+  while (!empty($message->process) && ($key = array_shift($callback_keys))) {
+    if ($callback = _messaging_callback_get($info, $key)) {
+      //dsm($callback);
+      $message = messaging_message_invoke($callback, $message, $info);
+    } elseif (function_exists('messaging_message_' . $key)) {
+      //dsm("callback $key");dsm($message);
+      $message = call_user_func('messaging_message_' . $key, $message, $info);
+    }
+  }
+  //dsm($message);  
+  return $message;
+}
+
+/**
+ * Add a callback to a callback collection
+ * 
+ * @param $callback_list
+ *   Existing callback list or method info
+ * @param $type
+ *   Callback type
+ * @param $callback
+ *   Callback function name or array('function_name', arg1, arg2...) *   
+ */
+function _messaging_callback_add(&$callback_list, $type, $callback) {
+  $name = $type . ' callback';
+  // If the existing callback is a single function name, make it an array
+  if (!empty($callback_list[$name]) && !is_array($callback_list[$name])) {
+    $callback_list[$name] = array($callback_list[$name]);
+  }
+  $callback_list[$name][] = $callback;  
+}
+
+/**
+ * Get a callback from the item information if present
+ */
+function _messaging_callback_get($info, $type, $default = NULL) {
+  if (!empty($info[$type . ' callback'])) {
+    return $info[$type . ' callback'];
+  } else {
+    return $default;
+  }
+}
+
+/**
+ * Helper function to get property from an info array
+ * 
+ * Depending on method and property, returns the full array or a specific property
+ */
+function _messaging_info($info, $method = NULL, $property = NULL, $default = NULL) {
+  if ($method && $property) {
+    return isset($info[$method][$property]) ? $info[$method][$property] : $default;
+  } elseif ($method) {
+    return isset($info[$method]) ? $info[$method] : $default;
+  } elseif ($property) {
+    // Get this property as a list indexed by method
+    $props = array();
+    foreach($info as $method => $values) {
+      if (isset($values[$property])) {
+        $props[$method] = $values[$property];
+      }
+    }
+    return $props;
+  } else {
+    return $info;
+  }  
+}
+
+/**
+ * Helper function for query builders.
+ * 
+ * Using schema data get 'field = [placeholder]' and args arrays
+ */
+function _messaging_query_conditions($table, $params) {
+ $schema = drupal_get_schema($table);
+ $conditions = $args = array();
+ foreach ($params as $field => $value) {
+   $type = $schema['fields'][$field]['type'];
+   // For array values, build IN conditions
+   if (is_array($value)) {
+     $conditions[] = $field . ' IN (' . db_placeholders($value, $type) . ')';
+     $args = array_merge($args, $value);
+   } else {
+     $conditions[] = $field . ' = ' . db_type_placeholder($type);
+     $args[] = $value;
+   }
+ }
+ return array('conditions' => $conditions, 'args' => $args);
+}
+
+/**
+ * Short hand for info logs
+ */
+function messaging_log($txt = NULL, $variables = NULL) {
+  return _messaging_log('info', $txt, $variables);
+}
+
+/**
+ * Quick logging for debugging and manual queue processing
+ */
+function _messaging_log($type, $txt = NULL, $variables = NULL, $severity = WATCHDOG_NOTICE) {
+  static $logs;
+  
+  if ($txt) {
+    $logs[] = array($type, $txt, $variables, $severity);
+  }
+  elseif ($logs) {
+    $items = array_map('_messaging_log_format', $logs);
+    $logs = NULL;
+    return $items;
+  }
+}
+
+/**
+ * Format notifications log
+ */
+function _messaging_log_format($log) {
+  list($type, $string, $args, $severity) = $log;
+ 
+  if ($args) {
+    // Transform arguments before inserting them.
+    $append = array();
+    foreach ($args as $key => $value) {      
+      if (is_array($value) || is_object($value)) {
+        $value = print_r($value, TRUE);
+      }
+      switch ($key[0]) {
+        case '@':
+          // Escaped only.
+          $args[$key] = check_plain($value);
+          break;
+        case '%':
+          $args[$key] = theme('placeholder', $value);
+          break;
+        case '!':
+          // Pass-through.
+          $args[$key] = $value;
+          break;
+        default:
+          // Append to string a key value pair, different from watchdog format
+          $append[] = ' <strong>' . $key . '</strong>= ' . check_plain($value);
+          $args[$key] = '';
+          break;
+      }
+    }
+    $string = strtr($string, $args);
+    $append ? $string .= ' ' . implode(', ', $append) : NULL;
+  }
+
+  return '<strong> '.$type . '</strong>: ' . $string;
+}

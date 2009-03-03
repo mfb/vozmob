@@ -1,0 +1,5 @@
+; $Id: mimemail.info,v 1.2 2008/09/21 02:20:56 jerdavis Exp $
+name = Mime Mail
+description = E-mail with HTML and attachments
+package = Mail
+core = 6.x

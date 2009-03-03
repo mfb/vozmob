@@ -1,0 +1,18 @@
+<?php
+// $Id: og_access.install,v 1.5 2008/10/29 19:58:47 dww Exp $
+
+/**
+ * An implementation of hook_install().
+ */
+function og_access_install() {
+  // Put this module after OG so it can form_alter as needed.
+  db_query("UPDATE {system} SET weight = 1 WHERE name = 'og_access'");
+}
+
+function og_access_uninstall() {
+  // Delete variables
+  $variables = array('og_private_groups', 'og_visibility');
+  foreach ($variables as $variable) {
+    variable_del($variable);
+  }
+}
