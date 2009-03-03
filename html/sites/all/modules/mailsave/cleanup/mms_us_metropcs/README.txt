@@ -19,6 +19,6 @@ and the email that is currently in use.
 
 --------
 
-MetroPCS messages are identified by being from @vzwpix.com. The messages are
-plain text, but have a long string attached to the end which is stripped.
-There are no additional attachments to remove.
+MetroPCS messages are identified by being from @mymetropcs.com. The 
+messages are plain text, but have a long string attached to the end 
+which is stripped. There are no additional attachments to remove.
