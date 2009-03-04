@@ -1,5 +1,5 @@
 <?php
-// $Id: views_bulk_operations_plugin_style.inc,v 1.1.2.22 2009/02/24 05:31:04 kratib Exp $
+// $Id: views_bulk_operations_plugin_style.inc,v 1.1.2.23 2009/03/02 05:35:03 kratib Exp $
 
 define('VBO_EXECUTION_DIRECT', 1);
 define('VBO_EXECUTION_BATCH', 2);
@@ -89,6 +89,10 @@ class views_bulk_operations_plugin_style extends views_plugin_style_table {
   function get_selected_operations() {
     $selected = array();
     foreach (array_filter($this->options['selected_operations']) as $key => $operation) {
+      if (module_exists('actions_permissions') && $this->options['all_operations'][$key]['type'] == 'action') {
+        $perm = 'execute ' . $this->options['all_operations'][$key]['label'] . ' ('. $this->options['all_operations'][$key]['callback'] .')';
+        if (!user_access($perm)) continue;
+      }
       $selected[$key] = t($this->options['all_operations'][$key]['label']);
     }
     return $selected;

@@ -1,4 +1,5 @@
 <?php
+// $Id: imagefield_formatter.inc,v 1.8 2009/03/04 05:28:24 quicksketch Exp $
 
 /**
  * @file
@@ -7,7 +8,7 @@
 
 
 function theme_imagefield_formatter_image_plain($element) {
-  // Inside a View this function may be called with null data.  In that case,
+  // Inside a View this function may be called with null data. In that case,
   // just return.
   if (empty($element['#item'])) {
     return '';
@@ -24,7 +25,7 @@ function theme_imagefield_formatter_image_plain($element) {
 }
 
 function theme_imagefield_formatter_image_nodelink($element) {
-  // Inside a View this function may be called with null data.  In that case,
+  // Inside a View this function may be called with null data. In that case,
   // just return.
   if (empty($element['#item'])) {
     return '';
@@ -37,7 +38,7 @@ function theme_imagefield_formatter_image_nodelink($element) {
 }
 
 function theme_imagefield_formatter_image_imagelink($element) {
-  // Inside a View this function may be called with null data.  In that case,
+  // Inside a View this function may be called with null data. In that case,
   // just return.
   if (empty($element['#item'])) {
     return '';
@@ -51,7 +52,7 @@ function theme_imagefield_formatter_image_imagelink($element) {
 }
 
 function theme_imagefield_formatter_path_plain($element) {
-  // Inside a View this function may be called with null data.  In that case,
+  // Inside a View this function may be called with null data. In that case,
   // just return.
   if (empty($element['#item'])) {
     return '';
@@ -68,7 +69,7 @@ function theme_imagefield_formatter_path_plain($element) {
 }
 
 function theme_imagefield_formatter_url_plain($element) {
-  // Inside a View this function may be called with null data.  In that case,
+  // Inside a View this function may be called with null data. In that case,
   // just return.
   if (empty($element['#item'])) {
     return '';
@@ -83,6 +84,3 @@ function theme_imagefield_formatter_url_plain($element) {
   $attributes['class'] .= ' imagefield-formatter-url';
   return '<span '. drupal_attributes($attributes) .'>'. file_create_url($item['filepath']) .'</span>';
 }
-
-
-

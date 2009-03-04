@@ -1,4 +1,5 @@
 <?php
+// $Id: imagefield_widget.inc,v 1.22 2009/03/04 05:28:24 quicksketch Exp $
 
 /**
  * @file
@@ -43,11 +44,11 @@ function imagefield_widget_widget_settings_form($widget) {
 
   $form['file_extensions'] = array(
     '#type' => 'textfield',
-    '#title' => t('Permitted upload file extensions.'),
+    '#title' => t('Permitted upload file extensions'),
     '#default_value' => !empty($widget['file_extensions']) ? $widget['file_extensions'] : 'jpg jpeg png gif',
     '#size' => 64,
     '#maxlength' => 64,
-    '#description' => t('Extensions a user can upload to this field. Seperate extensions with a space and do not include the leading dot.'),
+    '#description' => t('Extensions a user can upload to this field. Separate extensions with a space and do not include the leading dot.'),
     '#weight' => 2,
   );
 
@@ -166,6 +167,3 @@ function imagefield_widget_widget_validate($element) {
 function theme_imagefield_widget(&$element) {
   return theme('form_element', $element, $element['#children']);
 }
-
-
-

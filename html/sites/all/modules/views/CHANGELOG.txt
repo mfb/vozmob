@@ -143,3 +143,4 @@ Views 2.4
     o #375182 by vaish: Allow a reset parameter to views_get_all_views().
     o #356276 by nedjo: Locale support.
     o #316556 by Darren Oh: Better Views 1.x upgrades.
+    o #383242 by dww: Allow - Any - instead of <Any> as an option in the Views tools menu.

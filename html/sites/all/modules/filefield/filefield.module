@@ -1,4 +1,4 @@
-<?php  // $Id: filefield.module,v 1.164 2009/02/06 10:56:30 drewish Exp $
+<?php  // $Id: filefield.module,v 1.166 2009/03/02 07:27:18 quicksketch Exp $
 
 /**
  * @file
@@ -82,6 +82,10 @@ function filefield_theme() {
       'file' => 'filefield_widget.inc',
     ),
     'filefield_widget_preview' => array(
+      'arguments' => array('element' => NULL),
+      'file' => 'filefield_widget.inc',
+    ),
+    'filefield_widget_file' => array(
       'arguments' => array('element' => NULL),
       'file' => 'filefield_widget.inc',
     ),
@@ -504,15 +508,33 @@ function filefield_js($type_name, $field_name, $delta) {
   $field_form[$delta]['#prefix'] = '<div class="ahah-new-content">';
   $field_form[$delta]['#suffix'] = '</div>';
 
-  $output = theme('status_messages') . drupal_render($field_form[$delta]);
+  $output = drupal_render($field_form[$delta]);
 
   // AHAH is not being nice to us and doesn't know the "other" button (that is,
   // either "Upload" or "Delete") yet. Which in turn causes it not to attach
   // AHAH behaviours after replacing the element. So we need to tell it first.
+
+  // Loop through the JS settings and find the settings needed for our buttons.
   $javascript = drupal_add_js(NULL, NULL);
+  $filefield_ahah_settings = array();
   if (isset($javascript['setting'])) {
-    $output .= '<script type="text/javascript">jQuery.extend(Drupal.settings, '. drupal_to_js(call_user_func_array('array_merge_recursive', $javascript['setting'])) .');</script>';
+    foreach ($javascript['setting'] as $settings) {
+      if (isset($settings['ahah'])) {
+        foreach ($settings['ahah'] as $id => $ahah_settings) {
+          if (strpos($id, 'filefield-upload') || strpos($id, 'filefield-remove')) {
+            $filefield_ahah_settings[$id] = $ahah_settings;
+          }
+        }
+      }
+    }
   }
+
+  // Add the AHAH settings needed for our new buttons.
+  if (!empty($filefield_ahah_settings)) {
+    $output .= '<script type="text/javascript">jQuery.extend(Drupal.settings.ahah, '. drupal_to_js($filefield_ahah_settings) .');</script>';
+  }
+
+  $output = theme('status_messages') . $output;
 
   // For some reason, file uploads don't like drupal_json() with its manual
   // setting of the text/javascript HTTP header. So use this one instead.

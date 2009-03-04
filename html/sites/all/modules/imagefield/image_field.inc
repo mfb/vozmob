@@ -1,10 +1,10 @@
 <?php
+// $Id: image_field.inc,v 1.2 2009/03/04 05:28:23 quicksketch Exp $
 
 /**
  * @file
  * Field Hooks and Callbacks for ImageField.
  */
-
 
 /**
  * Implementation of hook_field_settings().

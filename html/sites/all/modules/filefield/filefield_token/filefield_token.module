@@ -29,7 +29,7 @@ function filefield_token_values($type, $object = NULL) {
   if ($type == 'field') {
     $item = $object[0];
     $tokens['filefield-fid']                = $item['fid'];
-    $tokens['filefield-description']        = $item['description'];
+    $tokens['filefield-description']        = isset($item['description']) ? $item['description'] : '';
     $tokens['filefield-filename']           = $item['filename'];
     $tokens['filefield-filepath']           = $item['filepath'];
     $tokens['filefield-filemime']           = $item['filemime'];

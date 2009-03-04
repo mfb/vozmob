@@ -1,5 +1,5 @@
 <?php
-// $Id: content.admin.inc,v 1.181.2.63 2009/01/21 20:24:19 yched Exp $
+// $Id: content.admin.inc,v 1.181.2.64 2009/03/01 13:48:44 yched Exp $
 
 /**
  * @file
@@ -245,7 +245,10 @@ function content_field_overview_form(&$form_state, $type_name) {
       ),
       'field_name' => array(
         '#type' => 'textfield',
-        '#field_prefix' => 'field_',
+        // This field should stay LTR even for RTL languages.
+        '#field_prefix' => '<span dir="ltr">field_',
+        '#field_suffix' => '</span>&lrm;',
+        '#attributes' => array('dir'=>'ltr'),
         '#size' => 15,
         '#description' => t('Field name (a-z, 0-9, _)'),
       ),
@@ -313,7 +316,10 @@ function content_field_overview_form(&$form_state, $type_name) {
       ),
       'group_name' => array(
         '#type' => 'textfield',
-        '#field_prefix' => 'group_',
+        // This field should stay LTR even for RTL languages.
+        '#field_prefix' => '<span dir="ltr">group_',
+        '#field_suffix' => '</span>&lrm;',
+        '#attributes' => array('dir'=>'ltr'),
         '#size' => 15,
         '#description' => t('Group name (a-z, 0-9, _)'),
       ),

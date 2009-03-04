@@ -1,5 +1,5 @@
 <?php
-// $Id: devel_node_access.module,v 1.15.2.12 2009/02/19 11:05:37 salvis Exp $
+// $Id: devel_node_access.module,v 1.15.2.13 2009/02/25 16:31:13 salvis Exp $
 /**
  * @file
  *
@@ -408,7 +408,7 @@ function devel_node_access_block($op = 'list', $delta = 0) {
 
             // explain how access is granted (code from node_access())
             $t = 't';
-            if (user_access('administer_nodes')) {
+            if (user_access('administer nodes')) {
               $output .= t('This user has the %administer_nodes permission and thus full access to all nodes.', array('%administer_nodes' => $t('administer nodes')));
             }
             else {

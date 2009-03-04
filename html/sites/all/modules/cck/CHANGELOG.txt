@@ -1,4 +1,4 @@
-//$Id: CHANGELOG.txt,v 1.1.6.302 2009/02/14 01:16:52 yched Exp $
+//$Id: CHANGELOG.txt,v 1.1.6.307 2009/03/01 14:40:34 yched Exp $
 
 CCK 6.x-2.x
 ===========
@@ -40,6 +40,11 @@ should be enough, though.
 - #370004 by dopry - Fix JS-'add more' button breaking fielfield's AHAH upload.
 - #374213 by rpanna - Fieldgroup: All field instances removed their groups when one instance is deleted from a content type.
 - #356158 by markus_petrux - Fix more (hopefully all ?) cases of bogus d-n-d reordering of 'pseudo-fields'.
+- #381876 by DamienMcKenna - Content Copy: Fix formatting glitch in exported type definitions.
+- #346202 Fieldgroup: let the 'simple' template be overridable (thks fiskit) + allow template variants.
+- #382004 by elcuco - Field name and group name fields should stay LTR for RTL languages.
+- #375316 Nodereference/Userreference: Ensure allowed values always return at least an empty array.
+- #368155 Nodereference/Userreference: Fix performance issue on large sites when validating empty noderef/userref fields.
 
 CCK 6.x-2.1
 ===========

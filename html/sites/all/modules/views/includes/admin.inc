@@ -1,5 +1,5 @@
 <?php
-// $Id: admin.inc,v 1.152 2009/02/18 02:01:03 merlinofchaos Exp $
+// $Id: admin.inc,v 1.153 2009/02/25 19:42:13 merlinofchaos Exp $
 /**
  * @file admin.inc
  * Provides the Views' administrative interface.
@@ -2735,6 +2735,13 @@ function views_ui_admin_tools() {
     '#title' => t('Page region to output performance statistics'),
     '#default_value' => variable_get('views_devel_region', 'footer'),
     '#options' => $regions,
+  );
+
+  $form['views_exposed_filter_any_label'] = array(
+    '#type' => 'select',
+    '#title' => t('Label for "Any" value on optional single-select exposed filters'),
+    '#options' => array('old_any' => t('<Any>'), 'new_any' => t('- Any -')),
+    '#default_value' => variable_get('views_exposed_filter_any_label', 'old_any'),
   );
 
   return system_settings_form($form);

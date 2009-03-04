@@ -1,8 +1,8 @@
 <?php
-// $Id: fieldgroup.tpl.php,v 1.2 2008/04/23 18:02:05 dww Exp $
+// $Id: fieldgroup-simple.tpl.php,v 1.1.2.1 2009/02/28 23:56:17 yched Exp $
 
 /**
- * @file fieldgroup.tpl.php
+ * @file fieldgroup-simple.tpl.php
  * Default theme implementation to display the a 'simple-styled' fieldgroup.
  *
  * Available variables:

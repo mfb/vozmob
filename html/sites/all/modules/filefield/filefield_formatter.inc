@@ -1,5 +1,5 @@
 <?php
-// $Id: filefield_formatter.inc,v 1.7 2009/02/04 02:18:27 dopry Exp $
+// $Id: filefield_formatter.inc,v 1.8 2009/03/02 07:09:32 quicksketch Exp $
 /**
  * @file
  * FileField: Defines a CCK file field type.
@@ -41,19 +41,19 @@ function theme_filefield_item($file, $field) {
 }
 
 /**
- * return whether a file is set to listed taking into consideration
- * widget default value settings.
+ * Return whether a file should be listed when viewing the node.
  *
- * @param $file a populated filefield item.
- * @param $field a cck field instance array.
+ * @param $file
+ *   A populated FileField item.
+ * @param $field
+ *   A CCK field instance array.
  */
 function filefield_file_listed($file, $field) {
-  if ($field['force_list_default']) return (bool)$field['list_default'];
-  return (bool)$file['list'];
+  if ($field['list_field']) {
+    return (bool)$file['list'];
+  }
+  return TRUE;
 }
-
-
-
 
 /**
  * Theme function for the 'generic' single file formatter.

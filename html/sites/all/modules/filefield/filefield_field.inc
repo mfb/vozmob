@@ -7,26 +7,27 @@
 
 
 function filefield_field_settings_form($field) {
+  drupal_add_js(drupal_get_path('module', 'filefield') .'/filefield.js');
+
   $form = array();
+
+  $form['list_field'] = array(
+    '#type' => 'radios',
+    '#title' => t('List field'),
+    '#options' => array(0 => t('Disabled'), 1 => t('Enabled')),
+    '#default_value' => $field['list_field'] === '' ? 0 : (int) $field['list_field'],
+    '#description' => t('The "list" option lets a user choose if a file should shown in a list when viewing the content after creation.'),
+    '#attributes' => array('class' => 'filefield-list-field'),
+  );
   $form['list_default'] = array(
-    '#type' => 'radios',
-    '#title' => t('Default list value'),
-    '#options' => array(1 => t('Listed'), 0 => t('Hidden')),
+    '#type' => 'checkbox',
+    '#title' => t('Files listed by default'),
     '#default_value' => $field['list_default'] === '' ? 1 : (int) $field['list_default'],
-    '#required' => true,
-    '#description' => t('The list option determines whether files are visible on node views. This will be used as the default value for the list option.'),
   );
-  $form['force_list_default'] = array(
-    '#type' => 'radios',
-    '#title' => t('How should the list value be handled?'),
-    '#options' => array(0 => t('User Configurable. (Users will be able to set the list value per file.)'), 1 => t('Enforce Default. (The default list value will be used for all files, and the list checkbox will not be displayed to users.)')),
-    '#default_value' => $field['force_list_default'] === '' ? 0 : (int) $field['force_list_default'],
-    '#required' => true,
-  );
-  $form['show_description'] = array(
+  $form['description_field'] = array(
     '#type' => 'radios',
     '#title' => t('Description field'),
-    '#default_value' => $field['show_description'] === '' ? 1 : (int) $field['show_description'],
+    '#default_value' => $field['description_field'] === '' ? 0 : (int) $field['description_field'],
     '#options' => array(0 => t('Disabled'), 1 => t('Enabled')),
     '#description' => t('When enabled, will display a text field where users may enter a description about the uploaded file.'),
   );
@@ -38,7 +39,7 @@ function filefield_field_settings_validate($field) {
 }
 
 function filefield_field_settings_save($field) {
-  return array('force_list_default', 'list_default', 'show_description', 'file_formatters');
+  return array('list_field', 'list_default', 'description_field');
 }
 
 function filefield_field_settings_database_columns($field) {
@@ -121,15 +122,16 @@ function filefield_field_update($node, $field, &$items, $teaser, $page) {
     return;
   } 
 
-  // try to delete items from original node 
+  // Try to delete items from original node.
   $orig = node_load($node->nid); 
-  // if there are, figure out which ones must go.
-  foreach($orig->$field['field_name'] as $oitem) {
-    if (!in_array($oitem['fid'], $curfids))  {
-      field_file_delete($oitem); 
+  // If there are, figure out which ones must go.
+  if (!empty($orig->$field['field_name'])) {
+    foreach ($orig->$field['field_name'] as $oitem) {
+      if (!in_array($oitem['fid'], $curfids))  {
+        field_file_delete($oitem); 
+      }
     }
   }
-  
 }
 
 function filefield_field_delete_revision($node, $field, &$items, $teaser, $page) {

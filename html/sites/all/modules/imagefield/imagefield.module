@@ -1,5 +1,5 @@
 <?php
-// $Id: imagefield.module,v 1.74 2009/02/05 02:07:43 dopry Exp $
+// $Id: imagefield.module,v 1.75 2009/03/04 05:28:23 quicksketch Exp $
 
 /**
  * @file
@@ -29,11 +29,13 @@ function imagefield_perm() {
  */
 function imagefield_theme() {
   return array(
-    // theme an image uploaded to imagefield with alt and title. @todo: switch to core theme image if possible.
+    // Theme an image uploaded to ImageField with alt and title.
+    // TODO: Switch to core theme image if possible.
     'imagefield_image' => array(
       'arguments' => array('file' => null, 'alt' => '', 'title' => '', 'attributes' => null, 'getsize' => TRUE),
     ),
-    // theme an imagefield field item. It calls imagefied_image with the proper item properties as arguments.
+    // Theme an ImageField field item. It calls imagefied_image with the proper
+    // item properties as arguments.
     'imagefield_item' => array(
       'arguments' => array('item' => null),
     ),
@@ -42,24 +44,21 @@ function imagefield_theme() {
       'arguments' => array('element' => null),
       'file' => 'imagefield_widget.inc',
     ),
-    // use to generate a preview (admin view) of an imagefield item for use in field item forms
-    // and filefield widgets. It is invoked by filefield_widget_process.
+    // Use to generate a preview (admin view) of an imagefield item for use in
+    // field item forms and filefield widgets. Invoked by filefield_widget_process.
     'imagefield_widget_preview' => array(
       'arguments' => array('item' => null),
     ),
-    // theme function for the field item elements. allows you to place children within the context
-    // of the parent.
+    // Theme function for the field item elements. allows you to place children
+    // within the context of the parent.
     'imagefield_widget_item' => array(
       'arguments' => array('element' => null),
     ),
-
-
-    // generates and img tag to the admin thumbnail of an imagefield upload.
+    // Generates and img tag to the admin thumbnail of an ImageField upload.
     'imagefield_admin_thumbnail' => array(
       'arguments' => array('item' => null),
     ),
-
-    // imagefield formatter theme functions.
+    // ImageField formatter theme functions.
     'imagefield_formatter_image_plain' => array(
       'arguments' => array('element' => null),
       'file' => 'imagefield_formatter.inc',
@@ -80,7 +79,6 @@ function imagefield_theme() {
       'arguments' => array('element' => null),
       'file' => 'imagefield_formatter.inc',
     ),
-
   );
 }
 
@@ -92,13 +90,13 @@ function imagefield_elements() {
   $elements['imagefield_widget'] =  array(
     // Indicate to FormAPI that this element needs processing and is not simply a render element.
     '#input' => TRUE,
-    // specify the return structure of the element (experimental, unused in releases).
+    // Specify the return structure of the element (experimental, unused in releases).
     '#returns' => array('array' => array('fid' => 'int', 'title' => 'string', 'alt' => 'string')),
-    // Delegate element processing to filefield. Filefield will include
+    // Delegate element processing to Filefield.
     '#process' => array('filefield_widget_process', 'imagefield_widget_widget_process'),
     // See imagefield_widget[#process] documentation.
     '#value_callback' => 'filefield_widget_value',
-    // delegate to filefield...
+    // Delegate to Filefield...
     '#element_validate' => array('filefield_widget_validate', 'imagefield_widget_validate'),
     '#description' => t('Changes made to the attachments are not permanent until you save this post.'),
   );
@@ -109,7 +107,7 @@ function imagefield_elements() {
  * Implementation of hook_file_download.
  */
 function imagefield_file_download($filepath) {
-  // return headers for admin thumbnails if private files are enabled.
+  // Return headers for admin thumbnails if private files are enabled.
   $path = str_replace('.thumb.jpg', '', $filepath);
   $path = file_create_path($path);
   if (file_exists($path)) {
@@ -177,10 +175,10 @@ function imagefield_widget_info() {
       'field types' => array('image', 'filefield'),
       'multiple values' => CONTENT_HANDLE_CORE,
       'callbacks' => array('default value' => CONTENT_CALLBACK_CUSTOM),
-      // callback for dynamic filefield widgets to determine
+      // Callback for dynamic Filefield widgets to determine
       // if this widget is appropriate for a file type.
       'suitability callback' => 'imagefield_handles_file',
-      // description to use on forms to describe this widget.
+      // Description to use on forms to describe this widget.
       'description' => t('An edit widget for image files, including a preview of the image.'),
     ),
   );
@@ -198,11 +196,11 @@ function imagefield_widget_settings($op, $widget) {
 /**
  * Implementation of hook_widget().
  *
- * Assign default properties to item and delegate to filefield.
+ * Assign default properties to item and delegate to FileField.
  */
 function imagefield_widget(&$form, &$form_state, $field, $items, $delta = 0) {
-  // @todo: use CCK's default value callback.
-  // add default values to items.
+  // Add default values to items.
+  // TODO: use CCK's default value callback.
   if (empty($items[$delta])) {
     $items[$delta] = array('alt' => '', 'title' => '');
   }
@@ -216,8 +214,10 @@ function imagefield_widget(&$form, &$form_state, $field, $items, $delta = 0) {
 /**
  * Get the upload validators for an image field.
  *
- * @param $field CCK Field
- * @return array suitable for passing to file_save_upload() or the filefield
+ * @param $field
+ *   CCK Field
+ * @return
+ *   An array suitable for passing to file_save_upload() or the FileField
  *   element's '#upload_validators' property.
  */
 function imagefield_widget_upload_validators($field) {
@@ -281,10 +281,7 @@ function imagefield_field_formatter_info() {
 /**
  * @defgroup "Theme Callbacks"
  * @{
- * @see: function imagefield_theme().
- *
- * A temporary home for theme functions until they all get relocated to
- * imagefield_theme.inc?? or should I leave theme here. They aren't that big.
+ * @see imagefield_theme().
  */
 function theme_imagefield_image($file, $alt = '', $title = '', $attributes = null, $getsize = true) {
   $file = (array)$file;
@@ -329,10 +326,8 @@ function theme_imagefield_admin_thumbnail($item = null) {
  * @} End defgroup "Theme Callbacks".
  */
 
-
-
 /**
- * A few miscellansous functions in need of a proper home.
+ * A few miscellaneous functions in need of a proper home.
  */
 // CCK's default value callback... doesn't seem to work. I need to figure out what is going on in D6.
 function imagefield_default_value(&$form, &$form_state, $field, $delta) {
@@ -344,7 +339,7 @@ function imagefield_default_value(&$form, &$form_state, $field, $delta) {
   return $items;
 }
 
-// Scale imagefield uploads.
+// Scale ImageField uploads.
 function _imagefield_scale_image($file, $resolution = 0) {
   $info = image_get_info($file['filepath']);
   if ($info) {

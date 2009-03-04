@@ -1,4 +1,4 @@
-// $Id: filefield.js,v 1.13 2009/01/31 17:56:22 dopry Exp $
+// $Id: filefield.js,v 1.15 2009/03/02 07:22:48 quicksketch Exp $
 
 /**
  * Auto-attach standard client side file input validation.
@@ -30,4 +30,57 @@ Drupal.behaviors.filefieldValidateAutoAttach = function(context) {
      */
     /* @todo */
   });
-}
+};
+
+
+/**
+ * Prevent FileField uploads when using buttons not intended to upload.
+ */
+Drupal.behaviors.filefieldButtons = function(context) {
+  $('input.form-submit.ahah-processed').bind('mousedown', Drupal.filefield.disableFields);
+};
+
+/**
+ * Admin enhancement: only show the "Files listed by default" when needed.
+ */
+Drupal.behaviors.filefieldAdmin = function(context) {
+  var $listField = $('div.filefield-list-field', context);
+  if ($listField.size()) {
+    $listField.find('input').change(function() {
+      if (this.checked) {
+        if (this.value == 0) {
+          $('#edit-list-default-wrapper').css('display', 'none');
+        }
+        else {
+          $('#edit-list-default-wrapper').css('display', 'block');
+        }
+      }
+    }).change();
+  }
+};
+
+/**
+ * Utility functions for use by FileField.
+ * @param {Object} event
+ */
+Drupal.filefield = {
+  disableFields: function(event){
+    var clickedButton = this;
+
+    // Using the grandparent, we ensure that we get up to at least the level
+    // of the CCK multiple field wrapper.
+    var $enabledFields = $(this).parent().parent().find('input.form-file');
+    var $disabledFields = $('div.filefield-element input.form-file').not($enabledFields);
+
+    // Disable upload fields other than the one we're currently working with.
+    $disabledFields.attr('disabled', 'disabled');
+
+    // All the other mousedown handlers (like AHAH) are excuted before any
+    // timeout functions will be called, so this effectively re-enables
+    // the filefields after the AHAH process is complete even though it only
+    // has a 1 millisecond timeout.
+    setTimeout(function(){
+      $disabledFields.attr('disabled', '');
+    }, 1);
+  }
+};

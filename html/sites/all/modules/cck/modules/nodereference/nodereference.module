@@ -1,5 +1,5 @@
 <?php
-// $Id: nodereference.module,v 1.138.2.47 2009/01/31 20:40:27 yched Exp $
+// $Id: nodereference.module,v 1.138.2.49 2009/03/01 14:40:35 yched Exp $
 
 /**
  * @file
@@ -195,17 +195,27 @@ function nodereference_field($op, &$node, $field, &$items, $teaser, $page) {
       // Extract nids to check.
       $ids = array();
       foreach ($items as $delta => $item) {
-        if (is_array($item) && !empty($item['nid']) && is_numeric($item['nid'])) {
-          $ids[] = $item['nid'];
+        if (is_array($item) && !empty($item['nid'])) {
+          if (is_numeric($item['nid'])) {
+            $ids[] = $item['nid'];
+          }
+          else {
+            $error_element = isset($item['_error_element']) ? $item['_error_element'] : '';
+            if (is_array($item) && isset($item['_error_element'])) unset($item['_error_element']);
+            form_set_error($error_element, t("%name: invalid input.", array('%name' => t($field['widget']['label']))));
+          }
         }
       }
-      $refs = _nodereference_potential_references($field, '', NULL, $ids);
-      foreach ($items as $delta => $item) {
-        if (is_array($item)) {
-          $error_element = isset($item['_error_element']) ? $item['_error_element'] : '';
-          if (is_array($item) && isset($item['_error_element'])) unset($item['_error_element']);
-          if (!empty($item['nid']) && !isset($refs[$item['nid']])) {
-            form_set_error($error_element, t("%name: this post can't be referenced.", array('%name' => t($field['widget']['label']))));
+      // Prevent performance hog if there are no ids to check.
+      if ($ids) {
+        $refs = _nodereference_potential_references($field, '', NULL, $ids);
+        foreach ($items as $delta => $item) {
+          if (is_array($item)) {
+            $error_element = isset($item['_error_element']) ? $item['_error_element'] : '';
+            if (is_array($item) && isset($item['_error_element'])) unset($item['_error_element']);
+            if (!empty($item['nid']) && !isset($refs[$item['nid']])) {
+              form_set_error($error_element, t("%name: this post can't be referenced.", array('%name' => t($field['widget']['label']))));
+            }
           }
         }
       }
@@ -743,7 +753,7 @@ function _nodereference_potential_references($field, $string = '', $match = 'con
     }
 
     // Store the results.
-    $results[$cid] = $references;
+    $results[$cid] = !empty($references) ? $references : array();
   }
 
   return $results[$cid];

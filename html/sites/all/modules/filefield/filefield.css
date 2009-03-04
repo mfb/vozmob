@@ -1,3 +1,5 @@
+/* $Id: filefield.css,v 1.17 2009/03/01 05:17:37 quicksketch Exp $ */
+
 /**
  * Overall styles
  */
@@ -12,57 +14,51 @@
   margin-right: 0.4em;
 }
 
-/* End formatter styles */
+/* End formatter styles. */
 
 /**
- * General widget form styles (applicable to all widgets)
+ * General widget form styles (applicable to all widgets).
  */
-.filefield-row {
-}
-
-.filefield-row .filefield-info  {
-  float : left;
-  padding-right: 1em;
-}
-
-.filefield-row .filefield-edit {
-  float : left;
-  width: 70%;
-}
-
-
-
-.filefield-row .filefield-description  {
-  width: 70%;
-}
-
-
-.filefield-row .filefield-list  {
-  float : right;
-}
-
-
-.filefield-file-edit-widget {
- float: left;
-}
-
-/* Only applies to single-value fields, for which we provide our own table. */
-.filefield-file-container-table {
-  width: 90%;
-  margin-top: 3px;
-  margin-bottom: 2px;
-}
-
-.filefield-file-upload {
-  margin-bottom: 5px;
-}
-
-.filefield-js-error {
-  /* For some reason, the JS error message doesn't wrap by default. */
+.filefield-element {
+  margin: 1em 0;
   white-space: normal;
 }
 
-/* End general widget form styles */
+.filefield-element .filefield-preview {
+  float: left;
+  width: 180px;
+  overflow: hidden;
+  margin-right: 10px;
+}
+
+.filefield-element .filefield-edit {
+  float: left;
+}
+
+.filefield-element .filefield-edit .form-item {
+  margin: 0 0 1em 0;
+}
+
+.filefield-element input.form-submit,
+.filefield-element input.form-file {
+  margin: 0;
+}
+
+.filefield-element input.progress-disabled {
+  float: none;
+  display: inline;
+}
+
+.filefield-element div.ahah-progress,
+.filefield-element div.throbber {
+  display: inline;
+  float: none;
+  padding: 1px 13px 2px 3px;
+}
+
+
+
+/* End general widget form styles. */
 
 /**
  * Generic file edit widget styles. Not applicable to other widgets that
@@ -79,14 +75,15 @@
   margin-right: 6em;
 }
 
-/* The text field is made unnecessarily long by node.css - shorten it */
+/* The text field is made unnecessarily long by node.css - shorten it. */
 .filefield-generic-edit .form-text {
   width: 99%;
 }
+
 .filefield-generic-edit .description {
   white-space: normal;
   margin-bottom: 0;
-  overflow: auto; /* indent on line wraps, don't float around the icon */
+  overflow: auto; /* Indent on line wraps, don't float around the icon. */
 }
 
-/* End widget form styles */
+/* End widget form styles. */

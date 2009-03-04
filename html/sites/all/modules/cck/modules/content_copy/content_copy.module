@@ -1,5 +1,5 @@
 <?php
-// $Id: content_copy.module,v 1.27.2.20 2009/01/30 20:13:49 yched Exp $
+// $Id: content_copy.module,v 1.27.2.21 2009/02/26 23:15:54 yched Exp $
 
 /**
  *  @file
@@ -267,7 +267,7 @@ function content_copy_export($form_values) {
 
   // Add weights of non-CCK fields.
   if ($extra = variable_get('content_extra_weights_'. $form_values['type_name'], array())) {
-    $output .= "\$content[extra]  = ". var_export((array) $extra, TRUE) .";\n";
+    $output .= "\$content['extra']  = ". var_export((array) $extra, TRUE) .";\n";
   }
 
   return $output;
@@ -606,7 +606,7 @@ function content_copy_get_macro() {
   $string = "";
   if (array_key_exists('submissions', $GLOBALS['content_copy'])) {
     foreach ($GLOBALS['content_copy']['submissions'] as $form_type => $form) {
-      $string .= "\$content[$form_type]  = ". var_export((array) $form, TRUE) .";\n";
+      $string .= "\$content['$form_type']  = ". var_export((array) $form, TRUE) .";\n";
     }
     return $string;
   }
