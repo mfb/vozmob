@@ -1,0 +1,8 @@
+; $Id: location_search.info,v 1.4 2008/10/22 17:30:23 bdragon Exp $
+name = Location Search
+package = Location
+description = Advanced search page for locations.
+core = 6.x
+dependencies[] = search
+dependencies[] = location
+dependencies[] = gmap

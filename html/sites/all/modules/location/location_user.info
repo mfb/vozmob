@@ -1,0 +1,6 @@
+; $Id: location_user.info,v 1.1 2008/12/05 18:08:32 bdragon Exp $
+name = User Locations
+description = Associate locations with users.
+dependencies[] = location
+package = Location
+core = 6.x

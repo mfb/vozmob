@@ -1,0 +1,7 @@
+; $Id: location_generate.info,v 1.2 2008/09/19 16:44:58 bdragon Exp $
+name = Location Generate
+description = Bulk assign random latitude and longitudes to nodes.
+package = Development
+core = 6.x
+dependencies[] = devel_generate
+dependencies[] = location

@@ -1,0 +1,6 @@
+; $Id: location_node.info,v 1.1.2.2 2009/02/25 18:49:31 bdragon Exp $
+name = Node Locations
+description = Associate locations with nodes.
+dependencies[] = location
+package = Location
+core = 6.x
