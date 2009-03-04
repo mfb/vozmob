@@ -28,47 +28,53 @@ function mms_us_tmobile_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
     // Discard the text file
     mailsave_discard_attachment($node, 'Temp.txt');
 
-      // Get the new body as a string
-      $body = $node->body;
+    if (strpos($node->body, '<td colspan=1 align="Left">') !== FALSE) {
 
-      // Strip surplus white space
-      $body = preg_replace('@\s\s+@', ' ', $body);
-      
-      // Strip t mobile text
-      $body = preg_replace('@T-Mobile@', ' ', $body);
+      // Get the new body as a string
+      $body = '';
+
+      // Find the HTML elements containing user-supplied text.
+      preg_match_all('!<td colspan=1 align="Left">([^<].*?)</td>!s', $node->body, $matches);
+
+      // Get the new body as a string
+      if (isset($matches[1])) {
+        foreach ($matches[1] as $match) {
+          if ($match) {
+            $body .= '<p class="mms-slide">' . $match . '</p>';
+          }
+        }
+      }
 
       // Store the amended body
       $node->body = $body;
       $node->teaser = node_teaser($node->body);
 
-      // Set node title and reset the body if the author just puts short text in the body
-      if (empty($node->title) && !empty($node->body) && strlen($node->body) <= 60) {
-        $node->title = truncate_utf8($body, 60, TRUE, TRUE);
-        $node->body = '';
-      }
+    }
 
-      // If there is no title and a long body, use body to set the title
-      if (empty($node->title) && !empty($node->body)) {
-        $node->title = truncate_utf8($body, 60, TRUE, TRUE);
-      }
+    // Set node title and reset the body if the author just puts short text in the body
+    if (empty($node->title) && !empty($node->body) && strlen($node->body) <= 60) {
+      $node->title = truncate_utf8(strip_tags($body), 60, TRUE, TRUE);
+      $node->body = '';
+    }
 
-      // If there is no title and no body, create a generic title
-      // Maybe this needs to be generic in mailsave or mailsave_to_image?
-      if (empty($node->title) && empty($node->body)) {
-        $node->title = t('Mobile Submission');
-      }
+    // If there is no title and a long body, use body to set the title
+    if (empty($node->title) && !empty($node->body)) {
+      $node->title = truncate_utf8(strip_tags($body), 60, TRUE, TRUE);
+    }
 
-      // Get rid of extra text attachments
-      foreach ($node->mailsave_attachments as $key => $file) {
-        if ($file['filemime'] == 'text/plain') {
-          unset($node->mailsave_attachments[$key]);
-        }
-      }
+    // If there is no title and no body, create a generic title
+    // Maybe this needs to be generic in mailsave or mailsave_to_image?
+    if (empty($node->title) && empty($node->body)) {
+      $node->title = t('Mobile Submission');
+    }
 
-    
+    // Get rid of extra text attachments
+    foreach ($node->mailsave_attachments as $key => $file) {
+      if ($file['filemime'] == 'text/plain') {
+        unset($node->mailsave_attachments[$key]);
+      }
+    }
   }
-
-  return;
 }
 
 
