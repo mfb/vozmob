@@ -10,7 +10,7 @@
 /**
  * Implementation of hook_mailsave().
  */
-function mailsave_textpart_mailsave($node, $result, $i, $header, $mailbox) {
+function mailsave_to_textpart_mailsave($node, $result, $i, $header, $mailbox) {
 
   // Initialize variables.
   $image = FALSE;
@@ -28,7 +28,9 @@ function mailsave_textpart_mailsave($node, $result, $i, $header, $mailbox) {
       // @todo: This is not really right. What if this text part was already
       // added to the body? What if we threw away an initial text part that we
       // actually wanted?
-      $node->body .= "\n" . $mimepart->data;
+      if (strpos($node->body, $mimepart->data) === FALSE) {
+        $node->body .= "\n" . $mimepart->data;
+      }
     }
     $image = (strpos($mimepart->filemime, 'IMAGE/') === 0) ? TRUE : FALSE;
   }
