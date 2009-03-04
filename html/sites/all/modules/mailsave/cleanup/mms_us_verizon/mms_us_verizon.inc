@@ -10,50 +10,39 @@ function mms_us_verizon_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
   $pattern = '@vzwpix.com$@';
   if (preg_match($pattern, $header->fromaddress)) {
 
-    // Build a regex to extract message body
-    // This regex identifies the actual message text in the email
-    $end_pattern = preg_quote('This message was sent using ');
-    $pattern = '@^(.*)' . $end_pattern . '@Us';
+    // Build a regex to extract message Verizon spam from message.
+    $node->body = preg_replace('/This message was sent using .* or higher is required\./s', '', $node->body);
+    $node->body = preg_replace('/This message was sent using .* email, QuickTime/s', '', $node->body);
 
-    // Check for regex success in case the provider changes their format
-    // Worst case is that match fails and nothing is changed
-    if (preg_match($pattern, $node->body, $matches)) {
+    // Strip surplus white space
+    $node->body = preg_replace('@\s\s+@', ' ', $node->body);
 
-      // Get the new body as a string
-      $body = $matches[1];
+    $node->teaser = node_teaser($node->body);
 
-      // Strip surplus white space
-      $body = preg_replace('@\s\s+@', ' ', $body);
-
-      // Store the amended body
-      $node->body = $body;
-      $node->teaser = node_teaser($node->body);
-
-      // Set node title and reset the body if the author just puts short text in the body
-      if (empty($node->title) && !empty($node->body) && strlen($node->body) <= 60) {
-        $node->title = truncate_utf8($body, 60, TRUE, TRUE);
-        $node->body = '';
-      }
-
-      // If there is no title and a long body, use body to set the title
-      if (empty($node->title) && !empty($node->body)) {
-        $node->title = truncate_utf8($body, 60, TRUE, TRUE);
-      }
-
-      // If there is no title and no body, create a generic title
-      // Maybe this needs to be generic in mailsave or mailsave_to_image?
-      if (empty($node->title) && empty($node->body)) {
-        $node->title = t('Mobile Submission');
-      }
-
-      // Get rid of extra text attachments
-      foreach ($node->mailsave_attachments as $key => $file) {
-        if ($file['filemime'] == 'text/plain') {
-          unset($node->mailsave_attachments[$key]);
-        }
-      }
-
+    // Set node title and reset the body if the author just puts short text in the body
+    if (empty($node->title) && !empty($node->body) && strlen($node->body) <= 60) {
+      $node->title = truncate_utf8($body, 60, TRUE, TRUE);
+      $node->body = '';
     }
+
+    // If there is no title and a long body, use body to set the title
+    if (empty($node->title) && !empty($node->body)) {
+      $node->title = truncate_utf8($body, 60, TRUE, TRUE);
+    }
+
+    // If there is no title and no body, create a generic title
+    // Maybe this needs to be generic in mailsave or mailsave_to_image?
+    if (empty($node->title) && empty($node->body)) {
+      $node->title = t('Mobile Submission');
+    }
+
+    // Get rid of extra text attachments
+    foreach ($node->mailsave_attachments as $key => $file) {
+      if ($file['filemime'] == 'text/plain') {
+        unset($node->mailsave_attachments[$key]);
+      }
+    }
+
   }
 
   return;
