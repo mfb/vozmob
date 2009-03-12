@@ -1,0 +1,649 @@
+<?php
+/**
+ * @file
+ * Content "Send To" feature using Messaging framework
+ * 
+ * Adds a "Send To" option for nodes providing a block with an autocomplete text field: 
+ * - If the receiver is a user name it will use the user's default messaging method
+ * - If other, it will try to locate a suitable method. I.e. mail if email address or 
+ *   SMS if it is a phone number, depending on the sending methods enabled.
+ * 
+ * @DONE Add per content type options -- can enable or disable per content type and change form based on content type
+ * @DONE PARTIALLY Maybe more UI options, like a node link or a tab -- now have small or large form option
+ * @DONE Some (optional) ajax wouldn't be bad. -- form can be submitted via ajax
+ */
+
+/**
+ * Implementation of hook_menu()
+ */
+function messaging_sendto_menu() {
+  $items = array();
+  $items['sendto/autocomplete'] = array(
+    'title' => 'SendTo autocomplete',
+    'page callback' => 'messaging_sendto_autocomplete', 
+    'access arguments' => array('forward content'), 
+    'type' => MENU_CALLBACK
+  );
+  $items['sendto/js'] = array(
+    'title' => 'SendTo js',
+    'page callback' => 'messaging_sendto_js',
+    'access arguments' => array('forward content'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['node/%node/sendto'] = array(
+     'title callback' => '_messaging_sendto_title',
+     'title arguments' => array(1),
+     'access callback' => '_messaging_sendto_node_access',
+     'access arguments' => array(1),
+     'page callback' => 'drupal_get_form',     
+     'page arguments' => array('messaging_sendto_form', 1),
+     'type' => MENU_CALLBACK,        
+  );
+
+  return $items;
+}
+
+function _messaging_sendto_node_access($node) {
+  return node_access('view', $node) && user_access('forward content');
+}
+function _messaging_sendto_title($node) {
+  return t('Forward: @title', array('@title' => $node->title));
+}
+
+/**
+ * Implementation of hook_perm()
+ */
+function messaging_sendto_perm() {
+  return array('forward content', 'forward content by email', 'forward content by sms');
+}
+
+/**
+ * Implementation of hook_block()
+ */
+function messaging_sendto_block($op = 'list', $delta = 0, $edit = array()) {
+  switch ($op) {
+    case 'list':
+      $blocks[0]['info'] = t('Messaging Send To');
+      return $blocks;
+    case 'view':
+      if ((arg(0) == 'node') && is_numeric(arg(1)) && arg(2) != 'sendto' && user_access('forward content') && ($node = node_load(arg(1)))) {
+        $formtype = variable_get('messaging_sendto_block', 3);
+        $contenttype = variable_get('messaging_sendto_type_'. $node->type, 0);
+        // sendto has to be enabled at the very least
+        if ($contenttype > 0) {
+          // inherit from content type if instructed
+          $formtype = $formtype ? $formtype : $contenttype;
+          if ($formtype > 0) {
+            $block['subject'] = t('Send To');
+            $block['content'] = drupal_get_form('messaging_sendto_block_form', $node, $formtype);
+          }
+        }
+        return $block;
+      }
+    case 'configure':
+      // Compile a list of fields to show
+      $form['wrapper']['type'] = array(
+        '#type' => 'radios',
+        '#title' => t('Messaging Sendto block form type'),
+        '#description' => t('Select what size form to place in the block.'),
+        '#options' => (array(0 => 'Inherit from content type') + _messaging_sendto_form_types()),
+        '#default_value' => variable_get('messaging_sendto_block', 3),
+        '#weight' => 15,
+      );
+      return $form;
+    case 'save':
+      variable_set('messaging_sendto_block', $edit['type']);
+      break;
+  }
+}
+
+/**
+ * Implemenation of hook_nodeapi().
+ */
+function messaging_sendto_nodeapi(&$node, $op, $teaser, $page) {
+  switch ($op) {
+    case 'view':
+      if (!$teaser) {
+        $formtype = variable_get('messaging_sendto_type_'. $node->type, FALSE);
+        if ($formtype > 1) {
+          $node->content['messaging_sendto'] = array(
+              '#value' => '<div id="send-to">'. drupal_get_form('messaging_sendto_form', $node, $formtype) .'</div>',
+              '#weight' => 15,
+            );
+        }
+      }
+      break;
+  }
+}
+
+/**
+ * Implementation of hook_form_alter().
+ */
+function messaging_sendto_form_alter(&$form, $form_state, $form_id) {
+  // Enable/disable widget on node type form.
+  if ($form_id == 'node_type_form' && isset($form['identity']['type'])) {
+    $form['workflow']['messaging_sendto_type'] = array(
+      '#type' => 'radios',
+      '#title' => t('Forward content using Messaging'),
+      '#description' => t('If enabled users can send this node type to other users, email addresses or SMS numbers.'),
+      '#options' => (array(0 => t('Disabled'), 1 => t('Enabled without Form')) + _messaging_sendto_form_types()),
+      '#default_value' => variable_get('messaging_sendto_type_'. $form['#node_type']->type, 0),
+      '#weight' => 15,
+      );
+  }
+}
+
+
+function _messaging_sendto_form_types() {
+  return array(
+    2 => 'Mini Form',
+    3 => 'Mini Form w/ Ajax Submission',
+    4 => t('Full form w/ Tokens replaced'),
+    5 => t('Full form w/ Tokens replaced w/ Ajax Submission'),
+    6 => t('Full form w/ Tokens remaining'),
+    7 => t('Full form w/ Tokens remaining w/ Ajax Submission'),
+  );
+               
+}
+/**
+ * Block Form wrappers so duplicate callbacks can't be executed inadvertently
+ */
+function messaging_sendto_block_form($form_state, $node, $formtype = 3) {
+  return messaging_sendto_form($form_state, $node, $formtype);
+}
+
+function messaging_sendto_block_form_submit($form, &$form_state) {
+  return messaging_sendto_form_submit($form, $form_state);
+}
+
+/**
+ * Form callback. Send multi-step form
+ */
+function messaging_sendto_form($form_state, $node, $formtype = 3) {
+  global $user;
+
+  $form['node'] = array('#type' => 'value', '#value' => $node);
+  $form['sender'] = array('#type' => 'value', '#value' => $user);
+
+  // if ajax form is enabled
+  if ($formtype % 2 == 1) {
+    static $ahahwrapid = 0;
+    $ahahwrapid ++;
+    $form['messaging-sendto-ahahwrapper'. $ahahwrapid] = array('#value' => '<div id="messaging-sendto-ahahwrapper'. $ahahwrapid .'"></div>');
+  }
+
+  $form['sendto'] = array(
+    '#title' => t('Send this !node_type to', array('!node_type' => node_get_types('name', $node->type))),
+    '#type' => 'textfield', 
+    '#autocomplete_path' => 'sendto/autocomplete', 
+    '#default_value' => '',
+    '#description' => t('Enter list of recipients separated by commas: %available_formats', array('%available_formats' => _messaging_sendto_available_formats())),
+    '#required' => TRUE,
+  );
+  if ($formtype > 3) {
+    // Custom text that will default to the message header
+    $def = messaging_message_part('messaging-sendto' , 'header', $method);
+    if($formtype == 4 || $formtype == 5) {
+      // this will replace the tokens prior to display to the user so that the raw tokens aren't ever seen
+      $def = token_replace($def, 'node', $node);
+    }
+    $form['custom'] = array(
+      '#title' => t('Personal message'),
+      '#type' => 'textarea',
+      '#description' => t('Custom text to add at the beginning of the message'),
+      '#default_value' => $def,
+    );
+  }
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Send'),
+  );
+
+  // if ajax form is enabled
+  if ($formtype % 2 == 1) {
+    $form['submit']['#ahah'] = array(
+      'path' => 'sendto/js',
+      'wrapper' => 'messaging-sendto-ahahwrapper'. $ahahwrapid,
+      'progress' => array('type' => 'bar', 'message' => t('Please wait...')),
+      'method' => 'replace',
+      'effect' => 'fade',
+    );
+  }
+
+
+  $form['#redirect'] = FALSE;
+  return $form;
+}
+
+/**
+ * Form submit callback
+ */
+function messaging_sendto_form_submit($form, &$form_state) {
+  // We are actually sending out the message
+  if (_messaging_sendto_send($form_state['values'])) {
+    drupal_set_message(t('Your message has been sent.'));
+  } 
+  else {
+    drupal_set_message(t('Your message could not be sent.'), 'error');
+  }
+}
+
+/**
+ * Form validate callback
+ */
+function messaging_sendto_form_validate($form, &$form_state) {
+  _messaging_sendto_match_multiple($form_state['values']['sendto']);
+}
+
+/**
+ * Implementation of hook_messaging
+ * 
+ * Definition of message templates
+ */
+function messaging_sendto_messaging($op, $type = NULL, $arg2 = NULL, $arg3 = NULL, $arg4 = NULL) {
+  switch ($op) {
+    case 'message groups':
+      // Generic notifications event
+      $info['messaging-sendto'] = array(
+        'module' => 'messaging_sendto',
+        'name' => t('Content Send To'),
+      );
+      return $info;
+    case 'message keys':
+      switch ($type) {
+        case 'messaging-sendto':
+          // Event notifications
+          return array(
+            'subject' => t('Subject'),
+            'header' => t('Body header'),
+            'main' => t('Main body'),
+            'footer' => t('Footer'),
+          );
+      }
+      break;
+    case 'messages':
+      if ($type == 'messaging-sendto') {
+        return array(
+          'subject' => t('Forwarded from [site-name]: [title]'),
+          'header' => array(
+            t("Greetings,"),
+            t('[user-name] thinks this content may be interesting for you:'),
+          ),
+          'main' => array(
+             '[title]',
+             '[node-teaser]',
+             t("Check out [node-url]"),
+           ),
+          'footer' => array(
+            t('This is a message from [site-name]'),
+          ),
+        );
+      }
+      break;
+    case 'tokens':
+      if ($type == 'messaging-sendto') {
+        return array('global', 'user', 'node');
+      }
+
+  }
+}
+
+/**
+ * Implementation of hook_token_list(). Documents the individual
+ * tokens handled by the module.
+ */
+function messaging_sendto_token_list($type = 'all') {
+  if (module_exists('notifications_content')) {
+    return array();
+  }
+  $tokens = array();
+  if ($type == 'node' || $type == 'all') {
+    $tokens['node']['node-teaser']    = t('The node teaser.');
+    $tokens['node']['node-body']    = t('The node body.');
+    $tokens['node']['node-url']      = t('The node view url for read more links.');
+    $tokens['node']['node-teaser-raw']    = t('Unfiltered node teaser. WARNING - raw user input.');
+    $tokens['node']['node-body-raw']    = t('Unfiltered node body. WARNING - raw user input.');
+  }
+  if ($type == 'comment' || $type == 'all') {
+    $tokens['comment']['comment-url'] = t('The comment view url.');
+    $tokens['comment']['comment-reply-url'] = t('The comment reply url.');
+  }
+  return $tokens;
+}
+
+/**
+ * Implementation of hook_token_values()
+ */
+function messaging_sendto_token_values($type, $object = NULL, $options = array()) {
+  if (module_exists('notifications_content')) {
+    return array();
+  }
+  $values = array();
+  switch ($type) {
+    case 'node':
+      if ($node = $object) {
+        $values['node-teaser'] = $node->teaser ? check_markup($node->teaser, $node->format, FALSE) : '';
+        $values['node-body'] = $node->body ? check_markup($node->body, $node->format, FALSE) : '';
+        $values['node-url'] = url('node/'. $node->nid, array('absolute' => TRUE));
+        $values['node-teaser-raw'] = $node->teaser ? $node->teaser : '';
+        $values['node-body-raw'] = $node->body ? $node->body : '';
+        return $values;
+      }
+      break;
+    case 'comment':
+      if ($comment = (object)$object) {
+        $values['comment-url'] = url('node/'. $comment->nid, array('fragment' => 'comment-'. $comment->cid, 'absolute' => TRUE));
+        $values['comment-reply-url'] = url('comment/reply/'. $comment->nid .'/'. $comment->cid, array('absolute' => TRUE));
+        return $values;
+      }
+      break;
+  }
+}
+
+/**
+ * Helper function for autocompletion. Only for user names
+ */
+function messaging_sendto_autocomplete($sendto = '') {
+  // The user enters a comma-separated list of destinations. We only autocomplete the last tag.
+  $array = split(',', $sendto);
+
+  $string = trim(array_pop($array));
+
+  $matches = array();
+  if ($string) {
+    $prefix = count($array) ? implode(', ', $array) .', ' : '';
+    
+    $result = db_query_range("SELECT name FROM {users} WHERE LOWER(name) LIKE LOWER('%s%%')", $string, 0, 10);
+    while ($user = db_fetch_object($result)) {
+      $matches[$prefix . $user->name] = $prefix . check_plain($user->name);
+   }
+  }
+  print drupal_to_js($matches);
+  exit();
+}
+
+function messaging_sendto_js() {
+  // Load the form from the Form API cache.
+  if (!($cached_form = form_get_cache($_POST['form_build_id'], $cached_form_state))) {
+    form_set_error('form_token', t('Validation error, please try again. If this error persists, please contact the site administrator.'));
+    $output = theme('status_messages');
+    print drupal_to_js(array('status' => TRUE, 'data' => $output));
+    exit();
+  }
+
+  $form_state = array('values' => $_POST);
+
+  // Handle new uploads, and merge tmp files into node-files.
+  messaging_sendto_form_submit($cached_form, $form_state);
+  $output = theme('status_messages');
+  print drupal_to_js(array('status' => TRUE, 'data' => $output));
+  exit();
+}
+
+/**
+ * Compose and send message
+ */
+function _messaging_sendto_send($values) {
+  // Send for each destination
+  $destinations = _messaging_sendto_match_multiple($values['sendto']);
+  $result = (count($destinations) > 0);
+  foreach ($destinations as $dest) {
+    $type = $dest[0];
+    $method = $dest[2];
+    $to = $dest[1];
+    // Now build the message and add some other message parameters
+    $message = _messaging_sendto_compose($method, $to, $values);
+    // Integration with triggers/actions
+    if (module_exists('actions')) {
+      messaging_sendto_trigger($message, $values);
+    }
+    // When sending to users we don't know specific destination parameter, so we use a different api
+    if ($type == 'user') {
+      $result = $result & messaging_message_send_user($to, $message, $message['sending_method']);
+    } else {
+      $result = $result & messaging_message_send($message['destinations'], $message, $message['sending_method']);
+    }
+  }
+  return $result;
+}
+
+/**
+ * Try to find out which kind of destination we've got
+ */
+function _messaging_sendto_match($destination) {
+  $destination = trim($destination);
+  // May be a user
+  if (!user_validate_name($destination) && ($account = user_load(array('name' => $destination, 'status' => 1)))) {
+    return array('user', $account, messaging_method_default($account));
+  } 
+  // May be an email address
+  elseif (($method = _messaging_sendto_available('mail')) && user_access('forward content by email') && valid_email_address($destination)) {
+    return array('email', $destination, $method);
+  } 
+  // May be a phone number
+  elseif (($method = _messaging_sendto_available('sms')) && user_access('forward content by sms') && sms_validate_number($destination)) {
+    return array('number', $number, $method);
+  }
+  // May be nonsense
+  else {
+    return array(NULL, $destination, NULL);
+  }
+}
+
+/**
+ * Match multiple destinations
+ */
+function _messaging_sendto_match_multiple($destination) {
+  $matches = array();
+  foreach (split(', ', $destination) as $to) {
+    list($type, $dest, $method) = _messaging_sendto_match($to);
+    if (!$type) {
+      form_set_error('sendto', t('Unknown destination type: %destination', array('%destination' => $to)));
+    } elseif (!$method) {
+      form_set_error('sendto', t('Cannot find available sending method for: %destination', array('%destination' => $to)));
+    } else {
+      $matches[] = array($type, $dest, $method);
+    }
+  }
+  return $matches;
+}
+
+/**
+ * Check available messaging method types
+ * 
+ * @return
+ *   Messaging method if available for this type or all if no type
+ */
+function _messaging_sendto_available($type = NULL) {
+  static $available;
+  
+  if (!isset($available)) {
+    $available = array();
+    foreach (messaging_method_info() as $method => $info) {
+      if (!empty($info['group'])) {
+        $available[$info['group']][] = $method;
+      } else {
+        $available[$method][] = $method;
+      }
+    }
+  }
+  if ($type) {
+    return isset($available[$type]) ? $available[$type][0] : NULL;
+  } else {
+    return $available;
+  }
+}
+
+/**
+ * Get available recipient types, ready for printing
+ */
+function _messaging_sendto_available_formats() {
+  $allowed[] = t('User names');
+  if (_messaging_sendto_available('mail') && user_access('forward content by email')) {
+    $allowed[] = t('Email addresses');
+  } 
+  if (_messaging_sendto_available('sms') && user_access('forward content by sms')) {
+    $allowed[] = t('Mobile phone numbers');
+  }
+  return implode(', ', $allowed);
+}
+
+/**
+ * Compose the message doing token replacement
+ * 
+ * @param $values
+ *   Form values
+ * @param $preview
+ *   True when generating a preview
+ */
+function _messaging_sendto_compose($method, $destination, $values, $preview = FALSE) {
+  // Get destination and method from parameters
+  $message['destinations'] = array($destination);
+  $message['sender_account'] = $values['sender'];
+  $message['sending_method'] = $method;
+ 
+  // Compose message text. Do all this in one replacement
+  // Hidden feature: token replacement on custom text
+  $text = array(
+    'subject' => messaging_message_part('messaging-sendto', 'subject', $method),
+    'header' => !empty($values['custom']) ? check_plain($values['custom']) : messaging_message_part('messaging-sendto' , 'header', $method),
+    'main'  => messaging_message_part('messaging-sendto', 'main', $method),
+    'footer' => messaging_message_part('messating-sendto', 'footer', $method),
+  );  
+  $tokens = array(
+    'node' => $values['node'],
+    'user' => $values['sender'],
+    'global' => NULL,
+  );
+
+  $text = token_replace_multiple($text, $tokens);
+
+  // When previewing, mark custom text
+  if ($preview) {
+    $text['header'] = theme('placeholder', $text['header']);
+  }
+  $message['subject'][] = $text['subject'];
+  unset($text['subject']);
+  $message['body'] = $text;
+
+  return $message; 
+}
+
+/**
+ * Compose the message for preview
+ */
+function _messaging_sendto_preview($values) {
+  // For previews we'll use the default sending method and no destination
+  $method = messaging_method_default();
+  $message = _messaging_sendto_compose($method, NULL, $values, TRUE);
+  // Fake rendering for preview. Tweak info for display on page
+  $info = messaging_method_info($message['sending_method']);
+  $info['glue'] = '<br />'; 
+  $message = messaging_message_render($message, $info);
+  return $message;
+}
+
+/**
+ * Format destination of the message
+ */
+function _messaging_sendto_format_destination($type, $value) {
+ 
+  switch ($type) {
+    case 'user':
+      return theme('username', $value);
+    case 'email':
+      return l($value, 'mailto://'.$value);
+    case 'sms':
+      return $value;
+  }
+}
+
+/**
+ * Format multiple destinations
+ */
+function _messaging_sendto_format_destination_multiple($destinations) {
+  $output = array();
+  foreach ($destinations as $dest) {
+    list ($type, $value, $method) = $dest;
+    $output[] = _messaging_sendto_format_destination($dest[0], $dest[1]);
+  }
+  return $output;
+}
+
+/**
+ * Implementation of hook_hook_info().
+ * 
+ * Triggers for messaging
+ */
+function messaging_sendto_hook_info() {
+  return array(
+    'messaging_sendto' => array(
+      'user' => array(
+        'sendto' => array(
+          'runs when' => t("When forwarding a node using 'Send To'"),
+        ),
+      ),
+    ),
+  );
+}
+
+/**
+ * Callback for messaging module 
+ */
+function messaging_sendto_trigger($message, $values) {
+  $aids = _actions_get_hook_aids('user', 'sendto');
+  
+  $message = (object)$message;
+  $context = array(
+    'hook' => 'user',
+    'op' => 'sendto',
+    'message' => $message,
+    'node' => $values['node'],  
+  );
+
+  // We need to get the expected object if the action's type is not 'comment'.
+  // We keep the object in $objects so we can reuse it if we have multiple actions
+  // that make changes to an object.
+  
+  $objects['node'] = $values['node'];
+  
+  foreach ($aids as $aid => $action_info) {
+    if ($action_info['type'] != 'user') {
+      if (!isset($objects[$action_info['type']])) {
+        $objects[$action_info['type']] = _messaging_sendto_actions_normalize_context($action_info['type'], $message, $values);
+      }
+      actions_do($aid, $objects[$action_info['type']], $context);
+    }
+    else {
+      actions_do($aid, $message->sender_account , $context);
+    }
+  }  
+}
+
+/**
+ * When an action is called in a context that does not match its type,
+ * the object that the action expects must be retrieved. For example, when
+ * an action that works on users is called during the node hook, the
+ * user object is not available since the node hook doesn't pass it.
+ * So here we load the object the action expects.
+ *
+ * @param $type
+ *   The type of action that is about to be called.
+ * @param $message
+ *   The message 
+ * @return
+ *   The object expected by the action that is about to be called.
+ */
+function _messaging_sendto_actions_normalize_context($type, $message, $values) {
+  global $user;
+
+  switch ($type) {
+    // An action that works on users is being called in a messaging context.
+    // Load the user object of the message sender.
+    case 'user':
+      return $message->sender_account;
+    case 'node':
+      return $values['node'];
+  }
+}
