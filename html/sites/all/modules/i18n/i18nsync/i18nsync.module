@@ -381,7 +381,7 @@ function i18nsync_node_available_fields($type) {
   $fields['node']['#title'] = t('Standard node fields.');
   $options = variable_get('i18nsync_fields_node', array());
   $options += array(
-    'author' => t('Author'),
+    'name' => t('Author'),
     'status' => t('Status'),
     'promote' => t('Promote'),
     'moderate' => t('Moderate'),
