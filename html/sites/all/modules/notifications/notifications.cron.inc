@@ -1,5 +1,5 @@
 <?php
-// $Id: notifications.cron.inc,v 1.6.2.6.2.18 2009/01/30 20:45:46 jareyero Exp $
+// $Id: notifications.cron.inc,v 1.6.2.6.2.19 2009/03/11 16:31:21 jareyero Exp $
 /**
  * Subscriptions module. Queue processing.
  * 
@@ -295,7 +295,9 @@ function notifications_process_queue($send_interval, $max_sqid) {
     }
   }
   // Update event counter
-  notifications_event_tracker('update');
+  if (!$test) {
+    notifications_event_tracker('update');
+  }
   // If doing a test run, return 0 so we don't go through this again
   return $test ? 0 : $count;
 }

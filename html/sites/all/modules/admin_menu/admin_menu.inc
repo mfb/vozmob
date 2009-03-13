@@ -1,5 +1,5 @@
 <?php
-// $Id: admin_menu.inc,v 1.11.2.20 2008/12/28 15:23:07 sun Exp $
+// $Id: admin_menu.inc,v 1.11.2.22 2009/02/26 16:27:07 sun Exp $
 
 /**
  * The key function that builds the menu links whenever there is a menu rebuild.
@@ -183,15 +183,17 @@ function admin_menu_admin_menu(&$deleted) {
     $type_url_str = str_replace('_', '-', $type->type);
     $type_path = 'admin/content/node-type/' . $type_url_str;
     $links[$type_path] = array(
-      'title' => 'Edit @content-type',
+      'title' => 'Edit !content-type',
       'path' => $type_path,
       'parent_path' => 'admin/content/types',
-      'options' => array('t' => array('@content-type' => $type->name)),
+      'options' => array('t' => array('!content-type' => $type->name)),
     );
-    unset($deleted['admin/content/node-type/' . $type_url_str . '/edit']);
+    unset($deleted[$type_path . '/edit']);
     // CCK and other modules adding to node types handled here.
     foreach($deleted as $path => $item) {
-      if (strpos($path, $type_path) !== FALSE) {
+      // Precise test needed to account for multiple content-types having the
+      // same prefix in their name.
+      if ($path === $type_path || strpos($path, $type_path . '/') === 0) {
         // Logically, parent path can never go shorter than $type_path.
         $i = $item['_number_parts'] - 1;
         do {

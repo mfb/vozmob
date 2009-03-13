@@ -1,4 +1,4 @@
-/* $Id: printlinks-rtl.css,v 1.1.2.2 2008/08/21 22:03:40 jcnventura Exp $ */
+/* $Id: printlinks-rtl.css,v 1.1.2.3 2009/03/05 00:45:29 jcnventura Exp $ */
 
 .print-link {
   float:left;
@@ -12,7 +12,7 @@
 }
 
 img.print-icon-margin {
-  margin-left: 4px;
+  padding-left: 4px;
 }
 
 label.printmail-label {

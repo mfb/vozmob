@@ -1,17 +1,18 @@
-/DEVELOPER.widgets.txt/1.1/Mon Jul 14 23:29:39 2008//
-/UPGRADE.txt/1.1/Mon Jul 14 05:29:07 2008//
-/filefield.info/1.8/Fri Jun 27 23:36:31 2008//
-/filefield.theme.inc/1.6/Wed Jul 23 17:20:49 2008//
 D/filefield_meta////
 D/icons////
 D/translations////
 D/filefield_token////
-/field_file.inc/1.23/Fri Feb 13 00:03:22 2009//
-/README.txt/1.5/Wed Mar  4 23:08:51 2009//
-/filefield.css/1.17/Wed Mar  4 23:08:51 2009//
-/filefield.install/1.19/Wed Mar  4 23:08:51 2009//
-/filefield.js/1.15/Wed Mar  4 23:08:51 2009//
-/filefield.module/1.166/Wed Mar  4 23:08:51 2009//
-/filefield_field.inc/1.14/Wed Mar  4 23:08:51 2009//
-/filefield_formatter.inc/1.8/Wed Mar  4 23:08:51 2009//
-/filefield_widget.inc/1.57/Wed Mar  4 23:08:51 2009//
+/DEVELOPER.widgets.txt/1.1/Fri Dec 19 20:34:31 2008//
+/README.txt/1.5/Fri Mar 13 19:27:12 2009//
+/UPGRADE.txt/1.1/Fri Dec 19 20:34:31 2008//
+/field_file.inc/1.24/Fri Mar 13 19:33:57 2009//
+/filefield-rtl.css/1.1/Thu Mar 12 22:22:25 2009//
+/filefield.css/1.19/Fri Mar 13 19:33:57 2009//
+/filefield.info/1.8/Fri Dec 19 20:34:31 2008//
+/filefield.install/1.20/Fri Mar 13 19:33:57 2009//
+/filefield.js/1.16/Fri Mar 13 19:33:57 2009//
+/filefield.module/1.173/Fri Mar 13 19:33:57 2009//
+/filefield.theme.inc/1.8/Fri Mar 13 19:33:57 2009//
+/filefield_field.inc/1.17/Fri Mar 13 19:33:57 2009//
+/filefield_formatter.inc/1.10/Fri Mar 13 19:33:57 2009//
+/filefield_widget.inc/1.63/Fri Mar 13 19:33:57 2009//

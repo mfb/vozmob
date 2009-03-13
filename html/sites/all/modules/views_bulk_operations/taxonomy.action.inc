@@ -9,7 +9,7 @@ function views_bulk_operations_taxonomy_action_info() {
   if (!module_exists('taxonomy')) return array();
   return array('views_bulk_operations_taxonomy_action' => array(
     'type' => 'node',
-    'description' => t('Modify node\'s taxonomy terms'),
+    'description' => t('Modify node taxonomy terms'),
     'configurable' => TRUE,
     'behavior' => array('changes_node_property'),
   ));

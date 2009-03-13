@@ -1,4 +1,3 @@
-/messaging.info/1.1.4.1/Sat Apr 12 18:40:14 2008//TDRUPAL-6--1
 D/messaging_debug////
 D/messaging_mail////
 D/messaging_mime_mail////
@@ -6,13 +5,14 @@ D/messaging_phpmailer////
 D/messaging_simple////
 D/messaging_sms////
 D/tests////
-/README.txt/1.1.4.2/Thu Oct  9 08:57:34 2008//TDRUPAL-6--1
 D/translations////
-/CHANGELOG.txt/1.1.2.8.2.25/Tue Mar  3 01:04:28 2009//TDRUPAL-6--1
-/messaging.admin.inc/1.1.2.12/Tue Mar  3 01:04:32 2009//TDRUPAL-6--1
-/messaging.install/1.2.2.4.2.10/Tue Mar  3 01:04:34 2009//TDRUPAL-6--1
-/messaging.module/1.7.2.8.2.24/Tue Mar  3 01:04:45 2009//TDRUPAL-6--1
-/messaging.store.inc/1.1.2.4.2.7/Tue Mar  3 01:04:56 2009//TDRUPAL-6--1
 D/messaging_notify////
 D/messaging_privatemsg////
 D/messaging_twitter////
+/CHANGELOG.txt/1.1.2.8.2.25/Fri Mar 13 19:27:16 2009//TDRUPAL-6--1
+/README.txt/1.1.4.2/Fri Mar 13 19:27:16 2009//TDRUPAL-6--1
+/messaging.admin.inc/1.1.2.12/Fri Mar 13 19:27:16 2009//TDRUPAL-6--1
+/messaging.info/1.1.4.1/Fri Mar 13 19:27:16 2009//TDRUPAL-6--1
+/messaging.install/1.2.2.4.2.10/Fri Mar 13 19:27:16 2009//TDRUPAL-6--1
+/messaging.module/1.7.2.8.2.24/Fri Mar 13 19:27:16 2009//TDRUPAL-6--1
+/messaging.store.inc/1.1.2.4.2.7/Fri Mar 13 19:27:16 2009//TDRUPAL-6--1

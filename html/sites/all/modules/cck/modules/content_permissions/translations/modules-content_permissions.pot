@@ -1,9 +1,9 @@
-# $Id: modules-content_permissions.pot,v 1.1.2.10 2008/11/05 12:24:00 hass Exp $
+# $Id: modules-content_permissions.pot,v 1.1.2.11 2009/03/09 21:49:59 hass Exp $
 #
 # LANGUAGE translation of Drupal (modules-content_permissions)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  content_permissions.module,v 1.5.2.3 2008/10/29 19:29:26 yched
+#  content_permissions.module,v 1.5.2.5 2008/12/27 22:22:55 yched
 #  content_permissions.install,v 1.1.2.2 2008/10/04 13:14:22 karens
 #  content_permissions.info,v 1.2 2008/04/23 18:01:52 dww
 #
@@ -11,7 +11,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2008-11-05 12:54+0100\n"
+"POT-Creation-Date: 2009-03-09 22:08+0100\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -20,15 +20,15 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: modules/content_permissions/content_permissions.module:9
+#: modules/content_permissions/content_permissions.module:10
 msgid "edit "
 msgstr ""
 
-#: modules/content_permissions/content_permissions.module:9;10
+#: modules/content_permissions/content_permissions.module:10;11
 msgid "field_name"
 msgstr ""
 
-#: modules/content_permissions/content_permissions.module:10
+#: modules/content_permissions/content_permissions.module:11
 msgid "view "
 msgstr ""
 

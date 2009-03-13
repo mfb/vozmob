@@ -1,5 +1,5 @@
 <?php
-// $Id: content_handler_field.inc,v 1.1.2.11 2008/12/29 23:34:35 yched Exp $
+// $Id: content_handler_field.inc,v 1.1.2.13 2009/03/06 15:29:34 karens Exp $
 
 /**
  * @file
@@ -132,6 +132,26 @@ class content_handler_field extends views_handler_field_node {
     }
   }
 
+  /**
+   * Return DIV or SPAN based upon the field's element type.
+   */
+  function element_type() {
+    if (isset($this->definition['element type'])) {
+      return $this->definition['element type'];
+    }
+    // TODO Figure out exactly when to return a div or a <span>. Any field
+    // that ever needs to be shown inline in Views UI. It needs to return
+    // a div for textareas to prevent wrapping a <span> around a <p>.
+    // Earl says we need to be sure that other fields we don't know
+    // about won't end up wrapping a span around a block-level element.
+    if ($this->content_field['widget']['type'] == 'text_textarea') {
+      return 'div';
+    }
+    else {
+      return 'span';
+    }
+  }
+
   function options_validate($form, &$form_state) { }
 
   /**
@@ -164,9 +184,9 @@ class content_handler_field extends views_handler_field_node {
     foreach ($db_info['columns'] as $column => $attributes) {
       $item[$column] = $values->{$this->aliases[$attributes['column']]};
     }
-
+    
     $item['#delta'] = $field['multiple'] ?  $values->{$this->aliases['delta']} : 0;
-
+    
     return $this->render_link(content_format($field, $item, $options['format'], $node), $values);
   }
 

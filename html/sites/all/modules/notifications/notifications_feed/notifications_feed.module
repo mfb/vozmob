@@ -1,5 +1,5 @@
 <?php
-// $Id: notifications_feed.module,v 1.2.2.4.2.1 2008/08/03 00:12:47 jareyero Exp $
+// $Id: notifications_feed.module,v 1.2.2.4.2.2 2009/03/12 23:55:56 jareyero Exp $
 /**
  * @file
  * Subscriptions to FeedAPI feeds
@@ -93,6 +93,8 @@ function notifications_feed_notifications($op, &$arg0, $arg1 = NULL, $arg2 = NUL
         'digest' => array('feed', 'nid'), 
       );
       return $types;
+    case 'event objects':
+      return array('feed' => t('FeedAPI feed'));
     case 'event load':
       $event = &$arg0;
       if ($event->type == 'feed') {

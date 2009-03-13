@@ -1,5 +1,5 @@
 <?php
-// $Id: content.module,v 1.301.2.97 2009/02/14 01:16:53 yched Exp $
+// $Id: content.module,v 1.301.2.99 2009/03/05 22:58:57 karens Exp $
 /**
  * @file
  * Allows administrators to associate custom fields to content types.
@@ -723,7 +723,7 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
 
     case 'view':
       $addition = array();
-
+      
       // Previewed nodes bypass the 'presave' op, so we need to some massaging.
       if ($node->build_mode == NODE_BUILD_PREVIEW && content_handle('widget', 'multiple values', $field) == CONTENT_HANDLE_CORE) {
         if (content_handle('widget', 'multiple values', $field) == CONTENT_HANDLE_CORE) {
@@ -795,7 +795,7 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
         else {
           $element['items'] += $format_info;
         }
-
+        
         // The wrapper lets us get the themed output for the whole field
         // to populate the $FIELD_NAME_rendered variable for node templates,
         // and hide it from the $content variable if needed.
@@ -1762,7 +1762,6 @@ function content_format($field, $item, $formatter_name = 'default', $node = NULL
         );
       }
     }
-
     return theme($theme, $element);
   }
 }
@@ -2318,7 +2317,7 @@ function content_content_fieldapi($op, $field) {
 function content_content_extra_fields($type_name) {
   $type = node_get_types('type', $type_name);
   $extra = array();
-
+  
   if ($type->has_title) {
     $extra['title'] = array(
       'label' => $type->title_label,
@@ -2417,7 +2416,7 @@ function content_extra_field_weight($type_name, $pseudo_field_name) {
     content_clear_type_cache();
     $type = content_types($type_name);
   }
-
+  
   if (isset($type['extra'][$pseudo_field_name])) {
     return $type['extra'][$pseudo_field_name]['weight'];
   }

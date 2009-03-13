@@ -1,5 +1,5 @@
 <?php
-// $Id: imagefield.install,v 1.21 2009/03/04 05:28:24 quicksketch Exp $
+// $Id: imagefield.install,v 1.24 2009/03/12 17:39:13 quicksketch Exp $
 
 /**
  * Implementation of hook_install().
@@ -25,107 +25,103 @@ function imagefield_disable() {
 }
 
 /**
- * Data is now stored in per-field tables.
+ * Implementation of hook_update_last_removed().
  */
-function imagefield_update_1() {
-  $ret = array();
-
-  include_once(drupal_get_path('module', 'content') .'/content.module');
-  include_once(drupal_get_path('module', 'content') .'/content_admin.inc');
-
-
-  $fields = content_fields();
-
-  foreach ($fields as $field) {
-    switch ($field['type']) {
-      case 'file':
-        $columns = array(
-          'list' => array('type' => 'int', 'not null' => TRUE, 'default' => '0'),
-        );
-        content_alter_db_field(array(), array(), $field, $columns);
-        break;
-    }
-  }
-  db_query('DELETE FROM {cache}');
-  return $ret;
-}
-
-/**
- * Schema change to enable alt and title tags.
- */
-function imagefield_update_2() {
-  $ret = array();
-
-  include_once(drupal_get_path('module', 'content') .'/content.module');
-  include_once(drupal_get_path('module', 'content') .'/content_admin.inc');
-
-  $fields = content_fields();
-
-  foreach ($fields as $field) {
-    switch ($field['type']) {
-      case 'image':
-        $oldcolumns = array(
-          'fid' => array('type' => 'int', 'not null' => TRUE, 'default' => '0'),
-        );
-        $newcolumns = array(
-          'fid' => array('type' => 'int', 'not null' => TRUE, 'default' => '0'),
-          'title' => array('type' => 'varchar', 'length' => 255, 'not null' => TRUE, 'default' => "''", 'sortable' => TRUE),
-          'alt' => array('type' => 'varchar', 'length' => 255, 'not null' => TRUE, 'default' => "''", 'sortable' => TRUE),
-        );
-        content_alter_db_field($field, $oldcolumns, $field, $newcolumns);
-        break;
-    }
-    drupal_set_message('altered: <br /><pre>'. print_r($field, true) .'</pre>');
-  }
-
-  db_query('DELETE FROM {cache}');
-  return $ret;
-}
-
-/**
- * Change default formatter key from 'default' to 'imagefield_default'.
- */
-function imagefield_update_3() {
-  $ret = array();
-  include_once(drupal_get_path('module', 'content') .'/content.module');
-  include_once(drupal_get_path('module', 'content') .'/content_admin.inc');
-  $result = db_query("SELECT field_name, type_name, display_settings FROM {node_field_instance} WHERE widget_type = 'image'");
-  while ($row = db_fetch_array($result)) {
-    $needs_update = FALSE;
-    $display_settings = unserialize($row['display_settings']);
-    foreach (_content_admin_display_contexts() as $context) {
-      if ($display_settings[$context]['format'] == 'default') {
-        $display_settings[$context]['format'] = 'imagefield_default';
-        $needs_update = TRUE;
-      }
-    }
-    if ($needs_update) {
-      db_query("UPDATE {node_field_instance} SET display_settings = '%s' WHERE type_name = '%s' AND field_name = '%s'", serialize($display_settings), $row['type_name'], $row['field_name']);
-    }
-  }
-  content_clear_type_cache();
-  return $ret;
+function imagefield_update_last_removed() {
+  return 3;
 }
 
 /**
  * Upgrade to CCK 2 and Drupal 6.
  */
 function imagefield_update_6001() {
-  // Make sure CCK's been updated first.
-  if ($abort = content_check_update('imagefield')) {
-    return $abort;
+  // This update was moved into 6004 so that it can be run again for users
+  // who were not properly updated.
+  return array();
+}
+
+/**
+ * Migrate fields to the new structure.
+ */
+function imagefield_update_6002() {
+  // This update was moved to 6004 so that it can be run again for users
+  // who were not properly updated.
+  return array();
+}
+
+/**
+ * Convert image field type to filefield.
+ */
+function imagefield_update_6003() {
+  $ret = array();
+
+  if (drupal_get_installed_schema_version('filefield', TRUE) < 6001) {
+    $ret['#abort'] = array('success' => FALSE, 'query' => t('FileField must be updated to Drupal 6 before ImageField can be updated.'));
+    return $ret;
   }
 
+  $ret[] = update_sql("UPDATE {" . content_field_tablename() . "} SET type = 'filefield', module = 'filefield', active = 1 WHERE module = 'imagefield' OR type = 'image'");
+  $ret[] = update_sql("UPDATE {" . content_instance_tablename() . "} SET widget_type = 'imagefield_widget', widget_active = 1 WHERE widget_type = 'image' OR widget_type = 'imagefield_widget'");
+  content_clear_type_cache();
+
+  return $ret;
+}
+
+/**
+ * Migrate fields to the new structure.
+ */
+function imagefield_update_6004(&$context) {
+  module_load_install('content');
+  module_load_include('inc', 'imagefield', 'imagefield_file');
   module_load_include('inc', 'content', 'includes/content.admin');
   module_load_include('inc', 'content', 'includes/content.crud');
 
-  $ret[] = update_sql("UPDATE {". content_instance_tablename() ."} SET widget_type = 'imagefield_widget' WHERE widget_type = 'image'");
-  content_associate_fields('imagefield');
+  $ret = array();
 
-  foreach (content_types_install() as $type_name => $fields) {
-    foreach ($fields as $field) {
-      // Skip non imagefields.
-      if ($field['type'] != 'image') continue;
+  if (!isset($context['sandbox']['progress'])) {
+    // Get the latest cache values and schema.
+    content_clear_type_cache(TRUE, TRUE);
+
+    // Grab the list of fields to update.
+    $context['sandbox']['fields'] = array();
+    foreach (content_types_install() as $type_name => $fields) {
+      foreach ($fields as $field) {
+        if ($field['type'] == 'filefield' && $field['widget']['type'] == 'imagefield_widget') {
+          // We only process a given field once.
+          $context['sandbox']['fields'][$field['field_name']] = $field;
+        }
+      }
+    }
+
+    if (empty($context['sandbox']['fields'])) {
+      return $ret;
+    }
+
+    // Add/update the database fields.
+    foreach ($context['sandbox']['fields'] as $field) {
+      $db_info = content_database_info($field);
+
+      // Convert the default value for the FID field to NULL.
+      db_change_field($ret, $db_info['table'], $field['field_name'] . '_fid', $field['field_name'] . '_fid', array('type' => 'int'));
+      $ret[] = update_sql("UPDATE {" . $db_info['table'] . "} SET " . $field['field_name'] . "_fid = NULL WHERE " . $field['field_name'] . "_fid = 0");
+
+      // Add the "data" and "list" columns to the field if not there already.
+      if (!db_column_exists($db_info['table'], $field['field_name'] . '_list')) {
+        db_add_field($ret, $db_info['table'], $field['field_name'] . '_list', array('type' => 'int', 'size' => 'tiny'));
+      }
+      if (!db_column_exists($db_info['table'], $field['field_name'] . '_data')) {
+        db_add_field($ret, $db_info['table'], $field['field_name'] . '_data', array('type' => 'text'));
+      }
+
+      // Set the default state of the global settings.
+      $field['list_field'] = '0';
+      $field['list_default'] = '1';
+      $field['description_field'] = '0';
+
+      // Set default state of instance settings.
+      if (isset($field['widget']['image_path'])) {
+        $field['widget']['file_path'] = $field['widget']['image_path'];
+      }
 
       // Map 'max_number_images' parameter to CCK 'multiple'.
       if (!empty($field['widget']['multiple']) && isset($field['widget']['max_number_images'])) {
@@ -136,79 +132,33 @@ function imagefield_update_6001() {
           $field['multiple'] = 0; // 0 means "Not Multiple" in CCK.
         }
         else {
-          $field['multiple'] == $field['widget']['max_number_images'];
+          $field['multiple'] = $field['widget']['max_number_images'];
         }
       }
-      unset($field['widget']['max_number_images']);
-
-      // Rename image_path to file_path to help convergence with filefield.module.
-      $field['widget']['file_path'] = $field['widget']['image_path'];
 
       // Update format names.
-      $display_settings = array('teaser', 'full', '4');
-      foreach ($display_settings as $context) {
-        switch($field['display_settings'][$context]['format']) {
+      $display_settings = array('teaser', 'full');
+      foreach ($display_settings as $display_context) {
+        switch ($field['display_settings'][$display_context]['format']) {
           case 'imagefield_nodelink':
-            $field['display_settings'][$context]['format'] = 'image_nodelink';
+            $field['display_settings'][$display_context]['format'] = 'image_nodelink';
             break;
           case 'imagefield_imagelink':
-            $field['display_settings'][$context]['format'] = 'image_imagelink';
+            $field['display_settings'][$display_context]['format'] = 'image_imagelink';
             break;
           case 'imagefield_path':
-            $field['display_settings'][$context]['format'] = 'path_plain';
+            $field['display_settings'][$display_context]['format'] = 'path_plain';
             break;
           case 'imagefield_url':
-            $field['display_settings'][$context]['format'] = 'url_plain';
+            $field['display_settings'][$display_context]['format'] = 'url_plain';
             break;
           case 'imagefield_default':
-            $field['display_settings'][$context]['format'] = 'image_plain';
+            $field['display_settings'][$display_context]['format'] = 'image_plain';
             break;
         }
       }
 
-      // Set list options inherited from file field to behave consistently with old imagefield.
-      $field['list_default'] = 1;
-      $field['force_list_default'] = 1;
-
       content_field_instance_update($field);
-    }
-  }
-
-  content_clear_type_cache(TRUE);
-
-  return $ret;
-}
-
-/**
- * Migrate fields to the new structure.
- */
-function imagefield_update_6002(&$context) {
-  include_once './'. drupal_get_path('module', 'content') .'/content.install';
-  include_once './'. drupal_get_path('module', 'imagefield') .'/imagefield_file.inc';
-
-  $ret = array();
-
-  if (!isset($context['sandbox']['progress'])) {
-    if ($abort = content_check_update('imagefield')) {
-      return $abort;
-    }
-
-    // Get the latest cache values and schema.
-    content_clear_type_cache(TRUE, TRUE);
-
-    // Grab the list of fields to update.
-    $context['sandbox']['fields'] = array();
-    foreach (content_types_install() as $type_name => $fields) {
-      foreach ($fields as $field) {
-        if ($field['type'] == 'image') {
-          // We only process a given field once.
-          $context['sandbox']['fields'][$field['field_name']] = $field;
-        }
-      }
-    }
-
-    if (empty($context['sandbox']['fields'])) {
-      return $ret;
     }
 
     $context['sandbox']['progress'] = 0;
@@ -223,12 +173,14 @@ function imagefield_update_6002(&$context) {
   $col_alt = $field['field_name'] .'_alt';
   $col_title = $field['field_name'] .'_title';
   $col_data = $field['field_name'] .'_data';
+  $col_list = $field['field_name'] .'_list';
 
   $limit = 10;
   $result = db_query_range("SELECT * FROM {". $table ."} WHERE vid > %d ORDER BY vid ASC", $context['sandbox']['current_node'], 0, $limit);
   $has_processed = FALSE;
-  while ($row = db_fetch_array($result)) {
 
+  // Loop through each ImageField row and convert its alt and title columns.
+  while ($row = db_fetch_array($result)) {
     // Try to unserialize the data column.
     if (!empty($row[$col_data])) {
       $data = unserialize($row[$col_data]);
@@ -237,17 +189,36 @@ function imagefield_update_6002(&$context) {
       $data = array();
     }
 
-    // Copy move the values from the columns into the array...
-    $data['alt'] = $row[$col_alt];
-    $data['title'] = $row[$col_title];
+    // Copy the values into the data array.
+    if (isset($row[$col_alt])) {
+      $data['alt'] = $row[$col_alt];
+    }
+    if (isset($row[$col_title])) {
+      $data['title'] = $row[$col_title];
+    }
+    $list = isset($row[$col_list]) ? $row[$col_list] : 1;
 
-    // ...serialize it and store it back to the db.
-    db_query("UPDATE {". $table ."} SET $col_data = '%s' WHERE vid = %d", serialize($data), $row['vid']);
+    // Depending on if this is multivalue or not, update based on delta.
+    if ($field['multiple'] > 0) {
+      $query = "UPDATE {". $table ."} SET $col_data = '%s', $col_list = %d WHERE vid = %d AND delta = %d";
+    }
+    else {
+      $query = "UPDATE {". $table ."} SET $col_data = '%s', $col_list = %d WHERE vid = %d";
+    }
+
+    // Serialize it and store it back to the db.
+    db_query($query, serialize($data), $list, $row['vid'], $row['delta']);
 
     // Create the thumbnail for that image.
     $file = db_fetch_object(db_query("SELECT * FROM {files} WHERE fid = %d", $row[$col_fid]));
     if ($file && file_exists($file->filepath) && !file_exists(imagefield_file_admin_thumb_path($file))) {
       imagefield_file_insert($file);
+    }
+
+    // Previous updates generated a thumbnail in the wrong location, delete
+    // these thumbnails if present.
+    if (file_exists($file->filepath . '.thumb.jpg')) {
+      unlink($file->filepath . '.thumb.jpg');
     }
 
     // Update our progress information.

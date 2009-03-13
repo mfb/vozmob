@@ -1,5 +1,5 @@
 <?php
-// $Id: print_mail.admin.inc,v 1.1.2.10 2009/02/05 00:37:43 jcnventura Exp $
+// $Id: print_mail.admin.inc,v 1.1.2.11 2009/03/05 00:45:30 jcnventura Exp $
 
 /**
  * @file
@@ -146,7 +146,7 @@ function print_mail_settings() {
  * @ingroup forms
  */
 function print_mail_strings_settings() {
-  drupal_set_message(t("Saving these strings will disable their translation via Drupal's language system. Use the reset button to return them to the original state."), 'warning');
+  drupal_set_message(t("Saving these strings will disable their translation via Drupal's language system. Use the reset button to return them to the original state."), 'warning', FALSE);
 
   $form['print_mail_text'] = array(
     '#type' => 'fieldset',
@@ -164,7 +164,7 @@ function print_mail_strings_settings() {
     '#type' => 'textfield',
     '#title' => t('Message Subject'),
     '#default_value' => variable_get('print_mail_text_subject', t('!user has sent you a message from !site')),
-    '#description' => t("e-mail subject line. The sender's name will appear in place of !user in the subject. The web site name will be inserted in place of !site."),
+    '#description' => t("e-mail subject line. The sender's name will appear in place of !user in the subject. The web site name will be inserted in place of !site. The page title replaces !title."),
   );
   $form['print_mail_text']['print_mail_text_message'] = array(
     '#type' => 'textfield',

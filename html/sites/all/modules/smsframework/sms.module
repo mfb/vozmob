@@ -1,5 +1,5 @@
 <?php
-// $Id: sms.module,v 1.8.2.8 2008/12/09 18:19:08 diggersf Exp $
+// $Id: sms.module,v 1.8.2.11 2009/03/10 18:49:02 diggersf Exp $
 
 /**
  * @file
@@ -43,11 +43,11 @@ function sms_send($number, $message, $options = array()) {
  * @param $message
  *   The content of the text message.
  */
-function sms_incoming($number, $message) {
+function sms_incoming($number, $message, $options = array()) {
   // Execute three phases
-  module_invoke_all('sms_incoming', 'pre process', $number, $message);
-  module_invoke_all('sms_incoming', 'process', $number, $message);
-  module_invoke_all('sms_incoming', 'post process', $number, $message);
+  module_invoke_all('sms_incoming', 'pre process', $number, $message, $options);
+  module_invoke_all('sms_incoming', 'process', $number, $message, $options);
+  module_invoke_all('sms_incoming', 'post process', $number, $message, $options);
 }
 
 /**

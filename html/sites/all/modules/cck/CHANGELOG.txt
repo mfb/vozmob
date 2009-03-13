@@ -1,4 +1,4 @@
-//$Id: CHANGELOG.txt,v 1.1.6.307 2009/03/01 14:40:34 yched Exp $
+//$Id: CHANGELOG.txt,v 1.1.6.308 2009/03/05 22:56:02 karens Exp $
 
 CCK 6.x-2.x
 ===========
@@ -11,6 +11,7 @@ Features:
 - #362216 by markus_petrux - sort the admin/content/types/fields overview by field name.
 
 Bugfixes:
+- #392476 Make sure CCK textarea fields in a View don't have a span wrapped around a block-level element.
 - Fix devel_generate for decimal and float values.
 - #358700 Can't use array_slice() on assoc array in PHP4.
 - #196421 Prefixed tables weren't getting queried correctly.

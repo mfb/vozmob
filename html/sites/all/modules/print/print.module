@@ -1,5 +1,5 @@
 <?php
-// $Id: print.module,v 1.25.2.58 2009/02/09 20:20:20 jcnventura Exp $
+// $Id: print.module,v 1.25.2.60 2009/03/12 20:22:55 jcnventura Exp $
 
 /**
  * @file
@@ -48,6 +48,7 @@ define('PRINT_TYPE_URLLIST_DEFAULT', 1);
 
 define('PRINT_ALLOW_NORMAL_LINK', 1);
 define('PRINT_ALLOW_BOOK_LINK', 2);
+define('PRINT_TYPE_FIELDS_WEIGHT', 50);
 
 /**
  * Implementation of hook_perm().
@@ -331,6 +332,7 @@ function print_form_alter(&$form, $form_state, $form_id) {
       '#title' => t('Printer, e-mail and PDF versions'),
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
+      '#weight' => function_exists('content_extra_field_weight') ? content_extra_field_weight($form['type']['#value'], 'print') : PRINT_TYPE_FIELDS_WEIGHT,
     );
 
     $form['print']['label'] = array(
@@ -364,6 +366,18 @@ function print_form_alter(&$form, $form_state, $form_id) {
       $form['print']['label']['#value'] = '<p><em>'. t('The settings below only apply in case the corresponding type-specific setting is also enabled (except for the "Show link in individual comments").') .'</em></p>'. $form['print']['label']['#value'];
     }
   }
+}
+
+/**
+ * Implementation of hook_content_extra_fields.
+ */
+function print_content_extra_fields($type_name) {
+  $fields['print'] = array(
+    'label' => t('Printer, e-mail and PDF versions'),
+    'description' => t('Print module form.'),
+    'weight' => PRINT_TYPE_FIELDS_WEIGHT,
+  );
+  return $fields;
 }
 
 /**

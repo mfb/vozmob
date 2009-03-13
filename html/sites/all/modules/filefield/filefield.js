@@ -1,4 +1,4 @@
-// $Id: filefield.js,v 1.15 2009/03/02 07:22:48 quicksketch Exp $
+// $Id: filefield.js,v 1.16 2009/03/09 05:07:35 quicksketch Exp $
 
 /**
  * Auto-attach standard client side file input validation.
@@ -37,7 +37,7 @@ Drupal.behaviors.filefieldValidateAutoAttach = function(context) {
  * Prevent FileField uploads when using buttons not intended to upload.
  */
 Drupal.behaviors.filefieldButtons = function(context) {
-  $('input.form-submit.ahah-processed').bind('mousedown', Drupal.filefield.disableFields);
+  $('input.form-submit').bind('mousedown', Drupal.filefield.disableFields);
 };
 
 /**
@@ -67,6 +67,11 @@ Drupal.filefield = {
   disableFields: function(event){
     var clickedButton = this;
 
+    // Only disable upload fields for AHAH buttons.
+    if (!$(clickedButton).hasClass('ahah-processed')) {
+      return;
+    }
+
     // Using the grandparent, we ensure that we get up to at least the level
     // of the CCK multiple field wrapper.
     var $enabledFields = $(this).parent().parent().find('input.form-file');
@@ -81,6 +86,6 @@ Drupal.filefield = {
     // has a 1 millisecond timeout.
     setTimeout(function(){
       $disabledFields.attr('disabled', '');
-    }, 1);
+    }, 1000);
   }
 };

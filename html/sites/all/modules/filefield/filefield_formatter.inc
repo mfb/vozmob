@@ -1,5 +1,5 @@
 <?php
-// $Id: filefield_formatter.inc,v 1.8 2009/03/02 07:09:32 quicksketch Exp $
+// $Id: filefield_formatter.inc,v 1.10 2009/03/12 03:35:27 quicksketch Exp $
 /**
  * @file
  * FileField: Defines a CCK file field type.
@@ -59,13 +59,34 @@ function filefield_file_listed($file, $field) {
  * Theme function for the 'generic' single file formatter.
  */
 function theme_filefield_file($file) {
+  // Views may call this function with a NULL value, return an empty string.
+  if (empty($file['fid'])) {
+    return '';
+  }
+
   $path = $file['filepath'];
   $url = file_create_url($path);
-  $icon = theme('filefield_icon', $file); // . '<pre>' .  print_r($file,1) . '</pre>';
-  // set options as per anchor format described on http://microformats.org/wiki/file-format-examples
-  // until I move to the more complex microformat described 
-  // @ http://darrelopry.com/story/microformats-and-media-rfc-if-you-js-or-css
-  $options = array('attributes' => array('type' => $file['filemime'], 'length' => $file['filesize']));
-  $options['attributes']['title'] =  (isset($file['data']['description'])) ? $file['data']['description'] : $file['filename'];
-  return '<div class="filefield-file clear-block">'. $icon . l($file['filename'], $url, $options) .'</div>';
+  $icon = theme('filefield_icon', $file);
+
+  // Set options as per anchor format described at
+  // http://microformats.org/wiki/file-format-examples
+  // TODO: Possibly move to until I move to the more complex format described 
+  // at http://darrelopry.com/story/microformats-and-media-rfc-if-you-js-or-css
+  $options = array(
+    'attributes' => array(
+      'type' => $file['filemime'],
+      'length' => $file['filesize'],
+    ),
+  );
+
+  // Use the description as the link text if available.
+  if (empty($file['data']['description'])) {
+    $link_text = $file['filename'];
+  }
+  else {
+    $link_text = $file['data']['description'];
+    $options['attributes']['title'] = $file['filename'];
+  }
+
+  return '<div class="filefield-file clear-block">'. $icon . l($link_text, $url, $options) .'</div>';
 }

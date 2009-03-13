@@ -1,4 +1,4 @@
-# $Id: README.txt,v 1.18.2.2.2.10 2008/12/23 03:40:02 designerbrent Exp $
+# $Id: README.txt,v 1.18.2.2.2.11 2009/03/03 05:29:42 designerbrent Exp $
 
 
 --- README  -------------------------------------------------------------
@@ -145,6 +145,21 @@ calculations work:
       padding-bottom: 1.4167em;   /* CORRECT :) */
     }
 
+
+--- NOTE: -----------------------------------------------------------
+Blueprint theme does not include the Drupal $logo variable. 
+
+The preferred method for adding a logo to the design is to do it in the CSS was a background image. An example of the way I typically do it is as follows:
+
+h1 a{
+width: [width of logo];
+height: [height of logo];
+display:block;
+text-indent: -99999em;
+background: url(../images/logo.png) no-repeat left top;
+}
+
+What this ends up doing is removing the text title of the site, and replacing it with a background image of the logo that is still linked to the homepage of the site.
 
 
 --- CHANGELOG --------------------------------------------------------
