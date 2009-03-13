@@ -117,6 +117,8 @@ function phptemplate_preprocess_page(&$vars) {
  */
 function phptemplate_preprocess_node(&$vars) {
   jquery_plugin_add('cycle');
+  jquery_plugin_add('expose');
+  jquery_plugin_add('overlay');
   drupal_add_js(drupal_get_path('theme', 'blueprint') . '/scripts/cycle.js', 'theme');
   $node = $vars['node']; // for easy reference
   // for easy variable adding for different node types
