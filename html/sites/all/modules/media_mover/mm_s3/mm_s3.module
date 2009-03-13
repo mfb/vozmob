@@ -1,0 +1,306 @@
+<?php
+// $Id: mm_s3.module,v 1.7 2008/01/18 00:35:58 bdragon Exp $
+
+/**
+ * please note, to use this module, you need to download drivers (pear libraries and s3 driver) from
+ * http://tunaspecial.com/files/drivers.tgz
+ */
+
+/**
+ * implementation of hook_menu
+ */
+function mm_s3_menu() {
+  // test page
+  $items['admin/content/media_mover/mm_s3/test'] = array(
+    'title' => t('S3 Test'),
+    'page callback' => 'mm_s3_test',
+    'access callback' => 'user_access',
+    'access arguments' => array('administer media_mover'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+  return $items;
+}
+
+/**
+ * implement the testing functionality
+ */
+function mm_s3_test() {
+  require_once drupal_get_path('module', 'mm_s3') .'/mm_s3_test.inc';
+}
+
+/**
+ * Implementation of media_mover hook
+ */
+function mm_s3_media_mover($op, $action_id = null, $configuration = array(), &$item = array()) {
+  switch ($op) {
+
+    case 'name':
+      return "S3 module";
+    break;
+
+    // edit new configuration option set
+    // $type is needed to build out options, is "type--action"
+    // $configuration is pulled from db
+    case 'config':
+      switch ($action_id) {
+       case '1':
+          return _mm_s3_config($action_id, $configuration, 'storage');
+        break;
+
+        case '2':
+          return _mm_s3_config($action_id, $configuration, 'complete');
+        break;
+      }
+    break;
+
+    case 'directories':
+    break;
+
+    case 'admin':
+      return _mm_s3_admin();
+    break;
+
+    case 'actions':
+      return array(
+        'storage' => array(1 => "move file to amazon s3 service"),
+        'complete' => array(2 => "move file to amazon s3 service"),
+      );
+    break;
+
+    case 'storage':
+      switch ($action_id) {
+        case '1':
+          return _mm_s3_send($item, $configuration, 'storage', 1);
+        break;
+      }
+    break;
+
+    case 'complete':
+      switch ($action_id) {
+        case '2':
+          return _mm_s3_send($item, $configuration, 'complete', 2);
+        break;
+      }
+    break;
+
+    default:
+      return;
+    break;
+  }
+}
+
+/**
+ * implements the hook_xspf_playlist_add to modify
+ * the output of xspf files. This is helpful for building
+ * playlists for flashplayers
+ */
+function mm_s3_xspf_playlist_add($action, $node) {
+  $items = array();
+  switch ($action) {
+    case 'pre':
+      if ($files = $node->media_mover) {
+        foreach ($files as $file) {
+          if (($file['storage_module'] == 'mm_s3') || ($file['complete_module'] == 'mm_s3')) {
+            $items[] = xspf_playlist_build_file_item($node, $file['url']);
+          }
+        }
+      }
+    break;
+
+    case 'post':
+    break;
+  }
+  return $items;
+}
+
+/**
+ * check and see if the drivers are installed
+ */
+function mm_s3_drivers_check() {
+  $drivers_path = drupal_get_path('module', 'media_mover_api') .'/drivers/Storage3';
+  if (file_exists($drivers_path .'/Storage3.php')) {
+    require_once($drivers_path .'/Storage3.php');
+    return true;
+  }
+  else {
+    drupal_set_message(t('Sorry, could not find the S3 drivers. Please read the documentation.'));
+    watchdog('media_mover', 'mm_s3: Unable to find S3 drivers.');
+    return false;
+  }
+}
+
+/**
+ * builds the form to display on the media mover admin page
+ */
+function _mm_s3_admin() {
+  global $conf;
+
+  mm_s3_drivers_check();
+
+  $form['mm_s3'] = array(
+    '#type' => 'fieldset',
+    '#title' => t("S3 configuration"),
+    '#collapsed' => true,
+    '#collapsible' => true,
+    '#description' => t('Settings for the S3 module. You can see if your connection is functional by using the !link.', array('!link' => l(t('S3 test'), 'admin/media_mover/mm_s3/test')))
+  );
+
+  // @TODO do some validation on this to see if we can create this bucket
+  $form['mm_s3']['mm_s3_bucket'] = array(
+    '#type' => 'textfield',
+    '#title' => t('S3 Bucket'),
+    '#default_value' => variable_get('mm_s3_bucket', str_replace(" ", "_", $conf['site_name'])),
+    '#description' => t("Name of the S3 bucket, note this has to be unique. This can be overridden by a configuration, but this is the default value."),
+  );
+
+  $form['mm_s3']['mm_s3_url'] = array(
+    '#type' => 'textfield',
+    '#title' => t('S3 URL'),
+    '#default_value' => variable_get('mm_s3_url', "https://s3.amazonaws.com/"),
+    '#description' => t("URL to send to amazon. You probably do not need to change this."),
+  );
+
+  $form['mm_s3']['mm_s3_key'] = array(
+    '#type' => 'textfield',
+    '#title' => t('S3 Key'),
+    '#default_value' => variable_get('mm_s3_key', ""),
+    '#description' => t("S3 key."),
+  );
+
+  $form['mm_s3']['mm_s3_skey'] = array(
+    '#type' => 'textfield',
+    '#title' => t('S3 Secret Key'),
+    '#default_value' => variable_get('mm_s3_skey', ""),
+    '#description' => t("S3 secret key."),
+  );
+
+  return $form;
+}
+
+/**
+ * builds the form to display on the media mover setup
+ */
+function _mm_s3_config($action_id, $configuration, $verb) {
+  global $conf;
+
+  // set the id based on the verb
+  $verb == 'storage' ? $id = 1 : $id = 2;
+
+  $form['mm_s3'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('S3 configuration'),
+    '#collapsed' => false,
+    // id => modulename--action this allows the javascript auto hide and show on the add config page
+    // class => mm_config_option allows jQuery to close and open this easily
+    '#attributes' => array('id' => 'mm_s3--'. $id, 'class' => 'mm_config_option'),
+  );
+
+  // @TODO do some validation on this to see if we can create this bucket
+  $form['mm_s3']["mm_s3_bucket"] = array(
+    '#type' => 'textfield',
+    '#title' => t('S3 Bucket'),
+    '#default_value' => $configuration['mm_s3_bucket'] ? $configuration['mm_s3_bucket'] : variable_get('mm_s3_bucket', str_replace(" ", "_", $conf['site_name'])),
+    '#description' => t("Name of the S3 bucket, note this has to be unique on Amazon's servers"),
+  );
+
+  return $form;
+}
+
+/**
+ * sends file to s3
+ * @file_path path to local file
+ * @file_name name of local file
+ *
+ * @returns a url to the amazon file
+ */
+function _mm_s3_send(&$item, $configuration, $action, $action_id) {
+  static $access_key, $secret_key, $url;
+
+  // assign bucket name, order: specific conf, general conf, sitename
+  $bucket = $configuration['mm_s3_bucket'] ? $configuration['mm_s3_bucket'] : variable_get('mm_s3_bucket', str_replace(" ", "_", $conf['site_name']));
+
+  // get s3 library. if it can't be loaded, exit
+  if (!mm_s3_drivers_check()) {
+    return;
+  }
+
+//@@@ Uh, what is this supposed to affect again?
+  if ($url = variable_get('mm_s3_url', 'https://s3.amazonaws.com/'))
+
+  // check access key
+  if (!$access_key = variable_get('mm_s3_key', null)) {
+    $message = 'Media Mover s3 key not set!';
+    $link = l('Change S3 Settings', 'admin/settings/media_mover');
+    watchdog('media_mover', $message, array(), WATCHDOG_ERROR, $link);
+    return false; // if no key is set, error
+  }
+
+  // check secret key
+  if (!$secret_key = variable_get('mm_s3_skey', null)) {
+    $message = 'Media Mover s3 secret key not set!';
+    $link = l('Change S3 Settings', 'admin/settings/media_mover');
+    watchdog('media_mover', $message, array(), WATCHDOG_ERROR, $link);
+    return false;
+  }
+
+  // make sure file is readable
+  if (! is_file($item['process']['file'])) {
+    $message = t("MM s3 could not read file for moving. File: @file", array('@file' => $item['process']['file']));
+    watchdog("media_mover", $message, "WATCHDOG_ERROR");
+    return false;
+  }
+
+  $file_name = basename($item['process']['file']);
+
+  //Create our Amazon S3 Service Interface
+  $s3 = new storage3($access_key, $secret_key, $url);
+
+  // make connection and get list of buckets
+  $buckets = $s3->lsBuckets();
+
+  // now that a connection is established, we can make sure the AWS auth works
+  if ($s3->responseInt != 200 ) {
+    $message = t('Error connecting to Amazon S3: !error_name: !error', array('!error_name' => $s3->responseArray['code'], '!error_name' => $s3->responseArray['Message']) );
+    watchdog("media_mover", $message, "WATCHDOG_ERROR");
+    return false;
+  }
+
+  // check if bucket exists (i can haz bucket?)
+  if (!in_array($bucket, $buckets)) {
+
+    // Create the bucket
+    if (!$s3->mkBucket($bucket)) {
+      $message = t('Amazon s3 could not create a bucket: @bucket', array('@bucket' => $bucket));
+      $link = l("Change S3 Settings",  "admin/settings/media_mover");
+      watchdog("media_mover", $message, "WATCHDOG_ERROR", $link);
+      $item['status'] = 0;
+      return false;
+    }
+  }
+
+  // put file on amazon
+  if ($s3->putFile($item['process']['file'], $bucket, $file_name) ) {
+
+    // set the ACL
+    if (!$s3->setACL($bucket, $file_name) ) {
+      $message = t("media_mover s3 could not set ACL on amazon");
+      $link = l("Change S3 Settings",  "admin/settings/media_mover");
+      watchdog("media_mover", $message, "WATCHDOG_ERROR", $link);
+      $item['status'] = 0;
+      return false;
+    }
+
+  }
+  else {
+   // Error condition when trying to put file up
+   $message = t('media_mover s3 could not upload file to amazon. Reporting error: @error', array('@error' => print_r($s3, true)) );
+   $link = l('Change S3 Settings',  'admin/settings/media_mover');
+   watchdog('media_mover', $message, 'WATCHDOG_ERROR', $link);
+   $item['status'] = 0;
+   return false;
+  }
+
+  // add info to $file
+  $item[$action]['file'] = "http://s3.amazonaws.com/". $bucket ."/". $file_name;
+  $item['url'] = "http://s3.amazonaws.com/". $bucket ."/". $file_name;
+}

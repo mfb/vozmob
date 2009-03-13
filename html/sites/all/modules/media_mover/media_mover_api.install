@@ -1,0 +1,394 @@
+<?php
+
+/* $Id: media_mover_api.install,v 1.13 2008/04/07 16:57:18 bdragon Exp $ */
+
+// media_mover.install
+
+function media_mover_api_schema() {
+  $schema['media_mover_files'] = array(
+    'fields' => array(
+      'mmfid' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+      ),
+      'nid' => array(
+        'type' => 'int',
+        'not null' => FALSE,
+      ),
+      'fid' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'cid' => array(
+        'type' => 'int',
+        'not null' => FALSE,
+      ),
+      'harvest_module' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+      ),
+      'harvest_action' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+      ),
+      'harvest_file' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+      ),
+      'process_module' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+      ),
+      'process_action' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+      ),
+      'process_file' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+      ),
+      'storage_module' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+      ),
+      'storage_action' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+      ),
+      'storage_file' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+      ),
+      'complete_module' => array(
+        'type' => 'varchar',
+        'length' => '225',
+        'not null' => FALSE,
+      ),
+      'complete_action' => array(
+        'type' => 'varchar',
+        'length' => '225',
+        'not null' => FALSE,
+      ),
+      'complete_file' => array(
+        'type' => 'varchar',
+        'length' => '225',
+        'not null' => FALSE,
+      ),
+      'url' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'status' => array(
+        'type' => 'varchar',
+        'length' => '48',
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'date' => array(
+        'type' => 'int',
+        'not null' => FALSE,
+      ),
+      'data' => array(
+        'type' => 'blob',
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('mmfid'),
+    'indexes' => array(
+      'fid' => array('fid'),
+    ),
+  );
+
+  $schema['media_mover_configurations'] = array(
+    'fields' => array(
+      'cid' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'verb' => array(
+        'type' => 'varchar',
+        'length' => '16',
+        'not null' => FALSE,
+      ),
+      'module' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'action' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+        'default' => '',
+      ),
+      'configuration' => array(
+        'type' => 'blob',
+        'not null' => TRUE,
+        'serialize' => TRUE,
+      ),
+    ),
+    'primary key' => array('cid', 'verb'),
+  );
+
+  $schema['media_mover_config_list'] = array(
+    'fields' => array(
+      'cid' => array(
+        'type' => 'serial',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        //'default' => 0,
+      ),
+      'name' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+      ),
+      'description' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => FALSE,
+      ),
+      'status' => array(
+        'type' => 'varchar',
+        'length' => '48',
+        'not null' => TRUE,
+        'default' => 'disabled',
+      ),
+      'start_time' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'last_start_time' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('cid'),
+  );
+
+  return $schema;
+}
+
+function media_mover_api_install() {
+
+  drupal_install_schema('media_mover_api');
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function media_mover_api_uninstall() {
+  drupal_uninstall_schema('media_mover_api');
+  variable_del('mma_no_cron_run');
+  variable_del('mma_file_perm');
+  variable_del('mma_file_mask');
+  variable_del('mma_node_edit_file_show');
+  variable_del('mma_node_file_delete');
+  variable_del('mma_cron_notify');
+  variable_del('mma_cron_notify_email');
+  variable_del('mma_cron_notify_time');
+}
+
+/**
+ * addes a status col to the configuration table
+ */
+function media_mover_api_update_1() {
+  $ret = array();
+  db_change_field($ret, 'media_mover_config_list', 'status', 'status', array(
+    'type' => 'varchar',
+    'length' => 48,
+    'not null' => TRUE,
+    'default' => 'disabled',
+  ));
+  return $ret;
+}
+
+/**
+ * adds data col to the files table
+ */
+function media_mover_api_update_2() {
+  $ret = array();
+  db_add_field($ret, 'media_mover_files', 'data', array(
+    'type' => 'blob',
+    //'after' => 'status',
+  ));
+  return $ret;
+}
+
+/**
+ * Creates the file harvest comparison table
+ */
+function media_mover_api_update_3() {
+  $ret = array();
+  db_add_field($ret, 'media_mover_config_list', 'start_time', array(
+    'type' => 'int',
+    'not null' => TRUE,
+    'default' => 0,
+    //'after' => 'status',
+  ));
+  db_add_field($ret, 'media_mover_config_list', 'last_start_time', array(
+    'type' => 'int',
+    'not null' => TRUE,
+    'default' => 0,
+    //'after' => 'start_time'
+  ));
+  return $ret;
+}
+
+/**
+ * adds data col to the files table
+ */
+function media_mover_api_update_4() {
+  $ret = array();
+  db_add_field($ret, 'media_mover_files', 'mmfid', array(
+    'type' => 'int',
+    'not null' => FALSE,
+    'default' => NULL,
+    // after => first?
+  ));
+  db_drop_index($ret, 'media_mover_files', 'nid');
+  db_drop_primary_key($ret, 'media_mover_files');
+  return $ret;
+}
+
+/**
+ * increases the size of the file tables
+ */
+function media_mover_api_update_5() {
+  $ret = array();
+  db_change_field($ret, 'media_mover_files', 'harvest_file', 'harvest_file', array(
+    'type' => 'varchar',
+    'length' => 255,
+  ));
+  db_change_field($ret, 'media_mover_files', 'process_file', 'process_file', array(
+    'type' => 'varchar',
+    'length' => 255,
+  ));
+  db_change_field($ret, 'media_mover_files', 'storage_file', 'storage_file', array(
+    'type' => 'varchar',
+    'length' => 255,
+  ));
+  return $ret;
+}
+
+/**
+ * add the completion stuff
+ */
+function media_mover_api_update_6() {
+  $ret = array();
+  db_add_field($ret, 'media_mover_files', 'complete_file', array(
+    'type' => 'varchar',
+    'length' => 255,
+    'not null' => TRUE,
+    //'after' => 'storage_file',
+  ));
+  db_add_field($ret, 'media_mover_files', 'complete_action', array(
+    'type' => 'varchar',
+    'length' => 255,
+    'not null' => TRUE,
+    //'after' => 'storage_file',
+  ));
+  db_add_field($ret, 'media_mover_files', 'complete_module', array(
+    'type' => 'varchar',
+    'length' => 255,
+    'not null' => TRUE,
+    //'after' => 'storage_file',
+  ));
+  return $ret;
+}
+
+/**
+ * add dates for when files were harvested
+ */
+function media_mover_api_update_9() {
+  $ret = array();
+  db_add_field($ret, 'media_mover_files', 'date', array(
+    'type' => 'int',
+    'not null' => FALSE,
+    'default' => 0, // @@@ Doesn't match schema!
+    //'after' => 'status',
+  ));
+
+  $ret[] = update_sql('UPDATE {media_mover_files} SET date = %d WHERE date = 0', time());
+  return $ret;
+}
+
+/**
+ * changes the names of modules to reflect the new module naming scheme
+ */
+function media_mover_api_update_10() {
+  $ret = array();
+
+  $ret[] = update_sql("UPDATE {media_mover_files} SET harvest_module = '%s' WHERE harvest_module = '%s' AND harvest_action <> 1", 'mm_node', 'media_mover');
+  $ret[] = update_sql("UPDATE {media_mover_files} SET storage_module = '%s' WHERE storage_module = '%s' AND storage_action <> 1", 'mm_node', 'media_mover');
+  $ret[] = update_sql("UPDATE {media_mover_files} SET process_module = '%s' WHERE process_module = '%s' AND process_action <> 1", 'mm_node', 'media_mover');
+  $ret[] = update_sql("UPDATE {media_mover_files} SET storage_module = '%s' WHERE storage_module = '%s' AND storage_action <> 1", 'mm_node', 'media_mover');
+  $ret[] = update_sql("UPDATE {media_mover_configurations} SET module = '%s' WHERE module = '%s' AND action <> 1", 'mm_node', 'media_mover');
+  $ret[] = update_sql("UPDATE {media_mover_configurations} SET module = '%s' WHERE module = '%s' AND action = 1", 'media_mover_api', 'media_mover');
+
+  return $ret;
+}
+
+/**
+ * Drupal 6 updates.
+ */
+function media_mover_api_update_6001() {
+  $ret = array();
+
+  // Add auto increment to {media_mover_files}.
+  db_drop_primary_key($ret, 'media_mover_files');
+  db_change_field($ret, 'media_mover_files', 'mmfid', 'mmfid', array('type' => 'serial', 'unsigned' => TRUE, 'not null' => TRUE), array('primary key' => array('mmfid')));
+
+  // Ad auto increment to {media_mover_config_list}.
+  db_drop_primary_key($ret, 'media_mover_config_list');
+  db_change_field($ret, 'media_mover_config_list', 'cid', 'cid', array('type' => 'serial', 'unsigned' => TRUE, 'not null' => TRUE), array('primary key' => array('cid')));
+
+  // delete db_next_id("{media_mover_config_list}_cid") ?
+  // delete db_next_id("{media_mover_files}_mmfid") ?
+
+  // These didn't make any sense in the first place...
+  variable_del('mm_config_name');
+  variable_del('mm_config_descript');
+
+  // Verb is WAY too long.
+  db_change_field($ret, 'media_mover_configurations', 'verb', 'verb', array('type' => 'varchar', 'length' => '16', 'not null' => TRUE, 'default' => ''));
+
+  // Add a primary key.
+  db_add_primary_key($ret, 'media_mover_configurations', array('cid', 'verb'));
+
+  return $ret;
+}
+
+/**
+ * Add a missing index.
+ */
+function media_mover_api_update_6002() {
+  $ret = array();
+  db_add_index($ret, 'media_mover_files', 'fid', array('fid'));
+  return $ret;
+}
+
+/**
+ * Add another missing index.
+ */
+function media_mover_api_update_6003() {
+  $ret = array();
+  db_add_index($ret, 'media_mover_files', 'nid_cid', array('nid', 'cid'));
+  return $ret;
+}

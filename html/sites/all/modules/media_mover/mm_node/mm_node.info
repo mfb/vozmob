@@ -1,0 +1,6 @@
+; $Id: mm_node.info,v 1.3 2008/01/03 20:41:31 bdragon Exp $
+name = Media Mover Node
+description = Media Mover node interfaces 
+package = "Media Mover"
+dependencies[] = media_mover_api
+core = 6.x

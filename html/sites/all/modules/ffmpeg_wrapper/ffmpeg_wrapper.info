@@ -1,0 +1,4 @@
+; $Id: ffmpeg_wrapper.info,v 1.1 2008/03/16 07:04:36 arthuregg Exp $
+name = FFmpeg Wrapper
+description = This is a helper module for modules which wish to implement FFmpeg functions
+package = "Other"
