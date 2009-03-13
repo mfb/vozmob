@@ -1,5 +1,5 @@
 <?php
-// $Id: messaging_twitter.module,v 1.1.2.2 2009/02/28 19:53:22 jareyero Exp $
+// $Id: messaging_twitter.module,v 1.1.2.3 2009/03/03 21:46:31 jareyero Exp $
 /**
  * @file
  * Messaging Twitter sending method
@@ -20,7 +20,7 @@ function messaging_twitter_messaging($op = 'info') {
         'name' => t('Twitter Direct Message'),
         'group' => 'twitter',
         'type' => MESSAGING_TYPE_PUSH,
-        'glue' => '<br />',
+        'glue' => ' ',
         'description' => t("Send as a Twitter direct message."),
         'send callback' => 'messaging_twitter_send_dm',
         'destination callback' => 'messaging_twitter_user_destination',
@@ -30,7 +30,7 @@ function messaging_twitter_messaging($op = 'info') {
         'name' => t('Twitter @ Message'),
         'group' => 'twitter',
         'type' => MESSAGING_TYPE_PUSH,
-        'glue' => '<br />',
+        'glue' => ' ',
         'description' => t("Send as a Twitter @ message."),
         'send callback' => 'messaging_twitter_send_at',
         'destination callback' => 'messaging_twitter_user_destination',

@@ -1,4 +1,4 @@
-/* $Id: filefield.css,v 1.17 2009/03/01 05:17:37 quicksketch Exp $ */
+/* $Id: filefield.css,v 1.19 2009/03/12 22:22:25 quicksketch Exp $ */
 
 /**
  * Overall styles
@@ -10,8 +10,8 @@
  */
 
 .filefield-icon {
-  float: left;
-  margin-right: 0.4em;
+  float: left; /* RTL */
+  margin-right: 0.4em; /* RTL */
 }
 
 /* End formatter styles. */
@@ -24,18 +24,23 @@
   white-space: normal;
 }
 
+.filefield-element .widget-preview {
+  float: left; /* RTL */
+  padding-right: 10px; /* RTL */
+  border-right: 1px solid #CCC; /* RTL */
+  margin-right: 10px; /* RTL */
+}
+
+.filefield-element .widget-edit {
+  float: left; /* RTL */
+}
+
 .filefield-element .filefield-preview {
-  float: left;
-  width: 180px;
+  width: 16em;
   overflow: hidden;
-  margin-right: 10px;
 }
 
-.filefield-element .filefield-edit {
-  float: left;
-}
-
-.filefield-element .filefield-edit .form-item {
+.filefield-element .widget-edit .form-item {
   margin: 0 0 1em 0;
 }
 
@@ -53,7 +58,7 @@
 .filefield-element div.throbber {
   display: inline;
   float: none;
-  padding: 1px 13px 2px 3px;
+  padding: 1px 13px 2px 3px; /* RTL */
 }
 
 
@@ -66,13 +71,13 @@
  */
 
 .filefield-generic-edit .filefield-icon {
-  float: left;
-  margin-right: 0.7em;
+  float: left; /* RTL */
+  margin-right: 0.7em; /* RTL */
   margin-top: 0.3em;
 }
 
 .filefield-generic-edit-description {
-  margin-right: 6em;
+  margin-right: 6em; /* RTL */
 }
 
 /* The text field is made unnecessarily long by node.css - shorten it. */

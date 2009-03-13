@@ -1,5 +1,5 @@
 <?php
-// $Id: notifications_content.module,v 1.4.2.9.2.22 2009/02/21 18:38:00 jareyero Exp $
+// $Id: notifications_content.module,v 1.4.2.9.2.24 2009/03/12 23:55:56 jareyero Exp $
 /**
  * @file
  * Subscriptions to content events
@@ -99,8 +99,7 @@ function notifications_content_form_alter(&$form, &$form_state, $form_id) {
     if (!empty($types[$node->type])) {    
       $form['notifications_content_disable'] = array(
         '#type'          => 'checkbox',
-        '#title'         => t('Disable Notifications'),
-        '#description'   => t('Check this box if you wish to disable notifications for this comment.'),
+        '#title'         => t('Do not send notifications for this comment.'),
         '#default_value' => 0,
         '#access' => user_access('skip notifications'),
       ); 
@@ -119,8 +118,7 @@ function notifications_content_form_alter(&$form, &$form_state, $form_id) {
       );
       $form['notifications_content']['notifications_content_disable'] = array(
         '#type'          => 'checkbox',
-        '#title'         => t('Disable Notifications'),
-        '#description'   => t('Check this box if you wish to disable notifications for this content update.'),
+        '#title'         => t('Do not send notifications for this update.'),
         '#default_value' => 0,
       );
     }
@@ -202,15 +200,20 @@ function notifications_content_notifications($op, &$arg0, $arg1 = NULL, $arg2 = 
         'name' => t('Node'),
         'field' => 'nid',
         'type' => 'int',
+        'name callback' => 'notifications_content_node_title',
+        'value callback' => 'notifications_content_node_nid',
       );
       $fields['author'] = array(
         'name' => t('Author'),
         'field' => 'author',
         'type' => 'int',
+        'autocomplete path' => 'user/autocomplete',
+        'name callback' => 'notifications_content_author_name',
+        'value callback' => 'notifications_content_author_uid',
       );
       $fields['type'] = array(
         'name' => t('Node type'),
-        'field' => 'author',
+        'field' => 'type',
         'type' => 'string',
         'options callback' => 'node_get_types',
         'options arguments' => array('names'),
@@ -244,6 +247,8 @@ function notifications_content_notifications($op, &$arg0, $arg1 = NULL, $arg2 = 
         }
       }
       break;
+    case 'event objects':
+      return array('node' => t('Node'));
     case 'event types':
       // Node inserts are not grouped by node but all together. The digest will look like:
       //   New content has been submitted
@@ -312,6 +317,40 @@ function notifications_content_notifications($op, &$arg0, $arg1 = NULL, $arg2 = 
       return array($access);      
       break;
   }
+}
+
+/**
+ * Field name callback, author uid to user name
+ */
+function notifications_content_author_name($uid) {
+  if ($account = user_load($uid)) {
+    return check_plain($account->name);
+  }
+}
+
+function notifications_content_author_uid($name) {
+  if ($account = user_load(array('name' => $name))) {
+    return $account->uid;
+  }
+  else {
+    return 0; // Default to anonymous if not recognized
+  }
+}
+
+function notifications_content_node_title($nid) {
+  if ($node = node_load($nid)) {
+    return check_plain($node->title);
+  }
+  else {
+    return t('Not found');
+  }
+}
+
+/**
+ * Reverse mapping from [nid] node title to nid
+ */
+function notifications_content_node_nid($name) {
+  
 }
 
 /**

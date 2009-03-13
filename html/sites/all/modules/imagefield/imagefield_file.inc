@@ -1,5 +1,5 @@
 <?php
-// $Id: imagefield_file.inc,v 1.7 2009/03/04 19:29:52 quicksketch Exp $
+// $Id: imagefield_file.inc,v 1.9 2009/03/11 01:41:57 quicksketch Exp $
 
 /**
  * @file
@@ -28,7 +28,7 @@ function imagefield_file_references($file) {
 function imagefield_file_insert($file) {
   if (imagefield_file_is_image($file)) {
     $info = image_get_info($file->filepath);
-    if ($info['width'] < 100 || $info['height'] < 100) {
+    if ($info['width'] <= 100 || $info['height'] <= 100) {
       $newfile = drupal_clone($file);
       file_copy($newfile->filepath, imagefield_file_admin_thumb_path($newfile));
     }
@@ -62,5 +62,8 @@ function imagefield_file_is_image($file) {
  */
 function imagefield_file_admin_thumb_path($file) {
   $file = (object)$file;
-  return $file->filepath .'.thumb.jpg';
+  $extension_dot = strrpos($file->filepath, '.');
+  $extension = substr($file->filepath, $extension_dot + 1);
+  $basepath = substr($file->filepath, 0, $extension_dot);
+  return $basepath .'.thumb.'. $extension;
 }

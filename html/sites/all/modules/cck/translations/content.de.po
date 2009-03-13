@@ -1,4 +1,4 @@
-# $Id: content.de.po,v 1.1.2.14 2008/11/05 12:39:46 hass Exp $
+# $Id: content.de.po,v 1.1.2.15 2009/03/09 22:04:26 hass Exp $
 # German translation of CCK
 # Copyright 2006 Lukas Gangoly <lukas.gangoly@univie.ac.at>
 # Copyright 2006 Jakob Petsovits <jpetso@gmx.at>
@@ -16,8 +16,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: German translation of CCK\n"
-"POT-Creation-Date: 2008-11-05 12:54+0100\n"
-"PO-Revision-Date: 2008-11-05 13:36+0100\n"
+"POT-Creation-Date: 2009-03-09 22:08+0100\n"
+"PO-Revision-Date: 2009-03-09 22:53+0100\n"
 "Last-Translator: Alexander Haß\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -64,75 +64,107 @@ msgstr "<em>Feldgruppe</em>, welches zusammenklappbare Feldgruppen erstellt, die
 msgid "For more information, see the online handbook entry for <a href=\"@handbook-cck\">CCK</a> or the <a href=\"@project-cck\">CCK project page</a>."
 msgstr "Nähere Informationen bezüglich der Konfiguration und Anpassung gibt es auf der Handbuch-Seite zum <a href=\"@handbook-cck\">CCK-Modul</a> oder auf der <a href=\"@project-cck\">CCK-Projektseite</a>."
 
-#: content.module:478
+#: content.module:486
 msgid "This field is required."
 msgstr "Dieses Feld wird benötigt."
 
-#: content.module:482
+#: content.module:490
 msgid "!title: !required"
 msgstr "!title: !required"
 
-#: content.module:1834
+#: content.module:1843
 msgid "Basic"
 msgstr "Basis"
 
-#: content.module:1847;1850
+#: content.module:1856;1859
 msgid "RSS"
 msgstr "RSS"
 
-#: content.module:1860
+#: content.module:1869
 msgid "Search"
 msgstr "Suchen"
 
-#: content.module:1863
+#: content.module:1872
 msgid "Search Index"
 msgstr "Suchindex"
 
-#: content.module:1867
+#: content.module:1876
 msgid "Search Result"
 msgstr "Suchergebnis"
 
-#: content.module:2282;2289
+#: content.module:2324;2331
 msgid "Node module form."
 msgstr "Formular des Beitrag-Moduls."
 
-#: content.module:2296
+#: content.module:2338
 msgid "Language"
 msgstr "Sprache"
 
-#: content.module:2297
+#: content.module:2339
 msgid "Locale module form."
 msgstr "Formular des Locale-Moduls."
 
-#: content.module:2303
+#: content.module:2345
 msgid "Menu settings"
 msgstr "Menüeinstellungen"
 
-#: content.module:2304
+#: content.module:2346
 msgid "Menu module form."
 msgstr "Formular des Menü-Moduls."
 
-#: content.module:2310
+#: content.module:2352
 msgid "Taxonomy"
 msgstr "Taxonomie"
 
-#: content.module:2311
+#: content.module:2353
 msgid "Taxonomy module form."
 msgstr "Formular des Taxonomie-Moduls."
 
-#: content.module:2317
+#: content.module:2359
+msgid "Book"
+msgstr "Buch"
+
+#: content.module:2360
+msgid "Book module form."
+msgstr "Formular des Buch-Moduls."
+
+#: content.module:2366
+msgid "Poll title"
+msgstr "Umfragetitel"
+
+#: content.module:2367
+msgid "Poll module title."
+msgstr "Umfragemodultitel"
+
+#: content.module:2371
+msgid "Poll choices"
+msgstr ""
+
+#: content.module:2372
+msgid "Poll module choices."
+msgstr ""
+
+#: content.module:2376
+msgid "Poll settings"
+msgstr "Umfrageeinstellungen"
+
+#: content.module:2377
+msgid "Poll module settings."
+msgstr "Umfragemoduleinstellungen"
+
+#: content.module:2383
 msgid "File attachments"
 msgstr "Dateianhänge"
 
-#: content.module:2318
+#: content.module:2384
 msgid "Upload module form."
 msgstr "Formular des Upload-Moduls."
 
-#: content.module:581
+#: content.module:589
 msgid "Updating field type %type with module %module."
 msgstr "Feldtyp %type wird mit Modul %module aktualisiert."
 
-#: content.module:588
+#: content.module:596
 msgid "Updating widget type %type with module %module."
 msgstr "Widget %type wird mit Modul %module aktualisiert."
 
@@ -156,23 +188,23 @@ msgstr "Felder anzeigen"
 msgid "Remove field"
 msgstr "Feld löschen"
 
-#: content.install:232
+#: content.install:236
 msgid "Updates for CCK-related modules are not run until the modules are enabled on the <a href=\"@admin-modules-path\">administer modules page</a>. When you enable them, you'll need to return to <a href=\"@update-php\">update.php</a> and run the remaining updates."
 msgstr "Aktualisierungen für CCK verwandte Module werden nicht ausgeführt, bis die Module auf der <a href=\"@admin-modules-path\">Verwaltungsseite für Module</a> aktiviert wurden. Sobald diese aktiviert werden, müssen die ausstehenden Aktualisierungen auf der <a href=\"@update-php\">update.php</a>-Seite ausgeführt werden."
 
-#: content.install:235
+#: content.install:239
 msgid "!module.module has updates but cannot be updated because content.module is not enabled.<br />If and when content.module is enabled, you will need to re-run the update script. You will continue to see this message until the module is enabled and updates are run."
 msgstr "Für !module.module liegen Aktualisierungen vor. Dieses kann aber nicht aktualisiert werden, da das content.module nicht aktiviert ist.<br />Wenn das content.module aktiviert wird, muss das Aktualisierungsskript noch einmal ausgeführt werden. Diese Nachricht erscheint so lange, bis das Modul aktiviert und die Aktualisierungen ausgeführt wurden."
 
-#: content.install:240
+#: content.install:244
 msgid "!module.module has updates and is available in the modules folder but is not enabled.<br />If and when it is enabled, you will need to re-run the update script. You will continue to see this message until the module is enabled and updates are run."
 msgstr "Für !module.module liegen Aktualisierungen vor. Dieses Modul befindet sich im Modulverzeichnis, ist aber nicht aktiviert.<br />Wenn es aktiviert wird, muss das Aktualisierungsskript noch einmal ausgeführt werden. Diese Nachricht erscheint so lange, bis das Modul aktiviert und die Aktualisierungen ausgeführt wurden."
 
-#: content.install:247
+#: content.install:251
 msgid "Some updates are still pending. Please return to <a href=\"@update-php\">update.php</a> and run the remaining updates."
 msgstr "Einige Aktualisierungen stehen noch aus. Bitte zur <a href=\"@update-php\">update.php</a> zurückkehren und die ausstehenden Aktualisierungen ausführen."
 
-#: content.install:248
+#: content.install:252
 msgid "Some updates are still pending.<br/>Please re-run the update script."
 msgstr "Einige Aktualisierungen stehen noch aus.<br/>Bitte das Aktualisierungsskript noch einmal ausführen."
 
@@ -186,7 +218,7 @@ msgstr "Die CCK-Integration mit dem Views-Modul erfordert Views 6.x-2.0-rc2 oder
 
 #: content.info:0
 #: includes/content.rules.inc:19;200
-#: includes/views/content.views.inc:177;221
+#: includes/views/content.views.inc:178;254
 msgid "Content"
 msgstr "Inhalt"
 

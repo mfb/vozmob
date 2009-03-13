@@ -1,5 +1,5 @@
 <?php
-// $Id: filefield_meta.install,v 1.5 2009/02/05 18:56:25 dopry Exp $
+// $Id: filefield_meta.install,v 1.6 2009/03/11 06:02:24 quicksketch Exp $
 /**
  * @file
  * FileField Meta: Add Video Support to File Field.
@@ -63,7 +63,7 @@ function filefield_meta_schema() {
         'default' => 0,
       ),
       'audio_channel_mode' => array(
-        'description' => t('The number of channels in the audio, by name.'),
+        'description' => t('The number of channels in the audio, by name (stereo or mono).'),
         'type' => 'varchar',
         'length' => 10,
         'not null' => TRUE,
@@ -77,7 +77,7 @@ function filefield_meta_schema() {
         'default' => 0,
       ),
       'audio_bitrate_mode' => array(
-        'description' => t('The kind of audio bitrate.'),
+        'description' => t('The kind of audio bitrate, such as VBR. Usually empty.'),
         'type' => 'varchar',
         'length' => 4,
         'not null' => TRUE,

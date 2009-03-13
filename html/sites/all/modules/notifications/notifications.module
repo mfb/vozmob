@@ -1,5 +1,5 @@
 <?php
-// $Id: notifications.module,v 1.6.2.9.2.34 2009/02/21 18:38:00 jareyero Exp $
+// $Id: notifications.module,v 1.6.2.9.2.36 2009/03/12 23:55:56 jareyero Exp $
 
 /**
  * @file
@@ -41,7 +41,7 @@ function notifications_menu() {
     'file path' => drupal_get_path('module', 'system'),
   );
   $items['admin/messaging/subscriptions'] = array(
-    'title' => 'Subscriptions',
+    'title' => 'Manage subscriptions',
     'description' => 'Manage existing subscriptions and queue.',
     'page callback' => 'notifications_admin_status_page',
     'access arguments' => array('administer notifications'),
@@ -818,22 +818,41 @@ function notifications_subscription_types($type = NULL, $field = NULL) {
     notifications_alter('subscription_types', $types);
   }
   
+  return notifications_info($types, $type, $field);
+}
+
+/**
+ * Get information about subscriptions fields
+ */
+function notifications_subscription_fields($type = NULL, $property = NULL) {
+  static $fields;
+  if (!isset($fields)) {
+    $fields = notifications_module_information('subscription fields');
+    notifications_alter('subscription_fields', $fields);
+  }
+  return notifications_info($fields, $type, $property);
+}
+
+/**
+ * Get information from an array of data
+ */
+function notifications_info(&$data, $type = NULL, $field = NULL) {
   if ($field && $type) {
-    return isset($types[$type][$field]) ? $types[$type][$field] : NULL;
+    return isset($data[$type][$field]) ? $data[$type][$field] : NULL;
   }
   elseif ($field) {
     $return = array();
-    foreach ($types as $id => $info) {
+    foreach ($data as $id => $info) {
       $return[$id] = $info[$field];
     }
     return $return;
   }
   elseif ($type) {
-    return isset($types[$type]) ? $types[$type] : array();
+    return isset($data[$type]) ? $data[$type] : array();
   }
   else {
-    return $types;
-  }
+    return $data;
+  }  
 }
 
 /**
@@ -1458,6 +1477,49 @@ function notifications_user_form_submit($form, &$form_state) {
       notifications_delete_subscription($current[$index]->sid);
     }
   }
+}
+
+/**
+ * Display a form field for a notifications_field
+ */
+function _notifications_subscription_field_element($type, $value = NULL) {
+  $info = notifications_subscription_fields($type);
+  $format = notifications_format_subscriptions_field($type, $value);
+  $element['#default_value'] = $value;
+  if (!empty($format['options'])) {
+    $element['#type'] = 'select';
+    $element['#options'] = $format['options'];
+  }
+  elseif (!empty($format['info']['autocomplete path'])) {
+    $element['#type'] = 'textfield';
+    $element['#autocomplete_path'] = $info['autocomplete path'];
+  }
+  else {
+    $element['#type'] = 'textfield';
+  }
+  
+  return $element;
+}
+
+/**
+ * Format subscriptions field for display and get some more information
+ */
+function notifications_format_subscriptions_field($type, $value) {
+  $format_name = $format_value = t('Unknown');
+  $options = array();  
+  if ($info = notifications_subscription_fields($type)) {
+    $format_name = $info['name'];
+    if (!empty($info['name callback'])) {
+      $format_value = call_user_func($info['name callback'], $value);
+    } 
+    elseif (!empty($info['options callback'])) {
+      $options = call_user_func_array($info['options callback'], !empty($info['options arguments']) ? $info['options arguments'] : array());
+      $format_value = isset($options[$value]) ? $options[$value] : t('Not available');
+    } else {
+      $format_value = check_plain($value);
+    }
+  }
+  return array('name' => $format_name, 'value' => $format_value, 'options' => $options);  
 }
 
 /**

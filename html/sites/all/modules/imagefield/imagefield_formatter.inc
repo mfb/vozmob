@@ -1,5 +1,5 @@
 <?php
-// $Id: imagefield_formatter.inc,v 1.8 2009/03/04 05:28:24 quicksketch Exp $
+// $Id: imagefield_formatter.inc,v 1.9 2009/03/09 02:47:20 quicksketch Exp $
 
 /**
  * @file
@@ -17,8 +17,15 @@ function theme_imagefield_formatter_image_plain($element) {
   $field = content_fields($element['#field_name']);
   $item = $element['#item'];
 
-  if (empty($item['fid']) && $field['use_default_image']) $item = $field['default_image'];
-  if (empty($item['filepath']))  $item = array_merge($item, field_file_load($item['fid']));
+  if (empty($item['fid']) && $field['use_default_image']) {
+    $item = $field['default_image'];
+  }
+  if (empty($item['filepath'])) {
+    $item = array_merge($item, field_file_load($item['fid']));
+  }
+
+  $item['data']['alt'] = isset($item['data']['alt']) ? $item['data']['alt'] : $item['filename'];
+  $item['data']['title'] = isset($item['data']['title']) ? $item['data']['title'] : NULL;
 
   $class = 'imagefield imagefield-'. $field['field_name'];
   return  theme('imagefield_image', $item, $item['data']['alt'], $item['data']['title'], array('class' => $class));

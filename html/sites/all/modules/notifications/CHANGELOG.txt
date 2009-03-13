@@ -1,4 +1,4 @@
-// $Id: CHANGELOG.txt,v 1.1.2.11.2.36 2009/02/21 18:38:00 jareyero Exp $
+// $Id: CHANGELOG.txt,v 1.1.2.11.2.38 2009/03/12 23:55:56 jareyero Exp $
 
 TO DO
 ------
@@ -11,6 +11,9 @@ TO DO
 
 6.x-1.1 to .....
 -----------------
+- Reworded and simplified the 'Disable notifications' option
+- Fixed events where being deleted when doing a test run
+- Fixed bulk deletion for 'manage subscriptions' page
 - Fixed wrong placeholders for subscription names, #376298
 - Fixed typo in node comment template, by bas.hr, #374725
 - Added fallback information for message templates, some better help texts.

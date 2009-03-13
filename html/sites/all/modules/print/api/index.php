@@ -1,14 +1,17 @@
 <?php
-// $Id: index.php,v 1.2.2.5 2008/09/25 22:11:55 jcnventura Exp $
+// $Id: index.php,v 1.2.2.6 2009/03/05 00:45:29 jcnventura Exp $
 
 /**
  * @file
- * Homepage of the API reference
+ * Homepage of the print module API reference
  */
 
-/** @mainpage Printer, e-mail and PDF versions
- * Welcome to the module developer's documentation. The interesting functions for
- * themers are those that start with 'theme_'.
+// * @page module-print modules/print: Printer, e-mail and PDF versions
+
+/** 
+ * @mainpage Printer, e-mail and PDF versions
+ * Welcome to the print module developer's documentation. The interesting
+ * functions for themers are those that start with 'theme_'.
  *
  * - Printer-friendly pages (core)
  *   - @link print.module Module main file @endlink

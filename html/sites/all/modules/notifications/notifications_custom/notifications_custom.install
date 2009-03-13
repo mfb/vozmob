@@ -1,0 +1,108 @@
+<?php
+// $Id: notifications_custom.install,v 1.1.2.1 2009/03/12 23:55:56 jareyero Exp $
+
+/**
+ * Implementation of hook_install().
+ */
+function notifications_custom_install() {
+  // Create tables.
+  drupal_install_schema('notifications_custom');
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function notifications_custom_uninstall() {
+  // Remove tables
+  drupal_uninstall_schema('notifications_custom');
+
+}
+
+/**
+ * Implementation of hook_schema().
+ */
+function notifications_custom_schema() {
+  $schema['notifications_custom'] = array(
+    'description' => 'Stores custom subscriptions information.',
+    'fields' => array(
+      'csid' => array(
+        'type' => 'serial',
+        'not null' => TRUE,
+        'description' => 'Primary Key: Unique custom subscription ID.',
+      ),
+      'title' => array(
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+        'description' => 'Title of the field shown to the end user.',
+      ),
+      'name' => array(
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => TRUE,
+        'default' => '',
+        'description' => 'Internal name of the field used in the form HTML and URLs.',
+      ),
+      'explanation' => array(
+        'type' => 'text',
+        'not null' => FALSE,
+        'description' => 'Explanation of the subscription to end users.',
+      ),
+      'type' => array(
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => FALSE,
+        'description' => 'Type of subscription.',
+      ),
+      'event_type' => array(
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => FALSE,
+        'description' => 'Type of event that triggers this subscription.',
+      ),
+      'weight' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'size' => 'tiny',
+        'description' => 'Weight of subscription for forms.',
+      ),
+      'required' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'size' => 'tiny',
+        'description' => 'Whether the user is required to enter a value. (0 = no, 1 = yes)',
+      ),
+      'register' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'size' => 'tiny',
+        'description' => 'Whether the subscription is visible in the user registration form. (1 = yes, 0 = no)',
+      ),
+      'visibility' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'size' => 'tiny',
+        'description' => 'The level of visibility for the field. (0 = only admin, 1 = user editable)',
+      ),
+      'default_value' => array(
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+        'size' => 'tiny',
+        'description' => 'Whether it is enabled by default. (0 = disabled, 1 = enabled)',
+      ),
+      'fields' => array(
+        'type' => 'text',
+        'not null' => FALSE,
+        'serialize' => TRUE,
+        'description' => 'Serialized field and other aditional information.',
+      ),
+    ),
+    'primary key' => array('csid'),
+  );
+  return $schema;
+}

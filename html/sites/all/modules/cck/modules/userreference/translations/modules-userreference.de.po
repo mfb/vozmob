@@ -1,4 +1,4 @@
-# $Id: modules-userreference.de.po,v 1.2.2.10 2008/11/05 12:24:00 hass Exp $
+# $Id: modules-userreference.de.po,v 1.2.2.11 2009/03/09 22:04:26 hass Exp $
 # German translation of CCK
 # Copyright 2006 Lukas Gangoly <lukas.gangoly@univie.ac.at>
 # Copyright 2006 Jakob Petsovits <jpetso@gmx.at>
@@ -16,8 +16,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: German translation of CCK\n"
-"POT-Creation-Date: 2008-11-05 12:54+0100\n"
-"PO-Revision-Date: 2008-11-05 13:21+0100\n"
+"POT-Creation-Date: 2009-03-09 22:08+0100\n"
+"PO-Revision-Date: 2009-03-09 23:01+0100\n"
 "Last-Translator: Alexander Haß\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -72,7 +72,7 @@ msgstr "Aktiv"
 msgid "Blocked"
 msgstr "Gesperrt"
 
-#: modules/userreference/userreference.module:95
+#: modules/userreference/userreference.module:94
 msgid "Advanced - Users that can be referenced (View)"
 msgstr "Erweitert - Benutzer die referenziert werden können (Ansicht)"
 
@@ -82,30 +82,39 @@ msgstr "Die zur Auswahl von Benutzern verwendete Ansicht"
 
 #: modules/userreference/userreference.module:104
 #, fuzzy
-msgid "Choose the \"Views module\" view that selects the users that can be referenced.<br />Note:<ul><li>Only views that have fields will work for this purpose.</li><li>This will discard the \"Referenceable Roles\" and \"Referenceable Status\" settings above. Use the view's \"filters\" section instead.</li><li>Use the view's \"fields\" section to display additional informations about candidate users on user creation/edition form.</li><li>Use the view's \"sort criteria\" section to determine the order in which candidate users will be displayed.</li></ul>"
-msgstr "Wähle die „Views-Modul“-Ansicht das die Beiträge auswählt, die Referenziert werden können.<br />Hinweis:<ul><li>Nur Ansichten mit Feldern werden für diesen Zweck nutzbar sein.</li><li>Dies wird die obigen Einstellungen der „referenzierbaren Rollen“ und „referenzierbaren Status“ verwerfen. Stattdessen sollte hierfür der „Filter“-Bereich der Ansicht verwendet werden.</li><li>Um weitere Informationen über Beitragskandidaten für das Erstellungs-/Bearbeitungsformular anzuzeigen, kann das Ansichten-Feld verwendet werden.</li><li>Um die Reihenfolge der Beitragskandidaten festzulegen sollte das „Sortierkriterium“ von Ansichten verwendet werden.</li></ul>"
+msgid "<p>Choose the \"Views module\" view that selects the users that can be referenced.<br />Note:</p>"
+msgstr "<p>Wähle die „Views-Modul“-Ansicht das die Beiträge auswählt, die Referenziert werden können.<br />Hinweis:</p>"
 
-#: modules/userreference/userreference.module:173
+#: modules/userreference/userreference.module:105;118
+#, fuzzy
+msgid "<ul><li>Only views that have fields will work for this purpose.</li><li>This will discard the \"Referenceable Roles\" and \"Referenceable Status\" settings above. Use the view's \"filters\" section instead.</li><li>Use the view's \"fields\" section to display additional informations about candidate users on user creation/edition form.</li><li>Use the view's \"sort criteria\" section to determine the order in which candidate users will be displayed.</li></ul>"
+msgstr "<ul><li>Nur Ansichten mit Feldern werden für diesen Zweck nutzbar sein.</li><li>Dies wird die obigen Einstellungen der „referenzierbaren Rollen“ und „referenzierbaren Status“ verwerfen. Stattdessen sollte hierfür der „Filter“-Bereich der Ansicht verwendet werden.</li><li>Um weitere Informationen über Beitragskandidaten für das Erstellungs-/Bearbeitungsformular anzuzeigen, kann das Ansichten-Feld verwendet werden.</li><li>Um die Reihenfolge der Beitragskandidaten festzulegen sollte das „Sortierkriterium“ von Ansichten verwendet werden.</li></ul>"
+
+#: modules/userreference/userreference.module:117
+msgid "<p>The list of user that can be referenced can be based on a \"Views module\" view but no appropriate views were found. <br />Note:</p>"
+msgstr ""
+
+#: modules/userreference/userreference.module:196
 msgid "%name: invalid user."
 msgstr "%name: Der Benutzer ist ungültig."
 
-#: modules/userreference/userreference.module:325
+#: modules/userreference/userreference.module:349
 msgid "Select the method used to collect autocomplete suggestions. Note that <em>Contains</em> can cause performance issues on sites with thousands of users."
 msgstr "Die Methode zur Sammlung von Autovervollständigungsvorschlägen auswählen. Dabei ist zu beachten, dass <em>Enthält</em> auf Websites mit tausenden von Benutzern große Performanceprobleme verursachen kann."
 
-#: modules/userreference/userreference.module:333
+#: modules/userreference/userreference.module:357
 msgid "Reverse link"
 msgstr "‚Zurück‘-Link"
 
-#: modules/userreference/userreference.module:335
+#: modules/userreference/userreference.module:359
 msgid "If selected, a reverse link back to the referencing node will displayed on the referenced user record."
 msgstr "Sobald ausgewählt, wird auf dem referenzierten Benutzerdatensatz ein ‚Zurück‘-Link zu dem referenzierten Beitrag angezeigt."
 
-#: modules/userreference/userreference.module:570
+#: modules/userreference/userreference.module:594
 msgid "%name: found no valid user with that name."
 msgstr "%name: Kein Benutzer mit diesem Namen gefunden."
 
-#: modules/userreference/userreference.module:873
+#: modules/userreference/userreference.module:889
 msgid "Related content"
 msgstr "Zugehöriger Inhalt"
 

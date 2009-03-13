@@ -1,5 +1,5 @@
 <?php
-// $Id: imageapi.module,v 1.23.2.1 2009/02/06 09:27:48 drewish Exp $
+// $Id: imageapi.module,v 1.23.2.2 2009/03/10 06:16:26 drewish Exp $
 
 /**
  * @file
@@ -145,36 +145,56 @@ function imageapi_default_toolkit() {
   return false;
 }
 
+
 /**
- * Scales an image to the exact width and height given. Achieves the
- * target aspect ratio by cropping the original image equally on both
- * sides, or equally on the top and bottom.  This function is, for
- * example, useful to create uniform sized avatars from larger images.
+ * Invokes the given method using the currently selected toolkit.
+ *
+ * @param $method
+ *   A string containing the method to invoke.
+ * @param $image
+ *   An image object returned by imageapi_image_open().
+ * @param $params
+ *   An optional array of parameters to pass to the toolkit method.
+ * @return
+ *   Mixed values (typically Boolean indicating successful operation).
+ */
+function imageapi_toolkit_invoke($method, &$image, array $params = array()) {
+  $function = $image->toolkit . '_image_' . $method;
+  if (function_exists($function)) {
+    array_unshift($params, $image);
+    return call_user_func_array($function, $params);
+  }
+  watchdog('imageapi', 'The selected image handling toolkit %toolkit can not correctly process %function.', array('%toolkit' => $image->toolkit, '%function' => $function), WATCHDOG_ERROR);
+  return FALSE;
+}
+
+/**
+ * Scales an image to the exact width and height given.
+ *
+ * This function achieves the target aspect ratio by cropping the original image
+ * equally on both sides, or equally on the top and bottom. This function is
+ * useful to create uniform sized avatars from larger images.
  *
  * The resulting image always has the exact target dimensions.
  *
  * @param $image
- *   An ImageAPI Image object.
+ *   An image object returned by imageapi_image_open().
  * @param $width
- *   The target width in pixels.
+ *   The target width, in pixels.
  * @param $height
- *   The target height in pixels.
+ *   The target height, in pixels.
  * @return
- *   True or false, based on success.
+ *   TRUE or FALSE, based on success.
  */
 function imageapi_image_scale_and_crop(&$image, $width, $height) {
-  $aspect = $image->info['height'] / $image->info['width'];
-  if (empty($height)) $height = $width / $aspect;
-  if (empty($width)) $width = $height * $aspect;
-
   $scale = max($width / $image->info['width'], $height / $image->info['height']);
-  $x = (int) round(($image->info['width'] * $scale - $width) / 2);
-  $y = (int) round(($image->info['height'] * $scale - $height) / 2);
+  $x = ($image->info['width'] * $scale - $width) / 2;
+  $y = ($image->info['height'] * $scale - $height) / 2;
 
   if (imageapi_image_resize($image, $image->info['width'] * $scale, $image->info['height'] * $scale)) {
     return imageapi_image_crop($image, $x, $y, $width, $height);
   }
-  return false;
+  return FALSE;
 }
 
 /**
@@ -184,28 +204,38 @@ function imageapi_image_scale_and_crop(&$image, $width, $height) {
  * The resulting image can be smaller for one or both target dimensions.
  *
  * @param $image
- *   An ImageAPI Image object.
+ *   An image object returned by imageapi_image_open().
  * @param $width
- *   The target width in pixels.
+ *   The target width, in pixels. This value is omitted then the scaling will
+ *   based only on the height value.
  * @param $height
- *   The target height in pixels.
+ *   The target height, in pixels. This value is omitted then the scaling will
+ *   based only on the width value.
  * @param $upscale
- *   Allow upscaling.
+ *   Boolean indicating that files smaller than the dimensions will be scalled
+ *   up. This generally results in a low quality image.
  * @return
- *   True or false, based on success.
+ *   TRUE or FALSE, based on success.
  */
-function imageapi_image_scale(&$image, $width, $height, $upscale = false) {
-  // set width/height according to aspect ratio if either is empty;
+function imageapi_image_scale(&$image, $width = NULL, $height = NULL, $upscale = FALSE) {
   $aspect = $image->info['height'] / $image->info['width'];
-  if (empty($height)) $height = $width / $aspect;
-  if (empty($width)) $width = $height * $aspect;
-  
-  // Don't scale up.
-  if (!$upscale && round($width) >= $image->info['width'] && round($height) >= $image->info['height']) {
-    return true;
+
+  if ($upscale) {
+    // Set width/height according to aspect ratio if either is empty.
+    $width = !empty($width) ? $width : $height / $aspect;
+    $height = !empty($height) ? $height : $width / $aspect;
+  }
+  else {
+    // Set impossibly large values if the width and height aren't set.
+    $width = !empty($width) ? $width : 9999999;
+    $height = !empty($height) ? $height : 9999999;
+
+    // Don't scale up.
+    if (round($width) >= $image->info['width'] && round($height) >= $image->info['height']) {
+      return TRUE;
+    }
   }
 
-  $aspect = $image->info['height'] / $image->info['width'];
   if ($aspect < $height / $width) {
     $height = $width * $aspect;
   }
@@ -213,53 +243,46 @@ function imageapi_image_scale(&$image, $width, $height, $upscale = false) {
     $width = $height / $aspect;
   }
 
-  // Width and height must be at least one pixel.
-  $width = max(1, (int) round($width));
-  $height = max(1, (int) round($height));
-
-  return call_user_func($image->toolkit .'_image_resize', $image, $width, $height);
+  return imageapi_image_resize($image, $width, $height);
 }
 
 /**
  * Resize an image to the given dimensions (ignoring aspect ratio).
  *
- * @param $source        The filepath of the source image.
- * @param $source
- *   The filepath of the source image.
- * @param $destination
- *   The file path of the destination image.
+ * @param $image
+ *   An image object returned by imageapi_image_open().
  * @param $width
- *   The target width in pixels.
+ *   The target width, in pixels.
  * @param $height
- *   The target height in pixels.
- * @param $toolkit
- *   An optional override of the default image toolkit.
+ *   The target height, in pixels.
  * @return
- *   True or false, based on success.
+ *   TRUE or FALSE, based on success.
  */
 function imageapi_image_resize(&$image, $width, $height) {
   $width = (int) round($width);
   $height = (int) round($height);
-  
-  return call_user_func($image->toolkit .'_image_resize', $image, $width, $height);
+
+  return imageapi_toolkit_invoke('resize', $image, array($width, $height));
 }
 
 /**
  * Rotate an image by the given number of degrees.
  *
  * @param $image
- *   An imageapi image object returned by imageapi_image_open().
+ *   An image object returned by imageapi_image_open().
  * @param $degrees
  *   The number of (clockwise) degrees to rotate the image.
- * @param $bg_color
- *   An hexidecimal integer specifying the background color to use for the
+ * @param $background
+ *   An hexadecimal integer specifying the background color to use for the
  *   uncovered area of the image after the rotation. E.g. 0x000000 for black,
- *   0xff00ff for magenta, and 0xffffff for white.
+ *   0xff00ff for magenta, and 0xffffff for white. For images that support
+ *   transparency, this will default to transparent. Otherwise it will
+ *   be white.
  * @return
- *   True or false, based on success.
+ *   TRUE or FALSE, based on success.
  */
-function imageapi_image_rotate(&$image, $degrees, $bgcolor = 0x000000) {
-  return call_user_func($image->toolkit .'_image_rotate', $image, $degrees, $bgcolor);
+function imageapi_image_rotate(&$image, $degrees, $background = NULL) {
+  return imageapi_toolkit_invoke('rotate', $image, array($degrees, $background));
 }
 
 /**
@@ -284,24 +307,24 @@ function imageapi_image_rotate(&$image, $degrees, $bgcolor = 0x000000) {
  *   True or false, based on success.
  */
 function imageapi_image_sharpen(&$image, $radius, $sigma, $amount, $threshold) {
-  return call_user_func($image->toolkit .'_image_sharpen', $image, $radius, $sigma, $amount, $threshold);
+  return imageapi_toolkit_invoke('sharpen', $image, array($radius, $sigma, $amount, $threshold));
 }
 
 /**
  * Crop an image to the rectangle specified by the given rectangle.
  *
  * @param $image
- *   An imageapi image object returned by imageapi_image_open().
+ *   An image object returned by imageapi_image_open().
  * @param $x
- *   The top left co-ordinate of the crop area (x axis value).
+ *   The top left coordinate, in pixels, of the crop area (x axis value).
  * @param $y
- *   The top left co-ordinate of the crop area (y axis value).
+ *   The top left coordinate, in pixels, of the crop area (y axis value).
  * @param $width
- *   The target width in pixels.
+ *   The target width, in pixels.
  * @param $height
- *   The target height in pixels.
+ *   The target height, in pixels.
  * @return
- *   True or false, based on success.
+ *   TRUE or FALSE, based on success.
  */
 function imageapi_image_crop(&$image, $x, $y, $width, $height) {
   $aspect = $image->info['height'] / $image->info['width'];
@@ -311,33 +334,41 @@ function imageapi_image_crop(&$image, $x, $y, $width, $height) {
   $width = (int) round($width);
   $height = (int) round($height);
 
-  return call_user_func($image->toolkit .'_image_crop', $image, $x, $y, $width, $height);
+  return imageapi_toolkit_invoke('crop', $image, array($x, $y, $width, $height));
 }
 
 /**
  * Convert an image to grayscale.
  *
  * @param $image
- *   An imageapi image object returned by imageapi_image_open().
+ *   An image object returned by imageapi_image_open().
  * @return
- *   True or false, based on success.
+ *   TRUE or FALSE, based on success.
  */
 function imageapi_image_desaturate(&$image) {
-  return call_user_func($image->toolkit .'_image_desaturate', $image);
+  return imageapi_toolkit_invoke('desaturate', $image);
 }
 
 /**
- * Open an image file and return an imageapi image object. Any changes to the
- * file are not saved until imageapi_image_close() is called.
+ * Open an image file and return an image object.
+ *
+ * Any changes to the file are not saved until imageapi_image_close() is called.
  *
  * @param $file
  *   Path to an image file.
  * @param $toolkit
  *   An optional, image toolkit name to override the default.
  * @return
- *   ImageAPI Image object or FALSE if there was a problem opening the file.
+ *   An image object or FALSE if there was a problem loading the file. The
+ *   image object has the following properties:
+ *    - 'source' - The original file path.
+ *    - 'info' - The array of information returned by image_get_info()
+ *    - 'toolkit' - The name of the image toolkit requested when the image was
+ *      loaded.
+ *   Image tookits may add additional properties. The caller is advised not to
+ *   monkey about with them.
  */
-function imageapi_image_open($file, $toolkit = false) {
+function imageapi_image_open($file, $toolkit = FALSE) {
   if (!$toolkit) {
     $toolkit = imageapi_default_toolkit();
   }
@@ -346,35 +377,40 @@ function imageapi_image_open($file, $toolkit = false) {
     $image->source = $file;
     $image->info = image_get_info($file);
     $image->toolkit = $toolkit;
-    if ($image = call_user_func($image->toolkit .'_image_open', $image)) {
+    if (imageapi_toolkit_invoke('open', $image)) {
       return $image;
     }
   }
-  watchdog('imageapi', 'ImageAPI failed to open %file with %toolkit', array('%file' => $file, '%toolkit' => $toolkit), WATCHDOG_WARNING);
-  return false;
+  return FALSE;
 }
 
 /**
  * Close the image and save the changes to a file.
  *
  * @param $image
- *   imageAPI image object.
- *
+ *   An image object returned by imageapi_image_open(). The object's 'info'
+ *   property will be updated if the file is saved successfully.
  * @param $destination
  *   Destination path where the image should be saved. If it is empty the
  *   original image file will be overwritten.
+ * @return
+ *   TRUE or FALSE, based on success.
  */
-function imageapi_image_close($image, $destination = '') {
+function imageapi_image_close($image, $destination = NULL) {
   if (empty($destination)) {
     $destination = $image->source;
   }
-  if ($return = call_user_func($image->toolkit .'_image_close', $image, $destination)) {
+  if ($return = imageapi_toolkit_invoke('close', $image, array($destination))) {
+    // Clear the cached file size and refresh the image information.
+    clearstatcache();
+    $image->info = image_get_info($destination);
+
     if (@chmod($destination, 0664)) {
       return $return;
     }
-    watchdog('imageapi', 'Could not set permissons on destination file: %file', array('%file' => $destination));
+    watchdog('imageapi', 'Could not set permissions on destination file: %file', array('%file' => $destination));
   }
-  return false;
+  return FALSE;
 }
 
 

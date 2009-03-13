@@ -1,4 +1,4 @@
-// $Id: CHANGELOG.txt,v 1.33.2.48 2009/02/01 04:26:17 sun Exp $
+// $Id: CHANGELOG.txt,v 1.33.2.50 2009/02/26 16:27:07 sun Exp $
 
 Admin Menu x.x-x.x, xxxx-xx-xx
 ------------------------------
@@ -6,6 +6,8 @@ Admin Menu x.x-x.x, xxxx-xx-xx
 
 Admin Menu 6.x-1.x, xxxx-xx-xx
 ------------------------------
+#384100 by kepol, sun: Fixed content-type items displayed in wrong place.
+#373339 by sun: Fixed double-escaped 'Edit <content-type>' link titles.
 by sun: Fixed admin menu tests (and updated to 6.x for SimpleTest 2.x).
 #359158 by nitrospectide, sun: Fixed Devel Themer breaks admin menu.
 #365335 by sun: Fixed not all variables removed after uninstall.

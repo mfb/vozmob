@@ -1,5 +1,5 @@
 <?php
-// $Id: imagefield.module,v 1.75 2009/03/04 05:28:23 quicksketch Exp $
+// $Id: imagefield.module,v 1.81 2009/03/11 06:43:22 quicksketch Exp $
 
 /**
  * @file
@@ -14,6 +14,7 @@
 function imagefield_init() {
   // field_file hooks and callbacks.
   module_load_include('inc', 'imagefield', 'imagefield_file');
+  module_load_include('inc', 'imagefield', 'imagefield_widget');
   drupal_add_css(drupal_get_path('module', 'imagefield') .'/imagefield.css');
 }
 
@@ -90,13 +91,11 @@ function imagefield_elements() {
   $elements['imagefield_widget'] =  array(
     // Indicate to FormAPI that this element needs processing and is not simply a render element.
     '#input' => TRUE,
-    // Specify the return structure of the element (experimental, unused in releases).
-    '#returns' => array('array' => array('fid' => 'int', 'title' => 'string', 'alt' => 'string')),
-    // Delegate element processing to Filefield.
-    '#process' => array('filefield_widget_process', 'imagefield_widget_widget_process'),
+    // Delegate element processing to FileField, then call ImageField.
+    '#process' => array('filefield_widget_process', 'imagefield_widget_process'),
     // See imagefield_widget[#process] documentation.
-    '#value_callback' => 'filefield_widget_value',
-    // Delegate to Filefield...
+    '#value_callback' => 'imagefield_widget_value',
+    // Delegate element validation to FileField, then call ImageField.
     '#element_validate' => array('filefield_widget_validate', 'imagefield_widget_validate'),
     '#description' => t('Changes made to the attachments are not permanent until you save this post.'),
   );
@@ -108,60 +107,22 @@ function imagefield_elements() {
  */
 function imagefield_file_download($filepath) {
   // Return headers for admin thumbnails if private files are enabled.
-  $path = str_replace('.thumb.jpg', '', $filepath);
-  $path = file_create_path($path);
-  if (file_exists($path)) {
-    return array(
-      'Content-Type: image/jpeg',
-      'Content-Length: ' . filesize($path)
-    );
+  if (strpos($filepath, '.thumb.')) {
+    $original_path = str_replace('.thumb', '', $filepath);
+    $original_full_path = file_create_path($original_path);
+    $thumb_full_path = file_create_path($filepath);
+
+    // Allow access to temporary thumbnails, since they're not yet associated
+    // with a node. If not temporary, check access on the original file.
+    $temporary = db_result(db_query("SELECT status FROM {files} WHERE filepath = '%s'", $original_full_path));
+    $access = ($temporary == 0 || module_invoke_all('file_download', $original_path));
+    if ($access && $info = getimagesize($thumb_full_path)) {
+      return array(
+        'Content-Type: ' . $info['mime'],
+        'Content-Length: ' . filesize($thumb_full_path)
+      );
+    }
   }
-}
-
-/**
- * Implementation of CCK's hook_field_info().
- *
- * This is the only field callback that is not delegated to FileField.
- * and is required to make sure CCK sets $field['module'] to imagefield
- * so filefield functions will know how to construct function names and
- * which includes to load.
- */
-function imagefield_field_info() {
-  return array(
-    'image' => array(
-      'label' => t('Image'),
-      'description' => t('Store an image file and optionally text for alt and title tags.'),
-    ),
-  );
-}
-
-/**
- * Implementation of CCK's hook_field_settings.
- *
- * Delegated to filefield_field_settings, which will include
- * imagefield_field.inc and call imagefield_image_field_settings_{$op}.
- * $module_$field_type_$hook_$op.
- */
-function imagefield_field_settings($op, $field) {
-  return filefield_field_settings($op, $field);
-}
-
-/**
- * Implementation of CCK's hook_field().
- *
- * @see: function imagefield_field_settings().
- */
-function imagefield_field($op, $node, $field, &$items, $teaser, $page) {
-  return filefield_field($op, $node, $field, $items, $teaser, $page);
-}
-
-/**
- * implementation of CCK's hook_content_is_empty
- *
- * Delegated to filefield.module.
- */
-function imagefield_content_is_empty($item, $field) {
-  return filefield_content_is_empty($item, $field);
 }
 
 /**
@@ -172,13 +133,9 @@ function imagefield_widget_info() {
   return array(
     'imagefield_widget' => array(
       'label' => t('Image'),
-      'field types' => array('image', 'filefield'),
+      'field types' => array('filefield'),
       'multiple values' => CONTENT_HANDLE_CORE,
       'callbacks' => array('default value' => CONTENT_CALLBACK_CUSTOM),
-      // Callback for dynamic Filefield widgets to determine
-      // if this widget is appropriate for a file type.
-      'suitability callback' => 'imagefield_handles_file',
-      // Description to use on forms to describe this widget.
       'description' => t('An edit widget for image files, including a preview of the image.'),
     ),
   );
@@ -186,11 +143,16 @@ function imagefield_widget_info() {
 
 /**
  * Implementation of CCK's hook_widget_settings().
- *
- * Delegated to filefield.
  */
 function imagefield_widget_settings($op, $widget) {
-  return filefield_widget_settings($op, $widget);
+  switch ($op) {
+    case 'form':
+      return imagefield_widget_settings_form($widget);
+    case 'validate':
+      return imagefield_widget_settings_validate($widget);
+    case 'save':
+      return imagefield_widget_settings_save($widget);
+  }
 }
 
 /**
@@ -204,32 +166,27 @@ function imagefield_widget(&$form, &$form_state, $field, $items, $delta = 0) {
   if (empty($items[$delta])) {
     $items[$delta] = array('alt' => '', 'title' => '');
   }
-  $element = filefield_widget($form, $form_state, $field, $items, $delta);
 
-  $element['#upload_validators'] += imagefield_widget_upload_validators($field);
+  // Start with the FileField widget as a basic start.
+  $element = module_invoke('filefield', 'widget', $form, $form_state, $field, $items, $delta);
 
-  return $element;
-}
+  // Ensure that only web images are supported.
+  $web_extensions = array('jpg', 'jpeg', 'gif', 'png');
+  $extensions = array_filter(explode(' ', $element['#upload_validators']['filefield_validate_extensions'][0]));
+  if (empty($extensions)) {
+    $extensions = $web_extensions;
+  }
+  $element['#upload_validators']['filefield_validate_extensions'][0] = implode(' ', array_intersect($extensions, $web_extensions));
 
-/**
- * Get the upload validators for an image field.
- *
- * @param $field
- *   CCK Field
- * @return
- *   An array suitable for passing to file_save_upload() or the FileField
- *   element's '#upload_validators' property.
- */
-function imagefield_widget_upload_validators($field) {
-  $validators = array();
-  $validators['filefield_validate_is_image'] = array();
+  // Add validators for resolutions.
   if (!empty($field['widget']['max_resolution']) || !empty($field['widget']['min_resolution'])) {
-    $validators['filefield_validate_image_resolution'] = array(
+    $element['#upload_validators']['filefield_validate_image_resolution'] = array(
       $field['widget']['max_resolution'],
       $field['widget']['min_resolution'],
     );
   }
-  return $validators;
+
+  return $element;
 }
 
 /**
@@ -240,36 +197,31 @@ function imagefield_field_formatter_info() {
   $formatters = array(
     'image_plain' => array(
       'label' => t('Image'),
-      'field types' => array('image', 'filefield'),
-      'suitability callback' => 'imagefield_handles_file',
+      'field types' => array('filefield'),
       'css' => array($module_path .'/imagefield.css'),
       'description' => t('Displays image files in their original size.'),
     ),
     'image_nodelink' => array(
       'label' => t('Image linked to node'),
-      'field types' => array('image', 'filefield'),
-      'suitability callback' => 'imagefield_handles_file',
+      'field types' => array('filefield'),
       'css' => array($module_path .'/imagefield.css'),
       'description' => t('Displays image files in their original size.'),
     ),
     'image_imagelink' => array(
       'label' => t('Image linked to file'),
-      'field types' => array('image', 'filefield'),
-      'suitability callback' => 'imagefield_handles_file',
+      'field types' => array('filefield'),
       'css' => array($module_path .'/imagefield.css'),
       'description' => t('Displays image files in their original size.'),
     ),
     'path_plain' => array(
       'label' => t('Path to file'),
-      'field types' => array('image', 'filefield'),
-      'suitability callback' => 'imagefield_handles_file',
+      'field types' => array('filefield'),
       'css' => array($module_path .'/imagefield.css'),
       'description' => t('Displays image files in their original size.'),
     ),
     'url_plain' => array(
       'label' => t('URL to file'),
-      'field types' => array('image', 'filefield'),
-      'suitability callback' => 'imagefield_handles_file',
+      'field types' => array('filefield'),
       'css' => array($module_path .'/imagefield.css'),
       'description' => t('Displays image files in their original size.'),
     ),
@@ -283,21 +235,27 @@ function imagefield_field_formatter_info() {
  * @{
  * @see imagefield_theme().
  */
-function theme_imagefield_image($file, $alt = '', $title = '', $attributes = null, $getsize = true) {
+function theme_imagefield_image($file, $alt = '', $title = '', $attributes = NULL, $getsize = TRUE) {
   $file = (array)$file;
   if (!is_file($file['filepath'])) {
-    return '<!-- file not found: '. $file['filepath'] .' -->';
+    return '<!-- File not found: '. $file['filepath'] .' -->';
   }
-  $image_attributes = array();
-  if (!$getsize || (list($width, $height, $type, $image_attributes) = @getimagesize($file['filepath']))) {
-    $attributes = drupal_attributes($attributes);
-    $alt = empty($alt) ? $file['alt'] : $alt;
-    $title = empty($title) ? $file['title'] : $title;
-    $url = file_create_url($file['filepath']) . '?' . $file['timestamp'];
-    return '<img src="'. check_url($url) .'" alt="'.
-        check_plain($alt) .'" title="'. check_plain($title) .'" '. $image_attributes . $attributes .' />';
+
+  if ($getsize && (list($width, $height, $type, $image_attributes) = @getimagesize($file['filepath']))) {
+    $attributes['width'] = $width;
+    $attributes['height'] = $height;
   }
-  return '<!-- could not get imagesize, possibly corrupt or non image. '. $file['filepath'] .' -->';
+
+  if (!empty($title)) {
+    $attributes['title'] = $title;
+  }
+  if (!empty($alt)) {
+    $attributes['alt'] = $alt;
+  }
+  $url = file_create_url($file['filepath']) . '?' . $file['timestamp'];
+  $attributes['src'] = $url;
+  $attributes = drupal_attributes($attributes);
+  return '<img '. $attributes .' />';
 }
 
 function theme_imagefield_item($item) {
@@ -305,14 +263,11 @@ function theme_imagefield_item($item) {
 }
 
 function theme_imagefield_widget_preview($item = null) {
-  return theme('imagefield_admin_thumbnail', $item);
+  return '<div class="imagefield-preview">' . theme('imagefield_admin_thumbnail', $item) . '</div>';
 }
 
 function theme_imagefield_widget_item($element) {
-  return '<div class="imagefield-row clear-block">'.
-            '<div class="imagefield-preview">'. drupal_render($element['preview']) . '</div>' .
-            '<div class="imagefield-edit">' . drupal_render($element) . '</div>' .
-         '</div>';
+  return theme('filefield_widget_item', $element);
 }
 
 function theme_imagefield_admin_thumbnail($item = null) {
@@ -325,32 +280,3 @@ function theme_imagefield_admin_thumbnail($item = null) {
 /**
  * @} End defgroup "Theme Callbacks".
  */
-
-/**
- * A few miscellaneous functions in need of a proper home.
- */
-// CCK's default value callback... doesn't seem to work. I need to figure out what is going on in D6.
-function imagefield_default_value(&$form, &$form_state, $field, $delta) {
-  $items = filefield_default_value($form, $form_state, $field, $delta);
-  foreach($items as $delta => $item) {
-    $items[$delta]['data']['title'] = $field['widget']['title'];
-    $items[$delta]['data']['alt'] = $field['widget']['alt'];
-  }
-  return $items;
-}
-
-// Scale ImageField uploads.
-function _imagefield_scale_image($file, $resolution = 0) {
-  $info = image_get_info($file['filepath']);
-  if ($info) {
-    list($width, $height) = explode('x', $resolution);
-    if ($width && $height) {
-      $result = image_scale($file['filepath'], $file['filepath'], $width, $height);
-      if ($result) {
-        $file['filesize'] = filesize($file['filepath']);
-        drupal_set_message(t('The image %filename was resized to fit within the maximum allowed resolution of %resolution pixels', array('%resolution' => $resolution, '%filename' => $file['filename'])));
-      }
-    }
-  }
-  return $file;
-}

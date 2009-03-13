@@ -1,4 +1,5 @@
-<?php  // $Id: filefield.module,v 1.166 2009/03/02 07:27:18 quicksketch Exp $
+<?php
+// $Id: filefield.module,v 1.173 2009/03/12 03:17:59 quicksketch Exp $
 
 /**
  * @file
@@ -265,35 +266,12 @@ function filefield_field($op, $node, $field, &$items, $teaser, $page) {
  * Implementation of CCK's hook_widget_settings().
  */
 function filefield_widget_settings($op, $widget) {
-  $return = array();
-  // load our widget settings callbacks..
-  $op =  str_replace(' ', '_', $op);
-  $function = 'filefield_widget_settings_'. $op;
-  if (function_exists($function)) {
-    $result = $function($widget);
-    if (isset($result) && is_array($result)) {
-      $return = $result;
-    }
+  switch ($op) {
+    case 'form':
+      return filefield_widget_settings_form($widget);
+    case 'save':
+      return filefield_widget_settings_save($widget);
   }
-
-  // sometimes widget_settings is called with widget, sometimes with field.
-  // CCK needs to make up it's mind here or get with the new hook formats.
-  $widget_type = isset($widget['widget_type']) ? $widget['widget_type'] : $widget['type'];
-  $widget_module = isset($widget['widget_module']) ? $widget['widget_module'] : $widget['module'];
-
-  // dynamically load widgets file and callbacks for other fields and widgets utilizing
-  // filefield's hook_widget_settings implementation.
-  module_load_include('inc', $widget_module, $widget_module .'_widget');
-
-  $function = $widget_type .'_widget_settings_'. $op;
-  if (function_exists($function)) {
-    $result = $function($widget);
-    if (isset($result) && is_array($result)) {
-      $return = array_merge($return, $result);
-    }
-  }
-
-  return $return;
 }
 
 /**
@@ -392,17 +370,9 @@ function filefield_field_formatter_info() {
   return array(
     'default' => array(
       'label' => t('Generic files'),
-      'suitability callback' => TRUE,
-      'field types' => array('filefield','image'),
+      'field types' => array('filefield'),
       'multiple values' => CONTENT_HANDLE_CORE,
       'description' => t('Displays all kinds of files with an icon and a linked file description.'),
-    ),
-    'filefield_dynamic' => array(
-      'label' => t('Dynamic file formatters'),
-      'suitability callback' => TRUE,
-      'field types' => array('file'),
-      'multiple values' => CONTENT_HANDLE_CORE,
-      'description' => t('(experimental) An extensible formatter for filefield.'),
     ),
   );
 }
@@ -410,9 +380,11 @@ function filefield_field_formatter_info() {
 /**
  * Determine the most appropriate icon for the given file's mimetype.
  *
- * @return The URL of the icon image file, or FALSE if no icon could be found.
+ * @param $file
+ *   A file object.
+ * @return
+ *   The URL of the icon image file, or FALSE if no icon could be found.
  */
-
 function filefield_icon_url($file) {
   include_once(drupal_get_path('module', 'filefield') .'/filefield.theme.inc');
   return _filefield_icon_url($file);
@@ -468,47 +440,33 @@ function filefield_js($type_name, $field_name, $delta) {
     exit;
   }
 
-  // form_get_cache() doesn't yield the original $form_state,
-  // but form_builder() does. Needed for retrieving the file array.
-  $built_form = $form;
-  $built_form_state = $form_state;
+  // Build the form. This calls the file field's #value_callback function and
+  // saves the uploaded file. Since this form is already marked as cached
+  // (the #cache property is TRUE), the cache is updated automatically and we
+  // don't need to call form_set_cache().
+  $args = $form['#parameters'];
+  $form_id = array_shift($args);
+  $form['#post'] = $_POST;
+  $form = form_builder($form_id, $form, $form_state);
 
-  $built_form += array('#post' => $_POST);
-  $built_form = form_builder($_POST['form_id'], $built_form, $built_form_state);
-
-  // Clean ids, so that the same element doesn't get a different element id
-  // when rendered once more further down.
-  form_clean_id(NULL, TRUE);
-
-  // Ask CCK for the replacement form element. Going through CCK gets us
-  // the benefit of nice stuff like '#required' merged in correctly.
-  module_load_include('inc', 'content', 'includes/content.node_form');
-  $field_element = content_field_form($form, $built_form_state, $field, $delta);
-  $delta_element = $field_element[$field_name][0]; // there's only one element in there
-
-  // Add the new element at the right place in the form.
+  // Update the cached form with the new element at the right place in the form.
   if (module_exists('fieldgroup') && ($group_name = _fieldgroup_field_get_group($type_name, $field_name))) {
-    $form[$group_name][$field_name][$delta] = $delta_element;
+    if (isset($form['#multigroups']) && isset($form['#multigroups'][$group_name][$field_name])) {
+      $form_element = $form[$group_name][$delta][$field_name];
+    }
+    else {
+      $form_element = $form[$group_name][$field_name][$delta];
+    }
   }
   else {
-    $form[$field_name][$delta] = $delta_element;
+    $form_element = $form[$field_name][$delta];
   }
 
-  // Render the form for output.
-  $form += array(
-    '#post' => $_POST,
-    '#programmed' => FALSE,
-  );
-  drupal_alter('form', $form, array(), 'filefield_js');
-  $form_state = array('submitted' => FALSE);
-  $form = form_builder('filefield_js', $form, $built_form_state);
-  $field_form = empty($group_name) ? $form[$field_name] : $form[$group_name][$field_name];
+  if (isset($form_element['_weight'])) {
+    unset($form_element['_weight']);
+  }
 
-  // We add a div around the new content to tell AHAH to let this fade in.
-  $field_form[$delta]['#prefix'] = '<div class="ahah-new-content">';
-  $field_form[$delta]['#suffix'] = '</div>';
-
-  $output = drupal_render($field_form[$delta]);
+  $output = drupal_render($form_element);
 
   // AHAH is not being nice to us and doesn't know the "other" button (that is,
   // either "Upload" or "Delete") yet. Which in turn causes it not to attach
@@ -544,41 +502,12 @@ function filefield_js($type_name, $field_name, $delta) {
 }
 
 /**
- * set the default values for imagefield.
- * This seems to work for all but add a new item on unlimited values which doesn't
- * get assigned a proper default.
- */
-function filefield_default_value(&$form, &$form_state, $field, $delta) {
-  $items = array();
-  $field_name = $field['field_name'];
-
-  switch ($field['multiple']) {
-    case 0:
-      $max = 1;
-      break;
-    case 1:
-      $max =  isset($form_state['item_count'][$field_name]) ? $form_state['item_count'][$field_name] : 1;
-      break;
-    default:
-      $max = $field['multiple'];
-      break;
-  }
-
-  for ($delta = 0; $delta < $max; $delta++) {
-    $items[$delta] = array('fid' => 0, 'list' => $field['list_default'], 'data' => array('description' => ''));
-  }
-  return $items;
-}
-
-
-
-/**
  * Implementation of hook_file_references().
  */
 function filefield_file_references($file) {
   $references = 0;
   foreach(content_fields() as $field) {
-    if ($field['type'] != 'file') {
+    if ($field['type'] != 'filefield') {
       continue;
     }
     $references += field_file_references($file, $field);

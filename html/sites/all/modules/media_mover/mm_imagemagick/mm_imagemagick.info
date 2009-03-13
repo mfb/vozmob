@@ -1,0 +1,6 @@
+; $Id: mm_imagemagick.info,v 1.1 2008/01/20 21:14:39 bdragon Exp $
+name = ImageMagick Media Mover module
+description = Runs ImageMagick for the Media Mover modules
+package = "Media Mover"
+dependencies[] = media_mover_api
+core = 6.x

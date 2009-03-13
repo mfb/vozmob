@@ -1,0 +1,7 @@
+; $Id: notifications_custom.info,v 1.1.2.1 2009/03/12 23:55:56 jareyero Exp $
+name = Custom subscriptions
+description = Allows creating predefined subscriptions and assigning them to users
+package = "Notifications"
+dependencies[] = notifications
+core = 6.x
+php = 5.0
