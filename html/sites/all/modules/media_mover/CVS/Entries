@@ -5,4 +5,17 @@
 /media_mover_api.install/1.13/Mon Apr  7 16:57:18 2008//
 /media_mover_api.module/1.27/Thu Apr 10 00:29:54 2008//
 /media_mover_api_admin.inc/1.11/Fri Feb 29 16:41:22 2008//
-D
+D/contrib////
+D/drivers////
+D/media_mover_email////
+D/media_mover_ftp////
+D/mm_cck////
+D/mm_content////
+D/mm_ffmpeg////
+D/mm_imagemagick////
+D/mm_node////
+D/mm_run_control////
+D/mm_s3////
+D/mm_sox////
+D/mm_workflow_ng////
+D/tests////
