@@ -1,0 +1,116 @@
+<?php
+// $Id$
+/**
+ * @file
+ * MMS Messsaging using SMS Framework. Messaging method plug-in
+ */
+
+/**
+ * Implementation of hook_messaging().
+ */
+function messaging_mms_messaging($op = 'info') {
+  switch($op) {
+    case 'send methods':
+      $info['sms'] = array(
+        'title' => 'MMS Framework',
+        'name' => t('MMS'),
+        'group' => 'mms', // Class of send method
+        'type' => MESSAGING_TYPE_PUSH,
+        'glue' => ' ',
+        'description' => t('Send MMS using SMS Framework.'),
+        'render callback' => 'messaging_mms_render',
+        'send callback' => 'messaging_mms_send_msg',
+        'destination callback' => 'messaging_mms_user_destination',
+      );
+      return $info;  
+  }
+}
+
+/**
+ * Message Render callback
+ */
+function messaging_mms_render($message, $info) {
+  // We need to apply filtering first or run through the render function
+  $message = messaging_message_render($message, $info);
+  // We can assume that we'll get max 110 characters for subject + body
+  // Because from and data take up about 50 characters and total character limit
+  // subject + from + date + body < 160
+  $message->subject = messaging_mms_truncate($message->subject, 40);
+  $message->body = messaging_mms_truncate($message->body, (110 - drupal_strlen($message->subject)));
+  return $message;
+}
+
+/**
+ * Send mail message to user account
+ */
+function messaging_mms_user_destination($account, $message) {
+  // Check for active mobile infomation. Simply return it so that the send
+  // callback has a destination array and access everything.
+  if (!empty($account->sms_user) && $account->sms_user[0]['status'] == 2) {
+    return $account->sms_user[0];
+  }
+}
+
+/**
+ * Send message to multiple destinations
+ * 
+ * This is just a wrapper for sms_send()
+ */
+function messaging_mms_send_msg($destination, $message, $params = array()) {
+  if (!empty($destination['number']) && !empty($destination['gateway'])) {
+    $text = $message->subject;
+    $text = !empty($text) && !empty($message->body) ? ' ' : '';
+    $text .= $message->body;
+    return sms_send($destination['number'], $text, $destination['gateway']);
+  } else {
+    return FALSE;
+  }
+}
+ 
+/**
+ * Truncate messages to 160 Characters.  Adapted from node_teaser() in node.module
+ */
+function messaging_mms_truncate($text, $length = 160) {
+
+  // If we have a short message, return the message
+  if (strlen($text) < $length) {
+    return $text;
+  }
+
+  // Initial slice.
+  $teaser = truncate_utf8($text, $length);
+  $position = 0;
+  // Cache the reverse of the message.
+  $reversed = strrev($teaser);
+
+  // split at paragraph boundaries.
+  $breakpoints = array('</p>' => 0, '<br />' => 6, '<br>' => 4, "\n" => 1);
+  // We use strpos on the reversed needle and haystack for speed.
+  foreach ($breakpoints as $point => $offset) {
+    $length = strpos($reversed, strrev($point));
+    if ($length !== FALSE) {
+      $position = - $length - $offset;
+      return ($position == 0) ? $teaser : substr($teaser, 0, $position);
+    }
+  }
+
+  // When even the first paragraph is too long, we try to split at the end of
+  // the last full sentence.
+  $breakpoints = array('. ' => 1, '! ' => 1, '? ' => 1, ' ' => 0);
+  $min_length = strlen($reversed);
+  foreach ($breakpoints as $point => $offset) {
+    $length = strpos($reversed, strrev($point));
+    if ($length !== FALSE) {
+      $min_length = min($length, $min_length);
+      $position = 0 - $length - $offset;
+    }
+  }
+  return ($position == 0) ? $teaser : substr($teaser, 0, $position);
+}
+
+/**
+ * Implementation of hook_disable()
+ */
+function messaging_mms_disable() {
+  messaging_method_disable('sms');
+}

@@ -65,7 +65,7 @@ function _mailsave_to_imagefield_attempt_image(&$node) {
 
   if (is_array($cck_info['fields'])) {
     foreach ($cck_info['fields'] as $cck_field => $field_info) {
-      if ($field_info['type'] == 'image') {
+      if ($field_info['widget']['type'] == 'imagefield_widget') {
         $cck_imagefield = $cck_field;
         $cck_multiple = $field_info['multiple'];
         $cck_image_extensions = $field_info['widget']['file_extensions'];
