@@ -1,5 +1,5 @@
 <?php
-// $Id: optionwidgets.module,v 1.69.2.21 2008/10/25 02:04:44 yched Exp $
+// $Id: optionwidgets.module,v 1.69.2.23 2009/03/18 21:00:58 yched Exp $
 
 /**
  * @file
@@ -151,7 +151,8 @@ function optionwidgets_elements() {
  * @param $form
  *   the entire form array, $form['#node'] holds node information
  * @param $form_state
- *   the form_state, $form_state['values'] holds the form values.
+ *   the form_state, $form_state['values'][$field['field_name']]
+ *   holds the field's form values.
  * @param $field
  *   the field array
  * @param $items
@@ -232,6 +233,10 @@ function optionwidgets_select_process($element, $edit, &$form_state, $form) {
   }
 
   $options = optionwidgets_options($field);
+
+  // For this specific widget, HTML should be filtered out and entities left unencoded.
+  // See content_allowed_values / content_filter_xss / filter_xss.
+  $options = array_map(create_function('$opt', 'return html_entity_decode(strip_tags($opt), ENT_QUOTES);'), $options);
   $element[$field_key] = array(
     '#type' => 'select',
     '#title' => $element['#title'],

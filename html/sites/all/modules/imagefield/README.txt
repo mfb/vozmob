@@ -1,4 +1,4 @@
-// $Id: README.txt,v 1.4 2009/03/04 05:28:24 quicksketch Exp $
+// $Id: README.txt,v 1.5 2009/03/16 23:34:17 quicksketch Exp $
 
 ImageField provides an "Image" widget type to CCK. This module leverages the
 functionality of FileField and behaves nearly identically. ImageField widgets
@@ -30,5 +30,5 @@ Install
 3) Create a new image field in through CCK's interface. Visit Administer ->
    Content management -> Content types (admin/content/types), then click
    Manage fields on the type you want to add an image upload field. Select
-   "Image" as the field type and "Image" as the widget type to create a new
+   "File" as the field type and "Image" as the widget type to create a new
    field.

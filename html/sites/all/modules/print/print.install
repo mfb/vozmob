@@ -1,5 +1,5 @@
 <?php
-// $Id: print.install,v 1.1.4.14 2009/02/05 00:37:43 jcnventura Exp $
+// $Id: print.install,v 1.1.4.15 2009/03/17 20:55:06 jcnventura Exp $
 
 /**
  * @file
@@ -272,7 +272,7 @@ function print_update_6003() {
   $t = get_t();
 
   foreach ($vars as $name => $default) {
-    if (variable_get($name,'') == $t($default)) {
+    if (variable_get($name, '') == $t($default)) {
       variable_del($name);
     }
   }

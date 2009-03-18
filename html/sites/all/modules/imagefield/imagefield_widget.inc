@@ -1,5 +1,5 @@
 <?php
-// $Id: imagefield_widget.inc,v 1.26 2009/03/13 05:25:06 quicksketch Exp $
+// $Id: imagefield_widget.inc,v 1.29 2009/03/17 00:57:55 quicksketch Exp $
 
 /**
  * @file
@@ -105,6 +105,13 @@ function imagefield_widget_settings_validate($widget) {
   if (count(array_diff($extensions, $web_extensions))) {
     form_set_error('file_extensions', t('Only web-standard images (jpg, gif, and png) are supported through the image widget. If needing to upload other types of images, change the widget to use a standard file upload.'));
   }
+
+  // Check that set resolutions are valid.
+  foreach (array('min_resolution', 'max_resolution') as $resolution) {
+    if (!empty($widget[$resolution]) && !preg_match('/^[0-9]+x[0-9]+$/', $widget[$resolution])) {
+      form_set_error($resolution, t('Please specify a resolution in the format WIDTHxHEIGHT (e.g. 640x480).'));
+    }
+  }
 }
 
 /**
@@ -141,6 +148,10 @@ function imagefield_widget_process($element, $edit, &$form_state, $form) {
 
   $element['#theme'] = 'imagefield_widget_item';
 
+  if (isset($element['preview']) && $element['#value']['fid'] != 0) {
+    $element['preview']['#value'] = theme('imagefield_widget_preview', $element['#value']);
+  }
+
   // Check if using the default alt text and replace tokens.
   $default_alt = (!$field['widget']['custom_alt'] || ($file['status'] == 0 && empty($file['data']['alt'])));
   if ($default_alt && function_exists('token_replace')) {
@@ -148,7 +159,7 @@ function imagefield_widget_process($element, $edit, &$form_state, $form) {
   }
   $element['data']['alt'] = array(
     '#title' => t('Alternate Text'),
-    '#type' => $field['widget']['custom_title'] ? 'textfield' : 'value',
+    '#type' => $field['widget']['custom_alt'] ? 'textfield' : 'value',
     '#default_value' => $default_alt ? $field['widget']['alt'] : $file['data']['alt'],
     '#description' => t('This text will be used by screen readers, search engines, or when the image cannot be loaded.'),
     '#maxlength' => 80, // See http://www.gawds.org/show.php?contentid=28.

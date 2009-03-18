@@ -1,21 +1,14 @@
-/.cvsignore/1.1/Tue Jan  2 21:15:38 2007//
-/README.txt/1.17/Wed Feb  6 22:35:07 2008//
-/media_mover_api.css/1.2/Fri Feb 15 18:05:36 2008//
-/media_mover_api.info/1.4/Thu Jan  3 06:17:22 2008//
-/media_mover_api.install/1.13/Mon Apr  7 16:57:18 2008//
-/media_mover_api.module/1.27/Thu Apr 10 00:29:54 2008//
-/media_mover_api_admin.inc/1.11/Fri Feb 29 16:41:22 2008//
-D/contrib////
-D/drivers////
 D/media_mover_email////
-D/media_mover_ftp////
-D/mm_cck////
 D/mm_content////
 D/mm_ffmpeg////
 D/mm_imagemagick////
 D/mm_node////
-D/mm_run_control////
 D/mm_s3////
 D/mm_sox////
-D/mm_workflow_ng////
-D/tests////
+/.cvsignore/1.1/Fri Mar 13 19:49:53 2009//
+/README.txt/1.17/Fri Mar 13 19:49:53 2009//
+/media_mover_api.css/1.2/Fri Mar 13 19:49:53 2009//
+/media_mover_api.info/1.4/Fri Mar 13 19:49:53 2009//
+/media_mover_api.install/1.13/Fri Mar 13 19:49:53 2009//
+/media_mover_api.module/1.27/Fri Mar 13 19:49:53 2009//
+/media_mover_api_admin.inc/1.11/Fri Mar 13 19:49:53 2009//

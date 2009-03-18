@@ -1,5 +1,5 @@
 <?php
-// $Id: imagefield.install,v 1.24 2009/03/12 17:39:13 quicksketch Exp $
+// $Id: imagefield.install,v 1.28 2009/03/15 09:29:54 quicksketch Exp $
 
 /**
  * Implementation of hook_install().
@@ -28,7 +28,10 @@ function imagefield_disable() {
  * Implementation of hook_update_last_removed().
  */
 function imagefield_update_last_removed() {
-  return 3;
+  // ImageField has later updates than this in the Drupal 5 version, however
+  // they deal with changing formatters that are not necessary for a successful
+  // upgrade to Drupal 6. Update 2 is as far as we really need.
+  return 2;
 }
 
 /**
@@ -105,6 +108,9 @@ function imagefield_update_6004(&$context) {
       db_change_field($ret, $db_info['table'], $field['field_name'] . '_fid', $field['field_name'] . '_fid', array('type' => 'int'));
       $ret[] = update_sql("UPDATE {" . $db_info['table'] . "} SET " . $field['field_name'] . "_fid = NULL WHERE " . $field['field_name'] . "_fid = 0");
 
+      // Set any entries that were abandoned by poor housekeeping to NULL.
+      $ret[] = update_sql("UPDATE {" . $db_info['table'] . "} SET " . $field['field_name'] . "_fid = NULL WHERE " . $field['field_name'] . "_fid NOT IN (SELECT fid FROM {files})");
+
       // Add the "data" and "list" columns to the field if not there already.
       if (!db_column_exists($db_info['table'], $field['field_name'] . '_list')) {
         db_add_field($ret, $db_info['table'], $field['field_name'] . '_list', array('type' => 'int', 'size' => 'tiny'));
@@ -153,6 +159,7 @@ function imagefield_update_6004(&$context) {
             $field['display_settings'][$display_context]['format'] = 'url_plain';
             break;
           case 'imagefield_default':
+          case 'default':
             $field['display_settings'][$display_context]['format'] = 'image_plain';
             break;
         }
@@ -175,7 +182,7 @@ function imagefield_update_6004(&$context) {
   $col_data = $field['field_name'] .'_data';
   $col_list = $field['field_name'] .'_list';
 
-  $limit = 10;
+  $limit = 100;
   $result = db_query_range("SELECT * FROM {". $table ."} WHERE vid > %d ORDER BY vid ASC", $context['sandbox']['current_node'], 0, $limit);
   $has_processed = FALSE;
 
@@ -209,18 +216,6 @@ function imagefield_update_6004(&$context) {
     // Serialize it and store it back to the db.
     db_query($query, serialize($data), $list, $row['vid'], $row['delta']);
 
-    // Create the thumbnail for that image.
-    $file = db_fetch_object(db_query("SELECT * FROM {files} WHERE fid = %d", $row[$col_fid]));
-    if ($file && file_exists($file->filepath) && !file_exists(imagefield_file_admin_thumb_path($file))) {
-      imagefield_file_insert($file);
-    }
-
-    // Previous updates generated a thumbnail in the wrong location, delete
-    // these thumbnails if present.
-    if (file_exists($file->filepath . '.thumb.jpg')) {
-      unlink($file->filepath . '.thumb.jpg');
-    }
-
     // Update our progress information.
     $context['sandbox']['current_node'] = $row['vid'];
     $has_processed = TRUE;
@@ -247,6 +242,34 @@ function imagefield_update_6004(&$context) {
   if (!empty($context['sandbox']['fields'])) {
     $ret['#finished'] = $context['sandbox']['progress'] / $context['sandbox']['total'];
   }
+
+  return $ret;
+}
+
+
+/**
+ * Delete thumbnails spread throughout the files directory.
+ */
+function imagefield_update_6005() {
+  $ret = array();
+
+  $result = db_query("SELECT * FROM {files} WHERE filemime LIKE 'image/%'");
+
+  while ($file = db_fetch_object($result)) {
+    // ImageField 6002 thumbnail path.
+    $thumb_path_a = $file->filepath . '.thumb.jpg';
+
+    // ImageField 6004 thumbnail path.
+    $extension_dot = strrpos($file->filepath, '.');
+    $extension = substr($file->filepath, $extension_dot + 1);
+    $basepath = substr($file->filepath, 0, $extension_dot);
+    $thumb_path_b = $basepath .'.thumb.'. $extension;
+
+    file_delete($thumb_path_a);
+    file_delete($thumb_path_b);
+  }
+
+  $ret[] = array('success' => TRUE, 'query' => t('Deleted admin thumbnails distributed throughout files directory. All thumbnails are now stored in the "imagefield_thumbs" directory.'));
 
   return $ret;
 }

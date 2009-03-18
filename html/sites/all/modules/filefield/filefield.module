@@ -1,5 +1,5 @@
 <?php
-// $Id: filefield.module,v 1.173 2009/03/12 03:17:59 quicksketch Exp $
+// $Id: filefield.module,v 1.174 2009/03/17 00:35:16 quicksketch Exp $
 
 /**
  * @file
@@ -200,8 +200,12 @@ function filefield_file_download($file) {
  * form.
  */
 function filefield_form_alter(&$form, $form_state, $form_id) {
-  if ($form_id == 'content_field_edit_form') {
-    $form['#attributes'] = array('enctype' => 'multipart/form-data');
+  if ($form_id == 'content_field_edit_form' && isset($form['#field']) && $form['#field']['type'] == 'filefield') {
+    $form['#attributes']['enctype'] = 'multipart/form-data';
+  }
+
+  if (preg_match('/_node_form$/', $form_id)) {
+    $form['#attributes']['enctype'] = 'multipart/form-data';
   }
 }
 

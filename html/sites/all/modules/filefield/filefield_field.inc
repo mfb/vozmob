@@ -1,5 +1,5 @@
 <?php
-// $Id: filefield_field.inc,v 1.17 2009/03/11 02:58:55 quicksketch Exp $
+// $Id: filefield_field.inc,v 1.18 2009/03/15 06:21:21 quicksketch Exp $
 
 /**
  * @file
@@ -87,7 +87,7 @@ function filefield_field_load($node, $field, &$items, $teaser, $page) {
     // Despite hook_content_is_empty(), CCK still doesn't filter out
     // empty items from $op = 'load', so we need to do that ourselves.
     if (empty($item['fid']) || !($file = field_file_load($item['fid']))) {
-      unset($items[$delta]);
+      $items[$delta] = NULL;
     }
     else {
       $item['data'] = unserialize($item['data']);
@@ -109,8 +109,12 @@ function filefield_field_update($node, $field, &$items, $teaser, $page) {
   foreach ($items as $delta => $item) {
     $items[$delta] = field_file_save($node, $item);
     // Remove items from the array if they have been deleted.
-    if (empty($items[$delta])) unset($items[$delta]);
-    $curfids[] = $item['fid'];
+    if (empty($items[$delta]) || empty($items[$delta]['fid'])) {
+      $items[$delta] = NULL;
+    }
+    else {
+      $curfids[] = $items[$delta]['fid'];
+    }
   }
 
   // if this is a new node... there are no
@@ -138,7 +142,7 @@ function filefield_field_delete_revision($node, $field, &$items, $teaser, $page)
     // For hook_file_references, remember that this is being deleted.
     $item['field_name'] = $field['field_name'];
     if (field_file_delete($item)) {
-      unset($items[$delta]);
+      $items[$delta] = NULL;
     }
   }
 }
@@ -156,7 +160,7 @@ function filefield_field_sanitize($node, $field, &$items, $teaser, $page) {
   foreach ($items as $delta => $item) {
     // Cleanup $items during node preview.
     if (empty($item['fid']) || !empty($item['delete'])) {
-      unset($items[$delta]);
+      $items[$delta] = NULL;
       continue;
     }
     // Load the complete file if a filepath is not available.

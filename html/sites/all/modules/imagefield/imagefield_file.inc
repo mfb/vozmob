@@ -1,5 +1,5 @@
 <?php
-// $Id: imagefield_file.inc,v 1.9 2009/03/11 01:41:57 quicksketch Exp $
+// $Id: imagefield_file.inc,v 1.13 2009/03/17 01:00:12 quicksketch Exp $
 
 /**
  * @file
@@ -22,20 +22,9 @@ function imagefield_file_references($file) {
 
 /**
  * Implementation of hook_file_insert().
- *
- * Create an image thumbnail to be used as a preview when editing a node.
  */
 function imagefield_file_insert($file) {
-  if (imagefield_file_is_image($file)) {
-    $info = image_get_info($file->filepath);
-    if ($info['width'] <= 100 || $info['height'] <= 100) {
-      $newfile = drupal_clone($file);
-      file_copy($newfile->filepath, imagefield_file_admin_thumb_path($newfile));
-    }
-    else {
-      image_scale($file->filepath, imagefield_file_admin_thumb_path($file), 100, 100);
-    }
-  }
+  // Currently empty. Thumbnails are now generated on preview.
 }
 
 /**
@@ -45,7 +34,7 @@ function imagefield_file_insert($file) {
  */
 function imagefield_file_delete($file) {
   if (imagefield_file_is_image($file)) {
-    file_delete(imagefield_file_admin_thumb_path($file));
+    file_delete(imagefield_file_admin_thumb_path($file, FALSE));
   }
 }
 
@@ -60,10 +49,55 @@ function imagefield_file_is_image($file) {
 /**
  * Given a file, return the path the image thumbnail used while editing.
  */
-function imagefield_file_admin_thumb_path($file) {
+function imagefield_file_admin_thumb_path($file, $create_thumb = TRUE) {
   $file = (object)$file;
-  $extension_dot = strrpos($file->filepath, '.');
-  $extension = substr($file->filepath, $extension_dot + 1);
-  $basepath = substr($file->filepath, 0, $extension_dot);
-  return $basepath .'.thumb.'. $extension;
+  $short_path = preg_replace('/^' . preg_quote(file_directory_path(), '/') . '/', '', $file->filepath);
+  $filepath = file_directory_path() . '/imagefield_thumbs' . $short_path;
+
+  if ($create_thumb) {
+    imagefield_create_admin_thumb($file->filepath, $filepath);
+  }
+
+  return $filepath;
+}
+
+/**
+ * Create a thumbnail to be shown while editing an image.
+ */
+function imagefield_create_admin_thumb($source, $destination) {
+  if (!is_file($source)) {
+    return FALSE;
+  }
+
+  $info = image_get_info($source);
+  $size = explode('x', variable_get('imagefield_thumb_size', '100x100'));
+
+  // Check if the destination image needs to be regenerated to match a new size.
+  if (is_file($destination)) {
+    $thumb_info = image_get_info($destination);
+    if ($thumb_info['width'] != $size[0] && $thumb_info['height'] != $size[1] && ($info['width'] > $size[0] || $info['height'] > $size[1])) {
+      unlink($destination);
+    }
+    else {
+      return;
+    }
+  }
+
+  // Ensure the destination directory exists and is writable.
+  $directories = explode('/', $destination);
+  array_pop($directories); // Remove the file itself.
+  foreach ($directories as $directory) {
+    $full_path = isset($full_path) ? $full_path . '/' . $directory : $directory;
+    file_check_directory($full_path, FILE_CREATE_DIRECTORY);
+  }
+
+  // Create the thumbnail.
+  if ($info['width'] <= $size[0] && $info['height'] <= $size[1]) {
+    file_copy($source, $destination);
+  }
+  else {
+    image_scale($source, $destination, $size[0], $size[1]);
+    // Set permissions. This is done for us when using file_copy().
+    @chmod($destination, 0664);
+  }
 }

@@ -1,5 +1,5 @@
 <?php
-// $Id: filefield_widget.inc,v 1.63 2009/03/12 03:35:27 quicksketch Exp $
+// $Id: filefield_widget.inc,v 1.64 2009/03/15 05:30:55 quicksketch Exp $
 
 /**
  * @file
@@ -238,10 +238,13 @@ function filefield_widget_process($element, $edit, &$form_state, $form) {
   $element['filefield_remove']['#access'] = !empty($item['fid']);
 
   // Figure out our fid...
-  $element['fid'] = array('#type' => 'hidden', '#value' =>  $item['fid']);
+  $element['fid'] = array('#type' => 'hidden', '#value' => $item['fid']);
 
   if ($item['fid'] != 0) {
-    $element['preview'] = array('#type' => 'markup', '#value' => theme($element['#type'] .'_preview', $item));
+    $element['preview'] = array(
+      '#type' => 'markup',
+      '#value' => theme('filefield_widget_preview', $item),
+    );
   }
 
   // placeholder.. will be serialized into the data column. this is a place for widgets

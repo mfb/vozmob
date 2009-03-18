@@ -1,5 +1,5 @@
 <?php
-// $Id: content.module,v 1.301.2.99 2009/03/05 22:58:57 karens Exp $
+// $Id: content.module,v 1.301.2.100 2009/03/18 19:20:52 yched Exp $
 /**
  * @file
  * Allows administrators to associate custom fields to content types.
@@ -1762,6 +1762,7 @@ function content_format($field, $item, $formatter_name = 'default', $node = NULL
         );
       }
     }
+
     return theme($theme, $element);
   }
 }
@@ -2317,7 +2318,7 @@ function content_content_fieldapi($op, $field) {
 function content_content_extra_fields($type_name) {
   $type = node_get_types('type', $type_name);
   $extra = array();
-  
+
   if ($type->has_title) {
     $extra['title'] = array(
       'label' => $type->title_label,
@@ -2377,7 +2378,7 @@ function content_content_extra_fields($type_name) {
       'description' => t('Poll module settings.'),
       'weight' => -3
     );
-  }  
+  }
   if (module_exists('upload') && variable_get("upload_$type_name", TRUE)) {
     $extra['attachments'] = array(
       'label' => t('File attachments'),
@@ -2416,7 +2417,7 @@ function content_extra_field_weight($type_name, $pseudo_field_name) {
     content_clear_type_cache();
     $type = content_types($type_name);
   }
-  
+
   if (isset($type['extra'][$pseudo_field_name])) {
     return $type['extra'][$pseudo_field_name]['weight'];
   }

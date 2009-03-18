@@ -1,5 +1,5 @@
 <?php
-// $Id: filefield.install,v 1.20 2009/03/10 21:57:23 quicksketch Exp $
+// $Id: filefield.install,v 1.22 2009/03/16 00:25:50 quicksketch Exp $
 /**
  * @file
  * FileField: Defines a CCK file field type.
@@ -141,6 +141,33 @@ function filefield_update_6100() {
   return $ret;
 }
 
+/**
+ * Set fid to NULL where files have been deleted.
+ *
+ * This is a double-cleanup from Drupal 5 versions, where fid used to be 0 for
+ * empty rows or sometimes referred to a nonexistent FID altogether.
+ */
+function filefield_update_6101() {
+  $ret = array();
+
+  module_load_include('inc', 'content', 'includes/content.crud');
+
+  $fields = content_fields();
+
+  foreach ($fields as $field) {
+    if ($field['type'] == 'filefield') {
+      $db_info = content_database_info($field);
+      if (isset($db_info['columns']['fid'])) {
+        $table = $db_info['table'];
+        $fid_column = $db_info['columns']['fid']['column'];
+        $list_column = $db_info['columns']['list']['column'];
+        $ret[] = update_sql("UPDATE {" . $table . "} SET $fid_column = NULL, $list_column = NULL WHERE $fid_column NOT IN (SELECT fid FROM {files})");
+      }
+    }
+  }
+
+  return $ret;
+}
 
 /**
  * Move the list and descriptions column into the serialized data column.

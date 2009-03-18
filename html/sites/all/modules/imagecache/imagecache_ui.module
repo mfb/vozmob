@@ -1,5 +1,5 @@
 <?php
-// $Id: imagecache_ui.module,v 1.28 2009/02/17 21:57:31 drewish Exp $
+// $Id: imagecache_ui.module,v 1.29 2009/03/18 08:17:34 drewish Exp $
 
 /**
  * Administrative interface to imagecache.
@@ -360,7 +360,7 @@ function imagecache_ui_preset_form($form_state, $preset = array()) {
   $form['actions'] = array(
     '#type' => 'fieldset',
     '#title' => t('Actions'),
-    '#tree' => true,
+    '#tree' => TRUE,
     '#theme' => 'imagecache_ui_preset_actions',
   );
 
@@ -412,10 +412,10 @@ function imagecache_ui_preset_form($form_state, $preset = array()) {
   }
 
   $form['actions']['new'] = array(
-    '#tree' => false,
+    '#tree' => FALSE,
     '#type' => 'fieldset',
     '#title' => t('New Actions'),
-    '#collapsible' => true,
+    '#collapsible' => TRUE,
     '#collapsed' => count($preset['actions']) > 0,
     '#access' => $preset['storage'] !== IMAGECACHE_STORAGE_DEFAULT,
   );
@@ -438,8 +438,8 @@ function imagecache_ui_preset_form($form_state, $preset = array()) {
 
   $form['files'] = array(
     '#type' => 'fieldset',
-    '#collapsible' => true,
-    '#collapsed' => true,
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
     '#title' =>  t('Error Files'),
   );
 
@@ -485,7 +485,7 @@ function imagecache_ui_preset_form($form_state, $preset = array()) {
   $form['preview'] = array(
     '#type' => 'item',
     '#title' => t('Preview'),
-    '#value' => l($imagecache_path, $imagecache_path) .'<br />'. l("<img src='$imagecache_path' />", $imagecache_path, array('html' => true)),
+    '#value' => l($imagecache_path, $imagecache_path) .'<br />'. l("<img src='$imagecache_path' />", $imagecache_path, array('html' => TRUE)),
   );
 
   return $form;
@@ -574,7 +574,7 @@ function imagecache_ui_action_form($form_state, $preset, $action) {
   }
 
   $form = array(
-    '#tree' => true,
+    '#tree' => TRUE,
   );
 
   $form['actionid'] = array(
@@ -642,7 +642,7 @@ function imagecache_ui_action_add_form($form_state, $preset, $actionname) {
   $definition = imagecache_action_definition($actionname);
 
   $form = array(
-    '#tree' => true,
+    '#tree' => TRUE,
   );
   $form['action'] = array(
     '#type' => 'value',

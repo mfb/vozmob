@@ -1,5 +1,5 @@
 <?php
-// $Id: print.module,v 1.25.2.60 2009/03/12 20:22:55 jcnventura Exp $
+// $Id: print.module,v 1.25.2.61 2009/03/17 20:55:06 jcnventura Exp $
 
 /**
  * @file
@@ -369,7 +369,7 @@ function print_form_alter(&$form, $form_state, $form_id) {
 }
 
 /**
- * Implementation of hook_content_extra_fields.
+ * Implementation of hook_content_extra_fields().
  */
 function print_content_extra_fields($type_name) {
   $fields['print'] = array(

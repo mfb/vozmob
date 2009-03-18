@@ -1,5 +1,5 @@
 <?php
-// $Id: field_file.inc,v 1.24 2009/03/11 01:43:47 quicksketch Exp $
+// $Id: field_file.inc,v 1.26 2009/03/16 23:44:59 quicksketch Exp $
 /**
  * @file
  * Common functionality for file handling CCK field modules.
@@ -202,7 +202,7 @@ function field_file_save_file($filepath, $validators = array(), $dest = FALSE) {
  */
 function field_file_save($node, &$file) {
   // If this item is marked for deletion.
-  if (!empty($file['delete'])) {
+  if (!empty($file['delete']) || !empty($file['_remove'])) {
     // If we're creating a new revision, return an empty array so CCK will
     // remove the item.
     if (!empty($node->old_vid)) {
@@ -341,7 +341,7 @@ function field_file_check_directory(&$directory, $mode = 0, $form_item = NULL) {
     else {
       $repl = array('%directory' => $directory, '!htaccess' => nl2br(check_plain($htaccess_lines)));
       form_set_error($form_item, t("Security warning: Couldn't write .htaccess file. Please create a .htaccess file in your %directory directory which contains the following lines:<br /><code>!htaccess</code>", $repl));
-      watchdog('security', "Security warning: Couldn't write .htaccess file.  Please create a .htaccess file in your %directory directory which contains the following lines:<br /><code>!htaccess</code>", $repl, WATCHDOG_ERROR);
+      watchdog('security', "Security warning: Couldn't write .htaccess file. Please create a .htaccess file in your %directory directory which contains the following lines:<br /><code>!htaccess</code>", $repl, WATCHDOG_ERROR);
     }
   }
 

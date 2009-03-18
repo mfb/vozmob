@@ -1,5 +1,5 @@
 <?php
-// $Id: index.php,v 1.2.2.6 2009/03/05 00:45:29 jcnventura Exp $
+// $Id: index.php,v 1.2.2.7 2009/03/17 20:55:07 jcnventura Exp $
 
 /**
  * @file
@@ -8,7 +8,7 @@
 
 // * @page module-print modules/print: Printer, e-mail and PDF versions
 
-/** 
+/**
  * @mainpage Printer, e-mail and PDF versions
  * Welcome to the print module developer's documentation. The interesting
  * functions for themers are those that start with 'theme_'.

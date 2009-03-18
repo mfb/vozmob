@@ -1,5 +1,5 @@
 <?php
-// $Id: number.module,v 1.91.2.31 2008/12/05 23:27:56 yched Exp $
+// $Id: number.module,v 1.91.2.33 2009/03/16 22:04:07 yched Exp $
 
 /**
  * @file
@@ -74,7 +74,7 @@ function number_field_settings($op, $field) {
         );
         $form['scale'] = array(
           '#type' => 'select',
-          '#options' => drupal_map_assoc(range(0, 2)),
+          '#options' => drupal_map_assoc(range(0, 10)),
           '#title' => t('Scale'),
           '#description' => t('The number of digits to the right of the decimal.'),
           '#default_value' => is_numeric($field['scale']) ? $field['scale'] : 2,
@@ -401,9 +401,12 @@ function number_elements() {
  * @param $form
  *   the entire form array, $form['#node'] holds node information
  * @param $form_state
- *   the form_state, $form_state['values'] holds the form values.
+ *   the form_state, $form_state['values'][$field['field_name']]
+ *   holds the field's form values.
  * @param $field
  *   the field array
+ * @param $items
+ *   array of default values for this field
  * @param $delta
  *   the order of this item in the array of subelements (0, 1, 2, etc)
  *

@@ -1,7 +1,14 @@
-//$Id: CHANGELOG.txt,v 1.1.6.308 2009/03/05 22:56:02 karens Exp $
+//$Id: CHANGELOG.txt,v 1.1.6.312 2009/03/18 21:00:58 yched Exp $
 
-CCK 6.x-2.x
+CCK 6.x-2.2
 ===========
+
+IMPORTANT:
+This release fixes a security issue (XSS vulnerability) in nodereference and userreference modules.
+All sites are using CCK for Drupal 6 are strongly encouraged to upgrade to CCK 2.2.
+Note that the Drupal 5 versions are not affected.
+See the Security Annoucement on http://drupal.org/node/406520 for more informations.
+
 
 Features:
 - #361311 Add poll settings forms to Manage fields screen.
@@ -9,6 +16,9 @@ Features:
 - #131953 by markus_petrux - Views integration: expose additional db columns.
 - #349987 by Michelle - Panels integration for fieldgroups.
 - #362216 by markus_petrux - sort the admin/content/types/fields overview by field name.
+- #242583 by jmiccolis - Number: Push maximum 'scale' setting up to 10 for decimal fields.
+- Correct RTL display.
+- #405452 - Views integration: Update to Views 2.3 API ('link to node'), with 2.2 compatibility preserved.
 
 Bugfixes:
 - #392476 Make sure CCK textarea fields in a View don't have a span wrapped around a block-level element.
@@ -44,8 +54,10 @@ should be enough, though.
 - #381876 by DamienMcKenna - Content Copy: Fix formatting glitch in exported type definitions.
 - #346202 Fieldgroup: let the 'simple' template be overridable (thks fiskit) + allow template variants.
 - #382004 by elcuco - Field name and group name fields should stay LTR for RTL languages.
+- #360712 by tombigel - CSS tweaks for RTL languages.
 - #375316 Nodereference/Userreference: Ensure allowed values always return at least an empty array.
 - #368155 Nodereference/Userreference: Fix performance issue on large sites when validating empty noderef/userref fields.
+- #319778 Optionwidgets: Fix double encoding issues for &, >, <,... chars in select lists.
 
 CCK 6.x-2.1
 ===========

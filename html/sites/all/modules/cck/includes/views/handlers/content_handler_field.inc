@@ -1,5 +1,5 @@
 <?php
-// $Id: content_handler_field.inc,v 1.1.2.13 2009/03/06 15:29:34 karens Exp $
+// $Id: content_handler_field.inc,v 1.1.2.14 2009/03/18 19:20:52 yched Exp $
 
 /**
  * @file
@@ -184,9 +184,9 @@ class content_handler_field extends views_handler_field_node {
     foreach ($db_info['columns'] as $column => $attributes) {
       $item[$column] = $values->{$this->aliases[$attributes['column']]};
     }
-    
+
     $item['#delta'] = $field['multiple'] ?  $values->{$this->aliases['delta']} : 0;
-    
+
     return $this->render_link(content_format($field, $item, $options['format'], $node), $values);
   }
 

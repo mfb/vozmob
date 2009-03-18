@@ -1,5 +1,5 @@
 <?php
-// $Id: nodereference.module,v 1.138.2.49 2009/03/01 14:40:35 yched Exp $
+// $Id: nodereference.module,v 1.138.2.50 2009/03/18 21:00:58 yched Exp $
 
 /**
  * @file
@@ -697,9 +697,7 @@ function nodereference_allowed_values($field) {
 
   $options = array();
   foreach ($references as $key => $value) {
-    // Views theming runs check_plain (htmlentities) on the values.
-    // We reverse that with html_entity_decode.
-    $options[$key] = html_entity_decode(strip_tags($value['rendered']), ENT_QUOTES);
+    $options[$key] = $value['rendered'];
   }
   return $options;
 }
@@ -881,7 +879,7 @@ function _nodereference_potential_references_standard($field, $string = '', $mat
   while ($node = db_fetch_object($result)) {
     $references[$node->nid] = array(
       'title' => $node->node_title,
-      'rendered' => $node->node_title,
+      'rendered' => check_plain($node->node_title),
     );
   }
 

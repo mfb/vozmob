@@ -1,5 +1,5 @@
 <?php
-// $Id: userreference.module,v 1.106.2.35 2009/03/01 14:40:35 yched Exp $
+// $Id: userreference.module,v 1.106.2.36 2009/03/18 21:00:58 yched Exp $
 
 /**
  * @file
@@ -608,9 +608,7 @@ function userreference_allowed_values($field) {
 
   $options = array();
   foreach ($references as $key => $value) {
-    // Views theming runs check_plain (htmlentities) on the values.
-    // We reverse that with html_entity_decode.
-    $options[$key] = html_entity_decode(strip_tags($value['rendered']), ENT_QUOTES);
+    $options[$key] = $value['rendered'];
   }
   return $options;
 }
@@ -805,7 +803,7 @@ function _userreference_potential_references_standard($field, $string = '', $mat
   while ($user = db_fetch_object($result)) {
     $users[$user->uid] = array(
       'title' => $user->name,
-      'rendered' => $user->name,
+      'rendered' => check_plain($user->name),
     );
   }
   return $users;

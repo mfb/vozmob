@@ -1,5 +1,5 @@
 <?php
-// $Id: print_mail.inc,v 1.2.2.17 2009/03/05 00:45:30 jcnventura Exp $
+// $Id: print_mail.inc,v 1.2.2.18 2009/03/18 20:49:44 jcnventura Exp $
 
 /**
  * @file
@@ -21,7 +21,7 @@ function print_mail_form($form_state) {
 
   $print_mail_hourly_threshold = variable_get('print_mail_hourly_threshold', PRINT_MAIL_HOURLY_THRESHOLD);
 
-  if (($user->uid != 1) && (!flood_is_allowed('print_mail', $print_mail_hourly_threshold))) {
+  if ((!user_access('administer print')) && (!flood_is_allowed('print_mail', $print_mail_hourly_threshold))) {
     $form['flood'] = array(
       '#type' => 'markup',
       '#value' => '<p>'. t('You cannot send more than %number messages per hour. Please try again later.', array('%number' => $print_mail_hourly_threshold)) .'</p>',
@@ -197,6 +197,12 @@ function print_mail_form_validate($form, &$form_state) {
     }
   }
 
+  $print_mail_hourly_threshold = variable_get('print_mail_hourly_threshold', PRINT_MAIL_HOURLY_THRESHOLD);
+
+  if ((!user_access('administer print')) && (!flood_is_allowed('print_mail', $print_mail_hourly_threshold - count($to_array) + 1))) {
+    form_set_error('txt_to_addrs',  t('You cannot send more than %number messages per hour. Please reduce the number of recipients.', array('%number' => $print_mail_hourly_threshold)));
+  }
+
   // In all fields, prevent insertion of custom headers
   foreach ($form_state['values'] as $key => $string) {
     if ( (substr($key, 0, 4) == 'fld_') && ((strpos($string, "\n") !== FALSE) || (strpos($string, "\r") !== FALSE)) ) {
@@ -234,11 +240,10 @@ function print_mail_form_submit($form, &$form_state) {
     else {
       $from = $form_state['values']['fld_from_addr'];
     }
-    $to = $form_state['values']['txt_to_addrs'];
     $cid = isset($form_state['values']['cid']) ? $form_state['values']['cid'] : NULL;
 
     $print_mail_text_message = variable_get('print_mail_text_message', t('Message from sender'));
-    $sender_message = $print_mail_text_message .':<br /><br /><em>'. nl2br($form_state['values']['txt_message']) .'</em>';
+    $sender_message = $print_mail_text_message .':<br /><br /><em>'. nl2br(check_plain($form_state['values']['txt_message'])) .'</em>';
 
     $print = print_controller($form_state['values']['path'], $cid, PRINT_MAIL_FORMAT, $form_state['values']['chk_teaser'], $sender_message);
 
@@ -256,16 +261,23 @@ function print_mail_form_submit($form, &$form_state) {
       $params['body'] = ob_get_contents();
       ob_end_clean();
 
-      $ret = drupal_mail('print_mail', 'sendpage', $to, language_default(), $params, $from, TRUE);
-      if ($ret['result']) {
-        flood_register_event('print_mail');
-        watchdog('print_mail', '%name [%from] sent %page to [%to]', array('%name' => $form_state['values']['fld_from_name'], '%from' => $form_state['values']['fld_from_addr'], '%page' => $form_state['values']['path'], '%to' => $to));
+      $ok = FALSE;
+      $addresses = explode(', ', $form_state['values']['txt_to_addrs']);
+      foreach ($addresses as $to) {
+        $ret = drupal_mail('print_mail', 'sendpage', $to, language_default(), $params, $from, TRUE);
+        if ($ret['result']) {
+          flood_register_event('print_mail');
+          $ok = TRUE;
+        }
+      }
+      if ($ok) {
+        watchdog('print_mail', '%name [%from] sent %page to [%to]', array('%name' => $form_state['values']['fld_from_name'], '%from' => $form_state['values']['fld_from_addr'], '%page' => $form_state['values']['path'], '%to' => $form_state['values']['txt_to_addrs']));
         $site_name = variable_get('site_name', t('us'));
         $print_mail_text_confirmation = variable_get('print_mail_text_confirmation', t('Thank you for spreading the word about !site.'));
         drupal_set_message(t($print_mail_text_confirmation, array('!site' => $site_name)));
 
         $nodepath = drupal_get_normal_path($form_state['values']['path']);
-        db_query("UPDATE {print_mail_page_counter} SET sentcount = sentcount + %d, sent_timestamp = %d WHERE path = '%s'", count(split(',', $to)), time(), $nodepath);
+        db_query("UPDATE {print_mail_page_counter} SET sentcount = sentcount + %d, sent_timestamp = %d WHERE path = '%s'", count($addresses), time(), $nodepath);
       }
     }
   }

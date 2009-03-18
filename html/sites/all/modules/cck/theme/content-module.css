@@ -1,4 +1,4 @@
-/* $Id: content-module.css,v 1.1.2.5 2008/10/27 16:58:38 yched Exp $ */
+/* $Id: content-module.css,v 1.1.2.6 2009/03/14 18:45:38 yched Exp $ */
 
 /* Node display */
 .field .field-label,
@@ -17,10 +17,10 @@
 /* Node form display */
 .node-form .content-multiple-table td.content-multiple-drag {
   width:30px;
-  padding-right:0;
+  padding-right:0;/*LTR*/
 }
 .node-form .content-multiple-table td.content-multiple-drag a.tabledrag-handle{
-  padding-right:.5em;
+  padding-right:.5em;/*LTR*/
 }
 
 .node-form .content-add-more .form-submit{
@@ -53,7 +53,7 @@
 /* 'Manage fields' overview */
 #content-field-overview-form .advanced-help-link,
 #content-display-overview-form .advanced-help-link {
-  margin: 4px 4px 0 0;
+  margin: 4px 4px 0 0;/*LTR*/
 }
 #content-field-overview-form .label-group,
 #content-display-overview-form .label-group,
@@ -63,7 +63,7 @@
 table#content-field-overview .label-add-new-field,
 table#content-field-overview .label-add-existing-field,
 table#content-field-overview .label-add-new-group {
-  float: left;
+  float: left;/*LTR*/
 }
 table#content-field-overview tr.content-add-new .tabledrag-changed {
   display: none;
