@@ -1,5 +1,5 @@
 <?php
-// $Id: mimedetect.install,v 1.3 2008/07/21 21:50:43 drewish Exp $
+// $Id: mimedetect.install,v 1.4 2009/03/16 20:42:35 drewish Exp $
 
 /**
  * Implementation of hook_install().
@@ -47,9 +47,9 @@ function mimedetect_requirements($phase) {
     }
   }
   else {
-     $requirement['value'] = $t('Browser & Extension');
-     $requirement['description'] = $t("MimeDetect is using the browser supplied mime type or file extension lookups. It is strongly recommended that you install and configure the PHP Fileinfo Extension or the UNIX 'file' command to provide more accurate severside mime type detection.");
-     $requirement['severity'] = REQUIREMENT_WARNING;
+    $requirement['value'] = $t('Browser & Extension');
+    $requirement['description'] = $t("MimeDetect is using the browser supplied mime type or file extension lookups. It is strongly recommended that you install and configure the PHP Fileinfo Extension or the UNIX 'file' command to provide more accurate severside mime type detection.");
+    $requirement['severity'] = REQUIREMENT_WARNING;
   }
 
   return array('mimedetect' => $requirement);

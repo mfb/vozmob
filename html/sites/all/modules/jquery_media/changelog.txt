@@ -1,4 +1,14 @@
-// $Id: changelog.txt,v 1.6.2.7 2008/08/28 01:47:17 aaron Exp $
+// $Id: changelog.txt,v 1.6.2.10 2008/12/17 14:45:40 aaron Exp $
+
+December 2008
+-------------
+ * Replace jquery.media.js with version 0.84 (aaron).
+ * Move hook_footer to hook_init, as we can't invoke js there (aaron).
+ * Comment out node invocation until tables are written at the least (aaron).
+
+September 2008
+--------------
+ * Begin allowing specific node invocation (aaron).
 
 August 2008
 -----------

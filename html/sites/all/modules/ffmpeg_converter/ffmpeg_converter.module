@@ -1,6 +1,6 @@
 <?php
 
-// $Id: ffmpeg_converter.module,v 1.26 2009/02/08 02:03:55 zoo33 Exp $
+// $Id: ffmpeg_converter.module,v 1.35 2009/03/15 08:56:32 zoo33 Exp $
 
 /**
  * @file
@@ -14,11 +14,24 @@
  */
 function ffmpeg_converter_menu() {
   $items = array();
-  $items['admin/build/ffmpeg_converter'] = array(
-    'title' => 'FFmpeg Converter presets',
-    'description' => t('Setup automatic media file conversion presets.'),
+  $items['admin/settings/ffmpeg_converter'] = array(
+    'title' => 'FFmpeg Converter',
+    'description' => t('Setup automatic media file conversion.'),
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('ffmpeg_converter_admin_settings'),
+    'page arguments' => array('ffmpeg_converter_admin_presets'),
+    'access arguments' => array('administer ffmpeg wrapper'),
+    'file' => 'ffmpeg_converter.admin.inc',
+  );
+  $items['admin/settings/ffmpeg_converter/presets'] = array(
+    'title' => 'Presets',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+  $items['admin/settings/ffmpeg_converter/debug'] = array(
+    'title' => 'Debugging',
+    'type' => MENU_LOCAL_TASK,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('ffmpeg_converter_admin_debug'),
     'access arguments' => array('administer ffmpeg wrapper'),
     'file' => 'ffmpeg_converter.admin.inc',
   );
@@ -156,6 +169,14 @@ function ffmpeg_converter_nodeform(&$form, $form_state) {
       
       // Define custom theme function for this form field.
       $field['#theme'] = 'ffmpeg_converter_widget';
+
+      // Wrap the field in a fieldset.
+      $prefix = '<fieldset class="collapsible">';
+      $prefix .= '<legend>' . t('!title:', array('!title' => $field['#title'])) . "</legend>\n";
+      $field['#prefix'] = empty($field['#prefix']) ? '' : $field['#prefix'];
+      $field['#prefix'] = $prefix . $field['#prefix'];
+      $field['#suffix'] = empty($field['#suffix']) ? '' : $field['#suffix'];
+      $field['#suffix'] .= "</fieldset>\n";
       
       // Examine the existing files in this field.
       $form['#ffmpeg_converter_files'][$field_def['field_name']] = array();
@@ -171,7 +192,7 @@ function ffmpeg_converter_nodeform(&$form, $form_state) {
             $form['#ffmpeg_converter_files'][$field_def['field_name']][$field_instance] = $file['#default_value']['data']['ffmpeg_converter_file'];
             
             // Save snapshot data. (No longer needed?)
-            if (isset($file['#default_value']['data']['ffmpeg_converter_snapshot_selected'])) {
+            if (!empty($file['#default_value']['data']['ffmpeg_converter_snapshot_selected'])) {
               $form['#ffmpeg_converter_selected_snapshots'][$field_def['field_name']] = $field_instance;
             }
           }
@@ -214,17 +235,21 @@ function ffmpeg_converter_nodeform(&$form, $form_state) {
               }
             }
           }
-          $field['ffmpeg_converter_snapshots'] = array(
+          $field['ffmpeg_converter_snapshot'] = array(
             '#type' => 'radios',
             '#options' => $snapshots,
-            '#default_value' => $form['#ffmpeg_converter_selected_snapshots'][$field_def['field_name']],
-            '#title' => t('Snapshot image') . ' (TODO)',
+            '#title' => t('Snapshot image'),
             '#description' => t('Choose which snapshot image you would like to use to preview the video.'),
             '#weight' => 9,
             '#prefix' => '<div class="ffmpeg-converter-snapshot-selection clear-block">',
             '#suffix' => '</div>',
-            '#disabled' => 1,
           );
+          if (is_numeric($form_state['values'][$field_def['field_name']]['ffmpeg_converter_snapshot'])) {
+            $field['ffmpeg_converter_snapshot']['#default_value'] = $form_state['values'][$field_def['field_name']]['ffmpeg_converter_snapshot'];
+          }
+          elseif (is_int($form['#ffmpeg_converter_selected_snapshots'][$field_def['field_name']])) {
+            $field['ffmpeg_converter_snapshot']['#default_value'] = $form['#ffmpeg_converter_selected_snapshots'][$field_def['field_name']];
+          }
         }
       }
     }
@@ -247,7 +272,7 @@ function ffmpeg_converter_nodeform_validate($form, &$form_state) {
         // Restore field instances that were changed to #type=value in _form_alter().
         $form_value[$field_instance] = $form[$field_name][$field_instance]['#default_value'];
         // Delete converted files if requested.
-        if ($form_state['values']['field_video']['ffmpeg_converter_delete']) {
+        if ($form_value['ffmpeg_converter_delete']) {
           $form_value[$field_instance]['fid'] = 0;
           $form_value[$field_instance]['data'] = array();
           $form_value[$field_instance]['filepath'] = '';
@@ -258,17 +283,20 @@ function ffmpeg_converter_nodeform_validate($form, &$form_state) {
         else {
           // Put ffmpeg_converter's file data into $form_state to have it saved to the database. TODO: (No longer needed?)
           $form_value[$field_instance]['data']['ffmpeg_converter_file'] = $file_type;
+          // Look for the selected snapshot.
+          if ($file_type == 'snapshot') {
+            if (is_numeric($form_value['ffmpeg_converter_snapshot']) && $form_value['ffmpeg_converter_snapshot'] == $field_instance) {
+              $form_value[$field_instance]['data']['ffmpeg_converter_snapshot_selected'] = 1;
+            }
+            else {
+              $form_value[$field_instance]['data']['ffmpeg_converter_snapshot_selected'] = 0;
+            }
+          }
         }
       }
     }
   }
   
-  // Check for selected snapshot images. TODO: (No longer needed?)
-  if (!empty($form['#ffmpeg_converter_selected_snapshots'])) {
-    foreach ($form['#ffmpeg_converter_selected_snapshots'] as $field_name => $field_instance) {
-      $form_state['values'][$field_name][$field_instance]['data']['ffmpeg_converter_snapshot_selected'] = 1;
-    }
-  }
 }
 
 
@@ -386,7 +414,7 @@ function ffmpeg_converter_preset_by_field($field) {
  * Implementation of hook_nodeapi().
  */
 function ffmpeg_converter_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
-  if (in_array($op, array('instert', 'update', 'view'))) {
+  if (in_array($op, array('insert', 'update', 'view'))) {
     
     $view_messages = array();
     
@@ -810,7 +838,7 @@ function ffmpeg_converter_convert($input_file, $output_file, $configuration, $li
   // Make sure that FFmpeg can decode the input file.
   if (!ffmpeg_wrapper_can_decode($input_file)) {
     watchdog('ffmpeg_converter', 'FFmpeg can not decode this file type: %file',
-             array('%file' => $output_file), WATCHDOG_WARNING, $link);
+             array('%file' => $input_file), WATCHDOG_WARNING, $link);
     return false;
   }
   
@@ -840,7 +868,8 @@ function ffmpeg_converter_convert($input_file, $output_file, $configuration, $li
   
   
   // Create padded frame size.
-  list($size, $pad) = ffmpeg_converter_get_padded_size($input_file, $size);
+  $pad = ffmpeg_converter_get_padded_size($input_file, $size, 'padding');
+  $size = ffmpeg_converter_get_padded_size($input_file, $size, 'size');
   
   // Use a custom option string.
   if ($configuration['ffmpeg_video_custom']) {
@@ -899,6 +928,11 @@ function ffmpeg_converter_convert($input_file, $output_file, $configuration, $li
   // Run FFmpeg with error checking.
   $output = ffmpeg_wrapper_run_command($command, true);
   
+  if (variable_get('ffmpeg_converter_debug', 0)) {
+    watchdog('ffmpeg_converter', 'FFmpeg was invoked with these options: %command',
+             array('%command' => $command), WATCHDOG_DEBUG, $link);
+  }
+  
   // false is returned on error.
   if ($output == false || !file_exists($output_file) || filesize($output_file) == 0) {
     watchdog('ffmpeg_converter', 'Conversion of %file failed unexpectedly. The command was: %command',
@@ -938,11 +972,12 @@ function ffmpeg_converter_create_snapshot($file, $output_path, $offset, $size = 
 
   // Calculate an output frame size and padding based on the proportions of the
   // source file.
-  list($size, $pad) = ffmpeg_converter_get_padded_size($file, $size);
+  $pad = ffmpeg_converter_get_padded_size($file, $size, 'padding');
+  $size = ffmpeg_converter_get_padded_size($file, $size, 'size');
   
   // Prepare FFmpeg options.
   $options = array();
-  $options[] = "-itsoffset -$offset";  
+  $options[] = "-ss $offset";  
   $options[] = "-i '$file'";
   $options[] = "-vcodec mjpeg -vframes 1 -an -f rawvideo -s '$size'";
   $options[] = $pad;
@@ -952,6 +987,11 @@ function ffmpeg_converter_create_snapshot($file, $output_path, $offset, $size = 
 
   // Run the command.
   $output = ffmpeg_wrapper_run_command($command);
+  
+  if (variable_get('ffmpeg_converter_debug', 0)) {
+    watchdog('ffmpeg_converter', 'FFmpeg was invoked with these options: %command',
+             array('%command' => $command), WATCHDOG_DEBUG, $link);
+  }
   
   if (file_exists($output_file)) {
     return $output_file;
@@ -964,6 +1004,9 @@ function ffmpeg_converter_create_snapshot($file, $output_path, $offset, $size = 
 
 /**
  * Calculate an output size and a padding value for a media file.
+ * 
+ * This function has been moved to FFmpeg Wrapper, and it will eventually be 
+ * removed.
  *
  * @param $file
  *   Path to the file to be converted.
@@ -971,20 +1014,30 @@ function ffmpeg_converter_create_snapshot($file, $output_path, $offset, $size = 
  *   The maximum dimensions of the output file, expressed as XXXxYYY. This will
  *   be cropped to match the original file's proportions and the remaining 
  *   space will be used to calculate the padding.
+ * @param $return
+ *   Either 'padding' or 'size'.
  * @return
- *   An array containing the size expressed as XXXxYYY and the padding argument 
- *   for FFmpeg, ie. "-padtop XX -padbottom XX".
+ *   Depending on the value of $return, the function returns either the size 
+ *   expressed as XXXxYYY, or the actual padding argument for FFmpeg, ie. 
+ *   "-padtop XX -padbottom XX". The result is statically cached, so you can 
+ *   call it multiple times without permormance issues.
  */
-function ffmpeg_converter_get_padded_size($file, $size) {
+function ffmpeg_converter_get_padded_size($file, $size, $return = 'padding') {
+  // Forward the call to ffmpeg_wrapper_padded_size() if it exists.
+  if (function_exists('ffmpeg_wrapper_padded_size')) {
+    return ffmpeg_wrapper_padded_size($file, $size, $return);
+  }
+  
+  // Cache file proportions statically.
   static $file_proportions;
   
   if (!isset($file_proportions)) {
     $file_proportions = array();
   }
-  
   if (isset($file_proportions[$file])) {
-    return $file_proportions[$file];
+    return ($return == 'size') ? $file_proportions[$file][0] : $file_proportions[$file][1];
   }
+
   else {
     $pad = '';
     
@@ -1023,11 +1076,11 @@ function ffmpeg_converter_get_padded_size($file, $size) {
         $size = $dest_x_calc . 'x' . $dest_y;
       }
       
-      
     }
 
+    // Save and return the results.
     $file_proportions[$file] = array($size, $pad);
-    return $file_proportions[$file];
+    return ($return == 'size') ? $size : $pad;
   }
 }
 
@@ -1075,8 +1128,13 @@ function ffmpeg_converter_preprocess_content_field(&$variables) {
               $converted = $item;
             }
             elseif ($item['#item']['data']['ffmpeg_converter_file'] == 'snapshot') {
-              // TODO: Show the chosen snapshot.
-              $snapshot = $item['#item'];
+              if (!empty($item['#item']['data']['ffmpeg_converter_snapshot_selected'])) {
+                $snapshot = $item['#item'];
+              }
+              elseif (empty($snapshot)) {
+                $snapshot = $item['#item'];
+              }
+              
             }
           }
         }
@@ -1097,14 +1155,13 @@ function ffmpeg_converter_preprocess_content_field(&$variables) {
         $height = '';
         
         // Check field display settings.
-        $field = content_fields($element['#field_name']);
-        if (arg(0) == 'node' && arg(1) == $nid) {
-          $format = $field['display_settings']['full']['format'];
+        if (isset($element['items'][0]['#formatter'])) {
+          $format = $element['items'][0]['#formatter'];
         }
         else {
-          $format = $field['display_settings']['teaser']['format'];
+          $field = content_fields($element['#field_name']);
+          $format = $field['display_settings']['full']['format'];
         }
-        
         $parts =  explode('_', $format);
         $link_style = array_pop($parts);
         $presetname = implode('_', $parts);
@@ -1138,7 +1195,7 @@ function ffmpeg_converter_preprocess_content_field(&$variables) {
           }
           list($width, $height) = explode('x', $size);
           
-          $snapshot_path = $snapshot['filepath'];
+          $snapshot_path = base_path() . $snapshot['filepath'];
         }
         
         // Check if an Imagecache preset should be used.

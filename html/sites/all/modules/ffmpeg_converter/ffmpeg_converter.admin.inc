@@ -1,6 +1,6 @@
 <?php 
 
-// $Id: ffmpeg_converter.admin.inc,v 1.2 2008/12/08 01:04:18 zoo33 Exp $
+// $Id: ffmpeg_converter.admin.inc,v 1.3 2009/03/04 19:47:19 zoo33 Exp $
 
 /**
  * @file
@@ -8,9 +8,9 @@
  */
 
 /**
- * Page callback: settings form.
+ * Page callback: presets settings form.
  */
-function ffmpeg_converter_admin_settings() {
+function ffmpeg_converter_admin_presets() {
   $form = array();
   $form['ffmpeg_converter_presets'] = array(
     '#value' => t('Use this page to create FFmpeg configuration presets which you can use to process media files automatically.'),
@@ -72,6 +72,23 @@ function ffmpeg_converter_admin_settings() {
   );
   // TODO: delete this line once this button is implemented.
   $form['add_preset']['#disabled'] = true;
+  
+  return system_settings_form($form);
+}
+
+
+/**
+ * Page callback: debug settings form.
+ */
+function ffmpeg_converter_admin_debug() {
+  $form = array();
+  
+  $form['ffmpeg_converter_debug'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Save debug messages to the log'),
+    '#description' => t('If you enable this, the options used when invoking ffmpeg will be logged each time a file is converted.'),
+    '#default_value' => variable_get('ffmpeg_converter_debug', 0),
+  );
   
   return system_settings_form($form);
 }

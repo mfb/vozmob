@@ -3,10 +3,3 @@ name = FFmpeg Converter
 description = This module lets you setup automatic media file conversions with FFmpeg.
 dependencies[] = ffmpeg_wrapper
 core=6.x
-
-; Information added by drupal.org packaging script on 2009-02-08
-version = "6.x-1.x-dev"
-core = "6.x"
-project = "ffmpeg_converter"
-datestamp = "1234094809"
-

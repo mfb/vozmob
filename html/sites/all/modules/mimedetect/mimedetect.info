@@ -2,10 +2,3 @@
 name = MimeDetect
 description = Provides common mime type detection for Drupal sites.
 core = 6.x
-
-; Information added by drupal.org packaging script on 2008-09-11
-version = "6.x-1.0"
-core = "6.x"
-project = "mimedetect"
-datestamp = "1221174037"
-

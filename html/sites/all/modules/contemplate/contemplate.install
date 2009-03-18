@@ -1,48 +1,45 @@
 <?php
-// $Id: contemplate.install,v 1.5.2.2 2008/02/28 19:05:38 jrglasgow Exp $
+// $Id: contemplate.install,v 1.5.2.4 2009/01/06 16:03:22 jrglasgow Exp $
+
+/**
+ * @file
+ * Content template module install/schema hooks.
+ */
+
+function contemplate_schema() {
+  $schema['contemplate_files'] = array(
+    'fields' => array(
+      'site' => array('type' => 'varchar', 'length' => '255', 'not null' => TRUE, 'description' => t('Which site in the site\s directory this is listed under' )),
+      'data' => array('type' => 'blob', 'size' => 'big', 'not null' => TRUE, 'description' => t('the data in the template file?'))
+    ),
+    'unique keys' => array(
+      'site' => array('site')
+    ),
+    'description' => t('This tables lists the files that are use as templates'),
+  );
+  $schema['contemplate'] = array(
+    'fields' => array(
+      'type' => array('type' => 'varchar', 'length' => '32', 'not null' => TRUE, 'default' => '', 'description' => t('What node type is this Template for?')),
+      'teaser' => array('type' => 'text', 'not null' => TRUE, 'description' => t('tempalte for teaser')),
+      'body' => array('type' => 'text', 'not null' => TRUE, 'description' => t('tempalte for body')),
+      'rss' => array('type' => 'text', 'not null' => TRUE, 'description' => t('tempalte for rss')),
+      'enclosure' => array('type' => 'varchar', 'length' => '128', 'not null' => TRUE, 'description' => t('enclosure information to be used with this node type.')),
+     'flags' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 7, 'disp-width' => '10', 'description' => t('bitmask of flags for this node type, which are enables, etc...'))
+    ),
+    'indexes' => array(
+      'type' => array('type')
+    ),
+    'description' => t('Store data for Content Templates for each node type, if ther be any.'),
+  );
+  return $schema;
+
+}
 
 function contemplate_install() {
-  switch ($GLOBALS['db_type']) {
-  case 'mysql':
-  case 'mysqli':
-    db_query("CREATE TABLE {contemplate} (
-      type varchar(32) NOT NULL default '',
-      teaser text NOT NULL,
-      body text NOT NULL,
-      rss text NOT NULL,
-      enclosure varchar(128) NOT NULL,
-      flags int(8) unsigned NOT NULL default '7',
-      KEY type (type)
-      ) /*!40100 DEFAULT CHARACTER SET utf8 */;");
-    db_query("CREATE TABLE {contemplate_files} (
-      site varchar(255) NOT NULL,
-      `data` longblob NOT NULL,
-      UNIQUE KEY site (site(255))
-      ) /*!40100 DEFAULT CHARACTER SET utf8 */;");
-    db_query("UPDATE {system} SET weight = 10 WHERE name = 'contemplate'");
-    break;
-  case 'pgsql':
-    db_query("CREATE TABLE {contemplate} (
-      type varchar(32) NOT NULL default '',
-      teaser text NOT NULL,
-      body text NOT NULL,
-      rss text NOT NULL,
-      enclosure varchar(128) NOT NULL,
-      flags int_unsigned NOT NULL default '0',
-      PRIMARY KEY (type)
-      );");
-
-    db_query("CREATE TABLE {contemplate_files} (
-      site varchar(255) NOT NULL,
-      data bytea NOT NULL
-      );");  // This code is untested. Please post a fix to the issue queue if incorrect
-
-    db_query("CREATE UNIQUE INDEX {contemplate_files}_site_idx ON {contemplate_files} (site)");
-    db_query("UPDATE {system} SET weight = 10 WHERE name = 'contemplate'");
-    break;
-  }
-   drupal_set_message(t('Database tables for ConTemplate module have been installed.'));
- }
+  drupal_install_schema('contemplate');
+  db_query("UPDATE {system} SET weight = 10 WHERE name = 'contemplate'");
+  drupal_set_message(t('Database tables for ConTemplate module have been installed.'));
+}
 
 function contemplate_update_1() {
   $ret = array();
@@ -78,7 +75,6 @@ function contemplate_update_2() {
 }
 
 function contemplate_uninstall() {
-  db_query('DROP TABLE {contemplate}');
-  db_query('DROP TABLE {contemplate_files}');
+  drupal_uninstall_schema('contemplate');
   drupal_set_message(t('The ConTemplate tables have been removed from the database'));
 }

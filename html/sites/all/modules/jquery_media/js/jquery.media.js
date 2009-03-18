@@ -8,9 +8,9 @@
  * http://www.gnu.org/licenses/gpl.html
  *
  * @author: M. Alsup
- * @version: 0.81 (06/05/2008)
+ * @version: 0.84 (12/01/2008)
  * @requires jQuery v1.1.2 or later
- * $Id: jquery.media.js,v 1.1.4.1 2008/06/30 14:26:55 aaron Exp $
+ * $Id: jquery.media.js,v 1.1.4.2 2008/12/17 14:45:40 aaron Exp $
  *
  * Supported Media Players:
  *    - Flash
@@ -96,6 +96,7 @@ $.fn.media.defaults = {
     bgColor:       '#ffffff', // background color
     params:        { wmode: 'transparent'},  // added to object element as param elements; added to embed element as attrs
     attrs:         {},        // added to object and embed elements as attrs
+    flvKeyName:    'file',    // key used for object src param (thanks to Andrea Ercolino)
     flashvars:     {},        // added to flash content as flashvars param/attr
     flashVersion:  '7',       // required flash version
     expressInstaller: null,   // src for express installer
@@ -214,7 +215,7 @@ function getTypesRegExp() {
         if (types.length) types += ',';
         types += $.fn.media.defaults.players[player].types;
     };
-    return new RegExp('\\.(' + types.replace(/,/g,'|') + ')\\b');
+    return new RegExp('\\.(' + types.replace(/,/g,'|') + ')$\\b');
 };
 
 function getGenerator(player) {
@@ -237,7 +238,7 @@ function getSettings(el, options) {
     meta = meta || {};
     var w = meta.width  || parseInt(((cls.match(/w:(\d+)/)||[])[1]||0));
     var h = meta.height || parseInt(((cls.match(/h:(\d+)/)||[])[1]||0));
-    
+   
     if (w) meta.width  = w;
     if (h) meta.height = h;
     if (cls) meta.cls = cls;
@@ -311,9 +312,13 @@ $.fn.media.swf = function(el, opts) {
 $.fn.media.flv = $.fn.media.mp3 = function(el, opts) {
     var src = opts.src;
     var player = /\.mp3\b/i.test(src) ? $.fn.media.defaults.mp3Player : $.fn.media.defaults.flvPlayer;
+    var key = opts.flvKeyName;
+    src = encodeURIComponent(src);
     opts.src = player;
-    opts.src = opts.src + '?file=' + src;
-    opts.flashvars = $.extend({}, { file: src }, opts.flashvars );
+    opts.src = opts.src + '?'+key+'=' + (src);
+    var srcObj = {};
+    srcObj[key] = src;
+    opts.flashvars = $.extend({}, srcObj, opts.flashvars );
     return $.fn.media.swf(el, opts);
 };
 
@@ -379,8 +384,12 @@ function generate(el, opts, player) {
         var a = ['<object width="' + opts.width + '" height="' + opts.height + '" '];
         for (var key in opts.attrs)
             a.push(key + '="'+opts.attrs[key]+'" ');
-        for (var key in o.oAttrs || {})
-            a.push(key + '="'+o.oAttrs[key]+'" ');
+        for (var key in o.oAttrs || {}) {
+            var v = o.oAttrs[key];
+            if (key == 'codebase' && window.location.protocol == 'https')
+                v = v.replace('http','https');
+            a.push(key + '="'+v+'" ');
+        }
         a.push('></ob'+'ject'+'>');
         var p = ['<param name="' + (o.oUrl || 'src') +'" value="' + opts.src + '">'];
         for (var key in opts.params)
@@ -397,7 +406,8 @@ function generate(el, opts, player) {
         for (var key in o.eAttrs || {})
             a.push(key + '="'+o.eAttrs[key]+'" ');
         for (var key in opts.params)
-            a.push(key + '="'+opts.params[key]+'" ');
+            if (key != 'wmode') // FF3/Quicktime borks on wmode
+                a.push(key + '="'+opts.params[key]+'" ');
         a.push('></em'+'bed'+'>');
     }
     // convert element to div

@@ -1,4 +1,14 @@
-// $Id: CHANGELOG.txt,v 1.2 2008/06/23 23:41:40 webchick Exp $
+// $Id: CHANGELOG.txt,v 1.4 2008/11/03 23:21:02 sun Exp $
+
+jQuery UI x.x-x.x, xxxx-xx-xx
+-----------------------------
+
+
+jQuery UI 6.x-1.x, xxxx-xx-xx
+-----------------------------
+#322731 by sun: Fixed improper use of t() in module install file.
+#227687 by sun: Fixed improperly capitalized package name.
+
 
 jQuery UI 6.x-1.2, 2008-06-23
 -----------------------------

@@ -1,4 +1,4 @@
-$Id: README.txt,v 1.5 2009/01/26 17:12:41 zoo33 Exp $
+$Id: README.txt,v 1.6 2009/02/12 19:34:55 zoo33 Exp $
 
 -----------------------
 FFMPEG CONVERTER README
@@ -20,8 +20,10 @@ Installation
    Share hosts usually don't have FFmpeg installed.
    
    - FFmpeg home: http://ffmpeg.mplayerhq.hu/
-   - Ubuntu instructions: http://ubuntuforums.org/showthread.php?t=911849
-   - Ubuntu instructions (compile): https://wiki.ubuntu.com/ffmpeg
+   - Ubuntu instructions:
+       Using Medibuntu - http://ubuntuforums.org/showthread.php?t=911849
+       Compiling - http://ubuntuforums.org/showthread.php?t=786095&highlight=libx264
+       Compiling - https://wiki.ubuntu.com/ffmpeg
 
 2. Download and install FFmpeg Wrapper which is required by FFmpeg Converter:
 

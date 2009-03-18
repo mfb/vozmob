@@ -1,4 +1,4 @@
-// $Id: README.txt,v 1.3 2008/06/21 22:58:43 webchick Exp $
+// $Id: README.txt,v 1.4 2008/06/23 23:45:01 webchick Exp $
 
 CONTENTS OF THIS FILE
 ---------------------
@@ -41,11 +41,6 @@ INSTALLATION
 
 4. Enable the module at Administer >> Site building >> Modules.
 
-5. If desired, configure the module at Administer >> Site configuration >>
-   jQuery UI. Here you may select which level of compression the jQuery library
-   should use. It defaults to 'minified' compression, which strips comments and
-   white space.
-
 
 API
 ---
@@ -74,10 +69,4 @@ the following changes:
    files that may be included, and see http://ui.jquery.com/docs for details on
    how to use them. The required ui.core file is automatically included, as is
    effects.core if you include any effects files.
-
-   If you wish to override the compression type selected in the settings
-   screen, you may do so by passing in an optional $type parameter. Possible
-   values are 'none', 'minified', and 'packed'.
-
-     jquery_ui_add(array('ui.draggable', 'ui.droppable', 'ui.sortable'), 'none');
 

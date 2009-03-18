@@ -70,7 +70,6 @@ function _jquery_media_add($options = array(), $return_js = FALSE) {
   static $jquery_blockui_installed = FALSE;
 
   $options = (array)$options;
-  $default_js_loaded = FALSE;
   if (empty($defaults) && !$return_js && variable_get('jquery_media_use_default_js_file', JQUERY_MEDIA_USE_DEFAULT_JS_FILE)) {
     drupal_add_js(variable_get('jquery_media_default_js_filepath', JQUERY_MEDIA_DEFAULT_JS_FILEPATH));
     $default_js_loaded = TRUE;

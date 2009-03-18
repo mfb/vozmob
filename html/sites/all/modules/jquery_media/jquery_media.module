@@ -1,5 +1,5 @@
 <?php
-// $Id: jquery_media.module,v 1.5.2.4 2008/08/28 01:47:17 aaron Exp $
+// $Id: jquery_media.module,v 1.5.2.6 2008/12/17 14:43:50 aaron Exp $
 
 /**
  * @file
@@ -41,7 +41,7 @@ function jquery_media_menu() {
  *  Implements hook_perm
  */
 function jquery_media_perm() {
-  return array('administer jquery media');
+  return array('administer jquery media', 'add jquery media to content');
 }
 
 /**
@@ -72,18 +72,84 @@ function jquery_media_add($options = array()) {
  *  Invoke the plugin if we support it for this node type.
  */
 function jquery_media_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
-  if ($op == 'view') {
-    if (in_array($node->type, variable_get('jquery_media_node_types', array()))) {
-      jquery_media_add();
-    }
+  switch ($op) {
+    case 'view':
+      $types = variable_get('jquery_media_node_types', array());
+      if ($types[$node->type]) {
+        jquery_media_add();
+      }
+//       if (is_array($node->jquery_media)) {
+//         jquery_media_add($node->jquery_media);
+//       }
+      break;
+    case 'delete':
+//       db_query("DELETE FROM {jquery_media_node} WHERE nid=%d", $node->nid);
+      break;
+    case 'update':
+//       db_query("DELETE FROM {jquery_media_node} WHERE nid=%d", $node->nid);
+      // Don't break yet; we may need to insert our new options.
+    case 'insert':
+//       if ($node->jquery_media_insert) {
+//         $node->jquery_media = array();
+//         // @TODO: Build the node specific options from form.
+//         db_query("INSERT INTO {jquery_media_node} (nid, options) VALUES (%d, '%s')", $node->nid, serialize($node->jquery_media));
+//       }
+//       unset($node->jquery_media_insert);
+      break;
+    case 'load':
+//       $jquery_media = db_result(db_query("SELECT options FROM {jquery_media_node} WHERE nid = %d", $node->nid));
+//       if (isset($jquery_media)) {
+//         $node->jquery_media = unserialize($jquery_media);
+//       }
+      break;
   }
 }
 
 /**
+ *  Implement hook_form_alter.
+ *  This will add a jQuery Media fieldset to node edit pages,
+ *  allowing to enable the plugin from a particular node.
+ */
+function jquery_media_form_alter(&$form, $form_state, $form_id) {
+//   if (substr($form_id, -10) == '_node_form') {
+//     if (user_access('add jquery media to content')) {
+//       $node = $form['#node'];
+//       $form['jquery_media_fieldset'] = array(
+//         '#type' => 'fieldset',
+//         '#title' => t('jQuery Media'),
+//         '#collapsible' => TRUE,
+//         '#collapsed' => TRUE,
+//       );
+//       $form['jquery_media_fieldset']['jquery_media_insert'] = array(
+//         '#type' => 'checkbox',
+//         '#title' => t('Invoke jQuery Media'),
+//         '#default_value' => is_array($node->jquery_media),
+//       );
+//       $form['jquery_media_fieldset']['jquery_media'] = array(
+//         '#type' => 'value',
+//         '#value' => $node->jquery_media,
+//       );
+//       // @TODO: Add specific options here, such as w/h.
+//     }
+//     else {
+//       $form['jquery_media_insert'] = array(
+//         '#type' => 'value',
+//         '#value' => is_array($node->jquery_media),
+//       );
+//       $form['jquery_media'] = array(
+//         '#type' => 'value',
+//         '#value' => $node->jquery_media,
+//       );
+//     }
+//   }
+}
+
+/**
+ *  Implements hook_init().
  *  Invoke the plugin on any page listed from the configuration page.
  *  Code swiped from block_list
  */
-function jquery_media_footer() {
+function jquery_media_init() {
   $path = drupal_get_path_alias($_GET['q']);
   $regexp = '/^('. preg_replace(array('/(\r\n?|\n)/', '/\\\\\*/', '/(^|\|)\\\\<front\\\\>($|\|)/'), array('|', '.*', '\1'. preg_quote(variable_get('site_frontpage', 'node'), '/') .'\2'), preg_quote(variable_get('jquery_media_pages', ''), '/')) .')$/';
   // Compare with the internal and path alias (if any).
