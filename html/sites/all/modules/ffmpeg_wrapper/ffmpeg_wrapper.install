@@ -1,0 +1,68 @@
+<?php
+
+// $Id: ffmpeg_wrapper.install,v 1.1.4.3 2009/03/05 21:46:03 arthuregg Exp $
+
+/**
+ * @FILE Install file for ffmpeg_wrapper
+ *
+ */
+
+function ffmpeg_wrapper_install() {
+  // see if we can find ffmpeg
+  if ($path = exec('export PATH=$PATH:/sw/bin:/bin:/usr/bin:/usr/local/bin; which ffmpeg')) {
+    variable_set('ffmpeg_wrapper_path', $path);
+    drupal_set_message(t('The FFmpeg binary was found. You are ready to start transcoding files.'));
+  }
+  else {
+    drupal_set_message(t('The FFmpeg binary was not found. You will need to set the path by hand !here.',
+      array('!here' => l(t('here'), 'admin/settings/ffmpeg_wrapper'))
+    ));
+  }
+}
+
+
+/**
+ * Implementation of hook_requirements().
+ *
+ * TODO: We could probably check the swfobject file's version here too, similar
+ * to how the jQuery_update 5.x module checks version of jQuery.
+ */
+function ffmpeg_wrapper_requirements($phase) {
+  $requirements = array();
+
+  if (! variable_get('ffmpeg_wrapper_path', false)) {
+   $error_message = t('The path to FFmpeg is not set correctly or missing. !url',
+      array('!url' => l(t('Please update your settings'), 'admin/settings/ffmpeg_wrapper'))
+    );
+  }
+  else if (! file_exists(variable_get('ffmpeg_wrapper_path', false))) {
+    $error_message = t('The path that you have set to FFmpeg does not appear to be correct. !url' ,
+      array('!url' => l(t('Please update your settings'), 'admin/settings/ffmpeg_wrapper'))
+    );
+  }
+
+  if ($error_message) {
+    // we need to explicitly set the message when installing the module,
+    // because drupal_check_module() in install.inc doesn't print out
+    // warning messages, and we prefer to tell the user what's wrong.
+    if ($phase == 'install') {
+      drupal_set_message($error_message, 'warning');
+    }
+    $requirements['ffmpeg_wrapper'] = array(
+      'title' => t('FFmpeg Wrapper'),
+      'description' => $error_message,
+      'severity' => $phase == 'install' ? REQUIREMENT_WARNING : REQUIREMENT_ERROR,
+      'value' => t('Copy swfobject.js'),
+    );
+  }
+  elseif ($phase == 'runtime') {
+    $requirements['ffmpeg_wrapper'] = array(
+      'title' => t('FFmpeg Wrapper'),
+      'severity' => REQUIREMENT_OK,
+      'value' => t('Installed correctly'),
+    );
+  }
+
+ 
+  return $requirements;
+}
