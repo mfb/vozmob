@@ -1,0 +1,1173 @@
+<?php
+
+// $Id: ffmpeg_converter.module,v 1.26 2009/02/08 02:03:55 zoo33 Exp $
+
+/**
+ * @file
+ * Main module file for FFmpeg Converter.
+ * This module lets you setup automatic media file conversions with FFmpeg.
+ */
+
+
+/**
+ * Implementation of hook_menu().
+ */
+function ffmpeg_converter_menu() {
+  $items = array();
+  $items['admin/build/ffmpeg_converter'] = array(
+    'title' => 'FFmpeg Converter presets',
+    'description' => t('Setup automatic media file conversion presets.'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('ffmpeg_converter_admin_settings'),
+    'access arguments' => array('administer ffmpeg wrapper'),
+    'file' => 'ffmpeg_converter.admin.inc',
+  );
+  
+  return $items;
+}
+
+
+/**
+ * Implementation of hook_theme().
+ */
+function ffmpeg_converter_theme($existing, $type, $theme, $path) {
+  return array(
+    'ffmpeg_converter_video' => array(
+      'template' => 'ffmpeg_converter_video',
+      'arguments' => array(
+        'file' => NULL,
+        'file_path' => NULL,
+        'snapshot' => NULL,
+        'snapshot_path' => NULL,
+        'description' => NULL,
+        'nid' => NULL,
+        'width' => NULL,
+        'height' => NULL,
+        'link_href' => NULL,
+      ),
+    ),
+    'ffmpeg_converter_messages' => array(
+      'template' => 'ffmpeg_converter_messages',
+      'arguments' => array(
+        'messages' => NULL,
+      ),
+    ),
+    'ffmpeg_converter_widget' => array(
+      'arguments' => array('element' => NULL),
+      'file' => 'ffmpeg_converter_theme.inc',
+    ),
+  );
+}
+
+
+/**
+ * Implementation of hook_form_alter().
+ */
+function ffmpeg_converter_form_alter(&$form, $form_state, $form_id) {
+  if ($form_id == 'content_field_edit_form' && $form['type']['#value'] == 'filefield') {
+    // Add FFmpeg setting to this field type.
+    ffmpeg_converter_field_settings($form, $form_state);
+  }
+  elseif ($form['#id'] == 'node-form' && !empty($form['#field_info'])) {
+    // Check for FFmpeg Converter enabled file fields and alter their behavior.
+    ffmpeg_converter_nodeform($form, $form_state);
+  }
+}
+
+
+/**
+ * Add settings to the field settings form.
+ *
+ * @param $form
+ * @param $form_state
+ */
+function ffmpeg_converter_field_settings(&$form, $form_state) {
+  
+  $form_item_id = 'ffmpeg_converter_' . $form['#field']['field_name'];
+  
+  $presets = array('disabled' => '<' . t('Disabled') . '>');
+  $presets = array_merge($presets, ffmpeg_converter_presets());
+  
+  $default_field_setting = variable_get($form_item_id, array('preset' => 'disabled', 'hide_original' => 1));
+  
+  $form['field'][$form_item_id] = array(
+    '#type' => 'fieldset',
+    '#title' => 'Automatic FFmpeg conversion',
+    '#description' => t('Use these options to automatically process media files that are uploaded to this field.'),
+    '#collapsible' => true,
+    '#tree' => true,
+  );
+  $form['field'][$form_item_id]['preset'] = array(
+    '#type' => 'select',
+    '#title' => t('FFmpeg Converter preset'),
+    '#description' => t('Choose the <a href="@config_page">FFmpeg Converter preset</a> that you want to use for this field.', array('@config_page' => url('admin/build/ffmpeg_converter'))),
+    '#options' => $presets,
+    '#default_value' => $default_field_setting['preset'],
+  );
+  // TODO: Add option to hide original files.
+  
+  $form['#validate'][] = 'ffmpeg_converter_fieldconfig_validate';
+  $form['#submit'][] = 'ffmpeg_converter_fieldconfig_submit';
+}
+
+
+/**
+ * validate submitted field configuration forms.
+ */
+function ffmpeg_converter_fieldconfig_validate($form, &$form_state) {
+  $form_item_id = 'ffmpeg_converter_' . $form['#field']['field_name'];
+  if ($form_state['values'][$form_item_id] != 'disabled') {
+    if ($form_state['values']['multiple'] != 1 && $form_state['values']['multiple'] < 5) {
+      form_set_error('multiple', t('In order to use a FFmpeg Converter preset with this field, the Multiple value has to be at least 5 or Unlimited. You must either change the Multiple value or disable the FFmpeg Converter setting.'));
+    }
+  }
+}
+  
+
+/**
+ * Handle submitted field configuration forms and save FFmpeg field setting.
+ */
+function ffmpeg_converter_fieldconfig_submit($form, &$form_state) {
+  $form_item_id = 'ffmpeg_converter_' . $form['#field']['field_name'];
+  variable_set($form_item_id, $form_state['values'][$form_item_id]);
+  // TODO: Add option to hide original files.
+}
+
+
+/**
+ * Alter node forms that have file fields that are enabled for this module.
+ * We can't alter the output of each file field instance here, so we save the 
+ * values we need in the $form array and pick them up later.
+ *
+ * @param $form
+ * @param $form_state
+ */
+function ffmpeg_converter_nodeform(&$form, $form_state) {
+
+  // Define custom form attributes.
+  $form['#ffmpeg_converter_files'] = array();
+  $form['#ffmpeg_converter_selected_snapshots'] = array();
+  
+  foreach ($form['#field_info'] as $field_def) {
+    $preset_key = ffmpeg_converter_preset_by_field($field_def['field_name']);
+    if ($preset_key) {
+
+      $field = &$form[$field_def['field_name']];
+      
+      // Define custom theme function for this form field.
+      $field['#theme'] = 'ffmpeg_converter_widget';
+      
+      // Examine the existing files in this field.
+      $form['#ffmpeg_converter_files'][$field_def['field_name']] = array();
+      foreach($field as $field_instance => &$file) {
+        if (is_numeric($field_instance)) {
+          if (isset($file['#default_value']['data']['ffmpeg_converter_file'])) {
+            // Override the filefield widget for this instance. This will 
+            // hide the file completely. We pick up and save the default 
+            // values in ffmpeg_converter_nodeform_validate().
+            $file['#type'] = 'value';
+            
+            // Save custom file information.
+            $form['#ffmpeg_converter_files'][$field_def['field_name']][$field_instance] = $file['#default_value']['data']['ffmpeg_converter_file'];
+            
+            // Save snapshot data. (No longer needed?)
+            if (isset($file['#default_value']['data']['ffmpeg_converter_snapshot_selected'])) {
+              $form['#ffmpeg_converter_selected_snapshots'][$field_def['field_name']] = $field_instance;
+            }
+          }
+        }
+      }
+      
+      // Add options to clear converted files and select one of the tree snapshot images.
+      if (!empty($form['nid']['#value'])) {
+        
+        if (ffmpeg_converter_file_is_queued($form['nid']['#value'], $field_def['field_name'])) {
+          $field['ffmpeg_converter_queued'] = array(
+            '#type' => 'markup',
+            '#value' => t('<p><strong>Note:</strong> This file has been added to the !job_queue and will be converted on the next available cron run.</p>', array('!job_queue' => l(t('job queue'), 'admin/reports/job_queue'))),
+          );
+        }
+        elseif (!empty($form['#ffmpeg_converter_files'][$field_def['field_name']])) {
+          $field['ffmpeg_converter_delete'] = array(
+            '#type' => 'checkbox',
+            '#title' => t('Delete converted files'),
+            '#description' => t('Check this box and click Save if you want to delete all converted files and reconvert the original.'),
+            '#weight' => 8,
+          );
+          $snapshots = array();
+          foreach ($form['#ffmpeg_converter_files'][$field_def['field_name']] as $instance => $type) {
+            if ($type == 'snapshot') {
+              $i = image_get_info($field[$instance]['#default_value']['filepath']);
+              if ($i) {
+                if ($i['width'] > $i['height']) {
+                  $w = 100;
+                  $h = round($i['height'] / $i['width'] * 100);
+                }
+                else {
+                  $h = 100;
+                  $w = round($i['width'] / $i['height'] * 100);
+                }
+                $snapshots[$instance] = theme('image', $field[$instance]['#default_value']['filepath'], '', '', array('width' => $w, 'height' => $h), false);
+              }
+              else {
+                $snapshots[$instance] = $field[$instance]['#default_value']['filename'];
+              }
+            }
+          }
+          $field['ffmpeg_converter_snapshots'] = array(
+            '#type' => 'radios',
+            '#options' => $snapshots,
+            '#default_value' => $form['#ffmpeg_converter_selected_snapshots'][$field_def['field_name']],
+            '#title' => t('Snapshot image') . ' (TODO)',
+            '#description' => t('Choose which snapshot image you would like to use to preview the video.'),
+            '#weight' => 9,
+            '#prefix' => '<div class="ffmpeg-converter-snapshot-selection clear-block">',
+            '#suffix' => '</div>',
+            '#disabled' => 1,
+          );
+        }
+      }
+    }
+  }
+  // Add validate and submit handlers to take care of custom file data and delete operations.
+  $form['#validate'][] = 'ffmpeg_converter_nodeform_validate';
+
+}
+
+
+/**
+ * Validate submitted node forms and save custom file data.
+ */
+function ffmpeg_converter_nodeform_validate($form, &$form_state) {
+  // Examine the file information saved in ffmpeg_converter_form_alter().
+  if (!empty($form['#ffmpeg_converter_files'])) {
+    foreach ($form['#ffmpeg_converter_files'] as $field_name => $field) {
+      $form_value = &$form_state['values'][$field_name];
+      foreach ($field as $field_instance => $file_type) {
+        // Restore field instances that were changed to #type=value in _form_alter().
+        $form_value[$field_instance] = $form[$field_name][$field_instance]['#default_value'];
+        // Delete converted files if requested.
+        if ($form_state['values']['field_video']['ffmpeg_converter_delete']) {
+          $form_value[$field_instance]['fid'] = 0;
+          $form_value[$field_instance]['data'] = array();
+          $form_value[$field_instance]['filepath'] = '';
+          $form_value[$field_instance]['filename'] = '';
+          $form_value[$field_instance]['filemime'] = '';
+          $form_value[$field_instance]['filesize'] = 0;
+        }
+        else {
+          // Put ffmpeg_converter's file data into $form_state to have it saved to the database. TODO: (No longer needed?)
+          $form_value[$field_instance]['data']['ffmpeg_converter_file'] = $file_type;
+        }
+      }
+    }
+  }
+  
+  // Check for selected snapshot images. TODO: (No longer needed?)
+  if (!empty($form['#ffmpeg_converter_selected_snapshots'])) {
+    foreach ($form['#ffmpeg_converter_selected_snapshots'] as $field_name => $field_instance) {
+      $form_state['values'][$field_name][$field_instance]['data']['ffmpeg_converter_snapshot_selected'] = 1;
+    }
+  }
+}
+
+
+/**
+ * Get the presets array.
+ *
+ * @param $key
+ *   This presets's key value. Optional.
+ * @return
+ *   If $key is specified, an array of options for the specific preset.
+ *   If not, a nested array containing options for all presets.
+ */
+function ffmpeg_converter_options($key = null) {
+  static $presets;
+  
+  if (!isset($presets)) {
+    $presets = variable_get('ffmpeg_converter_presets', array(
+      'preset-1' => array(
+        'name' => 'Default',
+        'process_same_format' => 0,
+        'ffmpeg_wrapper' => ffmpeg_converter_default_options(),
+      ),
+    ));
+    foreach ($presets as &$preset) {
+      // Flatten the ffmpeg_wrapper array of options.
+      $options = array();
+      foreach ($preset['ffmpeg_wrapper'] as $opt_key => $option) {
+        if (is_array($option)) {
+          $options = array_merge($options, $option);
+        }
+        else {
+          $options[$opt_key] = $option;
+        }
+      }
+      $preset['ffmpeg_wrapper'] = $options;
+    }
+  }
+  
+  if (!empty($key)) {
+    return $presets[$key]['ffmpeg_wrapper'];
+  }
+  else {
+    return $presets;
+  }
+}
+
+
+/**
+ * Get default preset options.
+ *
+ * @return
+ *   Array of default options.
+ */
+function ffmpeg_converter_default_options() {
+  return array(
+    'ffmpeg_output_type' => 'flv',
+    'ffmpeg_audio_advanced' => 0,
+    'ffmpeg_audio_ab' => 64,
+    'ffmpeg_audio_ar' => 22050,
+    'ffmpeg_audio_acodec' => null,
+    'ffmpeg_video_advanced' => 0,
+    'ffmpeg_video_size' => '320x240',
+    'ffmpeg_video_size_other' => '',
+    'ffmpeg_video_fps' => 25,
+    'ffmpeg_video_br' => 384,
+    'ffmpeg_video_vcodec' => null,
+    'ffmpeg_time_advanced' => 0,
+    'ffmpeg_time' => 300,
+    'ffmpeg_video_custom' => 0,
+    'ffmpeg_video_custom_command' => '-i %in_file %out_file',
+    'ffmpeg_video_wm' => 0,
+    'ffmpeg_video_wm_file' => '',
+    'ffmpeg_output_perms' => '0644',
+  );  
+}
+
+
+/**
+ * Get FFmpeg presets.
+ *
+ * @return
+ *   A keyed array of preset names.
+ */
+function ffmpeg_converter_presets() {
+  $presets = ffmpeg_converter_options();
+  $preset_names = array();
+  foreach ($presets as $key => $preset) {
+    $preset_names[$key] = $preset['name'];
+  }
+  
+  return $preset_names;
+}
+
+
+/**
+ * Get a FFmpeg Converter preset by file field
+ *
+ * @param $field
+ *   The name of the file field.
+ * @return
+ *   A preset key if the field has one assigned, false otherwise.
+ */
+function ffmpeg_converter_preset_by_field($field) {
+  $setting = variable_get('ffmpeg_converter_' . $field, array('preset' => 'disabled'));
+  if (!empty($setting['preset']) && $setting['preset'] != 'disabled') {
+    return $setting['preset'];
+  }
+  else {
+    return false;
+  }
+}
+
+
+/**
+ * Implementation of hook_nodeapi().
+ */
+function ffmpeg_converter_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  if (in_array($op, array('instert', 'update', 'view'))) {
+    
+    $view_messages = array();
+    
+    // Get this node type's fields and look for FFmpeg Converter files.
+    if (function_exists('content_fields')) {
+      $fields = content_fields();
+      foreach ($fields as $field) {
+        // Check if this field has a FFmpeg Converter preset.
+        $preset_key = ffmpeg_converter_preset_by_field($field['field_name']);
+        if ($preset_key && isset($node->{$field['field_name']})) {
+          // Examine files (we assume this is a file field).
+          $original = array();
+          $converted = array();
+          foreach($node->$field['field_name'] as $field_instance => $file) {
+            // $file may be an array with empty values.
+            if (!empty($file['fid'])) {
+              if (!empty($file['data']['ffmpeg_converter_file'])) {
+                $converted[] = array($field_instance, $file);
+              }
+              else {
+                $original[] = array($field_instance, $file);
+              }
+            }
+          }
+          // Act on the collected file data.
+          switch ($op) {
+            case 'insert':
+            case 'update':
+              // Look for new files.
+              if (!empty($original) && empty($converted) && !ffmpeg_converter_file_is_queued($node->nid, $field['field_name'])) {
+                list($field_instance, $file) = array_pop($original);
+                if (ffmpeg_converter_check_file($file['filename'], $preset_key)) {
+                  // Queue file for processing.
+                  ffmpeg_converter_queue_filefield($node->nid, $field['field_name'], 0, $preset_key);
+                  drupal_set_message(t('The file %file was added to the job queue.', array('%file' => check_plain($file['filename']))));
+                }
+              }
+              break;
+            case 'view':
+              // Look for unconverted files and hide from display.
+              // TODO: Respect user's option to hide or show original files.
+              if (!empty($original) && empty($converted)) {
+                list($field_instance, $file) = array_pop($original);
+                unset($node->content[$field['field_name']]['field']['items'][$field_instance]);
+                // Add message to node content for files that are being converted.
+                $view_messages[] = array(
+                  'message' => t('The file %file is waiting to be converted.', array('%file' => $file['filename'])),
+                  'filename' => $file['filename'],
+                );
+              }
+              break;
+          }      
+        }
+      }
+    }
+    
+    if ($op = 'view' && !empty($view_messages)) {
+      $node->content['ffmpeg_converter_messages'] = array(
+        '#value' => theme('ffmpeg_converter_messages', $view_messages)
+      );
+    }
+  }
+
+}
+
+
+/**
+ * Check if a file should be converted.
+ *
+ * @param $filename
+ *   The name of the file.
+ * @param $preset_key
+ *   The key of this configuration preset, such as "preset-1".
+ * @return unknown
+ *   TRUE if file should be converted, FALSE otherwise.
+ */
+function ffmpeg_converter_check_file($filename, $preset_key) {
+  $presets = ffmpeg_converter_options();
+  $extension = array_pop(explode('.', $filename));
+  
+  // Check if file type differs from destination type.
+  if ($presets[$preset_key]['ffmpeg_wrapper']['ffmpeg_output_type'] != $extension) {
+    return TRUE;
+  }
+  
+  // Check the "process same format" setting.
+  if ($presets[$preset_key]['process_same_format']) {
+    return TRUE;
+  }
+  
+  return FALSE;
+}
+
+
+/**
+ * Add a file field to the process queue.
+ *
+ * @param $nid
+ *   The id of the container node.
+ * @param $field_name
+ *   The name of the field that contains the source file.
+ * @param $field_instance
+ *   The field instance as an integer representing the key in the 
+ *   $node->{$field_name} array.
+ * @param $preset_key
+ *   The key of the FFmpeg Converter preset to use.
+ * @return
+ *   FALSE if Job queue is unavailable, NULL otherwise.
+ */
+function ffmpeg_converter_queue_filefield($nid, $field_name, $field_instance, $preset_key) {
+  if (function_exists('job_queue_add')) {
+    cache_clear_all('ffmpeg_converter_queued_files', 'cache');
+    return job_queue_add('ffmpeg_converter_convert_filefield', t('Convert a file field with FFmpeg.'), array($nid, $field_name, $field_instance, $preset_key));
+  }
+  else {
+    return false;
+  }
+}
+
+
+/**
+ * Check if a file is already in the job queue.
+ *
+ * @param $nid
+ *   The nid of the node containing the file.
+ * @param $field
+ *   The name of the field containing the file.
+ * @return 
+ *   TRUE or FALSE.
+ */
+function ffmpeg_converter_file_is_queued($nid, $field) {
+  $cache = cache_get('ffmpeg_converter_queued_files');
+  
+  if ($cache) {
+    $files = $cache->data;
+  }
+  else {
+    $jobs = db_query("SELECT * FROM {job_queue} WHERE function = 'ffmpeg_converter_convert_filefield'");
+    $files = array();
+    while ($job = db_fetch_array($jobs)) {
+      $args = unserialize($job['arguments']);
+      $files[] = $args[0] . '-' . $args[1];
+    }
+    cache_set('ffmpeg_converter_queued_files', $files);
+  }
+  
+  return in_array($nid . '-' . $field, $files);
+}
+
+
+/**
+ * Add a Drupal file to the process queue.
+ *
+ * @param $fid
+ *   The file object id.
+ * @param $preset_key
+ *   The key of the FFmpeg Converter preset to use.
+ * @param $link
+ *   Optional HTML link tag, to the source node or similar, for log messages.
+ * @return
+ *   FALSE if Job queue is unavailable, NULL otherwise.
+ */
+function ffmpeg_converter_queue_drupalfile($fid, $preset_key, $link = '') {
+  if (function_exists('job_queue_add')) {
+    return job_queue_add('ffmpeg_converter_convert_drupalfile', t('Convert a Drupal file with FFmpeg.'), array($fid, $nid, $preset_key, $link));
+  }
+  else {
+    return false;
+  }
+}
+
+
+/**
+ * Return a file name based on a source name and a destination suffix.
+ *
+ * @param $source_file
+ *   Source file name or path.
+ * @param $type
+ *   A file suffix that should be appended to the file name.
+ * @return
+ *   A file name or path with the correct file suffix.
+ */
+function ffmpeg_converter_filename($source_file, $type) {
+  $output_file = explode('.', $source_file);
+  array_pop($output_file);
+  array_push($output_file, $type);
+  return implode('.', $output_file);
+}
+
+
+/**
+ * Enter description here...
+ *
+ * @param $nid
+ *   The id of the container node.
+ * @param $field_name
+ *   The name of the field that contains the source file.
+ * @param $field_instance
+ *   The field instance as an integer representing the key in the 
+ *   $node->{$field_name} array.
+ * @param $preset_key
+ *   The key of the FFmpeg Converter preset to use.
+ */
+function ffmpeg_converter_convert_filefield($nid, $field_name, $field_instance, $preset_key) {
+  
+  $node = node_load($nid);
+  
+  // Check the necessary prerequisites.
+  if (empty($node) || empty($node->{$field_name}[$field_instance]['fid']) || !function_exists('content_fields')) {
+    return false;
+  }
+  
+  // Load the .inc pages that we need.
+  module_load_include('inc', 'node', 'node.pages');
+  module_load_include('inc', 'filefield', 'field_file');
+  
+  if (!function_exists('field_file_save_file')) {
+    return false;
+  }
+  
+  // Load the CCK field.
+  $field = content_fields($field_name, $node->type);
+  
+  // Get preset configuration.
+  $configuration = ffmpeg_converter_options($preset_key);
+  
+  // Setup paths.
+  $input_file = $node->{$field_name}[$field_instance]['filepath'];
+  $output_file = ffmpeg_converter_filename($input_file, $configuration['ffmpeg_output_type']);
+  $output_file = file_directory_temp() . '/' . basename($output_file);
+  
+  // Run conversion and check result.
+  $result = ffmpeg_converter_convert($input_file, $output_file, $configuration, l(t('Source node'), 'node/' . $node->nid));
+  if (!$result) {
+    return false;
+  }
+  
+  // We don't use filefield validators for saving generated files. We could use
+  // filefield_widget_upload_validators($field) to fetch the configured 
+  // restrictions for this field, but that might lead to situations where 
+  // conversions will fail inexplicably.
+  $validators = array();
+  
+  // Create the file object.
+  $destination_path = filefield_widget_file_path($field);
+  $file = field_file_save_file($output_file, $validators, $destination_path);
+
+  if (!is_array($file['data'])) {
+    $file['data'] = array();
+  }
+
+  // Copy file description from original to destination file.
+  if (!empty($node->{$field_name}[$field_instance]['data']['description'])) {
+    $file['data']['description'] = $node->{$field_name}[$field_instance]['data']['description'];
+  }
+  
+  // Leave a note that this is a converted file.
+  $file['data']['ffmpeg_converter_file'] = 'converted';
+  
+  // Attempt to get MIME type with mimedetect.  
+  if (function_exists('mimedetect_mime')) {
+    $file['filemime'] = mimedetect_mime($output_file);
+  }
+  
+  // Add the file to the node.
+  $node->{$field_name}[] = $file;
+  
+  // Try to get video duration and determine if this is a video file.
+  $duration = ffmpeg_wrapper_file_duration($input_file, false);
+  
+  if ($duration) {
+    
+    // Take three snapshot images of the film.
+    $duration = ffmpeg_wrapper_file_duration($input_file, false);
+    $offsets = array(
+      round($duration / 4),
+      round($duration / 2),
+      round($duration * 3 / 4),
+    );
+    
+    foreach ($offsets as $offset) {
+      // Format time code.
+      $timecode = str_pad($offset / 3600 % 24, 2, '0', STR_PAD_LEFT);
+      $timecode .= ':' . str_pad($offset / 60 % 60, 2, '0', STR_PAD_LEFT);
+      $timecode .= ':' . str_pad($offset % 60, 2, '0', STR_PAD_LEFT);
+      
+      // Create snapshot image.
+      $size = $configuration[$configuration['ffmpeg_video_size'] == 'other' ? 'ffmpeg_video_size_other' : 'ffmpeg_video_size'];
+      if ($snapshot = ffmpeg_converter_create_snapshot($input_file, file_directory_temp(), $timecode, $size)) {
+      
+        // Create the snapshot file object.
+        $s_file = field_file_save_file($snapshot, $validators, $destination_path);
+        
+        if (is_array($s_file)) {
+        
+          if (!is_array($s_file['data'])) {
+            $s_file['data'] = array();
+          }
+  
+          // Copy file description from original to snapshot image.
+          if (!empty($node->{$field_name}[$field_instance]['data']['description'])) {
+            $s_file['data']['description'] = $node->{$field_name}[$field_instance]['data']['description'];
+          }
+    
+          // Leave a note that this is a snapshot image file.
+          $s_file['data']['ffmpeg_converter_file'] = 'snapshot';
+          
+          // Add the snapshot image file to the node.
+          $node->{$field_name}[] = $s_file;
+      
+        
+        }
+      }
+      
+    }
+  }
+  
+  // Save the node.
+  $node = node_submit($node);
+  node_save($node);
+  
+  watchdog('ffmpeg_converter','FFmpeg converted the file %file to @format.',
+           array('%file' => basename($input_file), '@format' => $configuration['ffmpeg_output_type']), 
+           WATCHDOG_NOTICE, l(t('Source node'), 'node/' . $node->nid));
+
+  cache_clear_all('ffmpeg_converter_queued_files', 'cache');
+}
+
+
+/**
+ * Convert a Drupal file with FFmpeg.
+ * The original file will be replaced by the converted one.
+ *
+ * @param $fid
+ *   The file object id.
+ * @param $preset_key
+ *   The key of the FFmpeg Converter preset to use.
+ * @param $link
+ *   Optional HTML link tag, to the source node or similar, for log messages.
+ * @return
+ *   A file object on success, false on failure.
+ */
+function ffmpeg_converter_convert_drupalfile($fid, $preset_key, $link = '') {
+  
+  // Get the file object from the database.
+  $result = db_query('SELECT * FROM {files} WHERE fid = %d', $fid);
+  $file = db_fetch_object($result);
+  
+  $input_file = file_create_path($file->filepath);
+  
+  // Get preset configuration.
+  $configuration = ffmpeg_converter_options($preset_key);
+  
+  // Construct output file path.
+  $output_type = $configuration['ffmpeg_output_type'];
+  $output_file = ffmpeg_converter_filename($input_file, $output_type);
+  $output_file = file_directory_temp() . '/' . basename($output_file);
+  
+  // Run conversion and check result.
+  $result = ffmpeg_converter_convert($input_file, $output_file, $configuration, $link);
+  if (!$result) {
+    return false;
+  }
+  
+  // Move temp file to permanent location.
+  $permanent_path = file_destination(str_replace($file->filename, '', $file->filepath) . basename($output_file), FILE_EXISTS_RENAME);
+  if (!file_move($output_file, str_replace('/' . $file->filename, '', $file->filepath), FILE_EXISTS_RENAME)) {
+    watchdog('ffmpeg_converter', 'Could not save converted file %file, keeping original.', array('%file' => $output_file), WATCHDOG_WARNING, $link);
+    return false;
+  }
+  
+  // Prepare new file attributes.
+  $file->filepath = str_replace($file->filename, basename($output_file), $file->filepath);
+  $file->filename = basename($output_file);
+  $file->filesize = filesize($output_file);
+  
+  // Get MIME type.  
+  if (function_exists('mimedetect_mime')) {
+    $file->filemime = mimedetect_mime($output_file);
+  }
+  else {
+    $file->filemime = file_get_mimetype(basename($output_file));
+  }
+
+  // Save changes to database.
+  if (!db_query("UPDATE {files} SET filename = '%s', filepath = '%s', filesize = %d, filemime = '%s', timestamp = %d WHERE fid = %d", 
+                $file->filename, $file->filepath, $file->filesize, $file->filemime, time(), $file->fid)) {
+    watchdog('ffmpeg_converter', 'Could not save converted file %file to the database, keeping original.',
+             array('%file' => $output_file), WATCHDOG_WARNING, $link);
+    return false;
+  }
+  content_update(&$node);
+  
+  // Clear content cache.
+  cache_clear_all('content:', 'cache_content', true);
+  
+  watchdog('ffmpeg_converter','FFmpeg converted the file %file to @format.',
+           array('%file' => basename($input_file), '@format' => $output_type), 
+           WATCHDOG_NOTICE, $link);
+               
+  return $file;
+  
+}
+
+/**
+ * Convert a file with FFmpeg Wrapper.
+ *
+ * @param $input_file
+ *   Path to file being converted.
+ * @param $output_file
+ *   Path to resulting file. This should be a temporary file.
+ * @param $configuration
+ *   A FFmpeg Wrapper configuration array.
+ * @param $link
+ *   Optional HTML link tag, to the source node or similar, for log messages.
+ * @return
+ *   FFmpeg Wrapper result code.
+ */
+function ffmpeg_converter_convert($input_file, $output_file, $configuration, $link = '') {
+  
+  // Make sure that FFmpeg can decode the input file.
+  if (!ffmpeg_wrapper_can_decode($input_file)) {
+    watchdog('ffmpeg_converter', 'FFmpeg can not decode this file type: %file',
+             array('%file' => $output_file), WATCHDOG_WARNING, $link);
+    return false;
+  }
+  
+  // Go through configuration and build the command line options for FFmpeg.
+  $options = array();
+
+  // First, check output size against source file's proportions.
+  if ($configuration['ffmpeg_video_advanced']) {
+    $size = $configuration[$configuration['ffmpeg_video_size'] == 'other' ? 'ffmpeg_video_size_other' : 'ffmpeg_video_size'];
+  }
+  elseif ($configuration['ffmpeg_video_custom']) {
+    $matches = array();
+    preg_match("/-s ([0-9]+x[0-9]+)/", $configuration['ffmpeg_video_custom_command'], $matches);
+    if (!empty($matches[0])) {
+      $size = $matches[1];
+    }
+    else {
+      $size = '320x240';
+    }
+  }
+  else {
+    // Provide default frame size.
+    $size = '320x240';
+  }
+
+  // Make sure output size is a multiple of 2 (required by FFmpeg).
+  
+  
+  // Create padded frame size.
+  list($size, $pad) = ffmpeg_converter_get_padded_size($input_file, $size);
+  
+  // Use a custom option string.
+  if ($configuration['ffmpeg_video_custom']) {
+    $configuration['ffmpeg_video_custom_command'] = str_replace($matches[1], $size . ' ' . $pad, $configuration['ffmpeg_video_custom_command']);
+    $options[] = str_replace(array('%in_file', '%out_file'), array($input_file, $output_file), $configuration['ffmpeg_video_custom_command']);    
+  }
+  
+  // Build command line options from config options.
+  else {
+    $options[] = "-i '" . $input_file . "'";
+    
+    if ($configuration['ffmpeg_video_wm']) {
+      $options[] = "-vhook '" . ffmpeg_wrapper_path_to_vhook('watermark.so') . " -f " . $configuration['ffmpeg_video_wm_file'] . "'";
+    }
+      
+    if ($configuration['ffmpeg_audio_advanced']) {
+      if ($configuration['ffmpeg_audio_acodec']) { 
+        $options[] =  '-acodec '. $configuration['ffmpeg_audio_acodec'];
+      }
+      if ($configuration['ffmpeg_audio_ar'] ) {
+        $options[] = '-ar '. $configuration['ffmpeg_audio_ar'];
+      }
+      if ($configuration['ffmpeg_audio_ab']) {
+        $options[] = '-ab '. $configuration['ffmpeg_audio_ab'];
+      }
+    }
+  
+    if ($configuration['ffmpeg_video_advanced']) {
+      if ($configuration['ffmpeg_video_vcodec']) {
+        $options[] = '-vcodec '. $configuration['ffmpeg_video_vcodec'];
+      }
+      $options[] = '-s '. $size . ' ' . $pad;
+      if ($configuration['ffmpeg_video_br']) { 
+        $options[] = '-b '. $configuration['ffmpeg_video_br'];
+      }
+      if ($configuration['ffmpeg_video_fps']) {
+        $options[] = '-r '. $configuration['ffmpeg_video_fps'];
+      }
+    }
+    else {
+      $options[] = '-s '. $size . ' ' . $pad;
+    }
+  
+    if ($configuration['ffmpeg_time_advanced']) {
+      $options[] = '-t '. $configuration['ffmpeg_time'];
+    }
+    
+    // Replace existing files without asking any questions. (Use temp files!)
+    $options[] = '-y';
+    
+    $options[] = "'". $output_file ."'";
+  }
+  
+  $command = implode(" ", $options);
+
+  // Run FFmpeg with error checking.
+  $output = ffmpeg_wrapper_run_command($command, true);
+  
+  // false is returned on error.
+  if ($output == false || !file_exists($output_file) || filesize($output_file) == 0) {
+    watchdog('ffmpeg_converter', 'Conversion of %file failed unexpectedly. The command was: %command',
+             array('%file' => $output_file, '%command' => $command), WATCHDOG_WARNING, $link);
+    return false;
+  }
+
+  return true;
+}
+
+
+/**
+ * Create a snapshot image from a video file.
+ * 
+ * Based on video_thumbnailer_create_thumb() in Video Thumbnailer.
+ * 
+ * @param $file
+ *   Path to the input video file.
+ * @param $output_path
+ *   Path to the directory where the image will be saved.
+ * @param $offset
+ *   A time code in the format hh:mm:ss where the snapshot will be taken.
+ * @param $width
+ *   The destination size expressed as WIDTHxHEIGHT.
+ * @return
+ *   Filepath if successfull, FALSE otherwise.
+ */
+function ffmpeg_converter_create_snapshot($file, $output_path, $offset, $size = '320x240') {
+  
+  // Create output file path.
+  $output_file = explode('.', basename($file));
+  array_pop($output_file);
+  $output_file = join('.', $output_file) . '-snapshot-' . $offset . '.jpg';
+  $output_file = str_replace(':', '-', $output_file);
+  $output_file = str_replace(' ', '_', $output_file);
+  $output_file = file_create_filename($output_file, $output_path);
+
+  // Calculate an output frame size and padding based on the proportions of the
+  // source file.
+  list($size, $pad) = ffmpeg_converter_get_padded_size($file, $size);
+  
+  // Prepare FFmpeg options.
+  $options = array();
+  $options[] = "-itsoffset -$offset";  
+  $options[] = "-i '$file'";
+  $options[] = "-vcodec mjpeg -vframes 1 -an -f rawvideo -s '$size'";
+  $options[] = $pad;
+  $options[] = "'$output_file'";
+ 
+  $command = implode(" ", $options);
+
+  // Run the command.
+  $output = ffmpeg_wrapper_run_command($command);
+  
+  if (file_exists($output_file)) {
+    return $output_file;
+  }
+  else {
+    return FALSE;
+  }
+}
+
+
+/**
+ * Calculate an output size and a padding value for a media file.
+ *
+ * @param $file
+ *   Path to the file to be converted.
+ * @param $size
+ *   The maximum dimensions of the output file, expressed as XXXxYYY. This will
+ *   be cropped to match the original file's proportions and the remaining 
+ *   space will be used to calculate the padding.
+ * @return
+ *   An array containing the size expressed as XXXxYYY and the padding argument 
+ *   for FFmpeg, ie. "-padtop XX -padbottom XX".
+ */
+function ffmpeg_converter_get_padded_size($file, $size) {
+  static $file_proportions;
+  
+  if (!isset($file_proportions)) {
+    $file_proportions = array();
+  }
+  
+  if (isset($file_proportions[$file])) {
+    return $file_proportions[$file];
+  }
+  else {
+    $pad = '';
+    
+    // Determine source file's dimensions and proportions.
+    $output = ffmpeg_wrapper_run_command("-i $file");
+    $pattern = "/Stream.* ([0-9]+x[0-9]+)/";
+    $matches = array();
+    preg_match($pattern, $output, $matches);
+    if (!empty($matches[0])) {
+      list($orig_x, $orig_y) = explode('x', $matches[1]);
+      $orig_q = $orig_x / $orig_y;
+      
+      // Determine output dimensions and proportions.
+      list($dest_x, $dest_y) = explode('x', $size);
+      $dest_q = $dest_x / $dest_y;
+      
+      // Calculate new output size and padding.
+      if ($orig_q > $dest_q) {
+        // Width is the determining factor.
+        $dest_y_calc = round($dest_x / $orig_q);
+        // Make sure height is divisible by 2, otherwise ffmpeg freaks out.
+        $dest_y_calc &= ~1;
+        $padding1 = floor(($dest_y - $dest_y_calc) / 2);
+        $padding2 = $dest_y - $dest_y_calc - $padding1;
+        $pad = sprintf('-padtop %d -padbottom %d', $padding, $padding);
+        $size = $dest_x . 'x' . $dest_y_calc;
+      }
+      elseif ($dest_q > $orig_q) {
+        // Height is the determining factor.
+        $dest_x_calc = round($dest_y * $orig_q);
+        // Make sure width is divisible by 2, otherwise ffmpeg freaks out.
+        $dest_x_calc &= ~1;
+        $padding1 = round(($dest_x - $dest_x_calc) / 2);
+        $padding2 = $dest_x - $dest_x_calc - $padding1;
+        $pad = sprintf('-padleft %d -padright %d', $padding, $padding);
+        $size = $dest_x_calc . 'x' . $dest_y;
+      }
+      
+      
+    }
+
+    $file_proportions[$file] = array($size, $pad);
+    return $file_proportions[$file];
+  }
+}
+
+
+/**
+ * Implementation of hook_theme_registry_alter().
+ */
+function ffmpeg_converter_theme_registry_alter(&$theme_registry) {
+  // Insert our own preprocess funtion before CCKs theme_content_field().
+  if (isset($theme_registry['content_field']['preprocess functions'])) {
+    foreach ($theme_registry['content_field']['preprocess functions'] as $key => $function) {
+      if ($function == 'content_preprocess_content_field') {
+        unset($theme_registry['content_field']['preprocess functions'][$key]);
+      }
+    }
+    $theme_registry['content_field']['preprocess functions'][] = 'ffmpeg_converter_preprocess_content_field';
+    $theme_registry['content_field']['preprocess functions'][] = 'content_preprocess_content_field';
+  }
+}
+
+
+/**
+ * Preprocess CCK field template.
+ * If this field has an FFmpeg converter preset, we do some processing to 
+ * enable a custom view of video files.
+ */
+function ffmpeg_converter_preprocess_content_field(&$variables) {
+  $element =& $variables['element'];
+  
+  $preset_key = ffmpeg_converter_preset_by_field($element['#field_name']);
+  if ($preset_key) {
+    $instance_keys = element_children($element['items']);
+    
+    // This field has a preset. Check if it has been converted.
+    if (count($instance_keys) > 1) {
+      
+      // Look for converted file and snapshot images.
+      $converted = array();
+      $snapshot = array();
+      foreach ($instance_keys as $key) {
+        $item = &$element['items'][$key];
+        if (is_array($item['#item']) ) {
+          if (is_array($item['#item']['data']) && isset($item['#item']['data']['ffmpeg_converter_file'])) {
+            if ($item['#item']['data']['ffmpeg_converter_file'] == 'converted') {
+              $converted = $item;
+            }
+            elseif ($item['#item']['data']['ffmpeg_converter_file'] == 'snapshot') {
+              // TODO: Show the chosen snapshot.
+              $snapshot = $item['#item'];
+            }
+          }
+        }
+        
+      }
+      
+      // If this is a converted video file, replace the field items with a 
+      // linked snapshot image.
+      if (!empty($converted) && !empty($snapshot)) {
+        
+        // Set template variables.
+        $converted_path = base_path() . $converted['#item']['filepath'];
+        $nid = $element['#node']->nid;
+        
+        $link_href = '';
+        $snapshot_path = '';
+        $width = '';
+        $height = '';
+        
+        // Check field display settings.
+        $field = content_fields($element['#field_name']);
+        if (arg(0) == 'node' && arg(1) == $nid) {
+          $format = $field['display_settings']['full']['format'];
+        }
+        else {
+          $format = $field['display_settings']['teaser']['format'];
+        }
+        
+        $parts =  explode('_', $format);
+        $link_style = array_pop($parts);
+        $presetname = implode('_', $parts);
+        
+        // Define where the image should link to.
+        switch ($link_style) {
+          case 'nodelink':
+          case 'linked':
+            $link_href = url('node/' . $nid);
+            break;
+          case 'imagelink':
+            $link_href = $converted_path;
+            break;
+        }
+        
+        // Check if the standard image should be displayed.
+        if ($presetname == 'image') {
+          $configuration = ffmpeg_converter_options($preset_key);
+          if ($configuration['ffmpeg_video_advanced']) {
+            $size = $configuration[$configuration['ffmpeg_video_size'] == 'other' ? 'ffmpeg_video_size_other' : 'ffmpeg_video_size'];
+          }
+          elseif ($configuration['ffmpeg_video_custom']) {
+            $matches = array();
+            preg_match("/-s ([0-9]+x[0-9]+)/", $configuration['ffmpeg_video_custom_command'], $matches);
+            if (!empty($matches[1])) {
+              $size = $matches[1];
+            }
+          }
+          if (empty($size)) {
+            $size = '320x240';
+          }
+          list($width, $height) = explode('x', $size);
+          
+          $snapshot_path = $snapshot['filepath'];
+        }
+        
+        // Check if an Imagecache preset should be used.
+        if (empty($snapshot_path) && function_exists('imagecache_presets')) {
+          foreach (imagecache_presets() as $preset) {
+            if ($preset['presetname'] == $presetname) {
+              $snapshot_path = base_path() . imagecache_create_path($preset['presetname'], $snapshot['filepath']);
+              $width = NULL;
+              $height = NULL;
+              foreach ($preset['actions'] as $action) {
+                if (isset($action['data']['width'])) {
+                  $width = $action['data']['width'];
+                }
+                if (isset($action['data']['height'])) {
+                  $height = $action['data']['height'];
+                }
+              }
+              
+              break;
+            }
+          }
+        }
+        
+        if (!empty($snapshot_path)) {
+          // Replace the field display with a custom template.
+          $converted['#children'] = theme('ffmpeg_converter_video', $converted['#item'], $converted_path, $snapshot, $snapshot_path, check_plain($converted['#item']['data']['description']), $nid, $width, $height, $link_href);
+          $element['items'] = array($converted);
+        }
+      }
+    }
+  }
+}

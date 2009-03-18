@@ -128,6 +128,9 @@ function phptemplate_preprocess_node(&$vars) {
   switch ($node->type) {
     case 'page':
       break;
+    case 'slideshow': //add the sound plugin
+      jquery_plugin_add('jquery.sound');
+      drupal_add_js(drupal_get_path('theme', 'blueprint') . '/scripts/jquery.sound.js', 'theme');
   }
 }
 

@@ -1,0 +1,58 @@
+<?php
+// $Id: jq.module,v 1.9.2.1 2008/05/04 19:06:16 aaron Exp $
+
+/**
+ *  implements hook_menu
+ */
+function jq_menu() {
+  $items = array();
+  $items['admin/settings/jq'] = array(
+    'title' => 'jQ Plugin Administration',
+    'description' => 'Administer jQ (jQuery) Plugin Repository.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('jq_settings_form'),
+    'type' => MENU_NORMAL_ITEM,
+    'access arguments' => array('administer jq'),
+    'file' => 'jq.admin.inc',
+  );
+  return $items;
+}
+
+function jq_perm() {
+  return array('administer jq');
+}
+
+/**
+ *  This will add a specific jquery plugin to a page, if it hasn't already been.
+ *  Returns whether the plugin was successfully loaded or not. It will pass through any extra arguments.
+ *  For usage, see README.txt for hook_jq implementation.
+ */
+function jq_add($plugin) {
+  module_load_include('inc', 'jq', 'jq.add');
+  $extra = func_get_args();
+  array_shift($extra);
+  return _jq_add($plugin, $extra);
+}
+
+/**
+ *  returns all module defined plugins that are registered using hook_jq
+ *  this is cached, so a module is responsible for calling this on installation
+ */
+function jq_plugins($plugin = NULL, $cached = TRUE, $display_errors = FALSE, $log_errors = TRUE) {
+  static $plugins;
+  if (!isset($plugins) || !$cached) {
+    if ($cached && $cache = cache_get('jq_plugins')) {
+      $plugins = $cache->data;
+    }
+    else {
+      module_load_include('inc', 'jq', 'jq.admin');
+      $plugins = _jq_plugins($display_errors);
+      cache_set('jq_plugins', $plugins);
+    }
+  }
+  if (isset($plugin)) {
+    return $plugins[$plugin];
+  }
+  return $plugins;
+}
+
