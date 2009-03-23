@@ -13,4 +13,7 @@ div.field-field-image div.field-items img {
 div.overlay {
   display: none;
   background-image: url(../images/overlay.png);     
+  width: 660px; 
+  height: 500px;         
+  padding: 10px; 
 }
