@@ -10,7 +10,7 @@ div.field-field-image div.field-items img {
 .cycle-nav a.activeSlide { background: #ea0 }
 .cycle-nav a:focus { outline: none; }
 
-div.overlay {
+div.view-overlay {
   display: none;
   background-image: url(../images/overlay.png);     
   width: 660px; 

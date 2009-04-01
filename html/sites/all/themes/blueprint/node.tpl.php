@@ -19,6 +19,7 @@
   <div class="content clear-block">
     <?php print $picture ?>
     <?php print $content ?>
+    <?php print views_embed_view('overlay', 'default', $node->nid); ?>
   </div>
 
 <?php

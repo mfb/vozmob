@@ -55,7 +55,7 @@ $(function() {
 function inicializar(){
 
 	var url = "<?php print $node->field_audio[0]['filepath']; ?>";
-	var player = "/sites/all/themes/garland/scripts/Player.swf";
+	var player = "/sites/all/themes/blueprint/scripts/Player.swf";
 
 	//get the flash player and load the audio file from the node
 	$("#sound_player").sound({swf: player});
