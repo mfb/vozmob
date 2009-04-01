@@ -119,18 +119,21 @@ function phptemplate_preprocess_page(&$vars) {
  *   A sequential array of variables passed to the theme function.
  */
 function phptemplate_preprocess_node(&$vars) {
-  jquery_plugin_add('cycle');
+  jquery_plugin_add('cycle', 'theme', 'header');
   jquery_plugin_add('expose');
   jquery_plugin_add('overlay');
   drupal_add_js(drupal_get_path('theme', 'blueprint') . '/scripts/cycle.js', 'theme');
   $node = $vars['node']; // for easy reference
   // for easy variable adding for different node types
+  jquery_plugin_add('jquery.sound');
+  drupal_add_js(drupal_get_path('theme', 'blueprint') . '/scripts/jquery.sound.js', 'theme');
+
   switch ($node->type) {
     case 'page':
       break;
-    case 'slideshow': //add the sound plugin
-      jquery_plugin_add('jquery.sound');
-      drupal_add_js(drupal_get_path('theme', 'blueprint') . '/scripts/jquery.sound.js', 'theme');
+  //  case 'slideshow': //add the sound plugin
+  //    jquery_plugin_add('jquery.sound');
+  //    drupal_add_js(drupal_get_path('theme', 'blueprint') . '/scripts/jquery.sound.js', 'theme');
   }
 }
 

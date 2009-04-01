@@ -22,6 +22,7 @@ pre code { background-color: #eee }
 }
 #controls span { margin: 0 5px }
 </style>
+
 <script type="text/javascript">
 $(function() {
 
@@ -57,25 +58,17 @@ function inicializar(){
 	var url = "<?php print $node->field_audio[0]['filepath']; ?>";
 	var player = "/sites/all/themes/blueprint/scripts/Player.swf";
 
+	//here we need to see if there is more than one audio field and play them one after the other
+	//
 	//get the flash player and load the audio file from the node
 	$("#sound_player").sound({swf: player});
 	$("#sound_player").load(url);
 };
 
 function esMMS(){
-	return ("<?php print sizeof($node->field_audio) > 0 && sizeof($node->field_image) > 0 ?>");
+	return ("<?php print sizeof($node->field_audio) > 0 && sizeof($node->field_photo) > 0 ?>");
 }
 
-/*
-jQuery(document).ready(function() {
-
-	if (esMMS()) {	inicializar(); }
-
-	//while ($('#sound_player').isPlaying()) {
-	//	// wait until the audio ends
-	//}
-        //$('#slides').cycle('stop');
-});*/
 </script>
 
 <?php
@@ -93,14 +86,7 @@ jQuery(document).ready(function() {
     <span class="submitted"><?php print $submitted; ?></span>
   <?php endif; ?>
 
-
-<br>image:
-<?php print sizeof($node->field_image) ?><br>audio:
-<?php print sizeof($node->field_audio) ?>
-<br><br>
-
-
-<?php if (sizeof($node->field_audio) > 0 && sizeof($node->field_image) > 0): ?>
+<?php if ( (sizeof($node->field_audio)) > 0 && (sizeof($node->field_photo) > 0)): ?>
 	<?php print $node->content['body']['#value'] ?>
 	<div id="slideshow">
 	    <div id="controls">
@@ -109,7 +95,7 @@ jQuery(document).ready(function() {
 	    </div>
 	    <div id="slides" class="pics">                           
 	<?php 
-	     foreach ($node->field_image as $item) :
+	     foreach ($node->field_photo as $item) :
         	    if (!$item['empty']) : 
 	?>
         	<img src="<?php print $item['filepath'];?>" width="200" height="200" />

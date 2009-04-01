@@ -16,6 +16,7 @@
   <!--[if lte IE 6]>
   	<link href="<?php print $path; ?>css/ie6.css" rel="stylesheet"  type="text/css"  media="screen, projection" />
   <![endif]-->  
+<?php print $scripts ?>
 </head>
 
 <body class="<?php print $body_classes; ?>">
@@ -82,7 +83,7 @@
   <?php endif ?>
   
 
-  <?php print $scripts ?>
+  <!-- <-?php print $scripts ?> -->
   <script type="text/javascript" src="http://mediaplayer.yahoo.com/js"></script>
   <?php print $closure; ?>
 
