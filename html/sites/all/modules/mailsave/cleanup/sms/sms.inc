@@ -45,11 +45,13 @@ function sms_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
     $number = $from[0];
 
     sms_mailsave_receive($node, $number);
-
+    
+    //changed the name of the user that created the node to vozmob and a random number -- gaba
+    //'name' => implode('-', array(dechex(mt_rand()), dechex(mt_rand()))),
     $sms_email_gateway_providers = sms_email_gateway_sms_email_gateway_providers();
     if (!$node->uid && isset($sms_email_gateway_providers[$from[1]])) {
       $user = user_save(NULL, array(
-        'name' => implode('-', array(dechex(mt_rand()), dechex(mt_rand()))),
+        'name' => implode('-', array('vozmob', mt_rand(1,10000))),
         'pass' => dechex(mt_rand()) . dechex(mt_rand()),
         'mail' => $from_address,
         'roles' => drupal_map_assoc(array(3)),
