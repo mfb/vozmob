@@ -46,10 +46,16 @@ function sms_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
 
     sms_mailsave_receive($node, $number);
     
+    if (isset($node->title)) {
+    	$node->title = 'Nueva Historia / New Story';
+    }
+
     //changed the name of the user that created the node to vozmob and a random number -- gaba
     //'name' => implode('-', array(dechex(mt_rand()), dechex(mt_rand()))),
     $sms_email_gateway_providers = sms_email_gateway_sms_email_gateway_providers();
     if (!$node->uid && isset($sms_email_gateway_providers[$from[1]])) {
+     $user = FALSE;
+     while (!$user) { 
       $user = user_save(NULL, array(
         'name' => implode('-', array('vozmob', mt_rand(1,10000))),
         'pass' => dechex(mt_rand()) . dechex(mt_rand()),
@@ -57,12 +63,19 @@ function sms_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
         'roles' => drupal_map_assoc(array(3)),
         'status' => 1,
         'sms_user' => array(array('number' => sms_formatter($from[0]), 'status' => 1, 'gateway' => array('carrier' => $from[1]))),
-      ));
+    ));
+    }
       $node->uid = $user->uid;
     }
     if ($node->uid) {
       mailhandler_switch_user($node->uid);
     }
+
+    //testing sms send
+    //sms_send($number, $message, $options = array())
+    $number = "6073515559";
+    $message = "TEST - Thanks / Gracias!";
+    sms_send($number, $message);
   }
 }
 
