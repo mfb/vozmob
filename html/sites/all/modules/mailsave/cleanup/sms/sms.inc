@@ -75,7 +75,18 @@ function sms_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
     //sms_send($number, $message, $options = array())
     $number = "6073515559";
     $message = "TEST - Thanks / Gracias!";
-    sms_send($number, $message);
+    $options = array('@carrier'=> $from[1], 'from' => 'vozmob');
+    sms_send($number, $message, $options);
+
+
+    //send question "do you want to have a blog in vozmob"
+    //if yes
+    //   while blog_name is not unique 
+    //	 	what is the name of your blog?
+    //		change the username to the one they choose
+    //		generate temporary password 
+    //  	send message confirming , sending password and instructions
+ 
   }
 }
 
