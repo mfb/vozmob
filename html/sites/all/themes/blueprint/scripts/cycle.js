@@ -1,16 +1,6 @@
 // $Id$
 
 $(document).ready(function() {
-  // Set up the slideshow.
-  var cycleIndex = 0;
-  $('div.view-overlay div.views-field-field-image-fid span.field-content').each(function() {
-    $(this).before('<div class="cycle-nav" id="cycle-nav-' + cycleIndex + '"></div>').cycle({ 
-      fx:    'fade',
-      pager: '#cycle-nav-' + cycleIndex,
-      pause: 1
-    });
-    cycleIndex = 1 + cycleIndex;
-  });
   // Set up the overlay and expose behaviors.
   $('div.field-field-image div.field-items a').each(function() {
     // Get the nid for this image field and set the rel attribute to the overlay for this node.
@@ -22,6 +12,25 @@ $(document).ready(function() {
     $(this).overlay({
       onBeforeLoad: function() {
         this.getBackgroundImage().expose({color: '#000'});
+      },
+      onLoad: function() {
+        // Set up the slideshow.
+        this.getContent().find('div.views-field-field-image-fid span.field-content').each(function() {
+          $(this).append('<div class="overlay-links">' + $(this).parents('div.node').find('div.node-links').html() + '</div>');
+          $(this).cycle({ 
+            fx:    'fade',
+            next:  '.overlay-next',
+            prev:  '.overlay-previous',
+            pause: 1
+          });
+          var slideshow = this;
+          $('span.overlay-pause').click(function() {
+            $(slideshow).cycle('pause');
+          });
+          $('span.overlay-play').click(function() {
+            $(slideshow).cycle('resume');
+          });
+        });
       },
       onClose: function() {
         $.expose.close();

@@ -1,20 +1,20 @@
 <div id="node-<?php print $node->nid; ?>" class="node<?php if ($sticky) { print ' sticky'; } ?><?php if (!$status) { print ' node-unpublished'; } ?> clear-block">
 
-<?php if ($page == 0): ?>
-  <h2><a href="<?php print $node_url ?>" title="<?php print $title ?>"><?php print $title ?></a></h2>
-<?php endif; ?>
-
-<?php if ($submitted || $terms): ?>
-  <div class="meta">
-  <?php if ($submitted): ?>
-    <div class="submitted"><?php print $submitted ?></div>
+  <?php if ($page == 0): ?>
+    <h2><a href="<?php print $node_url ?>" title="<?php print $title ?>"><?php print $title ?></a></h2>
   <?php endif; ?>
 
-  <?php if ($terms): ?>
-    <div class="terms"><?php print $terms ?></div>
-  <?php endif;?>
-  </div>
-<?php endif; ?>
+  <?php if ($submitted || $terms): ?>
+    <div class="meta">
+      <?php if ($submitted): ?>
+        <div class="submitted"><?php print $submitted ?></div>
+      <?php endif; ?>
+
+      <?php if ($terms): ?>
+        <div class="terms"><?php print $terms ?></div>
+      <?php endif;?>
+    </div>
+  <?php endif; ?>
 
   <div class="content clear-block">
     <?php print $picture ?>
@@ -22,10 +22,15 @@
     <?php print views_embed_view('overlay', 'default', $node->nid); ?>
   </div>
 
-<?php
-  if ($links) {
-    print '<div class="node-links">'. $links .'</div>';
-  }
-?>
+  <?php if (!empty($node->og_groups) && $page): ?>
+    <div class="groups">
+      <?php print t('Groups') . ': '; ?>
+      <div class="links"><?php print $og_links['view']; ?></div>
+    </div>
+  <?php endif; ?>
+
+  <?php if ($links): ?>
+    <div class="node-links"><?php print $links; ?></div>
+  <?php endif; ?>
 
 </div>

@@ -26,3 +26,31 @@ div.view-overlay div.views-field-title {
 div.view-overlay div.views-field-field-image-fid {
   height: 400px;
 }
+
+div.view-overlay div.overlay-nav {
+  cursor: pointer;
+}
+
+div.view-overlay div.close {
+  background-image: url(../images/close.png);
+  position: absolute;
+  right: 5px;
+  top: 5px;
+  cursor: pointer;
+  height: 35px;
+  width: 35px;
+}
+
+div.overlay-links ul.links {
+  width: 512px;
+  display: block;
+  margin: 0pt 1.5em 1.5em;
+  padding: 20px;
+  text-align: left;
+  font-size: 2em;
+  line-height: 2.4em;
+}
+div.overlay-links li {
+  display: block;
+  list-style-image: url(../images/icons/menu-leaf.gif);
+}
