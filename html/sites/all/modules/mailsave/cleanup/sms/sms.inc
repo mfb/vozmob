@@ -77,7 +77,6 @@ function sms_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
     $message = "TEST - Thanks / Gracias!";
     $options = array('@carrier'=> $from[1], 'from' => 'vozmob');
     sms_send($number, $message, $options);
-    var_dump($number);
 
 
     //send question "do you want to have a blog in vozmob"
