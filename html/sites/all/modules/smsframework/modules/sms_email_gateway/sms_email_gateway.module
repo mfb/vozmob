@@ -64,6 +64,7 @@ function sms_email_gateway_sms_email_gateway_providers() {
     'myboostmobile.com' => t('Boost Mobile'),
     'mobile.celloneusa.com' => t('CellularOne'),
     'cwemail.com' => t('Centennial Wireless'),
+    'mms.claro.com.uy' => t('Claro UY'),
     'sms.mycricket.com' => t('Cricket'),
     'messaging.sprintpcs.com' => t('Helio'),
     'mymetropcs.com' => t('Metro PCS'),
