@@ -13,7 +13,16 @@ div.field-field-image div.field-items img {
 div.view-overlay {
   display: none;
   background-image: url(../images/overlay.png);     
-  width: 660px; 
-  height: 500px;         
-  padding: 10px; 
+  width: 656px; 
+  height: 526px;         
+  padding: 48px; 
+  color: #ddd;
+}
+
+div.view-overlay div.views-field-title {
+  font-size: 1.5em;
+}
+
+div.view-overlay div.views-field-field-image-fid {
+  height: 400px;
 }
