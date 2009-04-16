@@ -73,7 +73,7 @@ function sms_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
 
     //testing sms send
     //sms_send($number, $message, $options = array())
-    $number = "6073515559";
+    //$number = "6073515559";
     $message = "TEST - Thanks / Gracias!";
     $options = array('@carrier'=> $from[1], 'from' => 'vozmob');
     sms_send($number, $message, $options);
