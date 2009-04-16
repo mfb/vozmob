@@ -1,5 +1,5 @@
 <?php
-// $Id: menu.inc,v 1.255.2.28 2009/02/09 16:28:21 dries Exp $
+// $Id: menu.inc,v 1.255.2.30 2009/03/30 12:12:52 goba Exp $
 
 /**
  * @file
@@ -482,9 +482,13 @@ function _menu_check_access(&$item, $map) {
 function _menu_item_localize(&$item, $map, $link_translate = FALSE) {
   $callback = $item['title_callback'];
   $item['localized_options'] = $item['options'];
-  // If we are not doing link translation or if the title matches the
-  // link title of its router item, localize it.
-  if (!$link_translate || (!empty($item['title']) && ($item['title'] == $item['link_title']))) {
+  // If we are translating the title of a menu link, and its title is the same
+  // as the corresponding router item, then we can use the title information
+  // from the router. If it's customized, then we need to use the link title
+  // itself; can't localize.
+  // If we are translating a router item (tabs, page, breadcrumb), then we
+  // can always use the information from the router item.
+  if (!$link_translate || ($item['title'] == $item['link_title'])) {
     // t() is a special case. Since it is used very close to all the time,
     // we handle it directly instead of using indirect, slower methods.
     if ($callback == 't') {
@@ -963,6 +967,11 @@ function _menu_tree_cid($menu_name, $data) {
 
 /**
  * Recursive helper function - collect node links.
+ *
+ * @param $tree
+ *   The menu tree you wish to collect node links from.
+ * @param $node_links
+ *   An array in which to store the collected node links.
  */
 function menu_tree_collect_node_links(&$tree, &$node_links) {
   foreach ($tree as $key => $v) {
@@ -981,6 +990,12 @@ function menu_tree_collect_node_links(&$tree, &$node_links) {
 
 /**
  * Check access and perform other dynamic operations for each link in the tree.
+ *
+ * @param $tree
+ *   The menu tree you wish to operate on.
+ * @param $node_links
+ *   A collection of node link references generated from $tree by
+ *   menu_tree_collect_node_links().
  */
 function menu_tree_check_access(&$tree, $node_links = array()) {
 
