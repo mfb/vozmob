@@ -125,8 +125,8 @@ function phptemplate_preprocess_node(&$vars) {
   drupal_add_js(drupal_get_path('theme', 'blueprint') . '/scripts/cycle.js', 'theme');
   $node = $vars['node']; // for easy reference
   // for easy variable adding for different node types
-  jquery_plugin_add('jquery.sound');
-  drupal_add_js(drupal_get_path('theme', 'blueprint') . '/scripts/jquery.sound.js', 'theme');
+  // jquery_plugin_add('jquery.sound');
+  // drupal_add_js(drupal_get_path('theme', 'blueprint') . '/scripts/jquery.sound.js', 'theme');
 
   switch ($node->type) {
     case 'page':
