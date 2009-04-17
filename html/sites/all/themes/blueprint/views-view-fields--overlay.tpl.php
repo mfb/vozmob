@@ -44,7 +44,7 @@
           <?php foreach ($cid as $mmfid): ?>
             <?php if (substr($mmfid['complete_file'], -4, 4) == '.mp3'): ?>
               <div class="media-mover-audio">
-                <?php print theme('flowplayer', array('clip' => array('url' => file_create_url($mmfid['complete_file']), 'autoPlay' => FALSE), 'plugins' => array('controls' => array('fullscreen' => FALSE))), 'mmfid-' . $mmfid['mmfid']); ?>
+                <?php print theme('flowplayer', array('clip' => array('url' => file_create_url($mmfid['complete_file']), 'autoPlay' => FALSE, 'autoBuffering' => TRUE), 'plugins' => array('controls' => array('fullscreen' => FALSE))), 'mmfid-' . $mmfid['mmfid']); ?>
               </div>
             <?php endif; ?>
           <?php endforeach; ?>
