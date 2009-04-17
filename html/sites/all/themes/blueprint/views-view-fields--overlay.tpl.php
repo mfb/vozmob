@@ -37,20 +37,21 @@
       <<?php print $field->element_type; ?> class="field-content"><?php print $field->content; ?></<?php print $field->element_type; ?>>
   </<?php print $field->inline_html;?>>
 
-  <?php if ($field->class == 'field-image-fid'): ?>
-    <?php if (($node = node_load($view->args[0])) && !empty($node->media_mover)): ?>
-      <div class="media-mover">
-        <?php foreach ($node->media_mover as $cid): ?>
-          <?php foreach ($cid as $mmfid): ?>
-            <?php if (substr($mmfid['complete_file'], -4, 4) == '.mp3'): ?>
-              <div class="media-mover-audio">
-                <?php print theme('flowplayer', array('clip' => array('url' => file_create_url($mmfid['complete_file']), 'autoPlay' => FALSE, 'autoBuffering' => TRUE), 'plugins' => array('controls' => array('fullscreen' => FALSE))), 'mmfid-' . $mmfid['mmfid']); ?>
-              </div>
-            <?php endif; ?>
-          <?php endforeach; ?>
+  <?php if ($field->class == 'field-image-fid' && ($node = node_load($view->args[0])) && !empty($node->media_mover)): ?>
+    <div class="media-mover">
+      <?php foreach ($node->media_mover as $cid): ?>
+        <?php foreach ($cid as $mmfid): ?>
+          <?php if (substr($mmfid['complete_file'], -4, 4) == '.mp3'): ?>
+            <?php $playlist[] = array('url' => file_create_url($mmfid['complete_file'])); ?>
+          <?php endif; ?>
         <?php endforeach; ?>
-      </div>
-    <?php endif; ?>
+      <?php endforeach; ?>
+      <?php if (!empty($playlist)): ?>
+        <div class="media-mover-audio">
+          <?php print theme('flowplayer', array('clip' => array('autoPlay' => TRUE, 'autoBuffering' => TRUE), 'playlist' => $playlist, 'plugins' => array('controls' => array('fullscreen' => FALSE, 'playlist' => TRUE))), 'flowplayer-audio-' . $node->nid); ?>
+        </div>
+      <?php endif; ?>
+    </div>
   <?php endif; ?>
 
 <?php endforeach; ?>
