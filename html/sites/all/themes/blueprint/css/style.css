@@ -42,13 +42,10 @@ div.view-overlay div.close {
 }
 
 div.overlay-links ul.links {
-  width: 512px;
-  display: block;
+  float: right;
+  width: 160px;
   margin: 0pt 1.5em 1.5em;
   padding: 20px;
-  text-align: left;
-  font-size: 2em;
-  line-height: 2.4em;
 }
 div.overlay-links li {
   display: block;

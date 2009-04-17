@@ -44,13 +44,6 @@
     </div>
   <?php endif; ?>
 
-  <div class="overlay-nav">
-    <span class="overlay-previous"><?php print t('Previous'); ?></span>
-    <span class="overlay-play"><?php print t('Play'); ?></span>
-    <span class="overlay-pause"><?php print t('Pause'); ?></span>
-    <span class="overlay-next"><?php print t('Next'); ?></span>
-  </div>
-
   <?php if ($rows): ?>
     <div class="view-content">
       <?php print $rows; ?>

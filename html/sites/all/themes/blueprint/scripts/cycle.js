@@ -8,6 +8,10 @@ $(document).ready(function() {
     $(this).attr('rel', '#overlay-' + nid);
     $(this).attr('href', '#overlay-' + nid);
   });
+  var cycleIndex = 0;
+  $('div.view-overlay div.views-field-title').each(function() {
+    $(this).before('<div class="overlay-links">' + $(this).parents('div.node').find('div.node-links').html() + '</div>');
+  });
   $('div.field-field-image div.field-items a[rel]').each(function() {
     $(this).overlay({
       onBeforeLoad: function() {
@@ -16,20 +20,12 @@ $(document).ready(function() {
       onLoad: function() {
         // Set up the slideshow.
         this.getContent().find('div.views-field-field-image-fid span.field-content').each(function() {
-          $(this).append('<div class="overlay-links">' + $(this).parents('div.node').find('div.node-links').html() + '</div>');
-          $(this).cycle({ 
+          $(this).before('<div class="cycle-nav" id="cycle-nav-' + cycleIndex + '"></div>').cycle({ 
             fx:    'fade',
-            next:  '.overlay-next',
-            prev:  '.overlay-previous',
+            pager: '#cycle-nav-' + cycleIndex,
             pause: 1
           });
-          var slideshow = this;
-          $('span.overlay-pause').click(function() {
-            $(slideshow).cycle('pause');
-          });
-          $('span.overlay-play').click(function() {
-            $(slideshow).cycle('resume');
-          });
+          cycleIndex = 1 + cycleIndex;
         });
       },
       onClose: function() {
