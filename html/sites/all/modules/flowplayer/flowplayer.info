@@ -1,0 +1,4 @@
+; $Id: flowplayer.info,v 1.1 2009/02/07 00:31:44 robloach Exp $
+name = Flowplayer
+description = Provides integration with the Flowplayer video player.
+core = 6.x

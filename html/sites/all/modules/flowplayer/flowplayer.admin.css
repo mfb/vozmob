@@ -1,0 +1,30 @@
+/* $Id: flowplayer.admin.css,v 1.1.2.1 2009/02/19 16:33:33 robloach Exp $ */
+
+/**
+ * @file
+ * Provides the CSS for the Flowplayer Drupal module administration page.
+ */
+
+fieldset#flowplayer-color .form-item label {
+  float: left;
+  width: 125px;
+}
+
+#flowplayer-color-picker {
+  float: right;
+}
+
+#flowplayer-color {
+  float: left;
+  width: 450px;
+  margin-right: 20px;
+}
+
+#flowplayer-styling {
+  float:left;
+  padding-right: 30px
+}
+
+#flowplayer-preview-wrapper {
+  clear: both;
+}

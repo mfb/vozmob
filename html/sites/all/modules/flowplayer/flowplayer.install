@@ -1,0 +1,22 @@
+<?php
+// $Id: flowplayer.install,v 1.1.2.1 2009/02/19 16:33:33 robloach Exp $
+
+/**
+ * @file
+ * Provides the installation and uninstallation features of the Flowplayer Drupal module.
+ */
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function flowplayer_uninstall() {
+  // Remove any saved variables.
+  variable_del('flowplayer_key');
+  $colors = array('backgroundColor', 'sliderColor', 'buttonColor', 'buttonOverColor', 'durationColor', 'timeColor', 'progressColor', 'bufferColor');
+  foreach ($colors as $color) {
+    variable_del('flowplayer_color_'. $color);
+  }
+  variable_del('flowplayer_buttons');
+  variable_del('flowplayer_background_gradient');
+  variable_del('flowplayer_border_radius');
+}

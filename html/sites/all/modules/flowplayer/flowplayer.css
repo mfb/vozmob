@@ -1,0 +1,13 @@
+/**
+ * $Id: flowplayer.css,v 1.1 2009/02/07 00:31:44 robloach Exp $
+ */
+
+/**
+ * @file
+ * Default stylesheet for the Flowplayer.
+ */
+.flowplayer {
+  display: block;
+  width: 400px;
+  height: 300px;
+}
