@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_argument_validate_taxonomy_term.inc,v 1.2 2008/09/10 16:17:54 merlinofchaos Exp $
+// $Id: views_plugin_argument_validate_taxonomy_term.inc,v 1.4 2009/04/08 05:10:07 merlinofchaos Exp $
 /**
  * @file
  * Contains the 'taxonomy term' argument validator plugin.
@@ -42,12 +42,20 @@ class views_plugin_argument_validate_taxonomy_term extends views_plugin_argument
       '#process' => array('views_process_dependency'),
       '#dependency' => array('edit-options-validate-type' => array($this->id)),
     );
+
+    $form['validate_argument_transform'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Transform dashes in URL to spaces in term name arguments'),
+      '#default_value' => isset($this->argument->options['validate_argument_transform']) ? $this->argument->options['validate_argument_transform'] : FALSE,
+      '#process' => array('views_process_dependency'),
+      '#dependency' => array('edit-options-validate-type' => array($this->id)),
+    );
   }
 
   function validate_argument($argument) {
     $vids = isset($this->argument->options['validate_argument_vocabulary']) ? array_filter($this->argument->options['validate_argument_vocabulary']) : array();
-
     $type = isset($this->argument->options['validate_argument_type']) ? $this->argument->options['validate_argument_type'] : 'tid';
+    $transform = isset($this->argument->options['validate_argument_transform']) ? $this->argument->options['validate_argument_transform'] : FALSE;
 
     switch ($type) {
       case 'tid':
@@ -93,7 +101,9 @@ class views_plugin_argument_validate_taxonomy_term extends views_plugin_argument
         if (!empty($vids)) {
           $and = " AND td.vid IN(" . implode(', ', $vids) . ')';
         }
-
+        if ($transform) {
+          $argument = str_replace('-', ' ', $argument);
+        }
         $result = db_fetch_object(db_query("SELECT td.* FROM {term_data} td LEFT JOIN {term_synonym} ts ON ts.tid = td.tid WHERE (td.name = '%s' OR ts.name = '%s')$and", $argument, $argument));
         if (!$result) {
           return FALSE;
@@ -101,6 +111,7 @@ class views_plugin_argument_validate_taxonomy_term extends views_plugin_argument
 
         if ($type == 'convert') {
           $this->argument->argument = $result->tid;
+          $this->argument->validated_title = check_plain($result->name);
         }
 
         return TRUE;

@@ -1,5 +1,5 @@
 <?php
-// $Id: filefield_formatter.inc,v 1.10 2009/03/12 03:35:27 quicksketch Exp $
+// $Id: filefield_formatter.inc,v 1.13 2009/04/09 16:12:49 quicksketch Exp $
 /**
  * @file
  * FileField: Defines a CCK file field type.
@@ -21,7 +21,54 @@ function theme_filefield_formatter_default($element) {
 }
 
 /**
- * Theme function for any file that is managed by filefield.
+ * Theme function for the 'path_plain' formatter.
+ */
+function theme_filefield_formatter_path_plain($element) {
+  // Inside a View this function may be called with null data. In that case,
+  // just return.
+  if (empty($element['#item'])) {
+    return '';
+  }
+
+  $field = content_fields($element['#field_name']);
+  $item = $element['#item'];
+  // If there is no image on the database, use default.
+  if (empty($item['fid']) && $field['use_default_file']) {
+    $item = $field['default_file'];
+  }
+  if (empty($item['filepath']) && !empty($item['fid'])) {
+    $item = array_merge($item, field_file_load($item['fid']));
+  }
+
+  return empty($item['filepath']) ? '' : file_create_path($item['filepath']);
+}
+
+/**
+ * Theme function for the 'url_plain' formatter.
+ */
+function theme_filefield_formatter_url_plain($element) {
+  // Inside a View this function may be called with null data. In that case,
+  // just return.
+  if (empty($element['#item'])) {
+    return '';
+  }
+
+  $field = content_fields($element['#field_name']);
+  $item = $element['#item'];
+  // If there is no image on the database, use default.
+  if (empty($item['fid']) && $field['use_default_file']) {
+    $item = $field['default_file'];
+  }
+  if (empty($item['filepath']) && !empty($item['fid'])) {
+    $item = array_merge($item, field_file_load($item['fid']));
+  }
+
+  return empty($item['filepath']) ? '' : file_create_url($item['filepath']);
+}
+
+/**
+ * Theme function for any file that is managed by FileField.
+ *
  * It doesn't really format stuff by itself but rather redirects to other
  * formatters that are telling us they want to handle the concerned file.
  *
@@ -30,11 +77,7 @@ function theme_filefield_formatter_default($element) {
  * in any case, please use theme('filefield') instead.
  */
 function theme_filefield_item($file, $field) {
-  if (!filefield_view_access($field['field_name'])) {
-    return '<!-- you do not have access to view this file -->';
-  }
-
-  if (filefield_file_listed($file, $field)) {
+  if (filefield_view_access($field['field_name']) && filefield_file_listed($file, $field)) {
     return theme('filefield_file', $file);
   }
   return '';
@@ -74,8 +117,7 @@ function theme_filefield_file($file) {
   // at http://darrelopry.com/story/microformats-and-media-rfc-if-you-js-or-css
   $options = array(
     'attributes' => array(
-      'type' => $file['filemime'],
-      'length' => $file['filesize'],
+      'type' => $file['filemime'] . '; length=' . $file['filesize'],
     ),
   );
 

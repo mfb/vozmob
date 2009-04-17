@@ -1,4 +1,4 @@
-<?php  // $Id: imageapi_imagemagick.module,v 1.17.2.2 2009/02/12 16:41:57 drewish Exp $
+<?php  // $Id: imageapi_imagemagick.module,v 1.17.2.3 2009/03/18 07:59:56 drewish Exp $
 
 /**
  * @file
@@ -32,7 +32,7 @@ function imageapi_imagemagick_settings_form() {
   $form['imageapi_imagemagick_binary'] = array(
     '#type' => 'fieldset',
     '#title' => t('ImageMagick Binary'),
-    '#collapsible' => false,
+    '#collapsible' => FALSE,
     '#description' => t('ImageMagick is a standalone program used to manipulate images. To use it, it must be installed on your server and you need to know where it is located. If you are unsure of the exact path consult your ISP or server administrator.'),
   );
 
@@ -43,7 +43,7 @@ function imageapi_imagemagick_settings_form() {
     '#type' => 'textfield',
     '#title' => t('Path to the "convert" binary'),
     '#default_value' => variable_get('imageapi_imagemagick_convert', '/usr/bin/convert'),
-    '#required' => true,
+    '#required' => TRUE,
     '#description' => t('Specify the complete path to the ImageMagic <kbd>convert</kbd> binary. For example: <kbd>/usr/bin/convert</kbd> or <kbd>C:\Program Files\ImageMagick-6.3.4-Q16\convert.exe</kbd>'),
     '#element_validate' => array('imageapi_imagemagick_validate_path'),
   );
@@ -85,9 +85,9 @@ function imageapi_imagemagick_validate_path($element) {
   if ($errors = _imageapi_imagemagick_check_path($element['#value'])) {
     form_set_error($element['#parents'][0], implode('<br />', $errors));
     //form_set_value($element['#parents'][0], variable_get('imageapi_imagemagick_convert', '/usr/bin/convert'));
-    return false;
+    return FALSE;
   }
-  return true;
+  return TRUE;
 }
 
 function imageapi_imagemagick_quality_element_validate($element) {
@@ -109,14 +109,14 @@ function imageapi_imagemagick_image_crop(&$image, $x, $y, $width, $height) {
   $image->ops[]  = '-crop '. (int) $width .'x'. (int) $height .'+'. (int) $x .'+'. (int) $y .'!';
   $image->info['width'] = $width;
   $image->info['height'] = $height;
-  return true;
+  return TRUE;
 }
 
 function imageapi_imagemagick_image_resize(&$image, $width, $height) {
   $image->ops[] = '-resize '. (int) $width .'x'. (int) $height .'!';
   $image->info['width'] = $width;
   $image->info['height'] = $height;
-  return true;
+  return TRUE;
 }
 
 function imageapi_imagemagick_image_rotate(&$image, $degrees, $bgcolor) {
@@ -127,18 +127,18 @@ function imageapi_imagemagick_image_rotate(&$image, $degrees, $bgcolor) {
     $bgcolor = str_replace('0x', '#', $bgcolor);
   }
   $image->ops[] = '-background '. escapeshellarg($bgcolor) .' -rotate '. (float) $degrees;
-  return true;
+  return TRUE;
 }
 
 function imageapi_imagemagick_image_sharpen(&$image, $radius, $sigma, $amount, $threshold) {
   $unsharp_arg = $radius .'x'. $sigma .'+'. $amount/100 .'+'. $threshold;
   $image->ops[] = '-unsharp '. $unsharp_arg;
-  return true;
+  return TRUE;
 }
 
 function imageapi_imagemagick_image_desaturate(&$image) {
   $image->ops[] = '-colorspace GRAY';
-  return true;
+  return TRUE;
 }
 
 /**
@@ -152,7 +152,7 @@ function _imageapi_imagemagick_convert($source, $dest, $args) {
   $command = escapeshellarg($source) .' '. implode(' ', $args) .' '. escapeshellarg($dest);
 
   if (0 != _imageapi_imagemagick_convert_exec($command, $output, $errors)) {
-    return false;
+    return FALSE;
   }
   return file_exists($dest);
 }
@@ -175,7 +175,7 @@ function _imageapi_imagemagick_convert_exec($command_args, &$output, &$errors) {
   $convert_path = variable_get('imageapi_imagemagick_convert', '/usr/bin/convert');
   if ($errors = _imageapi_imagemagick_check_path($convert_path)) {
     watchdog('imageapi imagemagick', '!errors', array('!errors' => implode('<br />', $errors)), WATCHDOG_ERROR);
-    return false;
+    return FALSE;
   }
 
   if (strstr($_SERVER['SERVER_SOFTWARE'], 'Win32') || strstr($_SERVER['SERVER_SOFTWARE'], 'IIS')) {
@@ -203,7 +203,7 @@ function _imageapi_imagemagick_convert_exec($command_args, &$output, &$errors) {
     }
 
     // Display debugging information to authorized users.
-    if (variable_get('imageapi_imagemagick_debugging', false) && user_access('administer site configuration')) {
+    if (variable_get('imageapi_imagemagick_debugging', FALSE) && user_access('administer site configuration')) {
       drupal_set_message(t('ImageMagick command: @command', array('@command' => $convert_path .' '. $command_args)));
       drupal_set_message(t('ImageMagick output: @output', array('@output' => $output)));
     }
@@ -217,5 +217,5 @@ function _imageapi_imagemagick_convert_exec($command_args, &$output, &$errors) {
     fclose($pipes[2]);
     return proc_close($h);
   }
-  return false;
+  return FALSE;
 }

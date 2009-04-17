@@ -1,4 +1,23 @@
-//$Id: CHANGELOG.txt,v 1.1.6.312 2009/03/18 21:00:58 yched Exp $
+//$Id: CHANGELOG.txt,v 1.1.6.324 2009/04/15 01:00:07 yched Exp $
+
+CCK 6.x-2.x
+===========
+
+Features:
+- #419678 Views integration: expose CCK fields to 'Node revision' Views.
+- #399778 by Benjamin Melençon - Nodereference / Userreference: Add 'size' setting to autocomplete widgets.
+
+Bugfixes:
+- #407446 by quicksketch: prevent double serialization during per-field to per-type migration.
+- #407344 fix html appearing in selects in Views filters.
+- #409320 by bengtan: Nodereference / Userreference - fix 'this post cannot be referenced' for views-defined referenceable nodes/users, when the view definition has a 'limit'.
+- #409398 by markus_petrux - fix handling of fieldgroup_types() (prep work for combo / multigroups)
+- #356908 Number : Correclty filter 'prefix' and 'suffix' properties.
+- #412058 by fago - Rules integration: Fixed condition 'field has value' when operating on viewed nodes.
+- #413792 Views integration: fix fields using 'multiple formatters' and not 'group multiple fields'. Thanks Crell and quicksketch for the detective work.
+- #421126 Views integration: Use value aliases in argument title replacements for text / number fields.
+- #397358 by Darren Oh, yched, markus_petrux - Views integration: Use node title / user name in argument title replacements for nodereference and userreference argument fields.
+- #428400 Views integration : Fix fatal error with Views 2.4 (views_handler_filter_float has moved). Preserved compatibility with Views 2.3.
 
 CCK 6.x-2.2
 ===========

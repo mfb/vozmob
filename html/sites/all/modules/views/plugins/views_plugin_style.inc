@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_style.inc,v 1.4 2008/10/08 00:14:01 merlinofchaos Exp $
+// $Id: views_plugin_style.inc,v 1.5 2009/03/24 22:22:11 merlinofchaos Exp $
 /**
  * Base class to define a style plugin handler.
  */
@@ -192,6 +192,13 @@ class views_plugin_style extends views_plugin {
       }
     }
     return $errors;
+  }
+
+  function query() {
+    parent::query();
+    if (isset($this->row_plugin)) {
+      $this->row_plugin->query();
+    }
   }
 }
 

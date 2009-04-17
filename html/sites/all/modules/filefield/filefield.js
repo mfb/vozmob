@@ -1,4 +1,4 @@
-// $Id: filefield.js,v 1.16 2009/03/09 05:07:35 quicksketch Exp $
+// $Id: filefield.js,v 1.19 2009/04/08 20:01:06 quicksketch Exp $
 
 /**
  * Auto-attach standard client side file input validation.
@@ -12,7 +12,7 @@ Drupal.behaviors.filefieldValidateAutoAttach = function(context) {
      * Add client side validation for the input[type=file] accept attribute.
      */
     var accept = this.accept.replace(/,\s*/g, '|');
-    if (accept.length > 1) {
+    if (accept.length > 1 && this.value.length > 0) {
       var v = new RegExp('\\.(' + accept + ')$', 'gi');
       if (!v.test(this.value)) {
         var error = Drupal.t("The selected file %filename cannot not be uploaded. Only files with the following extensions are allowed: %extensions.",
@@ -37,7 +37,9 @@ Drupal.behaviors.filefieldValidateAutoAttach = function(context) {
  * Prevent FileField uploads when using buttons not intended to upload.
  */
 Drupal.behaviors.filefieldButtons = function(context) {
-  $('input.form-submit').bind('mousedown', Drupal.filefield.disableFields);
+  $('input.form-submit')
+    .bind('mousedown', Drupal.filefield.disableFields)
+    .bind('mousedown', Drupal.filefield.progressBar);
 };
 
 /**
@@ -72,9 +74,16 @@ Drupal.filefield = {
       return;
     }
 
-    // Using the grandparent, we ensure that we get up to at least the level
-    // of the CCK multiple field wrapper.
-    var $enabledFields = $(this).parent().parent().find('input.form-file');
+    // Check if we're working with an "Upload" button.
+    var $enabledFields = [];
+    if ($(this).parents('div.filefield-element').size() > 0) {
+      $enabledFields = $(this).parent().parent().find('input.form-file');
+    }
+    // Otherwise we're probably dealing with CCK's "Add another item" button.
+    else if ($(this).parents('div.content-add-more').size() > 0) {
+      $enabledFields = $(this).parent().parent().find('input.form-file');
+    }
+
     var $disabledFields = $('div.filefield-element input.form-file').not($enabledFields);
 
     // Disable upload fields other than the one we're currently working with.
@@ -87,5 +96,26 @@ Drupal.filefield = {
     setTimeout(function(){
       $disabledFields.attr('disabled', '');
     }, 1000);
+  },
+  progressBar: function(event) {
+    var clickedButton = this;
+    var $progressId = $(clickedButton).parents('div.filefield-element').find('input.filefield-progress');
+    if ($progressId.size()) {
+      var originalName = $progressId.attr('name');
+
+      // Replace the name with the required identifier.
+      $progressId.attr('name', originalName.match(/APC_UPLOAD_PROGRESS|UPLOAD_IDENTIFIER/)[0]);
+
+      // Restore the original name after the upload begins.
+      setTimeout(function() {
+        $progressId.attr('name', originalName);
+      }, 1000);
+
+      // Show the progress bar if the upload takes longer than 3 seconds.
+      setTimeout(function() {
+        $(clickedButton).parents('div.filefield-element').find('div.ahah-progress-bar').slideDown();
+      }, 500);
+
+    }
   }
 };

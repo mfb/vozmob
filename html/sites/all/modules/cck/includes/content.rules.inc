@@ -1,5 +1,5 @@
 <?php
-// $Id: content.rules.inc,v 1.1.2.4 2008/10/24 11:11:48 fago Exp $
+// $Id: content.rules.inc,v 1.1.2.5 2009/03/30 20:39:07 fago Exp $
 
 /**
  * @file
@@ -224,7 +224,21 @@ function content_rules_field_has_value($node, $settings, $element, &$state) {
   $value = _content_rules_get_field_value($settings, $state);
 
   if (!empty($field) && is_array($value)) {
-    return $node->$settings['field_name'] == $value;
+    $node_value = $node->$settings['field_name'];
+
+    if (count($value) != count($node_value)) {
+      return FALSE;
+    }
+    // Loop over multiple fields
+    foreach ($value as $delta => $sub_value) {
+      // Check if all properties of the value are there in the node value too
+      foreach ($sub_value as $delta2 => $sub_value2) {
+        if (!isset($node_value[$delta][$delta2]) || $node_value[$delta][$delta2] != $sub_value2) {
+          return FALSE;
+        }
+      }
+    }
+    return TRUE;
   }
   else {
     return FALSE;

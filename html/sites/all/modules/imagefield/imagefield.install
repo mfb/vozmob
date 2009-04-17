@@ -1,5 +1,5 @@
 <?php
-// $Id: imagefield.install,v 1.28 2009/03/15 09:29:54 quicksketch Exp $
+// $Id: imagefield.install,v 1.31 2009/04/15 20:15:03 quicksketch Exp $
 
 /**
  * Implementation of hook_install().
@@ -64,7 +64,7 @@ function imagefield_update_6003() {
   }
 
   $ret[] = update_sql("UPDATE {" . content_field_tablename() . "} SET type = 'filefield', module = 'filefield', active = 1 WHERE module = 'imagefield' OR type = 'image'");
-  $ret[] = update_sql("UPDATE {" . content_instance_tablename() . "} SET widget_type = 'imagefield_widget', widget_active = 1 WHERE widget_type = 'image' OR widget_type = 'imagefield_widget'");
+  $ret[] = update_sql("UPDATE {" . content_instance_tablename() . "} SET widget_type = 'imagefield_widget', widget_module = 'imagefield', widget_active = 1 WHERE widget_type = 'image' OR widget_type = 'imagefield_widget'");
   content_clear_type_cache();
 
   return $ret;
@@ -83,7 +83,7 @@ function imagefield_update_6004(&$context) {
 
   if (!isset($context['sandbox']['progress'])) {
     // Get the latest cache values and schema.
-    content_clear_type_cache(TRUE, TRUE);
+    content_clear_type_cache(TRUE);
 
     // Grab the list of fields to update.
     $context['sandbox']['fields'] = array();
@@ -92,6 +92,8 @@ function imagefield_update_6004(&$context) {
         if ($field['type'] == 'filefield' && $field['widget']['type'] == 'imagefield_widget') {
           // We only process a given field once.
           $context['sandbox']['fields'][$field['field_name']] = $field;
+          // Widgets are each updated individually.
+          $context['sandbox']['widgets'][] = $field;
         }
       }
     }
@@ -124,11 +126,6 @@ function imagefield_update_6004(&$context) {
       $field['list_default'] = '1';
       $field['description_field'] = '0';
 
-      // Set default state of instance settings.
-      if (isset($field['widget']['image_path'])) {
-        $field['widget']['file_path'] = $field['widget']['image_path'];
-      }
-
       // Map 'max_number_images' parameter to CCK 'multiple'.
       if (!empty($field['widget']['multiple']) && isset($field['widget']['max_number_images'])) {
         if ($field['widget']['max_number_images'] == 0) {
@@ -145,22 +142,78 @@ function imagefield_update_6004(&$context) {
       // Update format names.
       $display_settings = array('teaser', 'full');
       foreach ($display_settings as $display_context) {
-        switch ($field['display_settings'][$display_context]['format']) {
+        if (isset($field['display_settings'][$display_context])) {
+          switch ($field['display_settings'][$display_context]['format']) {
+            case 'imagefield_nodelink':
+              $field['display_settings'][$display_context]['format'] = 'image_nodelink';
+              break;
+            case 'imagefield_imagelink':
+              $field['display_settings'][$display_context]['format'] = 'image_imagelink';
+              break;
+            case 'imagefield_path':
+              $field['display_settings'][$display_context]['format'] = 'path_plain';
+              break;
+            case 'imagefield_url':
+              $field['display_settings'][$display_context]['format'] = 'url_plain';
+              break;
+            case 'imagefield_default':
+            case 'default':
+              $field['display_settings'][$display_context]['format'] = 'image_plain';
+              break;
+          }
+        }
+      }
+
+      // Move the default_image options to the widget level.
+      $field['widget']['default_image'] = isset($field['default_image']) ? $field['default_image'] : NULL;
+      $field['widget']['use_default_image'] = isset($field['use_default_image']) ? $field['use_default_image'] : 0;
+
+      // The default image needs to be saved in the files table.
+      if (isset($field['widget']['default_image']['filepath'])) {
+        $file = (object) $field['widget']['default_image'];
+        // Check if it's already in the files table.
+        if ($fid = db_result(db_query("SELECT fid FROM {files} WHERE filepath = '%s'", $file->filepath))) {
+          $field['widget']['default_image']['fid'] = $fid;
+        }
+        // Otherwise add it.
+        else {
+          $file->uid = 1;
+          $file->status = 1;
+          drupal_write_record('files', $file);
+          $field['widget']['default_image']['fid'] = $file->fid;
+        }
+
+        // Unset the field-level definition, or it will take precedence.
+        unset($field['default_image']);
+      }
+
+      content_field_instance_update($field);
+    }
+
+    // Update each widget instance.
+    foreach ($context['sandbox']['widgets'] as $field) {
+      // Change file_path to image_path.
+      if (isset($field['widget']['image_path'])) {
+        $field['widget']['file_path'] = $field['widget']['image_path'];
+      }
+
+      // Update the formatters.
+      foreach ($field['display_settings'] as $key => $display) {
+        switch ($display['format']) {
+          case 'default':
+            $field['display_settings'][$key]['format'] = 'image_plain';
+            break;
           case 'imagefield_nodelink':
-            $field['display_settings'][$display_context]['format'] = 'image_nodelink';
+            $field['display_settings'][$key]['format'] = 'image_nodelink';
             break;
           case 'imagefield_imagelink':
-            $field['display_settings'][$display_context]['format'] = 'image_imagelink';
+            $field['display_settings'][$key]['format'] = 'image_imagelink';
             break;
           case 'imagefield_path':
-            $field['display_settings'][$display_context]['format'] = 'path_plain';
+            $field['display_settings'][$key]['format'] = 'path_plain';
             break;
           case 'imagefield_url':
-            $field['display_settings'][$display_context]['format'] = 'url_plain';
-            break;
-          case 'imagefield_default':
-          case 'default':
-            $field['display_settings'][$display_context]['format'] = 'image_plain';
+            $field['display_settings'][$key]['format'] = 'url_plain';
             break;
         }
       }
@@ -211,6 +264,7 @@ function imagefield_update_6004(&$context) {
     }
     else {
       $query = "UPDATE {". $table ."} SET $col_data = '%s', $col_list = %d WHERE vid = %d";
+      $row['delta'] = 0;
     }
 
     // Serialize it and store it back to the db.

@@ -1,5 +1,5 @@
 <?php
-// $Id: userreference.module,v 1.106.2.36 2009/03/18 21:00:58 yched Exp $
+// $Id: userreference.module,v 1.106.2.40 2009/04/17 16:58:09 yched Exp $
 
 /**
  * @file
@@ -150,6 +150,7 @@ function userreference_field_settings($op, $field) {
         'left_table' => $table_alias,
         'left_field' => $field['field_name'] .'_uid',
       );
+      $data[$table_alias][$field['field_name'] .'_uid']['argument']['handler'] = 'content_handler_argument_reference';
       $data[$table_alias][$field['field_name'] .'_uid']['argument']['name table'] = "users_$table_alias";
       $data[$table_alias][$field['field_name'] .'_uid']['argument']['name field'] = 'name';
       // Relationship: Add a relationship for related user.
@@ -337,6 +338,7 @@ function userreference_widget_settings($op, $widget) {
     case 'form':
       $form = array();
       $match = isset($widget['autocomplete_match']) ? $widget['autocomplete_match'] : 'contains';
+      $size = (isset($widget['size']) && is_numeric($widget['size'])) ? $widget['size'] : 60;
       if ($widget['type'] == 'userreference_autocomplete') {
         $form['autocomplete_match'] = array(
           '#type' => 'select',
@@ -348,9 +350,17 @@ function userreference_widget_settings($op, $widget) {
           ),
           '#description' => t('Select the method used to collect autocomplete suggestions. Note that <em>Contains</em> can cause performance issues on sites with thousands of users.'),
         );
+        $form['size'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Size of textfield'),
+          '#default_value' => $size,
+          '#element_validate' => array('_element_validate_integer_positive'),
+          '#required' => TRUE,
+        );
       }
       else {
         $form['autocomplete_match'] = array('#type' => 'hidden', '#value' => $match);
+        $form['size'] = array('#type' => 'hidden', '#value' => $size);
       }
       $form['reverse_link'] = array(
         '#type' => 'checkbox',
@@ -361,7 +371,7 @@ function userreference_widget_settings($op, $widget) {
       return $form;
 
     case 'save':
-      return array('autocomplete_match', 'reverse_link');
+      return array('autocomplete_match', 'size', 'reverse_link');
   }
 }
 
@@ -705,9 +715,8 @@ function _userreference_potential_references_views($field, $string = '', $match 
     // should be moved to content_plugin_display_references
 
     // Limit result set size.
-    if (isset($limit)) {
-      $view->display_handler->set_option('items_per_page', $limit);
-    }
+    $limit = isset($limit) ? $limit : 0;
+    $view->display_handler->set_option('items_per_page', $limit);
 
     // Get arguments for the view.
     if (!empty($field['advanced_view_args'])) {

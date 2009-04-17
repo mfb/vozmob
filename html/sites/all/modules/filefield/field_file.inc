@@ -1,18 +1,20 @@
 <?php
-// $Id: field_file.inc,v 1.26 2009/03/16 23:44:59 quicksketch Exp $
+// $Id: field_file.inc,v 1.32 2009/04/12 21:22:17 quicksketch Exp $
+
 /**
  * @file
  * Common functionality for file handling CCK field modules.
  */
 
 /**
- * Load a file object from the database.
+ * Load a file from the database.
  *
  * @param $fid
  *   A numeric file id or string containing the file path.
- *
  * @param $reset
  *   Whether to reset the internal file_load cache.
+ * @return
+ *   A file array.
  */
 function field_file_load($fid, $reset = NULL) {
   // Reset internal cache.
@@ -44,23 +46,23 @@ function field_file_load($fid, $reset = NULL) {
       $function($file);
     }
 
-    // Cache the fully loaded file for later reusability.
+    // Cache the fully loaded file for later use.
     $files = _field_file_cache($file);
   }
 
-  // Cast to array for field. hook_file() expects objects as well as
-  // core file functions.
+  // Cast to an array for the field storage.
+  // Contrary to fields, hook_file() and core file functions expect objects.
   return (array)$files[$fid];
 }
 
 /**
- * Save a file upload to a new location. The source file is validated as a
- * proper upload and handled as such. By implementing hook_file($op = 'insert'),
- * modules are able to act on the file upload and to add their own properties
- * to the file.
+ * Save a file upload to a new location.
+ * The source file is validated as a proper upload and handled as such. By
+ * implementing hook_file($op = 'insert'), modules are able to act on the file
+ * upload and to add their own properties to the file.
  *
- * The file will be added to the files table as a temporary file. Temporary files
- * are periodically cleaned. To make the file permanent file call
+ * The file will be added to the files table as a temporary file. Temporary
+ * files are periodically cleaned. To make the file permanent file call
  * file_set_status() to change its status.
  *
  * @param $source
@@ -110,7 +112,6 @@ function field_file_save_upload($source, $validators = array(), $dest = FALSE) {
  *   not provided or is not writable, the temporary directory will be used.
  * @return
  *   An array containing the file information, or 0 in the event of an error.
- *
  */
 function field_file_save_file($filepath, $validators = array(), $dest = FALSE) {
   global $user;
@@ -192,7 +193,7 @@ function field_file_save_file($filepath, $validators = array(), $dest = FALSE) {
 }
 
 /**
- * Update an field item file. Delete marked items if neccessary and set new items as permamant.
+ * Save a node file. Delete items if necessary and set new items as permanent.
  *
  * @param $node
  *    Node object this file is be associated with.
@@ -293,8 +294,11 @@ function _field_file_cache($file = NULL, $reset = FALSE) {
 }
 
 /**
- * A silent version of file.inc:file_check_directory it's only talkative
- * on errors.
+ * A silent version of file.inc's file_check_directory().
+ *
+ * This function differs from file_check_directory in that it checks for
+ * files when doing the directory check and it does not use drupal_set_message()
+ * when creating directories. This function may be removed in Drupal 7.
  *
  * Check that the directory exists and is writable. Directories need to
  * have execute permissions to be considered a directory by FTP servers, etc.
@@ -311,24 +315,30 @@ function _field_file_cache($file = NULL, $reset = FALSE) {
 function field_file_check_directory(&$directory, $mode = 0, $form_item = NULL) {
   $directory = rtrim($directory, '/\\');
 
-  // error if dir is a file.
+  // Error if the directory is a file.
   if (is_file($directory)) {
-    watchdog('file system',  'check_directory: The path  %directory is a file.',  array('%directory' => $directory), WATCHDOG_ERROR);
-    if ($form_item)  form_set_error($form_item, t('The directory %directory is a file!', array('%directory' => $directory)));
+    watchdog('file system', 'The path %directory was checked as a directory, but it is a file.',  array('%directory' => $directory), WATCHDOG_ERROR);
+    if ($form_item) {
+      form_set_error($form_item, t('The directory %directory is a file and cannot be overwritten.', array('%directory' => $directory)));
+    }
     return FALSE;
   }
 
-  // create the directory if it is missing.
-  if (!is_dir($directory) && $mode & FILE_CREATE_DIRECTORY && !@mkdir($directory, 0775, true)) {
+  // Create the directory if it is missing.
+  if (!is_dir($directory) && $mode & FILE_CREATE_DIRECTORY && !@mkdir($directory, 0775, TRUE)) {
     watchdog('file system', 'The directory %directory does not exist.', array('%directory' => $directory), WATCHDOG_ERROR);
-    if ($form_item) form_set_error($form_item, t('The directory %directory does not exist.', array('%directory' => $directory)));
+    if ($form_item) {
+      form_set_error($form_item, t('The directory %directory does not exist.', array('%directory' => $directory)));
+    }
     return FALSE;
   }
 
   // Check to see if the directory is writable.
   if (!is_writable($directory) && $mode & FILE_MODIFY_PERMISSIONS && !@chmod($directory, 0775)) {
     watchdog('file system', 'The directory %directory is not writable, because it does not have the correct permissions set.', array('%directory' => $directory), WATCHDOG_ERROR);
-    if ($form_item) form_set_error($form_item, t('The directory %directory is not writable', array('%directory' => $directory)));
+    if ($form_item) {
+      form_set_error($form_item, t('The directory %directory is not writable', array('%directory' => $directory)));
+    }
     return FALSE;
   }
 
@@ -360,23 +370,14 @@ function field_file_strip_path($path) {
   return $path;
 }
 
-
 /**
- * return references to a file by a single field.
+ * Return a count of the references to a file by all modules.
  */
-
-function field_file_references($file, $field) {
-  $db_info = content_database_info($field);
-  $references = db_result(db_query(
-    'SELECT count('. $db_info['columns']['fid']['column'] .')
-      FROM {'. $db_info['table'] .'}
-      WHERE '. $db_info['columns']['fid']['column'] .' = %d', $file->fid
-  ));
-
-  // If a field_name is present in the file object, the file is being deleted
-  // from this field, decrement the number of total references by one.
-  if (isset($file->field_name) && $field['field_name'] == $file->field_name) {
-    --$references;
+function field_file_references($file) {
+  $references = (array) module_invoke_all('file_references', $file);
+  $reference_count = 0;
+  foreach ($references as $module => $count) {
+    $reference_count += $count;
   }
-  return $references;
+  return $reference_count;
 }

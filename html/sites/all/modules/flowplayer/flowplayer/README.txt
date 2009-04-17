@@ -1,5 +1,43 @@
 Version history:
 
+3.1.0
+-----
+New features:
+- clip's can have urlResolvers and connectionProviders
+- Added new configuration options 'connectionCallbacks' and 'streamCallbacks'. Both accept an Array of event names as a value.
+  When these events get fired on the connection or stream object, corresponding Clip events will be fired by the player.
+  This can be used for example when firing custom events from RTMP server apps
+- Added new clip event types: 'onConnectionEvent' and 'onStreamEvent' these get fired when the predefined events happen on the connection and stream objects.
+- Added Security.allowDomain() to allow loaded plugins to script the player
+- Added addClip(clip, index) to the API, index is optional
+- Possibility to view videos without metadata, using clip.metaData: false
+- Now the player's preloader uses the rotating animation instead of a percent text to indicate the progress
+  of loading the player SWF. You can disable the aninamtion by setting buffering: false
+- calling close() now does not send the onStop event
+- Clip's custom properties are now present in the root of the clip argument in all clip events that are sent to JS.
+
+Bug fixes:
+- The preloader sometimes failed to initialize the player
+- Allow seeking while in buffering state: http://flowplayer.org/forum/8/16505
+- Replay of a RTMP stream was failing after the connection had expired
+- Security error when clicking on the screen if there is an image in the playlist loaded from a foreign domain
+- loadPlugin() was not working
+- now fullscreen works with Flash versions older than 9.0.115, in versions that do not support hardware scaling
+- replaying a RTMP stream with an image in front of the stream in the playlist was not working (video stayed hidden). Happened
+  because the server does not send metadata if replaying the same stream.
+- the scrubber is disabled if the clip is not seekable in the first frame: http://flowplayer.org/forum/8/16526
+  By default if the clip has one of following extensions (the typical flash video extensions) it is seekable
+  in the first frame: 'f4b', 'f4p', 'f4v', 'flv'. Added new clip property seekableOnBegin that can be used to override the default.  
+
+3.0.6
+-----
+- added possibility to associate a linkUrl and linkWindow to the canvas
+Fixes:
+- fix for entering fullscreen for Flash versions that don't support the hardware scaled fullscreen-mode
+- when showing images the duration tracking starts only after the image has been completely loaded: http://flowplayer.org/forum/2/15301
+- fix for verifying license keys for domains that have more than 4 labels in them
+- if plugin loading failis because of a IO error, the plugin will be discarded and the player initialization continues:
+
 3.0.4
 -----
 - The "play" pseudo-plugin now supports fadeIn(), fadeOut(), showPlugin(), hidePlugin() and
@@ -14,6 +52,10 @@ Version history:
 - Added copyright notices and other GPL required entries to the user interface
 
 Fixes:
+- clip urls were not resolved correctly if the HTML page URL had a query string starting with a question mark (http://flowplayer.org/forum/8/14016#post-14016)
+- Fixed context menu for with IE (commercial version)
+- a cuepoint at time zero was fired several times
+- screen is now arranged correctly even when only bottom or top is defined for it in the configuration
 - Fixed context menu for with IE (commercial version)
 - a cuepoint at time zero was fired several times
 - screen is now arranged correctly even when only bottom or top is defined for it in the configuration

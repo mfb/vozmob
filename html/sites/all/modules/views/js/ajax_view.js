@@ -1,4 +1,4 @@
-// $Id: ajax_view.js,v 1.15 2009/01/08 00:10:08 merlinofchaos Exp $
+// $Id: ajax_view.js,v 1.17 2009/03/25 00:11:25 merlinofchaos Exp $
 
 /**
  * @file ajaxView.js
@@ -73,7 +73,7 @@ Drupal.behaviors.ViewsAjaxView = function() {
       })
       .addClass('views-processed')
       .submit(function () {
-        $('input[@type=submit]', this).after('<span class="views-throbbing">&nbsp</span>');
+        $('input[type=submit]', this).after('<span class="views-throbbing">&nbsp</span>');
         var object = this;
         $(this).ajaxSubmit({
           url: ajax_path,
@@ -132,7 +132,10 @@ Drupal.behaviors.ViewsAjaxView = function() {
                     // to browse newly loaded content after e.g. clicking a pager
                     // link.
                     var offset = $(target).offset();
-                    window.scrollTo(0, offset.top - 10);
+                    // Only scroll upward
+                    if (offset.top - 10 < $(window).scrollTop()) {
+                      $('html,body').animate({scrollTop: (offset.top - 10)}, 500);
+                    }
                     // Call all callbacks.
                     if (response.__callbacks) {
                       $.each(response.__callbacks, function(i, callback) {

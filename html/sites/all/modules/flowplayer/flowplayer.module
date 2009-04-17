@@ -68,12 +68,12 @@ function flowplayer_add($selector = NULL, $config = NULL) {
   // Add Flowplayer to the page if it hasn't been added yet.
   if ($flowplayer_added === FALSE) {
     // Add the FlowPlayer JavaScript and CSS to the page.
-    drupal_add_js(drupal_get_path('module', 'flowplayer') .'/flowplayer/example/flowplayer-3.0.5.min.js');
+    drupal_add_js(drupal_get_path('module', 'flowplayer') .'/flowplayer/example/flowplayer-3.1.0.min.js');
     drupal_add_css(drupal_get_path('module', 'flowplayer') .'/flowplayer.css');
 
     // Tell the JavaScript where flowplayer.swf is.
     $settings = array(
-      'flowplayerSwf' => drupal_get_path('module', 'flowplayer') .'/flowplayer/flowplayer-3.0.5.swf',
+      'flowplayerSwf' => drupal_get_path('module', 'flowplayer') .'/flowplayer/flowplayer-3.1.0.swf',
     );
     drupal_add_js($settings, 'setting');
     $flowplayer_added = TRUE;

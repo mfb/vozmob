@@ -1,5 +1,5 @@
 <?php
-// $Id: content_handler_argument_many_to_one.inc,v 1.1.2.2 2008/10/04 13:14:21 karens Exp $
+// $Id: content_handler_argument_many_to_one.inc,v 1.1.2.4 2009/04/05 01:41:21 yched Exp $
 
 /**
  * @file
@@ -19,13 +19,24 @@ class content_handler_argument_many_to_one extends views_handler_argument_many_t
     $options = $this->allowed_values();
     $value = $data->{$this->name_alias};
     if (isset($options[$value])) {
-      $value = check_plain($options[$value]);
+      $value = $options[$value];
     }
     else {
       $value = parent::summary_name($data);
     }
 
     return $value;
+  }
+
+  function title_query() {
+    $options = $this->allowed_values();
+    $values = $this->value;
+    foreach ($values as $key => $value) {
+      if (isset($options[$value])) {
+        $values[$key] = $options[$value];
+      }
+    }
+    return $values;
   }
 
   function allowed_values() {

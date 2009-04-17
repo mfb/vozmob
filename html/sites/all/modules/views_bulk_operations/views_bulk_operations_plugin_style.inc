@@ -1,5 +1,5 @@
 <?php
-// $Id: views_bulk_operations_plugin_style.inc,v 1.1.2.25 2009/03/06 20:00:18 kratib Exp $
+// $Id: views_bulk_operations_plugin_style.inc,v 1.1.2.27 2009/04/14 06:54:29 kratib Exp $
 
 define('VBO_EXECUTION_DIRECT', 1);
 define('VBO_EXECUTION_BATCH', 2);
@@ -122,6 +122,11 @@ class views_bulk_operations_plugin_style extends views_plugin_style_table {
     return $options;
   }
 
+  function uses_fields() {
+    if (isset($this->view->ignore_fields)) return FALSE;
+    return parent::uses_fields();
+  }
+
   private function populate_operations(&$options) {
     $operations = array();
 
@@ -156,6 +161,7 @@ class views_bulk_operations_plugin_style extends views_plugin_style_table {
       );
     }
 
+    uasort($operations, create_function('$a, $b', 'return strcasecmp($a["label"], $b["label"]);'));
     $options['all_operations'] = $operations;
   }
 

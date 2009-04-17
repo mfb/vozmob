@@ -1,5 +1,5 @@
 <?php
-// $Id: filefield.install,v 1.22 2009/03/16 00:25:50 quicksketch Exp $
+// $Id: filefield.install,v 1.30 2009/04/04 05:45:32 quicksketch Exp $
 /**
  * @file
  * FileField: Defines a CCK file field type.
@@ -43,6 +43,56 @@ function filefield_disable() {
 }
 
 /**
+ * Implementation of hook_requirements().
+ *
+ * Display information about getting upload progress bars working.
+ */
+function filefield_requirements($phase) {
+  $requirements = array();
+  // Ensure translations don't break at install time
+  $t = get_t();
+
+  // Report Drupal version
+  if ($phase == 'runtime') {
+    $implementation = filefield_progress_implementation();
+    $apache = strpos($_SERVER["SERVER_SOFTWARE"], 'Apache') !== FALSE;
+    $php_52 = version_compare(phpversion(), '5.2.0', '>');
+    if (!$apache || !$php_52) {
+      $value = $t('Not enabled');
+      $description = $t('Your server is not capable of displaying file upload progress. File upload progress requires PHP 5.2 and an Apache server.');
+      $severity = REQUIREMENT_INFO;
+    }
+    elseif (!$implementation && extension_loaded('apc')) {
+      $value = $t('Not enabled');
+      $description = $t('Your server is capable of displaying file upload progress through APC, but it is not enabled. Add <code>apc.rfc1867 = 1</code> to your php.ini configuration. Alternatively, it is recommended to use <a href="http://pecl.php.net/package/uploadprogress">PECL uploadprogress</a>, which supports more than one simultaneous upload.');
+      $severity = REQUIREMENT_WARNING;
+    }
+    elseif (!$implementation) {
+      $value = $t('Not enabled');
+      $description = t('Your server is capable of displaying file upload progress, but does not have the required libraries. It is recommended to install the <a href="http://pecl.php.net/package/uploadprogress">PECL uploadprogress library<a> (prefered) or to install <a href="http://us2.php.net/apc">APC</a>.');
+      $severity = REQUIREMENT_WARNING;
+    }
+    elseif ($implementation == 'apc') {
+      $value = $t('Enabled (<a href="http://php.net/manual/en/apc.configuration.php#ini.apc.rfc1867">APC RFC1867</a>)');
+      $description = t('Your server is capable of displaying file upload progress using APC RFC1867. Note that only one upload at a time is supported. It is recommneded to use the <a href="http://pecl.php.net/package/uploadprogress">PECL uploadprogress library<a> if possible.');
+      $severity = REQUIREMENT_OK;
+    }
+    elseif ($implementation == 'uploadprogress') {
+      $value = $t('Enabled (<a href="http://pecl.php.net/package/uploadprogress">PECL uploadprogress</a>)');
+      $severity = REQUIREMENT_OK;
+    }
+    $requirements['filefield_progress'] = array(
+      'title' => $t('Upload progress'),
+      'value' => $value,
+      'severity' => $severity,
+      'description' => $description,
+    );
+  }
+
+  return $requirements;
+}
+
+/**
  * Implementation of hook_update_last_removed().
  */
 function filefield_update_last_removed() {
@@ -58,41 +108,65 @@ function filefield_update_6001() {
   }
 
   $ret = array();
-  include_once(drupal_get_path('module','content') .'/includes/content.admin.inc');
+  include_once(drupal_get_path('module', 'content') .'/includes/content.admin.inc');
 
-  // rename the field type from file to filefield. adhere to module namespace.
-  $ret[] = update_sql("UPDATE {content_node_field} SET type='filefield' WHERE type='file'");
-  // rename default widget to filefield_widget. adhere to module namespace.
-  $ret[] = update_sql("UPDATE {content_node_field_instance} SET widget_type='filefield_widget' WHERE widget_type='file'");
+  // Rename the field type from file to filefield. adhere to module namespace.
+  $ret[] = update_sql("UPDATE {content_node_field} SET type = 'filefield', module = 'filefield', active = 1 WHERE type = 'file'");
+  // Rename default widget to filefield_widget. adhere to module namespace.
+  $ret[] = update_sql("UPDATE {content_node_field_instance} SET widget_type = 'filefield_widget', widget_module = 'filefield', widget_active = 1 WHERE widget_type = 'file'");
 
-  // update list default value and force list settings.
+  // Update list default value and force list settings.
   $result = db_query("SELECT * FROM {content_node_field} WHERE type = 'filefield'");
   while ($field = db_fetch_object($result)) {
-    $updated = false;
+    $updated = FALSE;
     $field_settings = unserialize($field->global_settings);
     if (!isset($field_settings['list_default']) || !is_numeric($field_settings['list_default'])) {
       $field_settings['list_default'] = 1;
-      $updated = true;
-
+      $updated = TRUE;
     }
-    // set behavior to match old force_list behavior.
+
+    // Set behavior to match old force_list behavior.
     if (!empty($field_settings['force_list'])) {
       $field_settings['list_default'] = 1;
       $field_settings['force_list_default'] = 1;
-      $updated = true;
+      $updated = TRUE;
     }
     if ($updated) {
       db_query("UPDATE {content_node_field} SET global_settings = '%s' WHERE field_name = '%s'", serialize($field_settings), $field->field_name);
     }
   }
 
+  // Re-enable all the FileFields on the site.
+  content_associate_fields('filefield');
 
-  // add data column to filefields.
-  $fields = content_fields();
-  foreach($fields as $field) {
-    if ($field['type'] != 'filefield') continue;
+  // Build a list of fields that need data updating.
+  $fields = array();
+  foreach (content_types_install() as $type_name => $type_fields) {
+    foreach ($type_fields as $field) {
+      if ($field['type'] == 'filefield') {
+        // We only process a given field once.
+        $fields[$field['field_name']] = $field;
+      }
+    }
+  }
+
+  // Update database storage (add data column, remove description, set NOT NULL).
+  foreach ($fields as $field) {
     $new_field = $field;
-    $new_field['columns']['data'] =  array('type' => 'text');
+
+    // Setup the previous definition.
+    $field['columns']['description'] = array('type' => 'varchar');
+    $field['columns']['fid']['not null'] = TRUE;
+    $field['columns']['list']['not null'] = TRUE;
+    unset($field['columns']['data']);
+
+    // Setup the new definition.
+    $new_field['columns']['data'] = array('type' => 'text', 'serialize' => TRUE);
+    $new_field['columns']['fid']['not null'] = FALSE;
+    $new_field['columns']['list']['size'] = 'tiny';
+    $new_field['columns']['list']['not null'] = FALSE;
+    unset($new_field['columns']['description']);
+
     content_alter_db($field, $new_field);
   }
 
@@ -102,21 +176,18 @@ function filefield_update_6001() {
     'operations' => array(),
     'file' => drupal_get_path('module', 'filefield') .'/filefield.install',
   );
-  $content_info = _content_type_info();
-  foreach ($content_info['content types'] as $node_type => $node_info) {
-    foreach ($node_info['fields'] as $field_name => $field) {
-      if ($field['type'] == 'filefield') {
-        $batch['operations'][] = array('_filefield_update_6001_move_operation', array($field));
-        $batch['operations'][] = array('_filefield_update_6001_drop_operation', array($field));
-      }
+  foreach ($fields as $field_name => $field) {
+    if ($field['type'] == 'filefield') {
+      $batch['operations'][] = array('_filefield_update_6001_move_operation', array($field));
+      $batch['operations'][] = array('_filefield_update_6001_drop_operation', array($field));
     }
   }
   batch_set($batch);
 
 
-  // clear them caches.
-  cache_clear_all('*', content_cache_tablename(), true);
-  cache_clear_all('*', 'cache', true);
+  // Clear caches.
+  cache_clear_all('*', content_cache_tablename(), TRUE);
+  cache_clear_all('*', 'cache', TRUE);
   return $ret;
 }
 
@@ -165,6 +236,41 @@ function filefield_update_6101() {
       }
     }
   }
+
+  return $ret;
+}
+
+/**
+ * Fix corrupted serialized data in the "data" column.
+ */
+function filefield_update_6102(&$sandbox) {
+  // Update removed. This turned out to be a bug in CCK core, so it is being
+  // fixed directly in CCK rather than in FileField.
+  // See http://drupal.org/node/407446.
+  return array();
+}
+
+/**
+ * Convert "Extensible File" to a normal "File" widget.
+ */
+function filefield_update_6103() {
+  $ret = array();
+
+  $ret[] = update_sql("UPDATE {". content_instance_tablename() ."} SET widget_type = 'filefield_widget' WHERE widget_type = 'filefield_combo'");
+
+  cache_clear_all('*', content_cache_tablename(), TRUE);
+  cache_clear_all('*', 'cache', TRUE);
+
+  return $ret;
+}
+
+/**
+ * Delete the filefield_token module entry in the system table.
+ */
+function filefield_update_6104() {
+  $ret = array();
+
+  $ret[] = update_sql("DELETE FROM {system} WHERE type = 'module' AND name = 'filefield_token'");
 
   return $ret;
 }

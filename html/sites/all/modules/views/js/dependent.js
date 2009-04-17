@@ -1,4 +1,4 @@
-// $Id: dependent.js,v 1.5 2008/06/23 20:00:58 merlinofchaos Exp $
+// $Id: dependent.js,v 1.7 2009/04/07 23:10:00 merlinofchaos Exp $
 /**
  * @file dependent.js
  *
@@ -21,11 +21,9 @@
  *   override it.
  */
 
-Drupal.Views.dependent = {};
+Drupal.Views = Drupal.Views || {};
 
-Drupal.Views.dependent.bindings = {};
-Drupal.Views.dependent.activeBindings = {};
-Drupal.Views.dependent.activeTriggers = [];
+Drupal.Views.dependent = { bindings: {}, activeBindings: {}, activeTriggers: [] };
 
 Drupal.Views.dependent.inArray = function(array, search_term) {
   var i = array.length;
@@ -75,7 +73,7 @@ Drupal.Views.dependent.autoAttach = function() {
       // Drupal.settings.viewsAjax.formRelationships[id].values[bind_id] holds the possible values
 
       if (bind_id.substring(0, 6) == 'radio:') {
-        var trigger_id = "input[@name='" + bind_id.substring(6) + "']";
+        var trigger_id = "input[name='" + bind_id.substring(6) + "']";
       }
       else {
         var trigger_id = '#' + bind_id;

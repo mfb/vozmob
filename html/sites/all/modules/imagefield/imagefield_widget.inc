@@ -1,11 +1,11 @@
 <?php
-// $Id: imagefield_widget.inc,v 1.29 2009/03/17 00:57:55 quicksketch Exp $
+// $Id: imagefield_widget.inc,v 1.35 2009/04/09 19:57:10 quicksketch Exp $
 
 /**
  * @file
  * ImageField widget hooks and callbacks.
  *
- * This file is loaded by fileifeld.module and the callbacks it contains are
+ * This file is loaded by filefield.module and the callbacks it contains are
  * invoked by filefield.module. This happens because imagefield delegates it's
  * CCK hooks and callbacks to filefield in imagefield.module.
  */
@@ -27,7 +27,7 @@ function imagefield_widget_settings_form($widget) {
     '#default_value' => !empty($widget['max_resolution']) ? $widget['max_resolution'] : 0,
     '#size' => 15,
     '#maxlength' => 10,
-    '#description' => t('The maximum allowed image size expressed as WIDTHxHEIGHT (e.g. 640x480). Set to 0 for no restriction. If a larger image is uploaded, it will be resized to reflect the given width and height.'),
+    '#description' => t('The maximum allowed image size expressed as WIDTHxHEIGHT (e.g. 640x480). Set to 0 for no restriction. If a larger image is uploaded, it will be resized to reflect the given width and height. Resizing images on upload will cause the loss of <a href="http://en.wikipedia.org/wiki/Exchangeable_image_file_format">EXIF data</a> in the image.'),
     '#weight' => 2,
   );
   $form['min_resolution'] = array(
@@ -54,8 +54,8 @@ function imagefield_widget_settings_form($widget) {
   $form['alt_settings'] = array(
     '#type' => 'fieldset',
     '#title' => t('ALT text settings'),
-    '#collapsible' => true,
-    '#collapsed' => true,
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
     '#weight' => 8,
   );
   $form['alt_settings']['custom_alt'] = array(
@@ -75,8 +75,8 @@ function imagefield_widget_settings_form($widget) {
   $form['title_settings'] = array(
     '#type' => 'fieldset',
     '#title' => t('Title text settings'),
-    '#collapsible' => true,
-    '#collapsed' => true,
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
     '#weight' => 8,
   );
   $form['title_settings']['custom_title'] = array(
@@ -85,6 +85,15 @@ function imagefield_widget_settings_form($widget) {
     '#default_value' =>  !empty($widget['custom_title']) ? $widget['custom_title'] : 0,
     '#description' => t('Enable user input title text for images.'),
   );
+  $form['title_settings']['title_type'] = array(
+    '#type' => 'select',
+    '#title' => t('Input type'),
+    '#options' => array(
+      'textfield' => 'textfield',
+      'textarea' => 'textarea'),
+    '#default_value' => !empty($widget['title_type']) ? $widget['title_type'] : 'textfield',
+    '#description' => t('Choose type of field to be displayed to the user.'),
+  );
   $form['title_settings']['title'] = array(
     '#type' => 'textfield',
     '#title' => t('Default Title text'),
@@ -92,8 +101,84 @@ function imagefield_widget_settings_form($widget) {
     '#description' => t('This value will be used as the image title by default.'),
     '#suffix' =>  theme('token_help', 'file'),
   );
+
+  // Default image settings.
+  $form['default'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Default image'),
+    '#element_validate' => array('_imagefield_widget_settings_default_validate'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#weight' => 10
+  );
+
+  // Present a thumbnail of the current default image.
+  $form['default']['use_default_image'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Use default image'),
+    '#default_value' =>  $widget['use_default_image'],
+    '#description' => t('When an image is not uploaded, show a default image on display.'),
+  );
+
+  if (!empty($widget['default_image'])) {
+    $form['default']['default_image_thumbnail'] = array(
+      '#type' => 'markup',
+      '#value' => theme('imagefield_image', $widget['default_image'], '', '', array('width' => '150'), FALSE),
+    );
+  }
+  $form['default']['default_image_upload'] = array(
+    '#type'  => 'file',
+    '#title' => t('Upload image'),
+    '#description' => t('Choose a image that will be used as default.'),
+  );
+
+  // We set this value on 'validate' so we can get CCK to add it
+  // as a standard field setting.
+  $form['default_image'] = array(
+    '#type' => 'value',
+    '#value' => $widget['default_image'],
+  );
+
   return $form;
 }
+
+/**
+ * Element specific validation for imagefield default value.
+ *
+ * Validated in a separate function from imagefield_field() to get access
+ * to the $form_state variable.
+ */
+function _imagefield_widget_settings_default_validate($element, &$form_state) {
+  // Verify the destination exists
+  $destination = file_directory_path() .'/imagefield_default_images';
+  if (!field_file_check_directory($destination, FILE_CREATE_DIRECTORY)) {
+    form_set_error('default_image', t('The default image could not be uploaded. The destination %destination does not exist or is not writable by the server.', array('%destination' => dirname($destination))));
+    return;
+  }
+
+  $validators = array(
+    'file_validate_is_image' => array(),
+  );
+
+  // We save the upload here because we can't know the correct path until the file is saved.
+  if (!$file = file_save_upload('default_image_upload', $validators, $destination)) {
+    // No upload to save we hope... or file_save_upload() reported an error on its own.
+    return;
+  }
+
+  // Remove old image (if any) & clean up database.
+  $old_default = $form_state['values']['default_image'];
+  if (!empty($old_default['fid'])) {
+    if (file_delete(file_create_path($old_default['filepath']))) {
+      db_query('DELETE FROM {files} WHERE fid=%d', $old_default['fid']);
+    }
+  }
+
+  // Make the file permanent and store it in the form.
+  file_set_status($file, FILE_STATUS_PERMANENT);
+  $file->timestamp = time();
+  $form_state['values']['default_image'] = (array)$file;
+ }
 
 /**
  * Validate callback for the CCK widget form.
@@ -120,7 +205,7 @@ function imagefield_widget_settings_validate($widget) {
 function imagefield_widget_settings_save($widget) {
   // TODO: Rename custom_alt and custom_title to alt_custom and title_custom.
   $filefield_settings = module_invoke('filefield', 'widget_settings', 'save', $widget);
-  return array_merge($filefield_settings, array('max_resolution', 'min_resolution', 'alt',  'custom_alt', 'title', 'custom_title'));
+  return array_merge($filefield_settings, array('max_resolution', 'min_resolution', 'alt',  'custom_alt', 'title', 'custom_title', 'title_type', 'default_image', 'use_default_image'));
 }
 
 /**
@@ -153,7 +238,7 @@ function imagefield_widget_process($element, $edit, &$form_state, $form) {
   }
 
   // Check if using the default alt text and replace tokens.
-  $default_alt = (!$field['widget']['custom_alt'] || ($file['status'] == 0 && empty($file['data']['alt'])));
+  $default_alt = (!$field['widget']['custom_alt'] || (empty($file['status']) && empty($file['data']['alt'])));
   if ($default_alt && function_exists('token_replace')) {
     $field['widget']['alt'] = token_replace($field['widget']['alt'], 'user', $GLOBALS['user']);
   }
@@ -162,7 +247,7 @@ function imagefield_widget_process($element, $edit, &$form_state, $form) {
     '#type' => $field['widget']['custom_alt'] ? 'textfield' : 'value',
     '#default_value' => $default_alt ? $field['widget']['alt'] : $file['data']['alt'],
     '#description' => t('This text will be used by screen readers, search engines, or when the image cannot be loaded.'),
-    '#maxlength' => 80, // See http://www.gawds.org/show.php?contentid=28.
+    '#maxlength' => variable_get('imagefield_alt_length', 80), // See http://www.gawds.org/show.php?contentid=28.
     '#attributes' => array('class' => 'imagefield-text'),
   );
   // #value must be hard-coded if #type = 'value'.
@@ -171,15 +256,25 @@ function imagefield_widget_process($element, $edit, &$form_state, $form) {
   }
 
   // Check if using the default title and replace tokens.
-  $default_title = (!$field['widget']['custom_title'] || ($file['status'] == 0 && empty($file['data']['title'])));
+  $default_title = (!$field['widget']['custom_title'] || (empty($file['status']) && empty($file['data']['title'])));
   if ($default_title && function_exists('token_replace')) {
     $field['widget']['title'] = token_replace($field['widget']['title'], 'user', $GLOBALS['user']);
   }
+
+  // If the custom title is enabled, input type defaults to textfield.
+  if (!empty($field['widget']['custom_title'])) {
+    $title_type = !empty($field['widget']['title_type']) ? $field['widget']['title_type'] : 'textfield';
+  }
+  else {
+    $title_type = 'value';
+  }
+
   $element['data']['title'] = array(
-    '#type' => $field['widget']['custom_title'] ? 'textfield' : 'value',
+    '#type' => $title_type,
     '#title' => t('Title'),
     '#default_value' => $default_title ? $field['widget']['title'] : $file['data']['title'],
     '#description' => t('The title is used as a tool tip when the user hovers the mouse over the image.'),
+    '#maxlength' => variable_get('imagefield_title_length', 500),
     '#attributes' => array('class' => 'imagefield-text'),
   );
   // #value must be hard-coded if #type = 'value'.
@@ -194,5 +289,6 @@ function imagefield_widget_process($element, $edit, &$form_state, $form) {
  * FormAPI theme function. Theme the output of an image field.
  */
 function theme_imagefield_widget(&$element) {
+  drupal_add_css(drupal_get_path('module', 'imagefield') .'/imagefield.css');
   return theme('form_element', $element, $element['#children']);
 }

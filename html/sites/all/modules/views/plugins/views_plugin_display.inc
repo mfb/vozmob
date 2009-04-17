@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_display.inc,v 1.18 2009/01/07 23:31:13 merlinofchaos Exp $
+// $Id: views_plugin_display.inc,v 1.20 2009/04/07 22:48:04 merlinofchaos Exp $
 /**
  * @file
  * Contains the base display plugin.
@@ -554,7 +554,7 @@ class views_plugin_display extends views_plugin {
       $text = '<span>' . $text . '</span>';
     }
 
-    if (empty($text)) {
+    if (!trim($text)) {
       $text = t('Broken field');
     }
 

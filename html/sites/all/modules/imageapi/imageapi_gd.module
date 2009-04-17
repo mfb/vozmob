@@ -1,4 +1,4 @@
-<?php // $Id: imageapi_gd.module,v 1.13.2.4 2009/03/10 06:16:26 drewish Exp $
+<?php // $Id: imageapi_gd.module,v 1.13.2.7 2009/04/17 00:15:21 drewish Exp $
 
 /**
  * @file
@@ -26,15 +26,6 @@ function imageapi_gd_settings_form() {
     '#maxlength' => 3,
     '#default_value' => variable_get('imageapi_jpeg_quality', 75),
     '#field_suffix' => '%',
-  );
-  $form['imageapi_crop_background'] = array(
-    '#type' => 'textfield',
-    '#title' => t('Crop background'),
-    '#description' => t('Hex string specifying the background color to use when cropping images. If not provided, will use the default. Examples: "ABC", "ABCD", "AABBCC", "AABBCCDD".'),
-    '#size' => 10,
-    '#maxlength' => 8,
-    '#default_value' => variable_get('imageapi_crop_background', ''),
-    '#field_prefix' => '#',
   );
   return system_settings_form($form);
 }
@@ -161,7 +152,7 @@ function imageapi_gd_image_resize(&$image, $width, $height) {
  * @return
  *   TRUE or FALSE, based on success.
  */
- function imageapi_gd_image_rotate(&$image, $degrees, $bgcolor) {
+ function imageapi_gd_image_rotate(&$image, $degrees, $background) {
   // PHP installations using non-bundled GD do not have imagerotate.
   if (!function_exists('imagerotate')) {
     require_once drupal_get_path('module', 'imageapi_gd') .'/imagerotate.inc';
@@ -213,8 +204,8 @@ function imageapi_gd_image_resize(&$image, $width, $height) {
 
 function imageapi_gd_image_sharpen(&$image, $radius, $sigma, $amount, $threshold) {
   $threshold = round($threshold * 255);
-  $image->res = imageapi_gd_unsharp_mask($image->res, $radius, $sigma, $amount, $threshold);
-  return true;
+  $image->resource = imageapi_gd_unsharp_mask($image->resource, $radius, $sigma, $amount, $threshold);
+  return TRUE;
 }
 
 /**
@@ -248,7 +239,7 @@ function imageapi_gd_image_desaturate(&$image) {
  * @return
  *   A GD image handle.
  */
-function imageapi_gd_create_tmp(stdClass $image, $width, $height) {
+function imageapi_gd_create_tmp($image, $width, $height) {
   $res = imagecreatetruecolor($width, $height);
 
   if ($image->info['extension'] == 'gif') {

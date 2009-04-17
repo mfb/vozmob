@@ -1,5 +1,5 @@
 <?php
-// $Id: rules.action.inc,v 1.1.2.2 2009/03/04 02:14:45 kratib Exp $
+// $Id: rules.action.inc,v 1.1.2.3 2009/03/30 20:51:42 kratib Exp $
 
 function views_bulk_operations_rules_action_info() {
   if (!module_exists('rules')) return array();
@@ -12,6 +12,7 @@ function views_bulk_operations_rules_action_info() {
         'parameters' => array('ruleset' => $ruleset_key),
         'description' => $ruleset['label'],
         'configurable' => false,
+        'rules_ignore' => true,
       );
       eval(<<<EOS
 if (!function_exists('views_bulk_operations_ruleset_action_{$ruleset_key}')) {

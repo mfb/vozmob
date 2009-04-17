@@ -1,5 +1,5 @@
 <?php
-// $Id: views.module,v 1.330 2009/02/20 23:02:09 merlinofchaos Exp $
+// $Id: views.module,v 1.332 2009/04/08 16:11:51 merlinofchaos Exp $
 /**
  * @file
  * Primarily Drupal hooks and global API functions to manipulate views.
@@ -38,7 +38,7 @@ function views_theme() {
   $arguments = array(
     'display' => array('view' => NULL),
     'style' => array('view' => NULL, 'options' => NULL, 'rows' => NULL, 'title' => NULL),
-    'row' => array('view' => NULL, 'options' => NULL, 'row' => NULL),
+    'row' => array('view' => NULL, 'options' => NULL, 'row' => NULL, 'field_alias' => NULL),
   );
 
   // Default view themes
@@ -1149,6 +1149,9 @@ function views_views_exportables($op = 'list', $views = NULL, $name = 'foo') {
     $code .= " */\n";
     $code .= "function " . $name . "_views_default_views() {\n";
     foreach ($views as $view => $truth) {
+      $code .= "  /*\n";
+      $code .= "   * View ". var_export($all_views[$view]->name, TRUE) ."\n";
+      $code .= "   */\n";
       $code .= $all_views[$view]->export('  ');
       $code .= '  $views[$view->name] = $view;' . "\n\n";
     }

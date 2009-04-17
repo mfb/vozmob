@@ -1,24 +1,10 @@
 <?php
-// $Id: imagefield_file.inc,v 1.13 2009/03/17 01:00:12 quicksketch Exp $
+// $Id: imagefield_file.inc,v 1.18 2009/04/14 01:28:52 quicksketch Exp $
 
 /**
  * @file
  * hook_file and imagefield file functions.
  */
-
-/**
- * Implementation of hook_file_references().
- */
-function imagefield_file_references($file) {
-  $references = 0;
-  foreach(content_fields() as $field) {
-    if ($field['type'] != 'imagefield') {
-      continue;
-    }
-    $references += field_file_references($file, $field);
-  }
-  return array('imagefield' => $references);
-}
 
 /**
  * Implementation of hook_file_insert().
@@ -86,18 +72,25 @@ function imagefield_create_admin_thumb($source, $destination) {
   // Ensure the destination directory exists and is writable.
   $directories = explode('/', $destination);
   array_pop($directories); // Remove the file itself.
+  // Get the file system directory.
+  $file_system = file_directory_path();
   foreach ($directories as $directory) {
     $full_path = isset($full_path) ? $full_path . '/' . $directory : $directory;
-    file_check_directory($full_path, FILE_CREATE_DIRECTORY);
+    // Don't check directories outside the file system path.
+    if (strpos($full_path, $file_system) === 0) {
+      field_file_check_directory($full_path, FILE_CREATE_DIRECTORY);
+    }
   }
 
   // Create the thumbnail.
   if ($info['width'] <= $size[0] && $info['height'] <= $size[1]) {
     file_copy($source, $destination);
   }
-  else {
-    image_scale($source, $destination, $size[0], $size[1]);
+  elseif (image_get_toolkit() && @image_scale($source, $destination, $size[0], $size[1])) {
     // Set permissions. This is done for us when using file_copy().
     @chmod($destination, 0664);
+  }
+  else {
+    drupal_set_message(t('An image thumbnail was not able to be created.'), 'error');
   }
 }

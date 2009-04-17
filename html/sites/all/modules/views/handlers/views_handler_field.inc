@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field.inc,v 1.8 2009/02/22 00:24:38 merlinofchaos Exp $
+// $Id: views_handler_field.inc,v 1.14 2009/04/08 05:23:56 merlinofchaos Exp $
 /**
  * @defgroup views_field_handlers Views' field handlers
  * @{
@@ -155,6 +155,7 @@ class views_handler_field extends views_handler {
         'max_length' => array('default' => ''),
         'word_boundary' => array('default' => TRUE),
         'ellipsis' => array('default' => TRUE),
+        'strip_tags' => array('default' => FALSE),
         'html' => array('default' => FALSE),
       ),
     );
@@ -191,7 +192,7 @@ class views_handler_field extends views_handler {
 
       $form['alter']['text'] = array(
         '#title' => t('Text'),
-        '#type' => 'textfield',
+        '#type' => 'textarea',
         '#default_value' => $this->options['alter']['text'],
         '#description' => t('The text to display for this field. You may include HTML. You may enter data from this view as per the "Replacement patterns" below.'),
         '#process' => array('views_process_dependency'),
@@ -332,6 +333,17 @@ class views_handler_field extends views_handler {
         ),
       );
 
+      $form['alter']['strip_tags'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Strip HTML tags'),
+        '#description' => t('If checked, all HTML tags will be stripped.'),
+        '#default_value' => $this->options['alter']['strip_tags'],
+        '#process' => array('views_process_dependency'),
+        '#dependency' => array(
+          'edit-options-alter-trim' => array(1)
+        ),
+      );
+
       $form['alter']['html'] = array(
         '#type' => 'checkbox',
         '#title' => t('Field can contain HTML'),
@@ -384,26 +396,28 @@ class views_handler_field extends views_handler {
     $this->last_render = $value = $this->render($values);
     $this->original_value = $value;
 
-    $tokens = NULL;
-    if (!empty($this->options['alter']['alter_text']) && !empty($this->options['alter']['text'])) {
-      $tokens = $this->get_render_tokens();
-      $value = $this->render_altered($tokens);
-    }
-
-    if (!empty($this->options['alter']['trim']) && !empty($this->options['alter']['max_length'])) {
-      $value = $this->render_trim_text($value);
-    }
-
-    if (!empty($this->options['alter']['make_link']) && !empty($this->options['alter']['path'])) {
-      if (!isset($tokens)) {
-       $tokens = $this->get_render_tokens();
+    if ($this->allow_advanced_render()) {
+      $tokens = NULL;
+      if (!empty($this->options['alter']['alter_text']) && !empty($this->options['alter']['text'])) {
+        $tokens = $this->get_render_tokens();
+        $value = $this->render_altered($tokens);
       }
-      $value = $this->render_as_link($value, $tokens);
-    }
 
-    // This happens here so that render_as_link can get the unaltered value of
-    // this field as a token rather than the altered value.
-    $this->last_render = $value;
+      if (!empty($this->options['alter']['trim']) && !empty($this->options['alter']['max_length'])) {
+        $value = $this->render_trim_text($value);
+      }
+
+      if (!empty($this->options['alter']['make_link']) && !empty($this->options['alter']['path'])) {
+        if (!isset($tokens)) {
+         $tokens = $this->get_render_tokens();
+        }
+        $value = $this->render_as_link($value, $tokens);
+      }
+
+      // This happens here so that render_as_link can get the unaltered value of
+      // this field as a token rather than the altered value.
+      $this->last_render = $value;
+    }
 
     return $this->last_render;
   }
@@ -423,6 +437,14 @@ class views_handler_field extends views_handler {
    * Trim the field down to the specified length.
    */
   function render_trim_text($value) {
+    if (!empty($this->options['alter']['strip_tags'])) {
+      $value = strip_tags($value);
+      // NOTE: It's possible that some external fields might override the
+      // element type so if someone from, say, CCK runs into a bug here,
+      // this may be why =)
+      $this->definition['element type'] = 'span';
+    }
+
     if (drupal_strlen($value) <= $this->options['alter']['max_length']) {
       return $value;
     }
@@ -430,9 +452,9 @@ class views_handler_field extends views_handler {
     $value = drupal_substr($value, 0, $this->options['alter']['max_length']);
 
     if (!empty($this->options['alter']['word_boundary'])) {
-      if (preg_match ("/(.*)\b.+/u", $value, $matches)) {
+      if (preg_match ("/(.*)\b.+/us", $value, $matches)) {
         // Remove scraps of HTML entities from the end of a strings
-        $value = preg_replace('/(?:<(?!.+>)|&(?!.+;)).{1,10}$/us', '', $matches[1]);
+        $value = preg_replace('/(?:<(?!.+>)|&(?!.+;))/us', '', $matches[1]);
         // Strip spare space at the end.
         $value = rtrim($value);
       }
@@ -457,7 +479,9 @@ class views_handler_field extends views_handler {
     // $path will be run through check_url() by l() so we do not need to
     // sanitize it ourselves.
     $path = $this->options['alter']['path'];
-    $path = strtr($path, $tokens);
+
+    // Use strip tags as there should never be HTML in the path.
+    $path = strip_tags(strtr($path, $tokens));
 
     $alt = $this->options['alter']['alt'];
     $alt = strtr($alt, $tokens);

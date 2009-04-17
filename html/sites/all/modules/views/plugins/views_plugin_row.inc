@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_row.inc,v 1.1 2008/09/03 19:21:30 merlinofchaos Exp $
+// $Id: views_plugin_row.inc,v 1.3 2009/04/11 17:18:58 merlinofchaos Exp $
 /**
  * @file
  * Contains the base row style plugin.
@@ -27,10 +27,63 @@ class views_plugin_row extends views_plugin {
     return !empty($this->definition['uses fields']);
   }
 
+
+  function option_definition() {
+    $options = parent::option_definition();
+    if (isset($this->base_table)) {
+      $options['relationship'] = array('default' => 'none');
+    }
+
+    return $options;
+  }
+
   /**
    * Provide a form for setting options.
    */
-  function options_form(&$form, &$form_state) { }
+  function options_form(&$form, &$form_state) {
+    if (isset($this->base_table)) {
+      $view = &$form_state['view'];
+
+      // A whole bunch of code to figure out what relationships are valid for
+      // this item.
+      $relationships = $view->display_handler->get_option('relationships');
+      $relationship_options = array();
+
+      foreach ($relationships as $relationship) {
+        $relationship_handler = views_get_handler($relationship['table'], $relationship['field'], 'relationship');
+
+        // If this relationship is valid for this type, add it to the list.
+        $data = views_fetch_data($relationship['table']);
+        $base = $data[$relationship['field']]['relationship']['base'];
+        if ($base == $this->base_table) {
+          $relationship_handler->init($view, $relationship);
+          $relationship_options[$relationship['id']] = $relationship_handler->label();
+        }
+      }
+
+      if (!empty($relationship_options)) {
+        $relationship_options = array_merge(array('none' => t('Do not use a relationship')), $relationship_options);
+        $rel = empty($this->options['relationship']) ? 'none' : $this->options['relationship'];
+        if (empty($relationship_options[$rel])) {
+          // Pick the first relationship.
+          $rel = key($relationship_options);
+        }
+
+        $form['relationship'] = array(
+          '#type' => 'select',
+          '#title' => t('Relationship'),
+          '#options' => $relationship_options,
+          '#default_value' => $rel,
+        );
+      }
+      else {
+        $form['relationship'] = array(
+          '#type' => 'value',
+          '#value' => 'none',
+        );
+      }
+    }
+  }
 
   /**
    * Validate the options form.
@@ -42,6 +95,16 @@ class views_plugin_row extends views_plugin {
    * There is no need for this function to actually store the data.
    */
   function options_submit($form, &$form_state) { }
+
+  function query() {
+    if (isset($this->base_table) && isset($this->options['relationship']) && isset($this->view->relationship[$this->options['relationship']])) {
+      $relationship = $this->view->relationship[$this->options['relationship']];
+      $this->field_alias = $this->view->query->add_field($relationship->alias, $this->base_field);
+    }
+    else {
+      $this->field_alias = $this->view->base_field;
+    }
+  }
 
   /**
    * Allow the style to do stuff before each row is rendered.
@@ -56,6 +119,6 @@ class views_plugin_row extends views_plugin {
    * of some form, but not always.
    */
   function render($row) {
-    return theme($this->theme_functions(), $this->view, $this->options, $row);
+    return theme($this->theme_functions(), $this->view, $this->options, $row, $this->field_alias);
   }
 }

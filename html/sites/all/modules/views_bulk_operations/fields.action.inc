@@ -1,5 +1,5 @@
 <?php
-// $Id: fields.action.inc,v 1.1.2.4 2009/03/11 03:08:19 kratib Exp $
+// $Id: fields.action.inc,v 1.1.2.8 2009/04/09 20:14:24 kratib Exp $
 /**
  * @file Drupal action to set individual field values. 
  * 
@@ -20,7 +20,7 @@ function views_bulk_operations_fields_action_form($context) {
   module_load_include('inc', 'content', 'includes/content.node_form');
   $form = array();
   $form_state = array();
-  $node = array('type' => '');
+  $node = array();
   $weight = -100;
   if (isset($context['selection'])) {
     $fields = array();
@@ -28,33 +28,43 @@ function views_bulk_operations_fields_action_form($context) {
     while ($type = db_result($result)) {
       $type_info = content_types($type);
       $fields += $type_info['fields'];
+      $fields += _views_bulk_operations_fields_action_non_cck($type);
     }
   }
   else {
     $fields = content_fields();
   }
-  $form['field_info'] = array('#type' => 'value', '#value' => array());
+  $form['fields'] = array('#type' => 'value', '#value' => array());
   foreach ($fields as $field) {
     $field['required'] = FALSE;
     $node[$field['field_name']] = NULL;
 
     // The field info and widget.
     $form['#field_info'][$field['field_name']] = $field;
-    $form['field_info']['#value'][] = $field['field_name'];
-    $form += (array)content_field_form($form, $form_state, $field);
+    $form['fields']['#value'][] = $field['field_name'];
+    if (isset($field['field_def'])) { // is it our hacked definition?
+      $form += (array)$field['field_def'];
+    }
+    else { // no, it's CCK
+      $form += (array)content_field_form($form, $form_state, $field);
+    }
     $form[$field['field_name']] += array('#weight' => $weight++, '#prefix' => '<div class="fields-action-togglable">', '#suffix' => '</div>');
 
     // Checkbox to enable/disable this field.
     $form[$field['field_name'] . '_check'] = array('#type' => 'checkbox', '#attributes' => array('class' => 'fields-action-toggler'));
 
     // PHP code to program the value.
-    $db_info = content_database_info($field);
-    $columns = array_keys($db_info['columns']);
-    foreach ($columns as $key => $column) {
-      $columns[$key] = t("'@column' => value for @column", array('@column' => $column));
+    if (isset($field['field_def'])) {
+      $sample = 'return value;';
     }
-    $sample = t("return array(\n  0 => array(@columns),\n  // You'll usually want to stop here. Provide more values\n  // if you want your 'default value' to be multi-valued:\n  1 => array(@columns),\n  2 => ...\n);", array('@columns' => implode(', ', $columns)));
-
+    else {
+      $db_info = content_database_info($field);
+      $columns = array_keys($db_info['columns']);
+      foreach ($columns as $key => $column) {
+        $columns[$key] = t("'@column' => value for @column", array('@column' => $column));
+      }
+      $sample = t("return array(\n  0 => array(@columns),\n  // You'll usually want to stop here. Provide more values\n  // if you want your 'default value' to be multi-valued:\n  1 => array(@columns),\n  2 => ...\n);", array('@columns' => implode(', ', $columns)));
+    }
     $form[$field['field_name'] . '_code'] = array(
       '#type' => 'textarea',
       '#default_value' => '',
@@ -74,7 +84,7 @@ function theme_views_bulk_operations_fields_action_form(&$form) {
   drupal_add_js(drupal_get_path('module', 'views_bulk_operations').'/fields.action.js');
   $header = array(theme('table_select_header_cell'), t('Field'), t('Code'));
   $rows = array();
-  foreach ($form['field_info']['#value'] as $field_name) {
+  foreach ($form['fields']['#value'] as $field_name) {
     $rows[] = array(
       drupal_render($form[$field_name . '_check']),
       drupal_render($form[$field_name]),
@@ -94,16 +104,18 @@ function theme_views_bulk_operations_fields_action_form(&$form) {
 function views_bulk_operations_fields_action_validate($form, $form_state) {
   $field_types = _content_field_types();
   $chosen = 0;
-  foreach ($form_state['values']['field_info'] as $field_name) {
+  foreach ($form_state['values']['fields'] as $field_name) {
     $field = content_fields($field_name);
     if ($form_state['values'][$field_name . '_check']) {
       $chosen++;
-      $function = $field_types[$field['type']]['module'] .'_field';
-      if (function_exists($function)) {
-        $form['#node'] = (object)array('type' => '', $field_name => $form_state['values'][$field_name]);
-        $items = isset($form['#node']->$field_name) ? $form['#node']->$field_name : array();
-        $function('validate', $form['#node'], $field, $items, $form, NULL);
-        content_field('validate', $form['#node'], $field, $items, $form, NULL);
+      if ($field) {
+        $function = $field_types[$field['type']]['module'] .'_field';
+        if (function_exists($function)) {
+          $form['#node'] = (object)array('type' => '', $field_name => $form_state['values'][$field_name]);
+          $items = isset($form['#node']->$field_name) ? $form['#node']->$field_name : array();
+          $function('validate', $form['#node'], $field, $items, $form, NULL);
+          content_field('validate', $form['#node'], $field, $items, $form, NULL);
+        }
       }
     }
   }
@@ -114,26 +126,85 @@ function views_bulk_operations_fields_action_validate($form, $form_state) {
 
 function views_bulk_operations_fields_action_submit($form, $form_state) {
   $values = array();
-  foreach ($form_state['values']['field_info'] as $field_name) {
+  foreach ($form_state['values']['fields'] as $field_name) {
     $values[$field_name] = $form_state['values'][$field_name];
     $values[$field_name . '_check'] = $form_state['values'][$field_name . '_check'];
     $values[$field_name . '_code'] = $form_state['values'][$field_name . '_code'];
   }
+  $values['fields'] = $form_state['values']['fields'];
   return $values;
 }
 
 function views_bulk_operations_fields_action(&$node, $context) {
-  $type_info = content_types($node->type);
-  if (!empty($type_info['fields'])) foreach ($type_info['fields'] as $field) {
-    if (@$context[$field['field_name'] . '_check']) { // there's a value for this field
-      if (!empty($context[$field['field_name'] . '_code'])) {
-        $value = eval($context[$field['field_name'] . '_code']);
+  foreach ($context['fields'] as $field_name) {
+    if ($context[$field_name . '_check']) { // use the value for this field
+      if (!empty($context[$field_name . '_code'])) {
+        $value = eval($context[$field_name . '_code']);
       }
       else {
-        $value = $context[$field['field_name']];
+        $value = $context[$field_name];
       }
-      $node->{$field['field_name']} = $value;
+      $node->$field_name = $value;
     }
   }
+  node_submit($node);
+}
+
+function _views_bulk_operations_fields_action_non_cck($type) {
+  module_load_include('inc', 'node', 'node.pages');
+  global $user;
+  $return = array();
+
+  // Get the form definition.
+  $form_state = array('storage' => NULL, 'submitted' => FALSE);
+  $form_id = $type . '_node_form';
+  $form = drupal_retrieve_form($form_id, $form_state, (object)array('type' => $type, 'name' => $user ? $user->name : '', 'nid' => 0));
+  drupal_prepare_form($form_id, $form, $form_state);
+
+  // Iterate on known fields.
+  foreach (array('title', 'body', 'format', 'revision', 'log', 'name', 'date', 'status', 'promote', 'sticky', 'comment') as $field_name) {
+    $path = array_key_path($field_name, $form);
+    if ($path === FALSE) continue;
+    $field_def = array_path($form, array_merge($path, (array)$field_name));
+    if (is_array($field_def) && 
+        (!isset($field_def['#access']) || $field_def['#access']) &&
+        (isset($field_def['#type']) && $field_def['#type'] != 'value' && $field_def['#type'] != 'hidden')
+    ) {
+      $field_def['#required'] = FALSE;
+      $return[$field_name] = array(
+        'field_name' => $field_name,
+        'field_def' => array($field_name => $field_def),
+      );
+    }
+  }
+
+  return $return;
+}
+
+if (!function_exists('array_key_path')) {
+function array_key_path($needle, $haystack, $forbidden = array(), $path = array()) {
+  foreach ($haystack as $key => $val) {
+    if (in_array($key, $forbidden)) {
+      continue;
+    }
+    if (is_array($val) && is_array($sub = array_key_path($needle, $val, $forbidden, array_merge($path, (array)$key)))) {
+      return $sub;
+    }
+    elseif ($key === $needle) {
+      return $path;
+    }
+  }
+  return FALSE;
+}
+}
+
+if (!function_exists('array_path')) {
+function &array_path(&$array, $path) {
+  $offset =& $array;
+  if ($path) foreach ($path as $index) {
+    $offset =& $offset[$index];
+  }
+  return $offset;
+}
 }
 

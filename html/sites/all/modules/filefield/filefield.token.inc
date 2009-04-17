@@ -1,35 +1,43 @@
 <?php
+// $Id: filefield.token.inc,v 1.4 2009/03/28 06:15:41 quicksketch Exp $
 
 /**
- * Implementation of hook_token_list():
- * Provide a user readable list of filefield tokens.
+ * @file
+ * Token hook implementations. Included if token.module is installed.
+ */
+
+/**
+ * Implementation of hook_token_list().
+ *
+ * Provide a user readable list of FileField tokens.
  */
 function filefield_token_list($type = 'all') {
   if ($type == 'field' || $type == 'all') {
     $tokens = array();
-    $tokens['file']['filefield-fid']                = t("File ID");
-    $tokens['file']['filefield-description']        = t("File description");
-    $tokens['file']['filefield-filename']           = t("File name");
-    $tokens['file']['filefield-filepath']           = t("File path");
-    $tokens['file']['filefield-filemime']           = t("File MIME type");
-    $tokens['file']['filefield-filesize']           = t("File size (in bytes)");
-    $tokens['file']['filefield-filesize_formatted'] = t("File size (pretty printed)");
-    $tokens['file']['filefield-view']               = t("Fully formatted HTML file tag");
-    $tokens['file']['filefield-onlyname']           = t("File name without extension.");
-    $tokens['file']['filefield-extension']          = t("File extension");
+    $tokens['file']['filefield-fid']                = t('File ID');
+    $tokens['file']['filefield-description']        = t('File description');
+    $tokens['file']['filefield-filename']           = t('File name');
+    $tokens['file']['filefield-filepath']           = t('File path');
+    $tokens['file']['filefield-filemime']           = t('File MIME type');
+    $tokens['file']['filefield-filesize']           = t('File size (in bytes)');
+    $tokens['file']['filefield-filesize_formatted'] = t('File size (pretty printed)');
+    $tokens['file']['filefield-view']               = t('Fully formatted HTML file tag');
+    $tokens['file']['filefield-onlyname']           = t('File name without extension');
+    $tokens['file']['filefield-extension']          = t('File extension');
     return $tokens;
   }
 }
 
 /**
- * Implementation of hook_token_values():
- * Provide the concrete token values for a given file item.
+ * Implementation of hook_token_values().
+ *
+ * Provide the token values for a given file item.
  */
 function filefield_token_values($type, $object = NULL) {
   if ($type == 'field') {
     $item = $object[0];
     $tokens['filefield-fid']                = $item['fid'];
-    $tokens['filefield-description']        = isset($item['description']) ? $item['description'] : '';
+    $tokens['filefield-description']        = isset($item['data']['description']) ? $item['data']['description'] : '';
     $tokens['filefield-filename']           = $item['filename'];
     $tokens['filefield-filepath']           = $item['filepath'];
     $tokens['filefield-filemime']           = $item['filemime'];

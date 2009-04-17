@@ -1,5 +1,5 @@
 <?php
-// $Id: content.views.inc,v 1.1.2.22 2009/01/14 13:19:47 karens Exp $
+// $Id: content.views.inc,v 1.1.2.25 2009/04/11 14:50:53 yched Exp $
 
 /**
  * @file
@@ -32,6 +32,9 @@ function content_views_handlers() {
       'content_handler_argument_numeric' => array(
         'parent' => 'views_handler_argument_numeric',
       ),
+      'content_handler_argument_reference' => array(
+        'parent' => 'content_handler_argument_numeric',
+      ),
       'content_handler_argument_many_to_one' => array(
         'parent' => 'views_handler_argument_many_to_one',
       ),
@@ -52,8 +55,7 @@ function content_views_handlers() {
         'parent' => 'views_handler_filter_numeric',
       ),
       'content_handler_filter_float' => array(
-        // views_handler_filter_float is defined in views_handler_filter_numeric.inc
-        'parent' => 'views_handler_filter_numeric',
+        'parent' => 'views_handler_filter_float',
       ),
       'content_handler_filter_many_to_one' => array(
         'parent' => 'views_handler_filter_many_to_one',
@@ -177,6 +179,11 @@ function content_views_field_views_data($field) {
     $data = array();
     $data['table']['group']  = t('Content');
     $data['table']['join']['node'] = array(
+      'table' => $db_info['table'],
+      'left_field' => 'vid',
+      'field' => 'vid',
+    );
+    $data['table']['join']['node_revisions'] = array(
       'table' => $db_info['table'],
       'left_field' => 'vid',
       'field' => 'vid',

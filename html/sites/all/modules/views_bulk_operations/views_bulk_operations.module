@@ -1,5 +1,5 @@
 <?php
-// $Id: views_bulk_operations.module,v 1.29.2.9.2.68 2009/03/06 20:00:17 kratib Exp $
+// $Id: views_bulk_operations.module,v 1.29.2.9.2.75 2009/04/13 19:34:45 kratib Exp $
 
 /**
  * @file 
@@ -58,21 +58,32 @@ function views_bulk_operations_theme() {
  * Provide the ability to select items in a view using checkboxes.
  */
 function theme_views_node_selector($element) {
+  require_once(drupal_get_path('module', 'views').'/theme/theme.inc');
+  
   drupal_add_js('misc/tableselect.js');
   drupal_add_js(drupal_get_path('module', 'views_bulk_operations').'/views_bulk_operations.js');
   drupal_add_css(drupal_get_path('module', 'views_bulk_operations') . '/views_bulk_operations.css', 'module');
-  drupal_add_js(array('vbo' => array('url' => url($_GET['q']))), 'setting');
 
-  require_once(drupal_get_path('module', 'views').'/theme/theme.inc');
+  // Don't add the vbo setting twice.
+  $javascript = drupal_add_js();
+  $found = FALSE;
+  if (!empty($javascript['setting'])) foreach ($javascript['setting'] as $setting) {
+    if (is_array($setting) && isset($setting['vbo']) && isset($setting['vbo']['url'])) {
+      $found = TRUE;
+      break;
+    }
+  }
+  if (!$found) {
+    drupal_add_js(array('vbo' => array('url' => url($_GET['q']))), 'setting');
+  }
 
+  $output = '';
   $view = $element['#view'];
   $sets = $element['#sets'];
-
   $vars = array(
     'view' => $view,
   );
 
-  $output = '';
   // Give each group its own headers row.
   foreach ($sets as $records) {
     // template_preprocess_views_view_table() expects the raw data in 'rows'.
@@ -226,7 +237,6 @@ function views_bulk_operations_form($form_state, $plugin) {
       $form['objects'] = array(
         '#type' => 'views_node_selector',
         '#view' => $plugin->view,
-        // Sets for grouping.
         '#sets' => $plugin->sets,
         '#value' => array_filter($default_objects),
         '#prefix' => '<div class="views-node-selector">',
@@ -265,22 +275,23 @@ function views_bulk_operations_form($form_state, $plugin) {
       $operation = $plugin->get_operation_info($ops[0]);
       $form['operation'] = array('#type' => 'value', '#value' => $ops[0]);
       if ($operation['configurable']) {
+        /*
         $form['select'] = array(
           '#type' => 'fieldset',
           '#title' => $operation['label'],
           '#prefix' => '<div id="views-bulk-operations-select">',
           '#suffix' => '</div>',
         );
+        */
         $selection = array();
         foreach ($plugin->view->result as $result) {
           $selection[$result->{$plugin->view->base_field}] = $result->{$plugin->view->base_field};
         }
-        $form['select'] += _views_bulk_operations_action_form($operation, $plugin->view, $selection);
+        $form += _views_bulk_operations_action_form($operation, $plugin->view, $selection);
       }
       $form['objects'] = array(
         '#type' => 'views_node_selector',
         '#view' => $plugin->view,
-        // Sets for grouping.
         '#sets' => $plugin->sets,
         '#value' => array_filter($default_objects),
         '#prefix' => '<div class="views-node-selector">',
@@ -292,22 +303,25 @@ function views_bulk_operations_form($form_state, $plugin) {
         '#prefix' => '<div id="views-bulk-operations-submit">',
         '#suffix' => '</div>',             
       );
+      $form['#theme'] = 'views_bulk_operations_form';
       break;
     
     case VIEWS_BULK_OPS_STEP_CONFIG:
       $operation = $plugin->get_operation_info($form_state['storage'][VIEWS_BULK_OPS_STEP_VIEW]['operation']);
-      $form['#theme'] = 'views_bulk_operations_form';
       $form['operation'] = array('#type' => 'value', '#value' => $operation);
       $form += _views_bulk_operations_action_form($operation, $plugin->view, array_filter($form_state['storage'][VIEWS_BULK_OPS_STEP_VIEW]['objects']));
       $form['execute'] = array(
         '#type' => 'submit',
         '#value' => t('Next'),
+        '#weight' => 98,
       );
       $query = drupal_query_string_encode($form_state['storage'][VIEWS_BULK_OPS_STEP_VIEW]['exposed_input']);
       $form['cancel'] = array(
         '#type' => 'markup',
         '#value' => t('<a href="@view">Cancel</a>', array('@view' => url($_GET['q'], array('query' => $query)))),
+        '#weight' => 99,
       );
+      $form['#theme'] = 'views_bulk_operations_form';
       drupal_set_title(t('Set parameters for \'%action\'', array('%action' => $operation['label'])));
       _views_bulk_operations_strip_view($plugin->view);
       break;
@@ -327,7 +341,7 @@ function views_bulk_operations_form($form_state, $plugin) {
   // Use views_bulk_operations_form_submit() for form submit, regardless of form_id.
   $form['#submit'][] = 'views_bulk_operations_form_submit';
   $form['#validate'][] = 'views_bulk_operations_form_validate';
-  $form['#cache'] = true;
+  $form['#cache'] = TRUE;
   return $form;
 }
 
@@ -341,7 +355,9 @@ function _views_bulk_operations_strip_view(&$view) {
 }
 
 function theme_views_bulk_operations_form($form) {
-  $function = 'theme_' . $form['operation']['#value']['callback'] . '_form';
+  $operation = is_array($form['operation']['#value']) ? $form['operation']['#value'] : $form['plugin']['#value']->get_operation_info($form['operation']['#value']);
+  $function = 'theme_' . $operation['callback'] . '_form';
+  $output = '';
   if (function_exists($function)) {
     $output = $function($form);
   }
@@ -444,6 +460,9 @@ function views_bulk_operations_form_submit($form, &$form_state) {
   if (isset($operation['callback arguments'])) {
     $params += $operation['callback arguments'];
   }
+  // Add this view as parameter.
+  $params['view'] = $plugin->view;
+
   $objects = $form_state['storage'][VIEWS_BULK_OPS_STEP_VIEW]['objects'];
 
   if (version_compare(VERSION, '6.10', '<')) {
@@ -470,7 +489,10 @@ function views_bulk_operations_form_submit($form, &$form_state) {
     batch_set($batch);
   }
   else if ($plugin->options['execution_type'] == VBO_EXECUTION_DIRECT) {
+    set_time_limit(0);
+
     $context['results']['rows'] = 0;
+    $context['results']['time'] = microtime(TRUE);
     if ($operation['type'] == 'action') {
       _views_bulk_operations_action_process($operation, $objects, $params, $context);
     }
@@ -503,6 +525,7 @@ function _views_bulk_operations_adjust_selection(&$objects, $exposed_input, $plu
     $view->pager['use_pager'] = FALSE;
     $view->pager['items_per_page'] = 0;
     $view->set_exposed_input($exposed_input);
+    $view->ignore_fields = TRUE; // we don't need the fields here so we tell our style plugin to ignore them
     $view->execute($plugin->view->current_display);
     foreach ($view->result as $result) {
       $objects[$result->{$view->base_field}] = $result->{$view->base_field};
@@ -514,9 +537,14 @@ function _views_bulk_operations_adjust_selection(&$objects, $exposed_input, $plu
  * Callback for Batch API operations.
  */
 function _views_bulk_operations_batch_process($operation, $oid, $params, &$context = NULL) {
+  if ($context && !isset($context['time'])) {
+    $context['results']['time'] = microtime(TRUE);
+  }
+
   $info = _views_bulk_operations_object_info_for_type($operation['object']);
   if (!$info) return;
   $object = call_user_func($info['load'], $oid);
+
   if ($operation['type'] == 'action') {
     _views_bulk_operations_action_do($operation, $object, $params);
   }
@@ -559,7 +587,7 @@ function _views_bulk_operations_operation_process($operation, $objects, $params,
  */
 function _views_bulk_operations_batch_finished($success, $results, $operations, $display_result = NULL) {
   if ($success) {
-    $message = t('!results rows processed:', array('!results' => $results['rows']));
+    $message = t('!results rows processed in about !time ms:', array('!results' => $results['rows'], '!time' => round((microtime(TRUE) - $results['time']) * 1000)));
     $message .= theme('item_list', $results['log']);
   }
   else {
@@ -682,7 +710,7 @@ function views_bulk_operations_views_bulk_operations_object_info() {
     'node' => array(
       'type' => 'node',
       'base_table' => 'node',
-      'load' => 'node_load',
+      'load' => '_views_bulk_operations_node_load',
       'title' => 'title',
     ),
     'user' => array(
@@ -698,6 +726,10 @@ function views_bulk_operations_views_bulk_operations_object_info() {
       'title' => 'subject',
     ),
   );
+}
+
+function _views_bulk_operations_node_load($nid) {
+  return node_load($nid, NULL, TRUE);
 }
 
 function _views_bulk_operations_object_info_for_view($view) {

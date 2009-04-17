@@ -1,5 +1,5 @@
 <?php
-// $Id: content_handler_filter_many_to_one.inc,v 1.1.2.2 2008/10/04 13:14:21 karens Exp $
+// $Id: content_handler_filter_many_to_one.inc,v 1.1.2.3 2009/03/20 00:53:47 yched Exp $
 
 /**
  * @file
@@ -27,6 +27,11 @@ class content_handler_filter_many_to_one extends views_handler_filter_many_to_on
     $field = $this->content_field;
     $function = $field['module'] .'_allowed_values';
     $options = function_exists($function) ? $function($field) : content_allowed_values($field);
+    if ($this->value_form_type == 'select') {
+      // For selects, HTML should be filtered out and entities left unencoded.
+      // See content_allowed_values / content_filter_xss / filter_xss.
+      $options = array_map(create_function('$opt', 'return html_entity_decode(strip_tags($opt), ENT_QUOTES);'), $options);
+    }
     return (array) $options;
   }
 

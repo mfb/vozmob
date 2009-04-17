@@ -1,5 +1,5 @@
 <?php
-// $Id: aggregator.views.inc,v 1.1 2009/01/07 19:38:08 merlinofchaos Exp $
+// $Id: aggregator.views.inc,v 1.2 2009/04/07 23:07:31 merlinofchaos Exp $
 /**
  * @file
  * Provide views data and handlers for aggregator.module
@@ -148,7 +148,7 @@ function aggregator_views_data() {
     'help' => t('The unique ID of the aggregator feed.'), // The help that appears on the UI,
     // Information for displaying the fid
     'field' => array(
-      'handler' => 'views_handler_field_aggregator_feed',
+      'handler' => 'views_handler_field_numeric',
       'click sortable' => TRUE,
     ),
     // Information for accepting a fid as an argument
@@ -159,7 +159,7 @@ function aggregator_views_data() {
     ),
     // Information for accepting a nid as a filter
     'filter' => array(
-      'handler' => 'views_handler_filter_aggregator_feed',
+      'handler' => 'views_handler_filter_numeric',
     ),
     // Information for sorting on a nid.
     'sort' => array(

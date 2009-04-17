@@ -9,7 +9,6 @@
 /views_handler_field_ncs_last_comment_name.inc/1.1/Wed Sep  3 19:21:29 2008//
 /views_handler_field_ncs_last_updated.inc/1.1/Wed Sep  3 19:21:29 2008//
 /views_handler_field_node_comment.inc/1.1/Wed Sep  3 19:21:29 2008//
-/views_handler_field_node_new_comments.inc/1.5/Fri Jan 30 19:59:17 2009//
 /views_handler_filter_comment_user_uid.inc/1.1/Fri Feb  6 21:13:04 2009//
 /views_handler_filter_ncs_last_updated.inc/1.1/Wed Sep  3 19:21:29 2008//
 /views_handler_filter_node_comment.inc/1.1/Wed Sep  3 19:21:29 2008//
@@ -18,4 +17,6 @@
 /views_handler_sort_ncs_last_updated.inc/1.1/Wed Sep  3 19:21:29 2008//
 /views_plugin_row_comment_rss.inc/1.3/Wed Jan 21 23:02:22 2009//
 /views_plugin_row_comment_view.inc/1.1/Wed Sep  3 19:21:29 2008//
+/views_handler_field_comment_node_link.inc/1.1/Wed Apr  8 06:38:41 2009//
+/views_handler_field_node_new_comments.inc/1.6/Fri Apr 17 17:33:35 2009//
 D

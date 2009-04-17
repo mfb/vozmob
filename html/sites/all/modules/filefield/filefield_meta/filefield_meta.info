@@ -1,8 +1,8 @@
-; $Id: filefield_meta.info,v 1.5 2008/07/31 01:02:15 drewish Exp $
+; $Id: filefield_meta.info,v 1.6 2009/04/01 08:57:49 quicksketch Exp $
 name = FileField Meta
 description = Add metadata gathering and storage to FileField.
 dependencies[] = filefield
 dependencies[] = getid3
 package = CCK
 core = 6.x
-php = 5.2
+php = 5.0

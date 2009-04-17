@@ -1,5 +1,5 @@
 <?php
-// $Id: imagecache_actions.inc,v 1.20 2009/03/18 08:17:34 drewish Exp $
+// $Id: imagecache_actions.inc,v 1.21 2009/04/17 02:57:25 drewish Exp $
 
 /**
  * ImageCache Scale
@@ -204,9 +204,9 @@ function imagecache_rotate_form($data) {
   );
   $form['bgcolor'] = array(
     '#type' => 'textfield',
-    '#default_value' => (isset($data['bgcolor'])) ? $data['bgcolor'] : '#FFFFFF',
+    '#default_value' => (isset($data['bgcolor'])) ? $data['bgcolor'] : '',
     '#title' => t('Background color'),
-    '#description' => t('The background color to use for exposed areas of the image. Use web-style hex colors (#FFFFFF for white, #000000 for black).'),
+    '#description' => t('The background color to use for exposed areas of the image. Use web-style hex colors (#FFFFFF for white, #000000 for black). An empty value will cause images that support transparency to have transparent backgrounds, otherwise it will be white.'),
   );
   return $form;
 }
@@ -214,20 +214,27 @@ function imagecache_rotate_form($data) {
 function theme_imagecache_rotate($element) {
   $output = t('degrees:') .' '. $element['#value']['degrees'] .', ';
   $output .= t('randomize:') .' '. (($element['#value']['random']) ? t('Yes') : t('No')) .', ';
-  $output .= t('background:') .' '. $element['#value']['bgcolor'];
+  $output .= t('background:') .' '. strlen(trim($element['#value']['bgcolor'])) ? $element['#value']['bgcolor'] : t('Transparent/white');
   return $output;
 }
 
 function imagecache_rotate_image(&$image, $data) {
+  // Merge in default values.
+  $data += array(
+    'degrees' => '0',
+    'random' => FALSE,
+    'bgcolor' => '',
+  );
+ 
   // Set sane default values.
-  $data['degrees'] = $data['degrees'] ? $data['degrees'] : 0;
-  $data['random'] = $data['random'] ? $data['random'] : FALSE;
-  $data['bgcolor'] = $data['bgcolor'] ? $data['bgcolor'] : '#FFFFFF';
+  if (strlen(trim($data['bgcolor']))) {
+    $data['bgcolor'] = hexdec(str_replace('#', '', $data['bgcolor']));
+  }
+  else {
+    $data['bgcolor'] = NULL;
+  }
 
-  // Manipulate the if we need to randomize, and convert to proper colors.
-  $data['bgcolor'] = '0x'. str_replace('#', '', $data['bgcolor']);
-
-  if (!empty($data['random'])) {
+  if ($data['random']) {
     $degrees = abs((float)$data['degrees']);
     $data['degrees'] = rand(-1 * $degrees, $degrees);
   }

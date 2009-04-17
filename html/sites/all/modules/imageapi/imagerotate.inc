@@ -1,5 +1,5 @@
 <?php 
-// $Id: imagerotate.inc,v 1.3.4.2 2009/02/16 20:17:05 drewish Exp $
+// $Id: imagerotate.inc,v 1.3.4.3 2009/03/18 08:35:59 drewish Exp $
 
 /** 
  * @file
@@ -71,8 +71,8 @@ function imagerotate(&$im, $angle, $bgcolor) {
   $rotate = imagecreatetruecolor($rot_width, $rot_height);
   $bg = imagecolorallocatealpha($rotate, $r, $g, $b, $a);
   imagefilledrectangle($rotate, 0, 0, $rot_width, $rot_height, $bg);
-  imagealphablending($rotate, false);
-  imagesavealpha($rotate, true);
+  imagealphablending($rotate, FALSE);
+  imagesavealpha($rotate, TRUE);
 
   switch ($angle) {
     case 270:

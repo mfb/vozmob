@@ -1,13 +1,12 @@
 <?php
-// $Id: filefield.theme.inc,v 1.8 2009/03/12 03:17:59 quicksketch Exp $
+// $Id: filefield.theme.inc,v 1.9 2009/03/28 06:13:07 quicksketch Exp $
+
 /**
  * @file
- * FileField: Defines a CCK file field type.
+ * Theme functions used for normal file output.
  *
  * Uses content.module to store the fid and field specific metadata,
  * and Drupal's {files} table to store the actual file data.
- *
- * This file contains common theme functions.
  */
 
 /**

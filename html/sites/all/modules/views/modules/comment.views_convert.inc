@@ -1,5 +1,5 @@
 <?php
-//$Id: comment.views_convert.inc,v 1.1 2009/02/23 19:05:56 merlinofchaos Exp $
+//$Id: comment.views_convert.inc,v 1.2 2009/04/07 23:21:00 merlinofchaos Exp $
 
 /**
  * @file
@@ -14,23 +14,17 @@
  * the right results, usually needed to set field options or values.
  */
 function comment_views_convert($display, $type, &$view, $field, $id = NULL) {
-  switch ($field['tablename']) { // Avoid conflicts with fields in tables from other modules.
-    case 'comments':
-      switch ($type) {
-        case 'field':
+  switch ($type) {
+    case 'field':
+      switch ($field['tablename']) {
+        case 'comments':
           switch ($field['field']) {
             case 'add':
-              $item = $view->get_item($display, 'field', $id);
-              $item['field'] = 'replyto_comment';
-              $view->set_item($display, 'field', $id, $item);
+              $view->set_item_option($display, 'field', $id, 'field', 'replyto_comment');
               break;
           }
           break;
-      }
-      break;
-    case 'node_comment_statistics':
-      switch ($type) {
-        case 'field':
+        case 'node_comment_statistics':
           switch ($field['field']) {
             case 'last_changed':
               $item = $view->get_item($display, 'field', $id);

@@ -1,5 +1,5 @@
 <?php
-//$Id: upload.views_convert.inc,v 1.1 2009/02/23 19:05:56 merlinofchaos Exp $
+//$Id: upload.views_convert.inc,v 1.2 2009/04/07 23:21:00 merlinofchaos Exp $
 
 /**
  * @file
@@ -14,11 +14,11 @@
  * the right results, usually needed to set field options or values.
  */
 function upload_views_convert($display, $type, &$view, $field, $id = NULL) {
-  switch ($field['tablename']) { // Avoid conflicts with fields in tables from other modules.
-    case 'files':
-      switch ($type) {
-        case 'field':
-          switch ($field['field']) {
+  switch ($type) {
+    case 'field':
+      switch ($field['tablename']) {
+        case 'files':
+          switch($field['field']) {
             case 'all_files':
               $item = $view->get_item($display, 'field', $id);
               switch ($field['options']) {

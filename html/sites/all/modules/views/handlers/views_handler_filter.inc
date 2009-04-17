@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_filter.inc,v 1.5 2009/02/25 19:42:13 merlinofchaos Exp $
+// $Id: views_handler_filter.inc,v 1.6 2009/04/07 23:05:29 merlinofchaos Exp $
 /**
  * @defgroup views_filter_handlers Views' filter handlers
  * @{
@@ -230,7 +230,7 @@ class views_handler_filter extends views_handler {
     }
 
     $form['expose'] = array(
-      '#prefix' => '<div class="views-expose-options clear">',
+      '#prefix' => '<div class="views-expose-options clear-block">',
       '#suffix' => '</div>',
     );
     $this->expose_form($form, $form_state);

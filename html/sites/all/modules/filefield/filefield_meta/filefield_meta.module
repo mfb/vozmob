@@ -1,5 +1,5 @@
 <?php
-// $Id: filefield_meta.module,v 1.11 2009/03/11 06:02:24 quicksketch Exp $
+// $Id: filefield_meta.module,v 1.13 2009/03/19 05:08:49 quicksketch Exp $
 /**
  * @file
  * FileField Meta: Add Video Support to File Field.
@@ -46,17 +46,21 @@ function filefield_meta_views_api() {
  * Implementation of filefield's hook_file_insert().
  */
 function filefield_meta_file_insert(&$file) {
-  filefield_meta($file);
-  $record = array_merge(array('fid' => $file->fid), $file->data);
-  drupal_write_record('filefield_meta', $record);
+  if (!empty($file->fid)) {
+    filefield_meta($file);
+    $record = array_merge(array('fid' => $file->fid), $file->data);
+    drupal_write_record('filefield_meta', $record);
+  }
 }
 
 /**
  * Implementation of filefield's hook_file_update().
  */
 function filefield_meta_file_update(&$file) {
-  filefield_meta_file_delete($file);
-  filefield_meta_file_insert($file);
+  if (!empty($file->fid)) {
+    filefield_meta_file_delete($file);
+    filefield_meta_file_insert($file);
+  }
 }
 
 /**
@@ -77,8 +81,8 @@ function filefield_meta(&$file) {
     $file->data['width'] = $info['video']['resolution_x'];
     $file->data['height'] = $info['video']['resolution_y'];
   }
-  else if (isset($info['video']['streams'])) {
-    foreach($info['video']['streams'] as $stream) {
+  elseif (isset($info['video']['streams'])) {
+    foreach ($info['video']['streams'] as $stream) {
       $file->data['width'] = max($file->data['width'], $stream['resolution_x']);
       $file->data['height'] = max($file->data['height'], $stream['resolution_y']);
     }
@@ -113,7 +117,7 @@ function theme_filefield_meta_duration($duration) {
     $seconds -= 60;
     $minutes++;
   }
-  return intval($minutes).':'.str_pad($seconds, 2, 0, STR_PAD_LEFT);
+  return intval($minutes) . ':' . str_pad($seconds, 2, 0, STR_PAD_LEFT);
 }
 
 

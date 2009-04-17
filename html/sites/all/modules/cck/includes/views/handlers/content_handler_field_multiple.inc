@@ -1,5 +1,5 @@
 <?php
-// $Id: content_handler_field_multiple.inc,v 1.1.2.16 2009/03/17 22:58:06 yched Exp $
+// $Id: content_handler_field_multiple.inc,v 1.1.2.17 2009/04/11 14:50:55 yched Exp $
 
 /**
  * @file
@@ -26,8 +26,13 @@ class content_handler_field_multiple extends content_handler_field {
       $this->additional_fields = array(
         'type' => array('table' => 'node', 'field' => 'type'),
         'nid' => array('table' => 'node', 'field' => 'nid'),
-        'vid' => array('table' => 'node', 'field' => 'vid'),
       );
+      if ($view->base_table == 'node_revisions') {
+        $this->additional_fields['vid'] = array('table' => 'node_revisions', 'field' => 'vid');
+      }
+      else {
+        $this->additional_fields['vid'] = array('table' => 'node', 'field' => 'vid');
+      }
     }
   }
 
@@ -140,20 +145,19 @@ class content_handler_field_multiple extends content_handler_field {
     $alias = content_views_tablename($field);
     // Prefix aliases with '_' to avoid clashing with field columns names.
     $query_columns = array(
-      'node.vid AS _vid',
-      "$alias.delta as _delta",
+      'vid AS _vid',
+      "delta as _delta",
       // nid is needed to generate the links for 'link to node' option.
-      'node.nid AS _nid',
+      'nid AS _nid',
     );
     // The actual field columns.
     foreach ($db_info['columns'] as $column => $attributes) {
-      $query_columns[] = "$alias.$attributes[column] AS $column";
+      $query_columns[] = "$attributes[column] AS $column";
     }
     $query = 'SELECT '. implode(', ', $query_columns) .
-             ' FROM {'. $db_info['table'] ."} $alias".
-             " LEFT JOIN {node} node ON node.vid = $alias.vid".
-             " WHERE node.vid IN (". implode(',', $vids) .')'.
-             " ORDER BY node.nid ASC, $alias.delta ". ($options['multiple']['multiple_reversed'] ? 'DESC' : 'ASC');
+             ' FROM {'. $db_info['table'] ."}".
+             " WHERE vid IN (". implode(',', $vids) .')'.
+             " ORDER BY nid ASC, delta ". ($options['multiple']['multiple_reversed'] ? 'DESC' : 'ASC');
     $result = db_query($query);
 
     while ($item = db_fetch_array($result)) {

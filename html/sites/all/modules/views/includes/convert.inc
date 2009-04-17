@@ -1,5 +1,5 @@
 <?php
-// $Id: convert.inc,v 1.13 2009/02/23 18:58:18 merlinofchaos Exp $
+// $Id: convert.inc,v 1.14 2009/04/07 23:21:00 merlinofchaos Exp $
 /**
  * @file convert.inc
  *
@@ -195,35 +195,52 @@ function views1_import($imported) {
     $handler = &$view->display[$block_display]->handler;
 
     if ($imported->block_title) {
-      $handler->set_override('title');
+      if (!empty($imported->page)) {
+        $handler->set_override('title');
+      }
       $handler->set_option('title', $imported->block_title);
     }
 
+    if (!empty($imported->page)) {
+      $handler->set_override('use_pager');
+    }
+    $handler->set_option('use_pager', FALSE);
+
     if ($imported->nodes_per_block != $imported->nodes_per_page) {
-      $handler->set_override('items_per_page');
+      if (!empty($imported->page)) {
+        $handler->set_override('items_per_page');
+      }
       $handler->set_option('items_per_page', $imported->nodes_per_block);
       $handler->set_option('offset', 0);
     }
 
     if (empty($imported->block_use_page_header)) {
-      $handler->set_override('header');
+      if (!empty($imported->page)) {
+        $handler->set_override('header');
+      }
       $handler->set_option('header', $imported->block_header);
       $handler->set_option('header_format', $imported->block_header_format);
     }
     if (empty($imported->block_use_page_footer)) {
-      $handler->set_override('footer');
+      if (!empty($imported->page)) {
+        $handler->set_override('footer');
+      }
       $handler->set_option('footer', $imported->block_footer);
       $handler->set_option('footer_format', $imported->block_footer_format);
     }
     if (empty($imported->block_use_page_empty)) {
-      $handler->set_override('empty');
+      if (!empty($imported->page)) {
+        $handler->set_override('empty');
+      }
       $handler->set_option('empty', $imported->block_empty);
       $handler->set_option('empty_format', $imported->block_empty_format);
     }
 
     $handler->set_option('more', $imported->block_more);
 
-    $handler->set_override('style_plugin');
+    if (!empty($imported->page)) {
+      $handler->set_override('style_plugin');
+    }
     views1_convert_style($view, $handler, $imported->block_type);
   }
 
@@ -281,19 +298,22 @@ function views1_import($imported) {
   // Exposed filters now get added to the filter array, not as a separate array.
   $count = 0;
   foreach ($imported->exposed_filter as $field) {
-    if (views_get_handler($field['tablename'], $field['field'], 'filter')) {
-      $view->display['default']->display_options['filters'][$field['field']]['exposed'] = 1;
+    list(, $id) = explode('.', $field['field'], 2);
+    $item = $view->get_item('default', 'filter', $id);
+    if (views_get_handler($item['table'], $item['field'], 'filter')) {
+      $item['exposed'] = 1;
 
       // Use the count to emulate the old, hardcoded filter naming.
-      $view->display['default']->display_options['filters'][$field['field']]['expose']['identifier'] = 'filter' . $count;
-      $view->display['default']->display_options['filters'][$field['field']]['expose']['label'] = $field['label'];
-      $view->display['default']->display_options['filters'][$field['field']]['expose']['operator'] = $field['operator'] ? 'op' . $count : '';
-      $view->display['default']->display_options['filters'][$field['field']]['expose']['optional'] = $field['optional'];
-      $view->display['default']->display_options['filters'][$field['field']]['expose']['single'] = $field['single'];
+      $item['expose']['identifier'] = 'filter' . $count;
+      $item['expose']['label'] = $field['label'];
+      $item['expose']['operator'] = $field['operator'] ? 'op' . $count : '';
+      $item['expose']['optional'] = $field['optional'];
+      $item['expose']['single'] = $field['single'];
+      $view->set_item('default', 'filter', $id, $item);
     }
     $count++;
     foreach (module_implements('views_convert') as $module) {
-      module_invoke($module, 'views_convert', 'default', 'exposed_filter', $view, $field, $field['field']);
+      module_invoke($module, 'views_convert', 'default', 'exposed_filter', $view, $field, $id);
     }
   }
 
@@ -404,7 +424,7 @@ function views1_load($arg) {
         $filter['operator'] == 'OR' ||
         $filter['operator'] == 'NOR') {
         // TODO - need another way to identify this type of filter
-        // without being able to call hook_implements().  
+        // without being able to call hook_implements().
         //|| $filters[$filter['field']]['value-type'] == 'array' ) {
       if ($filter['value'] !== NULL && $filter['value'] !== '') {
         $filter['value'] = explode(',', $filter['value']);

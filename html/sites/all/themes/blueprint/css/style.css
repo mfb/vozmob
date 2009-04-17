@@ -51,3 +51,7 @@ div.overlay-links li {
   display: block;
   list-style-image: url(../images/icons/menu-leaf.gif);
 }
+
+.media-mover-audio .flowplayer {
+  height: 24px;
+}

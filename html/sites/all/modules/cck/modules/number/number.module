@@ -1,5 +1,5 @@
 <?php
-// $Id: number.module,v 1.91.2.33 2009/03/16 22:04:07 yched Exp $
+// $Id: number.module,v 1.91.2.34 2009/03/26 23:43:19 yched Exp $
 
 /**
  * @file
@@ -328,8 +328,8 @@ function theme_number_formatter_generic($element) {
       break;
   }
 
-  $prefixes = isset($field['prefix']) ? explode('|', check_plain($field['prefix'])) : array(0 => '');
-  $suffixes = isset($field['suffix']) ? explode('|', check_plain($field['suffix'])) : array(0 => '');
+  $prefixes = isset($field['prefix']) ? array_map('content_filter_xss', explode('|', $field['prefix'])) : array('');
+  $suffixes = isset($field['suffix']) ? array_map('content_filter_xss', explode('|', $field['suffix'])) : array('');
   $prefix = (count($prefixes) > 1) ? format_plural($value, $prefixes[0], $prefixes[1]) : $prefixes[0];
   $suffix = (count($suffixes) > 1) ? format_plural($value, $suffixes[0], $suffixes[1]) : $suffixes[0];
 
@@ -464,11 +464,11 @@ function number_process($element, $edit, $form_state, $form) {
   }
   if (!empty($field['prefix'])) {
     $prefixes = explode('|', $field['prefix']);
-    $element[$field_key]['#field_prefix'] = array_pop($prefixes);
+    $element[$field_key]['#field_prefix'] = content_filter_xss(array_pop($prefixes));
   }
   if (!empty($field['suffix'])) {
     $suffixes = explode('|', $field['suffix']);
-    $element[$field_key]['#field_suffix'] = array_pop($suffixes);
+    $element[$field_key]['#field_suffix'] = content_filter_xss(array_pop($suffixes));
   }
   switch ($field['type']) {
     case 'number_float':

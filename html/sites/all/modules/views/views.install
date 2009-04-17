@@ -1,5 +1,5 @@
 <?php
-// $Id: views.install,v 1.44 2009/02/20 22:57:19 merlinofchaos Exp $
+// $Id: views.install,v 1.46 2009/04/07 20:39:51 merlinofchaos Exp $
 /**
  * @file views.install
  * Contains install and update functions for Views.
@@ -75,7 +75,7 @@ function views_schema_1() {
       ),
     ),
     'primary key' => array('vid'),
-    'unique key' => array('name' => array('name')),
+    'unique keys' => array('name' => array('name')),
   );
 
   $schema['views_display'] = array(
@@ -206,11 +206,23 @@ function views_update_6001() {
   return $ret;
 }
 
+// NOTE: Update 6002 removed because it did not always work.
+/**
+ * Add missing unique key.
+ */
+function views_update_6003() {
+  $ret = array();
+
+  db_add_unique_key($ret, 'views_view', 'name', array('name'));
+
+  return $ret;
+}
+
 /**
  * Enlarge the views_object_cache.data column to prevent truncation and JS
  * errors.
  */
-function views_update_6002() {
+function views_update_6004() {
   $ret = array();
 
   $new_field = array(
@@ -220,7 +232,10 @@ function views_update_6002() {
     'serialize' => TRUE,
   );
 
-  db_change_field($ret, 'views_object_cache', 'data', 'data', $new_field);
+  // Drop and re-add this field because there is a bug in
+  // db_change_field that causes this to fail when trying to cast the data.
+  db_drop_field($ret, 'views_object_cache', 'data');
+  db_add_field($ret, 'views_object_cache', 'data', $new_field);
 
   return $ret;
 }

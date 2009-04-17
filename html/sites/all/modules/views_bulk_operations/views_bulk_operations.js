@@ -1,4 +1,4 @@
-// $Id: views_bulk_operations.js,v 1.1.4.14 2009/02/20 23:16:49 kratib Exp $
+// $Id: views_bulk_operations.js,v 1.1.4.16 2009/04/07 19:42:22 kratib Exp $
 (function ($) {
 // START jQuery
 
@@ -61,7 +61,7 @@ Drupal.vbo.startUp = function(context) {
 
   // Set up the ability to click anywhere on the row to select it.
   $('tr.rowclick', context).click(function(event) {
-    if (event.target.type !== 'checkbox') {
+    if (event.target.tagName.toLowerCase() != 'input' && event.target.tagName.toLowerCase() != 'a') {
       $(':checkbox', this).each(function() {
         var checked = this.checked;
         // trigger() toggles the checkmark *after* the event is set, 

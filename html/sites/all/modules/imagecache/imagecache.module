@@ -1,5 +1,5 @@
 <?php
-// $Id: imagecache.module,v 1.99 2009/03/18 08:17:34 drewish Exp $
+// $Id: imagecache.module,v 1.100 2009/04/14 00:01:21 drewish Exp $
 
 /**
  * @file
@@ -288,7 +288,7 @@ function imagecache_action_definition($action) {
 
 /**
  * Return a URL that points to the location of a derivative of the
- * original image at @p $path, transformed with the given @p $preset.
+ * original image transformed with the given preset.
  *
  * Special care is taken to make this work with the possible combinations of
  * Clean URLs and public/private downloads. For example, when Clean URLs are not
@@ -298,10 +298,24 @@ function imagecache_action_definition($action) {
  *
  * This code is very similar to the Drupal core function file_create_url(), but
  * handles the case of Clean URLs and public downloads differently however.
+ *
+ * @param $presetname
+ * @param $filepath
+ *   String specifying the path to the image file.
+ * @param $bypass_browser_cache
+ *   A Boolean indicating that the URL for the image should be distinct so that
+ *   the visitors browser will not be able to use a previously cached version.
+ *   This is
  */
-function imagecache_create_url($presetname, $path) {
-  $path = _imagecache_strip_file_directory($path);
-  return file_create_url(file_directory_path() .'/imagecache/'. $presetname .'/'. $path);
+function imagecache_create_url($presetname, $filepath, $bypass_browser_cache = FALSE) {
+  $path = _imagecache_strip_file_directory($filepath);
+  $args = array('absolute' => TRUE, 'query' => $bypass_browser_cache ? time() : $bypass_browser_cache);
+  switch (variable_get('file_downloads', FILE_DOWNLOADS_PUBLIC)) {
+    case FILE_DOWNLOADS_PUBLIC:
+      return url($GLOBALS['base_url'] . '/' . file_directory_path() .'/imagecache/'. $presetname .'/'. $path, $args);
+    case FILE_DOWNLOADS_PRIVATE:
+      return url('system/files/imagecache/'. $presetname .'/'. $path, $args);
+  }
 }
 
 /**

@@ -1,5 +1,10 @@
 <?php
-// $Id: filefield_meta_handler_field_duration.inc,v 1.1 2009/03/11 06:02:24 quicksketch Exp $
+// $Id: filefield_meta_handler_field_duration.inc,v 1.2 2009/03/19 03:43:37 quicksketch Exp $
+
+/**
+ * @file
+ * A special handler that properly formats duration fields as minutes:seconds.
+ */
 
 /**
  * Render a field as a readable value in hours, minutes, and seconds.

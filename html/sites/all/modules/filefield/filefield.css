@@ -1,4 +1,4 @@
-/* $Id: filefield.css,v 1.19 2009/03/12 22:22:25 quicksketch Exp $ */
+/* $Id: filefield.css,v 1.21 2009/04/08 20:04:52 quicksketch Exp $ */
 
 /**
  * Overall styles
@@ -29,10 +29,12 @@
   padding-right: 10px; /* RTL */
   border-right: 1px solid #CCC; /* RTL */
   margin-right: 10px; /* RTL */
+  max-width: 30%;
 }
 
 .filefield-element .widget-edit {
   float: left; /* RTL */
+  max-width: 70%;
 }
 
 .filefield-element .filefield-preview {
@@ -61,7 +63,16 @@
   padding: 1px 13px 2px 3px; /* RTL */
 }
 
+.filefield-element div.ahah-progress-bar {
+  display: none;
+  margin-top: 4px;
+  width: 28em;
+  padding: 0;
+}
 
+.filefield-element div.ahah-progress-bar div.bar {
+  margin: 0;
+}
 
 /* End general widget form styles. */
 
