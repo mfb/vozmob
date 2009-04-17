@@ -1,7 +1,7 @@
 <?php
 // $Id: og_views.views_default.inc,v 1.3 2008/10/29 19:59:45 dww Exp $
 
-function vozmob_support_default_views() {
+function vozmob_support_views_default_views() {
 
 $view = new view;
 $view->name = 'overlay';
