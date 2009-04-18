@@ -1,5 +1,5 @@
 <?php
-// $Id: notifications_ui.module,v 1.3.2.8.2.9 2009/01/28 16:40:05 jareyero Exp $
+// $Id: notifications_ui.module,v 1.3.2.8.2.19 2009/04/15 16:08:14 jareyero Exp $
 /**
  * @file
  * User Interface for subscriptions modules
@@ -11,10 +11,12 @@
 function notifications_ui_help($path, $arg) {
   switch ($path) {
     case 'admin/messaging/notifications/ui':
-      $output = '<p>'. t('These are UI settings only. They will be combined with other settings and permissions to determine which subscription options will be finally available for each page.') .'</p>';
-      if (module_exists('notifications_content')) {
-        $output .= '<p>'. t('To determine how the subscription controls will be rendered for each content type (links, form, block) visit the !content-type-settings', array('!content-type-settings' => l(t('content types settings page'), 'admin/content/types'))) .'</p>';
-      }
+      $output = '<p>' . t('These are UI settings only and will define which options will be visible for end users and how they\'ll be displayed. Which options will be finally available will be determined by:') . 
+      $output .= '<ol>';
+      $output .= '<li>' . t('Enabled subscription types on the other Notifications settings pages') . '</li>';
+      $output .= '<li>' . t('Permissions that you can configure on <a href="@administer-permissions">Administer permissions</a>.', array('@administer-permissions' => url('admin/user/permissions'))) . '</li>';
+      $output .= '<li>' . t('The enabled options on this page.') .'</li>';
+      $output .= '</ol></p>';
       return $output;
   }
 }
@@ -24,14 +26,81 @@ function notifications_ui_help($path, $arg) {
  */
 function notifications_ui_menu() {
   $items['admin/messaging/notifications/ui'] = array(
-    'title' => 'User Interface',
+    'title' => 'User interface',
     'description' => 'Enables site settings for user subscriptions.',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('notifications_ui_settings_form'),
     'access arguments' => array('administer site configuration'),
     'type' => MENU_LOCAL_TASK,
+    'file' => 'notifications_ui.pages.inc',
   );
+  // Add single subscription page
+  $items['user/%user/notifications/add'] = array(
+    'type' => MENU_LOCAL_TASK,
+    'title' => 'Add subscription',
+    'page callback' => 'notifications_ui_page_user_add',
+    'page arguments' => array(1),
+    'access callback' => 'notifications_ui_access_user_add',
+    'access arguments' => array(1, 4),
+    'file' => 'notifications_ui.pages.inc',
+    'weight' => 100,
+  );
+
+  // Enabled pages for user account and subscription types
+  /*
+  foreach (notifications_subscription_types() as $type => $info) {
+    $info = notifications_subscription_types($type);
+    if (!empty($info['page callback'])) {
+      $items['user/%user/notifications/' . $type] = array(  
+        'type' => MENU_LOCAL_TASK,
+        'access callback' => 'notifications_ui_access_page', 
+        'access arguments' => array($type, 1),
+        'title' => $info['title'],
+        'page callback' => $info['page callback'],
+        'page arguments' => array(1),
+        'weight' => 10,
+      );
+    }
+  }
+  */
   return $items;
+}
+
+/**
+ * Implementation of hook_menu_alter()
+ */
+function notifications_ui_menu_alter(&$items) {
+  foreach (notifications_subscription_types() as $type => $info) {
+    if (!empty($info['user page'])) {
+      $items[$info['user page']]['access callback'] = 'notifications_ui_access_page';
+      $items[$info['user page']]['access arguments'] = array($type, 1);
+    }
+  }
+}
+
+/**
+ * Menu access callback: add subscription
+ */
+function notifications_ui_access_user_add($account, $type = NULL) {
+  // Main tab, visible only if any subscription type enabled
+  $check_types = $type ? array($type) : array_keys(notifications_ui_subscription_types());
+  foreach ($check_types as $type) {
+    if (notifications_ui_subscription_type($type) && notifications_ui_user_options('create') && notifications_access_user_add($account, $type)) {
+      return TRUE;
+    }
+  }
+}
+
+/**
+ * Menu access callback: account pages
+ */
+function notifications_ui_access_page($type, $account) {
+  // Global user permissions
+  if (notifications_access_user($account) && notifications_ui_subscription_type($type) && notifications_ui_user_options('page')) {    
+    // Check specifics for this subscription type
+    $access = notifications_subscription_types($type, 'access');
+    return $access ? user_access($access, $account) : TRUE;
+  }
 }
 
 /**
@@ -52,34 +121,33 @@ function notifications_ui_menu() {
         }
       }
       $form_state['values']['subscriptions'] = $event->node->subscriptions;
-      notifications_ui_node_form_submit('', $form_state);
+      notifications_ui_options_form_submit('', $form_state);
     }
     elseif ($event->type == 'node' && isset($event->comment->subscriptions)) {
       $form_state['values']['subscriptions'] = $event->comment->subscriptions;
-      notifications_ui_node_form_submit('', $form_state);      
+      notifications_ui_options_form_submit('', $form_state);      
     }
   }
 }
 
 /**
- *  Site-wide settings form.
+ * Get info about subscription types, exclude custom types
+ *
+ * @see notifications_subscription_types()
  */
-function notifications_ui_settings_form() {
-
-  $form['notifications_ui_types'] = array(
-    '#type' => 'checkboxes',
-    '#title' => t('Enabled subscription types'),
-    '#options' => notifications_subscription_types(NULL, 'title'),
-    '#default_value' => variable_get('notifications_ui_types', array()),
-    '#description' => t('Check the subscription types the UI module should show.'),
-  );
-  $form['notifications_link_teaser'] = array(
-    '#type'          => 'checkbox',
-    '#title'         => t('Show subscribe link with teaser'),
-    '#default_value' => variable_get('notifications_link_teaser', 1),
-    '#description'   => t('Uncheck to show links only in full node view. This will work only for content types that have subscription links enabled.'),
-  );
-  return system_settings_form($form);
+function notifications_ui_subscription_types($type = NULL, $field = NULL) {
+  static $types;
+  
+  if (!isset($types)) {
+    $types = array();
+    foreach (notifications_subscription_types() as $key => $info) {
+      if (empty($info['custom'])) {
+        $types[$key] = $info;
+      }
+    }
+  }
+  
+  return notifications_info($types, $type, $field);
 }
 
 /**
@@ -89,27 +157,52 @@ function notifications_ui_settings_form() {
 function notifications_ui_form_alter(&$form, $form_state, $form_id) {
   global $user;
   // Content type settings
-  if ($form_id == 'node_type_form' && isset($form['identity']['type'])) {
-    // Just in case we want to add more settings here
-    $form['workflow']['notifications_node_ui'] = array(
-      '#type' => 'checkboxes',
-      '#title' => t('Subscriptions UI'),
-      '#default_value' => notifications_ui_type_options($form['#node_type']->type),
-      '#options' => _notifications_ui_type_options(),
-      '#description' => t('Enable different display options for subscriptions to this content type'), 
-    );  
-  }
-  elseif (isset($form['type']) && $form['type']['#value'] .'_node_form' == $form_id && notifications_ui_type_options($form['type']['#value'], 'form')) {
-    //  Add node forms.
-    $node = $form['#node'];
-    $form[] = notifications_ui_node_form(NULL, $node, TRUE);
-  }
-  elseif ($form_id == 'comment_form')  {
-    // Add to comment forms.
-    $node = node_load($form['nid']['#value']);
-    if ($user->uid && notifications_ui_type_options($node->type, 'comment')) {
-      $form[] = notifications_ui_node_form(NULL, $node, TRUE);    
-    }
+  switch ($form_id) {
+    case 'node_type_form':
+      if (isset($form['identity']['type'])) {
+        // Just in case we want to add more settings here
+        $form['notifications']['notifications_node_ui'] = array(
+          '#type' => 'checkboxes',
+          '#title' => t('Subscriptions UI'),
+          '#default_value' => notifications_ui_node_options($form['#node_type']->type),
+          '#options' => _notifications_ui_node_options(),
+          '#description' => t('Enable different display options for subscriptions to this content type.'),
+        );
+        if (!variable_get('notifications_ui_per_type', 0)) {
+          $form['notifications']['notifications_node_ui']['#disabled'] = TRUE;
+          $form['notifications']['notifications_node_ui']['#description'] .= ' <strong>' . t('To enable these options check the <a href="@notifications-ui-settings">Notifications UI settings</a>', array('@notifications-ui-settings' => url('admin/messaging/notifications/ui'))) . '</strong>';
+        }
+      }
+      break;
+
+    case 'comment_form':
+      // Add to comment forms.
+      $node = node_load($form['nid']['#value']);
+      if ($user->uid && notifications_ui_node_options($node->type, 'comment')) {
+        $form[] = notifications_ui_node_subform($node);    
+      }
+      break;
+    
+    case 'notifications_user_overview':
+      // Create new subscription
+      $account = $form['account']['#value'];
+      foreach (notifications_ui_subscription_types() as $key => $type) {
+        if (notifications_ui_subscription_type($key) && notifications_ui_user_options('create') && notifications_access_user_add($account, $key)) {
+          $create[] = l($type['title'], "user/$account->uid/notifications/add/$key");
+        }
+      }
+      if (!empty($create)) {
+        // $output .= theme('item_list', $create, t('or create a new subscription'));
+        $form['create'] = array('#type' => 'item', '#weight' => 30, '#title' => t('or create a new subscription'), '#value' => theme('item_list', $create));
+      }      
+      break;
+       
+    default: 
+      if (isset($form['type']) && $form['type']['#value'] .'_node_form' == $form_id && notifications_ui_node_options($form['type']['#value'], 'form')) {
+        //  Add node forms.
+        $node = $form['#node'];
+        $form[] = notifications_ui_node_subform($node);
+      }  
   }
 }
 
@@ -117,90 +210,118 @@ function notifications_ui_form_alter(&$form, $form_state, $form_id) {
  * Form for node subscriptions
  * @ TODO: offer the same form in a block to be put in the contents region.
  *
- * @param $node
- *   a node object
- * @param $subform
- *   Optional produce subform instead of full form with buttons
- * @param $node_options
- *   Allows to override node subscription options to display
+ * @param $subscriptions
+ *   Array of subscription options
+ * @param $fieldset
+ *   Optional produce fieldset instead of full form 
+ * @param $buttons
+ *   Whether to add buttons
+ * 
  * @return 
  *   Partial subscription form, just missing submit button.
  */
-function notifications_ui_node_form($form_state, $node, $subform = TRUE, $node_options = NULL) {
+function notifications_ui_options_form($form_state, $subscriptions, $fieldset = FALSE, $buttons = TRUE) {
   global $user;
-  $form = array();
-  
-  // Retrieve node options if not passed
-  $node_options = is_null($node_options) ? notifications_ui_user_node($user, $node) : $node_options;
-  
-  if (count($node_options)) {
-    // Process all options building the array of indexed params for each
-    $options = $params = $defaults = array();
-    $index = 1; // If we start with zero, get some value sent as 0 => 0
-    $number = 0; // Number of subscriptions
-    foreach ($node_options as $option) {
-      $options[$index] = $option['name'];
-      // Check wether user is subscribed
-      if (!empty($option['subscription'])) {
-        $params[$index] = (array)$option['subscription'];
-        $defaults[] = $index;
-        $number++;
-      }
-      else {
-        $params[$index] = $option;
-      }
-      $index++;
-    }
 
-    // Now we have compiled the data, build the form. Note that we are passing the parameters
-    // in the 'params' value as an array, while the checkboxes are in 'options' fieldset
-    if ($subform) {
-      $form['subscriptions'] = array(
-        '#type' => 'fieldset',
-        '#title' => t('Subscriptions (%number)', array('%number' => $number)),
-        '#collapsible' => TRUE,
-        '#collapsed' => FALSE,
-        '#tree' => TRUE,
-      );
+  $form = array();  
+
+  // Process all options building the array of indexed params for each
+  $options = $params = $defaults = array();
+  $index = 1; // If we start with zero, get some value sent as 0 => 0
+  $number = 0; // Number of subscriptions
+  foreach ($subscriptions as $option) {
+    $options[$index] = $option['name'];
+    // Check wether user is subscribed
+    if (!empty($option['subscription'])) {
+      $params[$index] = (array)$option['subscription'];
+      $defaults[] = $index;
+      $number++;
     }
     else {
-      $form['subscriptions'] = array('#tree' => TRUE);
+      $params[$index] = $option;
     }
-    $form['subscriptions']['params'] = array('#type' => 'value', '#value' => $params);
-    $form['subscriptions']['options'] = array(
-      '#type' => 'checkboxes',
-      '#default_value' => $defaults,
-      '#options' => $options,
+    $index++;
+  }
+
+  // Now we have compiled the data, build the form. Note that we are passing the parameters
+  // in the 'params' value as an array, while the checkboxes are in 'options' fieldset
+  if ($fieldset) {
+    $form['subscriptions'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Subscriptions (%number)', array('%number' => $number)),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+      '#tree' => TRUE,
     );
-    $form['subscriptions']['account'] = array('#type' => 'value', '#value' => $user);
-    
-    if (!$subform) {
-      $form['submit'] = array('#type' => 'submit', '#value' => t('Update'));
-    }
+  }
+  else {
+    $form['subscriptions'] = array('#tree' => TRUE);
+  }
+  $form['subscriptions']['params'] = array('#type' => 'value', '#value' => $params);
+  $form['subscriptions']['options'] = array(
+    '#type' => 'checkboxes',
+    '#default_value' => $defaults,
+    '#options' => $options,
+  );
+
+  $form['subscriptions']['account'] = array('#type' => 'value', '#value' => $user);
+  
+  if ($buttons) {
+    $form['subscriptions']['submit'] = array('#type' => 'submit', '#value' => t('Update'));
+    // If full form, redirect so the full page which may have subscription links is updated
+    $form['#redirect'] = $_GET['q'];
   }
   
-  // Allow other modules, i.e. autosubscribe to change this form
-  notifications_alter('node_form', $form);
-
   return $form;
 }
+
+
+/**
+ * Form for node subscriptions
+ * @ TODO: offer the same form in a block to be put in the contents region.
+ *
+ * @param $node
+ *   a node object
+ * @return 
+ *   Partial subscription form, just missing submit button.
+ */
+function notifications_ui_node_subform($node) {
+  global $user;
+  
+  // Retrieve node options if not passed
+  $node_options = notifications_ui_user_node($user, $node);
+  
+  $subform = notifications_ui_options_form(NULL, $node_options, TRUE, FALSE);
+  
+  return $subform;
+}
+
 
 /**
  * Form submission, node subscriptions form
  */
-function notifications_ui_node_form_submit($form, &$form_state) {
+function notifications_ui_options_form_submit($form, &$form_state) {
+  $enabled = $disabled = 0;
   $form_values = $form_state['values'];
   $uid = $form_values['subscriptions']['account']->uid;
   foreach ($form_values['subscriptions']['options'] as $index => $value) {
     $subscription = $form_values['subscriptions']['params'][$index] + array('uid' => $uid, 'event_type' => 'node');   
-    if ($value) {
+    if ($value && empty($subscription['sid'])) {
       notifications_save_subscription($subscription);
+      $enabled++;
     }
-    elseif (!empty($subscription['sid'])) {
+    elseif (!$value && !empty($subscription['sid'])) {
       notifications_delete_subscription($subscription['sid']);
+      $disabled++;
     }
   }
-  drupal_set_message(t('Your subscriptions have been updated.'));
+
+  if ($enabled) {
+    drupal_set_message(format_plural($enabled, 'A subscription has been created', '@count subscriptions have been created'));
+  }
+  if ($disabled) {
+    drupal_set_message(format_plural($disabled, 'A subscription has been deleted', '@count subscriptions have been deleted'));
+  }
 }
 
 /**
@@ -210,30 +331,63 @@ function notifications_ui_node_form_submit($form, &$form_state) {
  */
 function notifications_ui_link($type, $node = NULL, $teaser = FALSE) {
   global $user;
-  $links = array();
 
-  if ($type == 'node' && $user->uid && (variable_get('notifications_link_teaser', 1) || !$teaser) && notifications_ui_type_options($node->type, 'links')) {
-    // Now we have the array of allowed options ready, build links
-    foreach (notifications_ui_user_node($user, $node) as $index => $option) {
-      if (!empty($option['subscription'])) {
-        // Unsubscribe link
-        $title = t('Unsubscribe from: !name', array('!name' => $option['name']));
-        $props = notifications_get_link('unsubscribe', array('sid' => $option['subscription']->sid));
-      }
-      else {
-        // Subscribe link
-        $title = t('Subscribe to: !name', array('!name' => $option['name']));
-        $props = notifications_get_link('subscribe', array('type' => $option['type'], 'confirm' => TRUE, 'fields' => $option['fields']));
-      }
-      $links['notifications_'. $index] = array(
-        'title' => $title,
-        'html' => TRUE,
-        'href' => $props['href'],
-      ) + $props['options'];      
+  if ($type == 'node' && $user->uid && 
+    (notifications_ui_node_options($node->type, 'teaserlinks') && $teaser || notifications_ui_node_options($node->type, 'links') && !$teaser)
+     && ($options = notifications_ui_subscribe_options($user, 'node', $node))) {
+      // Now we have the array of allowed options ready, build single links 
+      return notifications_ui_build_links($options);
+  }
+}
+
+/**
+ * Build subscription options as an array of links
+ * 
+ * These links can be added as node link elements or rendered some other way
+ * 
+ * @param $options
+ *   Array of subscription options, like the one produced by notifications_ui_user_node()
+ * @param $prefix
+ *   Prefix to use for the link indexes
+ */
+function notifications_ui_build_links($options, $prefix = 'notifications_') {
+  $links = array();  
+  foreach ($options as $index => $option) {
+    if (!empty($option['subscription'])) {
+      // Unsubscribe link
+      $title = t('Unsubscribe from: !name', array('!name' => $option['name']));
+      $props = notifications_get_link('unsubscribe', array('sid' => $option['subscription']->sid));
+    }
+    else {
+      // Subscribe link
+      $title = t('Subscribe to: !name', array('!name' => $option['name']));
+      $props = notifications_get_link('subscribe', array('type' => $option['type'], 'confirm' => TRUE, 'fields' => $option['fields']));
+    }
+    $links[$prefix . $index] = array(
+      'title' => $title,
+      'html' => TRUE,
+      'href' => $props['href'],
+    ) + $props['options'];      
+  }
+  return $links;  
+}
+
+/**
+ * Display a button + js overlay
+ * 
+ * From http://groups.drupal.org/node/17779
+ */
+function notifications_ui_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  global $user;
+
+  if ($op == 'alter' && notifications_ui_node_options($node->type, 'subform')) {
+    if (($options = notifications_ui_user_node($user, $node)) ) {
+      $node->body .= drupal_get_form('notifications_ui_options_form', $options, TRUE, TRUE);
     }
   }
-  return $links;
 }
+
+
 
 /**
  * Get list of allowed subscriptions types
@@ -244,10 +398,9 @@ function notifications_ui_link($type, $node = NULL, $teaser = FALSE) {
  *   Subscription types allowed for this user
  */
 function notifications_ui_allowed_types() {
-  $enabled = variable_get('notifications_ui_types', array());
   $allowed = array();
   foreach (notifications_subscription_types() as $type => $info) {
-    if (isset($enabled[$type]) && $enabled[$type] && !empty($info['access']) && user_access($info['access'])) {
+    if (notifications_ui_subscription_type($type) && !empty($info['access']) && user_access($info['access'])) {
       $allowed[$type] = $info;
     }
   }
@@ -255,49 +408,64 @@ function notifications_ui_allowed_types() {
 }
 
 /**
- * Get list of possible and existing subscriptions for user/node
+ * Get list of possible and existing subscriptions for user/object
+ * 
+ * @param $account
+ *   User account to get options/subscriptions for
+ * @param $type
+ *   Subscription type to get options: 'user', 'node'
+ * @param $object
+ *   The object to subscribe. It may be $node or $user
+ * @param $load
+ *   Whether to load current subscriptions for each option
  * 
  * @return
  *   Array of subscription options
  *   The enabled ones will have a 'subscriptions' element loaded
  */
-function notifications_ui_user_node($account, $node) {
+function notifications_ui_subscribe_options($account, $type, $object, $load = TRUE) {
   // Get allowed node options and current subscriptions
-  $node_options = notifications_module_information('node options', $account, $node);
+  $subscribe_options = notifications_module_information("$type options", $account, $object);
   $allowed_types = notifications_ui_allowed_types();
   $allowed_options = array();
+ 
   // We also keep track of event types for each subscription type
   $event_types = array('node' => TRUE);
-  foreach ($node_options as $index => $option) {
-    if (isset($allowed_types[$option['type']])) {
+  foreach ($subscribe_options as $index => $option) {
+    if (isset($allowed_types[$option['type']]) && notifications_user_allowed('subscription', $account, (object)$option)) {
       $allowed_options[] = $option;
       // We add the event type to our list
       $event_types[$allowed_types[$option['type']]['event_type']] = TRUE;
     }
   }
   
-  // Check if user is subscribed to show 'subscribe'/'unsubscribe' links
-  $subscriptions = array();
-  foreach (array_keys($event_types) as $type) {
-    if ($more = notifications_user_get_subscriptions($account->uid, $type, $node->nid, $node)) {
-      $subscriptions += $more;
-    }
-  }      
-  // Do some matching and populate subscriptions when they exist
-  foreach ($allowed_options as $index => $option) {
-    foreach ($subscriptions as $sub) {
-      if ($sub->type == $option['type'] && !array_diff_key($option['fields'], $sub->fields)) {
-        $allowed_options[$index]['subscription'] = $sub;
-      }        
-    }
+  if ($load) {
+    notifications_ui_load_subscriptions($allowed_options, $account);
   }
-  // Finally check permissions for all of them
-  foreach ($allowed_options as $index => $option) {
-    if (!notifications_user_allowed('subscription', $account, (object)$option)) {
-      unset ($allowed_options[$index]);
-    }
-  }
+  
   return $allowed_options;
+}
+
+/**
+ * Load subscriptions for available options
+ * 
+ * @param $options
+ *   Subscription types with field values
+ * @param $account
+ *   Alternate user account to get subscriptions for, will default to current user
+ */
+function notifications_ui_load_subscriptions(&$options, $account = NULL) {
+  global $user;
+  
+  $account = $account ? $account : $user;
+  $subscriptions = array();
+  foreach ($options as $index => $info) {
+    if ($subs_type = notifications_get_subscriptions(array('uid' => $account->uid, 'type' => $info['type']), $info['fields'], TRUE)) {
+      // Take the first subscription only, there may be cases when there are more than one
+      $subscriptions = array_merge($subscriptions, $subs_type); 
+      $options[$index]['subscription'] = array_shift($subs_type);
+    }
+  }   
 }
 
 /**
@@ -311,15 +479,38 @@ function notifications_ui_block($op = 'list', $delta = 0) {
     return $blocks;
   }
   else if ($op == 'view') {
-    if ((arg(0) == 'node') && is_numeric(arg(1)) && ($node = node_load(arg(1))) && notifications_ui_type_options($node->type, 'block')) {
+    if ((arg(0) == 'node') && is_numeric(arg(1)) && ($node = node_load(arg(1))) && notifications_ui_node_options($node->type, 'block')) {
       // Only display if we have something for the form
-      if ($node_options = notifications_ui_user_node($user, $node)) {
+      if ($node_options = notifications_ui_subscribe_options($user, 'node', $node)) {
         $block['subject'] = t('Subscriptions');
-        $block['content'] = drupal_get_form('notifications_ui_node_form', $node, FALSE, $node_options);
+        $block['content'] = drupal_get_form('notifications_ui_options_form', $node_options, FALSE);
         return $block;
       }      
     }
+    elseif (arg(0) == 'user' && is_numeric(arg(1)) && notifications_ui_account_options('block')) {
+      // Only display if we have something for the form
+      if (($account = user_load(arg(1))) && ($options = notifications_ui_subscribe_options($user, 'user', $account))) {
+        $block['subject'] = t('Subscriptions');
+        $block['content'] = drupal_get_form('notifications_ui_options_form', $options, FALSE);
+        return $block;
+      }       
+    }
   }  
+}
+
+/**
+ * Check whether this subscription type is enabled / disabled
+ * 
+ * @param $type
+ *   Subscription type
+ * @param $option
+ *   Option name. None to get all settings
+ * 
+ * @todo Maybe move settings into a table instead a variable
+ */
+function notifications_ui_subscription_type($type) {
+  $settings = variable_get('notifications_ui_types', array());
+  return in_array($type, $settings, TRUE);
 }
 
 /**
@@ -336,15 +527,20 @@ function notifications_ui_node_type($op, $info) {
  * Get settings value for content types
  * 
  * @param $type
- *   Content type
+ *   Content type to get settings for
  * @param $option
- *   Optional option to check
+ *   Optional option to check (each option can be enabled or disabled)
  */
-function notifications_ui_type_options($type, $option = NULL, $default = NULL) {
-  // The default setting will be 'links' = 1
-  $settings = variable_get('notifications_node_ui_'. $type, array('links'));
+function notifications_ui_node_options($type = NULL, $option = NULL) {
+  // We can use global options or per content type options. The default setting will be 'links' = 1
+  $defaults = variable_get('notifications_ui_node', array('links'));
+  if ($type && variable_get('notifications_ui_per_type', 0)) {
+    $settings = variable_get('notifications_node_ui_'. $type, $defaults);  
+  } else {
+    $settings = $defaults;
+  }
   if ($option) {
-    return is_array($settings) && in_array($option, $settings) ? TRUE : $default;
+    return in_array($option, $settings, TRUE) ? TRUE : FALSE;
   }
   else {
     return $settings;
@@ -352,13 +548,117 @@ function notifications_ui_type_options($type, $option = NULL, $default = NULL) {
 }
 
 /**
+ * Check enabled option / Get options for user account pages
+ * 
+ * @param $type
+ *   Option type = 'page', 'create'
+ *   Null to get all of them
+ */
+function notifications_ui_user_options($type = NULL) {
+  $settings = variable_get('notifications_ui_user', array('page', 'create'));
+  if ($type) {
+    return in_array($type, $settings, TRUE);
+  }
+  else {
+    return $settings;
+  }
+}
+
+/**
+ * Get subscribe otpions for user account tabs
+ * 
+ * @param $type
+ *   Content type
+ * @param $option
+ *   Optional option to check
+ */
+function notifications_ui_account_options($option = NULL) {
+  // The default setting will be 'links' = 1
+  $settings = variable_get('notifications_ui_account_options', array('links'));
+  if ($option) {
+    return in_array($option, $settings, TRUE);
+  }
+  else {
+    return $settings;
+  }
+}
+
+function notifications_ui_user($op, &$edit, &$account, $category = NULL) {
+  global $user;
+
+  if ($op == 'view' ) {
+    // Add plain links if enabled
+    if (notifications_ui_account_options('links') && ($options = notifications_ui_subscribe_options($user, 'user', $account))) {
+      $links = notifications_ui_build_links($options);
+      $account->content['summary']['notifications'] =  array(
+        '#type' => 'user_profile_item',
+        '#title' => t('Subscriptions'),
+        '#value' => theme('links', $links, array('class' => 'item-list')),
+      );
+    }
+  }
+}
+
+/**
+ * Form for node subscriptions
+ * @ TODO: offer the same form in a block to be put in the contents region.
+ *
+ * @param $node
+ *   a node object
+ * @return 
+ *   Partial subscription form, just missing submit button.
+ */
+function notifications_ui_account_subform($author, $options) {
+  global $user;
+  
+  // Retrieve node options if not passed
+  $options = notifications_ui_user_account($user, $author);
+  
+  $subform = notifications_ui_options_form(NULL, $options, TRUE, TRUE);
+  
+  return $subform;
+}
+/**
  * Allowed options for content types
  */
-function _notifications_ui_type_options() {
+function _notifications_ui_node_options() {
   return array(
-    'form' => t('Display in node form'),
-    'comment' => t('Display in comment form'),
-    'links' => t('Display as node links'),
+    'form' => t('<strong>In node form</strong>. A subscriptions subform will be available when creating or editing nodes.'),
+    'comment' => t('<strong>In comment form</strong>. A subscriptions subform will be available when posting comments.'),
+    'links' => t('<strong>Full node links</strong>. Subscription links will be displayed for full node pages.'),
+    'teaserlinks' => t('<strong>Teaser node links</strong>. Subscription links will be displayed for node teasers.'),
+    'subform' => t('<strong>Form on node pages</strong>. A collapsible subscriptions form will be displayed for full node pages.'),    
+    'block' => t('<strong>In block</strong>. Options will be displayed on the Subscriptions block when viewing a node.'),
+  );
+}
+
+/**
+ * Allowed options for user accounts
+ */
+function _notifications_ui_account_options() {
+  return array(
+    //'form' => t('Subform on user account tab'),
+    'links' => t('Links on user account tab'),
     'block' => t('Display in block'),
+  );
+}
+
+/**
+ * Implementation of hook_theme()
+ */
+function notifications_ui_theme() {
+  return array(
+    'notifications_ui_subscription_types' => array(
+      'arguments' => array('element' => NULL),
+      'file' => 'notifications_ui.pages.inc',
+    ),
+    'notifications_ui_content_types' => array(
+      'arguments' => array('element' => NULL),
+      'file' => 'notifications_ui.pages.inc',
+    ),
+    'notifications_ui_add_list' => array(
+      'arguments' => array('content' => NULL),
+      'file' => 'notifications_ui.pages.inc',
+    ),
   );
 }

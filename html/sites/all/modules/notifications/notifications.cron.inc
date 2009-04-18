@@ -1,7 +1,7 @@
 <?php
-// $Id: notifications.cron.inc,v 1.6.2.6.2.19 2009/03/11 16:31:21 jareyero Exp $
+// $Id: notifications.cron.inc,v 1.6.2.6.2.20 2009/03/25 18:57:06 jareyero Exp $
 /**
- * Subscriptions module. Queue processing.
+ * Notifications module. Queue processing.
  * 
  * Callbacks for queue processing. They may be implemented by other modules
  *    _load_user()

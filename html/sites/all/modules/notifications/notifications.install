@@ -1,5 +1,5 @@
 <?php
-// $Id: notifications.install,v 1.4.2.5.2.5 2009/01/27 00:54:44 jareyero Exp $
+// $Id: notifications.install,v 1.4.2.5.2.6 2009/04/07 19:05:33 jareyero Exp $
 
 /**
  * Implementation of hook_schema()
@@ -219,13 +219,14 @@ function notifications_update_6003() {
   $ret = array();
   db_add_field($ret, 'notifications_fields', 'intval', array('type' => 'int', 'not null' => TRUE, 'default' => 0, 'disp-width' => '11'));
   // Populate intval, this should depend on db type. Is there any way that works for all?
+  // For both, CAST produces an error when it is no integer that's why the regexp...
   switch ($GLOBALS['db_type']) {
     case 'mysql':
     case 'mysqli':
-      $ret[] = update_sql("UPDATE {notifications_fields} SET intval = CAST(value AS UNSIGNED)");
+      $ret[] = update_sql('UPDATE {notifications_fields} SET intval = CAST(value AS UNSIGNED) WHERE value REGEXP \'^-?[0-9]+$\'');
       break;
     case 'pgsql':
-      $ret[] = update_sql("UPDATE {notifications_fields} SET intval = CAST(value AS INTEGER)");
+      $ret[] = update_sql('UPDATE {notifications_fields} SET intval = CAST(value AS INTEGER) WHERE value SIMILAR TO \'^-?[0-9]+$\'');
       break;
   }
   return $ret;

@@ -1,5 +1,5 @@
 <?php
-// $Id: notifications_content.install,v 1.1.2.2 2008/10/29 12:10:50 jareyero Exp $
+// $Id: notifications_content.install,v 1.1.2.4 2009/04/15 16:08:13 jareyero Exp $
 
 /**
  * Implementation of hook_install().
@@ -14,6 +14,13 @@ function notifications_content_install() {
  * Implementation of hook_uninstall().
  */
 function notifications_content_uninstall() {
+  // Delete variables
+  variable_del('notifications_content_types');
+  variable_del('notifications_content_per_type');
+  
+  foreach (array_keys(node_get_types()) as $type) {
+    variable_del('notifications_content_type_' . $type);
+  }  
   drupal_set_message(t('Content notifications uninstallation script complete.'));
 }
 
@@ -22,5 +29,14 @@ function notifications_content_uninstall() {
  */
 function notifications_content_update_6000() {
   notifications_content_install();
+  return array();
+}
+
+/**
+ * Update enabled options
+ */
+function notifications_content_update_6001() {
+  // All options will be messed up so we better do manual review
+  drupal_set_message('Please, check all your Notifications content settings and note the new options.');
   return array();
 }

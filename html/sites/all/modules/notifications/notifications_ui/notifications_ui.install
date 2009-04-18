@@ -1,0 +1,28 @@
+<?php
+// $Id: notifications_ui.install,v 1.1.2.4 2009/04/15 16:08:14 jareyero Exp $
+
+/**
+ * Implementation of hook_uninstall()
+ */
+function notifications_ui_uninstall() {
+  // Some global variables
+  variable_del('notifications_ui_per_type');
+  variable_del('notifications_ui_user');
+  variable_del('notifications_ui_node');
+  variable_del('notifications_ui_account_options');
+  // Just delete variables for subscription types and node types  
+  variable_del('notifications_ui_types');
+  foreach (array_keys(node_get_types()) as $type) {
+    variable_del('notifications_node_ui_' . $type);
+  }
+}
+
+/**
+ * Update UI variables
+ */
+function notifications_ui_update_6000() {
+  // All options will be messed up so we better do manual review
+  variable_del('notifications_link_teaser');  
+  drupal_set_message('Please, check all your Notifications UI settings and note the new options.');
+  return array();
+}

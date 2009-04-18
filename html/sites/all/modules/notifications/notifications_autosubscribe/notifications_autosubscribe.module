@@ -1,5 +1,5 @@
 <?php
-// $Id: notifications_autosubscribe.module,v 1.2.2.3.2.3 2008/09/20 15:43:30 jareyero Exp $
+// $Id: notifications_autosubscribe.module,v 1.2.2.3.2.5 2009/04/10 16:12:36 jareyero Exp $
 /**
  * Subscription_autosubscribe module allow users to automatically subscribe to threads they create. Used by
  * notifications_content.
@@ -51,12 +51,12 @@ function notifications_autosubscribe_form_alter(&$form, $form_state, $form_id) {
       }
       break;
     case 'notifications_content_settings_form':
-      $form['notifications_default_auto'] = array(
+      $form['autosubscribe'] = array('#type' => 'fieldset', '#title' => t('Autosubscribe'), '#weight' => -10);
+      $form['autosubscribe']['notifications_default_auto'] = array(
         '#type'          => 'checkbox',
         '#title'         => t('Set all users to "autosubscribe" by default'),
         '#default_value' => variable_get('notifications_default_auto', 0),
-        '#description'   => t('Sets each users "autosubscribe" profile option.'),
-        '#weight' => -10,
+        '#description'   => t("If checked the option will be 'enabled' by default for user account settings. This won't change existing settings for users who have already defined it."),
       );
       break;
   }
@@ -68,7 +68,11 @@ function notifications_autosubscribe_form_alter(&$form, $form_state, $form_id) {
 function notifications_autosubscribe_notifications($op, $arg0, $arg1 = NULL, $arg2 = NULL) {
   if ($op == 'event trigger') {
     $event = $arg0;
-    if ($event->type == 'node' && isset($event->node->nid) && (!isset($event->node->autosubscribe) || $event->node->autosubscribe )) {
+
+    if ($event->type == 'node'
+        && isset($event->node->nid)
+        && (!isset($event->node->autosubscribe) || $event->node->autosubscribe )
+        && $event->action !== 'update') {
       notifications_autosubscribe('thread', 'node', 'nid', $event->node->nid);
     }
   }

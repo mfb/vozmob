@@ -1,5 +1,5 @@
 <?php
-// $Id: notifications_custom.install,v 1.1.2.1 2009/03/12 23:55:56 jareyero Exp $
+// $Id: notifications_custom.install,v 1.1.2.2 2009/03/16 19:33:35 jareyero Exp $
 
 /**
  * Implementation of hook_install().
@@ -36,6 +36,17 @@ function notifications_custom_schema() {
         'not null' => FALSE,
         'description' => 'Title of the field shown to the end user.',
       ),
+      'type' => array(
+        'type' => 'varchar',
+        'length' => 128,
+        'not null' => FALSE,
+        'description' => 'Type of subscription.',
+      ),
+      'module' => array(
+        'description' => 'Module that defines this custom subscription.',
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => TRUE),
       'name' => array(
         'type' => 'varchar',
         'length' => 128,
@@ -47,12 +58,6 @@ function notifications_custom_schema() {
         'type' => 'text',
         'not null' => FALSE,
         'description' => 'Explanation of the subscription to end users.',
-      ),
-      'type' => array(
-        'type' => 'varchar',
-        'length' => 128,
-        'not null' => FALSE,
-        'description' => 'Type of subscription.',
       ),
       'event_type' => array(
         'type' => 'varchar',

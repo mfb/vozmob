@@ -1,16 +1,28 @@
-// $Id: CHANGELOG.txt,v 1.1.2.11.2.38 2009/03/12 23:55:56 jareyero Exp $
+// $Id: CHANGELOG.txt,v 1.1.2.11.2.51 2009/04/14 17:25:16 jareyero Exp $
 
 TO DO
 ------
-* Add CAN-SPAM complicance, 'Unsubscribe from all'..
 * Use actions and triggers instead of old notifications' events, see http://drupal.org/node/260100
-* Streamline the UI. Replace the user account tabs with a single page using collapsible fieldsets providing some more global options for each type (method, interval for each subscription type)
-* Move some left parts of the UI provided by modules into the notifications_ui module so we can have a drop-in replacement to provide a yet more simple UI.
 * Support for persistent notifications that will be triggered with a given interval until the user takes some action. Look into the subscription system to see whether this is currently possible with a plug-in or we need some api extensions.
 * Support for notifications in multiple languages, depending on user language
 
 6.x-1.1 to .....
 -----------------
+- Added subscription options to user account, optionally in block too.
+- Reworked UI module, more options, moved some stuff from other modules there.
+- Improved query builder used for notifications_get_subscriptions() and notifications_delete_subscriptions()
+- New UI for creating new subscriptions with autocomplete fields and drop downs.
+- User account tabs now provided by Notifications UI, can be disabled.
+- Added new account overview page and administration page
+- Fixed upgrade script error (pending pgsql testing), #375746
+- Added field type handling for the query builder (performance++ and pgsql support)
+- Fixed comment token parameters, by peter.swietoslawski, #420342
+- Notifications UI improvements. Better API, new form option for nodes..
+- Created node library for functions to be reused by multiple plug-ins.
+- Updated FeedAPI plug-in for 6.x (untested). Added some theming for feed items
+- Fixed: Leftover debug message, by David Lesieur, #402306
+- Fixed: Autosubscribe on Create and Comment - but NOT on update, by a_c_m, #406072
+- Changed node/comment form fieldset so it works better with notifications_team, by David Goode.
 - Reworded and simplified the 'Disable notifications' option
 - Fixed events where being deleted when doing a test run
 - Fixed bulk deletion for 'manage subscriptions' page

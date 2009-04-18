@@ -1,5 +1,5 @@
 <?php
-// $Id: notifications_api.test,v 1.1.2.1.2.7 2009/01/30 20:45:45 jareyero Exp $
+// $Id: notifications_api.test,v 1.1.2.1.2.8 2009/04/07 18:17:00 jareyero Exp $
 /**
  * Class for testing notifications module.
  * Tests basic API functions
@@ -123,8 +123,8 @@ class NotificationsBasicTests extends DrupalWebTestCase {
     );
     $query = notifications_query_build(array('fields' => $fields), $query);
     list($sql, $args) = notifications_query_sql($query);
-    $fields_sql .= " OR (f.field = '%s' AND f.value IN ('%s', '%s'))";
-    $fields_sql .= " OR (f.field = '%s' AND f.value IN ('%s', '%s'))";
+    $fields_sql .= " OR (f.field = '%s' AND f.value IN ('%s','%s'))";
+    $fields_sql .= " OR (f.field = '%s' AND f.value IN ('%s','%s'))";
     $target = "SELECT field1 FROM table1 JOIN table2 WHERE ($fields_sql)";
     $target_args = array('f1', 1, 'f2', 'value2', 'f3', 1, 2, 'f4', 'value3', 'value4');
     $this->assertEqual($sql, $target, 'Build basic query with array fields, conditions match.');
