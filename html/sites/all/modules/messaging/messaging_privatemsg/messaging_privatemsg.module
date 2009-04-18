@@ -16,7 +16,7 @@ function messaging_privatemsg_messaging($op) {
         'title' => 'Privatemsg',
         'name' => t('Private message'),
         'group' => 'web',
-        'type' => MESSAGING_TYPE_PUSH,
+        'type' => MESSAGING_TYPE_SEND,
         'access' => 'access private messages',
         'glue' => "\n",
         'description' => t('Send messages through Privatemsg'),
@@ -30,30 +30,20 @@ function messaging_privatemsg_messaging($op) {
 /**
  * Send mail message to user accounts
  * 
- * Fake form submission till they provide a decent API, see http://drupal.org/node/288183
+ * Privatemsg API documentation on http://drupal.org/node/369399
  * 
  * @param $destination
- *   User account
+ *   User account or user id
  */
-function messaging_privatemsg_send_msg($uid, $message) {
-  // Fake form submission, parmeter mapping
-  if (!empty($message['sender_account'])) {
-    $sender = $message['sender_account'];
-  } elseif (!empty($message['sender'])) {
-    $sender = messaging_load_user($message['sender']);
-  }
-  $form_state['validate_built_message'] = array(
-    'subject' => $message['subject'],
-    'author' => !empty($sender) ? $sender : drupal_anonymous_user() ,
-    'body' => $message['body'],
-    'timestamp' => !empty($message['sent']) ? $message['sent'] : time(),
-    'recipients' => messaging_load_user($uid),
-  );
-  
-  pm_send(NULL, $form_state);
-  
-  // @ TO DO How to check for success?
-  return 1;
+function messaging_privatemsg_send_msg($destination, $message) {
+  // Prepare the privatemsg parameters
+  $recipients = is_object($destination) ? array($destination) : array(messaging_load_user($destination));
+  if (!empty($message->sender_account)) {
+    $sender = $message->sender_account;
+  } elseif (!empty($message->sender)) {
+    $sender = messaging_load_user($message->sender);
+  } 
+  return (bool)privatemsg_new_thread($message->subject, $message->body, $recipients, $sender);
 }
 
 /**

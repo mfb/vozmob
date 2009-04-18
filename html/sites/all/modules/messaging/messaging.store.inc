@@ -1,5 +1,5 @@
 <?php
-// $Id: messaging.store.inc,v 1.1.2.4.2.7 2009/01/29 23:38:51 jareyero Exp $
+// $Id: messaging.store.inc,v 1.1.2.4.2.9 2009/03/25 13:06:46 jareyero Exp $
 /**
  * @file
  *   Database storage for the messaging framework
@@ -93,7 +93,7 @@ function messaging_store_queue_process_step($limit, $timeout = 0) {
  * - @ TODO Remove expired queued messages
  */
 function messaging_store_queue_cleanup() {
-  if ($expire = variable_get('messaging_log_expire', 0)) {
+  if ($expire = variable_get('messaging_log', 0)) {
     db_query('DELETE FROM {messaging_store} WHERE log = 1 AND queue = 0 AND sent < %d', time() - $expire);
   }
 }
@@ -267,7 +267,10 @@ function messaging_store_del($params) {
  *   Should be 1 when this entry is to be processed on cron (queueing for push methods)
  */
 function messaging_store_save($message) {
-  
+  // Normalize some values. Boolean parameters must be 0|1
+  foreach (array('queue', 'log', 'cron') as $field) {
+    $message->$field = empty($message->$field) ? 0 : 1;
+  }
   // If sender is a user account, save sender field
   if (!empty($message->sender_account)) {
     $message->sender = $message->sender_account->uid;

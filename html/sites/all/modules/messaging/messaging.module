@@ -1,5 +1,5 @@
 <?php
-// $Id: messaging.module,v 1.7.2.8.2.24 2009/03/01 16:45:48 jareyero Exp $
+// $Id: messaging.module,v 1.7.2.8.2.27 2009/04/01 11:54:50 jareyero Exp $
 /**
  * Drupal Messaging Framework
  *
@@ -15,6 +15,13 @@
 define('MESSAGING_TYPE_PUSH', 1);
 // Method type with pull delivery. Messages will be pulled using messaging pull methods
 define('MESSAGING_TYPE_PULL', 2);
+// Outgoing method
+define('MESSAGING_TYPE_OUTGOING', 4);
+// Incoming method
+define('MESSAGING_TYPE_INCOMING', 8);
+// Shorthand type: Push + Outgoing
+define('MESSAGING_TYPE_SEND', MESSAGING_TYPE_PUSH | MESSAGING_TYPE_OUTGOING);
+
 // Special string for empty text part
 define('MESSAGING_EMPTY', '<none>');
 
@@ -61,8 +68,24 @@ function messaging_menu() {
     'file' => 'messaging.admin.inc',
   );
   $items['admin/messaging/settings/overview'] = array(
-    'title' => 'Messaging settings',
+    'title' => 'Messaging',
     'description' => 'Configuration of sending methods',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+  $items['admin/messaging/settings/method'] = array(
+    'title' => 'Send methods',
+    'description' => 'Configuration of sending methods',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('messaging_admin_method_settings'),
+    'access arguments' => array('administer messaging'),
+    'weight' => -10,
+    'file' => 'messaging.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+  );
+  $items['admin/messaging/settings/method/overview'] = array(
+    'title' => 'General',
+    'description' => 'General settings',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'weight' => -10,
   );
@@ -80,7 +103,6 @@ function messaging_menu() {
     'access arguments' => array('administer messaging'),
     'file' => 'messaging.admin.inc',
   );
-
 
   return $items;
 }
@@ -267,7 +289,7 @@ function messaging_message_prepare($message, $info) {
   global $user;
 
   // Set some default values if not already set
-  foreach (array('sent' => 0, 'queue' => 0, 'cron' => 0, 'log' => variable_get('messaging_log', 0), 'sender' => $user->uid) as $field => $value) {
+  foreach (array('sent' => 0, 'queue' => 0, 'cron' => 0, 'log' => (bool)variable_get('messaging_log', 0), 'sender' => $user->uid) as $field => $value) {
     if (!isset($message->$field)) {
       $message->$field = $value;
     }
@@ -792,99 +814,14 @@ function messaging_text_replace($text, $objects) {
   // Add some token types
   $objects['global'] = NULL;  
 
+  // Use token_logic if available, http://code.developmentseed.org/token_logic
+  // Otherwise use standard contrib token module, http://drupal.org/project/token
   if (module_exists('token_logic')) {
-    $text = token_logic_replace_multiple($text, $objects);
+    return token_logic_replace_multiple($text, $objects);
   }
-
-  return token_replace_multiple($text, $objects);
-}
-
-/**
- * Rebuild message in Drupal mail format
- * 
- * This is the only non method agnostic functionality in this module. As there are several plug-ins
- * for mail sending, we add this helper function here so its available for all them.
- * 
- * @param $destination
- *   Email destination
- * @param $message
- *   Message object
- * @param $params
- *   Aditional parameters
- * @param $alter
- *   Whether to run the mail_alter hook
- */
-function messaging_mail_prepare($destination, $message, $params, $alter = TRUE) {
-
-  // The message 'from' will depend on message sender if present, otherwise default to site mail
-  $default_from = variable_get('site_mail', ini_get('sendmail_from'));
-  
-  if (empty($params['from'])) {
-    if (!empty($message->sender_account) && !empty($message->sender_account->mail)) {
-      $from = check_plain($message->sender_account->name) . ' <'.$message->sender_account->mail.'>';
-    } elseif(!empty($message->sender_name) && $default_from) {
-      $from = check_plain($message->sender_name) . ' <'.$default_from.'>';
-    } else {
-      $from = $default_from;
-    }
-    $params['from'] = $from;
-  } else {
-    $from = $params['from'];
+  else {
+    return token_replace_multiple($text, $objects);
   }
-
-  // Build the mail object, mimic drupal_mail() format
-  $mail = array(
-    'id'       => 'messaging_'. (!empty($message->type) ? 'message-'.$message->type : 'message'),
-    'to'       => $destination,
-    'from'     => $from,
-    'language' => !empty($message->language) ? $message->language : language_default(),
-    'params'   => $params,
-    'subject'  => $message->subject,
-    'body'     => $message->body,
-    'headers'  => messaging_mail_headers($message, $params),
-  );  
-  
-  // Invoke hook_mail_alter() to allow all modules to alter the resulting e-mail.
-  if ($alter) {
-    drupal_alter('mail', $mail);
-  }
-  return $mail;
-}
-
-/**
- * Get mail headers. Helper function for mail methods
- * 
- */
-function messaging_mail_headers($message, $params) {
-  
-  $headers = !empty($params['headers']) ? $params['headers'] : array();
-  
-  // Add some default headers
-  $headers += array(
-    'MIME-Version'              => '1.0',
-    'Content-Type'              => 'text/plain; charset=UTF-8; format=flowed; delsp=yes',
-    'Content-Transfer-Encoding' => '8Bit',
-    'X-Mailer'                  => 'Drupal'
-  );
-  
-  $default_from = variable_get('site_mail', ini_get('sendmail_from'));
-  $from = !empty($params['from']) ? $params['from'] : $default_from;
-
-  // Set default headers depending on data
-  $headers += array(
-    'From' => $from,
-    'Reply-To' => $from,
-  );
-  
-  if ($default_from) {
-    // To prevent e-mail from looking like spam, the addresses in the Sender and
-    // Return-Path headers should have a domain authorized to use the originating
-    // SMTP server. Errors-To is redundant, but shouldn't hurt.
-    $more_headers['Sender'] = $more_headers['Return-Path'] = $more_headers['Errors-To'] = $default_from;
-    $headers += $more_headers;
-  }  
-
-  return $headers;
 }
 
 /**
@@ -914,8 +851,8 @@ function messaging_requirements($phase) {
  * This is just a wrapper for handling incoming in messaging_incoming module
  */
 function messaging_message_in($method, $channel, $message, $params = array()) {
-  if (function_exists('messaging_processor_message_in')) {
-    return messaging_processor_message_in($method, $channel, $message, $params);
+  if (function_exists('messaging_incoming_post')) {
+    return messaging_incoming_post($method, $channel, $message, $params);
   } else {
     return FALSE;
   }
@@ -996,6 +933,41 @@ function messaging_message_callbacks($callback_keys, $message, $info) {
   }
   //dsm($message);  
   return $message;
+}
+
+/**
+ * Implementation of hook_token_list(). Documents the individual
+ * tokens handled by the module.
+ */
+function messaging_token_list($type = 'all') {
+  $tokens = array();
+  if ($type == 'message' || $type == 'all') {
+    $tokens['message']['message-subject']    = t('The message subject.');
+    $tokens['message']['message-body']    = t('The message body.');
+    $tokens['message']['message-author-name'] = t('The message\'s author name.');
+    $tokens['message']['message-method'] = t('The message\'s method name.');
+    $tokens['message']['message-date'] = t('The message\'s sending date.');
+  }
+  return $tokens;
+}
+
+/**
+ * Implementation of hook_token_values()
+ */
+function messaging_token_values($type, $object = NULL, $options = array()) {
+  switch ($type) {
+    case 'message':
+      if ($message = $object) {
+        $values['message-subject'] = check_plain($message->subject);
+        $values['message-body'] = filter_xss($message->body);
+        $sender = messaging_load_user($message->sender);
+        $values['message-author-name'] = check_plain($sender->name);
+        $tokens['message-method'] = messaging_method_info($message->method, 'name');
+        $tokens['message-date'] = format_date($message->sent);
+        return $values;
+      }
+      break;
+  }
 }
 
 /**

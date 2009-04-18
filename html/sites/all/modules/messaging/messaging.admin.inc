@@ -1,5 +1,5 @@
 <?php
-// $Id: messaging.admin.inc,v 1.1.2.12 2009/02/21 18:38:36 jareyero Exp $
+// $Id: messaging.admin.inc,v 1.1.2.13 2009/04/01 11:54:50 jareyero Exp $
 /**
  * @file
  * Messaging Framework - Admin UI
@@ -30,6 +30,9 @@ function messaging_admin_help($path, $arg) {
       $output .= '<li>' . t('If the Default part is blank too, the fallback template (the parent in this tree) will be used.') . '</li>';
       $output .= '</ul>';
       return $output;
+    case 'admin/messaging/settings/method':
+      $output = '<p>' . t('Depending on your content format and the tokens you are using for messages it is important that you use the right filtering for the message body. Set up the filters you need using the <a href="@input_formats">Input formats</a> page', array('@input_formats' => url('admin/settings/filters'))) . '</p>';
+      return $output; 
     default:
       // Edit template groups
       if ($arg[3] == 'edit' && ($group = $arg[4])) {
@@ -257,46 +260,6 @@ function messaging_admin_settings() {
     '#description' => t('If enabled all messages will be logged and kept for the specified time after they\'re sent.'),
   );
 
-  // Sending methods settings
-  $form['messaging_methods'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Settings for messaging methods'),
-    '#collapsible' => TRUE,
-    '#description' => t('Depending on your content format and the tokens you are using for messages it is important that you use the right filtering for the message body.').' '.
-      t('Set up the filters you need using the !input_formats page', array('!input_formats' => l('Input Formats', 'admin/settings/filters'))),
-  );
-  if ($info = messaging_method_info()) {
-    foreach (filter_formats() as $format) {
-      $format_options[$format->format] = $format->name;
-    }
-    // We add this last for it not bo be default
-    $format_options[0] = t('None (Insecure)');
-    foreach ($info as $method => $options) {
-      $key = 'messaging_method_'.$method;
-      // This will preserve settings for disabled modules
-      $form['messaging_methods'][$key] = array(
-        '#type' => 'fieldset',
-        '#title' => t('!name settings', array('!name' => $options['title'])),
-        '#tree' => TRUE,
-      );
-      // Display name
-      $form['messaging_methods'][$key]['name'] = array(
-        '#type' => 'textfield',
-        '#title' => t('Name'),
-        '#default_value' => $options['name'],
-        '#description' => t('Name for display.'),
-      );      
-      // Output filter applied to message body
-      $form['messaging_methods'][$key]['filter'] = array(
-        '#type' => 'select',
-        '#title' => t('Message body filter'),
-        '#default_value' => isset($options['filter']) ? $options['filter'] : variable_get('messaging_default_filter', ''),
-        '#options' => $format_options,
-      );
-    }
-  } else {
-    $form['messaging_methods']['warning'] = array('#value' => t('You should enable some messaging method plug-ins for this to work.'));
-  }
   // Processing limits
   $limit = variable_get('messaging_process_limit', array('message' => 0, 'percent' => 0, 'time' => 0));
   $form['messaging_process_limit'] = array(
@@ -327,4 +290,44 @@ function messaging_admin_settings() {
     '#description' => t('Maximum percentage of cron time the process may use.'),
   );
   return system_settings_form($form);
+}
+
+/**
+ * Default sending methods settings
+ */
+function messaging_admin_method_settings() {
+  // Sending methods settings
+  if ($info = messaging_method_info()) {
+    foreach (filter_formats() as $format) {
+      $format_options[$format->format] = $format->name;
+    }
+    // We add this last for it not bo be default
+    $format_options[0] = t('None (Insecure)');
+    foreach ($info as $method => $options) {
+      $key = 'messaging_method_'.$method;
+      // This will preserve settings for disabled modules
+      $form[$key] = array(
+        '#type' => 'fieldset',
+        '#title' => t('!name settings', array('!name' => $options['title'])),
+        '#tree' => TRUE,
+      );
+      // Display name
+      $form[$key]['name'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Name'),
+        '#default_value' => $options['name'],
+        '#description' => t('Name for display.'),
+      );      
+      // Output filter applied to message body
+      $form[$key]['filter'] = array(
+        '#type' => 'select',
+        '#title' => t('Message body filter'),
+        '#default_value' => isset($options['filter']) ? $options['filter'] : variable_get('messaging_default_filter', ''),
+        '#options' => $format_options,
+      );
+    }
+  } else {
+    $form['warning'] = array('#value' => t('You should enable some messaging method plug-ins for this to work.'));
+  }
+  return system_settings_form($form);  
 }

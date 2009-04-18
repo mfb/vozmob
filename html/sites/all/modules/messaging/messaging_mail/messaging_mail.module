@@ -1,11 +1,14 @@
 <?php
-// $Id: messaging_mail.module,v 1.2.2.4.2.7 2008/12/16 15:00:29 jareyero Exp $
+// $Id: messaging_mail.module,v 1.2.2.4.2.8 2009/04/01 11:54:50 jareyero Exp $
 /**
  * @file
  * Simple mail using Drupal API. Messaging method plug-in
  * 
  * This is also the reference implementation of sending method plug-ins
  */
+
+// Include messaging mail library
+require_once drupal_get_path('module', 'messaging') . '/messaging.mail.inc';
 
 /**
  * Implementation of hook_messaging()
@@ -18,7 +21,7 @@
  * @return mixed
  *   Depending on $op   
  */
-function messaging_mail_messaging($op) {
+function messaging_mail_messaging($op, $type = NULL) {
   switch($op) {
     case 'send methods':
       $info['mail'] = array(
@@ -26,11 +29,13 @@ function messaging_mail_messaging($op) {
         'name' => t('Mail'), // Name for display
         'group' => 'mail', // Class of sending method
         'destination' => 'mail', // Account property to use as destination
-        'type' => MESSAGING_TYPE_PUSH,  // Method type: push || pull
+        'type' => MESSAGING_TYPE_SEND,  // Method type: push || pull
         'glue' => "\n", // Glue for message body lines
         'footer' => "\n--",  // Separator for message footer
         'description' => t('Send e-mails using the default Drupal mail library.'),
         'send callback' => 'messaging_mail_send_msg', // Sending callback
+        'system accounts' => TRUE, // Supports multiple sending accounts
+        'account type' => 'mail', // The type of system account to use
       );
       return $info;  
   }

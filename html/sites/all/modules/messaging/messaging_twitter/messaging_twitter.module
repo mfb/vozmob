@@ -1,5 +1,5 @@
 <?php
-// $Id: messaging_twitter.module,v 1.1.2.3 2009/03/03 21:46:31 jareyero Exp $
+// $Id: messaging_twitter.module,v 1.1.2.5 2009/04/02 10:23:06 jareyero Exp $
 /**
  * @file
  * Messaging Twitter sending method
@@ -19,21 +19,25 @@ function messaging_twitter_messaging($op = 'info') {
         'title' => t('Twitter Direct Message'),
         'name' => t('Twitter Direct Message'),
         'group' => 'twitter',
-        'type' => MESSAGING_TYPE_PUSH,
+        'type' => MESSAGING_TYPE_SEND,
         'glue' => ' ',
         'description' => t("Send as a Twitter direct message."),
         'send callback' => 'messaging_twitter_send_dm',
         'destination callback' => 'messaging_twitter_user_destination',
+        'system accounts' => TRUE, // Supports multiple sending accounts
+        'account type' => 'twitter', // The type of system account to use
       );
       $info['twitter_at'] = array(
         'title' => t('Twitter @ Message'),
         'name' => t('Twitter @ Message'),
         'group' => 'twitter',
-        'type' => MESSAGING_TYPE_PUSH,
+        'type' => MESSAGING_TYPE_SEND,
         'glue' => ' ',
         'description' => t("Send as a Twitter @ message."),
         'send callback' => 'messaging_twitter_send_at',
         'destination callback' => 'messaging_twitter_user_destination',
+        'system accounts' => TRUE, // Supports multiple sending accounts
+        'account type' => 'twitter', // The type of system account to use
       );
       return $info;  
   }
@@ -99,14 +103,14 @@ function messaging_twitter_send_at($destination, $message, $params = array()) {
 function messaging_twitter_menu() {
   $items = array();
   
-  $items['admin/messaging/settings/twitter'] = array(
+  $items['admin/messaging/settings/method/twitter'] = array(
     'title' => 'Twitter',
     'description' => 'Configure the Twitter ID information for the site.',
     'page callback' => 'messaging_twitter_admin',
     'access arguments' => array('administer messaging'),
     'type' => MENU_LOCAL_TASK,   
   );
-  
+
   return $items;
 }
 

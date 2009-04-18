@@ -1,5 +1,5 @@
 <?php
-// $Id: messaging_notify.module,v 1.1.2.5 2009/02/21 18:38:36 jareyero Exp $
+// $Id: messaging_notify.module,v 1.1.2.8 2009/04/15 00:20:29 jareyero Exp $
 /**
  * @file
  * Subscriptions to messaging events
@@ -153,7 +153,8 @@ function messaging_notify_notifications($op, &$arg0, $arg1 = NULL, $arg2 = NULL)
     case 'subscription types':
       $types['messaging'] = array(
         'event_type' => 'message',
-        'title' => t('Thread'),
+        'title' => t('Messages'),
+        'description' => t('Receive an aditional notification whenever a message is sent to you by a different method.'),
         'access' => 'subscribe to messages',
         'fields' => array('method'),
       );
@@ -164,6 +165,7 @@ function messaging_notify_notifications($op, &$arg0, $arg1 = NULL, $arg2 = NULL)
         'name' => t('Sending method'),
         'field' => 'method',
         'type' => 'string',
+        'options callback' => 'messaging_notify_method_list'
       );
       return $fields;
 
@@ -203,6 +205,20 @@ function messaging_notify_notifications($op, &$arg0, $arg1 = NULL, $arg2 = NULL)
       return $types;
 
    }
+}
+
+/**
+ * Available methods to subscribe to
+ */
+function messaging_notify_method_list() {
+  $options = array();
+  $allowed = variable_get('messaging_notify_subscribe', array());
+  foreach (messaging_method_info(NULL, 'name') as $method => $name) {
+    if (!empty($allowed[$method])) {
+      $options[$method] = $name;
+    }
+  }
+  return $options;
 }
 
 /**
@@ -316,41 +332,6 @@ function messaging_notify_aftersend($message, $info) {
   notifications_event($event);
 
   return $message;     
-}
-
-/**
- * Implementation of hook_token_list(). Documents the individual
- * tokens handled by the module.
- */
-function messaging_notify_token_list($type = 'all') {
-  $tokens = array();
-  if ($type == 'message' || $type == 'all') {
-    $tokens['message']['message-subject']    = t('The message subject.');
-    $tokens['message']['message-body']    = t('The message body.');
-    $tokens['message']['message-author-name'] = t('The message\'s author name.');
-    $tokens['message']['message-method'] = t('The message\'s method name.');
-    $tokens['message']['message-date'] = t('The message\'s sending date.');
-  }
-  return $tokens;
-}
-
-/**
- * Implementation of hook_token_values()
- */
-function messaging_notify_token_values($type, $object = NULL, $options = array()) {
-  switch ($type) {
-    case 'message':
-      if ($message = $object) {
-        $values['message-subject'] = check_plain($message->subject);
-        $values['message-body'] = check_markup($message->body);
-        $sender = messaging_load_user($message->sender);
-        $values['message-author-name'] = check_plain($sender->name);
-        $tokens['message-method'] = messaging_method_info($message->method, 'name');
-        $tokens['message-date'] = format_date($message->sent);
-        return $values;
-      }
-      break;
-  }
 }
 
 /**

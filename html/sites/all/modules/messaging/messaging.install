@@ -1,5 +1,5 @@
 <?php
-// $Id: messaging.install,v 1.2.2.4.2.10 2009/01/27 15:50:30 jareyero Exp $
+// $Id: messaging.install,v 1.2.2.4.2.13 2009/04/01 11:54:50 jareyero Exp $
 
 /**
 * Implementation of hook_schema().
@@ -98,7 +98,6 @@ function messaging_uninstall() {
   variable_del('messaging_default_filter');
   variable_del('messaging_default_method');
   variable_del('messaging_log');
-  variable_del('messaging_log_expire');
   variable_del('messaging_process_limit');
   db_query("DELETE FROM {variable} WHERE name LIKE 'messaging_method_%'");
 }
@@ -229,7 +228,16 @@ function messaging_update_6004() {
   $ret = array();
   db_add_index($ret, 'messaging_store', 'cron', array('cron'));
   db_add_index($ret, 'messaging_store', 'queue', array('queue'));
-  db_add_index($ret, 'messaging_store', 'log', array('log'));
-  
+  db_add_index($ret, 'messaging_store', 'log', array('log'));  
+  return $ret;
+}
+
+/**
+ * Clean up message logs that were not properly cleaned before
+ */
+function messaging_update_6005() {
+  $ret = array();
+  $ret[] = update_sql('UPDATE {messaging_store} SET log = 1 WHERE log > 1');
+  $ret[] = update_sql('DELETE FROM {messaging_store} WHERE log = 1 AND queue = 0 AND sent < %d', time() - variable_get('messaging_log', 0));
   return $ret;
 }

@@ -4,6 +4,26 @@
  * HTML Mail using PHPMailer. Messaging method plug-in.
  */
 
+// Include messaging mail library
+require_once drupal_get_path('module', 'messaging') . '/messaging.mail.inc';
+
+/**
+ * Implementation of hook_menu().
+ */
+function messaging_phpmailer_menu() {
+  $items = array();
+  
+  $items['admin/messaging/settings/method/phpmailer'] = array(
+    'title' => 'PHPMailer',
+    'description' => 'Configure PHPMailer.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('messaging_phpmailer_settings_form'),
+    'access arguments' => array('administer messaging'),
+    'type' => MENU_LOCAL_TASK,   
+  );
+
+  return $items;
+}
 
 /**
  * Implementation of hook_messaging
@@ -17,13 +37,32 @@ function messaging_phpmailer_messaging($op = 'info') {
         'group' => 'mail',
         'destination' => 'mail',
         'send callback' => 'messaging_phpmailer_send_msg',
-        'type' => MESSAGING_TYPE_PUSH,
+        'type' => MESSAGING_TYPE_SEND,
         'glue' => "<br>", // don't use <br/> nor <br /> for maximum HTML email client compatibility
         'footer' => "<br><br>--",
         'description' => t('Send HTML e-mails using PHPMailer'),
       );
       return $info;
   }
+}
+
+/**
+ * Settings form callback
+ */
+function messaging_phpmailer_settings_form($form_state) {
+  $form['messaging_phpmailer_smtp_server'] = array(
+    '#title' => t('SMTP server'),
+    '#type' => 'textfield',
+    '#default_value' => variable_get('messaging_phpmailer_smtp_server', ini_get('SMTP')),
+  );
+  $form['messaging_phpmailer_debug'] = array(
+      '#title' => t('Debug mode'),
+      '#type' => 'radios',
+      '#options' => array(t('Disabled'), t('Enabled')),
+      '#default_value' => variable_get('messaging_phpmailer_debug', 0),
+      '#description' => t('If enabled, PHPMailer debugging will be activated and all messages logged to watchdog.')
+  );
+  return system_settings_form($form);
 }
 
 /**
@@ -62,8 +101,7 @@ function messaging_phpmailer_drupal_mail($message) {
   $mail->IsSMTP(); // telling the class to use SMTP
   $mail->CharSet = 'utf-8';
   $mail->ContentType = 'text/html';
-  // Uncomment the following line to get debug information printed out during mail sends
-  //$mail->SMTPDebug = TRUE;
+
   $host = variable_get('messaging_phpmailer_smtp_server', ini_get('SMTP'));
   if ($host) {
     $mail->Host = $host; // SMTP server
@@ -95,7 +133,15 @@ function messaging_phpmailer_drupal_mail($message) {
   // The subject has been already filtered by messaging module
   $mail->Subject = $subject;
   $mail->Body = str_replace("\r", '', $body);
-  return $mail->Send();
+  
+  // If enabled debug option, log everything...
+  if (variable_get('messaging_phpmailer_debug', 0)) {
+    $mail->SMTPDebug = TRUE;
+    watchdog('messaging', 'PHPMailer debug message: '. $mail->Send() . ' - ' . $mail->ErrorInfo);    
+  }
+  else {
+    return $mail->Send();
+  }
 }
 
 /**
