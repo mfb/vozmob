@@ -73,12 +73,12 @@ function sms_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
 
     //testing sms send
     //sms_send($number, $message, $options = array())
-    $numberSasha = "6073515559";
-    $message = "otro test";
-    $options = array('carrier' => 'vtext.com' , 'from' => 'vozmob.sandbox.reg@gmail.com');
-    //$message = "Thanks / Gracias! Do you want to have a blog in vozmob? If yes please send one word identifying the blog.";
-    //$options = array('carrier'=> $from[1], 'from' => 'vozmob.sandbox.reg@gmail.com');
-    sms_send($numberSasha, $message, $options);
+    //when testing -> $numberSasha = "6073515559";
+    //when testing -> $message = "otro test";
+    //when testing -> $options = array('carrier' => 'vtext.com' , 'from' => 'vozmob.sandbox.reg@gmail.com');
+    $message = "Thanks / Gracias! Do you want to have a blog in vozmob? If yes please send one word identifying the blog.";
+    $options = array('carrier'=> $from[1], 'from' => 'vozmob.sandbox.reg@gmail.com');
+    sms_send($number, $message, $options);
 
     watchdog('debug', print_r($options, TRUE));
 	    

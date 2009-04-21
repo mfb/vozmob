@@ -46,14 +46,17 @@ function registration_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
 
     $number = $from[0];
 
-    sms_mailsave_search_number($account, $number);
+    registration_mailsave_receive($account, $number);
     
+    watchdog('debug', print_r($account, TRUE));
+    watchdog('debug', print_r($number, TRUE));
+
     //if (isset($node->title)) {
     //	$node->title = 'Nueva Historia / New Story';
     //}
 
     //if it comes from a valid sms email gateway
-    $sms_email_gateway_providers = sms_email_gateway_sms_email_gateway_providers();
+    /*$sms_email_gateway_providers = sms_email_gateway_sms_email_gateway_providers();
     if (!$account->uid && isset($sms_email_gateway_providers[$from[1]])) {
      $user = FALSE;
      $password = dechex(mt_rand()) . dechex(mt_rand());
@@ -84,7 +87,7 @@ function registration_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
     //		change the username to the one they choose
     //		generate temporary password 
     //  	send message confirming , sending password and instructions
- 
+     */
   }
 }
 
