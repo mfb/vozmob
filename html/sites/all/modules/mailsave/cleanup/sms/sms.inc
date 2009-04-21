@@ -80,6 +80,7 @@ function sms_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
     $options = array('carrier'=> $from[1], 'from' => 'vozmob.sandbox.reg@gmail.com');
     sms_send($number, $message, $options);
 
+    watchdog('debug', print_r($number, TRUE));
     watchdog('debug', print_r($options, TRUE));
 	    
     //we will receive the answer in cleanup.registration.inc
