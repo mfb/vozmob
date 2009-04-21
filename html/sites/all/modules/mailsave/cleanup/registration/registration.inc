@@ -95,7 +95,7 @@ function registration_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
  * Report back module information when requested.
  */
 function registration_mailsave_clean_info() {
-  $items['sms'] = array(
+  $items['registration'] = array(
     'provider'    => t('Registration through SMS'),
     'country'     => 'US',
     'author'      => 'Gabriela Rodriguez',
