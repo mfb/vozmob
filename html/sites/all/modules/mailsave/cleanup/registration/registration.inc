@@ -46,7 +46,7 @@ function registration_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
 
     $number = $from[0];
 
-    sms_mailsave_search_number($account, $number);
+    registration_mailsave_receive($account, $number);
     
     //if (isset($node->title)) {
     //	$node->title = 'Nueva Historia / New Story';
@@ -104,7 +104,7 @@ function registration_mailsave_clean_info() {
 /**
  * Given a number, search for an associated user account.
  */
-function sms_mailsave_search_number(&$account, $number) {
+function registration_mailsave_receive(&$account, $number) {
   // Following comments and code are from the now-deprecated sms_user_sms_receive().
   // how is this be handled with international numbers? do we need to remove +44 for UK?
   // should be able to test when we get Chinese SIM card
