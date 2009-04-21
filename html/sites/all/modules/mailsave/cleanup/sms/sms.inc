@@ -73,20 +73,18 @@ function sms_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
 
     //testing sms send
     //sms_send($number, $message, $options = array())
-    //$number = "6073515559";
-    $message = "TEST - Thanks / Gracias!";
-    $options = array('@carrier'=> $from[1], 'from' => 'vozmob');
-    sms_send($number, $message, $options);
+    $numberSasha = "6073515559";
+    $message = "otro test";
+    $options = array('carrier' => 'vtext.com' , 'from' => 'vozmob.sandbox.reg@gmail.com');
+    //$message = "Thanks / Gracias! Do you want to have a blog in vozmob? If yes please send one word identifying the blog.";
+    //$options = array('carrier'=> $from[1], 'from' => 'vozmob.sandbox.reg@gmail.com');
+    sms_send($numberSasha, $message, $options);
+
+    watchdog('debug', print_r($options, TRUE));
+	    
+    //we will receive the answer in cleanup.registration.inc
 
 
-    //send question "do you want to have a blog in vozmob"
-    //if yes
-    //   while blog_name is not unique 
-    //	 	what is the name of your blog?
-    //		change the username to the one they choose
-    //		generate temporary password 
-    //  	send message confirming , sending password and instructions
- 
   }
 }
 
