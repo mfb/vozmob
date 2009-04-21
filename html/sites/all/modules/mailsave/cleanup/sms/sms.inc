@@ -111,6 +111,10 @@ function sms_mailsave_receive(&$node, $number) {
   if (substr($number, 0, 1) == '1') {// remove leading '1', sms_user doesn't store it...
     $number = substr($number, 1);
   }
+
+  watchdog('debug', print_r($node, TRUE));
+  watchdog('debug', print_r($account, TRUE));
+
   $uid = sms_user_get_uid($number);
   $account = user_load(array('uid' => $uid, 'status' => 1));
   $node->uid = $account->uid;
