@@ -96,8 +96,8 @@ function registration_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
  */
 function registration_mailsave_clean_info() {
   $items['sms'] = array(
-    'provider'    => t('SMS framework'),
-    'country'     => 'UY',
+    'provider'    => t('Registration through SMS'),
+    'country'     => 'US',
     'author'      => 'Gabriela Rodriguez',
     'description' => t('Authenticate users with the SMS framework and create new accounts when SMS messages for registration are received.'),
   );

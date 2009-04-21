@@ -78,10 +78,12 @@ function sms_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
     //when testing -> $options = array('carrier' => 'vtext.com' , 'from' => 'vozmob.sandbox.reg@gmail.com');
     $message = "Thanks / Gracias! Do you want to have a blog in vozmob? If yes please send one word identifying the blog.";
     $options = array('carrier'=> $from[1], 'from' => 'vozmob.sandbox.reg@gmail.com');
-    sms_send($number, $message, $options);
 
     watchdog('debug', print_r($number, TRUE));
     watchdog('debug', print_r($options, TRUE));
+
+    sms_send($number, $message, $options);
+
 	    
     //we will receive the answer in cleanup.registration.inc
 
@@ -114,11 +116,12 @@ function sms_mailsave_receive(&$node, $number) {
   }
 
   $uid = sms_user_get_uid($number);
+  watchdog('debug', print_r($uid, TRUE));
+
   $account = user_load(array('uid' => $uid, 'status' => 1));
   $node->uid = $account->uid;
   $node->name = $account->name;
 
-  watchdog('debug', print_r($uid, TRUE));
   watchdog('debug', print_r($node, TRUE));
   watchdog('debug', print_r($account, TRUE));
 }
