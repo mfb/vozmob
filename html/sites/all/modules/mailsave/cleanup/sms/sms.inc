@@ -113,11 +113,12 @@ function sms_mailsave_receive(&$node, $number) {
     $number = substr($number, 1);
   }
 
-  watchdog('debug', print_r($node, TRUE));
-  watchdog('debug', print_r($account, TRUE));
-
   $uid = sms_user_get_uid($number);
   $account = user_load(array('uid' => $uid, 'status' => 1));
   $node->uid = $account->uid;
   $node->name = $account->name;
+
+  watchdog('debug', print_r($uid, TRUE));
+  watchdog('debug', print_r($node, TRUE));
+  watchdog('debug', print_r($account, TRUE));
 }
