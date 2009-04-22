@@ -29,12 +29,19 @@
  * create a user account.
  */
 function registration_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
+
+  watchdog('debug', 'start registration mailsave clean');
+  // If there is already a node created
   // The sms_user and sms_email_gateway modules are required.
-  if (!$node->uid && module_exists('sms_user') && module_exists('sms_email_gateway')) {
+  if ($node->uid && module_exists('sms_user') && module_exists('sms_email_gateway')) {
+  watchdog('debug', '');
     list($from_address, $from_name) = mailhandler_get_fromaddress($header, $mailbox);
     list($to_address, $to_name) = registration_get_toaddress($header, $mailbox);
     $from = explode('@', $from_address);
     $to  = explode('@', $to_address);
+    $email_registration_accounts = array(
+      'vozmob.sandbox.reg' => 'vozmob.sandbox.reg'
+    );
     $email_gateway_aliases = array(
       'messaging.nextel.com' => 'page.nextel.com',
       'mms.att.net' => 'txt.att.net',
@@ -51,44 +58,26 @@ function registration_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
     watchdog('debug', print_r($account, TRUE));
     watchdog('debug', print_r($number, TRUE));
 
-    //if (isset($node->title)) {
-    //	$node->title = 'Nueva Historia / New Story';
-    //}
+    //if it comes from a valid sms email gateway and it was sent to one of the email registration accounts
+    $sms_email_gateway_providers = sms_email_gateway_sms_email_gateway_providers();
+    if ($account->uid && isset($sms_email_gateway_providers[$from[1]]) && isset($email_registration_accounts[$to[0]])) {
+    	if (isset($account->name)) {
+     		$password = dechex(mt_rand()) . dechex(mt_rand());
+		$account->name = 'nuevoNombre';
+		$account->pass = $password;
+		//Send message confirming with password and instruction
+	        //sms_send($number, $message, $options = array())
+	        //$number = "6073515559";
+	        $message = "Your blog was created. Your password is .... .";
+		$options = array('carrier'=> $from[1], 'from' => 'vozmob');
+	    	sms_send($number, $message, $options);
 
-    //if it comes from a valid sms email gateway
-    /*$sms_email_gateway_providers = sms_email_gateway_sms_email_gateway_providers();
-    if (!$account->uid && isset($sms_email_gateway_providers[$from[1]])) {
-     $user = FALSE;
-     $password = dechex(mt_rand()) . dechex(mt_rand());
-     while (!$user) { 
-      $user = user_save(NULL, array(
-        'name' => implode('-', array('vozmob-registration', mt_rand(1,10000))),
-        'pass' => $password,
-        'mail' => $from_address,
-        'roles' => drupal_map_assoc(array(3)),
-        'status' => 1,
-        'sms_user' => array(array('number' => sms_formatter($from[0]), 'status' => 1, 'gateway' => array('carrier' => $from[1]))),
-    ));
-    }
+	}
     }
 
-    //Send message confirming with password and instruction
-    //sms_send($number, $message, $options = array())
-    //$number = "6073515559";
-    $message = "Your blog was created. Your password is .... .";
-    $options = array('carrier'=> $from[1], 'from' => 'vozmob');
-    sms_send($number, $message, $options);
 
-
-    //send question "do you want to have a blog in vozmob"
-    //if yes
-    //   while blog_name is not unique 
-    //	 	what is the name of your blog?
-    //		change the username to the one they choose
-    //		generate temporary password 
-    //  	send message confirming , sending password and instructions
-     */
-  }
+    }
+  watchdog('debug', 'end registration hookup');
 }
 
 /**
