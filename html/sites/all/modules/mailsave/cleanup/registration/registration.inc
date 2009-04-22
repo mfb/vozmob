@@ -61,7 +61,8 @@ function registration_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
     //if it comes from a valid sms email gateway and it was sent to one of the email registration accounts
     $sms_email_gateway_providers = sms_email_gateway_sms_email_gateway_providers();
     if ($account->uid && isset($sms_email_gateway_providers[$from[1]]) && isset($email_registration_accounts[$to[0]])) {
-    	$user = user_save($account, array('name' => 'nuevoNombre'));
+    	$user = user_save($account, array('name' => 'nuevoNombre'), 'account');
+	watchdog('debug', print_r($user));
 	if ($user) {
 		watchdog('debug', 'user was saved succesfully');
      		//$password = dechex(mt_rand()) . dechex(mt_rand());

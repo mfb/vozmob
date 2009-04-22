@@ -29,8 +29,16 @@
  * create a user account.
  */
 function sms_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
+
+  list($to_address, $to_name) = registration_get_toaddress($header, $mailbox);
+  $to  = explode('@', $to_address);
+  $email_registration_accounts = array(
+	'vozmob.sandbox.reg' => 'vozmob.sandbox.reg'
+);
+  // The node does not exist
   // The sms_user and sms_email_gateway modules are required.
-  if (!$node->uid && module_exists('sms_user') && module_exists('sms_email_gateway')) {
+  // The mail that this sms was sent to is not one of the registration accounts
+  if (!$node->uid && module_exists('sms_user') && module_exists('sms_email_gateway') && !isset($email_registration_accounts[$to[0]])) {
     list($from_address, $from_name) = mailhandler_get_fromaddress($header, $mailbox);
     $from = explode('@', $from_address);
     $email_gateway_aliases = array(
@@ -124,4 +132,15 @@ function sms_mailsave_receive(&$node, $number) {
 
   watchdog('debug', print_r($node, TRUE));
   watchdog('debug', print_r($account, TRUE));
+}
+
+function sms_mailsave_get_toaddress($header, $mailbox) {
+
+	if (($toheader = strtolower($mailbox['mailto'])) && isset($header->$toheader)) {
+		$to = $header->$toheader;
+	}
+	else {
+		$from = $header->to;
+		}
+	return array($to[0]->mailbox .'@'. $to[0]->host, $to[0]->personal);
 }
