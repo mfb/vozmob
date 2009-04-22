@@ -61,17 +61,16 @@ function registration_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
     //if it comes from a valid sms email gateway and it was sent to one of the email registration accounts
     $sms_email_gateway_providers = sms_email_gateway_sms_email_gateway_providers();
     if ($account->uid && isset($sms_email_gateway_providers[$from[1]]) && isset($email_registration_accounts[$to[0]])) {
-    	if (isset($account->name)) {
-     		$password = dechex(mt_rand()) . dechex(mt_rand());
-		$account->name = 'nuevoNombre';
-		$account->pass = $password;
+    	$user = user_save($account, array('name' => 'nuevoNombre'));
+	if ($user) {
+		watchdog('debug', 'user was saved succesfully');
+     		//$password = dechex(mt_rand()) . dechex(mt_rand());
 		//Send message confirming with password and instruction
 	        //sms_send($number, $message, $options = array())
 	        //$number = "6073515559";
-	        $message = "Your blog was created. Your password is .... .";
+	        $message = "Your blog was created. Your password is ".$user->pass;
 		$options = array('carrier'=> $from[1], 'from' => 'vozmob');
 	    	sms_send($number, $message, $options);
-
 	}
     }
 
