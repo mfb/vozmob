@@ -58,6 +58,10 @@ function registration_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
     watchdog('debug', print_r($account, TRUE));
     watchdog('debug', print_r($number, TRUE));
 
+    watchdog('debug','next the watchdogs for the if');
+    watchdog('debug', print_r($account->uid, TRUE));
+    watchdog('debug', print_r($sms_email_gateway_providers[$from[1]], TRUE));
+    watchdog('debug', print_r($email_registration_accounts[$to[0]], TRUE));
     //if it comes from a valid sms email gateway and it was sent to one of the email registration accounts
     $sms_email_gateway_providers = sms_email_gateway_sms_email_gateway_providers();
     if ($account->uid && isset($sms_email_gateway_providers[$from[1]]) && isset($email_registration_accounts[$to[0]])) {
