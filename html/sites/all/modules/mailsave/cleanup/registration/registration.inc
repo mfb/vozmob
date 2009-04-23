@@ -116,7 +116,9 @@ function registration_mailsave_receive(&$account, $number) {
     $to = $header->$toheader;
   }
   else {
-    $from = $header->to;
+    $to = $header->to;
   }
+  watchdog('debug','dentro del get to address');
+  watchdog('debug',print_r($to,TRUE));
   return array($to[0]->mailbox .'@'. $to[0]->host, $to[0]->personal);
 }
