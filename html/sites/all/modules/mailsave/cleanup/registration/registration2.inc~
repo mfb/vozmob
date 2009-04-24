@@ -29,16 +29,8 @@
  * create a user account.
  */
 function sms_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
-
-  list($to_address, $to_name) = registration_get_toaddress($header, $mailbox);
-  $to  = explode('@', $to_address);
-  $email_registration_accounts = array(
-	'vozmob.sandbox.reg' => 'vozmob.sandbox.reg'
-);
-  // The node does not exist
   // The sms_user and sms_email_gateway modules are required.
-  // The mail that this sms was sent to is not one of the registration accounts
-  if (!$node->uid && module_exists('sms_user') && module_exists('sms_email_gateway') && !isset($email_registration_accounts[$to[0]])) {
+  if (!$node->uid && module_exists('sms_user') && module_exists('sms_email_gateway')) {
     list($from_address, $from_name) = mailhandler_get_fromaddress($header, $mailbox);
     $from = explode('@', $from_address);
     $email_gateway_aliases = array(
@@ -81,21 +73,20 @@ function sms_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
 
     //testing sms send
     //sms_send($number, $message, $options = array())
-    //when testing -> $numberSasha = "6073515559";
-    //when testing -> $message = "otro test";
-    //when testing -> $options = array('carrier' => 'vtext.com' , 'from' => 'vozmob.sandbox.reg@gmail.com');
+    //$number = "6073515559";
     $message = "Thanks / Gracias! Do you want to have a blog in vozmob? If yes please send one word identifying the blog.";
-    $options = array('carrier'=> $from[1], 'from' => 'vozmob.sandbox.reg@gmail.com');
-
-    watchdog('debug', print_r($number, TRUE));
-    watchdog('debug', print_r($options, TRUE));
-
+    $options = array('carrier'=> $from[1], 'from' => 'vozmob');
     sms_send($number, $message, $options);
 
-	    
-    //we will receive the answer in cleanup.registration.inc
 
-
+    //send question "do you want to have a blog in vozmob"
+    //if yes
+    //   while blog_name is not unique 
+    //	 	what is the name of your blog?
+    //		change the username to the one they choose
+    //		generate temporary password 
+    //  	send message confirming , sending password and instructions
+ 
   }
 }
 
@@ -122,25 +113,8 @@ function sms_mailsave_receive(&$node, $number) {
   if (substr($number, 0, 1) == '1') {// remove leading '1', sms_user doesn't store it...
     $number = substr($number, 1);
   }
-
   $uid = sms_user_get_uid($number);
-  watchdog('debug', print_r($uid, TRUE));
-
   $account = user_load(array('uid' => $uid, 'status' => 1));
   $node->uid = $account->uid;
   $node->name = $account->name;
-
-  watchdog('debug', print_r($node, TRUE));
-  watchdog('debug', print_r($account, TRUE));
-}
-
-function sms_mailsave_get_toaddress($header, $mailbox) {
-
-	if (($toheader = strtolower($mailbox['mailto'])) && isset($header->$toheader)) {
-		$to = $header->$toheader;
-	}
-	else {
-		$from = $header->to;
-		}
-	return array($to[0]->mailbox .'@'. $to[0]->host, $to[0]->personal);
 }
