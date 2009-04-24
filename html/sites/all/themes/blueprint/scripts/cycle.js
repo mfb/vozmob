@@ -1,6 +1,6 @@
 // $Id$
 
-$(document).ready(function() {
+Drupal.behaviors.overlayCycle = function() {
   // Set up the overlay and expose behaviors.
   $('div.field-field-image div.field-items a').each(function() {
     // Get the nid for this image field and set the rel attribute to the overlay for this node.
@@ -20,17 +20,24 @@ $(document).ready(function() {
       onLoad: function() {
         // Set up the slideshow.
         this.getContent().find('div.views-field-field-image-fid span.field-content').each(function() {
-          $(this).before('<div class="cycle-nav" id="cycle-nav-' + cycleIndex + '"></div>').cycle({ 
-            fx:    'fade',
-            pager: '#cycle-nav-' + cycleIndex,
-            pause: 1
-          });
-          cycleIndex = 1 + cycleIndex;
+          if (!this.loaded) {
+            $(this).before('<div class="cycle-nav" id="cycle-nav-' + cycleIndex + '"></div>').cycle({ 
+              fx:    'fade',
+              pager: '#cycle-nav-' + cycleIndex,
+              pause: 1
+            });
+            cycleIndex = 1 + cycleIndex;
+            this.loaded = true;
+          }
+          $(this).cycle('resume');
         });
       },
       onClose: function() {
         $.expose.close();
+        this.getContent().find('div.views-field-field-image-fid span.field-content').each(function() {
+          $(this).cycle('pause');
+        });
       }
     });
   });
-});
+};
