@@ -54,7 +54,7 @@ function sms_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
 
     sms_mailsave_receive($node, $number);
     
-    if (isset($node->title)) {
+    if (empty($node->title)) {
     	$node->title = 'Nueva Historia / New Story';
     }
 
