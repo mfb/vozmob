@@ -30,11 +30,9 @@
  */
 function registration_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
 
-  watchdog('debug', 'start registration mailsave clean');
   // If there is already a node created
   // The sms_user and sms_email_gateway modules are required.
   if ($node->uid && module_exists('sms_user') && module_exists('sms_email_gateway')) {
-  watchdog('debug', '');
     list($from_address, $from_name) = mailhandler_get_fromaddress($header, $mailbox);
     list($to_address, $to_name) = registration_get_toaddress($header, $mailbox);
     $from = explode('@', $from_address);
@@ -55,18 +53,12 @@ function registration_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
 
     registration_mailsave_receive($account, $number);
     
-    watchdog('debug', print_r($account, TRUE));
-    watchdog('debug', print_r($number, TRUE));
+    $newName =  $node->name;
 
-    watchdog('debug','next the watchdogs for the if');
-    watchdog('debug', print_r($account->uid, TRUE));
-    watchdog('debug', print_r($from[1], TRUE));
-    watchdog('debug', print_r($to_address, TRUE));
     //if it comes from a valid sms email gateway and it was sent to one of the email registration accounts
     $sms_email_gateway_providers = sms_email_gateway_sms_email_gateway_providers();
     if ($account->uid && isset($sms_email_gateway_providers[$from[1]]) && isset($email_registration_accounts[$to[0]])) {
-    	$user = user_save($account, array('name' => 'nuevoNombre'), 'account');
-	watchdog('debug', print_r($user));
+    	$user = user_save($account, array('name' => $newName), 'account');
 	if ($user) {
 		watchdog('debug', 'user was saved succesfully');
      		//$password = dechex(mt_rand()) . dechex(mt_rand());
@@ -118,6 +110,5 @@ function registration_mailsave_receive(&$account, $number) {
   else {
     $to = $header->to;
   }
-  watchdog('debug',print_r($to,TRUE));
   return array($to[0]->mailbox .'@'. $to[0]->host, $to[0]->personal);
 }
