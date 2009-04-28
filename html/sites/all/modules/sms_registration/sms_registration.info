@@ -1,0 +1,9 @@
+; $Id$
+name = SMS registration
+description = Allow users to register to the site through SMS
+dependencies[] = mailhandler
+dependencies[] = mailsave
+dependencies[] = sms_user
+dependencies[] = sms_email_gateway
+package = "Mailhandler"
+core = 6.x 

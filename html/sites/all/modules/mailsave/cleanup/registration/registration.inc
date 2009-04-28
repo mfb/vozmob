@@ -54,6 +54,7 @@ function registration_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
     registration_mailsave_receive($account, $number);
     
     $newName =  $node->body;
+    watchdog('debug', print_r($newName,TRUE));
 
     //if it comes from a valid sms email gateway and it was sent to one of the email registration accounts
     $sms_email_gateway_providers = sms_email_gateway_sms_email_gateway_providers();
