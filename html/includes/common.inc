@@ -1,5 +1,5 @@
 <?php
-// $Id: common.inc,v 1.756.2.48 2009/02/25 23:16:45 goba Exp $
+// $Id: common.inc,v 1.756.2.50 2009/04/30 00:39:01 goba Exp $
 
 /**
  * @file
@@ -149,6 +149,15 @@ function drupal_set_header($header = NULL) {
  */
 function drupal_get_headers() {
   return drupal_set_header();
+}
+
+/**
+ * Make any final alterations to the rendered xhtml.
+ */
+function drupal_final_markup($content) {
+  // Make sure that the charset is always specified as the first element of the
+  // head region to prevent encoding-based attacks.
+  return preg_replace('/<head[^>]*>/i', "\$0\n<meta http-equiv=\"Content-Type\" content=\"text/html; charset=utf-8\" />", $content, 1);
 }
 
 /**
