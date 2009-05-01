@@ -1,5 +1,5 @@
 <?php
-// $Id: devel_generate.module,v 1.11.2.7 2009/01/05 01:15:20 weitzman Exp $
+// $Id: devel_generate.module,v 1.11.2.10 2009/04/09 18:48:14 weitzman Exp $
 
 require_once('devel_generate_batch.inc');
 
@@ -83,7 +83,8 @@ function devel_generate_users_form_submit($form_id, &$form_state) {
   devel_create_users($form_state['values']['num'], $form_state['values']['kill_users'], $form_state['values']['time_range']);
 }
 
-function devel_generate_content_form() {
+// Return an $options array of content types.
+function devel_generate_content_types() {
   if (module_exists('content')) {
     $types = content_types();
     foreach ($types as $type) {
@@ -100,8 +101,16 @@ function devel_generate_content_form() {
       $options[$type->type] = t($type->name);
     }
   }
+  
   // we cannot currently generate valid polls.
   unset($options['poll']);
+  
+  return $options;
+}
+
+function devel_generate_content_form() {
+  $options = devel_generate_content_types();
+  
   $form['node_types'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Which node types do you want to create?'),
@@ -132,9 +141,9 @@ function devel_generate_content_form() {
     '#default_value' => 604800,
   );
   
-  $form['num_comments'] = array(
-    '#type' => module_exists('comment') ? 'textfield' : 'value',
-    '#title' => t('How many comments per node would you like to generate?'),
+  $form['max_comments'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Maximum number of generated comments per node'),
     '#description' => t('You must also enable comments for the node types you are generating.'),
     '#default_value' => 0,
     '#size' => 3,
@@ -167,6 +176,12 @@ function devel_generate_content_form() {
     '#title' => t('Add an url alias for each node.'),
     '#default_value' => FALSE,
   );
+  $form['add_statistics'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Generate node view statistics (node_counter table).'),
+    '#default_value' => TRUE,
+    '#access' => module_exists('statistics'),
+  );
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Do it!'),
@@ -178,7 +193,7 @@ function devel_generate_content_form() {
 
 function devel_generate_content_form_submit($form_id, &$form_state) {
   $form_state['values']['node_types'] = array_filter($form_state['values']['node_types']);
-  if (!$form_state['values']['kill_content'] && $form_state['values']['num_nodes'] <= 50 && $form_state['values']['num_comments'] <= 10) {
+  if (!$form_state['values']['kill_content'] && $form_state['values']['num_nodes'] <= 50 && $form_state['values']['max_comments'] <= 10) {
     require_once('devel_generate.inc');
     devel_generate_content($form_state);
   }

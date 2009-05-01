@@ -1,5 +1,5 @@
 <?php
-// $Id: userreference.module,v 1.106.2.40 2009/04/17 16:58:09 yched Exp $
+// $Id: userreference.module,v 1.106.2.41 2009/04/29 20:51:53 karens Exp $
 
 /**
  * @file
@@ -51,6 +51,7 @@ function userreference_field_info() {
     'userreference' => array(
       'label' => t('User reference'),
       'description' => t('Store the ID of a related user as an integer value.'),
+      'content_icon' => 'icon_content_noderef.png',
     ),
   );
 }

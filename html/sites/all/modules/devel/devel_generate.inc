@@ -1,5 +1,5 @@
 <?php
-// $Id: devel_generate.inc,v 1.14.2.9 2008/11/14 14:35:01 weitzman Exp $
+// $Id: devel_generate.inc,v 1.14.2.12 2009/04/09 19:22:56 weitzman Exp $
 // If not in 'safe mode', increase the maximum execution time:
 if (!ini_get('safe_mode')) {
   set_time_limit(240);
@@ -58,8 +58,9 @@ function devel_generate_content($form_state) {
   drupal_set_message(format_plural($form_state['values']['num_nodes'], '1 node created.', '@count nodes created'));
 }
 
-function devel_generate_add_comments($node, $users, $num_comments, $title_length = 8) {
+function devel_generate_add_comments($node, $users, $max_comments, $title_length = 8) {
   // Insert new data:
+  $num_comments = mt_rand(1, $max_comments);
   for ($i = 1; $i <= $num_comments; $i++) {
     $comment->nid = $node->nid;
     $comment->cid = NULL;
@@ -369,18 +370,34 @@ function devel_generate_add_upload(&$node) {
 }
 
 /**
+ * Generate statistics information for a node.
+ *
+ * @param $node
+ *   A node object.
+ */
+function devel_generate_add_statistics($node) {
+  $totalcount = mt_rand(0, 500);
+  $daycount = mt_rand(0, $totalcount);
+  $timestamp = time() - mt_rand(0, $node->created);
+  db_query('INSERT INTO {node_counter} (nid, daycount, totalcount, timestamp) VALUES (%d, %d, %d, %d)', $node->nid, $daycount, $totalcount, $timestamp);
+}
+
+/**
  * Handle the devel_generate_content_form request to kill all of the content.
  * This is used by both the batch and non-batch branches of the code.
  *
  * @param $num
  *   array of options obtained from devel_generate_content_form.
  */
-function devel_generate_content_kill(&$results) {
+function devel_generate_content_kill($results) {
   $sql = 'SELECT nid FROM {node} WHERE type IN ('. db_placeholders($results['node_types'], 'text'). ')';
   $result = db_query($sql, $results['node_types']);
+  $i=0;
   while ($row = db_fetch_object($result)) {
     node_delete($row->nid);
+    $i++;
   }
+  drupal_set_message(format_plural($i, 'Deleted one post', 'Deleted @count posts'));
 }
 
 /**
@@ -448,13 +465,18 @@ function devel_generate_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
         }
         break;
     case 'insert':
-      if ($results['num_comments']) {
-        devel_generate_add_comments($node, $results['users'], $results['num_comments'], $results['title_length']);
+      if ($results['max_comments']) {
+        devel_generate_add_comments($node, $results['users'], $results['max_comments'], $results['title_length']);
       }
     
       // Add an url alias. Cannot happen before save becasue we don't know the nid.
       if ($results['add_alias']) {
         path_set_alias("node/$node->nid", "node-$node->nid-$node->type");
+      }
+
+      // Add node statistics.
+      if ($results['add_statistics']) {
+        devel_generate_add_statistics($node);
       }
       break;  
     }

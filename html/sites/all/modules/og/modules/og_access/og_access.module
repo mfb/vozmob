@@ -1,5 +1,5 @@
 <?php
-// $Id: og_access.module,v 1.30 2009/01/02 03:55:41 weitzman Exp $
+// $Id: og_access.module,v 1.32.4.1 2009/04/09 21:14:20 weitzman Exp $
 
 // visibility states for private groups. site admin chooses in og_access_settings()
 define('OG_PRIVATE_GROUPS_NEVER', 0);
@@ -22,6 +22,34 @@ function og_access_menu() {
     'access arguments' => array('administer site configuration'),
   );
   return $items;
+}
+
+function og_access_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
+  switch ($op) {
+    case 'load':
+      if (og_is_group_post_type($node->type)) {
+        $node->og_public = (bool)db_result(db_query("SELECT og_public FROM {og_access_post} WHERE nid = %d", $node->nid));
+      }
+      break;
+    case 'insert':
+      // Save og_public.
+      if (og_is_group_post_type($node->type)) {
+        drupal_write_record('og_access_post', $node);
+      }
+      break;
+    case 'update':
+      // Save og_public.
+      if (og_is_group_post_type($node->type)) {
+        drupal_write_record('og_access_post', $node, 'nid');
+      }
+      break;
+    case 'delete':
+      if (og_is_group_post_type($node->type)) {
+        $sql = "DELETE FROM {og_access_post} WHERE nid = %d";
+        db_query($sql, $node->nid);
+      }
+      break;
+  }
 }
 
 function og_access_settings() {
@@ -67,6 +95,7 @@ function og_access_content_extra_fields($type_name) {
     $extra['og_private'] = array(
       'label' => t('Private group'),
       'description' => t('Checkbox for visibility of group home page to non-members.'),
+      'weight' => 0,
     );
   }
   return $extra;
@@ -138,12 +167,12 @@ function og_access_alter_nongroup_form(&$form, $form_state, $node) {
     
     // If the post is to a private group, visibility must default to one of the private options.
     $selected_groups = isset($form_state['values']['og_groups']) ? array_filter($form_state['values']['og_groups']) : $groups;
-    if (count($selected_groups)) {  
+    if (!empty($selected_groups)) {
       foreach ($selected_groups as $gid) {
         $group_node = new stdClass();
         $group_node->nid = $gid;
         og_load_group($group_node);
-         if ($group_node->og_private) {
+         if (!empty($group_node->og_private)) {
            // Try not to show checkbox if admin likes to reduce decisions for node authors.
            $vis = variable_get('og_visibility', 0) == OG_VISIBLE_BOTH ? OG_VISIBLE_GROUPONLY : OG_VISIBLE_CHOOSE_PRIVATE;
           break;
@@ -307,6 +336,7 @@ function og_access_node_access_records($node) {
       );
     }
   }
+      
   if (!empty($grants)) {
     // Allow other modules to change the grants.
     drupal_alter('og_access_grants', $grants, $node);

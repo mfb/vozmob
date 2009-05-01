@@ -1,5 +1,10 @@
 <?php
-// $Id: imagecache_actions.inc,v 1.21 2009/04/17 02:57:25 drewish Exp $
+// $Id: imagecache_actions.inc,v 1.22 2009/04/19 19:19:51 drewish Exp $
+
+function theme_imagecache_resize($element) {
+  $data = $element['#value'];
+  return 'width: '. $data['width'] .', height: '. $data['height'];
+}
 
 /**
  * ImageCache Scale

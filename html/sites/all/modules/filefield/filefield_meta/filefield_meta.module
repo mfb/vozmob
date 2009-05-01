@@ -1,5 +1,5 @@
 <?php
-// $Id: filefield_meta.module,v 1.13 2009/03/19 05:08:49 quicksketch Exp $
+// $Id: filefield_meta.module,v 1.14 2009/04/20 22:29:24 quicksketch Exp $
 /**
  * @file
  * FileField Meta: Add Video Support to File Field.
@@ -100,8 +100,8 @@ function filefield_meta(&$file) {
     $file->data['audio_format'] = $info['audio']['dataformat']; //e.g. mp3
     $file->data['audio_sample_rate'] = $info['audio']['sample_rate']; //e.g. 44100
     $file->data['audio_channel_mode'] = $info['audio']['channelmode']; // e.g. mono
-    $file->data['audio_bitrate'] = $info['audio']['bitrate']; //e.g. 64000
-    $file->data['audio_bitrate_mode'] = $info['audio']['bitrate_mode']; //e.g. cbr
+    $file->data['audio_bitrate'] = isset($info['audio']['bitrate']) ? $info['audio']['bitrate'] : NULL; //e.g. 64000
+    $file->data['audio_bitrate_mode'] = isset($info['audio']['bitrate_mode']) ? $info['audio']['bitrate_mode'] : NULL; //e.g. cbr
   }
 };
 

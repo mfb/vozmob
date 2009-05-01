@@ -1,5 +1,5 @@
 <?php
-// $Id: content.install,v 1.85.2.30 2008/11/07 16:24:58 yched Exp $
+// $Id: content.install,v 1.85.2.31 2009/04/23 18:37:10 yched Exp $
 
 function content_requirements($phase) {
   $requirements = array();
@@ -517,5 +517,100 @@ function content_update_6009() {
     db_query("UPDATE {content_node_field_instance} SET display_settings='%s' WHERE field_name='%s' AND type_name='%s'", serialize($new_settings), $type['field_name'], $type['type_name']);
   }
   variable_set('content_schema_version', 6009);
+  return $ret;
+}
+
+/**
+ * Fix multiple serialization caused by per-field to per-type migration.
+ * See http://drupal.org/node/407446.
+ */
+function content_update_6010(&$sandbox) {
+  $ret = array();
+
+  // Gather list of tables and columns that need to be updated.
+  if (!isset($sandbox['tables'])) {
+    $sandbox['tables'] = array();
+    $fields = content_fields();
+    foreach ($fields as $name => $field) {
+      $db_info = content_database_info($field);
+      foreach ($db_info['columns'] as $column => $attributes) {
+        if (isset($attributes['serialize']) && $attributes['serialize']) {
+          $sandbox['tables'][$db_info['table']]['table'] = $db_info['table'];
+          $sandbox['tables'][$db_info['table']]['columns'][] = $attributes['column'];
+          $sandbox['tables'][$db_info['table']]['multiple'] = $field['multiple'];
+        }
+      }
+    }
+    $sandbox['count'] = count($sandbox['tables']);
+    $sandbox['current_vid'] = 0;
+    $sandbox['current_delta'] = 0;
+  }
+
+  // Number of rows to fix in one pass.
+  $limit = 500;
+  // Start correcting data.
+  if ($table_info = array_shift($sandbox['tables'])) {
+    $table = $table_info['table'];
+    $columns = $table_info['columns'];
+
+    if ($table_info['multiple']) {
+      $query = "SELECT * FROM {" . $table . "} WHERE (vid = %d AND delta > %d) OR (vid > %d) ORDER BY vid ASC, delta ASC";
+      $args = array($sandbox['current_vid'], $sandbox['current_delta'], $sandbox['current_vid']);
+    }
+    else {
+      $query = "SELECT * FROM {" . $table . "} WHERE vid > %d ORDER BY vid ASC";
+      $args = array($sandbox['current_vid']);
+    }
+    $result = db_query_range($query, $args, 0, $limit);
+    $count = 0;
+    while ($row = db_fetch_array($result)) {
+      $update_query = $update_args = array();
+      foreach ($columns as $column) {
+        $data = $row[$column];
+        // No need to do anything if the data is NULL.
+        if (!empty($data)) {
+          // Unserialize until we get something that is not a string
+          while (is_string($data)) {
+            $unserialized = @unserialize($data);
+            if ($unserialized !== FALSE) {
+              $data = $unserialized;
+            }
+            else {
+              // TODO : test with a serialized string, just in case...
+              break;
+            }
+          }
+          // Re-serialize once.
+          $data = serialize($data);
+          // If we end up with something different than what we started with, update.
+          if ($data !== $row[$column]) {
+            $update_query[] = "$column = '%s'";
+            $update_args[] = $data;
+          }
+        }
+      }
+      if ($update_query) {
+        $update_args[] = $row['vid'];
+        db_query("UPDATE {" . $table . "} SET ". implode(', ', $update_query) ." WHERE vid = %d", $update_args);
+      }
+      $sandbox['current_vid'] = $row['vid'];
+      $sandbox['current_delta'] = isset($row['delta']) ? $row['delta'] : 0;
+      $count++;
+    }
+    if ($count == $limit) {
+      // Add the table back into the list of tables to be processed if rows remain.
+      array_unshift($sandbox['tables'], $table_info);
+    }
+    else {
+      // Done with this table: reset vid and delta markers.
+      $sandbox['current_vid'] = 0;
+      $sandbox['current_delta'] = 0;
+      $ret[] = array('success' => TRUE, 'query' => "Fixed serialized values in table $table");
+    }
+  }
+
+  if ($sandbox['count']) {
+    $ret['#finished'] = 1 - count($sandbox['tables']) / $sandbox['count'];
+  }
   return $ret;
 }

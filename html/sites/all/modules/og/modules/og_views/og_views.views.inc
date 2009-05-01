@@ -1,5 +1,5 @@
 <?php
-// $Id: og_views.views.inc,v 1.12 2008/12/31 13:49:32 weitzman Exp $
+// $Id: og_views.views.inc,v 1.13.4.2 2009/04/10 03:07:25 weitzman Exp $
 
 /**
  * Implementation of hook_views_handlers().
@@ -66,6 +66,9 @@ function og_views_views_handlers() {
       'og_views_handler_field_og_managelinkmy' => array(
         'parent' => 'views_handler_field',
       ),
+      'og_views_handler_field_og_uid_groups' => array(
+        'parent' => 'views_handler_field_prerender_list',
+      ),
       // argument
       'og_views_handler_argument_og_group_nid' => array(
         'parent' => 'views_handler_argument_numeric',
@@ -98,7 +101,7 @@ function og_views_views_plugins() {
  */
 function og_views_views_data() {
   $data = array();
-  $tables = array('og', 'og_ancestry', 'og_uid');
+  $tables = array('og', 'og_ancestry', 'og_uid', 'og_access_post');
   foreach ($tables as $table) {
     $function = "og_views_data_$table";
     $data += $function();
@@ -179,9 +182,12 @@ function og_views_data_og() {
     'real field' => 'og_private',
     'field' => array(
       'handler' => 'views_handler_field_boolean',
+      'click sortable' => TRUE
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_boolean_operator',
+      'label' => t('Private'),
+      'type' => 'yes-no',
     ),
     'sort' => array(
       'handler' => 'views_handler_sort',
@@ -194,9 +200,12 @@ function og_views_data_og() {
     'field' => array(
       'real field' => 'og_directory',
       'handler' => 'views_handler_field_boolean',
+      'click sortable' => TRUE,
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_boolean_operator',
+      'label' => t('List in directory'),
+      'type' => 'yes-no',
     ),
     'sort' => array(
       'handler' => 'views_handler_sort',
@@ -256,7 +265,7 @@ function og_views_data_og_ancestry() {
   $data['og_ancestry']['table']['base'] = array(
     'field' => 'nid',
     'title' => t('Group posts'),
-    'help' => t('Posts which are affiiated with a group.'),
+    'help' => t('Posts which are affiliated with a group.'),
   );
   $data['og_ancestry']['table']['join'] = array(
     'node' => array(
@@ -264,6 +273,7 @@ function og_views_data_og_ancestry() {
       'field' => 'nid',
     ),
   );
+
   $data['og_ancestry']['group_nid'] = array(
     'title' => t('Groups'),
     'help' => t('The groups for a post.'),
@@ -306,22 +316,40 @@ function og_views_data_og_ancestry() {
       'handler' => 'og_views_handler_filter_og_picg',
     ),
   );
-  
-  // TOODL: yes_empty field
-  $data['og_ancestry']['is_public'] = array(
+
+  return $data;
+}
+
+// --------- Table og_access_post
+function og_views_data_og_access_post() {
+  $data['og_access_post']['table']['group']  = t('Organic groups');
+  $data['og_access_post']['table']['base'] = array(
+    'field' => 'nid',
+    'title' => t('Group posts'),
+    'help' => t('Posts which are affiiated with a group.'),
+  );
+  $data['og_access_post']['table']['join'] = array(
+    'node' => array(
+      'left_field' => 'nid',
+      'field' => 'nid',
+    ),
+  );
+  $data['og_access_post']['og_public'] = array(
     'title' => t('Post: Public'),
-    'help' => t('Is a given post public or private according to OG.'),
+    'help' => t('Is a given group post public or private according to OG.'),
     'field' => array(
       'handler' => 'views_handler_field_boolean',
+      'click sortable' => TRUE,
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_boolean_operator',
+      'label' => t('Public'),
+      'type' => 'yes-no',
     ),
     'sort' => array(
       'handler' => 'views_handler_sort',
     ),
-  );
-
+  );  
   return $data;
 }
 
@@ -356,6 +384,15 @@ function og_views_data_og_uid() {
       'help' => t('<strong>Members</strong> are filtered for a specific group.'),
     ),
   ); 
+  $data['og_uid']['groups'] = array(
+    'title' => t('User\'s groups'),
+    'help' => t('Groups that a member belongs to.'),
+    'field' => array(
+      'field' => 'uid',
+      'handler' => 'og_views_handler_field_og_uid_groups',
+      'help' => t("OG: List of user's groups"),
+    ),
+  );
   $data['og_uid']['uid'] = array(
     'title' => t('Group member'),
     // 'help' => t('foo')
@@ -409,13 +446,15 @@ function og_views_data_og_uid() {
   );
   $data['og_uid']['is_active'] = array(
     'title' => t('OG: Is membership approved'),
-    'help' => t("Add <em>approval needed</em> user if user's membership request is pending."),
+    'help' => t("Appends <em>approval needed</em> if user's membership request is pending."),
     'field' => array(
       'handler' => 'og_views_handler_field_og_is_active',
       'click sortable' => TRUE,
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_boolean_operator',
+      'label' => t('Approved'),
+      'type' => 'yes-no',
     ),
     'sort' => array(
        'handler' => 'views_handler_sort',
@@ -425,6 +464,7 @@ function og_views_data_og_uid() {
     'title' => t('OG: Is the group manager'),
     'help' => t('Add <em>manager</em> text if user is the group manager.'),
     'field' => array(
+      'field' => 'uid',
       'handler' => 'og_views_handler_field_og_is_manager',
       'click sortable' => FALSE,
     ),

@@ -1,5 +1,5 @@
 <?php
-// $Id: filefield_widget.inc,v 1.84 2009/04/17 00:14:33 quicksketch Exp $
+// $Id: filefield_widget.inc,v 1.87 2009/04/28 04:06:06 quicksketch Exp $
 
 /**
  * @file
@@ -21,6 +21,19 @@ function filefield_widget_settings_form($widget) {
     '#size' => 64,
     '#description' => t('Extensions a user can upload to this field. Separate extensions with a space and do not include the leading dot. Leaving this blank will allow users to upload a file with any extension.'),
     '#weight' => 1,
+  );
+
+  $form['progress_indicator'] = array(
+    '#type' => 'radios',
+    '#title' => t('Progress indicator'),
+    '#options' => array(
+      'bar' => t('Bar with progress meter'),
+      'throbber' => t('Throbber'),
+    ),
+    '#default_value' => empty($widget['progress_indicator']) ? 'bar' : $widget['progress_indicator'],
+    '#description' => t('Your server supports upload progress capabilities. The "throbber" display does not indicate progress but takes up less room on the form, you may want to use it if you\'ll only be uploading small files or if experiencing problems with the progress bar.'),
+    '#weight' => 5,
+    '#access' => filefield_progress_implementation(),
   );
 
   $form['path_settings'] = array(
@@ -73,7 +86,7 @@ function filefield_widget_settings_form($widget) {
  * Implementation of CCK's hook_widget_settings($op == 'save').
  */
 function filefield_widget_settings_save($widget) {
-  return array('file_extensions', 'file_path', 'max_filesize_per_file', 'max_filesize_per_node');
+  return array('file_extensions', 'file_path', 'progress_indicator', 'max_filesize_per_file', 'max_filesize_per_node');
 }
 
 function _filefield_widget_settings_file_path_validate($element, &$form_state) {
@@ -205,7 +218,7 @@ function filefield_widget_value($element, $edit = FALSE) {
 
     // Checkboxes loose their value when empty.
     // If the list field is present make sure its unchecked value is saved.
-    if ($field['list_field'] && empty($edit['list'])) {
+    if (!empty($field['list_field']) && empty($edit['list'])) {
       $item['list'] = 0;
     }
   }
@@ -296,7 +309,8 @@ function filefield_widget_process($element, $edit, &$form_state, $form) {
   $element['filefield_remove']['#access'] = !empty($item['fid']);
 
   // Add progress bar support to the upload if possible.
-  if ($implementation = filefield_progress_implementation()) {
+  $progress_indicator = isset($field['widget']['progress_indicator']) ? $field['widget']['progress_indicator'] : 'bar';
+  if ($progress_indicator != 'throbber' && $implementation = filefield_progress_implementation()) {
     $upload_progress_key = md5(mt_rand());
 
     if ($implementation == 'uploadprogress') {
@@ -339,7 +353,7 @@ function filefield_widget_process($element, $edit, &$form_state, $form) {
     '#access' => !empty($item['fid']),
   );
 
-  if ($field['description_field']) {
+  if (!empty($field['description_field'])) {
     $element['data']['description'] = array(
       '#type' => 'textfield',
       '#title' => t('Description'),
@@ -349,13 +363,12 @@ function filefield_widget_process($element, $edit, &$form_state, $form) {
     );
   }
 
-  if ($field['list_field']) {
+  if (!empty($field['list_field'])) {
     $element['list'] = array(
-      '#type' => 'checkbox',
+      '#type' => empty($item['fid']) ? 'hidden' : 'checkbox',
       '#title' => t('List'),
       '#value' => isset($item['list']) ? $item['list'] : $field['list_default'],
       '#attributes' => array('class' => 'filefield-list'),
-      '#access' => !empty($item['fid']),
     );
   }
   else {

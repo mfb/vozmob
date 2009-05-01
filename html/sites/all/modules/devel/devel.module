@@ -1,5 +1,5 @@
 <?php
-// $Id: devel.module,v 1.258.2.47 2009/02/11 04:11:46 weitzman Exp $
+// $Id: devel.module,v 1.258.2.53 2009/04/20 02:32:36 weitzman Exp $
 
 // This module holds functions useful for Drupal development.
 // Please contribute!
@@ -26,7 +26,7 @@ function devel_help($section) {
       return '<p>'. t('Here are the contents of your <code>$_SESSION</code> variable.'). '</p>';
     case 'devel/variable':
       $api = variable_get('devel_api_url', 'api.drupal.org');
-      return '<p>'. t('This is a list of the variables and their values currently stored in variables table and the <code>$conf</code> array of your settings.php file. These variables are usually accessed with <a href="@variable-get-doc">variable_get()</a> and <a href="@variable-set-doc">variable_set()</a>. Variables that are too long can slow down your pages.', array('@variable-get-doc' => "http://$api/api/HEAD/function/variable_get", '@variable-set-doc' => 'http://$api/api/HEAD/function/variable_set')).'</p>';
+      return '<p>'. t('This is a list of the variables and their values currently stored in variables table and the <code>$conf</code> array of your settings.php file. These variables are usually accessed with <a href="@variable-get-doc">variable_get()</a> and <a href="@variable-set-doc">variable_set()</a>. Variables that are too long can slow down your pages.', array('@variable-get-doc' => "http://$api/api/HEAD/function/variable_get", '@variable-set-doc' => "http://$api/api/HEAD/function/variable_set")).'</p>';
   }
 }
 
@@ -319,9 +319,9 @@ function devel_display_source($standalone = TRUE) {
 function devel_highlight_file($path = NULL, $standalone = FALSE) {
   if (file_exists($path)) {
     $source = highlight_file($path, TRUE);
-    // add anchor links before all functions
-    // with doxygen
-    $source = preg_replace('!(\/\*\*.*?\*\/.*?)<br.*?function.*?#0000BB">(.*?)<\/span>!', '<a id="$2"></a> $0', $source);
+    // add anchor links before all functions so that we can link to a function within the source
+    // ** commented out because regexes aren't working **
+    //$source = preg_replace('!(\/\*\*.*?\*\/.*?)<br.*?function.*?#0000BB">(.*?)<\/span>!', '<a id="$2"></a> $0', $source);
     //$source = preg_replace('!(\/\*\*.*?\*\/).*?function.*?#0000BB">(.*?)<\/span>!', '<a id="$2"></a> $0', $source);
     if ($standalone) {
       $source = <<<EOT
@@ -423,6 +423,7 @@ function devel_silent() {
   // isset($_GET['q']) is needed on IIS when calling the front page. q is not set.
   // Don't interfere with private files/images.
   return
+    devel_verify_cli() ||
     isset($GLOBALS['devel_shutdown']) ||
     strstr($_SERVER['PHP_SELF'], 'update.php') ||
     (isset($_GET['q']) && (
@@ -458,7 +459,25 @@ function backtrace_error_handler($errno, $message, $filename, $line) {
   if (error_reporting() == 0) return;
 
   if ($errno & (E_ALL ^ E_NOTICE)) {
-    $types = array(1 => 'error', 2 => 'warning', 4 => 'parse error', 8 => 'notice', 16 => 'core error', 32 => 'core warning', 64 => 'compile error', 128 => 'compile warning', 256 => 'user error', 512 => 'user warning', 1024 => 'user notice', 2048 => 'strict warning');
+    // We can't use the PHP E_* constants here as not all versions of PHP have all
+    // the constants defined, so for consistency, we just use the numeric equivelant.
+    $types = array(
+      1 => 'error',
+      2 => 'warning',
+      4 => 'parse error',
+      8 => 'notice',
+      16 => 'core error',
+      32 => 'core warning',
+      64 => 'compile error',
+      128 => 'compile warning',
+      256 => 'user error',
+      512 => 'user warning',
+      1024 => 'user notice',
+      2048 => 'strict warning',
+      4096 => 'recoverable error',
+      8192 => 'deprecated',
+      16384 => 'user deprecated',
+    );
     $entry = $types[$errno] .': '. $message .' in '. $filename .' on line '. $line .'.';
 
     if (variable_get('error_level', 1) == 1) {
@@ -524,10 +543,10 @@ function devel_block($op = 'list', $delta = 0, $edit = array()) {
 }
 
 function devel_block_switch_user() {
-  $block['subject'] = t('Switch user');
   $links = devel_switch_user_list();
   if (!empty($links)) {
-    $block['content'] = theme('item_list', $links);
+    $block['subject'] = t('Switch user');
+    $block['content'] = theme('links', $links);
     $block['content'] .= drupal_get_form('devel_switch_user_form');
     return $block;
   }
@@ -555,14 +574,25 @@ function devel_switch_user_list() {
       $users = db_query_range("SELECT DISTINCT u.uid, u.name, u.access FROM {users} u LEFT JOIN {users_roles} r ON u.uid = r.uid WHERE $where_sql ORDER BY u.access DESC", 0, $list_size);
     }
     while ($user = db_fetch_object($users)) {
-      $links[$user->uid] = l(theme('placeholder', $user->name), 'devel/switch/'. $user->name, array('attributes' => array('title' => t('This user can switch back.')), 'query' => $dest, 'html' => TRUE));
+      $links[$user->uid] = array(
+        'title' => theme('placeholder', $user->name),
+        'href' => 'devel/switch/' . $user->name,
+        'query' => $dest,
+        'attributes' => array('title' => t('This user can switch back.')),
+        'html' => TRUE,
+      );
     }
     $num_links = count($links);
     if ($num_links < $list_size) {
       // If we don't have enough, add distinct uids until we hit $list_size.
       $users = db_query_range('SELECT uid, name, access FROM {users} WHERE uid > 0 AND uid NOT IN ('. implode(',', array_keys($links)) .') ORDER BY access DESC', 0, $list_size - $num_links);
       while (($user = db_fetch_object($users)) && count($links) < $list_size) {
-        $links[$user->uid] = l($user->name ? $user->name : 'anon', 'devel/switch/'. $user->name, array('attributes' => array('title' => t('Caution: this user will be unable switch back.')), 'query' => $dest));
+        $links[$user->uid] = array(
+          'title' => $user->name ? $user->name : 'anon',
+          'href' => 'devel/switch/' . $user->name,
+          'query' => $dest,
+          'attributes' => array('title' => t('Caution: this user will be unable switch back.')),
+        );
       }
     }
   }
@@ -714,11 +744,6 @@ function devel_shutdown_real() {
           return;
         }
       }
-    }
-
-    // don't append gunk to CLI scripts
-    if (devel_verify_cli()) {
-      return;
     }
 
     if (isset($user) && user_access('access devel information')) {
@@ -1487,7 +1512,7 @@ function devel_query_table($queries, $counts) {
       $cell[$i][] = $count;
     }
     $cell[$i][] = l($function, "http://$api/api/$version/function/$function");
-    $pos = strpos($query[0], '*/') + 3;
+    $pos = strpos($query[0], '*/') !== FALSE ? strpos($query[0], '*/') + 3 : 0;
     $cell[$i][] = check_plain(substr($query[0], $pos));
     $i++;
     unset($diff, $count);

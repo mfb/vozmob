@@ -1,5 +1,5 @@
 <?php
-// $Id: filefield_formatter.inc,v 1.13 2009/04/09 16:12:49 quicksketch Exp $
+// $Id: filefield_formatter.inc,v 1.14 2009/04/28 04:06:06 quicksketch Exp $
 /**
  * @file
  * FileField: Defines a CCK file field type.
@@ -92,7 +92,7 @@ function theme_filefield_item($file, $field) {
  *   A CCK field instance array.
  */
 function filefield_file_listed($file, $field) {
-  if ($field['list_field']) {
+  if (!empty($field['list_field'])) {
     return (bool)$file['list'];
   }
   return TRUE;

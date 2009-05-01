@@ -1,4 +1,4 @@
-// $Id: filefield.js,v 1.19 2009/04/08 20:01:06 quicksketch Exp $
+// $Id: filefield.js,v 1.20 2009/04/28 01:39:31 quicksketch Exp $
 
 /**
  * Auto-attach standard client side file input validation.
@@ -77,7 +77,7 @@ Drupal.filefield = {
     // Check if we're working with an "Upload" button.
     var $enabledFields = [];
     if ($(this).parents('div.filefield-element').size() > 0) {
-      $enabledFields = $(this).parent().parent().find('input.form-file');
+      $enabledFields = $(this).parents('div.filefield-element').find('input.form-file');
     }
     // Otherwise we're probably dealing with CCK's "Add another item" button.
     else if ($(this).parents('div.content-add-more').size() > 0) {

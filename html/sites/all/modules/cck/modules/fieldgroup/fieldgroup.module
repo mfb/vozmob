@@ -1,5 +1,5 @@
 <?php
-// $Id: fieldgroup.module,v 1.79.2.45 2009/02/28 23:56:17 yched Exp $
+// $Id: fieldgroup.module,v 1.79.2.48 2009/04/29 20:51:52 karens Exp $
 
 /**
  * @file
@@ -17,8 +17,14 @@
  */
 function fieldgroup_init() {
   drupal_add_css(drupal_get_path('module', 'fieldgroup') .'/fieldgroup.css');
-  if (module_exists('panels')) {
-    module_load_include('inc', 'fieldgroup', 'fieldgroup.panels');
+}
+
+/**
+ * Implementation of hook_ctools_plugin_directory().
+ */
+function fieldgroup_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'ctools' && $plugin == 'content_types') {
+    return 'panels/' . $plugin;
   }
 }
 
@@ -69,7 +75,7 @@ function fieldgroup_theme() {
     'fieldgroup_display_overview_form' => array(
       'arguments' => array('form' => NULL),
     ),
-    'fieldgroup_panel' => array(
+    'fieldgroup_content_type' => array(
       'arguments' => array('vars' => NULL, 'nid' => NULL),
     ),
   );
