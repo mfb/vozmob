@@ -1,6 +1,6 @@
-; $Id: messaging_debug.info,v 1.1.4.1 2008/04/12 18:40:15 jareyero Exp $
-name = Debug tool
-description = Debugging utilities for messaging.
-package = "Messaging"
+; $Id: messaging_debug.info,v 1.1.4.1.2.1 2009/04/29 16:24:40 jareyero Exp $
+name = Messaging debug
+description = Debugging and development utilities for messaging package.
+package = "Development"
 dependencies[] = messaging
 core = 6.x

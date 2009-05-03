@@ -1,26 +1,65 @@
 <?php
-// $Id: messaging.install,v 1.2.2.4.2.13 2009/04/01 11:54:50 jareyero Exp $
+// $Id: messaging.install,v 1.2.2.4.2.13.2.1 2009/04/24 11:27:50 jareyero Exp $
 
 /**
 * Implementation of hook_schema().
 */
 function messaging_schema() {
   $schema['messaging_store'] = array(
-    'description' => 'Stores sent messages',
+    'description' => 'Stores queued messages to be sent or sent messages as logs.',
     'fields' => array(
-      'mqid'    => array('type' => 'serial', 'unsigned' => TRUE, 'not null' => TRUE),
-      'uid'    => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0),
-      'sender' => array('type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0),
-      'method' => array('type' => 'varchar', 'length' => 255, 'not null' => TRUE, 'default' => ''),
-      'destination' => array('type' => 'varchar', 'length' => 255, 'not null' => TRUE, 'default' => ''),
-      'subject' => array('type' => 'varchar', 'length' => 255, 'not null' => TRUE, 'default' => ''),
-      'body' => array('type' => 'text', 'not null' => TRUE, 'size' => 'big'),
-      'params' => array('type' => 'text', 'not null' => TRUE, 'size' => 'big', 'serialize' => TRUE),
-      'created' => array('type' => 'int', 'not null' => TRUE, 'default' => 0),
-      'sent' => array('type' => 'int', 'not null' => TRUE, 'default' => 0),  
-      'cron' => array('type' => 'int', 'not null' => TRUE, 'default' => 0, 'size' => 'tiny'),
-      'queue' => array('type' => 'int', 'not null' => TRUE, 'default' => 0, 'size' => 'tiny'),
-      'log' => array('type' => 'int', 'not null' => TRUE, 'default' => 0, 'size' => 'tiny'),
+      'mqid'    => array(      
+        'type' => 'serial', 'unsigned' => TRUE, 'not null' => TRUE,
+        'description' => 'Unique message id.',
+      ),
+      'uid'    => array(
+        'type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0,
+        'description' => 'The {user}.uid for destination if it is a unique destination.',        
+      ),
+      'sender' => array(
+        'type' => 'int', 'unsigned' => TRUE, 'not null' => TRUE, 'default' => 0,
+        'description' => 'The {user}.uid who sent the message if any.',     
+      ),
+      'method' => array(
+        'type' => 'varchar', 'length' => 255, 'not null' => TRUE, 'default' => '',
+        'description' => 'Messaging send method key.',
+      ),
+      'destination' => array(
+        'type' => 'varchar', 'length' => 255, 'not null' => TRUE, 'default' => '',
+        'description' => 'Destination identifier, it may be an email address.',
+      ),
+      'subject' => array(
+        'type' => 'varchar', 'length' => 255, 'not null' => TRUE, 'default' => '',
+        'description' => 'Message subject, single text line.',
+      ),
+      'body' => array(
+        'type' => 'text', 'not null' => TRUE, 'size' => 'big',
+        'description' => 'Message body, multiple text line.',
+      ),
+      'params' => array(
+        'type' => 'text', 'not null' => TRUE, 'size' => 'big', 'serialize' => TRUE,
+        'description' => 'Additional serialized parameters.',
+      ),
+      'created' => array(
+        'type' => 'int', 'not null' => TRUE, 'default' => 0,
+        'description' => 'Unix timestamp, when the message was created/stored.',
+      ),
+      'sent' => array(
+        'type' => 'int', 'not null' => TRUE, 'default' => 0,
+        'description' => 'Unix timestamp, when the message was sent.',
+      ),  
+      'cron' => array(
+        'type' => 'int', 'not null' => TRUE, 'default' => 0, 'size' => 'tiny',
+        'description' => 'Will be 1 if row marked for processing on cron.',
+      ),
+      'queue' => array(
+        'type' => 'int', 'not null' => TRUE, 'default' => 0, 'size' => 'tiny',
+        'description' => 'Will be 1 if this is a queued message.',
+      ),
+      'log' => array(
+        'type' => 'int', 'not null' => TRUE, 'default' => 0, 'size' => 'tiny',
+        'description' => 'Will be 1 if this is a message log.',
+      ),
     ),    
     'primary key' => array('mqid'),
     'indexes' => array(
@@ -43,12 +82,28 @@ function messaging_schema() {
   );
   */
   $schema['messaging_message_parts'] = array(
+    'description' => 'Templates for message composition.',
     'fields' => array(
-      'type'    => array('type' => 'varchar', 'length' => 100, 'not null' => TRUE, 'default' => ''),
-      'method'    => array('type' => 'varchar', 'length' => 50, 'not null' => TRUE, 'default' => ''),
-      'msgkey' => array('type' => 'varchar', 'length' => 100, 'not null' => TRUE, 'default' => ''),
-      'module' => array('type' => 'varchar', 'length' => 255, 'not null' => TRUE, 'default' => ''),
-      'message' => array('type' => 'text', 'not null' => TRUE, 'size' => 'big'),
+      'type'    => array(
+        'type' => 'varchar', 'length' => 100, 'not null' => TRUE, 'default' => '',
+        'description' => 'Message group key.',
+      ),
+      'method'    => array(
+        'type' => 'varchar', 'length' => 50, 'not null' => TRUE, 'default' => '',
+        'description' => 'Messaging send method.',
+      ),
+      'msgkey' => array(
+        'type' => 'varchar', 'length' => 100, 'not null' => TRUE, 'default' => '',
+        'description' => 'Message part key, should be unique within a group (header, footer,..).',
+      ),
+      'module' => array(
+        'type' => 'varchar', 'length' => 255, 'not null' => TRUE, 'default' => '',
+        'description' => 'Module that owns this template.',
+      ),
+      'message' => array(
+        'type' => 'text', 'not null' => TRUE, 'size' => 'big',
+        'description' => 'Message template, multiline text with tokens for replacement.',
+      ),
     ),
     'indexes' => array(
       'type'    => array('type'),

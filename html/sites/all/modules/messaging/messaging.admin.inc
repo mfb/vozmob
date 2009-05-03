@@ -1,5 +1,5 @@
 <?php
-// $Id: messaging.admin.inc,v 1.1.2.13 2009/04/01 11:54:50 jareyero Exp $
+// $Id: messaging.admin.inc,v 1.1.2.13.2.2 2009/04/30 10:42:35 jareyero Exp $
 /**
  * @file
  * Messaging Framework - Admin UI
@@ -220,12 +220,12 @@ function messaging_admin_message_form_submit($form, &$form_state) {
   foreach ($form_state['values']['messages'] as $key => $messages) {
     foreach ($messages as $method => $text) {
       db_query("DELETE FROM {messaging_message_parts} WHERE type = '%s' AND msgkey = '%s' AND method = '%s'", $group, $key, $method);
-      if ($text = trim($text)) {
+      if (trim($text)) {
         db_query("INSERT INTO {messaging_message_parts} (type, msgkey, method, module, message) VALUES('%s', '%s', '%s', '', '%s')", $group, $key, $method, $text);
       }
     }
   }
-  drupal_set_message('The messages have been updated');
+  drupal_set_message('The message templates have been updated');
 }
 
 /**
@@ -303,25 +303,23 @@ function messaging_admin_method_settings() {
     }
     // We add this last for it not bo be default
     $format_options[0] = t('None (Insecure)');
+    $form['methods'] = array('#theme' => 'messaging_admin_method_settings');
     foreach ($info as $method => $options) {
       $key = 'messaging_method_'.$method;
       // This will preserve settings for disabled modules
-      $form[$key] = array(
-        '#type' => 'fieldset',
-        '#title' => t('!name settings', array('!name' => $options['title'])),
-        '#tree' => TRUE,
+      $form['methods'][$key]['#tree'] = TRUE;
+      $form['methods'][$key]['title'] = array(
+        '#value' => $options['title'],
       );
       // Display name
-      $form[$key]['name'] = array(
+      $form['methods'][$key]['name'] = array(
         '#type' => 'textfield',
-        '#title' => t('Name'),
         '#default_value' => $options['name'],
-        '#description' => t('Name for display.'),
+        '#size'          => 40,
       );      
       // Output filter applied to message body
-      $form[$key]['filter'] = array(
+      $form['methods'][$key]['filter'] = array(
         '#type' => 'select',
-        '#title' => t('Message body filter'),
         '#default_value' => isset($options['filter']) ? $options['filter'] : variable_get('messaging_default_filter', ''),
         '#options' => $format_options,
       );
@@ -330,4 +328,22 @@ function messaging_admin_method_settings() {
     $form['warning'] = array('#value' => t('You should enable some messaging method plug-ins for this to work.'));
   }
   return system_settings_form($form);  
+}
+
+/**
+ * Theme method settings
+ */
+function theme_messaging_admin_method_settings(&$form) {
+  $header = array(t('Method'), t('Name for display'), t('Message body filter'));
+  $rows = array();
+  foreach (element_children($form) as $key) {
+    $rows[] = array(
+      drupal_render($form[$key]['title']),
+      drupal_render($form[$key]['name']),
+      drupal_render($form[$key]),
+    );
+  }
+  $output = theme('table', $header, $rows);
+  $output .= drupal_render($form);
+  return $output;
 }

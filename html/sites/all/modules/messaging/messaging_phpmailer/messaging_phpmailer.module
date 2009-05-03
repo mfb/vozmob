@@ -115,14 +115,20 @@ function messaging_phpmailer_drupal_mail($message) {
   list($subject, $body) = theme('messaging_phpmailer', $message);
 
   // Add some headers. Look for rfc2822 "From" formatting (ex: "name" <foo@bar.com>)
-  $from = array();
-  preg_match('/["\']?(?<name>.*)["\']? <(?<email>.*)>/', $message['headers']['From'], $from);
+  $matches = array();
+  preg_match('/["\']?(.*)["\']? <(.*)>/', $message['headers']['From'], $matches);
+  if (!empty($matches[1])) {
+    $from['name'] = $matches[1];
+  }
+  if (!empty($matches[2])) {
+    $from['email'] = $matches[2];
+  }
   $mail->From = !empty($from['email']) ? $from['email'] : $message['headers']['From'];
   $mail->FromName = !empty($from['name']) ? $from['name'] : '';
   $mail->AddAddress($message['to']);
 
   if(!empty($message['headers']['Message-ID'])) {
-    $mail->AddCustomHeader('Message-ID: ' . $message['headers']['Message-ID']);
+    $mail->MessageID = $message['headers']['Message-ID'];
   }
   if(!empty($message['headers']['Reply-To'])) {
     $mail->AddReplyTo($message['headers']['Reply-To']);
