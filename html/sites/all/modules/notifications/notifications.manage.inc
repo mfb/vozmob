@@ -1,5 +1,5 @@
 <?php
-// $Id: notifications.manage.inc,v 1.1.2.3 2009/04/14 17:25:16 jareyero Exp $
+// $Id: notifications.manage.inc,v 1.1.2.3.2.3 2009/04/24 17:19:40 jareyero Exp $
 
 /**
  * @file
@@ -102,21 +102,15 @@ function notifications_manage_subscriptions_form($account = NULL, $full = TRUE) 
   $send_methods = messaging_method_info(NULL, 'name');
   $send_intervals = _notifications_send_intervals();
   while ($sub = db_fetch_object($result)) {
+    $subscriptions[$sub->sid] = '';
+    // Naming for this specific subscription, formatted strings    
+    $form['type'][$sub->sid] = array('#value' => notifications_subscription_types($sub->type, 'title'));
+    // If full loading, load full subscription and add description
     if ($full) {
       $sub = notifications_load_subscription($sub);
-    }
-    $subscriptions[$sub->sid] = '';
-    $name = notifications_subscription_types($sub->type, 'title');
-    $form['type'][$sub->sid] = array('#value' => $name ? $name : $sub->type );
-    // Build description using field formatters
-    if ($full) {
-      $description = array();
-      foreach ($sub->fields as $type => $value) {
-        $format = notifications_format_subscription_field($type, $value, TRUE);
-        $description[] = $format['value'];
-      }
-    }
-    $form['description'][$sub->sid] = array('#value' => implode(', ', $description));
+      $format = notifications_format_subscription($sub, 'array');
+      $form['description'][$sub->sid] = array('#value' => $format['name']);
+    }    
     if (!$account) {
       $form['username'][$sub->sid] = array('#value' => theme('username', $sub));
     }
@@ -125,7 +119,7 @@ function notifications_manage_subscriptions_form($account = NULL, $full = TRUE) 
     $form['status'][$sub->sid] =  array('#value' => $status[$sub->status]);
     $operations = array(
       l(t('edit'), 'notifications/subscription/' . $sub->sid, array('query' => $destination)),
-      l(t('drop'), 'notifications/unsubscribe/' . $sub->sid, array('query' => $destination)),
+      l(t('drop'), 'notifications/unsubscribe/sid/' . $sub->sid, array('query' => $destination)),
     );
     $form['operations'][$sub->sid] = array('#value' => implode(', ', $operations));
   }
@@ -228,7 +222,7 @@ function notifications_subscriptions_filters() {
 
   $filters['send_method'] = array(
     'title' => t('method'), 
-    'options' => messaging_method_info(NULL, 'title')
+    'options' => _notifications_send_methods(),
   );
   
   $filters['send_interval'] = array(
@@ -247,11 +241,6 @@ function notifications_subscriptions_filters() {
  */
 function notifications_subscriptions_operations($account = NULL) {
   $operations = array(
-    'block' => array(
-      'label' => t('Block'),
-      'callback' => 'notifications_subscriptions_mass_update',
-      'callback arguments' => array('updates' => array('status' => NOTIFICATIONS_SUBSCRIPTION_BLOCKED)),
-    ),
     'activate' => array(
       'label' => t('Activate'),
       'callback' => 'notifications_subscriptions_mass_update',
@@ -267,9 +256,17 @@ function notifications_subscriptions_operations($account = NULL) {
       'callback' => NULL,
     ),
   );
+  // Block option only for administrators
+  if (user_access('administer notifications') || user_access('manage all subscriptions')) {
+    $operations['block'] = array(
+      'label' => t('Block'),
+      'callback' => 'notifications_subscriptions_mass_update',
+      'callback arguments' => array('updates' => array('status' => NOTIFICATIONS_SUBSCRIPTION_BLOCKED)),
+    );
+  }
   // Sending methods
   $parent = t('Change send method to');
-  foreach (messaging_method_list($account) as $key => $name) {
+  foreach (_notifications_send_methods($account) as $key => $name) {
     $operations['send_method-' . $key] = array(
       'label' => $name,
       'parent' => $parent,

@@ -1,20 +1,18 @@
 D/notifications_autosubscribe////
 D/notifications_content////
-D/notifications_feed////
 D/notifications_lite////
 D/notifications_tags////
 D/notifications_ui////
 D/tests////
 D/translations////
 D/notifications_views////
-D/notifications_custom////
-/CHANGELOG.txt/1.1.2.11.2.51/Fri May  1 22:05:29 2009//TDRUPAL-6--1
-/README.txt/1.1.2.1.2.1/Wed Apr  1 07:47:46 2009//TDRUPAL-6--1
-/notifications.admin.inc/1.5.2.6.2.19/Fri May  1 22:05:29 2009//TDRUPAL-6--1
-/notifications.cron.inc/1.6.2.6.2.20/Fri May  1 22:05:29 2009//TDRUPAL-6--1
-/notifications.info/1.1.4.1/Wed Apr  1 07:47:46 2009//TDRUPAL-6--1
-/notifications.install/1.4.2.5.2.6/Fri May  1 22:05:29 2009//TDRUPAL-6--1
-/notifications.manage.inc/1.1.2.3/Fri May  1 22:05:29 2009//TDRUPAL-6--1
-/notifications.module/1.6.2.9.2.50/Fri May  1 22:05:29 2009//TDRUPAL-6--1
-/notifications.node.inc/1.1.2.2/Fri May  1 22:05:29 2009//TDRUPAL-6--1
-/notifications.pages.inc/1.1.2.8/Fri May  1 22:05:29 2009//TDRUPAL-6--1
+/CHANGELOG.txt/1.1.2.11.2.51.2.14/Sun May  3 17:18:22 2009//TDRUPAL-6--2
+/README.txt/1.1.2.1.2.1/Tue Mar  3 01:05:37 2009//TDRUPAL-6--2
+/notifications.admin.inc/1.5.2.6.2.19.2.5/Sun May  3 17:18:22 2009//TDRUPAL-6--2
+/notifications.cron.inc/1.6.2.6.2.20.2.6/Sun May  3 17:18:22 2009//TDRUPAL-6--2
+/notifications.info/1.1.4.1/Sun Apr 13 18:02:39 2008//TDRUPAL-6--2
+/notifications.install/1.4.2.5.2.6.2.2/Sun May  3 17:18:22 2009//TDRUPAL-6--2
+/notifications.manage.inc/1.1.2.3.2.3/Sun May  3 17:18:22 2009//TDRUPAL-6--2
+/notifications.module/1.6.2.9.2.50.2.8/Sun May  3 17:18:22 2009//TDRUPAL-6--2
+/notifications.node.inc/1.1.2.2.2.1/Sun May  3 17:18:22 2009//TDRUPAL-6--2
+/notifications.pages.inc/1.1.2.8.2.4/Sun May  3 17:18:22 2009//TDRUPAL-6--2

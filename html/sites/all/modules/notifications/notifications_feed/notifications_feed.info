@@ -1,7 +1,0 @@
-; $Id: notifications_feed.info,v 1.1.4.1 2009/03/25 18:57:06 jareyero Exp $
-name = FeedAPI Subscriptions
-description = Allows users to subscribe to feeds and be notified when they are updated
-package = "Notifications"
-dependencies[] = notifications
-dependencies[] = feedapi
-core = 6.x

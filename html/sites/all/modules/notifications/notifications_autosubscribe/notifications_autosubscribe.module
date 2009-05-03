@@ -1,13 +1,43 @@
 <?php
-// $Id: notifications_autosubscribe.module,v 1.2.2.3.2.5 2009/04/10 16:12:36 jareyero Exp $
+// $Id: notifications_autosubscribe.module,v 1.2.2.3.2.5.2.1 2009/04/19 11:02:20 jareyero Exp $
 /**
- * Subscription_autosubscribe module allow users to automatically subscribe to threads they create. Used by
- * notifications_content.
+ * @file
+ *   Notifications Autosubscribe module.
+ * 
+ * Allows users to automatically subscribe to threads they create or comment on. This module depends on
+ * and needs to run before notifications_content module (weight = 100) for it to work properly.
  */
- 
+
+/**
+ * Implementation of hook_nodeapi()
+ */
+function notifications_autosubscribe_nodeapi(&$node, $op, $arg = 0) {
+  global $user;
+  
+  if ($user->uid && $op == 'insert' && $node->uid == $user->uid) {
+    notifications_autosubscribe($user, 'thread', 'node', 'nid', $node->nid);
+  }
+}
+
+/**
+ * Implementation of hook_comment().
+ */
+function notifications_autosubscribe_comment($comment, $op) {
+  global $user;
+  
+  // $comment can be an object or an array.
+  $comment = (object)$comment;
+
+  if ($user->uid && $op == 'insert' && $comment->uid == $user->uid) {
+    notifications_autosubscribe($user, 'thread', 'node', 'nid', $comment->nid); 
+  }
+}
+
 /**
  * Subscribes users to content they post, if not already subscribed
  *
+ * @param $account
+ *   User account to subscribe
  * @param $type
  *   Subscription type
  * @param $event type
@@ -18,12 +48,11 @@
  *   Int, value of $field that triggers subscription.
  *
  */
-function notifications_autosubscribe($type, $event_type, $field, $value) {
-  global $user;
+function notifications_autosubscribe($account, $type, $event_type, $field, $value) {
   // if user has auto subscribe enabled and he's not already subscribed
-  if (notifications_user_setting('auto', $user) && !notifications_user_get_subscriptions($user->uid, $event_type, $field, $value)) {
+  if (notifications_user_setting('auto', $account) && !notifications_user_get_subscriptions($account->uid, $event_type, $field, $value)) {
     $subscription = array(
-      'uid' => $user->uid,
+      'uid' => $account->uid,
       'type' => $type,
       'event_type' => $event_type,
       'fields' => array($field => $value),
@@ -59,22 +88,6 @@ function notifications_autosubscribe_form_alter(&$form, $form_state, $form_id) {
         '#description'   => t("If checked the option will be 'enabled' by default for user account settings. This won't change existing settings for users who have already defined it."),
       );
       break;
-  }
-}
-
-/**
- * Implementation of hook_notifications.
- */
-function notifications_autosubscribe_notifications($op, $arg0, $arg1 = NULL, $arg2 = NULL) {
-  if ($op == 'event trigger') {
-    $event = $arg0;
-
-    if ($event->type == 'node'
-        && isset($event->node->nid)
-        && (!isset($event->node->autosubscribe) || $event->node->autosubscribe )
-        && $event->action !== 'update') {
-      notifications_autosubscribe('thread', 'node', 'nid', $event->node->nid);
-    }
   }
 }
 

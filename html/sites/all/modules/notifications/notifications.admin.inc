@@ -1,5 +1,5 @@
 <?php
-// $Id: notifications.admin.inc,v 1.5.2.6.2.19 2009/04/14 17:25:16 jareyero Exp $
+// $Id: notifications.admin.inc,v 1.5.2.6.2.19.2.5 2009/04/29 16:24:08 jareyero Exp $
 
 /**
  * Admin settings
@@ -20,7 +20,7 @@ function notifications_settings_form() {
     '#title' => t('Immediate sending'),
     '#type' => 'checkbox',
     '#default_value' => variable_get('notifications_send_immediate', 0),
-    '#description' => t('Notifications are usually queued to be sent on cron process later. Checking this option will cause immediate notifications to be sent right away, instead of being queued. This will produce more timely notifications for sites with a small number of users. Not recommended for sites with a large number of users.'),
+    '#description' => t('Notifications are usually queued to be sent on cron process later. Checking this option will cause immediate notifications to be sent right away, instead of being queued. This will produce more timely notifications for sites with a small number of users. Not recommended for sites with a large number of users. This may not work for AJAX forms and notifications will be queued anyway.'),
   );
   $form['general']['notifications_sender'] = array(
     '#title' => t('Notifications Sender'),
@@ -119,7 +119,7 @@ function notifications_send_intervals_form() {
     '#title' => t('Send intervals'),
     '#tree' => TRUE,
     '#theme' => 'notifications_send_intervals',
-    '#description' => t('To delete an interval, set the time unit and the name empty.'),
+    '#description' => t('To delete an interval, set the time unit and the name empty. If the time is negative, notifications will never be sent.'),
   );
   $intervals = _notifications_send_intervals() + array('new1' => '', 'new2' => '');
   $index = 0;
@@ -292,6 +292,7 @@ function notifications_admin_status_page() {
   $result = db_query("SELECT type, count(*) AS count FROM {notifications} GROUP BY type");
   $count = 0;
   $types = notifications_subscription_types();
+  $rows = array();
   while ($stype = db_fetch_object($result)) {
     $rows[] = array(
       !empty($types[$stype->type]['title']) ? $types[$stype->type]['title'] : '<strong>' . $stype->type . '</strong>' , 
@@ -328,7 +329,8 @@ function notifications_admin_queue_summary() {
   $send_intervals = _notifications_send_intervals();
   $header = array(t('Send interval'), t('Number'));
   $count = 0;
-  $result = db_query("SELECT send_interval, count(*) AS count FROM {notifications_queue} GROUP BY send_interval");    
+  $result = db_query("SELECT send_interval, count(*) AS count FROM {notifications_queue} WHERE cron = 1 GROUP BY send_interval");    
+  $rows = array();
   while ($stype = db_fetch_object($result)) {
     $rows[] = array($send_intervals[$stype->send_interval], $stype->count);
     $count += $stype->count;
@@ -350,7 +352,7 @@ function notifications_admin_queue($op = 'status', $param = NULL) {
 
   // Display logs from last process
   if (!empty($_SESSION['notifications_logs'])) {
-    $output .= theme('box', t('Process log'), theme('item_list', $_SESSION['notifications_logs']));
+    $output .= theme('box', t('Process log'), messaging_log_format($_SESSION['notifications_logs']));
     unset($_SESSION['notifications_logs']);
   }
   return $output;
@@ -413,6 +415,12 @@ function notifications_queue_operations() {
       'callback' => 'notifications_process_rows',
       'callback arguments' => array(array('cron' => 1, 'send_interval' => 0)),
     ),
+    'clean' => array(
+      'label' => t('Clean queue'),
+      'description' => t('Delete all logs, processed rows and related data in queue.'),
+      'callback' => 'notifications_admin_queue_process',
+      'callback arguments' => array('clean queue'),
+    ),
     'reset' => array(
       'label' => t('Reset queue'),
       'description' => t('Delete all notifications in queue.'),
@@ -443,6 +451,10 @@ function notifications_admin_queue_process($op) {
       notifications_process('option', 'test', TRUE);
       notifications_process_run(FALSE);
       break;
+    case 'clean queue':
+      // Delete logs and clean up events
+      notifications_queue_clean(array('cron' => 0));
+      break;      
   }
 }
 

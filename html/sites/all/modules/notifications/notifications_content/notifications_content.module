@@ -1,5 +1,5 @@
 <?php
-// $Id: notifications_content.module,v 1.4.2.9.2.36 2009/04/15 16:08:13 jareyero Exp $
+// $Id: notifications_content.module,v 1.4.2.9.2.36.2.8 2009/04/28 10:22:01 jareyero Exp $
 /**
  * @file
  * Subscriptions to content events
@@ -78,7 +78,8 @@ function notifications_content_perm() {
  */
 function notifications_content_help($path, $arg) {
   if ($path == 'admin/messaging/notifications/content') {
-    $output .= '<p>'. t('To determine the available subscription types for each content type you can also use the !content-type-settings', array('!content-type-settings' => l(t('content types settings page'), 'admin/content/types'))) .'</p>';
+    $output = '<p>' . t('Content subscriptions are subscriptions to nodes that will produce notifications when a node is posted or updated or when a comment is posted for that nodes. Notifications will be sent only for published content so if you need to be notified of unpublished content waiting for approval you better use Triggers and Actions or some other module for that.') . '</p>';
+    $output .= '<p>'. t('On this page you can set which of the available subscription types are allowed. Alternatively you can select the <i>Set up for each content type</i> option and use the <a href="@content-type-settings">Administer Content types</a> page. These settings will be combined with permissions and other options (See user interface options if enabled) to determine which subscriptions will be finally available for users.', array('@content-type-settings' => url( 'admin/content/types'))) .'</p>';
     return $output;
   }
   elseif (array($arg[0], $arg[1], $arg[2], $arg[3]) == array('admin', 'messaging', 'template', 'edit') && ($group = $arg[4])) {
@@ -107,13 +108,13 @@ function notifications_content_form_alter(&$form, &$form_state, $form_id) {
       // Load the node which is possibly cached to get the node type
       $node = node_load($form['nid']['#value']);
       if (notifications_content_type_enabled($node->type)) {    
-        $form['notifications']['notifications_content_disable'] = array(
-          '#type'          => 'checkbox',
-          '#title'         => t('Do not send notifications for this comment.'),
-          '#default_value' => 0,
-          '#access' => user_access('skip notifications'),
-        ); 
+        _notifications_content_add_disable_field($form);
+        // If editing the comment, add values to remember
+        if (!empty($form['cid']['#value']) && !empty($form['admin']['status'])) {
+          $form['notifications_comment_status'] = array('#type' => 'value', '#value' => $form['admin']['status']['#default_value']);
+        }
       }
+
       break;   
     case 'node_type_form':
       if (isset($form['identity']['type'])) {
@@ -143,26 +144,27 @@ function notifications_content_form_alter(&$form, &$form_state, $form_id) {
       // Node form. Option to disable notifications
       if (isset($form['type']) && isset($form['#node']) && $form['type']['#value'] .'_node_form' == $form_id) {
         $types = notifications_content_types(NULL);
-        if (notifications_content_type_enabled($node->type)) {
-          $noprevious = !isset($form['notifications']);
-          $form['notifications']['#type'] = 'fieldset';
-          $form['notifications']['#title'] = t('Notifications');
-          $form['notifications']['#collapsible'] = TRUE;
-          $form['notifications']['#weight'] = 1;
-          //don't want to hide/change access on modules that already used the notifications fieldset for something
-          if ($noprevious) {
-            $form['notifications']['#collapsed']   = TRUE;
-            $form['notifications']['#access'] = user_access('skip notifications');
-          }
-          $form['notifications']['notifications_content_disable'] = array(
-            '#type'          => 'checkbox',
-            '#title'         => t('Do not send notifications for this update.'),
-            '#default_value' => 0,
-            '#access' => user_access('skip notifications'),
-          );
+        if (notifications_content_type_enabled($form['#node']->type)) {
+          _notifications_content_add_disable_field($form);
         }
       }
   }
+}
+
+/**
+ * Add disable (skip notifications) field set
+ */
+function _notifications_content_add_disable_field(&$form) {
+  // Add fieldset without affecting any other elements there
+  $form['notifications']['#type'] = 'fieldset';
+  $form['notifications']['#title'] = t('Notifications');
+  $form['notifications']['#collapsible'] = TRUE;  
+  $form['notifications']['notifications_content_disable'] = array(
+    '#type'          => 'checkbox',
+    '#title'         => t('Do not send notifications for this update.'),
+    '#default_value' => 0,
+    '#access' => user_access('skip notifications'),
+  );  
 }
 
 /**
@@ -294,11 +296,21 @@ function notifications_content_notifications($op, &$arg0, $arg1 = NULL, $arg2 = 
       $event = &$arg0;
       $load = array();
       if ($event->type == 'node') {
-        if (!empty($event->params['nid'])) {
-          $event->objects['node'] = node_load($event->params['nid']);
+        if (!empty($event->params['nid']) && empty($event->objects['node'])) {
+          if ($node = node_load($event->params['nid'])) {
+            $event->objects['node'] = $node;
+          }
+          else { // Node not available anymore, mark event for deletion
+            $event->delete = TRUE;
+          }
         }
-        if (!empty($event->params['cid'])) {
-          $event->objects['comment'] = notifications_content_comment_load($event->params['cid']);
+        if (!empty($event->params['cid']) && empty($event->objects['comment'])) {
+          if ($comment = notifications_content_comment_load($event->params['cid'])) {
+            $event->objects['comment'] = $comment;
+          }
+          else { // Comment not available anymore, mark event for deletion
+            $event->delete = TRUE;
+          }
         }
       }
       break;
@@ -463,7 +475,7 @@ function notifications_content_messaging($op, $arg1 = NULL, $arg2 = NULL, $arg3 
         case 'notifications-digest-node-nid':
         case 'notifications-digest-node-type':
           $parts['title'] = t('Group title');
-          $parts['footer'] = t('Group footer');
+          $parts['closing'] = t('Group footer');
           return $parts;
       }
       break;
@@ -510,14 +522,16 @@ function notifications_content_messaging($op, $arg1 = NULL, $arg2 = NULL, $arg3 
             ),
           );
         case 'notifications-digest-node-nid':
+          // Define only group title and group footer (closing)
+          // The 'closing' statement is typically a 'read more' link
           return array(
             'title' => t('Updates for [type-name]: [title]'),
-            'footer' => t('Read more [node-url]'),
+            'closing' => t('Read more [node-url]'),
           );
         case 'notifications-digest-node-type':
           return array(
             'title' => t('New content of type [type-name] has been submitted'),
-            'footer' => '<none>',
+            'closing' => '<none>',
           );       
       }
       break;
@@ -635,7 +649,6 @@ function notifications_content_nodeapi(&$node, $op, $arg = 0) {
       if ($node->status && empty($node->notifications_content_disable) && notifications_content_type_enabled($node->type)) {
         $event = array(
           'module' => 'node',
-          'uid' => $node->uid,
           'oid' => $node->nid,
           'type' => 'node',
           'action' => $op,
@@ -644,12 +657,15 @@ function notifications_content_nodeapi(&$node, $op, $arg = 0) {
         );        
         if ($op == 'update') {
           // If the node has been published the 'update' will become a 'insert' (first post)
+          // In this case the event user will be the node author instead of the current user
           if (!isset($node->old_status)) {
             // We try to find out previous status with the cached node.
             $oldnode = node_load($node->nid);
             $node->old_status = $oldnode->status;
           }
           if (!$node->old_status) {
+            // The node has gone from unpublished to published, adjust event parameters
+            $event['uid'] = $node->uid;
             $event['action'] = 'insert';
           }
           // If immediate sending is active, need to reset the node cache so we don't send old versions of the node
@@ -668,25 +684,34 @@ function notifications_content_nodeapi(&$node, $op, $arg = 0) {
 
 /**
  * Implementation of hook_comment().
- */
+ * 
+ * This is a bit tricky because we just want to send notifications when they are published. Quick reminder:
+ * - Normal 'insert' operations are followed by a 'publish' one so we don't process that ones.
+ * - Normal 'update' operations are followed by a 'publish' whatever the previous status was
+ * - For 'publish' operations we notify if the comment was not published before.
+ * 
+ * Note that we don't take the comment by ref so we don't change it when it's an array
+ **/
 function notifications_content_comment($comment, $op) {
   // $comment can be an object or an array.
   $comment = (object)$comment;
-  
-  if (($op == 'update' || $op == 'publish') && empty($comment->notifications_content_disable) && empty($comment->status)) {
-    $node = node_load($comment->nid);
-    if (notifications_content_type_enabled($node->type)) {
+
+  if ($op == 'publish' && empty($comment->notifications_content_disable) &&
+    (!isset($comment->notifications_comment_status) || !empty($comment->notifications_comment_status)) ) {
+    // Check that the node is published and comment notifications are enabled for this node type
+    $node = node_load($comment->nid);    
+    if ($node->status && notifications_content_type_enabled($node->type)) {
       $event = array(
+        'uid' => $comment->uid, // For this special case the event actor is the user who posts the comment
         'module' => 'node',
-        'uid' => $comment->uid,
         'type' => 'node',
         'action' => 'comment',
         'node' => $node,
         'comment' => $comment,
         'params' => array('nid' => $comment->nid, 'cid' => $comment->cid),
       );
-    }
-    notifications_event($event);
+      notifications_event($event);
+    }    
   }
 }
 
@@ -694,9 +719,17 @@ function notifications_content_comment($comment, $op) {
  * Implementation of hook node_type
  */
 function notifications_content_node_type($op, $info) {
-  if ($op == 'delete') {
-    // Remove all subscriptions for this node type
-    notifications_delete_subscriptions(array('event_type' => 'node'), array('type' => $info->type));
+  switch ($op) {
+    case 'delete':
+      // Remove all subscriptions for this node type
+      notifications_delete_subscriptions(array('event_type' => 'node'), array('type' => $info->type));
+      break;
+    case 'update':
+      // When changing node type machine name, update all subscriptions
+      if (!empty($info->old_type) && $info->old_type != $info->type) {
+        db_query("UPDATE {notifications_fields} SET value = '%s' WHERE field = 'type' AND value = '%s'", $info->type, $info->old_type);
+      }
+      break;
   }
 }
 
@@ -724,7 +757,7 @@ function notifications_content_comment_load($cid) {
 function notifications_content_types($field = 'name', $subs_type = 'nodetype') {
   // Get list of available node types, all of them will be allowed by default
   $types = array();
-  
+
   foreach (node_get_types() as $key => $data) {
     if (notifications_content_type_enabled($key, $subs_type)) {
       $types[$key] = $data;

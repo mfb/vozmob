@@ -1,5 +1,5 @@
 <?php
-// $Id: notifications_tags.module,v 1.1.2.5.2.12 2009/04/15 15:39:55 jareyero Exp $
+// $Id: notifications_tags.module,v 1.1.2.5.2.12.2.3 2009/04/20 18:55:26 jareyero Exp $
 /**
  * @file
  * Subscriptions to taxonomy terms
@@ -79,7 +79,48 @@ function notifications_tags_notifications($op, &$arg0, $arg1 = NULL, $arg2 = NUL
         }
       }
       break;
+    
+    case 'node options':
+      return _notifications_tags_node_options($arg0, $arg1);
+   
+    case 'access': 
+      $type = $arg0;
+      $object = &$arg2;
+      $access = TRUE;
+      if ($type == 'subscription') {
+        $access = TRUE;
+        if (!empty($object->fields['tid'])) {
+          $term = taxonomy_get_term($object->fields['tid']);
+          $allowed_vocabs = notifications_tags_vocabularies();
+          if (!array_key_exists($term->vid, $allowed_vocabs)) {
+            $access = FALSE;
+          }
+        }
+      }
+      return array($access);      
+      break;
+ 
   }
+}
+
+/**
+ * Provide tag subscriptions on nodes.
+ */
+function _notifications_tags_node_options($account, $node) {
+  $options = array();
+  $vocabs = notifications_tags_vocabularies();
+  if (notifications_content_type_enabled($node->type, 'taxonomy') && !empty($node->taxonomy)) {
+    foreach ($node->taxonomy as $tid => $term) {
+      if (array_key_exists($term->vid, $vocabs)) {
+        $options[] = array(
+          'name' => t('Posts tagged with %name', array('%name' => $term->name)),
+          'type' => 'taxonomy',
+          'fields' => array('tid' => $tid),
+        );
+      }
+    }
+  }
+  return $options;
 }
 
 /**
@@ -134,6 +175,12 @@ function notifications_tags_form_alter(&$form, $form_state, $form_id) {
       '#description'   => t('Select vocabularies to which subscriptions should be <em>allowed</em>.'),
       '#multiple'      => TRUE,
     );
+    $form['tags']['notifications_tags_showsubscribed'] = array(
+      '#type'          => 'checkbox',
+      '#title'         => t('Limit the displayed taxonomy terms'),
+      '#default_value' => variable_get('notifications_tags_showsubscribed', 0),
+      '#description'   => t('If checked, the displayed taxonomy terms in User Interface form will be limited to subscribed terms only. When you have too many taxonomy terms causing the Tags tab to run out of memory under Notifications UI, enabling this setting can fix the problem by only displaying the subscribed taxonomy terms. Note that if you enable this setting, you will have to provide your users an alternative way to subscribe to taxonomy items, such as providing links like: notifications/subscribe/%user/taxonomy/tid/%tid . The link will bring up the standard subscription confirmation dialog.'),
+    );
   }
 
 }
@@ -156,8 +203,7 @@ function notifications_tags_user_page($account = NULL) {
 /**
  * Returns the taxonomy subscription form
  */
-function notifications_tags_user_form($form_state, $account) {
-  
+function notifications_tags_user_form($form_state, $account) {  
   // query string for category subscriptions
   $vocabularies = notifications_tags_vocabularies();
   // Get subscriptions indexed by tid
@@ -191,7 +237,14 @@ function notifications_tags_user_form($form_state, $account) {
   if (count($send_methods) > 1) {
     $header[] = t('Send method');
   }  
+  // We may be limiting the list to subscribed terms only, so we load all of them to find out the vocabulary and name
+  if (variable_get('notifications_tags_showsubscribed', 0)) {
+    $load_terms = notifications_tags_get_tree(array_keys($subscriptions));
+  }
   foreach ($vocabularies as $vid => $vocab) {
+    if (isset($load_terms) && empty($load_terms[$vid])) {
+      continue;
+    }
     // display vocabulary name and group terms together
     $form['subscriptions'][$vid] = array(
       '#type' => 'fieldset',
@@ -203,10 +256,10 @@ function notifications_tags_user_form($form_state, $account) {
       '#header' => $header,
       '#parents' => array('subscriptions'),
     );
-    // @ TODO create mechanism to allow users to
-    //        subscribe to all terms under this vocabulary
+    
+    // We may have already loaded the terms, see above about limiting the list
+    $tree = isset($load_terms) ? $load_terms[$vocab->vid] : taxonomy_get_tree($vocab->vid); 
 
-    $tree = taxonomy_get_tree($vocab->vid);
     $field = 'tid';
     foreach ($tree as $term) {
       $key = $term->tid;
@@ -243,6 +296,20 @@ function notifications_tags_user_form($form_state, $account) {
 
   $form['#submit'][] = 'notifications_content_form_submit';
   return $form;
+}
+
+/**
+ * Quick get list of term data from tids indexed by vocabulary, tid
+ */
+function notifications_tags_get_tree($tids) {
+  $list = array();
+  if ($tids) {
+    $result = db_query('SELECT * FROM {term_data} WHERE tid IN (' . db_placeholders($tids) . ')', $tids);
+    while ($term = db_fetch_object($result)) {
+      $list[$term->vid][$term->tid] = $term;
+    }
+  }
+  return $list;
 }
 
 /**

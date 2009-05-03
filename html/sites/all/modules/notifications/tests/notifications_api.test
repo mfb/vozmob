@@ -1,5 +1,5 @@
 <?php
-// $Id: notifications_api.test,v 1.1.2.1.2.8 2009/04/07 18:17:00 jareyero Exp $
+// $Id: notifications_api.test,v 1.1.2.1.2.8.2.1 2009/04/20 12:51:09 jareyero Exp $
 /**
  * Class for testing notifications module.
  * Tests basic API functions
@@ -14,7 +14,7 @@ class NotificationsBasicTests extends DrupalWebTestCase {
   }
   
   function setUp() {
-    parent::setUp('notifications');
+    parent::setUp('notifications', 'notifications_lite');
     require_once drupal_get_path('module', 'notifications') .'/notifications.cron.inc';
   }
 
@@ -73,6 +73,10 @@ class NotificationsBasicTests extends DrupalWebTestCase {
     notifications_delete_subscriptions(array('type' => $test_type));
     $subs = notifications_get_subscriptions(array('type' => $test_type));
     $this->assertEqual(count($subs), 0, 'The subscriptions have been deleted');
+    
+    // Try notifications_lite API
+    notifications_lite_send($user->uid, 'Test Subject', 'Test body');
+    $this->assertEqual($this->countQueued(array('uid' => $user->uid)), 1, 'Notification queued with notifications_lite');
   }
 
   /**
