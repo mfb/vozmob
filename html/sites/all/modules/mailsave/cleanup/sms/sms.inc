@@ -92,6 +92,7 @@ function sms_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
 	    $options = array('carrier'=> $from[1], 'from' => 'vozmob.sandbox.reg@gmail.com');
     	    sms_send($number, $message, $options);
     	    //we will receive the answer in cleanup.registration.inc
+	    watchdog('debug','sms sent');
     }
 
   }
