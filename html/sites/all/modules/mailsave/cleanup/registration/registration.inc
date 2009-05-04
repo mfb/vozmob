@@ -49,12 +49,14 @@ function registration_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
       $from[1] = $email_gateway_aliases[$from[1]];
     }
 
-    $number = $from[0];
 
+    $number = $from[0];
     registration_mailsave_receive($account, $number);
     
     $newName =  $node->body;
     watchdog('debug', print_r($newName,TRUE));
+
+    $node = FALSE;
 
     //if it comes from a valid sms email gateway and it was sent to one of the email registration accounts
     $sms_email_gateway_providers = sms_email_gateway_sms_email_gateway_providers();
