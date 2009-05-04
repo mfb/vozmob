@@ -1,4 +1,5 @@
 <?php
+// $Id: messaging_debug.module,v 1.1.2.4.2.11.2.1 2009/04/29 16:24:40 jareyero Exp $
 /**
  * @file
  * Simple messaging using html page. Messaging method plug-in
@@ -290,6 +291,65 @@ function _messaging_debug_log_text($message) {
 }
 
 /**
+ * Messaging debug logs
+ */
+function messaging_debug_log($txt = NULL, $variables = NULL) {
+  // Sometimes we are passing objects as variables, we need to make sure they are not by reference
+  // We can let this be for normal logs but for debugging we want accurate unique data on each stage
+  if ($variables) {
+    foreach ($variables as $key => $value) {
+      if (is_object($value)) {
+        $variables[$key] = clone($value);
+      }
+    }
+  }
+  return _messaging_log('debug', $txt, $variables);
+}
+
+/**
+ * Format complex log as collapsible fieldset
+ */
+function _messaging_debug_format_log($type, $string, $append, $objects) {
+  $content = '';
+  foreach ($objects as $key => $value) {
+    $content .= _messaging_debug_format_object($value, $key);
+  }
+  // Build collapsible fieldset
+  $field['object'] = array(
+    '#type' => 'fieldset',
+    '#title' => $string,
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#description' => $append ? implode(' ', $append) : '',
+  );
+
+  $field['object']['content']['#value'] = $content;
+  
+  return drupal_render($field);    
+}
+
+/**
+ * Format objects/array in logs
+ */
+function _messaging_debug_format_object($data, $name) {
+  $rows = array();
+  foreach ($data as $key => $value) {
+    if (is_object($value) || is_array($value)) {
+      $content = _messaging_debug_format_object($value, $key);
+    } else {
+      // Make line endings visible
+      $content = str_replace("\n", '\n<br />', check_plain($value));
+    }
+    $rows[] = array(
+      check_plain($key),
+      $content, 
+    );
+  }
+  $header = array(check_plain($name), is_object($data) ? t('Object') : t('Array'));
+  return theme('table', $header, $rows);
+}
+
+/**
  * Just show message title to the user. 
  * 
  * This is a pull method though, so this is mainly intended for testing options
@@ -299,22 +359,22 @@ function messaging_debug_send_msg($destination, &$message) {
   $message->log = 1;
   $text = '';
   $watchdog = array();
-  $text  = t('Message %key for %name: %subject', array('%name' => $destination, '%key' => $message->type, '%subject' => $message->subject));
-  messaging_log($text);
+  $variables = array('%name' => $destination, '%key' => $message->type, '%subject' => $message->subject, '!body' => $message->body);
+  messaging_log('Message %key for %name: %subject', $variables);
   // Just log message body at the end
-  watchdog('messaging', 'Message %key for %name: %subject <br /> Message body: <br /><pre>!body</pre>', array('%name' => $destination, '%key' => $message->type, '%subject' => $message->subject, '!body' => $message->body));
+  watchdog('messaging', 'Message %key for %name: %subject <br /> Message body: <br /><pre>!body</pre>', $variables);
   return TRUE;
 }
 
 /**
  * Implementation of hook_footer()
  * 
- * Only debugging functionality for administrators, uses devel module facility
+ * Only debugging functionality for administrators, prints out a table with logs
+ * 
+ * Note: this is useless when there is a redirection after submitting. Enable Devel option 'Display redirection page' to see them.
  */
 function messaging_debug_footer() {
-  if (variable_get('messaging_debug', 0) && user_access('administer messaging') && ($logs = messaging_log()) && function_exists('dsm')) {
-    foreach ($logs as $log) {
-      dsm($log);
-    }
+  if (variable_get('messaging_debug', 0) && user_access('administer messaging') && ($logs = messaging_log())) {
+    return messaging_log_format($logs);
   }
 }

@@ -1,5 +1,5 @@
 <?php
-// $Id: filefield_field.inc,v 1.30 2009/04/13 00:42:18 quicksketch Exp $
+// $Id: filefield_field.inc,v 1.31 2009/04/20 22:30:08 quicksketch Exp $
 
 /**
  * @file
@@ -237,6 +237,7 @@ function filefield_field_sanitize($node, $field, &$items, $teaser, $page) {
       // TODO: Provide an API to ImageField to do this itself?
       if (!empty($field['widget']['use_default_image']) && !empty($field['widget']['default_image']['filepath'])) {
         $items[$delta] = $field['widget']['default_image'];
+        $items[$delta]['default'] = TRUE;
       }
       else {
         $items[$delta] = NULL;

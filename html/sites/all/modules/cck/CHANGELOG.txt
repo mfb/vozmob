@@ -1,14 +1,16 @@
-//$Id: CHANGELOG.txt,v 1.1.6.324 2009/04/15 01:00:07 yched Exp $
+//$Id: CHANGELOG.txt,v 1.1.6.327 2009/04/30 10:29:40 karens Exp $
 
 CCK 6.x-2.x
 ===========
 
 Features:
+- #414298 by Michelle, merlinofchaos - Add Panels 3 integration for fields and fieldgroups.
 - #419678 Views integration: expose CCK fields to 'Node revision' Views.
 - #399778 by Benjamin Melençon - Nodereference / Userreference: Add 'size' setting to autocomplete widgets.
 
 Bugfixes:
 - #407446 by quicksketch: prevent double serialization during per-field to per-type migration.
+  Followup: update function to fix potentially existing corrupted data.
 - #407344 fix html appearing in selects in Views filters.
 - #409320 by bengtan: Nodereference / Userreference - fix 'this post cannot be referenced' for views-defined referenceable nodes/users, when the view definition has a 'limit'.
 - #409398 by markus_petrux - fix handling of fieldgroup_types() (prep work for combo / multigroups)
@@ -18,6 +20,7 @@ Bugfixes:
 - #421126 Views integration: Use value aliases in argument title replacements for text / number fields.
 - #397358 by Darren Oh, yched, markus_petrux - Views integration: Use node title / user name in argument title replacements for nodereference and userreference argument fields.
 - #428400 Views integration : Fix fatal error with Views 2.4 (views_handler_filter_float has moved). Preserved compatibility with Views 2.3.
+- #447562 by markus_petrux: fix non-XHTML markup on 'Manage fields' screen.
 
 CCK 6.x-2.2
 ===========

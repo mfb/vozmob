@@ -1,5 +1,5 @@
 <?php
-// $Id: imagecache.module,v 1.100 2009/04/14 00:01:21 drewish Exp $
+// $Id: imagecache.module,v 1.104 2009/04/29 15:19:06 drewish Exp $
 
 /**
  * @file
@@ -111,6 +111,7 @@ function imagecache_theme() {
         'attributes' => array(),
     )),
     'imagecache_resize' => array(
+      'file' => 'imagecache_actions.inc',
       'arguments' => array('element' => NULL),
     ),
     'imagecache_scale' => array(
@@ -146,23 +147,23 @@ function imagecache_theme() {
   foreach (imagecache_presets() as $preset) {
     $theme['imagecache_formatter_'. $preset['presetname'] .'_default'] = array(
       'arguments' => array('element' => NULL),
-      'function' => 'theme_imagecache_formatter',
+      'function' => 'theme_imagecache_formatter_default',
     );
     $theme['imagecache_formatter_'. $preset['presetname'] .'_linked'] = array(
       'arguments' => array('element' => NULL),
-      'function' => 'theme_imagecache_formatter',
+      'function' => 'theme_imagecache_formatter_linked',
     );
     $theme['imagecache_formatter_'. $preset['presetname'] .'_imagelink'] = array(
       'arguments' => array('element' => NULL),
-      'function' => 'theme_imagecache_formatter',
+      'function' => 'theme_imagecache_formatter_imagelink',
     );
     $theme['imagecache_formatter_'. $preset['presetname'] .'_path'] = array(
       'arguments' => array('element' => NULL),
-      'function' => 'theme_imagecache_formatter',
+      'function' => 'theme_imagecache_formatter_path',
     );
     $theme['imagecache_formatter_'. $preset['presetname'] .'_url'] = array(
       'arguments' => array('element' => NULL),
-      'function' => 'theme_imagecache_formatter',
+      'function' => 'theme_imagecache_formatter_url',
     );
   }
 
@@ -394,15 +395,17 @@ function _imagecache_cache($presetname, $path) {
   // preserve path for watchdog.
   $src = $path;
 
-  // check if the path to the file exists
+  // Check if the path to the file exists.
   if (!is_file($src) && !is_file($src = file_create_path($src))) {
-    // Send a 404 if we don't know of a preset.
+    watchdog('imagecache', '404: Unable to find %image ', array('%image' => $src), WATCHDOG_ERROR);
     header("HTTP/1.0 404 Not Found");
     exit;
   };
 
-  // bail if the requested file isn't an image you can't just summon .php files etc...
+  // Bail if the requested file isn't an image you can't request .php files
+  // etc...
   if (!getimagesize($src)) {
+    watchdog('imagecache', '403: File is not an image %image ', array('%image' => $src), WATCHDOG_ERROR);
     header('HTTP/1.0 403 Forbidden');
     exit;
   }
@@ -456,9 +459,14 @@ function _imagecache_apply_action($action, $image) {
 }
 
 /**
- * helper function to transfer files from imagecache. Determines mime type and sets a last modified header.
- * @param $path path to file to be transferred.
- * @return <exit>
+ * Helper function to transfer files from imagecache.
+ *
+ * Determines MIME type and sets a last modified header.
+ *
+ * @param $path
+ *   String containing the path to file to be transferred.
+ * @return
+ *   This function does not return. It calls exit().
  */
 
 function imagecache_transfer($path) {
@@ -475,7 +483,18 @@ function imagecache_transfer($path) {
 
 /**
  * Set file headers that handle "If-Modified-Since" correctly for the
- * given fileinfo. Most code has been taken from drupal_page_cache_header().
+ * given fileinfo.
+ *
+ * Note that this function may return or may call exit().
+ *
+ * Most code has been taken from drupal_page_cache_header().
+ *
+ * @param $fileinfo
+ *   Array returned by stat().
+ * @param
+ *   Array of existing headers.
+ * @return
+ *   Nothing but beware that this function may not return.
  */
 function _imagecache_cache_set_cache_headers($fileinfo, &$headers) {
   // Set default values:
@@ -628,57 +647,77 @@ function imagecache_field_formatter_info() {
   return $formatters;
 }
 
-function theme_imagecache_formatter($element) {
-  if (isset($element['#item']['nid']) && $node = node_load($element['#item']['nid'])) {
-    return imagecache_field_formatter($element['#field_name'], $element['#item'], $element['#formatter'], $node);
+function theme_imagecache_formatter_default($element) {
+  // Inside a view $element may contain NULL data. In that case, just return.
+  if (empty($element['#item']['fid'])) {
+    return '';
   }
+
+  list($presetname, $style) = explode('_', $element['#formatter'], 2);
+  $item = $element['#item'];
+  $item['data']['alt'] = isset($item['data']['alt']) ? $item['data']['alt'] : '';
+  $item['data']['title'] = isset($item['data']['title']) ? $item['data']['title'] : NULL;
+
+  $class = "imagecache imagecache-$presetname imagecache-$style imagecache-{$element['#formatter']}";
+  return theme('imagecache', $presetname, $item['filepath'], $item['data']['alt'], $item['data']['title'], array('class' => $class));
 }
 
-
-/**
- * Implementation of hook_field_formatter().
- */
-function imagecache_field_formatter($field, $item, $formatter, $node) {
-  if (empty($item['fid']) && $field['use_default_image']) {
-    $item = $field['default_image'];
+function theme_imagecache_formatter_linked($element) {
+  // Inside a view $element may contain NULL data. In that case, just return.
+  if (empty($element['#item']['fid'])) {
+    return '';
   }
-  // Views does not load the file for us, while CCK display fields does.
-  if (empty($item['filepath'])) {
-    $item = array_merge($item, field_file_load($item['fid']));
+
+  list($presetname, $style) = explode('_', $element['#formatter'], 2);
+  $item = $element['#item'];
+  $item['data']['alt'] = isset($item['data']['alt']) ? $item['data']['alt'] : '';
+  $item['data']['title'] = isset($item['data']['title']) ? $item['data']['title'] : NULL;
+
+  $imagetag = theme('imagecache', $presetname, $item['filepath'], $item['data']['alt'], $item['data']['title']);
+  $path = empty($item['nid']) ? '' : 'node/'. $item['nid'];
+  $class = "imagecache imagecache-$presetname imagecache-$style imagecache-{$element['#formatter']}";
+  return l($imagetag, $path, array('attributes' => array('class' => $class), 'html' => TRUE));
+}
+
+function theme_imagecache_formatter_imagelink($element) {
+  // Inside a view $element may contain NULL data. In that case, just return.
+  if (empty($element['#item']['fid'])) {
+    return '';
   }
-  if (is_string($item['data'])) {
-    $item['data'] = unserialize($item['data']);
+
+  list($presetname, $style) = explode('_', $element['#formatter'], 2);
+  $item = $element['#item'];
+  $item['data']['alt'] = isset($item['data']['alt']) ? $item['data']['alt'] : '';
+  $item['data']['title'] = isset($item['data']['title']) ? $item['data']['title'] : NULL;
+
+  $imagetag = theme('imagecache', $presetname, $item['filepath'], $item['data']['alt'], $item['data']['title']);
+  $path = file_create_url($item['filepath']);
+  $class = "imagecache imagecache-$presetname imagecache-$style imagecache-{$element['#formatter']}";
+  return l($imagetag, $path, array('attributes' => array('class' => $class), 'html' => TRUE));
+}
+
+function theme_imagecache_formatter_path($element) {
+  // Inside a view $element may contain NULL data. In that case, just return.
+  if (empty($element['#item']['fid'])) {
+    return '';
   }
-  $alt = empty($item['data']['alt']) ? '' : $item['data']['alt'];
-  $title = empty($item['data']['title']) ? '' : $item['data']['title'];
-  $parts =  explode('_', $formatter);
-  $style = array_pop($parts);
-  $presetname = implode('_', $parts);
 
-  $class = "imagecache imagecache-$presetname imagecache-$style imagecache-$formatter";
-  if ($preset = imagecache_preset_by_name($presetname)) {
-    $item['filepath'] = $item['fid'] == 'upload' ? $item['preview'] : $item['filepath'];
-    switch ($style) {
-      case 'linked':
-        $imagetag = theme('imagecache', $presetname, $item['filepath'], $alt, $title);
-        return l($imagetag, 'node/'. $node->nid, array('attributes' => array('class' => $class), 'html' => TRUE));
+  list($presetname, $style) = explode('_', $element['#formatter'], 2);
+  $item = $element['#item'];
 
-      case 'imagelink':
-        $original_image_url = file_create_url($item['filepath']);
-        $imagetag =  theme('imagecache', $presetname, $item['filepath'], $alt, $title);
-        return l($imagetag, $original_image_url, array('attributes' => array('class' => $class), 'html' => TRUE));
+  return imagecache_create_path($presetname, $item['filepath']);
+}
 
-      case 'url':
-        return imagecache_create_url($presetname, $item['filepath']);
-
-      case 'path':
-        return imagecache_create_path($presetname, $item['filepath']);
-
-      default:
-        return theme('imagecache', $presetname, $item['filepath'], $alt, $title, array('class' => $class));
-    }
+function theme_imagecache_formatter_url($element) {
+  // Inside a view $element may contain NULL data. In that case, just return.
+  if (empty($element['#item']['fid'])) {
+    return '';
   }
-  return '<!-- imagecache formatter preset('. $presetname .') not found! -->';
+
+  list($presetname, $style) = explode('_', $element['#formatter'], 2);
+  $item = $element['#item'];
+
+  return imagecache_create_url($presetname, $item['filepath']);
 }
 
 /**
@@ -826,13 +865,6 @@ function imagecache_resize_form($action) {
   );
   return $form;
 }
-
-function theme_imagecache_resize($element) {
-  $data = $element['#value'];
-  return 'width: '. $data['width'] .', height: '. $data['height'];
-}
-
-
 
 /**
  *  ImageCache 2.x API

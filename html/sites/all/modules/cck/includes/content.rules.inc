@@ -1,5 +1,5 @@
 <?php
-// $Id: content.rules.inc,v 1.1.2.5 2009/03/30 20:39:07 fago Exp $
+// $Id: content.rules.inc,v 1.1.2.6 2009/04/30 09:56:07 fago Exp $
 
 /**
  * @file
@@ -151,7 +151,21 @@ function content_rules_action_populate_field_validate($form, &$form_state) {
 }
 
 function content_rules_action_populate_field_submit(&$settings, $form, &$form_state) {
+  // Take over field values and filter out private properties added by CCK
   $settings['value'] = array_filter($form_state['values'][$settings['field_name']], 'is_array');
+
+  foreach ($settings['value'] as $key => $data) {
+    foreach (array_filter(array_keys($data)) as $col) {
+      if ($col[0] == '_') {
+        unset($settings['value'][$key][$col]);
+      }
+    }
+    if ($key && count(array_filter($settings['value'][$key])) == 0) {
+      // For multi-valued fields don't check for any additional empty values.
+      unset($settings['value'][$key]);
+    }
+  }
+
   $settings['code'] = $form_state['values']['code'];
 
   if (function_exists('rules_action_custom_php_submit')) {
@@ -164,10 +178,8 @@ function content_rules_action_populate_field_submit(&$settings, $form, &$form_st
   $names = array('code');
 
   foreach ($settings['value'] as $key => $data) {
-    foreach ($data as $col => $value) {
-      if (is_string($value) && $col != '_error_element') {
-        $names[] = "value|$key|$col";
-      }
+    foreach (array_filter($data, 'is_string') as $col => $value) {
+      $names[] = "value|$key|$col";
     }
   }
   $form_state['element']['#info']['eval input'] = $names;
@@ -218,33 +230,17 @@ function content_rules_condition_info() {
 /**
  * Condition: Check the value of a field.
  */
-function content_rules_field_has_value($node, $settings, $element, &$state) {
+function content_rules_field_has_value($node, $settings) {
   // Get information about the field.
   $field = content_fields($settings['field_name'], $node->type);
   $value = _content_rules_get_field_value($settings, $state);
 
-  if (!empty($field) && is_array($value)) {
-    $node_value = $node->$settings['field_name'];
-
-    if (count($value) != count($node_value)) {
-      return FALSE;
-    }
-    // Loop over multiple fields
-    foreach ($value as $delta => $sub_value) {
-      // Check if all properties of the value are there in the node value too
-      foreach ($sub_value as $delta2 => $sub_value2) {
-        if (!isset($node_value[$delta][$delta2]) || $node_value[$delta][$delta2] != $sub_value2) {
-          return FALSE;
-        }
-      }
-    }
-    return TRUE;
-  }
-  else {
+  if (empty($field) || !is_array($value)) {
     return FALSE;
   }
-}
 
+  return _content_rules_field_has_value($node->$settings['field_name'], $value);
+}
 
 /**
  * Use the same configuration form as the "populate field" action.
@@ -270,7 +266,7 @@ function content_rules_field_changed($node1, $node2, $settings) {
   // Get information about the field.
   $field = content_fields($settings['field_name'], $node1->type);
 
-  return !empty($field) && $node1->$settings['field_name'] != $node2->$settings['field_name'];
+  return !empty($field) && !_content_rules_field_has_value($node1->$settings['field_name'], $node2->$settings['field_name']);
 }
 
 function content_rules_field_changed_form($settings, &$form, &$form_state) {
@@ -321,4 +317,27 @@ function _content_rules_get_field_value($settings, &$state) {
     $value = $settings['value'];
   }
   return $value;
+}
+
+/**
+ * Checks whether both field values match in a robust way.
+ *
+ * It returns TRUE, only if the number of multiple values matches and
+ * each property of the cck field's value is the same in the node.
+ *
+ * @param $node_value The value present in the node.
+ * @param $value The value to check for.
+ */
+function _content_rules_field_has_value($node_value, $value) {
+  if (count($value) != count($node_value)) {
+    return FALSE;
+  }
+  // Loop over multiple fields
+  foreach ($value as $delta => $sub_value) {
+    // Check if all properties of the value are there in the node value too
+    if (count(array_diff_assoc($sub_value, $node_value[$delta])) != 0) {
+      return FALSE;
+    }
+  }
+  return TRUE;
 }

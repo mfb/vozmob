@@ -1,5 +1,5 @@
 <?php
-// $Id: nodereference.module,v 1.138.2.53 2009/04/15 01:00:07 yched Exp $
+// $Id: nodereference.module,v 1.138.2.54 2009/04/29 20:51:53 karens Exp $
 
 /**
  * @file
@@ -59,6 +59,7 @@ function nodereference_field_info() {
     'nodereference' => array(
       'label' => t('Node reference'),
       'description' => t('Store the ID of a related node as an integer value.'),
+      'content_icon' => 'icon_content_noderef.png',
     ),
   );
 }

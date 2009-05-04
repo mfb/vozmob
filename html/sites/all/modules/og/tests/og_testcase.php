@@ -1,5 +1,5 @@
 <?php
-// $Id: og_testcase.php,v 1.10 2008/10/09 12:39:50 weitzman Exp $
+// $Id: og_testcase.php,v 1.10.4.1 2009/04/09 21:14:22 weitzman Exp $
 
 /**
  * @file
@@ -56,7 +56,6 @@ class OgTestCase extends DrupalWebTestCase {
     $keys = array(
       'og_groups',
       'og_groups_both',
-      'og_public',
     );
     $og_type = t('Group post');
     return $this->_addOgContent($type, $og_type, $edit, $keys);

@@ -1,5 +1,5 @@
 <?php
-// $Id: notifications.node.inc,v 1.1.2.2 2009/04/09 10:09:21 jareyero Exp $
+// $Id: notifications.node.inc,v 1.1.2.2.2.1 2009/04/28 10:22:01 jareyero Exp $
 /**
  * @file
  * Notifications node API for use by plug-in modules providing node related features
@@ -106,7 +106,7 @@ function _notifications_node_references($string, $match = 'contains', $types = a
     'starts_with' => "LIKE '%s%%'",
   );
   if ($types) {
-    $where[] = 'n.type IN (' . db_placeholders($types, 'string') . ') ';
+    $where[] = 'n.type IN (' . db_placeholders($types, 'char') . ') ';
     $args = $types;
   }
   $where[] = 'n.title '. (isset($match_operators[$match]) ? $match_operators[$match] : $match_operators['contains']);

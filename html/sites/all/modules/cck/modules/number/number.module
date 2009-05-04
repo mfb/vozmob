@@ -1,5 +1,5 @@
 <?php
-// $Id: number.module,v 1.91.2.34 2009/03/26 23:43:19 yched Exp $
+// $Id: number.module,v 1.91.2.35 2009/04/29 20:51:53 karens Exp $
 
 /**
  * @file
@@ -33,14 +33,17 @@ function number_field_info() {
     'number_integer' => array(
       'label' => t('Integer'),
       'description' => t('Store a number in the database as an integer.'),
+      'content_icon' => 'icon_content_number.png',
     ),
     'number_decimal' => array(
       'label' => t('Decimal'),
       'description' => t('Store a number in the database in a fixed decimal format.'),
+      'content_icon' => 'icon_content_number.png',
     ),
     'number_float' => array(
       'label' => t('Float'),
       'description' => t('Store a number in the database in a floating point format.'),
+      'content_icon' => 'icon_content_number.png',
     ),
   );
 }

@@ -1,5 +1,5 @@
 <?php
-// $Id: content.module,v 1.301.2.100 2009/03/18 19:20:52 yched Exp $
+// $Id: content.module,v 1.301.2.103 2009/04/29 20:51:52 karens Exp $
 /**
  * @file
  * Allows administrators to associate custom fields to content types.
@@ -51,8 +51,14 @@ function content_init() {
   if (module_exists('diff') && !function_exists('content_diff')) {
     module_load_include('inc', 'content', 'includes/content.diff');
   }
-  if (module_exists('panels')) {
-    module_load_include('inc', 'content', 'includes/content.panels');
+}
+
+/**
+ * Implementation of hook_ctools_plugin_directory().
+ */
+function content_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'ctools' && $plugin == 'content_types') {
+    return 'includes/panels/' . $plugin;
   }
 }
 
@@ -723,7 +729,7 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
 
     case 'view':
       $addition = array();
-      
+
       // Previewed nodes bypass the 'presave' op, so we need to some massaging.
       if ($node->build_mode == NODE_BUILD_PREVIEW && content_handle('widget', 'multiple values', $field) == CONTENT_HANDLE_CORE) {
         if (content_handle('widget', 'multiple values', $field) == CONTENT_HANDLE_CORE) {
@@ -795,7 +801,7 @@ function content_field($op, &$node, $field, &$items, $teaser, $page) {
         else {
           $element['items'] += $format_info;
         }
-        
+
         // The wrapper lets us get the themed output for the whole field
         // to populate the $FIELD_NAME_rendered variable for node templates,
         // and hide it from the $content variable if needed.

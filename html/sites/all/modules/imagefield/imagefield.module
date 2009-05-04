@@ -1,5 +1,5 @@
 <?php
-// $Id: imagefield.module,v 1.97 2009/04/15 20:15:58 quicksketch Exp $
+// $Id: imagefield.module,v 1.99 2009/04/20 23:57:17 quicksketch Exp $
 
 /**
  * @file
@@ -9,7 +9,7 @@
 /**
  * Implementation of hook_init().
  *
- * Load required includes and css files.
+ * Load required includes.
  */
 function imagefield_init() {
   // If FileField is not available, immediately disable ImageField.
@@ -21,13 +21,6 @@ function imagefield_init() {
 
   module_load_include('inc', 'imagefield', 'imagefield_file');
   module_load_include('inc', 'imagefield', 'imagefield_widget');
-}
-
-/**
- * Implementation of hook_perm().
- */
-function imagefield_perm() {
-  return array('view imagefield uploads');
 }
 
 /**
@@ -163,7 +156,7 @@ function imagefield_widget_settings($op, $widget) {
 }
 
 /**
- * Implementation of hook_widget().
+ * Implementation of CCK's hook_widget().
  *
  * Assign default properties to item and delegate to FileField.
  */

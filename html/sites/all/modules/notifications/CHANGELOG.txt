@@ -1,4 +1,4 @@
-// $Id: CHANGELOG.txt,v 1.1.2.11.2.51 2009/04/14 17:25:16 jareyero Exp $
+// $Id: CHANGELOG.txt,v 1.1.2.11.2.51.2.14 2009/04/29 16:24:08 jareyero Exp $
 
 TO DO
 ------
@@ -6,8 +6,57 @@ TO DO
 * Support for persistent notifications that will be triggered with a given interval until the user takes some action. Look into the subscription system to see whether this is currently possible with a plug-in or we need some api extensions.
 * Support for notifications in multiple languages, depending on user language
 
-6.x-1.1 to .....
------------------
+6.x-1.2-beta5 to 6.x-1.2-beta6
+-------------------------------
+- Removed logging functions, now using messaging logging facility.
+- Added content type subscription update when content type name changes, #429296
+- Fixed wrong db_placehoder type for node autocomplete callback
+- Fixed inconsistent fieldset for 'Skip notifications' in node and comment form.
+- Added comment about Immediate notifications not working with AJAX forms, #444010
+- Fixed wrong names for sending methods on subscriptions form, #443802
+
+6.x-1.2-beta4 to 6.x-1.2-beta5
+-------------------------------
+- Fixed: notification subscription error in postgreSQL, #442852
+- Fixed: notifications lite messages were not digested properly
+- Renamed template parts for group footer: 'footer' => 'closing' to avoid overlap
+- Fixed: Event for token replacement was not properly set in short digests
+- Fixed: notifications_process_rows() not returning the right number of rows in queue
+- Added some tests a base test clase, some utility function, etc...
+- Improved queue status report and new clean option, #441342
+- Added event information to objects for token replacement in digests, #348722
+- Fixed multiple minor usability and formatting issues in subscriptions form
+- Renamed custom subscriptions field names: explanation -> description.
+
+6.x-1.2-beta3 to 6.x-1.2-beta4
+------------------------------
+- Fixed bug: double emails, #440168
+- Fixed some notices, variables not initialized.
+- New option to limit the displayed terms to subscribed ones only, by mehmeta, #328708
+- Change in notifications ui to avoid loading subscriptions twice.
+
+6.x-1.2-beta1 to 6.x-1.2-beta3
+------------------------------
+- Added temporary enable / disable options
+- Fixed some issues with administration and edit forms
+- Improved event handling functions, removed global variable, fixed event schema
+- Some code clean up and performance improvements in notifications_lite, related #434826
+- Fixed WSOD When Notifications Content Module is Enabled, #438886
+- Fixed subscribe/unsubscribe forms redirection, #400996, #380672
+- Improved notifications for node/comment approval workflow, added tests, #285226
+- Notifications autosubscribe now operating on node/comment post fixing some issues, #359634
+- Added table and fields description to schema, #429184
+- Fixed code style / formatting, by grendzy, #437286
+- New feature: support for anonymous subscriptions, #233830
+- Fixed some notices, by grendzy, #437282
+- Fixed PHP fatal error: unsupported operand types, by chintu84, #436698
+- Fixed wrong event author for node/comment events, #436498
+- Added taxonomy subscription links/options to nodes, by Jody Lynn, #406606
+- Fixed WSOD with notifications_ui, renamed old functions, #434766
+- Fixing releases, moved new development to DRUPAL--6-2 branch
+
+6.x-1.1 to 6.x-1.2-beta1
+---------------------------
 - Added subscription options to user account, optionally in block too.
 - Reworked UI module, more options, moved some stuff from other modules there.
 - Improved query builder used for notifications_get_subscriptions() and notifications_delete_subscriptions()
@@ -195,4 +244,3 @@ TO DO
 - Added simpletest for content notifications. Needs more cases.
 - Fixed buggy url generation (destination not working on cron)
 - Improved page workflow and fixed bug in confirmation form (send_method)
- 

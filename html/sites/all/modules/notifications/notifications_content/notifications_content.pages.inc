@@ -1,5 +1,5 @@
 <?php
-// $Id: notifications_content.pages.inc,v 1.1.2.3 2009/04/15 16:08:13 jareyero Exp $
+// $Id: notifications_content.pages.inc,v 1.1.2.3.2.1 2009/04/30 11:22:37 jareyero Exp $
 /**
  * @file
  * Subscriptions to content events
@@ -32,19 +32,7 @@ function notifications_content_settings_form() {
     '#default_value' => variable_get('notifications_content_type', array()),
     '#description' => t('Define the available subscription types that will be enabled globally'),
   );
-  /*
-  foreach (node_get_types('names') as $content_type => $type_name) {
-    $key = 'notifications_content_type_' . $content_type;
-    $settings = variable_get($key, array());
-    // These will be expanded to individual checkboxes before theming
-    $form['content'][$key] = array(
-      '#title' => check_plain($type_name),
-      '#type' => 'checkboxes',
-      '#default_value' => notifications_content_type_enabled($content_type),
-      '#options' => _notifications_content_type_options(),
-    );
-  }
-  */
+
   return system_settings_form($form);
 }
 

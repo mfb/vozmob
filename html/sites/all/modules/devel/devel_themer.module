@@ -100,9 +100,20 @@ function devel_themer_init() {
     }
     drupal_add_css($path .'/devel_themer.css');
     drupal_add_js($path .'/devel_themer.js');
+    
     // The order these last two are loaded is important.
-    drupal_add_js($path .'/ui.mouse.js');
-    drupal_add_js($path .'/ui.draggable.js');
+    if (module_exists('jquery_ui'))
+    {
+      jquery_ui_add('ui.core');
+      jquery_ui_add('ui.mouse');
+      jquery_ui_add('ui.draggable');
+    }
+    else
+    {
+      drupal_add_js($path .'/ui.mouse.js');
+      drupal_add_js($path .'/ui.draggable.js');
+    }
+    
     // This needs to happen after all the other CSS.
     drupal_set_html_head('<!--[if IE]>
     <link href="' . $path .'/devel_themer_ie_fix.css" rel="stylesheet" type="text/css" media="screen" />
