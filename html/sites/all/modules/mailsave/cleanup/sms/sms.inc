@@ -30,7 +30,7 @@
  */
 function sms_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
 
-  watchdog('debug', 'sms mailsave clean');
+  watchdog('debug','starting sms_mailsave_clean');
 
   list($to_address, $to_name) = registration_get_toaddress($header, $mailbox);
   $to  = explode('@', $to_address);
