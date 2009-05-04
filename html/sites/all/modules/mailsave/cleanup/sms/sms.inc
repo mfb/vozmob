@@ -40,9 +40,11 @@ function sms_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
   // The node does not exist
   // The sms_user and sms_email_gateway modules are required.
   // The mail that this sms was sent to is not one of the registration accounts
+  watchdog('debug','aa');
   if (!$node->uid && module_exists('sms_user') && module_exists('sms_email_gateway') && !isset($email_registration_accounts[$to[0]])) {
     list($from_address, $from_name) = mailhandler_get_fromaddress($header, $mailbox);
     $from = explode('@', $from_address);
+  watchdog('debug','bb');
     $email_gateway_aliases = array(
       'messaging.nextel.com' => 'page.nextel.com',
       'mms.att.net' => 'txt.att.net',
@@ -54,6 +56,8 @@ function sms_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
 
     $number = $from[0];
 
+
+  watchdog('debug','cc');
     sms_mailsave_receive($node, $number);
     
     if (empty($node->title)) {
@@ -64,6 +68,7 @@ function sms_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
     //'name' => implode('-', array(dechex(mt_rand()), dechex(mt_rand()))),
     $sms_email_gateway_providers = sms_email_gateway_sms_email_gateway_providers();
     if (!$node->uid && isset($sms_email_gateway_providers[$from[1]])) {
+  watchdog('debug','dd');
      $user = FALSE;
      while (!$user) { 
       $user = user_save(NULL, array(
@@ -81,11 +86,7 @@ function sms_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
       mailhandler_switch_user($node->uid);
     }
 
-    //testing sms send
-    //sms_send($number, $message, $options = array())
-    //when testing -> $numberSasha = "6073515559";
-    //when testing -> $message = "otro test";
-    //when testing -> $options = array('carrier' => 'vtext.com' , 'from' => 'vozmob.sandbox.reg@gmail.com');
+    watchdog('debug','ee');
 
     if (module_exists('sms_registration')) {
 	    $message = "Thanks / Gracias! Do you want to have a blog in vozmob? If yes please send one word identifying the blog.";
