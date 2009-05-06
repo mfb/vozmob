@@ -90,7 +90,7 @@ function sms_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
 
     if (module_exists('sms_registration')) {
 	    $message = "Thanks / Gracias! Do you want to have a blog in vozmob? If yes please send one word identifying the blog.";
-	    $options = array('carrier'=> $from[1], 'from' => 'vozmob.sandbox.reg@gmail.com');
+	    $options = array('carrier'=> $from[1], 'from' => 'vozmob.sandbox.reg@gmail.com', 'subject'=>'Media posted');
     	    sms_send($number, $message, $options);
     	    //we will receive the answer in cleanup.registration.inc
 	    watchdog('debug','sms sent');
