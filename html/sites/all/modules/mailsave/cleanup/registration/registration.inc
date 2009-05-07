@@ -70,8 +70,12 @@ function registration_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
 	        //sms_send($number, $message, $options = array())
 	        //$number = "6073515559";
 	        $message = "Your blog was created. Your password is ".$user->pass;
-		$options = array('carrier'=> $from[1], 'from' => 'vozmob');
+		$options = array('carrier'=> $from[1], 'from' => 'vozmob.sandbox.reg@gmail.com');
 	    	sms_send($number, $message, $options);
+	}
+	//the user was not able to be created
+	else {
+
 	}
         watchdog('debug', 'end registration hookup');
     }
