@@ -1,0 +1,17 @@
+<?php
+// $Id: returnpath.install,v 1.2 2008/08/29 08:41:21 deciphered Exp $
+
+/**
+ * @file
+ */
+
+function returnpath_install() {
+  $path = drupal_get_path('module', 'returnpath');
+  variable_set('smtp_library', "{$path}/dummyfile.php");
+  drupal_set_message(t('Return-Path mail handler installed.'));
+}
+
+function returnpath_uninstall() {
+  variable_del('smtp_library');
+  drupal_set_message(t('Return-Path mail handler removed.'));
+}
