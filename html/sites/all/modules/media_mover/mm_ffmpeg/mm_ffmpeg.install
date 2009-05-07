@@ -1,0 +1,23 @@
+<?php
+
+// $Id$; 
+
+// @FILE is the install file for mm_ffmpeg
+
+function mm_ffmpeg_update_1() {
+	// select configurations from the data base and update a few variable items
+	// ffmpeg_acodec => ffmpeg_audio_acodec
+	// ffmpeg_vcodec => ffmpeg_video_vcodec
+	
+	// get all the possible configurations that could have this
+	$results = db_query('SELECT * FROM {media_mover_configurations} WHERE module = "%s"', 'mm_ffmpeg');
+	while ($result = db_fetch_array($results)) {
+		$result['configuration'] = unserialize($result['configuration']);
+		$result['configuration']['ffmpeg_audio_acodec'] = $result['configuration']['ffmpeg_acodec'];
+		$result['configuration']['ffmpeg_video_vcodec'] = $result['configuration']['ffmpeg_vcodec'];
+
+	  $result['configuration'] = serialize($result['configuration']);
+	  // update the database
+	  db_query('UPDATE {media_mover_configurations} SET configuration = "%s" WHERE cid = %d AND module = "%s"', $result['configuration'], $result['cid'], 'mm_ffmpeg');
+	}  		
+}

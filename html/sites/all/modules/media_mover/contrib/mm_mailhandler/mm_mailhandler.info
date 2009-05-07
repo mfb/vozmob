@@ -1,0 +1,7 @@
+; $Id: mm_mailhandler.info,v 1.1.2.1 2009/04/01 06:06:33 arthuregg Exp $
+name = MailHandler
+description = Adds email attachment harvesting to Media Mover
+package = "Media Mover"
+dependencies[] = media_mover_api
+dependencies[] =  mailhandler
+core=6.x

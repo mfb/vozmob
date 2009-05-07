@@ -1,0 +1,315 @@
+<?php
+// $Id$
+
+/**
+ * This file contains the integration between Media Mover and CCK
+ * Options for harvesting from and storing to are provided
+ */
+
+define(MM_CCK_HARVEST, 1);
+define(MM_CCK_STORE, 2);
+define(MM_CCK_COMPLETE, 3);
+
+/**
+ * Implementation of media_mover hook
+ * @param string $op
+ *   is the operator to return
+ * @param int $action
+ *   action id that is being called
+ * @param array $configuration is the specific configuration saved for the action for this configuration
+ * @param array $file
+ *   is the file in use
+ * @param array $running_config
+ *   is the full configuration data currently running
+ * @param int $nid
+ *   special param for processing individual nodes
+ */
+function mm_cck_media_mover($op, $action = null, $configuration = null, &$file = array(), $running_config = null, $nid = null) {
+  if (module_exists('content')) {
+    switch ($op) {
+      case 'name':
+        return t('Media Mover CCK module');
+
+      case 'actions':
+        return array(
+          'harvest' => array(MM_CCK_HARVEST => t('Harvest from a CCK field')),
+          'storage' => array(MM_CCK_STORE => t('Save data in a CCK field')),
+          'complete' => array(MM_CCK_COMPLETE => t('Save data in a CCK field')),
+        );
+
+      case 'config':
+        switch ($action) {
+          case MM_CCK_HARVEST:
+            return mm_cck_config_harvest($action, $configuration);
+
+          case MM_CCK_COMPLETE:
+          case MM_CCK_STORE:
+            return mm_cck_config_save_node($action, $configuration, $configuration['verb']);
+        }
+        break;
+
+      case 'harvest':
+        if ($action == MM_CCK_HARVEST) {
+          return mm_cck_harvest($action, $configuration, $running_config, $nid);
+        }
+        break;
+
+      case 'complete':
+      case 'storage':
+        return mm_cck_node_save($action, $configuration, $file);
+
+      case 'delete':
+        if ($action == MM_CCK_STORE) {
+          // @TODO: check action that is being deleted and remove single files based on config
+        }
+        break;
+    }
+  }
+}
+
+/**
+ * Media Mover: Media Mover hook functions
+ */
+
+/**
+ * return the configuration form for harvesting from CCK fields
+ */
+function mm_cck_config_harvest($action, $configuration) {
+  $form = array();
+  $form['mm_harvest_conf'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Harvest Configuration'),
+    '#description' => t('This module harvests files attached to a CCK field'),
+  );
+  $form['mm_harvest_conf']['mm_config_harvest_field'] = array(
+    '#type' => 'select',
+    '#multiple' => true,
+    '#title' => t('Select files from these CCK fields'),
+    '#description' => t('Select the CCK fields to harvest files from.'),
+    '#options' => mm_cck_fields(),
+    '#default_value' => $configuration['mm_config_harvest_field'],
+  );
+  $form['mm_harvest_conf']['file_types'] = array(
+    '#title' => t('File types'),
+    '#type' => 'textfield',
+    '#default_value' => $configuration['file_types'] ? $configuration['file_types'] : 'avi mov wmv mpeg mp4 mpeg2 dv 3gp 3g2 mpeg4',
+    '#description' => t('Space separated list of file types that can be harvested. These are file extensions and are values like "avi mov wmv mpeg mp4 mpeg2 dv".'),
+  );
+  return $form;
+}
+
+
+/**
+ * Return the configuration form for saving to CCK fields
+ * @param int $action
+ * @param array $configuration
+ * @return array
+ */
+function mm_cck_config_save_node($action, $configuration, $verb) {
+  $form = array();
+  $form['mm_'. $verb .'_conf'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('!verb Configuration', array('!verb' => $verb)),
+    '#description' => t('This module saves data to a CCK field'),
+    '#collapsed' => false,
+  );
+  // add the $action extension to keep name spacing
+  $form['mm_'. $verb .'_conf']['mm_cck_field_save_'. $action] = array(
+    '#type' => 'select',
+    '#title' => t('Save the file to this CCK field'),
+    '#description' => t('Select the CCK field to save files to. There must be incoming node data for this to function correctly.'),
+    '#options' => mm_cck_fields(),
+    '#default_value' => $configuration['mm_cck_field_save_'. $action],
+  );
+  $form['mm_'. $verb .'_conf']['field_save_list'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('List File'),
+    '#description' => t('List file automatically on the node.'),
+    '#default_value' => $configuration['field_save_list'] ? $configuration['field_save_list'] : 0,
+  );
+  return $form;
+}
+
+
+/**
+ * Harvest files from a CCK field
+ * @param array $config
+ *   the configuration array
+ * @param array $running_config
+ *   the full configuration object that is running
+ * @param int $nid
+ *   node id if a single node is being processed
+ * @return array
+ */
+function mm_cck_harvest($action, $configuration, $running_config, $nid) {
+  $files = array();
+  $fields = content_fields();
+
+  $harvest_conditions = '';
+  // are we harvesting from a specific NID ?
+  if ($nid) {
+    $harvest_conditions = ' AND n.nid = '. $nid;
+  }
+
+  // we need to harvest from each field that was selected
+  foreach ($configuration['mm_config_harvest_field'] as $field_name) {
+    // get the relevant database information for this field
+    $db_info = content_database_info($fields[$field_name]);
+
+    // change the query based on field type
+    switch ($fields[$field_name]['type']) {
+      case 'text':
+        //$node->{$field['field_name']} = array(array('value' => $file['process_file']));
+      break;
+
+      // handle image field case
+      case 'filefield':
+      case 'image':
+        // are file types being checked?
+        if ($configuration['file_types']) {
+          $types = explode(' ', $configuration['file_types'] );
+          foreach ($types as $type) {
+            $conditions[] = "f.filepath LIKE '%%.$type%'";
+          }
+          // build the SQL to check against the file types
+          $file_type_conditions = ' AND ('. implode(' OR ', $conditions) .')';
+        }
+
+        $results = db_query('SELECT f.filepath AS harvest_file, n.nid, f.fid FROM {files} f
+          LEFT JOIN {'. $db_info['table'] .'} c ON c.'. $db_info['columns']['fid']['column'] .' = f.fid
+          LEFT JOIN {node} n ON c.nid = n.nid
+          LEFT JOIN {media_mover_files} m ON m.fid = f.fid AND m.cid = %d
+          WHERE  (n.nid IS NOT NULL AND m.nid IS NULL) OR
+            (n.nid IS NOT NULL AND n.nid = m.nid AND f.filepath <> m.harvest_file)
+            '. $file_type_conditions .'
+          ORDER BY f.timestamp', $configuration['cid']);
+
+        // now build the out going file data
+        while ($result = db_fetch_array($results)) {
+          $files[] = $result;
+        }
+      break;
+    }
+  }
+  return $files;
+}
+
+
+/**
+ * Save to the CCK field
+ * @param int $action
+ *   action id that is being run
+ * @param array $configuration
+ *   the configuration array
+ * @param array $file
+ *   media mover file array
+ * @return string
+ *   new file location
+ */
+function mm_cck_node_save($action, $configuration, $file) {
+  // get the path to the file to operate on. We need this to pass out of the function
+  $file_path = media_mover_api_config_current_file($file);
+
+  // is there a node attached to the $file array?
+  if (! $node = media_mover_api_get_node_from_file($file)) {
+    // set an alert
+    watchdog('Media Mover CCK', 'No node data was passed for storing file data in a specified CCK field: !file',
+      array('!file', l(t($file['mmfid']),  'admin/media_mover/file/edit/'. $file['mmfid'])), WATCHDOG_ERROR);
+    // we can not save the file; exit
+    return;
+  }
+
+  // get the field that we are using
+  $field = content_fields($configuration['mm_cck_field_save_'. $action]);
+  switch ($field['type']) {
+    case 'text':
+      $node->{$field['field_name']} = array(array('value' => $file_path));
+  	  // save the node
+      node_save($node);
+      // clear the cache
+      cache_clear_all('content:'. $node->nid .':'. $node->vid, 'cache_content');
+  	  $file['filepath'] = $file_path;
+    break;
+
+    // handle CCK image and CCK file field cases
+  	case 'image':
+  	case 'filefield':
+  	  if (! $file = mm_cck_field_filefield($node, $field, $file_path, $configuration)) {
+  	  	return;
+  	  }
+  	break;
+
+  }
+
+  // return the file
+  return $file['filepath'];
+}
+
+
+/**
+ * Helper function to map file to CCK file fields
+ * @param array $node
+ *   Drupal node object
+ * @param array $field
+ *   CCK field array
+ * @param string $file_path
+ *   The file path
+ * @param array $configuration
+ * @return array
+ */
+function mm_cck_field_filefield(&$node, $field, $file_path, $configuration) {
+  // is there a specified directory to use with this field?
+  $destination_path = mm_cck_field_widget_files_directory($field);
+
+  // get the validators for this field
+  if ($field['type'] == 'image') {
+    $validators = array_merge(filefield_widget_upload_validators($field), imagefield_widget_upload_validators($field));
+  }
+  else { $validators = filefield_widget_upload_validators($field);}
+
+  // now get the new field
+  if (! $file = field_file_save_file($file_path, $validators, $destination_path)) {
+    watchdog('MM Content', 'Could not save file', null, WATCHDOG_ERROR);
+    return;
+  }
+
+  // we need to alter the file object slightly so it will display correctly
+  $file['data'] = array('description' => '');
+  // do we list the file?
+  $file['list'] = $configuration['field_save_list'];
+
+  // add the file on to the node
+  $node->{$field['field_name']}[] = $file;
+  // save the node
+  node_save($node);
+  // clear the cache
+  cache_clear_all('content:'. $node->nid .':'. $node->vid, 'cache_content');
+  return $file;
+}
+
+
+/**
+ * Create a destination path
+ * @param $field
+ * @return unknown_type
+ */
+function mm_cck_field_widget_files_directory($field) {
+  $widget_file_path = $field['widget']['file_path'];
+  if (module_exists('token')) {
+    global $user;
+    $widget_file_path = token_replace($widget_file_path, 'user', $user);
+  }
+  return file_directory_path() .'/'. $widget_file_path;
+}
+
+
+/**
+ * Return array of content fields for display in configuration forms.
+ */
+function mm_cck_fields() {
+  $fields = array();
+  foreach (content_fields() as $field) {
+    $fields[$field['field_name']] = $field['widget']['label'];
+  }
+  return $fields;
+}

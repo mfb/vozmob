@@ -1,0 +1,6 @@
+; $Id;
+name = S3 Media Mover module
+description = Allows Media Mover modules to store files on Amazon's S3 system
+package = "Media Mover"
+dependencies[] = media_mover_api
+core=6.x

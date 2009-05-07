@@ -1,0 +1,17 @@
+<?php
+
+// $Id: mm_i18nsync.install,v 1.1.2.1 2008/04/21 22:18:18 arthuregg Exp $;
+
+/**
+ * Check that the FTP extension exists for PHP.
+ */
+function mm_i18nsync_requirements($phase) {
+  $is_patched = function_exists('i18nsync_extend');
+  $requirements['mm_i18nsync'] = array(
+    'title' => t('i18n Sync'),
+    'description' => t("Media Mover i18n Sync requires a patch to be applied to i18nsync. Please see !link.", array('!link' => l('i18nsync hook', 'http://drupal.org/node/233787'))),
+    'value' => $is_patched ? t('Enabled') : t('Not patched'),
+    'severity' => $is_patched ? REQUIREMENT_OK : REQUIREMENT_ERROR,
+  );
+  return $requirements;
+}

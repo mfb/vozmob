@@ -1,6 +1,0 @@
-; $Id: mm_sox.info,v 1.1 2008/01/18 00:35:58 bdragon Exp $
-name = SoX Media Mover module
-description = Runs Sound eXchange for the Media Mover modules
-package = "Media Mover"
-dependencies[] = media_mover_api
-core = 6.x

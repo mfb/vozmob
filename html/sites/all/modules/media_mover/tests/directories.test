@@ -1,0 +1,26 @@
+<?php
+// $Id: directories.test,v 1.1.2.1 2008/07/09 22:35:45 arthuregg Exp $; 
+
+/**
+ * @FILE this builds a basic test to see if the media mover files directory 
+ *       is readable
+ */
+
+class media_mover_api_directories extends DrupalTestCase {
+  function get_info() {
+    return array(
+      'name' => t('Media Mover API directory tests'),
+      'desc' => t('ensures that the Media Mover files directory is writeable.'),
+      'group' => 'Media Mover API'
+    );
+  }
+  
+  function setUp() {
+  }
+
+  function test_media_mover_api_directories() {
+  	$return = is_writeable(media_mover_api_dir_path());
+    $this->assertTrue($return, $return ? "The Media Mover files directory is writeable" : "The Media Mover files directory is not writeable");
+  }
+}
+

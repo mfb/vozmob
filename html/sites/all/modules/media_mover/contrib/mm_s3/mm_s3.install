@@ -1,0 +1,17 @@
+<?php
+
+/**
+ * Check that the FTP extension exists for PHP.
+ */
+function mm_s3_requirements($phase) {
+  // Check for CURL
+  if (extension_loaded('curl') && !@dl(PHP_SHLIB_SUFFIX == 'so' ? 'curl.so' : 'php_curl.dll')) { $has_curl = true; }  
+  $requirements['mm_s3'] = array(
+    'title' => t('PHP Curl Support'),
+    'description' => t('Media Mover S3 requires PHP to have the Curl libraries. If your version of PHP does not have it, check with your system administrator.'),
+    'value' => $has_curl ? t('Enabled') : t('Not found'),
+    'severity' => $has_curl ? REQUIREMENT_OK : REQUIREMENT_ERROR,
+  );
+  return $requirements;
+}
+

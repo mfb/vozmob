@@ -1,0 +1,129 @@
+<?php
+
+// $Id$
+
+
+/**
+ * Implementation of media_mover hook
+ * @param $op is the operator to return
+ * @param $action is which action is being called
+ * @param $verb is the verb being run
+ * @param $configuration is the specific configuration saved for the action for this configuration
+ * @param $file is the file in use
+ * @param $job is the full configuration data currently running
+ */
+function mm_zip_media_mover($op = null, $action = null, $configuration = null, &$file = array(), $job = null, $nid = null ) {
+  switch ($op) {
+
+    // give your module a distinct name
+    case 'name':
+      return "Media Mover Zip Compression";
+    break;
+
+    // defines the actions that this module does
+    case 'actions':
+      return array(
+        'process' => array(
+          1 => t('Zip incoming file'),
+        ),
+        'storage' => array(
+          2 => t('Zip incoming file'),
+        ),
+        'complete' => array(
+          3 => t('Zip incoming file'),
+        ),
+      );
+    break;
+
+    // create edit configuration option set
+    case 'config':
+      return mm_zip_config($action, $configuration, $op);
+    break;
+
+    case 'process':
+    case 'storage':
+    case 'complete':
+      return mm_zip_process($file, $configuration);
+
+    case 'admin':
+      return mm_zip_admin();
+    break;
+  }
+}
+
+
+/**
+ * Creates the configuration form
+ * @param $action
+ * @param $configuration
+ * @param $verb
+ *   what verb is currently being called
+ * @return array
+ */
+function mm_zip_config($action, $configuration, $verb) {
+  $form['mm_zip'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Zip for: !verb files', array('!verb' => $verb)),
+    '#description' => t('This compresses files with the Zip utility.'),
+    '#collapsed' => false,
+  );
+  return $form;
+}
+
+
+/**
+ * Provides the administration settings
+ * @return unknown_type
+ */
+function mm_zip_admin() {
+  $form['mm_zip'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Media Mover Zip Compression'),
+  );
+  $form['mm_zip']['mm_zip_path'] = array(
+    '#title' => t('Path to Zip binary'),
+    '#type' => 'textfield',
+    '#default_value' => variable_get('mm_zip_path', '/usr/bin/zip'),
+    '#descript' => t('Path to the Zip binary. You can find it by using the command line and typing "whereis zip"'),
+  );
+
+  return $form;
+}
+
+
+/**
+ * Runs the actual processing of the file
+ * @param $file
+ *   media mover file array
+ * @param $configuration
+ *   media mover configuration
+ * @return string
+ */
+function mm_zip_process($file, $configuration) {
+  // Is the path correct to the Zip binary?
+  if (! file_exists(variable_get('mm_zip_path', '/usr/bin/zip'))) {
+    watchdog('MM Zip', 'Path to zip was not found', null, WATCHDOG_ERROR);
+    return;
+  }
+  // get the path to Zip
+  $path_to_zip = variable_get('mm_zip_path', '/usr/bin/zip');
+
+  // get the path to the file to operate on. We need this
+  // to pass out of the function
+  $file_path = media_mover_api_config_current_file($file);
+
+  // create the output file in the media mover files directory
+  $output_file = media_mover_api_dir_path($configuration['module'] .'/'. $configuration['action']) .'/'. basename($file_path) .'.zip';
+
+  // build the command
+  $command = array($path_to_zip, escapeshellarg($output_file), escapeshellarg($file_path));
+
+  // run the command
+  ob_start();
+    passthru(implode(' ', $command), $command_return);
+    $output = ob_get_contents();
+  ob_end_clean();
+
+  // return the zip file
+  return $output_file;
+}

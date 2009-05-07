@@ -1,0 +1,7 @@
+;$Id;
+name = Media Mover Views
+description = Provides Media Mover Views integration
+package = "Media Mover"
+dependencies[] = media_mover_api 
+dependencies[] = views
+core=6.x
