@@ -1,11 +1,13 @@
 <?php
-// $Id: sms_email_gateway.module,v 1.4.2.2 2008/09/17 14:11:50 diggersf Exp $
+// $Id: sms_email_gateway.module,v 1.4.2.2.2.6 2009/04/24 18:56:14 thehunmonkgroup Exp $
 
 function sms_email_gateway_gateway_info() {
   return array(
     'email' => array(
       'name' => 'E-mail',
-      'send' => 'sms_email_gateway_send',      
+      'send' => 'sms_email_gateway_send',
+      'receive' => TRUE,
+      'configure form' => 'sms_email_gateway_admin_form',
       'send form' => 'sms_email_gateway_send_form',
     ),
   );
@@ -14,12 +16,12 @@ function sms_email_gateway_gateway_info() {
 /**
  * Returns custom additions to be added to the send forms
  */
-function sms_email_gateway_send_form() {  
+function sms_email_gateway_send_form() {
   $options = array();
   $providers = module_invoke_all('sms_email_gateway_providers');
   asort($providers);
   $options += $providers;
-    
+
   $form['carrier'] = array(
     '#type' => 'select',
     '#title' => t('Carrier'),
@@ -28,8 +30,132 @@ function sms_email_gateway_send_form() {
     '#options' => $options,
     '#default_value' => -1,
   );
-  
+
   return $form;
+}
+
+/**
+ * Builds the admin settings form.
+ *
+ * @return An array of the form.
+ */
+function sms_email_gateway_admin_form(&$form_state) {
+  $form = array();
+
+/*
+  TODO: we may not need this, but leaving here just in case.
+  $form['sms_email_gateway_sendmail_path'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Path to sendmail'),
+    '#default_value' => variable_get('sms_email_gateway_sendmail_path', '/usr/sbin/sendmail'),
+    '#description' => t('Enter the full system path to the sendmail program. This is system-dependent. If you have shell access to the system, you can try <em>which sendmail</em> to get the path.'),
+  );*/
+  $form['sms_email_gateway_mail_domain'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Default mail domain'),
+    '#default_value' => variable_get('sms_email_gateway_mail_domain', 'example.com'),
+    '#description' => t('Enter the default domain where the email gateway messages are received.'),
+  );
+
+  return system_settings_form($form);
+}
+
+/**
+ * Implementation of hook_xmlrpc()
+ */
+function sms_email_gateway_xmlrpc() {
+  return array(
+    // Process the data from a received e-mail.
+    array(
+      'emailGateway.send',
+      'sms_email_gateway_receive_message',
+      array('int', 'string'),
+      t('sends a received e-mail to the configured Drupal site')
+    ),
+  );
+}
+
+function sms_email_gateway_receive_message($email) {
+  // Break up the lines.
+  $lines = explode("\n", $email);
+
+  $from = '';
+  $to = '';
+  $subject = '';
+  $headers = '';
+  $message = '';
+  $splittingheaders = TRUE;
+
+  // Loop through one line at a time.
+  for ($i = 0; $i < count($lines); $i++) {
+    // This is a header.
+    if ($splittingheaders) {
+      $headers .= $lines[$i] ."\n";
+
+      // Grab Subject:, From:, To: separately.
+      if (preg_match('/^Subject:(.*)/', $lines[$i], $matches)) {
+        $subject = trim($matches[1]);
+      }
+      elseif (preg_match('/^From:(.*)/', $lines[$i], $matches)) {
+        // For combo name/email addresses, parse out the email addy.
+        $from = sms_email_gateway_parse_email(trim($matches[1]));
+
+      }
+      elseif (preg_match('/^To:(.*)/', $lines[$i], $matches)) {
+        // For combo name/email addresses, parse out the email addy.
+        $to = sms_email_gateway_parse_email(trim($matches[1]));
+      }
+    // Message chunk.
+    } else {
+      $message .= $lines[$i] ."\n";
+    }
+
+    // Empty line, header section has ended.
+    if (trim($lines[$i]) == '') {
+      $splittingheaders = FALSE;
+    }
+  }
+
+  sms_email_gateway_process_incoming_message($from, $to, $subject, $message, $headers);
+
+  return 0;
+}
+
+/**
+ * Passes the data from a received e-mail to a callback function.
+ *
+ * @param $from
+ *    The address the email was sent from.
+ * @param $to
+ *    The address the email was sent to.
+ * @param $subject
+ *    The e-mail subject.
+ * @param $message
+ *    The body of the email message.
+ * @param $headers
+ *    A string of the full headers from email.
+ *
+ * @return
+ *   Successful exit code.
+ */
+function sms_email_gateway_process_incoming_message($from, $to, $subject, $message, $headers) {
+
+  // The normal convention for mobile email addresses is phonenumber@provider,
+  // but some allow custom names and such for the email username.  There's not
+  // much we can do about that, so just treat whatever is the email username as
+  // the SMS number...
+  $split = explode('@', $from);
+  $number = $split[0];
+
+  // Build email-specific metadata.
+  $options = array(
+    'sms_email_gateway_from' => $from,
+    'sms_email_gateway_to' => $to,
+    'sms_email_gateway_subject' => $subject,
+    'sms_email_gateway_headers' => $headers,
+  );
+
+  sms_incoming($number, $message, $options);
 }
 
 /**
@@ -75,4 +201,177 @@ function sms_email_gateway_sms_email_gateway_providers() {
     'vmobl.com' => t('Virgin Mobile'),
     'vtext.com' => t('Verizon'),
   );
+}
+
+/**
+ * Parses out email address from addresses with human-readable names.
+ *
+ * @param $full_address
+ *   The full email address.
+ *
+ * @return
+ *   The email address.
+ */
+function sms_email_gateway_parse_email($full_address) {
+  if ($left = strpos($full_address, '<')) {
+    $right = strpos($full_address, '>');
+    $address = substr($full_address, $left + 1, $right - $left - 1);
+  }
+  else {
+    $address = $full_address;
+  }
+
+  return $address;
+}
+
+/**
+ * Parses an email address matching a standardized structure into metadata.
+ *
+ * Address codes and identifiers are extracted from the email address using the
+ * following logic:
+ *
+ *   1. If no email address extension (+) is present, the address code is the
+ *      user portion of the email address, and there is no identifier.
+ *
+ *   2. If an email address extension (+) is present:
+ *
+ *        a. If the address extension contains an underscore, the address code
+ *           is the portion of the extension to the left of the underscore, and
+ *           the identifier is the portion to the right of the underscore.
+ *
+ *        b. If the address extension does not contain an underscore, the
+ *           address code is portion to the left of the + sign in the username,
+ *           and the identifier is the portion to the right of the + sign in the
+ *           username.
+ *
+ * Examples:
+ *
+ *   1. foo@example.com -- address code is foo, no identifier.
+ *
+ *   2. foo+bar@example.com -- address code is foo, identifier is bar.
+ *
+ *   3. foo+bar_baz@example.com -- address code is bar, identifier is baz.
+ *
+ * By convention, address codes are normally two characters long, but can be
+ * longer.
+ *
+ * USE CASE:
+ *
+ * See sms_email_gateway_test_incoming_sms_incoming() in
+ * sms_email_gateway_test_incoming.module for an example of how to use this
+ * functionality.
+ *
+ * CAVEATS:
+ *
+ * 1. It is the job of any calling code to validate the metadata -- this is
+ *    only a parsing function!!
+ *
+ * @param $address
+ *   The email address to parse.
+ *
+ * @return
+ *   An associative array with the following key/value pairs:
+ *     'user'         => The user portion of the email address.
+ *     'domain'       => The domain portion of the email address.
+ *     'address_code' => The parsed address code.
+ *     'identifier'   => The parsed identifier, if any.
+ */
+function sms_email_gateway_address_metadata($address) {
+  // Break up the To: address
+  $split = explode('@', $address);
+  // User section.
+  $user1 = $split[0];
+  // Domain section.
+  $domain = $split[1];
+  // Check for extension.
+  if (strstr($user1, '+')) {
+    // Split extension.
+    $user2 = explode('+', $user1);
+    // User section.
+    $user = $user2[0];
+    // Extension section.
+    $extension1 = $user2[1];
+    // Check for address code/identifier.
+    if (strstr($extension1, '_')) {
+      // Split extension into address code and identifier.
+      $extension = explode('_', $extension1);
+      $address_code = $extension[0];
+      $identifier = $extension[1];
+    }
+    // No address code -- make user address code.
+    else {
+      $address_code = $user;
+      $identifier = $extension1;
+    }
+  }
+  // No extension, no identifier -- make user equal address code.
+  else {
+    $user = $user1;
+    $address_code = $user1;
+    $identifier = '';
+  }
+
+  return array(
+    'user' => $user,
+    'domain' => $domain,
+    'address_code' => $address_code,
+    'identifier' => $identifier,
+  );
+}
+
+/**
+ * Formats metadata-embedded email addresses.
+ *
+ * This function is a helper function to build addresses that are in the format
+ * parsed by sms_email_gateway_address_metadata().  See that function for
+ * details on the format.
+ *
+ * @param $config
+ *   An associative array of information needed to build the from address.
+ *   Possible keys are:
+ *      'user'           =>  Required. The user the email is sent from.
+ *      'user_title'     =>  Optional. Adds a human-readable username to the
+ *                           From: address, ex. Bob <bob@example.com>.  Default
+ *                           is no human-readable username.
+ *      'domain'         =>  Optional. The domain the email is sent from.
+ *                           Defaults to the mail domain setting for the email
+ *                           gateway.
+ *      'address_code'   =>  Optional. A code that can be used for routing
+ *                           incoming messages, ex. map different codes to
+ *                           different callbacks.
+ *      'identifier      =>  Optional. A custom identifier, ex. A nid.
+ *
+ * @return
+ *   The metadata-formatted email address.
+ */
+function sms_email_gateway_build_metadata_address($config) {
+
+  // Build extension components, if any.
+  $extension_components = array();
+  if (isset($config['address_code'])) {
+    $extension_components[] = $config['address_code'];
+  }
+  if (isset($config['identifier'])) {
+    $extension_components[] = $config['identifier'];
+  }
+  if (empty($extension_components)) {
+    $extension = '';
+  }
+  else {
+    $extension = '+' . implode('_', $extension_components);
+  }
+
+  // Use custom domain, fallback to default.
+  $domain = isset($config['domain']) ? $config['domain'] : variable_get('sms_email_gateway_mail_domain', 'example.com');
+
+  // Build final from address.
+  $from = $config['user']. $extension .'@'. $domain;
+  if (isset($config['user_title'])) {
+    $full_from = $config['user_title'] . ' <'. $from .'>';
+  }
+  else {
+    $full_from = $from;
+  }
+
+  return $full_from;
 }
