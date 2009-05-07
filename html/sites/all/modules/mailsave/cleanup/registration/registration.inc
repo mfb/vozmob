@@ -33,7 +33,7 @@ function registration_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
   watchdog('debug','starting registration_mailsave_clean');
   // If there is already a node created
   // The sms_user and sms_email_gateway modules are required.
-  if ($node->uid && module_exists('sms_user') && module_exists('sms_email_gateway')) {
+  if (module_exists('sms_user') && module_exists('sms_email_gateway')) {
     list($from_address, $from_name) = mailhandler_get_fromaddress($header, $mailbox);
     list($to_address, $to_name) = registration_get_toaddress($header, $mailbox);
     $from = explode('@', $from_address);
