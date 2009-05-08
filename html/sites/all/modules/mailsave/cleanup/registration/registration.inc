@@ -65,17 +65,16 @@ function registration_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
     	$user = user_save($account, array('name' => $newName), 'account');
 	if ($user) {
 		watchdog('debug', 'user was saved succesfully');
-     		//$password = dechex(mt_rand()) . dechex(mt_rand());
-		//Send message confirming with password and instruction
-	        //sms_send($number, $message, $options = array())
-	        //$number = "6073515559";
 	        $message = "Your blog was created. Your password is ".$user->pass;
 		$options = array('carrier'=> $from[1], 'from' => 'vozmob.sandbox.reg@gmail.com');
 	    	sms_send($number, $message, $options);
 	}
 	//the user was not able to be created
 	else {
-
+		watchdog('debug', 'user was not saved. sending error message');
+	        $message = "The blog was not created. Please choose other name.";
+		$options = array('carrier'=> $from[1], 'from' => 'vozmob.sandbox.reg@gmail.com');
+	    	sms_send($number, $message, $options);
 	}
         watchdog('debug', 'end registration hookup');
     }
