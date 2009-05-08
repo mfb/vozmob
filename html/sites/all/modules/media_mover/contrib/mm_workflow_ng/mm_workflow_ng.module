@@ -1,0 +1,241 @@
+<?php
+
+// ;$Id: mm_workflow_ng.module,v 1.1.2.1.2.1 2008/09/26 16:58:18 arthuregg Exp $
+
+module_load_include('nc', 'mm_workflow_ng', '');
+
+/**
+ * Defines the Media Mover operations 
+ *
+ * @return array
+ */
+function mm_workflow_ng_event_info() {
+  return array(
+    'media_mover_harvest_file' => array(
+      '#label' => t('Media file has been harvested'),
+      '#module' => t('Media Mover'), 
+      '#arguments' => workflow_ng_events_hook_media_mover_arguments('harvest'),     
+      '#redirect' => TRUE,
+    ),        
+    'media_mover_process_file' => array(
+      '#label' => t('Media file has been processed'),
+      '#module' => t('Media Mover'), 
+      '#arguments' => workflow_ng_events_hook_media_mover_arguments('process'),     
+      '#redirect' => TRUE,
+    ),        
+    'mediamover_stored_file' => array(
+      '#label' => t('Media file has been stored'),
+      '#module' => t('Media Mover'), 
+      '#arguments' => workflow_ng_events_hook_media_mover_arguments('store'),     
+      '#redirect' => TRUE,
+    ),    
+    'media_mover_complete_file' => array(
+      '#label' => t('Media Mover has finished with the file'),
+      '#module' => t('Media Mover'), 
+      '#arguments' => workflow_ng_events_hook_media_mover_arguments('complete'),     
+      '#redirect' => TRUE,
+    ),
+  );
+}
+
+
+/*
+ * Returns some arguments suitable for hook comment
+ */
+function workflow_ng_events_hook_media_mover_arguments($type) {
+  
+  $args = array (
+    'mm_file' => array('#entity' => 'mm_file', '#label' => t('New Media Mover file')),
+    'mm_config' => array('#entity' => 'mm_config', '#label' => t('Media Mover Configuration'), '#handler' => 'media_mover_workflow_ng_config_argument_handler'),
+  );
+    
+  switch ($type) {
+    case 'complete':      
+      $args['node'] = array ('#entity' => 'node', '#label' => t('New Media Mover Node'), '#handler' => 'media_mover_workflow_ng_node_argument_handler');
+      $args['user'] = array ('#entity' => 'user', '#label' => t('Uploading User (if avail)'), '#handler' => 'media_mover_workflow_ng_user_argument_handler');
+      break;
+  }
+  
+  return $args;
+}
+
+
+function mm_workflow_ng_complete($configuration,$file) {
+  //workflow_ng_invoke_event('mediamover_completed_file',$file);
+  return $file;
+}
+
+function media_mover_workflow_ng_config_argument_handler($file) {
+  if ($config = media_mover_token_get_config($file['cid']) ) {
+    return $config;
+  }
+}
+
+function media_mover_workflow_ng_node_argument_handler($file) {
+  if ($node = node_load(array('nid' => $file['nid']))) {    
+    return $node;
+  }
+  return new stdClass();
+}
+
+function media_mover_workflow_ng_user_argument_handler($file) {  
+  if ($node = node_load(array('nid' => $file['nid']))) {
+    return user_load(array('uid' => $node->uid));
+  }
+}
+
+
+/*
+ * Implementation of hook_action_info()
+ */
+function mm_workflow_ng_action_info() {
+  return array(
+    'workflow_ng_action_mm_run_config_with_node' => array(
+      '#label' => t('DEBUG_ONLY: Run a Media Mover config with completed node'),
+      '#arguments' => array(
+        'node' => array('#entity' => 'node', '#label' => t('Node')),
+      ),
+      '#module' => t('Media Mover'),
+    )
+  );
+}
+
+function workflow_ng_action_mm_run_config_with_node($node, $settings, &$arguments, &$log) {
+  //first sanity check to make sure we aren't running a workflow_ng complete enabled config
+  //This is dicey... will write later.
+  
+  if ( ($config = _mm_get_configuration($settings['configuration']) ) && $node->nid) {
+    $cmd = "media_mover_api_run_config(" . var_export($config,1) . ",false,$node->nid);";
+    dpr('I would have ran' . $cmd);
+  }
+}
+
+function workflow_ng_action_mm_run_config_with_node_form($settings = array(), $argument_info) {
+  $form = array();
+  
+  $form['configuration'] = _mm_workflow_ng_configuration_select_elem();
+  $form['configuration']['#description'] = t('Select the Media Mover Configuration you would like to feed the new node into');
+  $form['configuration']['#default_value'] = $settings['configuration'];
+  
+  return $form;
+}
+
+function workflow_ng_action_mm_run_config_with_node_submit($form, &$form_state) {
+  $form_state['redirect'] = array ('configuration' => $form_state['values']['configuration']);
+}
+/*
+ * Implementation of hook_condition_info()
+ */
+function mm_workflow_ng_condition_info() {
+  return array(
+    'workflow_ng_condition_mm_configuration_is' => array(
+      '#label' => t('Media Mover Configuration is'),
+      '#arguments' => array(
+        'mm_config' => array('#entity' => 'mm_config', '#label' => t('Media Mover configuration being run')),
+      ),
+      '#description' => t('Evaluates to TRUE, if the given configuration selected is the one being run.'),
+      '#module' => t('Media Mover'),
+    ),
+    
+    'workflow_ng_condition_mm_file_type_is' => array(
+      '#label' => t('Media Mover file type is'),
+      '#arguments' => array(
+        'mm_file' => array('#entity' => 'mm_file', '#label' => t('Media Mover file being sent through')),
+      ),
+      '#description' => t('Evaluates to TRUE, if the file type selected is the same as the one being used.'),
+      '#module' => t('Media Mover'),
+    ),
+  );
+}
+
+/*
+ * Condition: Check for selected content types
+ */
+function workflow_ng_condition_mm_configuration_is($config, $settings) {
+  return in_array($config['cid'], $settings['configuration']);
+}
+
+/*
+ *  Check for content types - Configuration form
+ */
+function workflow_ng_condition_mm_configuration_is_form($settings = array()) {
+  
+  $form['configuration'] = _mm_workflow_ng_configuration_select_elem();
+  $form['configuration']['#description'] = t('Select the Media Mover Configuration');
+  $form['configuration']['#default_value'] = $settings['configuration'];
+  $form['configuration']['#multiple'] = true;
+  $form['configuration']['#size'] = 6;
+  
+  return $form;
+}
+
+function workflow_ng_condition_mm_configuration_is_submit($form, &$form_state) {
+  return array('configuration' => $form_state['values']['configuration']);
+}
+
+/*
+ * Condition: Check for selected content types
+ */
+function workflow_ng_condition_mm_file_type_is($file, $settings) {
+  //dpr("testing " . $config['cid'] . " against " . var_export($settings['configuration'],1));
+  $states = array(
+	    MMA_FILE_STATUS_HARVESTED => 'harvest',
+	    MMA_FILE_STATUS_IN_PROCESS => 'process',
+	    MMA_FILE_STATUS_PROCESS_COMPLETE => 'process',
+	    MMA_FILE_STATUS_IN_STORAGE => 'storage',
+	    MMA_FILE_STATUS_STORAGE_COMPLETE => 'storage',
+	    MMA_FILE_STATUS_IN_COMPLETE => 'complete',
+	    MMA_FILE_STATUS_COMPLETE_COMPLETE => 'complete',
+	  );
+      $file_path = $file[$states[$file['status']] .'_file'];
+      $_pinfo = pathinfo($file_path);
+      //Get rid of spaces
+      $allowed_ext = explode(',',str_replace(array(' ','.'),'',$settings['extensions']));
+    return in_array($_pinfo['extension'], $allowed_ext);
+}
+
+function trim_value(&$value)
+{
+   $value = trim($value);
+}
+
+/*
+ *  Check for content types - Configuration form
+ */
+function workflow_ng_condition_mm_file_type_is_form($settings = array()) {
+  
+  $form['extensions'] = array (
+    '#type' => 'textfield',
+    '#title' => t('Extensions'),
+    '#required' => true,
+    '#description' => t('Input a comma separated list of extensions to evaluate against (e.g. avi,mpeg,m4v)'),
+    '#default_value' => $settings['extensions'],
+  );
+  
+  return $form;
+}
+
+function workflow_ng_condition_mm_file_type_is_submit($form, &$form_state) {
+  return array('extensions' => $form_state['values']['extensions']);
+}
+
+/**
+ * Util
+ */
+function _mm_workflow_ng_configuration_select_elem() {
+  $configs = media_mover_api_get_configurations();
+  foreach ($configs as $config) {
+    $config_options[$config->cid] = $config->name;
+  }
+  
+  $configuration_elem = array (
+    "#type" => "select",
+    '#title' => t('Media Mover Configuration'),
+    '#description' => t('Select the Media Mover Configuration you would like to feed the new node into'),
+    "#multiple" => 0,
+    "#size" => 1,    
+    '#options' => $config_options,
+  );
+  
+  return $configuration_elem;
+}

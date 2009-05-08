@@ -1,0 +1,6 @@
+; $Id: mm_antiword.info,v 1.1.2.1 2009/03/01 14:34:39 arthuregg Exp $
+name = Media Mover Antiword
+description = Support for converting MS documents into other formats
+package = "Media Mover"
+core = 6.x
+php = 5.0

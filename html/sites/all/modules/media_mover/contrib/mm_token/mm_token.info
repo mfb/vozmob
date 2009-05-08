@@ -1,0 +1,8 @@
+;$Id$
+name = Media Mover API Token
+description = Token implementation for Media Mover
+package = "Media Mover"
+core= 6.x
+dependencies[] = token
+dependencies[] = media_mover_api
+

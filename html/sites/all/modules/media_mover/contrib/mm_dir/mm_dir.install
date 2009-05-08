@@ -1,0 +1,22 @@
+<?php
+
+// $Id: mm_dir.install,v 1.1.4.2 2009/01/21 17:43:18 arthuregg Exp $
+
+/**
+ * Update the file types
+ * @return unknown_type
+ */
+function mm_dir_update_6100() {
+  $results = db_query('SELECT * FROM {media_mover_configurations} WHERE module = "mm_dir"');
+  while($result = db_fetch_array($results)) {
+    $configuration = unserialize($result['configuration']);
+    if ($configuration['file_types'] ) {
+      $configuration['file_types'] = str_replace(',', ' ', $configuration['file_types']);
+      db_query('UPDATE {media_mover_configurations} set configuration = "%s" WHERE cid = %d AND module = "%s"',
+        serialize($configuration['configuration']), $result['cid'], $result['module']
+      );
+      drupal_set_message(t('Media Mover Directory file types updated'));
+    }
+  }
+  return array();
+}

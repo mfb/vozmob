@@ -1,0 +1,152 @@
+<?php
+
+/**
+ * @file This module provides mechanisms to limit 
+ *       when configurations are run
+ */
+
+
+/**
+ * implementation of hook_media_mover
+ */
+function mm_run_control_media_mover ($op, $action_id = null, $configuration= array(), &$file = array() ) {
+  switch ($op) {
+  	case 'admin':
+      return mm_run_control_settings_form();  		
+  break;
+  	
+  }
+	
+}
+
+
+/**
+ * implementation of hook_run_control
+ * handles the pass off to the different throttle options
+ *
+ * @param object $configuration
+ * @param string $action
+ */
+function mm_run_control_run_control($configuration, $action, $file = null) {
+	$function = 'mm_run_control_'. $action;
+	if (function_exists($function)) {
+		return $function($configuration, $file);
+	}
+}
+
+
+/**
+ * handles all throttle options that are run off of cron
+ *
+ * @param object $configuration
+ * @return boolean
+ */
+function mm_run_control_cron_run($configuration) {
+	// do we respect drupal's throttle module?
+	if (variable_get('mm_throttle_use_throttle', 'false')) {
+		// If the site is currently throttling disable run 
+		if ($throttle = module_invoke('throttle', 'status')) {
+			return true;
+		}   		
+	}
+	
+	// check configurations settings if this configuration should be run on cron
+	// if not, disable run
+	if (! (isset($configurationv->config->mma_cron_run) ? $configuration->config->mma_cron_run : variable_get('mma_cron_run', true))) {      
+	  return true;
+	}
+	
+  // now we check and see there is a hard override of this configuration
+  // in the settings.php file
+  if (variable_get("media_mover_cron_off_". $configuration->cid, false)) {
+  	return true;
+  }
+}
+
+
+/**
+ * handles CPU throttling on process actions
+ *
+ * @param object $configuration
+ */
+function mm_run_control_process_run($configuration) {
+  // should we check the cpu load?
+  if (variable_get('mma_cpu_limit', false)) {
+    $load = mm_run_control_cpu_load();
+    if ($load > variable_get('mma_cpu_limit_threshold', 4)) {
+      return true;
+    }   
+  }
+  return false;
+}
+
+
+/**
+ * get the current CPU load
+ *
+ * @return real
+ */
+function mm_run_control_cpu_load() {  
+  ob_start();
+    passthru('w' ." 2>&1", $command_return);
+    $command_output = ob_get_contents();
+  ob_end_clean();
+ 
+  // split the output
+  $pattern = "/.*load averages: ([0-9\.]*) ([0-9\.]*) ([0-9\.]*)/";
+  preg_match($pattern, $command_output, $matches);
+  return $matches[variable_get('mma_cpu_limit_sample', 2)];
+}  
+
+
+/* ******************************************* */
+/* Administration functions */
+/* ******************************************* */
+
+/**
+ * admin form displayed on admin/media_mover/settings for run control settings
+ * 
+ * @return array
+ *   drupal form
+ */
+function mm_run_control_settings_form () {
+	$form['mm_run_control'] = array (
+	  '#type' => 'fieldset',
+	  '#title' => t('Run control'),
+	  '#description' => t('Limit Media Mover configurations by CPU levels, Cron settings, and other options'),
+	  '#collapsible' => true,
+	  '#collapsed' => true,	  
+	);
+	$form['mm_run_control']['mma_cron_run'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Run Media Mover on cron runs'),
+    '#default_value' => variable_get('mma_cron_run', true),
+    '#description' => t('By checking this, Media Mover will run when cron.php is called. This is helpful when you don\'t want to have harvest operations running automatically. Default is on.'),
+  );
+	$form['mm_run_control']['cpu']['mma_cpu_limit'] = array(
+    '#title' => t('Stop on high load'),
+    '#type' => 'checkbox',
+    '#default_value' => variable_get('mma_cpu_limit', false),
+    '#description' => t('Media Mover can check the current system load on Linux systems and not run when load reaches the set threshold. Default is off'),     
+  );
+  
+  $options = drupal_map_assoc(array(1,2,3,4,5,5.5,6,6.5,7,7.5,8,8.5,9,10));
+  $form['mm_run_control']['cpu']['mma_cpu_limit_threshold'] = array(
+    '#title' => t('CPU threshold'),
+    '#type' => 'select',
+    '#options' => $options,
+    '#default_value' => variable_get('mma_cpu_limit_threshold', 4),
+    '#description' => t('Media Mover can check the current system load and not run when load reaches the set threshold.'),     
+  );
+  
+  $options = array(1 => 1, 2 => 5, 3 => 15);
+  $form['mm_run_control']['cpu']['mma_cpu_limit_sample'] = array(
+    '#title' => t('CPU sample'),
+    '#type' => 'select',
+    '#options' => $options,
+    '#default_value' => variable_get('mma_cpu_limit_sample', 2),
+    '#description' => t('Select the 1, 5, 15 minute load average to use as the threshold.'),     
+  ); 
+  return $form;
+}
+

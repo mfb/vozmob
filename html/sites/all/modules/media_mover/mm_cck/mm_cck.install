@@ -1,0 +1,41 @@
+<?php
+
+// $Id: mm_cck.install,v 1.1.4.5 2008/12/11 06:24:38 arthuregg Exp $
+
+/**
+ * this provides an update from the mm_content module
+ */
+
+function mm_cck_install() {
+  // update all the old instances of mm_content to mm_cck
+  db_query('UPDATE {media_mover_configurations} SET module = "mm_cck" WHERE module = "mm_content"');
+}
+
+
+/**
+ * Updates to new module name
+ * @return array
+ */
+function mm_cck_update_6000() {
+  // update all the old instances of mm_content to mm_cck if necessary
+  db_query('UPDATE {media_mover_configurations} SET module = "mm_cck" WHERE module = "mm_content"');
+  return array();
+}
+
+
+/**
+ * Update the file types
+ * @return unknown_type
+ */
+function mm_cck_update_6001() {
+  $results = db_query('SELECT * FROM {media_mover_configurations} WHERE module = "mm_cck"');
+  while($result = db_fetch_array($results)) {
+    $configuration = unserialize($result['configuration']);
+    $configuration = str_replace(',', ' ', $configuration);
+    db_query('UPDATE {media_mover_configurations} set configuration = "%s" WHERE cid = %d AND module = "%s"',
+      serialize($configuration['configuration']), $result['cid'], $result['module']
+    );
+  }
+  drupal_set_message(t('Media Mover CCK file types updated'));
+  return array();
+}

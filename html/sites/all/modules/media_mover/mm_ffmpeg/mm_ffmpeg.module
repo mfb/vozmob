@@ -1,71 +1,104 @@
 <?php
-// $Id: mm_ffmpeg.module,v 1.19 2008/03/11 19:42:59 bdragon Exp $
 
-/**
- * @file
- * Media Mover ffmpeg interface.
+/* $Id: mm_ffmpeg.module,v 1.1.2.60.2.14 2009/05/04 16:14:17 arthuregg Exp $ */
+
+
+/*
+ * @ TODO lots of configuration fixes which need to be tied to ffmpeg_wrapper
  */
 
 /**
- * @ TODO lots of configuration fixes
- * @ TODO error checking on ffmpeg
- * @ TODO have somebody build a nice compiled version of ffmpeg
+ * Implementation of media_mover hook
+ * @param $op is the operator
+ * @param $action_id is the action to call
+ * @param $configuration is the media mover configuration currently being run
+ * @param $file is the media mover file array
+ *
  */
-
-/**
- * Implementation of hook_media_mover().
- */
-function mm_ffmpeg_media_mover($op, $action_id = null, $configuration = array(), &$item = array()) {
+function mm_ffmpeg_media_mover($op, $action_id = null, $configuration = array(), &$file = array() ) {
   switch ($op) {
+  	// identify this module
     case 'name':
-      return 'FFmpeg module';
-      break;
+      return "FFmpeg module";
+    break;
 
-    // edit a configuration option set
-    // $type is needed to build out options, is "type:action"
-    // $configuration is passed in from db
-    case 'config':
-      switch ($action_id) {
-        case '1': //convert video
-          return mm_ffmpeg_config($action_id, $configuration);
-        case '2': //create thumbnail from video
-          return mm_ffmpeg_config_thumb($action_id, $configuration);
-      }
-      break;
-
-    case 'admin':
-      return mm_ffmpeg_admin();
-
-    // defines what type of driver this module is
-    // harvest, process, storage
-    case 'verbs':
-      return array('process');
-
+    // define this module's actions
     case 'actions':
       return array(
         'process' => array(
           1 => 'convert video',
           2 => 'create thumbnail from video',
-        ),
+         )
       );
+    break;
 
+    // edit a configuration option set
+    // $configuration is a config array
+    case 'config':
+      switch ($action_id) {
+        case "1": //convert video
+          return mm_ffmpeg_config($configuration);
+        break;
+        case "2": //create thumbnail from video
+          return mm_ffmpeg_config_thumb($configuration);
+        break;
+      }
+    break;
+
+    // validate configuration
+    case 'config_validate':
+    	switch ($action_id) {
+    		case 1:
+    	    return mm_ffmpeg_config_validate($configuration);
+    	  break;
+    		case 2:
+    		break;
+    	}
+    break;
+
+    // define global settings for this module
+    // @return array drupal form array
+    case 'admin':
+      return mm_ffmpeg_admin();
+    break;
+
+    // define any directories that might need to be created
     case 'directories':
       return array('ffmpeg/converted', 'ffmpeg/thumbnails');
+    break;
 
+    // define the processing that this module does
     case 'process':
       switch ($action_id) {
         case '1': //convert video
-          return _mm_ffmpeg_video($item, $configuration);
+          return mm_ffmpeg_video($file, $configuration);
+        break;
         case '2': //create thumbnail from video
-          return _mm_ffmpeg_video_thumbnail($item, $configuration);
+           return mm_ffmpeg_video_thumbnail($file, $configuration);
+        break;
       }
-      break;
+    break;
   }
+  return;
 }
+
+
+/**
+ * Implementation of hook_help().
+ */
+function mm_ffmpeg_help($path, $arg) {
+  switch ($path) {
+    case 'admin/modules#description' :
+      return t('Helper module for Media Mover. Allows users to convert video and image files');
+  }
+  return;
+}
+
 
 /* ************************************ */
 /* conversion functions */
 /* ************************************ */
+
 
 /**
  * create the thumbnail
@@ -73,51 +106,53 @@ function mm_ffmpeg_media_mover($op, $action_id = null, $configuration = array(),
  * @param $configuration is a configuration array
  * @return modifield file array
  */
-function _mm_ffmpeg_video_thumbnail(&$item, $configuration) {
-  // check if the incoming file exists
-  mm_ffmpeg_file_exists($item);
-  if ($item['status'] === 0) {
-    return;
-  }
+function mm_ffmpeg_video_thumbnail($file, $configuration) {
 
   $output_file  = file_create_filename(
-    str_replace(' ', '_', basename($item['harvest']['file'])) .'.thumb'. $configuration['cid'] .'.'. $configuration['thumb_format'],
+    str_replace(' ', '_', basename($file['harvest_file'])) .'.thumb'. $configuration['cid'] .'.'. $configuration['thumb_format'],
     media_mover_api_dir_path('ffmpeg/thumbnails/'. $configuration['cid'])
   );
 
   // get input file
-  $options[] = '-i '. escapeshellarg($item['harvest']['file']);
+  $options[] = '-i \''. $file['harvest_file'] .'\'';
   // set frame time
-  $options[] = '-vframes 1 -ss '. $configuration['thumb_time']  .' -an';
+  $options[] = '-vframes 1 -ss \''. $configuration['thumb_time']  .'\' -an';
   // set codec
-  $options[] = '-vcodec mjpeg -f rawvideo -s '. $configuration['thumb_dimensions'];
+  $options[] = '-vcodec mjpeg -f rawvideo';
+  // set the frame size if it is defined
+  $size = $configuration['thumb_dimensions']  ? $size = '-s \''. $configuration['thumb_dimensions'] .'\'': null;
+  $options[] = $size;
   // add output file
-  $options[] = escapeshellarg($output_file);
+  $options[] = '\''. $output_file .'\'';
 
-  $command = implode(' ', $options);
-  $output = _mm_ffmpeg_run_command($command);
+  // now run the full command
+  $output = ffmpeg_wrapper_run_command(implode(" ", $options));
 
-  if (!_mm_ffmpeg_error_check($output, $item, $configuration, $command)) {
-    $item['status'] = 0;
-    return;
+  // was there an error?
+  if (! file_exists($output_file)) {
+    $message = 'MM FFmpeg failed to create this file %file';
+    $variables = array('%file' => $output_file);
+    watchdog('MM FFmpeg', $message, $variables, WATCHDOG_ERROR);
+    return false;
   }
-  if (!file_exists($output_file)) {
-    watchdog('media_mover', 'FFmpeg failed to create %file.', array('%file' => $output_file), WATCHDOG_ERROR);
-    $item['status'] = 0;
+
+  // can we get the mime type for this?
+  if (function_exists('mimedetect_mime')) {
+    $mime = mimedetect_mime($output_file);
+    $file['data']['file']['mime'] = $mime;
   }
 
   // run media mover's file perms
   media_mover_api_set_file_perm($output_file);
 
-  $link = l('node '. $item['nid'], "node/$item[nid]/edit");
-  watchdog('media_mover', 'FFmpeg created %file.', array('%file' => $output_file), WATCHDOG_INFO, $link);
+  $message = "MM FFmpeg created this file: !file";
+  $variables = array('!file' => $output_file);
+  $link = l("node ". $file['nid'],  "node/". $file['nid'] ."/edit");
+  watchdog("MM FFmpeg", $message, $variables, WATCHDOG_NOTICE, $link);
 
-  // add info to $file
-  $item['process']['file'] = $output_file;
-
-  // set file type to thumb
-  $item['type'] = 'thumb'; // @@@ WTF?
+  return $output_file;
 }
+
 
 /**
  * processes the incoming file
@@ -126,463 +161,196 @@ function _mm_ffmpeg_video_thumbnail(&$item, $configuration) {
  * @param $configuration is the configuration that governs this process
  * returns the file array
  */
-function _mm_ffmpeg_video(&$item, $configuration) {
-  // check if the incoming file exists
-  mm_ffmpeg_file_exists($item);
-  if ($item['status'] === 0 ) {
-    return;
+function mm_ffmpeg_video(&$file, $configuration) {
+  // get the file we should be operating on
+  $current_file = media_mover_api_config_current_file($file);
+
+  // first error check, make sure that we can decode  this kind of file
+  if (! ffmpeg_wrapper_can_decode($current_file)) {
+    $message = 'FFmpeg can not decode this file: %file !link';
+    $variables = array(
+      '%file' => $current_file,
+      '!link' => l(t('media mover file'), 'admin/build/media_mover/file/edit/'. $file['mmfid'])
+    );
+
+    $link = l("node ". $file['nid'],  "node/". $file['nid'] ."/edit");
+    watchdog('MM FFmpeg', $message, $variables, WATCHDOG_ERROR, $link);
+    return false;
   }
 
-  $path_to_wm = variable_get('mm_ffmpeg_wm', '/opt/ffmpeg/current/lib/vhook/watermark.so');
+  // Construct the file name
+  // We need to strip off the last file extension and append the conversion
+  // type on the end. Also, replace any spaces in the file name.
+  $pattern = array('/(.*)\..*$/', '/(\s)/');
+  $replace = array('$1.'. $configuration['ffmpeg_output_type'], '_');
+  $output_file = preg_replace($pattern, $replace, basename($current_file));
+  // create the destination path
+  $destination = media_mover_api_dir_path('ffmpeg/converted/'. $configuration['cid']);
+  // now make sure that this file does not already exist at the destination
+  $output_file = file_destination("$destination/$output_file", FILE_EXISTS_RENAME);
 
-  // check to see if this file can be decoded
-  if (!_mm_ffmpeg_can_decode($item['harvest']['file'])) {
-    $link = l('node '. $item['nid'],  "node/$item[nid]/edit");
-    watchdog('media_mover', 'FFmpeg can not decode %file. !link', array('%file' => $item['harvest']['file'], '!link' => l('file', "admin/content/media_mover/file/$item[mmfid]/edit")), WATCHDOG_NOTICE, $link);
-    $item['status'] = 0;
-    return;
+  // did the admin define a specific FFmpeg comand to run?
+  //  we only run what the admin specified
+  if ($configuration['ffmpeg_video_custom']) {
+    $options[] = str_replace(array('%in_file', '%out_file'), array(escapeshellarg($current_file), escapeshellarg($output_file)), $configuration['ffmpeg_video_custom_command']);
+  }
+  // build a standard configuration
+  else {
+    // build the ffmpeg command structure out
+    $options = array();
+
+    // input file
+    $options[] = "-i ". escapeshellarg($current_file);
+
+    // build the watermark config
+    if ($configuration['ffmpeg_video_wm']) {
+      $options[] = "-vhook '". ffmpeg_wrapper_path_to_vhook('watermark.so') ." -f ". $configuration['ffmpeg_video_wm_file'] ."'";
+    }
+
+    // build the audio config
+    if ($configuration['ffmpeg_audio_advanced']) {
+
+      // use a specifc codec?
+      if ($configuration['ffmpeg_audio_acodec']) {
+        $options[] =  '-acodec '. $configuration['ffmpeg_audio_acodec'];
+      }
+
+      // use a specific sample rate?
+      if ($configuration['ffmpeg_audio_ar'] ) {
+        $options[] = '-ar '. $configuration['ffmpeg_audio_ar'];
+      }
+
+      // use a specific bit rate?
+      if ($configuration['ffmpeg_audio_ab']) {
+        $options[] = '-ab '. $configuration['ffmpeg_audio_ab'];
+      }
+    }
+
+    // build the video config
+    if ($configuration['ffmpeg_video_advanced']) {
+
+      // is codec set?
+      if ($configuration['ffmpeg_video_vcodec']) {
+        $options[] = '-vcodec '. $configuration['ffmpeg_video_vcodec'];
+      }
+
+      // is frame size set?
+      if ($configuration['ffmpeg_video_size']) {
+        $options[] = '-s '. $configuration[$configuration['ffmpeg_video_size'] == 'other' ? 'ffmpeg_video_size_other' : 'ffmpeg_video_size'];
+      }
+
+      // is the bit rate set?
+      if ($configuration['ffmpeg_video_br']) {
+        $options[] = '-b '. $configuration['ffmpeg_video_br'];
+      }
+
+      // is frame rate set?
+      if ($configuration['ffmpeg_video_fps']) {
+        $options[] = '-r '. $configuration['ffmpeg_video_fps'];
+      }
+    }
+
+    // implement truncating
+    if ($configuration['ffmpeg_time_advanced']) {
+      $options[] = '-t '. $configuration['ffmpeg_time'];
+    }
+
+    // add the output file
+    $options[] =  escapeshellarg($output_file);
   }
 
-  // build the ffmpeg command structure out
-  $options = array();
-
-  // input file
-  $options[] = '-i '. escapeshellarg($item['harvest']['file']);
-
-  // build the watermark config
-  if ($configuration['ffmpeg_video_wm']) {
-   $options[] = '-vhook '. escapeshellarg($path_to_wm) .' -f '. escapeshellarg($configuration['ffmpeg_video_wm_file']);
-  }
-
-   // use a specifc codec?
-   if ($configuration['ffmpeg_acodec']) {
-     $options[] = '-acodec '. $configuration['ffmpeg_acodec'];
-   }
-   else {
-     $options[] = '-acodec mp3';
-   }
-
-  // build the audio config
-  if ($configuration['ffmpeg_audio_advanced']) {
-
-    // use a specific sample rate?
-    if ($configuration['ffmpeg_audio_ar'] ) {
-      $options[] = '-ar '. $configuration['ffmpeg_audio_ar'];
-    }
-
-    // use a specific bit rate?
-    if ($configuration['ffmpeg_audio_ab']) {
-      $options[] = '-ab '. $configuration['ffmpeg_audio_ab'];
-    }
-  }
-
-  // build the video config
-  if ($configuration['ffmpeg_video_advanced']) {
-
-    // is codec set?
-    if ($configuration['ffmpeg_vcodec']) {
-      $options[] = '-vcodec '. $configuration['ffmpeg_vcodec'];
-    }
-
-    // is frame size set?
-    if ($configuration['ffmpeg_video_size']) {
-      $options[] = '-s '. $configuration['ffmpeg_video_size'];
-    }
-
-    // is the bit rate set?
-    if ($configuration['ffmpeg_video_br']) {
-      $options[] = '-b '. $configuration['ffmpeg_video_br'];
-    }
-
-    // is frame rate set?
-    if ($configuration['ffmpeg_video_fps']) {
-      $options[] = '-r '. $configuration['ffmpeg_video_fps'];
-    }
-  }
-
-  // implement truncating
-  if ($configuration['ffmpeg_time_advanced']) {
-    $options[] = '-t '. $configuration['ffmpeg_time'];
-  }
-
-  // add the output file
-  // @ TODO make sure that the output file has the appropriate extension.
-  $output_file  = file_create_filename(
-    str_replace(' ', '_', basename($item['harvest']['file'])) .'.'. $configuration['ffmpeg_output_type'],
-    media_mover_api_dir_path('ffmpeg/converted/'. $configuration['cid'])
-  );
-
-  // add the output file
-  $options[] = escapeshellarg($output_file);
-
-  $command = implode(' ', $options);
+  $command = implode(" ", $options);
 
   // run ffmpeg
-  $output = _mm_ffmpeg_run_command($command);
-
-  // check and see if any errors were reported
-  if (!_mm_ffmpeg_error_check($output, $item, $configuration, $command)) {
-    $item['status'] = 0;
+  if (! $output = ffmpeg_wrapper_run_command($command)) {
+    mm_ffmpeg_error_alert($output, $file, $command);
+    return false;
   }
 
-  $link = l('node '. $item['nid'],  "node/$item[nid]/edit");
-  watchdog('media_mover', 'FFmpeg converted %file', array('%file' => $output_file), WATCHDOG_INFO, $link);
+  // successful convert, make a note in the log
+  $message = 'MM FFmpeg converted this file: !file<br />ffmpeg ran this command:<br />  !command' ;
+  $variables = array('!file' => $output_file, '!command' => implode(" ", $options));
+  $link = l('node '. $file['nid'],  'node/'. $file['nid'] .'/edit');
+  watchdog('MM FFmpeg', $message, $variables, WATCHDOG_NOTICE, $link);
 
-  // run media mover's file perms
+  // run media mover's file perms on the completed file
   media_mover_api_set_file_perm($output_file);
 
-  // add info to $file
-  $item['process']['file'] = $output_file;
-  $item['data']['file']['mime'] = 'image/'. $configuration['ffmpeg_output_type'];
-  $item['data']['file']['drupal_path'] = $output_file;
-  $item['status'] = 1;
+  // can we get the mime type for this?
+  $file['data']['file']['mime'] = file_get_mimetype($output_file);
+
+  // get any meta data for this file
+  $file['data']['meta'] = ffmpeg_wrapper_file_data($output_file);
+
+  // return the completed file
+  return $output_file;
 }
 
-/**
- * Run a ffmpeg command and return the output.
- */
-function _mm_ffmpeg_run_command($options) {
-  $command = variable_get('mm_ffmpeg_path', '/opt/ffmpeg/current/bin/ffmpeg') .' '. $options;
-  watchdog('media_mover', 'Running FFmpeg command: %command', array('%command' => $command), WATCHDOG_DEBUG);
-  ob_start();
-  passthru($command ." 2>&1", $command_return );
-  $command_output = ob_get_contents();
-  ob_end_clean();
-  return $command_output;
-}
 
 /**
- * gets an array of format types usable on this system
- * this should probably be smoothed out so that it doesn't rely on
- * text so much
+ * this a custom alert if the conversion fails
+ * @param string $output is console output
+ * @param string $file is the file being converted
+ * @param string $commmand was the command that was run
  */
-function _mm_ffmpeg_get_file_formats($ret = null) {
-  static $rows, $encode_formats, $decode_formats;
-
-  // only parse if this hasn't been set
-  if (!is_array($rows)) {
-    $formats = _mm_ffmpeg_run_command('-formats');
-
-    // slice up the format output
-    $startpos = strpos($formats, 'File formats:');
-    $endpos = strpos($formats, 'Codecs:');
-    $formats = substr($formats, $startpos, $endpos);
-
-    //remove the header
-    $formats = str_replace('File formats:', '', $formats);
-
-    $formats = explode("\n", $formats);
-
-    $decode_formats = array();
-    $encode_formats = array();
-
-    foreach ($formats as $format) {
-      // only run on lines longer than 3
-      if (!strlen($format) < 3) {
-        // codec names seem to always be here
-        $pattern = '/\s+/';
-        $replace = ' ';
-        $type = preg_replace($pattern, $replace, substr($format, 4, 19));
-        $type = explode(' ', $type);
-
-        if (count($type) < 2) {
-          // Skip incomplete lines.
-          continue;
-        }
-        $a_format['type'] = $type[0];
-        $a_format['name'] = $type[1];
-
-        if (substr($format, 1, 1) == 'D') {
-          $a_format['decode'] = t('yes');
-          $decode_formats[] = $a_format['type'];
-        }
-        else {
-          $a_format['decode'] = t('no');
-        }
-
-        if (substr($format, 2, 1) == 'E') {
-          $a_format['encode'] = t('yes');
-          $encode_formats[] = $a_format['type'];
-        }
-        else {
-          $a_format['encode'] = t('no');
-        }
-
-        $a_format['description'] = substr($format, 20);
-        if ($a_format['description']) {
-          $rows[] = $a_format;
-        }
-      }
-    }
-  }
-
-  switch ($ret) {
-    case 'encode':
-      return $encode_formats;
-    break;
-    case 'decode':
-      return $decode_formats;
-    break;
-    default:
-      return $rows;
-    break;
-  }
-}
-
-/**
- * checks an incoming file path extension to
- * see if it can be decoded
- *
- * @param $file is a full system filepath
- */
-function _mm_ffmpeg_can_decode($path) {
-  $file_types = _mm_ffmpeg_get_file_formats('decode');
-
-  $path_parts = pathinfo($path);
-
-  $exception = false;
-  // exception handling
-  // WMVs are sometimes asf files
-  if ($path_parts['extension'] == 'wmv') {
-    $exception = 'asf';
-  }
-
-  if ($file_types) {
-    foreach ($file_types as $file_type) {
-      if ($path_parts['extension']) {
-        if (stristr($file_type, $path_parts['extension']) || stristr($file_type, $exception)) {
-          return true;
-        }
-      }
-    }
-  }
-  return false;
-}
-
-/**
- * gets an array of codec types usable on this system
- * this should probably be smoothed out so that it doesn't rely on
- * text so much
- * @ TODO this needs to be rethought to pass params right
- * @output is the output text from the ffmpeg -formats
- */
-function _mm_ffmpeg_get_codecs($ret = null) {
-  $rows = array();
-  // get formats from ffmpeg
-  $output =  _mm_ffmpeg_run_command('-formats');
-
-  // parse the list
-  // we know where the codecs are by looking at the output of ffmpeg -formats
-  $codecs_formats_pos = strpos($output, "Codecs:");
-  $codecs_formats_pos_end = strpos($output, "upported file protocols:");
-
-  $video_formats = substr($output, $codecs_formats_pos, ($codecs_formats_pos_end - $codecs_formats_pos));
-
-  $video_formats = str_replace('Codecs:', '', $video_formats);
-  $video_formats = preg_split('/[\n\r]+/', $video_formats);
-
-  foreach ($video_formats as $format) {
-
-    // codec names seem to always be here
-    $a_format['name'] = substr($format, 8);
-
-    if (substr($format, 3, 1) == 'A') {
-      $a_format['type'] = t('audio');
-      $encode_formats[] = $a_format['name'];
-    }
-    else {
-      $a_format['type'] = t('video');
-    }
-
-    // get the decode
-    if (substr($format, 1, 1) == 'D') {
-      $a_format['decode'] = t('yes');
-      $decode_formats[] = $a_format['name'];
-    }
-    else {
-      $a_format['decode'] = t('no');
-    }
-
-    // get the encode
-    if (substr($format, 2, 1) == 'E') {
-      $a_format['encode'] = t('yes');
-      $encode_formats[] = $a_format['name'];
-    }
-    else {
-      $a_format['encode'] = t('no');
-    }
-
-    if ($a_format['name']) {
-      $rows[] = $a_format;
-    }
-    $a_format = null;
-  }
-
-  switch ($ret) {
-    case 'encode':
-      return $encode_formats;
-    break;
-    case 'decode':
-      return $decode_formats;
-    break;
-    default:
-      return $rows;
-    break;
-  }
-}
-
-/**
- * checks to see if a file exists
- * @param $item A media mover item.
- */
-function mm_ffmpeg_file_exists(&$item) {
-  // make sure file exists
-  if (!file_exists($item['harvest']['file']) ) {
-    $link = l("node ". $item['nid'],  "node/$item[nid]/edit");
-    watchdog('media_mover', 'File %file did not exist for FFmpeg conversion!', array('%file' => $item['harvest']['file']), WATCHDOG_NOTICE, $link);
-    $item['status'] = 0;
-  }
-}
-
-/**
- * checks ffmpeg's output for errors and tries to handle them some way
- * @param $output is the output from a shell command
- * @param $item A media mover item.
- * @param $configuration is the configuration being run
- * @param $watchdog is boolean, log errors to drupal's watchdog
- * @return true if no errors, false if errors
- */
-function _mm_ffmpeg_error_check($output, &$item, $configuration, $command, $watchdog = true) {
-  // build the error conditions
-  // these are all pulled by hand at this point
-  $errors = array(
-    '/Segmentation fault/i',
-    '/Unsupported/i',
-   //'/Error while/i', // this is not necessarily fatal
-    '/Unable for find a suitable output format for/i',
-    '/Incorrect frame size/i',
-    '/Unsupported codec/i',
-    '/Unknown encoder/i',
-    '/Could not write header/i',
-  );
-
-  // check for error conditions
-  foreach ($errors as $error) {
-    if ($match = preg_match($error, $output)) {
-      _mm_ffmpeg_error_log($output, $item, $configuration, $command);
-      return false;
-    }
-  }
-  return true;
-}
-
-/**
- * takes error conditions from the conversion process and deals
- * with them according to the admin configuration
- *
- * @param $output is the command line output
- * @param $file is the file that failed
- * @param $configuration is the configuration that was running
- */
-function _mm_ffmpeg_error_log($output, &$item, $configuration, $command) {
-  watchdog(
-    'media_mover',
-    "Media Mover ff_mpeg had an error converting this file: @file. \nThe command was: @command",
-    array(
-      '@file' => $item['harvest']['file'],
-      '@command' => $command,
-    ),
-    WATCHDOG_NOTICE, // @@@ 6.x state it maps to better?
-    url("node/$item[nid]/edit") // @@@ nid no longer the right thing due to file table in 6.x?
-  );
-
-  // notify admin
-  if ($emails = variable_get('ffmpeg_error_email', null)) {
+function mm_ffmpeg_error_alert($output, $file, $command) {
+ // notify admin
+  if ($emails = variable_get('ffmpeg_error_email', null) ){
+    $emails = str_replace(' ', '', $emails);
     $emails = explode(',', $emails);
     foreach ($emails as $email) {
-      $email = trim($email);
-      if (valid_email_address($email)) {
-        drupal_mail('mm_ffmpeg', 'admin_notice', $email, language_default(), array('file' => $item));
+      if (valid_email_address($email)){
+        $subject = t('FFmpeg conversion problem');
+        $body = "There was a problem converting this file:\n";
+        $body .= $file['harvest_file'] ."\n\n";
+        $body .= "FFmpeg said:\n";
+        $body .= $output ."\n\n";
+        $body .= "File data:\n";
+        $body .= print_r($file, true);
+//        drupal_mail(time(), $email, $subject, $body);
+        /* TODO Create a hook_mail($key, &$message, $params) function to generate
+        the message body when called by drupal_mail. */
+        $account = array(); // Set this as needed
+        $language = user_preferred_language($account);
+        $object = array(); // Replace this as needed
+        $context['subject'] = $subject;
+        $context['body'] = $body;
+        $params = array('account' => $account, 'object' => $object, 'context' => $context);
+        drupal_mail('mm_ffmpeg', time(), $email, $language, $params);
       }
     }
   }
 
   // send uploader a message
   if (variable_get('ffmpeg_error_user', null)) {
-    if ($item['uid']) { // @@@ Test whether this works.
-      $account = user_load($item['uid']);
-      drupal_mail('mm_ffmpeg', 'user_notice', $account->mail, user_preferred_language($account), array('account' => $account, 'file' => $item));
+    if ($file['nid']) {
+      $node = node_load($file['nid']);
+      $account = user_load(array('uid' => $node->uid));
+      $body = theme('mm_ffmpeg_email_user_error', $account, $file);
+      $subject = t('Problem with your uploaded file');
+//      drupal_mail(time(), $account->mail, $subject, $body);
+      /* TODO Create a hook_mail($key, &$message, $params) function to generate
+      the message body when called by drupal_mail. */
+      $account = array(); // Set this as needed
+      $language = user_preferred_language($account);
+      $object = array(); // Replace this as needed
+      $context['subject'] = $subject;
+      $context['body'] = $body;
+      $params = array('account' => $account, 'object' => $object, 'context' => $context);
+      drupal_mail('mm_ffmpeg', time(), $account->mail, $language, $params);
     }
   }
-  // Flag error.
-  $item['status'] = 0;
 }
 
-/**
- * Implementation of hook_mail().
- */
-function mm_ffmpeg_mail($key, &$message, $params) {
-  $language = $message['language'];
-  $l = $language->language;
-  switch ($key) {
-    case 'admin_notice':
-      $message['subject'] = t('FFmpeg conversion problem', array(), $l);
-      $message['body'][] = t('There was a problem converting this file:', array(), $l);
-      $message['body'][] = $file['harvest']['file'];
-      $message['body'][] = t('FFmpeg said:', array(), $l);
-      $message['body'][] = $output;
-      $message['body'][] = t('File data:', array(), $l);
-      $message['body'][] = print_r($params['file'], true); // @@@ What does this look like in an email, exactly?
-      break;
-
-    case 'user_notice':
-      $account = $params['account'];
-      $variables = user_mail_tokens($account, $language);
-      $file_parts = pathinfo($params['file']['harvest']['file']);
-      $file = $file_parts['basename'] .'.'. $file_parts['extension'];
-      $message['subject'] = t('Problem with your uploaded file', $variables, $l);
-      $message['body'][] = "$account->name,";
-      $message['body'][] = t("We're sorry, but we're having a hard time converting a file you uploaded.", $variables, $l);
-      $message['body'][] = t("We'll take a look at the file and see if we can help, but you can always try converting to a standard format and uploading again.", $variables, $l);
-      $message['body'][] = t('Sorry, and thanks for using our site.', $variables, $l);
-      break;
-  }
-}
-
-/**
- * checks to make sure that FFmpeg is in the path
- */
-function mm_ffmpeg_is_path() {
-  if (!_mm_ffmpeg_run_command('')) {
-    return false;
-  }
-  return true;
-}
-
-/**
- * displays a table of the supported ffmpeg file formats
- */
-function _mm_ffmpeg_formats_data_display() {
-  $header = array(t('name'), t('type'), t('decode'), t('encode'), t('description') );
-  $output = theme('table', $header, _mm_ffmpeg_get_file_formats() );
-  return $output;
-}
-
-/**
- * displays a table of the ffmpeg encoding and decoding options
- */
-function _mm_ffmpeg_get_codecs_display() {
-  $header = array(t('codec'), t('codec type'), t('decode'), t('encode'));
-  $output = theme('table', $header, _mm_ffmpeg_get_codecs() );
-  return $output;
-}
 
 /* ************************************ */
 /* configuration */
 /* ************************************ */
 
+
 /**
  * builds the admin form
+ * @return drupal form array
  */
 function mm_ffmpeg_admin() {
 
@@ -591,48 +359,6 @@ function mm_ffmpeg_admin() {
     '#title' => t("FFmpeg"),
     '#collapsed' => true,
     '#collapsible' => true,
-  );
-
-  $form['mm_ffmpeg']['mm_ffmpeg_about'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('About FFmpeg installation'),
-    '#collapsible' => true,
-    '#collapsed' => true,
-  );
-
-  $form['mm_ffmpeg']['mm_ffmpeg_about']['mm_ffmpeg_version'] = array(
-    '#type' => 'item',
-    '#title' => t('FFmpeg version'),
-    '#value' =>  '<blockquote>'. _mm_ffmpeg_run_command(' -v') .'</blockquote>',
-    '#description' => t('Version of FFmpeg running on your system'),
-  );
-
-  $form['mm_ffmpeg']['mm_ffmpeg_about']['mm_ffmpeg_formats'] = array(
-    '#type' => 'item',
-    '#title' => t('Supported file formats'),
-    '#value' =>  _mm_ffmpeg_formats_data_display(),
-    '#description' => t('File formats that the installed version of FFmpeg supports.'),
-  );
-
-  $form['mm_ffmpeg']['mm_ffmpeg_about']['mm_ffmpeg_codecs'] = array(
-    '#type' => 'item',
-    '#title' => t('Installed codecs'),
-    '#value' => _mm_ffmpeg_get_codecs_display(),
-    '#description' => t('FFmpeg was either compiled with these codecs, or these are the codecs available on your system'),
-  );
-
-  $form['mm_ffmpeg']['mm_ffmpeg_path'] = array(
-    '#type' => 'textfield',
-    '#title' => t('FFmpeg path'),
-    '#default_value' => variable_get('mm_ffmpeg_path', '/opt/ffmpeg/current/bin/ffmpeg'),
-    '#description' => t("Absolute path to the FFmpeg exeutable."),
-  );
-
-  $form['mm_ffmpeg']['mm_ffmpeg_wm'] = array(
-    '#type' => 'textfield',
-    '#title' => t('FFmpeg watermark path'),
-    '#default_value' => variable_get('mm_ffmpeg_wm', '/opt/ffmpeg/current/lib/vhook/watermark.so'),
-    '#description' => t("Absolute path to the FFmpeg vhook watermark exeutable."),
   );
 
   $form['mm_ffmpeg']['errors'] = array(
@@ -659,209 +385,51 @@ function mm_ffmpeg_admin() {
   return $form;
 }
 
+
 /**
  * builds the edit config form
+ * @param $configuration is the current configuration array
+ * @return is a drupal file array
  */
-function mm_ffmpeg_config($action, $configuration) {
-  if (!mm_ffmpeg_is_path()) {
-    drupal_set_message(t('Sorry, could not find FFmpeg, please go to: !link', array('!link' => l(t('Media Mover Settings'), 'admin/media_mover/settings'))), 'error');
+function mm_ffmpeg_config($configuration) {
+  if (! ffmpeg_wrapper_executable()){
+    drupal_set_message(t('Sorry, could not find FFmpeg, please go to: !link', array('!link' => l(t('FFmpeg Wrapper'), 'admin/settings/ffmpeg_wrapper'))), 'error');
   }
   else {
-    $form['mm_ffmpeg'] = array(
-      '#type' => 'fieldset',
-      '#title' => t("FFmpeg video conversion settings"),
-      '#collapsed' => false,
-    );
+    // add the css and js to show/hide the size: other option
+  	drupal_add_css(drupal_get_path('module', 'mm_ffmpeg') .'/mm_ffmpeg.css', 'module');
+    drupal_add_js(drupal_get_path('module', 'mm_ffmpeg') .'/mm_ffmpeg.js');
 
-    // get the output formats
-    $outputs = _mm_ffmpeg_get_file_formats('encode');
-    foreach ($outputs as $output) {
-      $formats[$output] = $output;
-    }
-    $form['mm_ffmpeg']["ffmpeg_output_type"] = array(
-      '#type' => 'select',
-      '#title' => t('Output format'),
-      '#options' => $formats,
-      '#default_value' => $configuration['ffmpeg_output_type'] ? $configuration['ffmpeg_output_type'] : 'flv',
-      '#description' => t('Select the output format. Note, some formats may require setting audio or video codecs.'),
-     );
-
-    $form['mm_ffmpeg']['audio'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Audio conversion settings'),
-      '#collapsed' => $configuration['ffmpeg_audio_advanced'] ? false : true,
-      '#collapsible' => true,
-    );
-    $form['mm_ffmpeg']['audio']["ffmpeg_audio_advanced"] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Use advanced settings'),
-      '#description' => t('Use the advanced audio encoding options. If this is off, FFmpeg will encode mp3 at 64bit, 44.1khz.'),
-      '#default_value' => $configuration['ffmpeg_audio_advanced'],
-    );
-    // @@@ These need to have a k appended apparently? Maybe in the actual invocation?
-    $bit_rates = array(8 => 8, 16 => 16, 32 => 32, 64 => t('64k (default)'), 128 => 128, 256 => 256);
-    $form['mm_ffmpeg']['audio']["ffmpeg_audio_ab"] = array(
-      '#type' => 'select',
-      '#title' => t('Audio bit rate'),
-      '#options' => $bit_rates,
-      '#default_value' => $configuration['ffmpeg_audio_ab'] ? $configuration['ffmpeg_audio_ab'] :  64,
-      '#description' => t("Audio bit rate for conversion."),
-    );
-    $sample_rates = array('11025' => '11khz', '22050' => '22khz', '32000' => '34khz', '44100' => '44.1khz (default)' );
-    $form['mm_ffmpeg']['audio']["ffmpeg_audio_ar"] = array(
-      '#type' => 'select',
-      '#title' => t('Audio sample rate'),
-      '#options' => $sample_rates,
-      '#default_value' => $configuration['ffmpeg_audio_ar'] ? $configuration['ffmpeg_audio_ar'] : 44100,
-      '#description' => t('Audio sample rate for conversion.'),
-    );
-
-    $vcodecs = array( '' => 'default');
-
-    // get list of avaiable audio and video codecs
-    $codec_list = _mm_ffmpeg_get_codecs();
-    $acodecs = array();
-    $vcodecs = array();
-    if ($codec_list) {
-      foreach ($codec_list as $codec) {
-        if ($codec['encode'] == 'yes') {
-          if ($codec['type'] == 'audio') {
-            $acodecs[$codec['name']] = $codec['name'];
-          }
-          else if($codec['type'] == 'video') {
-            $vcodecs[$codec['name']] = $codec['name'];
-          }
-        }
-      }
-    }
-
-    // overriding the hand backs from ffmpeg until a better way of matching up the supported
-    // codecs and the command line args becomes apparent
-    array_unshift($acodecs, array('mp3' => t('lame mp3 (alternate name)')));
-    array_unshift($acodecs, array('libmp3lame' => t('lame mp3 (default)')));
-    $form['mm_ffmpeg']['audio']['ffmpeg_acodec'] = array(
-      '#type' => 'select',
-      '#title' => t('Audio codec'),
-      '#options' => $acodecs,
-      '#default_value' => $configuration['ffmpeg_acodec'] ? $configuration['ffmpeg_acodec'] : 'mp3' ,
-      '#description' => t('Select the codec for the output format. Please note, you may need to pick an appropriate video codec for the transcoding. WARNING the codec support right now is experimental. Things may not work as expected.'),
-     );
-
-    $form['mm_ffmpeg']['video'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Video conversion settings'),
-      '#collapsed' => $configuration['ffmpeg_video_advanced'] ? false : true,
-      '#collapsible' => true,
-    );
-    $form['mm_ffmpeg']['video']['ffmpeg_video_advanced'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Use advanced settings'),
-      '#description' => t('Use the advanced video encoding options. If this is off, FFmpeg will encode flv at 200 kb/s, 128x96, 25fps.'),
-      '#default_value' => $configuration['ffmpeg_video_advanced'],
-    );
-
-    // video frame size
-    $frame_size = drupal_map_assoc(array('128x96', '176x144', '320x240', '352x288', '704x576'));
-    $form['mm_ffmpeg']['video']['ffmpeg_video_size'] = array(
-      '#type' => 'select',
-      '#title' => t('Video frame size'),
-      '#options' => $frame_size,
-      '#default_value' => $configuration['ffmpeg_video_size'],
-      '#description' => t('Dimensions of the converted video.'),
-    );
-
-    $fps_rates = array(0 => 'default', 10 => 10, 15 => 15, 20 => 20, 25 => '25 (default)', 29.97 => 29.97);
-    $form['mm_ffmpeg']['video']['ffmpeg_video_fps'] = array(
-      '#type' => 'select',
-      '#title' => t('Video fps rate'),
-      '#options' => $fps_rates,
-      '#default_value' => $configuration['ffmpeg_video_fps'] ? $configuration['ffmpeg_video_fps'] : 25,
-      '#description' => t("Sets the frames per second of the converted video."),
-    );
-
-    $bit_rates = array('50k' => '50kps', '100k' => '100kps', '150k' => '150kps', '200k' => '200kps', '250k' => '250kps', '300k' => '300kps', '500k' => '500kps', '750k' => '750kps', '1000k' => '1000kps', '1250k' => '1250kps', '1500k' => '1500kps', '2000k' => '2000kps');
-    $form['mm_ffmpeg']['video']['ffmpeg_video_br'] = array(
-      '#type' => 'select',
-      '#title' => t('Video bit rate'),
-      '#options' => $bit_rates,
-      '#default_value' => $configuration['ffmpeg_video_br'],
-      '#description' => t('Target the output video to this bit rate.'),
-    );
-
-    $form['mm_ffmpeg']['video']['ffmpeg_vcodec'] = array(
-      '#type' => 'select',
-      '#title' => t('Video codec'),
-      '#options' => $vcodecs,
-      '#default_value' => $configuration['ffmpeg_vcodec'],
-      '#description' => t('Select the codec for the output format. Please note, you may need to pick an appropriate audio codec for the transcoding.'),
-    );
-
-    $form['mm_ffmpeg']['time'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Video duration'),
-      '#collapsed' => $configuration['ffmpeg_time_advanced'] ? false : true,
-      '#collapsible' => true,
-    );
-    $form['mm_ffmpeg']['time']['ffmpeg_time_advanced'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Truncate the output video'),
-      '#description' => t('Use this to limit the length of the output video. Useful for making a video teaser'),
-      '#default_value' => $configuration['ffmpeg_time_advanced'],
-    );
-    $times = array(30 => "30 seconds", 60 => "1 minute", 120 => "2 minutes", 300 => "5 minutes");
-    $form['mm_ffmpeg']['time']['ffmpeg_time'] = array(
-      '#type' => 'select',
-      '#title' => t('Video length'),
-      '#options' => $times,
-      '#default_value' => $configuration['ffmpeg_time'],
-      '#description' => t("Set the max video length time."),
-    );
-
-    $form['mm_ffmpeg']['watermark'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('Video watermark settings'),
-      '#collapsed' => $configuration['ffmpeg_video_wm'] ? false : true,
-      '#collapsible' => true,
-    );
-    $form['mm_ffmpeg']['watermark']['ffmpeg_video_wm'] = array(
-      '#type' => 'checkbox',
-      '#title' => t('Use watermark'),
-      '#description' => t('Use a file to watermark the converted video.'),
-      '#default_value' => $configuration['ffmpeg_video_wm'],
-    );
-    // @ TODO make this a file upload
-    $form['mm_ffmpeg']['watermark']['ffmpeg_video_wm_file'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Path to file'),
-      '#description' => t('Absolute path to the watermark file.'),
-      '#default_value' => $configuration['ffmpeg_video_wm_file'],
-    );
-
-
-    $form['mm_ffmpeg']['file'] = array(
-      '#type' => 'fieldset',
-      '#title' => t('File settings'),
-      '#collapsed' => true,
-      '#collapsible' => true,
-    );
-
-    $form['mm_ffmpeg']['file']['ffmpeg_output_perms'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Output file permissions'),
-      '#description' => t('Set the permissions on the output file. Default is 0644.'),
-      '#default_value' => $configuration['ffmpeg_output_perms'] ? $configuration['ffmpeg_output_perms'] : '0644' ,
-      '#size' => 4,
-    );
+    // get the configuration form
+  	return ffmpeg_wrapper_configuration_form($configuration, 'edit-'. media_mover_api_form_prefix($configuration));
   }
-  return $form;
 }
 
 /**
- * builds the edit config form for thumbnail
+ * validates the video configuration setup
+ * @param int $action_id
+ * @param array $configuration
  */
-function mm_ffmpeg_config_thumb($action, $configuration) {
-  if (!mm_ffmpeg_is_path()) {
-    drupal_set_message(t('Sorry, could not find FFmpeg, please go to: !link', array('!link' => l(t('Media Mover Settings'), 'admin/media_mover/settings'))), 'error');
+function mm_ffmpeg_config_validate($configuration) {
+	// check the custom command
+  if (preg_match('/[|>]/', $configuration['ffmpeg_video_custom_command'])) {
+  	$errors[] = array(
+  	  'element' => 'ffmpeg_video_custom_command',
+  	  'message' => t('You can not use | or > in your command'),
+  	);
+  }
+  return $errors;
+}
+
+
+/**
+ * builds the edit config form for thumbnail
+ * @param $configuration is the current configuration
+ * @return is a drupal file array
+ */
+function mm_ffmpeg_config_thumb($configuration) {
+  if (! ffmpeg_wrapper_executable()){
+    drupal_set_message(t('Sorry, could not find FFmpeg, please go to: !link', array('!link' => l(t('FFmpeg Wrapper'), 'admin/settings/ffmpeg_wrapper'))), 'error');
   }
   else {
     $form['mm_ffmpeg_thumb'] = array(
@@ -870,12 +438,28 @@ function mm_ffmpeg_config_thumb($action, $configuration) {
       '#collapsed' => false,
     );
 
-    // @ TODO make this use the same sizes as the conversion
+    $frame_sizes = ffmpeg_wrapper_frame_sizes();
+    $frame_sizes['other'] = t('Other');
     $form['mm_ffmpeg_thumb']['thumb_dimensions'] = array(
-      '#type' => 'textfield',
+      '#type' => 'select',
       '#title' => t('Thumbnail output dimensions'),
-      '#default_value' => $configuration['thumb_dimensions'] ? $configuration['thumb_dimensions'] : '320x240',
-      '#description' => t("Thumbnail image output dimensions, in the form <em>320x240</em>."),
+      '#options' => $frame_sizes,
+      '#default_value' => $configuration['thumb_dimensions'],
+      '#description' => t("Thumbnail image output dimensions, in the form <em>320X240</em>."),
+      '#attributes' => array('class' => 'ffmpeg-thumb-size'),
+      '#validate' => array('mm_ffmpeg_config_video_size_validate'),
+      '#mm_ffmpeg_config_video_size_validate_param_1' => 'thumb_dimensions',
+    );
+    $form['mm_ffmpeg_thumb']['thumb_dimensions_other'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Thumbnail frame size- other'),
+      '#default_value' => $configuration['thumb_dimensions_other'],
+      '#description' => t('Dimensions of the thumbnail in the format 600x400.'),
+      '#prefix' => '<div class="ffmpeg-thumb-size-other">',
+      '#suffix' => '</div>',
+      '#validate' => array('mm_ffmpeg_config_video_size_validate'),
+      '#mm_ffmpeg_config_video_size_validate_param_1' => 'thumb_dimensions_other',
+      '#size' => 12,
     );
 
     $form['mm_ffmpeg_thumb']['thumb_time'] = array(
@@ -893,6 +477,62 @@ function mm_ffmpeg_config_thumb($action, $configuration) {
       '#default_value' => $configuration['thumb_format'] ? $configuration['thumb_format'] : 'jpg',
       '#description' => t('Format for the thumbnail output'),
     );
+
   }
   return $form;
+}
+
+
+/**
+ * validates the video frame size for converting
+ * @param array $element
+ * @param string $field_id
+ *
+ */
+function mm_ffmpeg_config_video_size_validate($form, &$form_state) {
+  static
+    $ffmpeg_video_size_name, $ffmpeg_video_size_value,
+    $thumb_dimensions_name, $thumb_dimensions_value;
+
+  switch ($field_id) {
+    case 'ffmpeg_video_size':
+    case 'thumb_dimensions':
+      ${$field_id .'_name'} = $element['#name'];
+      ${$field_id .'_value'} = $element['#value'];
+    break;
+
+    // handles all the dimensional cases
+    case 'ffmpeg_video_size_other':
+    case 'thumb_dimensions_other':
+      // create the value we want to find
+      $value_name = str_replace('_other', '_value', $field_id);
+      // check to see if we need to be concerned about this value
+      if (${$value_name} == 'other') {
+        // is the format right?
+        if (! preg_match('/^\d+x\d+$/', $element['#value'])) {
+          form_set_error($field_id, t('The size must be of the format 600x400 (width x height)'));
+        }
+      }
+    break;
+  }
+}
+
+
+/* ************************************ */
+/* theme functions */
+/* ************************************ */
+
+/**
+ * builds the body for the email to the user if their video didn't convert
+ * @param $account is a drupal user account
+ * @param $file is the media mover file array
+ */
+function theme_mm_ffmpeg_email_user_error($account, $file){
+  $file_parts = pathinfo($file['harvest_file']);
+  $file = $file_parts['basename'] .'.'. $file_parts['extension'];
+  $body = t('We\'re sorry, but we\'re having a hard time converting a file you uploaded.') . "\n";
+  $body .= $file ."\n\n";
+  $body .= t('We\'ll take a look at the file and see if we can help, '."\n".'but you can always try converting to a standard format and uploading again.') ."\n\n";
+  $body .= t('Sorry, and thanks for using our site.');
+  return $body;
 }

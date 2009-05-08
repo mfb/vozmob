@@ -1,0 +1,134 @@
+<?php
+
+// ;$Id: mm_token.module,v 1.1.2.1.2.1 2009/03/25 16:57:57 arthuregg Exp $
+
+/**
+ * this gets a media mover configuration and returns it to token
+ *
+ * @param int $cid
+ * @return object
+ */
+function mm_token_get_config($cid) {
+  // get a media mover configuration
+  if ($config = media_mover_api_get_configuration($cid)) {
+    return $config;
+  }
+  return false;
+}
+
+/**
+ * Implementation of hook_token_values().
+ */
+function mm_token_token_values($type, $object = NULL) {
+  $values = array();
+  switch ($type) {
+
+    case 'mm_config':
+      $config = $object;
+      foreach ($config as $k => $v) {
+        if ($k == 'status') {
+          //@TODO
+          //$values['status_name'] = media_mover_api_con($v);
+        }
+        if ($k == 'states') {
+          foreach ($v as $verb => $state) {
+            foreach ($state as $state_key => $state_var) {
+              if (is_string($state_var)) {
+                $values["{$verb}-{$state_key}"] = $state_var;
+              }
+            }
+            if (function_exists("{$state['module']}_token_values")) {
+              //Would be nice to have this stuff... but not sure how to integrate nicely without jumbling the interface.
+              $extra_config_tokens = call_user_func("{$state['module']}_token_values",$type,unserialize($state['configuration']));
+              foreach ($extra_config_tokens as $config_key => $config_val) {
+                $values["{$verb}-{$state_key}-{$config_key}"] = $config_val;
+              }
+            }
+          }
+        } else {
+          $values[$k] = $v;
+        }
+      }
+      break;
+    case 'mm_file':
+
+      $file = (object)$object;
+
+      foreach ($file as $key => $v) {
+
+        if ($k == 'status') {
+          $values['status_name'] = media_mover_api_item_status($v);
+        }
+        if (is_array($v)) {
+          //this handles the data element
+          foreach ($v as $file_key => $file_v) {
+            $values['data-' . $file_key] = $file_v;
+          }
+        } else {
+          $values[$key] = $v;
+        }
+      }
+      break;
+  }
+
+  return $values;
+}
+
+/**
+ * Implementation of hook_token_list().
+ */
+function mm_token_token_list($type = 'all') {
+
+  //@TODO: Flesh these out with real descriptions
+  if ($type == 'mm_file' || $type == 'all') {
+    $tokens['Media Mover File'] = array (
+	    'mmfid' => t('Media Mover File Id'),
+	    'nid' => t('Node Id of assocaited node (if any)'),
+	    'fid' => t('File Id of associated file type entry (if any)'),
+	    'cid' => t('Media Mover configuration from whence this file came'),
+	    'harvest_file' => t('Path to harvested file'),
+	    'process_file' => t('Path to processed file'),
+	    'storage_file' => t('Path to stored file'),
+	    'complete_file' => t('Path to completed file'),
+	    'url' => t('Url for file access (if any)'),
+	    'status' => t('Status code of file'),
+	    'status_name' => t('Status name of file'),
+	    'date' => t('Date of creation'),
+    );
+
+    $tokens['Media Mover File'] = array_merge($tokens['Media Mover File'],
+	    array (
+		    'data-filesize' => t('Filesize of completed file'),
+		    'data-filename' => t('Filename of compelted file'),
+		    'data-filepath' => t('Filepath of completed file'),
+		    'data-harvest_module' => t('Module used for harvesting'),
+		    'data-harvest_action' => t('Action of harvesting Module'),
+		    'data-harvest_file' => t('Harvested file'),
+		    'data-node' => t('Node??'), )
+	    );
+  }
+
+  if ($type == "mm_config") {
+    $tokens['Media Mover Configuration'] = array (
+       'cid' => t('Media Mover Configuration '),
+       'name' => t('Name of Configuration'),
+       'description' => t('Configuration description'),
+       'status' => t('Configuration status'),
+       //@TODO
+       //'status_name' => t('Configuration status name'),
+       'start_time' => t('Configuration start time'),
+       'last_start_time' => t('Configuration last start time'),
+       'rss' => t('is configuration exposed via RSS?'),
+       'cron' => t('is configuration set to run on cron'),
+    );
+
+
+    $tokens['Media Mover Configuration']['harvest-module'] = t("Module used for Harvesting");
+    $tokens['Media Mover Configuration']['storage-module'] = t("Module used for Storage");
+    $tokens['Media Mover Configuration']['process-module'] = t("Module used for Processing");
+    $tokens['Media Mover Configuration']['complete-module'] = t("Module used for Completion");
+
+  }
+
+  return $tokens;
+}

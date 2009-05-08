@@ -1,0 +1,7 @@
+; $Id: mm_cck.info,v 1.1.4.2 2008/12/11 02:47:00 arthuregg Exp $
+name = Media Mover CCK
+description = "Media Mover content (CCK) interfaces"
+package = "Media Mover"
+dependencies[] = media_mover_api
+dependencies[] = content
+core=6.x

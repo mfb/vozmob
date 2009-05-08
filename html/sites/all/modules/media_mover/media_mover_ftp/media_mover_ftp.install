@@ -1,0 +1,64 @@
+<?php
+
+// $Id: media_mover_ftp.install,v 1.1.2.3.2.2 2008/10/17 00:00:34 arthuregg Exp $
+
+/**
+ * install the token table
+ */
+function media_mover_ftp_install() {
+  // Create tables.
+  drupal_install_schema('media_mover_ftp');
+}
+
+
+/**
+ * Implementation of hook_uninstall
+ * deletes all media mover tables
+ */
+function media_mover_ftp_uninstall() {
+  drupal_uninstall_schema('media_mover_ftp');
+}
+
+
+/**
+ * Implementation of hook_schema()
+ */
+function media_mover_ftp_schema() {
+  $schema['media_mover_ftp_tokens'] = array(
+    'description' => t('Holds user tokens to match against uploaded files'),
+    'fields' => array(
+      'uid' => array(
+        'description' => t('Drupal user ID'),
+        'type' => 'int',
+        'unsigned' => TRUE       
+      ),
+      'token' => array(
+        'description' => t('Token value'),
+        'type' => 'text',
+        'size' => 'small'
+      ),
+      'date' => array(
+        'description' => t('Date added'),
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+  );
+  return $schema;
+}
+
+
+/**
+ * Check that the FTP extension exists for PHP.
+ */
+function media_mover_ftp_requirements($phase) {
+  $has_ftp = function_exists('ftp_connect');
+  $requirements['media_mover_ftp'] = array(
+    'title' => t('FTP'),
+    'description' => t("Media Mover FTP requires that PHP's !ext is enabled in order to function properly.", array('!ext' => l('FTP extension', 'http://www.php.net/ftp'))),
+    'value' => $has_ftp ? t('Enabled') : t('Not found'),
+    'severity' => $has_ftp ? REQUIREMENT_OK : REQUIREMENT_ERROR,
+  );
+  return $requirements;
+}

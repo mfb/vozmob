@@ -1,5 +1,6 @@
-; $Id: media_mover_api.info,v 1.4 2008/01/03 06:17:22 bdragon Exp $
+; $Id: media_mover_api.info,v 1.1.2.1.2.2 2008/10/02 23:34:41 arthuregg Exp $
 name = Media Mover API
-description = Core of the Media Mover system.
+description = Core of the Media Mover system
 package = "Media Mover"
 core = 6.x
+php = 5.0

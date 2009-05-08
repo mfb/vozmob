@@ -1,0 +1,61 @@
+--- /Users/arthur/Desktop/s3-php5-curl/S3.php	2008-12-16 06:45:09.000000000 -0500
++++ S3.php	2008-12-18 11:31:25.000000000 -0500
+@@ -34,6 +34,13 @@
+ * @link http://undesigned.org.za/2007/10/22/amazon-s3-php-class
+ * @version 0.3.8
+ */
++
++
++/**
++ * AF added the checkKeys function
++ *
++ */
++
+ class S3 {
+ 	// ACL flags
+ 	const ACL_PRIVATE = 'private';
+@@ -75,6 +82,24 @@ class S3 {
+ 
+ 
+ 	/**
++  * Check connection to S3,
++  *
++  * @param boolean $detailed Returns response if error, false if ok
++  * @return array | false
++  */
++  public static function checkKeys() {
++    $rest = new S3Request('GET', '', '');
++    $rest = $rest->getResponse();
++    if ($rest->error === false && $rest->code !== 200)
++      return array('code' => $rest->code, 'message' => 'Unexpected HTTP status');
++    if ($rest->error !== false) {
++      return $rest->error;
++    }
++    return false;
++  }
++
++
++  /**
+ 	* Get a list of buckets
+ 	*
+ 	* @param boolean $detailed Returns detailed bucket list when true
+@@ -187,7 +212,7 @@ class S3 {
+ 	* @param string $location Set as "EU" to create buckets hosted in Europe
+ 	* @return boolean
+ 	*/
+-	public static function putBucket($bucket, $acl = self::ACL_PRIVATE, $location = false) {
++  public static function putBucket($bucket, $acl = self::ACL_PRIVATE, $location = false, $error_report = true) {
+ 		$rest = new S3Request('PUT', $bucket, '');
+ 		$rest->setAmzHeader('x-amz-acl', $acl);
+ 
+@@ -206,8 +231,10 @@ class S3 {
+ 		if ($rest->error === false && $rest->code !== 200)
+ 			$rest->error = array('code' => $rest->code, 'message' => 'Unexpected HTTP status');
+ 		if ($rest->error !== false) {
++      if ($error_report) {
+ 			trigger_error(sprintf("S3::putBucket({$bucket}, {$acl}, {$location}): [%s] %s",
+ 			$rest->error['code'], $rest->error['message']), E_USER_WARNING);
++      }
+ 			return false;
+ 		}
+ 		return true;

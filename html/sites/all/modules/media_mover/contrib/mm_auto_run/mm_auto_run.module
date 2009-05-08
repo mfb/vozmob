@@ -1,0 +1,126 @@
+<?php
+
+// $Id: mm_auto_run.module,v 1.1.2.2.2.2 2008/09/26 17:48:44 arthuregg Exp $
+
+
+/**
+ * @FILE this provides auto run for specific 
+ *       configurations from media mover
+ */
+
+
+/* ********************************************** */
+/* DRUPAL HOOKS                                   */
+/* ********************************************** */
+
+
+/**
+ * Implementation of hook_menu
+ *
+ * @return array
+ */
+function mm_auto_run_menu() {
+  $items = array();
+ 
+  $items['admin/settings/mm_auto_run'] = array(
+    'title' => 'Media Mover Auto Run',
+    '#description' => t('Configure automatically run Media Mover configurations.'),
+    'access arguments' => array('administer media_mover'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mm_auto_run_drupal_settings_form'),
+  );
+    
+  return $items;
+}
+
+
+/**
+ * Implementation of media_mover hook
+ * @param $op is the operator to return
+ * @param $action_id is which action is being called
+ * @param $configuration is the specific configuration saved for the action for this configuration
+ * @param $file is the file in use
+ * @param $running_config is the full configuration data currently running 
+ */
+function mm_auto_run_media_mover($op, $action = null, $configuration = null, &$file = array(), $running_config = null ) {
+
+  switch ($op) {
+    // admin options for the API setup
+    case 'admin':
+      return mm_auto_run_settings_form();
+    break;
+  }
+}
+
+
+/**
+ * Implementation of hook_nodeapi()
+ *
+ * @param object $node
+ * @param string $op
+ * @param string $a3
+ * @param string $a4
+ */
+function mm_auto_run_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  // we only run on update or insert
+  if ($op == 'insert' || $op == 'update') {
+    // get the list of configurations
+    $configurations = variable_get('mm_auto_run_configs', false);
+    if ($configurations) {
+      // run each configuration that is enabled
+      foreach($configurations as $cid => $enabled) {        
+        if ($enabled) {
+          $config = media_mover_api_get_configuration($cid);
+          // run the media mover configuration on this node
+          media_mover_api_run_config($config, true, $node->nid);
+        }
+      }
+    }
+  }
+}
+
+
+/* ********************************************** */
+/* INTERNAL FUNCTIONS                             */
+/* ********************************************** */
+
+
+/**
+ * builds the settings form, used on admin/settings/mm_auto_run and 
+ * admin/media_mover/settings
+ *
+ * @return array
+ */
+function mm_auto_run_settings_form() {
+  // build some description information
+  $form['auto_run'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Media Mover Auto Run'),
+    '#description' => t('Select which Media Mover configurations you would like to run automatically when a user creates or updates a node. This will only work with configurations that harvest their data from nodes.'),  
+    '#collapsible' => true,
+  );
+  
+  // get a list of all current MM configurations
+  $configurations = media_mover_api_get_configurations();
+  foreach ($configurations as $configuration) {
+    $options[$configuration->cid] = '<strong>'. $configuration->name .'</strong><br />'. $configuration->description;
+  }
+
+  $form['auto_run']['mm_auto_run_configs'] = array(
+    '#title' => t('Select the configurations to run'),
+    '#type' => 'checkboxes',
+    '#options' => $options,
+    '#default_value' => variable_get('mm_auto_run_configs', array()),
+  );     
+   
+  return $form;
+}
+
+
+/**
+ * builds the settings form for drupal (admin/settings/mm_auto_run)
+ * @return array
+ */
+function mm_auto_run_drupal_settings_form() {
+  return system_settings_form(mm_auto_run_settings_form());
+}

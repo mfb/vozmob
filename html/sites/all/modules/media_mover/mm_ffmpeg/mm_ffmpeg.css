@@ -1,0 +1,5 @@
+/* $Id: mm_ffmpeg.css,v 1.1.2.1 2008/01/29 21:54:33 douggreen Exp $ */
+
+html.js .ffmpeg-video-size-other {
+  display: none;
+}
