@@ -44,8 +44,8 @@ function messaging_sms_render($message, $info) {
 function messaging_sms_user_destination($account, $message) {
   // Check for active mobile infomation. Simply return it so that the send
   // callback has a destination array and access everything.
-  if (!empty($account->sms_user) && $account->sms_user[0]['status'] == 2 && !empty($account->sms_user[0]['number'])) {
-    return $account->sms_user[0]['number'];
+  if (!empty($account->sms_user) && $account->sms_user['status'] == 2 && !empty($account->sms_user['number'])) {
+    return $account->sms_user['number'];
   }
 }
 
