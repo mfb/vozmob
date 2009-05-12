@@ -34,3 +34,13 @@ function vozmob_support_form_alter(&$form, $form_state, $form_id) {
   }
 }
 
+/**
+ * Implementation of hook_nodeapi().
+ */
+function vozmob_support_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  // Move the messaging_sendto form down to the bottom of the node.
+  if ($op == 'view' && isset($node->content['messaging_sendto']['#weight'])) {
+    $node->content['messaging_sendto']['#weight'] = 40;
+  }
+}
+
