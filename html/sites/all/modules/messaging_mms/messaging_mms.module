@@ -11,7 +11,7 @@ function messaging_mms_messaging($op = 'info') {
   switch($op) {
     case 'send methods':
       $info['mms'] = array(
-        'title' => 'SMS Framework E-mail Gateway',
+        'title' => 'MMS via SMS Framework E-mail Gateway',
         'name' => t('MMS'),
         'group' => 'sms', // Class of send method
         'type' => MESSAGING_TYPE_SEND,
@@ -39,7 +39,7 @@ function messaging_mms_send_msg($destination, $message, $params = array()) {
   // Add e-mail gateway to destination.
   $mail['to'] .= '@' . (($mms_email_gateway = mms_email_gateway_get_mms($params['carrier'])) ? $mms_email_gateway : $params['carrier']);
   // mimemail($sender, $recipient, $subject, $body, $plaintext = NULL, $headers = array(), $text = NULL, $attachments = array(), $mailkey = '')
-  return mimemail($mail['from'], $mail['to'], $mail['subject'], $mail['body'], NULL, $mail['headers'], NULL, $mail['attachments'], '');
+  return mimemail($mail['from'], $mail['to'], $mail['subject'], $mail['body'], TRUE, $mail['headers'], NULL, $mail['attachments'], '');
 }
 
 /**
