@@ -30,7 +30,6 @@
  */
 function sms_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
 
-  watchdog('debug','starting sms_mailsave_clean');
 
   list($to_address, $to_name) = registration_get_toaddress($header, $mailbox);
   $to  = explode('@', $to_address);
@@ -40,11 +39,11 @@ function sms_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
   // The node does not exist
   // The sms_user and sms_email_gateway modules are required.
   // The mail that this sms was sent to is not one of the registration accounts
-  watchdog('debug','aa');
+
   if (!$node->uid && module_exists('sms_user') && module_exists('sms_email_gateway') && !isset($email_registration_accounts[$to[0]])) {
     list($from_address, $from_name) = mailhandler_get_fromaddress($header, $mailbox);
     $from = explode('@', $from_address);
-  watchdog('debug','bb');
+
     $email_gateway_aliases = array(
       'messaging.nextel.com' => 'page.nextel.com',
       'mms.att.net' => 'txt.att.net',
@@ -56,8 +55,6 @@ function sms_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
 
     $number = $from[0];
 
-
-  watchdog('debug','cc');
     sms_mailsave_receive($node, $number);
     
     if (empty($node->title)) {
@@ -68,7 +65,6 @@ function sms_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
     //'name' => implode('-', array(dechex(mt_rand()), dechex(mt_rand()))),
     $sms_email_gateway_providers = sms_email_gateway_sms_email_gateway_providers();
     if (!$node->uid && isset($sms_email_gateway_providers[$from[1]])) {
-  watchdog('debug','dd');
      $user = FALSE;
      while (!$user) { 
       $user = user_save(NULL, array(
@@ -83,19 +79,26 @@ function sms_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
       $node->uid = $user->uid;
 
       if (module_exists('sms_registration')) {
-	    $message = "Thanks / Gracias! Do you want to have a blog in vozmob? If yes please send one word identifying the blog.";
+
+	    $lan = sms_mailsave_get_language();
+	    if ($lan == "en") {
+	        $message = "Thanks! Do you want to have a blog in vozmob? If yes please send one word identifying the blog.";
+		$subject = "Media posted";
+		}
+	    else {
+		$message = "Gracias! Quiere tener un blog en vozmob? Si es asi envie una palabra identificando su blog.";
+		$subject = "Publicado";
+		}
+ watchdog('debug', print_r($message, TRUE));
 	    $options = array('carrier'=> $from[1], 'from' => 'vozmob.sandbox.reg@gmail.com', 'subject'=>'Media posted');
     	    sms_send($number, $message, $options);
     	    //we will receive the answer in cleanup.registration.inc
-	    watchdog('debug','sms sent');
      }
 
     }
     if ($node->uid) {
       mailhandler_switch_user($node->uid);
     }
-
-    watchdog('debug','ee');
 
   }
 }
@@ -141,4 +144,9 @@ function sms_mailsave_get_toaddress($header, $mailbox) {
 		$from = $header->to;
 		}
 	return array($to[0]->mailbox .'@'. $to[0]->host, $to[0]->personal);
+}
+
+function sms_mailsave_get_language() {
+
+	return $language->language;
 }
