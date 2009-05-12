@@ -40,14 +40,15 @@ function messaging_mail_prepare($destination, $message, $params, $alter = TRUE) 
 
   // Build the mail object, mimic drupal_mail() format
   $mail = array(
-    'id'       => 'messaging_'. (!empty($message->type) ? 'message-'.$message->type : 'message'),
-    'to'       => $destination,
-    'from'     => $from,
-    'language' => !empty($message->language) ? $message->language : language_default(),
-    'params'   => $params,
-    'subject'  => $message->subject,
-    'body'     => $message->body,
-    'headers'  => messaging_mail_headers($message, $params),
+    'id'          => 'messaging_'. (!empty($message->type) ? 'message-'.$message->type : 'message'),
+    'to'          => $destination,
+    'from'        => $from,
+    'language'    => !empty($message->language) ? $message->language : language_default(),
+    'params'      => $params,
+    'subject'     => $message->subject,
+    'body'        => $message->body,
+    'attachments' => $message->attachments,
+    'headers'     => messaging_mail_headers($message, $params),
   );  
   
   // Invoke hook_mail_alter() to allow all modules to alter the resulting e-mail.

@@ -12,3 +12,25 @@
 function vozmob_support_views_api() {
   return array('api' => 2);
 }
+
+/**
+ * Implementation of hook_form_alter().
+ */
+function vozmob_support_form_alter(&$form, $form_state, $form_id) {
+  switch ($form_id) {
+    case 'messaging_sendto_form':
+      $form['sendto']['#description'] = t("Enter a recipient's mobile phone number, email address or user name.");
+      $form['sendto']['#weight'] = -20;
+      $gateway = sms_default_gateway();
+      if (function_exists($gateway['send form'])) {
+        $form['gateway']['#tree'] = TRUE;
+        $form['gateway']['#weight'] = -10;
+        $form['gateway'] = array_merge($gateway['send form']($required), $form['gateway']);
+      }
+      if (isset($form['gateway']['carrier']['#description'])) {
+        $form['gateway']['carrier']['#description'] = t("Select the recipient's wireless carrier if sending to a phone number.");
+      }
+      break;
+  }
+}
+
