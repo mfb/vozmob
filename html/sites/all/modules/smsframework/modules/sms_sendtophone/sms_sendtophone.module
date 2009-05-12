@@ -70,11 +70,11 @@ function sms_sendtophone_admin_overview() {
 function sms_sendtophone_page($type = NULL) {
   global $user;
   $user = user_load(array('uid' => $user-> uid));
-  if (user_access('send to any number') || !empty($user->sms_user['0']['number'])) {
+  if (user_access('send to any number') || !empty($user->sms_user['number'])) {
     $form = drupal_get_form('sms_sendtophone_form', $type);
   }
   else {
-    if (empty($user->sms_user['0']['number']) && user_access('send to any number')) {
+    if (empty($user->sms_user['number']) && user_access('send to any number')) {
       $register = array(
         '#value' => t('You need need to <a href="@setup">setup</a> your mobile phone to send messages.', array('@setup' => url('user/'. $user->uid .'/mobile')))
       );
@@ -365,9 +365,9 @@ function sms_sendtophone_form($form_state, $type) {
   }
 
   $form = array_merge(sms_send_form(), $form);
-  $form['number']['#default_value'] = $user->sms_user['0']['number'];
-  if (is_array($user->sms_user['0']['gateway'])) {
-    foreach ($user->sms_user['0']['gateway'] as $option => $value) {
+  $form['number']['#default_value'] = $user->sms_user['number'];
+  if (is_array($user->sms_user['gateway'])) {
+    foreach ($user->sms_user['gateway'] as $option => $value) {
       $form['gateway'][$option]['#default_value'] = $value;
     }
   }
