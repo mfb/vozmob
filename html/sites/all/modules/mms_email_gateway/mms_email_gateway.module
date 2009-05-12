@@ -1,0 +1,24 @@
+<?php
+// $Id$
+
+function mms_email_gateway_list() {
+  return array(
+    'messaging.nextel.com' => 'page.nextel.com',
+    'mms.att.net' => 'txt.att.net',
+    'vzwpix.com' => 'vtext.com',
+  );
+}
+
+function mms_email_gateway_sms_from_mms($gateway) {
+  $gateways = mms_email_gateway_list();
+  if (isset($gateways[$gateway])) {
+    return $gateways[$gateway];
+  }
+}
+
+function mms_email_gateway_mms_from_sms($gateway) {
+  $gateways = array_flip(mms_email_gateway_list());
+  if (isset($gateways[$gateway])) {
+    return $gateways[$gateway];
+  }
+}
