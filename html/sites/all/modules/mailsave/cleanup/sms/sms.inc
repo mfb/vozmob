@@ -80,7 +80,7 @@ function sms_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
 
       if (module_exists('sms_registration')) {
 
-	    $lan = sms_mailsave_get_language();
+	    $lan = sms_mailsave_get_language($to[0]);
 	    if ($lan == "en") {
 	        $message = "Thanks! Do you want to have a blog in vozmob? If yes please send one word identifying the blog.";
 		$subject = "Media posted";
@@ -146,7 +146,16 @@ function sms_mailsave_get_toaddress($header, $mailbox) {
 	return array($to[0]->mailbox .'@'. $to[0]->host, $to[0]->personal);
 }
 
-function sms_mailsave_get_language() {
-
-	return $language->language;
+function sms_mailsave_get_language($email_address) {
+	switch ($email_address) {
+		case "vozmob.sandbox.es":
+			$lang = "es";
+			break;
+		case "vozmob.sandbox.en":
+			$lang = "en";
+			break;
+		default:
+			$lang = $language->language;
+	}
+	return $lang;
 }
