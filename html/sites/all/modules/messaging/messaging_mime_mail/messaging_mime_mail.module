@@ -39,7 +39,7 @@ function messaging_mime_mail_send_msg($destination, $message, $params = array())
   // Get parameters without invoking hook_mail_alter()
   $mail = messaging_mail_prepare($destination, $message, $params, FALSE);
   // mimemail($sender, $recipient, $subject, $body, $plaintext = NULL, $headers = array(), $text = NULL, $attachments = array(), $mailkey = '')  
-  return mimemail($mail['from'], $mail['to'], $mail['subject'], $mail['body'], NULL, $mail['headers'], NULL, array(), '');
+  return mimemail($mail['from'], $mail['to'], $mail['subject'], $mail['body'], NULL, $mail['headers'], NULL, $mail['attachments'], '');
 }
 
 /**
