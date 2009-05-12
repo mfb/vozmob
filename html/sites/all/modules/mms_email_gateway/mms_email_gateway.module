@@ -1,7 +1,10 @@
 <?php
 // $Id$
 
-function mms_email_gateway_list() {
+/**
+ * Return an array of MMS e-mail gateways and corresponding SMS e-mail gateways.
+ */
+function mms_email_gateway_get_map() {
   return array(
     'messaging.nextel.com' => 'page.nextel.com',
     'mms.att.net' => 'txt.att.net',
@@ -9,15 +12,21 @@ function mms_email_gateway_list() {
   );
 }
 
-function mms_email_gateway_sms_from_mms($gateway) {
-  $gateways = mms_email_gateway_list();
+/**
+ * Return an SMS e-mail gateway given an MMS e-mail gateway.
+ */
+function mms_email_gateway_get_sms($gateway) {
+  $gateways = mms_email_gateway_get_map();
   if (isset($gateways[$gateway])) {
     return $gateways[$gateway];
   }
 }
 
-function mms_email_gateway_mms_from_sms($gateway) {
-  $gateways = array_flip(mms_email_gateway_list());
+/**
+ * Return an MMS e-mail gateway given an SMS e-mail gateway.
+ */
+function mms_email_gateway_get_mms($gateway) {
+  $gateways = array_flip(mms_email_gateway_get_map());
   if (isset($gateways[$gateway])) {
     return $gateways[$gateway];
   }
