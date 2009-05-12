@@ -194,6 +194,7 @@ function sms_email_gateway_sms_email_gateway_providers() {
     'sms.mycricket.com' => t('Cricket'),
     'messaging.sprintpcs.com' => t('Helio'),
     'mymetropcs.com' => t('Metro PCS'),
+    'mobilinkworld.com => t('Mobilink World'),
     'page.nextel.com' => t('Nextel'),
     'qwestmp.com' => t('Qwest'),
     'messaging.sprintpcs.com' => t('Sprint'),
