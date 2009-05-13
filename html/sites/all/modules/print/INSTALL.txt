@@ -25,7 +25,7 @@ dompdf support:
 
   1. Download dompdf from http://sourceforge.net/projects/dompdf/
   2. Extract the contents of the downloaded package into the print module
-  directory (usually sites/all/modules/print)
+  directory (usually sites/all/modules/print/lib)
   3. Check if dompdf_config.inc.php fits your installation. In 99% of cases,
   no changes are necessary, so just try to use it and only edit anything if
   the PDF generation fails.
@@ -42,9 +42,24 @@ TCPDF support:
 
   1. Download TCPDF from http://sourceforge.net/projects/tcpdf/
   2. Extract the contents of the downloaded package into the print module
-  directory (usually sites/all/modules/print). There is no need to modify
-  the config/tcpdf_config.php file, as the module self-configures TCPDF.
+  directory (usually sites/all/modules/print/lib). There is no need to
+  modify the config/tcpdf_config.php file, as the module self-configures
+  TCPDF.
   3. Check http://tcpdf.sourceforge.net/ for further information.
+
+wkhtmltopdf support:
+
+  1. Download wkhtmltopdf from
+  http://code.google.com/p/wkhtmltopdf/downloads/list. You can choose to
+  download the source and compile it or simply download the static binary,
+  which doesn't require you to complile anything.
+  2. Place the wkhtmltopdf executable into the print module directory
+  (usually sites/all/modules/print/lib). You can also place a symbolic link
+  to the executable.
+  3. You will need a running X Server or the virtual (headless) X
+  framebuffer server: Xvfb. Place the Xvfb binary or a symbolic link to it
+  in the print module directory (usually sites/all/modules/print/lib).
+  4. Check http://code.google.com/p/wkhtmltopdf/ for further information.
 
 UPDATE
 ------
@@ -72,4 +87,4 @@ Note that pattern matching in robots.txt is a Google extension (see
 http://www.google.com/support/webmasters/bin/answer.py?answer=40367 for more
 information).
 
-// $Id: INSTALL.txt,v 1.10.2.9 2009/02/19 23:39:14 jcnventura Exp $
+// $Id: INSTALL.txt,v 1.10.2.10 2009/04/27 22:53:50 jcnventura Exp $

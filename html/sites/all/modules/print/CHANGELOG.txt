@@ -1,3 +1,88 @@
+May 12, 2009
+        Update changelog
+        Coder fixes
+        Fix #457528: When using TCPDF remove queries from the image URL
+May 11, 2009
+        Disable corner link span when empty
+        Add CCK's print_content_build_modes hook (currently disabled)
+May 6, 2009
+        Forgot quotes around UTF-8 in fix for #435578
+        Fix #451036: don't call drupal_get_title when the non-node path was not found
+        Don't try to use URL aliases when the node doesn't have one
+May 5, 2009
+        by Zoltan Balogh: Updated Hungarian translation
+May 4, 2009
+        Last part of the fix for the last part of #435578
+        Fix #420460: When using TCPDF remove imagefield/filefield numerical query from image filenames
+        Fix #449446 by rsantiag: Use the job_queue module to send emails during the cron run
+May 2, 2009
+        Fix another part of #435578: decode HTML entities in TCPDF title
+April 29, 2009
+        Fix #441770: Footer was placed at top of page in TCPDF => 4.6
+April 27, 2009
+        Improve wkhtmltopdf documentation, configuration and add a directory to place external libraries
+        Fix #385994: Printer-friendly pages do not inherit organic group membership from original page
+April 25, 2009
+        by Zoltan Balogh: Updated Hungarian translation
+April 23, 2009
+        Prevent PHP from blocking in the wkhtmltopdf code
+        Use cyclical numbering for the X display instead of random
+        Coder fixes
+April 22, 2009
+        Fix #283950: clean the output buffer to recover from any TCPDF warning/error
+        Fix #440376 by rsantiag: add hooks before and after the email sending action
+        Use Drupal log for wkhtmltopdf errors
+        Fix #429054: decode html entities in image URLs passed to TCPDF
+        Fix a notice with undefined node->type when printing system pages
+        Remove some dead code for an untested fix to #254863
+        Fix #435578: for now, don't use build_mode as CCK is not ready for it yet
+April 21, 2009
+        Updated German translation by rastatt
+        Fix #419296 by noelbush: ** Use wkhtmltopdf for PDF generation **
+        Fix #439314: use better pattern matching for TCPDF's paragraph replacement
+April 20, 2009
+        Fix #437128 by florin: add some bottom padding to the corner link
+April 16, 2009
+        Fix #435386 by rhys: accept recepient lists with consecutive separators \(newlines or commas\)
+April 15, 2009
+        Filter node titles using check_plain
+        Hide TCPDF notices
+        Fix #428024: use build_mode in hook_nodeapi and elsewhere
+March 27, 2009
+        Expand the advanced link options by default (too many users couldn't see it) and move the book link inside the fieldset
+        Fix #391790: display CCK fields (and labels) better in PDFs generated with TCPDF
+        Try to fix #414910 by using a smaller default weight
+        Fix #404052: allow node tabs pages to display the links for system pages
+        Fix #405564: display the content corner links above the content
+        Try to use other functions to convert from UTF-8 to ISO-8859-1 for the PDF generation with dompdf
+March 24, 2009
+        Fix #408238 by chris.cohen: improve PHP in the default print template
+        Updated Italian translation by fabrizioprocopio
+        Updated French translation by xmacinfo
+March 18, 2009
+        SA-CONTRIB-2009-012 Print module can be used as a spam relay
+March 17, 2009
+        Make tests successful again
+        Coder fixes
+March 12, 2009
+        Fix #303506 partly by joostvdl: remove the country code from paths to private image files used in generating PDFs
+        Simpler fix to #388008: Use a 'heavier' weight even in the absense of the CCK module
+March 10, 2009
+        Fix #388008: implement CCK's hook_content_extra_fields to manage the order of the per-content type settings
+March 5, 2009
+        Fix #384294 by ron_s: use padding instead of margin in icons
+        Fix #381586 by Fleshgrinder: add space at the end of the reset button in the send mail form
+        Fix #372250: Add page title to send mail form and the ability to use the !title token
+        Improvements to the API index.php
+        Updated slovak translation by etki
+February 20, 2009
+        Fix #371455: Convert all links in the PDF to absolute
+        Better fix for #371388: handle tbody tags with attributes
+        Fix #375892: Don't validate mail send form when pressing cancel
+        Improved Turkish translation by drupalhizmetleri
+        Document print_[format].tpl better in the README.txt
+February 11, 2009
+        by Zoltan Balogh: Updated Hungarian translation
 February 10, 2009
         Update changelog
 February 9, 2009

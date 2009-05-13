@@ -1,5 +1,5 @@
 <?php
-// $Id: print.module,v 1.25.2.61 2009/03/17 20:55:06 jcnventura Exp $
+// $Id: print.module,v 1.25.2.66 2009/05/10 23:12:59 jcnventura Exp $
 
 /**
  * @file
@@ -48,7 +48,7 @@ define('PRINT_TYPE_URLLIST_DEFAULT', 1);
 
 define('PRINT_ALLOW_NORMAL_LINK', 1);
 define('PRINT_ALLOW_BOOK_LINK', 2);
-define('PRINT_TYPE_FIELDS_WEIGHT', 50);
+define('PRINT_TYPE_FIELDS_WEIGHT', 30);
 
 /**
  * Implementation of hook_perm().
@@ -245,7 +245,7 @@ function print_link_alter(&$links, $node) {
             break;
           case 2:
             $print_html_link_use_alias = variable_get('print_html_link_use_alias', PRINT_HTML_LINK_USE_ALIAS_DEFAULT);
-            $path = $print_html_link_use_alias ? $node->path : $node->nid;
+            $path = ($print_html_link_use_alias && isset($node->path)) ? $node->path : $node->nid;
             break;
         }
 
@@ -271,8 +271,7 @@ function print_help($path, $arg) {
   }
 
   $print_html_link_pos = variable_get('print_html_link_pos', array(PRINT_HTML_LINK_POS_DEFAULT => PRINT_HTML_LINK_POS_DEFAULT));
-  if ((preg_match('!^node/!i', $path) == 0) &&
-      !(empty($print_html_link_pos['link']) && empty($print_html_link_pos['corner']))) {
+  if (($path !== 'node/%') && !(empty($print_html_link_pos['link']) && empty($print_html_link_pos['corner']))) {
     static $output = FALSE;
 
     if ($output === FALSE) {
@@ -293,16 +292,20 @@ function print_nodeapi(&$node, $op = 'view', $teaser, $page) {
   switch ($op) {
     case 'view':
       // Insert content corner links
+      if (($teaser === FALSE) &&
+          !isset($node->printing)) {
+//          isset($node->build_mode) && ($node->build_mode == NODE_BUILD_NORMAL)) {
+      $node->content['print_links'] = array(
+        '#value' => "<span class='print-link'></span>",
+        '#weight' => -101,
+      );
       $print_html_link_pos = variable_get('print_html_link_pos', array(PRINT_HTML_LINK_POS_DEFAULT => PRINT_HTML_LINK_POS_DEFAULT));
-      if (($teaser === FALSE) && !empty($print_html_link_pos['corner']) &&
-          (preg_match('!^print!i', $_GET['q']) == 0)) {
+      if (!empty($print_html_link_pos['corner'])) {
         $link = print_insert_link(NULL, $node);
         if ($link) {
-          $node->content['print_link'] = array(
-            '#value' => "<span class='print-link'>$link</span>",
-            '#weight' => -101,
-          );
+          $node->content['print_links']['#value'] = preg_replace('!</span>$!', $link .'</span>', $node->content['print_links']['#value']);
         }
+      }
       }
       break;
     case 'load':
@@ -315,7 +318,7 @@ function print_nodeapi(&$node, $op = 'view', $teaser, $page) {
       break;
     case 'delete':
       db_query("DELETE FROM {print_node_conf} WHERE nid = %d", $node->nid);
-      db_query("DELETE FROM {print_page_counter} WHERE path = '%s'", $node->path);
+      db_query("DELETE FROM {print_page_counter} WHERE path = 'node/%d'", $node->nid);
       break;
   }
 }
@@ -332,7 +335,7 @@ function print_form_alter(&$form, $form_state, $form_id) {
       '#title' => t('Printer, e-mail and PDF versions'),
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
-      '#weight' => function_exists('content_extra_field_weight') ? content_extra_field_weight($form['type']['#value'], 'print') : PRINT_TYPE_FIELDS_WEIGHT,
+      '#weight' => (function_exists('content_extra_field_weight') && isset($form['type'])) ? content_extra_field_weight($form['type']['#value'], 'print') : PRINT_TYPE_FIELDS_WEIGHT,
     );
 
     $form['print']['label'] = array(
@@ -379,6 +382,23 @@ function print_content_extra_fields($type_name) {
   );
   return $fields;
 }
+
+/**
+ * Implementation of hook_content_build_modes().
+ */
+/*function print_content_build_modes() {
+  return array(
+    'print' => array(
+      'title' => t('Print'),
+      'build modes' => array(
+        NODE_BUILD_PRINT => array(
+          'title' => t('Print'),
+          'views style' => TRUE,
+        ),
+      ),
+    ),
+  );
+}*/
 
 /**
  * Auxiliary function to assign the per-node settings to the node object fields
@@ -673,9 +693,8 @@ function print_link_allowed($args) {
     $print_html_node_link_visibility = variable_get('print_html_node_link_visibility', PRINT_HTML_NODE_LINK_VISIBILITY_DEFAULT);
     $print_html_node_link_pages = variable_get('print_html_node_link_pages', PRINT_HTML_NODE_LINK_PAGES_DEFAULT);
 
-    if (!empty($node->printing) ||
-        !_print_page_match($print_html_node_link_visibility, $print_html_node_link_pages)) {
-      // Page not in visibility list or we are working!
+    if (!_print_page_match($print_html_node_link_visibility, $print_html_node_link_pages)) {
+      // Page not in visibility list
       return FALSE;
     }
     elseif (isset($args['type']) && ($args['type'] == 'comment') && isset($node_type)) {

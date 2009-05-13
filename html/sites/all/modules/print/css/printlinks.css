@@ -1,9 +1,19 @@
-/* $Id: printlinks.css,v 1.1.2.3 2009/03/05 00:45:29 jcnventura Exp $ */
+/* $Id: printlinks.css,v 1.1.2.5 2009/04/20 16:00:53 jcnventura Exp $ */
 
 .print-link {
+  /* Use these for links above the content */
+  display: block;
+  text-align: right;
+  padding-bottom: 0.5em;
+  /* Use these for links in a corner of the content */
+  /*
   position:relative;
   bottom: 0.5em;
   float:right;
+  */
+}
+
+.print_html, .print_mail, .print_pdf {
   margin-left: 1em;
 }
 

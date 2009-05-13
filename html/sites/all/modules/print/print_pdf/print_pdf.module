@@ -1,5 +1,5 @@
 <?php
-// $Id: print_pdf.module,v 1.1.2.31 2009/02/09 20:20:20 jcnventura Exp $
+// $Id: print_pdf.module,v 1.1.2.36 2009/05/06 00:23:05 jcnventura Exp $
 
 /**
  * @file
@@ -26,6 +26,9 @@ define('PRINT_PDF_PAGE_ORIENTATION_DEFAULT', 'portrait');
 define('PRINT_PDF_FONT_FAMILY_DEFAULT', 'dejavusans');
 define('PRINT_PDF_FONT_SIZE_DEFAULT', 10);
 define('PRINT_PDF_FILENAME_DEFAULT', '[site-name] - [title] - [mod-yyyy]-[mod-mm]-[mod-dd]');
+define('PRINT_PDF_WKHTMLTOPDF_OPTIONS', "--footer-font-size 7 --footer-right '[page]'");
+define('PRINT_PDF_XVFB_OPTIONS', '');
+//  define('PRINT_PDF_XVFB_OPTIONS', ' -fp /usr/share/fonts/X11/misc/,/usr/share/fonts/X11/Type1/,/usr/share/fonts/X11/75dpi/,/usr/share/fonts/X11/100dpi/');
 
 /**
  * Implementation of hook_theme().
@@ -214,8 +217,7 @@ function print_pdf_link($type, $node = NULL, $teaser = FALSE) {
  */
 function print_pdf_help($path, $arg) {
   $print_pdf_link_pos = variable_get('print_pdf_link_pos', array(PRINT_PDF_LINK_POS_DEFAULT => PRINT_PDF_LINK_POS_DEFAULT));
-  if ((preg_match('!^node/!i', $path) == 0) &&
-      !(empty($print_pdf_link_pos['link']) && empty($print_pdf_link_pos['corner']))) {
+  if (($path !== 'node/%') && !(empty($print_pdf_link_pos['link']) && empty($print_pdf_link_pos['corner']))) {
     static $output = FALSE;
 
     if ($output === FALSE) {
@@ -238,13 +240,11 @@ function print_pdf_nodeapi(&$node, $op = 'view', $teaser, $page) {
       // Insert content corner links
       $print_pdf_link_pos = variable_get('print_pdf_link_pos', array(PRINT_PDF_LINK_POS_DEFAULT => PRINT_PDF_LINK_POS_DEFAULT));
       if (($teaser === FALSE) && !empty($print_pdf_link_pos['corner']) &&
-          (preg_match('!^print!i', $_GET['q']) == 0)) {
+          !isset($node->printing)) {
+//          isset($node->build_mode) && ($node->build_mode == NODE_BUILD_NORMAL)) {
         $link = print_pdf_insert_link(NULL, $node);
         if ($link) {
-          $node->content['print_pdf_link'] = array(
-            '#value' => "<span class='print-link'>$link</span>",
-            '#weight' => -103,
-          );
+          $node->content['print_links']['#value'] = preg_replace('!</span>$!', $link .'</span>', $node->content['print_links']['#value']);
         }
       }
       break;
@@ -258,7 +258,7 @@ function print_pdf_nodeapi(&$node, $op = 'view', $teaser, $page) {
       break;
     case 'delete':
       db_query("DELETE FROM {print_pdf_node_conf} WHERE nid = %d", $node->nid);
-      db_query("DELETE FROM {print_pdf_page_counter} WHERE path = '%s'", $node->path);
+      db_query("DELETE FROM {print_pdf_page_counter} WHERE path = 'node/%d'", $node->nid);
       break;
   }
 }
@@ -473,9 +473,8 @@ function print_pdf_link_allowed($args) {
     $print_pdf_node_link_visibility = variable_get('print_pdf_node_link_visibility', PRINT_PDF_NODE_LINK_VISIBILITY_DEFAULT);
     $print_pdf_node_link_pages = variable_get('print_pdf_node_link_pages', PRINT_PDF_NODE_LINK_PAGES_DEFAULT);
 
-    if (!empty($node->printing) ||
-        !_print_page_match($print_pdf_node_link_visibility, $print_pdf_node_link_pages)) {
-      // Page not in visibility list or we are working!
+    if (!_print_page_match($print_pdf_node_link_visibility, $print_pdf_node_link_pages)) {
+      // Page not in visibility list
       return FALSE;
     }
     elseif (isset($args['type']) && ($args['type'] == 'comment') && isset($node_type)) {

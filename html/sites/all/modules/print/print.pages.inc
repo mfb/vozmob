@@ -1,5 +1,5 @@
 <?php
-// $Id: print.pages.inc,v 1.1.2.41 2009/01/21 01:11:51 jcnventura Exp $
+// $Id: print.pages.inc,v 1.1.2.49 2009/05/13 16:18:06 jcnventura Exp $
 
 /**
  * @file
@@ -20,16 +20,21 @@ $_print_urls = PRINT_URLS_DEFAULT;
  */
 function print_controller_html() {
   $args = func_get_args();
-  // Remove the print/ prefix
   $path = implode('/', $args);
   $cid = isset($_GET['comment']) ? (int)$_GET['comment'] : NULL;
 
   $print = print_controller($path, $cid, PRINT_HTML_FORMAT);
   if ($print !== FALSE) {
     $node = $print['node'];
-    include_once(_print_get_template(PRINT_HTML_FORMAT, $print['type']));
 
-    $nodepath = drupal_get_normal_path($node->path);
+    ob_start();
+    include_once(_print_get_template(PRINT_HTML_FORMAT, $print['type']));
+    $html = ob_get_contents();
+    ob_end_clean();
+    $html = drupal_final_markup($html);
+    print $html;
+
+    $nodepath = (isset($node->path)) ? drupal_get_normal_path($node->path) : 'node/'. $path;
     db_query("UPDATE {print_page_counter} SET totalcount = totalcount + 1, timestamp = %d WHERE path = '%s'", time(), $nodepath);
     // If we affected 0 rows, this is the first time viewing the node.
     if (!db_affected_rows()) {
@@ -163,7 +168,7 @@ function _print_var_generator($node, $message = NULL, $cid = NULL) {
   $print_footer_user = variable_get('print_footer_user', PRINT_FOOTER_USER_DEFAULT);
 
   $print['language'] = $language->language;
-  $print['title'] = $node->title;
+  $print['title'] = check_plain($node->title);
   $print['head'] = drupal_get_html_head();
   $print['scripts'] = drupal_get_js();
   $print['robots_meta'] = _print_robots_meta_generator();
@@ -516,7 +521,7 @@ function _print_url_list_enabled($node, $format = PRINT_HTML_FORMAT) {
 
   // Get value of Printer-friendly URLs setting
   return (variable_get('print_urls', PRINT_URLS_DEFAULT) && ($node_urllist) &&
-          variable_get('print_'. $fmt .'display_urllist_'. $node->type, PRINT_TYPE_URLLIST_DEFAULT));
+          (isset($node->type) ? variable_get('print_'. $fmt .'display_urllist_'. $node->type, PRINT_TYPE_URLLIST_DEFAULT) : PRINT_TYPE_URLLIST_DEFAULT));
 }
 
 /**
@@ -550,14 +555,22 @@ function _print_generate_node($nid, $cid = NULL, $format = PRINT_HTML_FORMAT, $t
     drupal_access_denied();
     return FALSE;
   }
-  drupal_set_title($node->title);
+  drupal_set_title(check_plain($node->title));
 
   //alert other modules that we are generating a printer-friendly page, so they can choose to show/hide info
   $node->printing = TRUE;
 
+  //use the proper build_mode
+//  $node->build_mode = NODE_BUILD_PRINT;
+
   // Turn off Pagination by the Paging module
   unset($node->pages);
   unset($node->page_count);
+
+  // Make this page a member of the original page's organic group
+  if (function_exists('og_set_group_context') && isset($node->og_groups)) {
+    og_set_group_context($node->og_groups);
+  }
 
   if ($cid === NULL) {
     // Adapted (simplified) version of node_view
@@ -581,11 +594,6 @@ function _print_generate_node($nid, $cid = NULL, $format = PRINT_HTML_FORMAT, $t
       $node->body = $content;
       unset($node->teaser);
     }
-
-    //TODO the following was part of the fix for http://drupal.org/node/254863
-    //check if it is reproducible and find the exact condition which
-    //triggered it
-    //$node->body = html_entity_decode($node->body);
   }
 
   $print_comments = variable_get('print_comments', PRINT_COMMENTS_DEFAULT);
@@ -658,8 +666,6 @@ function _print_generate_path($path, $format = PRINT_HTML_FORMAT, $teaser = FALS
   // Adapted from index.php.
   $node = new stdClass();
   $node->body = menu_execute_active_handler($path);
-  $node->title = drupal_get_title();
-  $node->path = $path;
 
   // It may happen that a drupal_not_found is called in the above call
   if (preg_match('/404 Not Found/', drupal_get_headers()) == 1) {
@@ -678,6 +684,9 @@ function _print_generate_path($path, $format = PRINT_HTML_FORMAT, $teaser = FALS
         break;
     }
   }
+
+  $node->title = drupal_get_title();
+  $node->path = $path;
 
   // Delete any links area
   $node->body = preg_replace('!\s*<div class="links">.*?</div>!sim', '', $node->body);

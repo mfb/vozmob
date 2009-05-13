@@ -1,5 +1,5 @@
 <?php
-// $Id: print_mail.module,v 1.1.2.27 2009/02/09 20:59:32 jcnventura Exp $
+// $Id: print_mail.module,v 1.1.2.33 2009/05/13 01:11:46 jcnventura Exp $
 
 /**
  * @file
@@ -22,6 +22,7 @@ define('PRINT_MAIL_BOOK_LINK_DEFAULT', 1);
 define('PRINT_MAIL_HOURLY_THRESHOLD', 3);
 define('PRINT_MAIL_TEASER_DEFAULT_DEFAULT', 1);
 define('PRINT_MAIL_TEASER_CHOICE_DEFAULT', 1);
+define('PRINT_MAIL_JOB_QUEUE_DEFAULT', 0);
 
 /**
  * Implementation of hook_theme().
@@ -168,8 +169,7 @@ function print_mail_link($type, $node = NULL, $teaser = FALSE) {
  */
 function print_mail_help($path, $arg) {
   $print_mail_link_pos = variable_get('print_mail_link_pos', array(PRINT_MAIL_LINK_POS_DEFAULT => PRINT_MAIL_LINK_POS_DEFAULT));
-  if ((preg_match('!^node/!i', $path) == 0) &&
-      !(empty($print_mail_link_pos['link']) && empty($print_mail_link_pos['corner']))) {
+  if (($path !== 'node/%') && !(empty($print_mail_link_pos['link']) && empty($print_mail_link_pos['corner']))) {
     static $output = FALSE;
 
     if ($output === FALSE) {
@@ -192,13 +192,11 @@ function print_mail_nodeapi(&$node, $op = 'view', $teaser, $page) {
       // Insert content corner links
       $print_mail_link_pos = variable_get('print_mail_link_pos', array(PRINT_MAIL_LINK_POS_DEFAULT => PRINT_MAIL_LINK_POS_DEFAULT));
       if (($teaser === FALSE) && !empty($print_mail_link_pos['corner']) &&
-          (preg_match('!^print!i', $_GET['q']) == 0)) {
+          !isset($node->printing)) {
+//          isset($node->build_mode) && ($node->build_mode == NODE_BUILD_NORMAL)) {
         $link = print_mail_insert_link(NULL, $node);
         if ($link) {
-          $node->content['print_mail_link'] = array(
-            '#value' => "<span class='print-link'>$link</span>",
-            '#weight' => -102,
-          );
+          $node->content['print_links']['#value'] = preg_replace('!</span>$!', $link .'</span>', $node->content['print_links']['#value']);
         }
       }
       break;
@@ -212,7 +210,7 @@ function print_mail_nodeapi(&$node, $op = 'view', $teaser, $page) {
       break;
     case 'delete':
       db_query("DELETE FROM {print_mail_node_conf} WHERE nid = %d", $node->nid);
-      db_query("DELETE FROM {print_mail_page_counter} WHERE path = '%s'", $node->path);
+      db_query("DELETE FROM {print_mail_page_counter} WHERE path = 'node/%d'", $node->nid);
       break;
   }
 }
@@ -254,6 +252,16 @@ function print_mail_form_alter(&$form, $form_state, $form_id) {
       $form['print']['print_mail_display_urllist']['#default_value'] = isset($node->print_mail_display_urllist) ? $node->print_mail_display_urllist : PRINT_TYPE_URLLIST_DEFAULT;
     }
   }
+}
+
+/**
+ * Implementation of hook_job_queue_functions().
+ */
+function print_mail_job_queue_functions() {
+  $functions['print_mail'] = array(
+   'title' => t('Send to friend'),
+  );
+  return $functions;
 }
 
 /**
@@ -425,9 +433,8 @@ function print_mail_link_allowed($args) {
     $print_mail_node_link_visibility = variable_get('print_mail_node_link_visibility', PRINT_MAIL_NODE_LINK_VISIBILITY_DEFAULT);
     $print_mail_node_link_pages = variable_get('print_mail_node_link_pages', PRINT_MAIL_NODE_LINK_PAGES_DEFAULT);
 
-    if (!empty($node->printing) ||
-        !_print_page_match($print_mail_node_link_visibility, $print_mail_node_link_pages)) {
-      // Page not in visibility list or we are working!
+    if (!_print_page_match($print_mail_node_link_visibility, $print_mail_node_link_pages)) {
+      // Page not in visibility list
       return FALSE;
     }
     elseif (isset($args['type']) && ($args['type'] == 'comment') && isset($node_type)) {

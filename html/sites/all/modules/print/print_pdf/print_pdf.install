@@ -1,5 +1,5 @@
 <?php
-// $Id: print_pdf.install,v 1.1.2.8 2009/03/17 20:55:07 jcnventura Exp $
+// $Id: print_pdf.install,v 1.1.2.10 2009/04/27 22:53:50 jcnventura Exp $
 
 /**
  * @file
@@ -37,6 +37,9 @@ function print_pdf_uninstall() {
   variable_del('print_pdf_link_text');
   variable_del('print_pdf_link_use_alias');
   variable_del('print_pdf_filename');
+  variable_del('print_pdf_wkhtmltopdf_xdisplay');
+  variable_del('print_pdf_wkhtmltopdf_options');
+  variable_del('print_pdf_xvfb_options');
   $settings = db_query("SELECT name FROM {variable} WHERE name LIKE 'print\_pdf\_display\_%'");
   while ($variable = db_fetch_object($settings)) {
     variable_del($variable->name);
