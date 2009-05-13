@@ -6,7 +6,6 @@ D/scripts////
 D/sites////
 D/themes////
 /.htaccess/1.90.2.3/Wed Apr  1 07:47:45 2009//TDRUPAL-6
-/CHANGELOG.txt/1.253.2.28/Fri May  1 22:05:57 2009//TDRUPAL-6
 /COPYRIGHT.txt/1.2.2.1/Wed Apr  1 07:47:45 2009//TDRUPAL-6
 /INSTALL.mysql.txt/1.10/Wed Apr  1 07:47:45 2009//TDRUPAL-6
 /INSTALL.pgsql.txt/1.7/Wed Apr  1 07:47:45 2009//TDRUPAL-6
@@ -20,3 +19,4 @@ D/themes////
 /robots.txt/1.9.2.1/Wed Apr  1 07:47:45 2009//TDRUPAL-6
 /update.php/1.252.2.3/Fri Apr 17 07:59:26 2009//TDRUPAL-6
 /xmlrpc.php/1.15/Wed Apr  1 07:47:46 2009//TDRUPAL-6
+/CHANGELOG.txt/1.253.2.30/Wed May 13 20:50:31 2009//TDRUPAL-6
