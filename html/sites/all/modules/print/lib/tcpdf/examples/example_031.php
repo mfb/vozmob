@@ -2,7 +2,7 @@
 //============================================================+
 // File name   : example_031.php
 // Begin       : 2008-06-09
-// Last Update : 2008-06-09
+// Last Update : 2009-03-18
 // 
 // Description : Example 031 for TCPDF class
 //               Pie Chart
@@ -46,6 +46,9 @@ $pdf->SetKeywords('TCPDF, PDF, example, test, guide');
 // disable header and footer
 $pdf->setPrintHeader(false);
 $pdf->setPrintFooter(false);
+
+// set default monospaced font
+$pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
 
 //set margins
 $pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);

@@ -1,11 +1,11 @@
 <?php
 //============================================================+
-// File name   : example_035.php
-// Begin       : 2008-07-22
-// Last Update : 2009-03-18
+// File name   : example_047.php
+// Begin       : 2009-03-19
+// Last Update : 2009-03-19
 // 
-// Description : Example 035 for TCPDF class
-//               Line styles with cells and multicells
+// Description : Example 047 for TCPDF class
+//               Transactions
 // 
 // Author: Nicola Asuni
 // 
@@ -22,12 +22,12 @@
 /**
  * Creates an example PDF TEST document using TCPDF
  * @package com.tecnick.tcpdf
- * @abstract TCPDF - Example: Line styles with cells and multicells
+ * @abstract TCPDF - Example: Transactions
  * @author Nicola Asuni
  * @copyright 2004-2009 Nicola Asuni - Tecnick.com S.r.l (www.tecnick.com) Via Della Pace, 11 - 09044 - Quartucciu (CA) - ITALY - www.tecnick.com - info@tecnick.com
  * @link http://tcpdf.org
  * @license http://www.gnu.org/copyleft/lesser.html LGPL
- * @since 2008-03-04
+ * @since 2009-03-19
  */
 
 require_once('../config/lang/eng.php');
@@ -39,7 +39,7 @@ $pdf = new TCPDF(PDF_PAGE_ORIENTATION, PDF_UNIT, PDF_PAGE_FORMAT, true, 'UTF-8',
 // set document information
 $pdf->SetCreator(PDF_CREATOR);
 $pdf->SetAuthor('Nicola Asuni');
-$pdf->SetTitle('TCPDF Example 035');
+$pdf->SetTitle('TCPDF Example 047');
 $pdf->SetSubject('TCPDF Tutorial');
 $pdf->SetKeywords('TCPDF, PDF, example, test, guide');
 
@@ -70,45 +70,41 @@ $pdf->setLanguageArray($l);
 // ---------------------------------------------------------
 
 // set font
-$pdf->SetFont('times', 'BI', 16);
+$pdf->SetFont('helvetica', '', 10);
 
 // add a page
 $pdf->AddPage();
 
-// print a line using Cell()
-$pdf->Cell(0, 12, 'Example 035', 1, 1, 'C');
+// start transaction
+$pdf->startTransaction();
 
-$pdf->Ln();
+$pdf->Write(0, "LINE 1\n");
+$pdf->Write(0, "LINE 2\n");
 
-$pdf->SetLineStyle(array('width' => 0.5, 'cap' => 'butt', 'join' => 'miter', 'dash' => 4, 'color' => array(255, 0, 0)));
-$pdf->SetFillColor(255,255,128);
-$pdf->SetTextColor(0,0,128);
+// restarts transaction
+$pdf->startTransaction();
+ 
+$pdf->Write(0, "LINE 3\n");
+$pdf->Write(0, "LINE 4\n");
 
-$text="DUMMY";
+// rolls back to the last (re)start
+$pdf = $pdf->rollbackTransaction();
 
-$pdf->Cell(0, 0, $text, 1, 1, 'L', 1, 0);
+$pdf->Write(0, "LINE 5\n");
+$pdf->Write(0, "LINE 6\n");
 
-$pdf->Ln();
+// start transaction
+$pdf->startTransaction(); 
 
-$pdf->SetLineStyle(array('width' => 0.5, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(0, 0, 255)));
-$pdf->SetFillColor(255,255,0);
-$pdf->SetTextColor(0,0,255);
-$pdf->MultiCell(60, 4, $text, 1, 'C', 1, 0);
+$pdf->Write(0, "LINE 7\n");
 
-$pdf->SetLineStyle(array('width' => 0.5, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 255, 0)));
-$pdf->SetFillColor(0,0,255);
-$pdf->SetTextColor(255,255,0);
-$pdf->MultiCell(60, 4, $text, 'TB', 'C', 1, 0);
-
-$pdf->SetLineStyle(array('width' => 0.5, 'cap' => 'butt', 'join' => 'miter', 'dash' => 0, 'color' => array(255, 0, 255)));
-$pdf->SetFillColor(0,255,0);
-$pdf->SetTextColor(255,0,255);
-$pdf->MultiCell(60, 4, $text, 1, 'C', 1, 1);
+// commit transaction (actually just frees memory)
+$pdf->commitTransaction();  
 
 // ---------------------------------------------------------
 
 //Close and output PDF document
-$pdf->Output('example_035.pdf', 'I');
+$pdf->Output('example_047.pdf', 'I');
 
 //============================================================+
 // END OF FILE                                                 

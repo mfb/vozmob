@@ -2,7 +2,7 @@
 //============================================================+
 // File name   : example_016.php
 // Begin       : 2008-03-04
-// Last Update : 2008-10-10
+// Last Update : 2009-03-18
 // 
 // Description : Example 016 for TCPDF class
 //               Document Encryption / Security
@@ -66,6 +66,9 @@ $pdf->SetHeaderData(PDF_HEADER_LOGO, PDF_HEADER_LOGO_WIDTH, PDF_HEADER_TITLE, PD
 // set header and footer fonts
 $pdf->setHeaderFont(Array('helvetica', '', PDF_FONT_SIZE_MAIN));
 $pdf->setFooterFont(Array('helvetica', '', PDF_FONT_SIZE_DATA));
+
+// set default monospaced font
+$pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
 
 //set margins
 $pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);

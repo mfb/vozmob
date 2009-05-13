@@ -2,7 +2,7 @@
 //============================================================+
 // File name   : example_028.php
 // Begin       : 2008-03-04
-// Last Update : 2009-01-02
+// Last Update : 2009-03-18
 // 
 // Description : Example 028 for TCPDF class
 //               Changing page formats
@@ -46,6 +46,9 @@ $pdf->SetKeywords('TCPDF, PDF, example, test, guide');
 // remove default header/footer
 $pdf->setPrintHeader(false);
 $pdf->setPrintFooter(false);
+
+// set default monospaced font
+$pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
 
 //set margins
 $pdf->SetMargins(10, PDF_MARGIN_TOP, 10);

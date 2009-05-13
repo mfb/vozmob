@@ -71,7 +71,7 @@ Configuration file for TCPDF.<br /><br /><br /><br />
     <td><b>version:</b>&nbsp;&nbsp;</td><td>4.0.014</td>
   </tr>
   <tr>
-    <td><b>copyright:</b>&nbsp;&nbsp;</td><td>2004-2009 Nicola Asuni - Tecnick.com S.r.l (www.tecnick.com) Via Della Pace, 11 - 09044 - Quartucciu (CA) - ITALY - www.tecnick.com - info@tecnick.com</td>
+    <td><b>copyright:</b>&nbsp;&nbsp;</td><td>2004-2008 Nicola Asuni - Tecnick.com S.r.l (www.tecnick.com) Via Della Pace, 11 - 09044 - Quartucciu (CA) - ITALY - www.tecnick.com - info@tecnick.com</td>
   </tr>
   <tr>
     <td><b>link:</b>&nbsp;&nbsp;</td><td><a href="http://tcpdf.sourceforge.net">http://tcpdf.sourceforge.net</a></td>
@@ -89,7 +89,7 @@ Configuration file for TCPDF.<br /><br /><br /><br />
 <br /><br />
   <hr />
 	<a name="defineHEAD_MAGNIFICATION"></a>
-	<h3>HEAD_MAGNIFICATION <span class="smalllinenumber">[line 206]</span></h3>
+	<h3>HEAD_MAGNIFICATION <span class="smalllinenumber">[line 211]</span></h3>
 	<div class="tags">
     <table width="90%" border="0" cellspacing="0" cellpadding="1"><tr><td class="code_border">
     <table width="100%" border="0" cellspacing="0" cellpadding="2"><tr><td class="code">
@@ -115,7 +115,7 @@ Configuration file for TCPDF.<br /><br /><br /><br />
 	<div class="top">[ <a href="#top">Top</a> ]</div><br /><br />
   <hr />
 	<a name="defineK_CELL_HEIGHT_RATIO"></a>
-	<h3>K_CELL_HEIGHT_RATIO <span class="smalllinenumber">[line 211]</span></h3>
+	<h3>K_CELL_HEIGHT_RATIO <span class="smalllinenumber">[line 216]</span></h3>
 	<div class="tags">
     <table width="90%" border="0" cellspacing="0" cellpadding="1"><tr><td class="code_border">
     <table width="100%" border="0" cellspacing="0" cellpadding="2"><tr><td class="code">
@@ -188,7 +188,7 @@ Configuration file for TCPDF.<br /><br /><br /><br />
     </td></tr></table>
     </td></tr></table>
 
-    URL path to tcpdf installation folder (http://localhost/tcpdf/).<br /><br /><p>By default it is automatically calculated but you can also set it as a fixed string to improve performances..</p><br />    <br />
+    URL path to tcpdf installation folder (http://localhost/tcpdf/).<br /><br /><p>By default it is automatically calculated but you can also set it as a fixed string to improve performances.</p><br />    <br />
 		</div>
 	<div class="top">[ <a href="#top">Top</a> ]</div><br /><br />
   <hr />
@@ -206,7 +206,7 @@ Configuration file for TCPDF.<br /><br /><br /><br />
 	<div class="top">[ <a href="#top">Top</a> ]</div><br /><br />
   <hr />
 	<a name="defineK_SMALL_RATIO"></a>
-	<h3>K_SMALL_RATIO <span class="smalllinenumber">[line 221]</span></h3>
+	<h3>K_SMALL_RATIO <span class="smalllinenumber">[line 226]</span></h3>
 	<div class="tags">
     <table width="90%" border="0" cellspacing="0" cellpadding="1"><tr><td class="code_border">
     <table width="100%" border="0" cellspacing="0" cellpadding="2"><tr><td class="code">
@@ -219,7 +219,7 @@ Configuration file for TCPDF.<br /><br /><br /><br />
 	<div class="top">[ <a href="#top">Top</a> ]</div><br /><br />
   <hr />
 	<a name="defineK_TITLE_MAGNIFICATION"></a>
-	<h3>K_TITLE_MAGNIFICATION <span class="smalllinenumber">[line 216]</span></h3>
+	<h3>K_TITLE_MAGNIFICATION <span class="smalllinenumber">[line 221]</span></h3>
 	<div class="tags">
     <table width="90%" border="0" cellspacing="0" cellpadding="1"><tr><td class="code_border">
     <table width="100%" border="0" cellspacing="0" cellpadding="2"><tr><td class="code">
@@ -257,6 +257,19 @@ Configuration file for TCPDF.<br /><br /><br /><br />
 		</div>
 	<div class="top">[ <a href="#top">Top</a> ]</div><br /><br />
   <hr />
+	<a name="definePDF_FONT_MONOSPACED"></a>
+	<h3>PDF_FONT_MONOSPACED <span class="smalllinenumber">[line 201]</span></h3>
+	<div class="tags">
+    <table width="90%" border="0" cellspacing="0" cellpadding="1"><tr><td class="code_border">
+    <table width="100%" border="0" cellspacing="0" cellpadding="2"><tr><td class="code">
+		<code>PDF_FONT_MONOSPACED = 'courier'</code>
+    </td></tr></table>
+    </td></tr></table>
+
+    default monospaced font name<br /><br />    <br />
+		</div>
+	<div class="top">[ <a href="#top">Top</a> ]</div><br /><br />
+  <hr />
 	<a name="definePDF_FONT_NAME_DATA"></a>
 	<h3>PDF_FONT_NAME_DATA <span class="smalllinenumber">[line 191]</span></h3>
 	<div class="tags">
@@ -266,7 +279,7 @@ Configuration file for TCPDF.<br /><br /><br /><br />
     </td></tr></table>
     </td></tr></table>
 
-    data font name<br /><br />    <br />
+    default data font name<br /><br />    <br />
 		</div>
 	<div class="top">[ <a href="#top">Top</a> ]</div><br /><br />
   <hr />
@@ -279,7 +292,7 @@ Configuration file for TCPDF.<br /><br /><br /><br />
     </td></tr></table>
     </td></tr></table>
 
-    main font name<br /><br />    <br />
+    default main font name<br /><br />    <br />
 		</div>
 	<div class="top">[ <a href="#top">Top</a> ]</div><br /><br />
   <hr />
@@ -292,7 +305,7 @@ Configuration file for TCPDF.<br /><br /><br /><br />
     </td></tr></table>
     </td></tr></table>
 
-    data font size<br /><br />    <br />
+    default data font size<br /><br />    <br />
 		</div>
 	<div class="top">[ <a href="#top">Top</a> ]</div><br /><br />
   <hr />
@@ -305,7 +318,7 @@ Configuration file for TCPDF.<br /><br /><br /><br />
     </td></tr></table>
     </td></tr></table>
 
-    main font size<br /><br />    <br />
+    default main font size<br /><br />    <br />
 		</div>
 	<div class="top">[ <a href="#top">Top</a> ]</div><br /><br />
   <hr />
@@ -362,15 +375,15 @@ Configuration file for TCPDF.<br /><br /><br /><br />
 	<div class="top">[ <a href="#top">Top</a> ]</div><br /><br />
   <hr />
 	<a name="definePDF_IMAGE_SCALE_RATIO"></a>
-	<h3>PDF_IMAGE_SCALE_RATIO <span class="smalllinenumber">[line 201]</span></h3>
+	<h3>PDF_IMAGE_SCALE_RATIO <span class="smalllinenumber">[line 206]</span></h3>
 	<div class="tags">
     <table width="90%" border="0" cellspacing="0" cellpadding="1"><tr><td class="code_border">
     <table width="100%" border="0" cellspacing="0" cellpadding="2"><tr><td class="code">
-		<code>PDF_IMAGE_SCALE_RATIO = 4</code>
+		<code>PDF_IMAGE_SCALE_RATIO = 1</code>
     </td></tr></table>
     </td></tr></table>
 
-    Ratio used to scale the images<br /><br />    <br />
+    ratio used to adjust the conversion of pixels to user units<br /><br />    <br />
 		</div>
 	<div class="top">[ <a href="#top">Top</a> ]</div><br /><br />
   <hr />
@@ -494,7 +507,7 @@ Configuration file for TCPDF.<br /><br /><br /><br />
 
         <div class="credit">
 		    <hr />
-		    Documentation generated on Sat, 28 Feb 2009 09:47:03 +0100 by <a href="http://www.phpdoc.org">phpDocumentor 1.4.1</a>
+		    Documentation generated on Wed, 13 May 2009 13:03:48 +0200 by <a href="http://www.phpdoc.org">phpDocumentor 1.4.1</a>
 	      </div>
       </td></tr></table>
     </td>

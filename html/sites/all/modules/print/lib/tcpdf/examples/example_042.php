@@ -2,7 +2,7 @@
 //============================================================+
 // File name   : example_042.php
 // Begin       : 2008-12-23
-// Last Update : 2009-01-02
+// Last Update : 2009-04-16
 // 
 // Description : Example 042 for TCPDF class
 //               Test Image with alpha channel
@@ -50,6 +50,9 @@ $pdf->SetHeaderData(PDF_HEADER_LOGO, PDF_HEADER_LOGO_WIDTH, PDF_HEADER_TITLE, PD
 $pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
 $pdf->setFooterFont(Array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
 
+// set default monospaced font
+$pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+
 //set margins
 $pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
 $pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
@@ -76,7 +79,7 @@ $pdf->AddPage();
 
 // create background text
 $background_text = str_repeat('TCPDF test PNG Alpha Channel ', 50);
-$pdf->MultiCell(0, 5, $background_text, 0, 'J', 0, 2, 0 , 0, true, 0, false);
+$pdf->MultiCell(0, 5, $background_text, 0, 'J', 0, 2, '', '', true, 0, false);
 
 
 // [A] The Image() method recognizes the alpha channel embedded on the image:

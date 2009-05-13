@@ -2,7 +2,7 @@
 //============================================================+
 // File name   : example_043.php
 // Begin       : 2009-01-02
-// Last Update : 2009-01-02
+// Last Update : 2009-04-16
 // 
 // Description : Example 043 for TCPDF class
 //               Disk caching
@@ -50,6 +50,9 @@ $pdf->SetHeaderData(PDF_HEADER_LOGO, PDF_HEADER_LOGO_WIDTH, PDF_HEADER_TITLE, PD
 $pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
 $pdf->setFooterFont(Array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
 
+// set default monospaced font
+$pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+
 //set margins
 $pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
 $pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
@@ -73,7 +76,7 @@ $pdf->SetFont('times', '', 10);
 $pdf->AddPage();
 
 // Multicell test
-$pdf->MultiCell(0, 0, "DISK CACHING TEST: check the parameters on class constructor.", 1, 'L', 0, 0, 0 ,0, true);
+$pdf->MultiCell(0, 0, "DISK CACHING TEST: check the parameters on class constructor.", 1, 'L', 0, 0, '', '', true);
 
 // ---------------------------------------------------------
 

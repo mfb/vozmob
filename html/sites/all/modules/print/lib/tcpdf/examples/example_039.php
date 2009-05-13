@@ -2,7 +2,7 @@
 //============================================================+
 // File name   : example_039.php
 // Begin       : 2008-10-16
-// Last Update : 2008-10-18
+// Last Update : 2009-03-18
 // 
 // Description : Example 039 for TCPDF class
 //               HTML justification
@@ -50,6 +50,9 @@ $pdf->SetHeaderData(PDF_HEADER_LOGO, PDF_HEADER_LOGO_WIDTH, PDF_HEADER_TITLE, PD
 $pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
 $pdf->setFooterFont(Array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
 
+// set default monospaced font
+$pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+
 //set margins
 $pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
 $pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
@@ -67,7 +70,7 @@ $pdf->setLanguageArray($l);
 // ---------------------------------------------------------
 
 // create some HTML content
-$htmlcontent = "<span style=\"text-align:justify;\">a <u>abc</u> abcdefghijkl abcdef abcdefg <b>abcdefghi</b> a abc abcd <img src=\"../images/logo_example.png\" border=\"0\" height=\"41\" width=\"41\" /> <img src=\"../images/tiger.ai\" alt=\"test alt attribute\" width=\"100\" height=\"100\" border=\"0\" /> abcdef abcdefg <b>abcdefghi</b> a abc abcd abcdef abcdefg <b>abcdefghi</b> a abc abcd abcdef abcdefg <b>abcdefghi</b> a <u>abc</u> abcd abcdef abcdefg <b>abcdefghi</b> a abc abcd abcdef abcdefg <b>abcdefghi</b> a abc abcd abcdef abcdefg <b>abcdefghi</b> a abc abcd abcdef abcdefg <b>abcdefghi</b> a abc abcd abcdef abcdefg <b>abcdefghi</b> a abc abcd abcdef abcdefg abcdefghi a abc abcd <a href=\"http://tcpdf.org\">abcdef abcdefg</a> start a abc before <span style=\"background-color:yellow\">yellow color</span> after a abc abcd abcdef abcdefg abcdefghi a abc abcd end abcdefg abcdefghi a abc abcd abcdef abcdefg abcdefghi a abc abcd abcdef abcdefg abcdefghi a abc abcd abcdef abcdefg abcdefghi a abc abcd abcdef abcdefg abcdefghi a abc abcd abcdef abcdefg abcdefghi a abc abcd abcdef abcdefg abcdefghi a abc abcd abcdef abcdefg abcdefghi<br />abcd abcdef abcdefg abcdefghi<br />abcd abcde abcdef</span>";
+$html = '<span style="text-align:justify;">a <u>abc</u> abcdefghijkl abcdef abcdefg <b>abcdefghi</b> a abc abcd <img src="../images/logo_example.png" border="0" height="41" width="41" /> <img src="../images/tiger.ai" alt="test alt attribute" width="100" height="100" border="0" /> abcdef abcdefg <b>abcdefghi</b> a abc abcd abcdef abcdefg <b>abcdefghi</b> a abc abcd abcdef abcdefg <b>abcdefghi</b> a <u>abc</u> abcd abcdef abcdefg <b>abcdefghi</b> a abc abcd abcdef abcdefg <b>abcdefghi</b> a abc abcd abcdef abcdefg <b>abcdefghi</b> a abc abcd abcdef abcdefg <b>abcdefghi</b> a abc abcd abcdef abcdefg <b>abcdefghi</b> a abc abcd abcdef abcdefg abcdefghi a abc abcd <a href="http://tcpdf.org">abcdef abcdefg</a> start a abc before <span style="background-color:yellow">yellow color</span> after a abc abcd abcdef abcdefg abcdefghi a abc abcd end abcdefg abcdefghi a abc abcd abcdef abcdefg abcdefghi a abc abcd abcdef abcdefg abcdefghi a abc abcd abcdef abcdefg abcdefghi a abc abcd abcdef abcdefg abcdefghi a abc abcd abcdef abcdefg abcdefghi a abc abcd abcdef abcdefg abcdefghi a abc abcd abcdef abcdefg abcdefghi<br />abcd abcdef abcdefg abcdefghi<br />abcd abcde abcdef</span>';
 
 // set core font
 $pdf->SetFont('helvetica', '', 10);
@@ -76,7 +79,7 @@ $pdf->SetFont('helvetica', '', 10);
 $pdf->AddPage();
 
 // output the HTML content
-$pdf->writeHTML($htmlcontent, true, 0, true, true);
+$pdf->writeHTML($html, true, 0, true, true);
 
 $pdf->Ln();
 
@@ -84,7 +87,7 @@ $pdf->Ln();
 $pdf->SetFont('dejavusans', '', 10);
 
 // output the HTML content
-$pdf->writeHTML($htmlcontent, true, 0, true, true);
+$pdf->writeHTML($html, true, 0, true, true);
 
 // reset pointer to the last page
 $pdf->lastPage();

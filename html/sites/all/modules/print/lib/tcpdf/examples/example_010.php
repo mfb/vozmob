@@ -2,7 +2,7 @@
 //============================================================+
 // File name   : example_010.php
 // Begin       : 2008-03-04
-// Last Update : 2009-01-02
+// Last Update : 2009-04-16
 // 
 // Description : Example 010 for TCPDF class
 //               Text on multiple columns
@@ -68,6 +68,7 @@ class MYPDF extends TCPDF {
 			$this->SetRightMargin($this->w - $x - $this->colwidth);
 		}
 		$this->x = $x;
+		//$this->x = $x + $this->cMargin; // use this for html mode
 		if ($col > 0) {
 			$this->y = $this->y0;
 		}
@@ -78,8 +79,6 @@ class MYPDF extends TCPDF {
 		if($this->col < ($this->ncols - 1)) {
 			//Go to next column
 			$this->SetCol($this->col + 1);
-			//Set ordinate to top
-			$this->SetY($this->y0);
 			//Keep on page
 			return false;
 		} else {
@@ -111,7 +110,7 @@ class MYPDF extends TCPDF {
 		// Font
 		$this->SetFont('times', '', 9);
 		// Output text in a column
-		$this->MultiCell($this->colwidth, 5, $txt, 0, 'J', 0, 1, 0, 0, true, 0);
+		$this->MultiCell($this->colwidth, 5, $txt, 0, 'J', 0, 1, '', '', true, 0, false);
 		$this->Ln();
 		// Go back to first column
 		$this->SetCol(0);
@@ -144,6 +143,9 @@ $pdf->SetHeaderData(PDF_HEADER_LOGO, PDF_HEADER_LOGO_WIDTH, PDF_HEADER_TITLE, PD
 // set header and footer fonts
 $pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
 $pdf->setFooterFont(Array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
+
+// set default monospaced font
+$pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
 
 //set margins
 $pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);

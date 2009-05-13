@@ -2,7 +2,7 @@
 //============================================================+
 // File name   : example_004.php
 // Begin       : 2008-03-04
-// Last Update : 2008-10-10
+// Last Update : 2009-03-18
 // 
 // Description : Example 004 for TCPDF class
 //               Cell stretching
@@ -50,6 +50,9 @@ $pdf->SetHeaderData(PDF_HEADER_LOGO, PDF_HEADER_LOGO_WIDTH, PDF_HEADER_TITLE, PD
 $pdf->setHeaderFont(Array(PDF_FONT_NAME_MAIN, '', PDF_FONT_SIZE_MAIN));
 $pdf->setFooterFont(Array(PDF_FONT_NAME_DATA, '', PDF_FONT_SIZE_DATA));
 
+// set default monospaced font
+$pdf->SetDefaultMonospacedFont(PDF_FONT_MONOSPACED);
+
 //set margins
 $pdf->SetMargins(PDF_MARGIN_LEFT, PDF_MARGIN_TOP, PDF_MARGIN_RIGHT);
 $pdf->SetHeaderMargin(PDF_MARGIN_HEADER);
@@ -67,17 +70,17 @@ $pdf->setLanguageArray($l);
 // ---------------------------------------------------------
 
 // set font
-$pdf->SetFont('times', "B", 12);
+$pdf->SetFont('times', 'B', 12);
 
 // add a page
 $pdf->AddPage();
 
 // test Cell stretching
-$pdf->Cell(0, 10, "TEST CELL STRETCH: no stretch", 1, 1, 'C', 0, '', 0);
-$pdf->Cell(0, 10, "TEST CELL STRETCH: scaling", 1, 1, 'C', 0, '', 1);
-$pdf->Cell(0, 10, "TEST CELL STRETCH: force scaling", 1, 1, 'C', 0, '', 2);
-$pdf->Cell(0, 10, "TEST CELL STRETCH: spacing", 1, 1, 'C', 0, '', 3);
-$pdf->Cell(0, 10, "TEST CELL STRETCH: force spacing", 1, 1, 'C', 0, '', 4);
+$pdf->Cell(0, 10, 'TEST CELL STRETCH: no stretch', 1, 1, 'C', 0, '', 0);
+$pdf->Cell(0, 10, 'TEST CELL STRETCH: scaling', 1, 1, 'C', 0, '', 1);
+$pdf->Cell(0, 10, 'TEST CELL STRETCH: force scaling', 1, 1, 'C', 0, '', 2);
+$pdf->Cell(0, 10, 'TEST CELL STRETCH: spacing', 1, 1, 'C', 0, '', 3);
+$pdf->Cell(0, 10, 'TEST CELL STRETCH: force spacing', 1, 1, 'C', 0, '', 4);
 
 // ---------------------------------------------------------
 
