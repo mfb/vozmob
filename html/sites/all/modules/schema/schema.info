@@ -1,0 +1,6 @@
+; $Id: schema.info,v 1.3 2007/07/05 04:04:29 bjaspan Exp $
+name = Schema
+description = The Schema module provides functionality built on the Schema API.
+package = Database
+core = 6.x
+

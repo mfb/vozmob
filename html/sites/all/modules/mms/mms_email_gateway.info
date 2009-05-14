@@ -1,0 +1,6 @@
+; $Id$
+name = "MMS E-mail Gateway"
+description = "Allows the SMS and Messaging frameworks to use MMS e-mail gateways."
+dependencies[] = sms_email_gateway
+package = SMS Framework
+core = 6.x
