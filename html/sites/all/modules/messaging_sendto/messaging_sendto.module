@@ -103,7 +103,7 @@ function messaging_sendto_block($op = 'list', $delta = 0, $edit = array()) {
 function messaging_sendto_nodeapi(&$node, $op, $teaser, $page) {
   switch ($op) {
     case 'view':
-      if (!$teaser) {
+      if (!$teaser && user_access('forward content')) {
         $formtype = variable_get('messaging_sendto_type_'. $node->type, FALSE);
         if ($formtype > 1) {
           $node->content['messaging_sendto'] = array(
