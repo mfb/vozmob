@@ -60,6 +60,10 @@ function sms_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
     if (empty($node->title)) {
     	$node->title = 'Nueva Historia / New Story';
     }
+    watchdog('debug', 'el titulo del nodo es ');
+    watchdog('debug', print_r($node->title,TRUE));
+
+    $lan = sms_mailsave_get_language($to[0]);
 
     //changed the name of the user that created the node to vozmob and a random number -- gaba
     //'name' => implode('-', array(dechex(mt_rand()), dechex(mt_rand()))),
@@ -73,6 +77,7 @@ function sms_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
         'mail' => $from_address,
         'roles' => drupal_map_assoc(array(3)),
         'status' => 1,
+	'language' => $lan,
         'sms_user' => array(array('number' => sms_formatter($from[0]), 'status' => 1, 'gateway' => array('carrier' => $from[1]))),
     ));
     }
@@ -80,7 +85,6 @@ function sms_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
 
       if (module_exists('sms_registration')) {
 
-	    $lan = sms_mailsave_get_language($to[0]);
 	    if ($lan == "en") {
 	        $message = "Thanks! Do you want to have a blog in vozmob? If yes please send one word identifying the blog.";
 		$subject = "Media posted";
