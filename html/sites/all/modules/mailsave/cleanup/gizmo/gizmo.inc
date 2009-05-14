@@ -11,10 +11,10 @@
  */
 function gizmo_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
   // Check if this message was from Gizmo.
-  if ($header->fromaddress == 'voicemail@gizmoproject.com') {
+  if (is_int(strpos($header->fromaddress, 'voicemail@gizmoproject.com'))) {
     // Check for "Voicemail from:" in case the format changes.
     // Worst case is that match fails and nothing is changed.
-    if (is_int(strpos($node->body, '<title>Voicemail from:'))) {
+    if (is_int(strpos($node->body, '<title>You have a new voicemail message!</title>')) || is_int(strpos($node->body, '<title>Voicemail from:'))) {
       // Store the amended body
       $node->body = '';
       $node->teaser = node_teaser($node->body);
