@@ -152,10 +152,10 @@ function sms_mailsave_get_toaddress($header, $mailbox) {
 
 function sms_mailsave_get_language($email_address) {
 	switch ($email_address) {
-		case "vozmob.sandbox.es":
+		case "reg-prueba":
 			$lang = "es";
 			break;
-		case "vozmob.sandbox.en":
+		case "reg-test":
 			$lang = "en";
 			break;
 		default:
