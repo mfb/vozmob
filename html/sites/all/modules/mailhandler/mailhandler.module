@@ -250,3 +250,8 @@ function mailhandler_default_type() {
   return $default_type;
 
 }
+
+function mailhandler_get_language(){
+
+	
+}
