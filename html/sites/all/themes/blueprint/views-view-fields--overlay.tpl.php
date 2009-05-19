@@ -24,24 +24,29 @@
     <?php print $field->separator; ?>
   <?php endif; ?>
 
-  <<?php print $field->inline_html;?> class="views-field-<?php print $field->class; ?>">
-    <?php if ($field->label): ?>
-      <label class="views-label-<?php print $field->class; ?>">
-        <?php print $field->label; ?>:
-      </label>
-    <?php endif; ?>
-      <?php
-      // $field->element_type is either SPAN or DIV depending upon whether or not
-      // the field is a 'block' element type or 'inline' element type.
-      ?>
-      <<?php print $field->element_type; ?> class="field-content"><?php print $field->content; ?></<?php print $field->element_type; ?>>
-  </<?php print $field->inline_html;?>>
+  <?php if (strlen($field->content) > 0): ?>
+    <<?php print $field->inline_html;?> class="views-field-<?php print $field->class; ?>">
+      <?php if ($field->label): ?>
+        <label class="views-label-<?php print $field->class; ?>">
+          <?php print $field->label; ?>:
+        </label>
+      <?php endif; ?>
+        <?php
+        // $field->element_type is either SPAN or DIV depending upon whether or not
+        // the field is a 'block' element type or 'inline' element type.
+        ?>
+        <<?php print $field->element_type; ?> class="field-content"><?php print $field->content; ?></<?php print $field->element_type; ?>>
+    </<?php print $field->inline_html;?>>
+  <?php endif; ?>
 
   <?php if ($field->class == 'field-image-fid' && ($node = node_load($view->args[0])) && !empty($node->media_mover)): ?>
     <div class="media-mover">
       <?php foreach ($node->media_mover as $cid): ?>
         <?php foreach ($cid as $mmfid): ?>
           <?php if (substr($mmfid['complete_file'], -4, 4) == '.mp3'): ?>
+            <?php if (empty($playlist)): ?>
+              <?php $playlist[] = base_path() . drupal_get_path('theme', 'blueprint') . '/images/audio_icon_large.gif'; ?>
+            <?php endif; ?>
             <?php $playlist[] = array('url' => file_create_url($mmfid['complete_file'])); ?>
           <?php endif; ?>
         <?php endforeach; ?>
