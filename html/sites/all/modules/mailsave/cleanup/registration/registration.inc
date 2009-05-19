@@ -9,6 +9,11 @@
  */
 function registration_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
 
+  // Ignore empty messages.
+  if (empty($node)) {
+    return; 
+  }
+
   watchdog('debug','starting registration_mailsave_clean');
   // If there is already a node created
   // The sms_user and sms_email_gateway modules are required.

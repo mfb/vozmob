@@ -9,6 +9,10 @@
  */
 function sms_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
 
+  // Ignore empty messages.
+  if (empty($node)) {
+    return; 
+  }
 
   list($to_address, $to_name) = registration_get_toaddress($header, $mailbox);
   $to  = explode('@', $to_address);
