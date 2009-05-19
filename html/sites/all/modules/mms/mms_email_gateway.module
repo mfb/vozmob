@@ -2,7 +2,7 @@
 // $Id$
 
 /**
- * Return an array of MMS e-mail gateways and corresponding SMS e-mail gateways.
+ * Return map of MMS gateways and corresponding SMS gateways.
  */
 function mms_email_gateway_get_map() {
   return array(
@@ -13,21 +13,23 @@ function mms_email_gateway_get_map() {
 }
 
 /**
- * Return an SMS e-mail gateway given an MMS e-mail gateway.
+ * Rewrite an MMS gateway to its corresponding SMS gateway.
  */
-function mms_email_gateway_get_sms($gateway) {
+function mms_email_gateway_rewrite_to_sms($gateway) {
   $gateways = mms_email_gateway_get_map();
   if (isset($gateways[$gateway])) {
     return $gateways[$gateway];
   }
+  return $gateway;
 }
 
 /**
- * Return an MMS e-mail gateway given an SMS e-mail gateway.
+ * Rewrite an SMS gateway to its corresponding MMS gateway.
  */
-function mms_email_gateway_get_mms($gateway) {
+function mms_email_gateway_rewrite_to_mms($gateway) {
   $gateways = array_flip(mms_email_gateway_get_map());
   if (isset($gateways[$gateway])) {
     return $gateways[$gateway];
   }
+  return $gateway;
 }
