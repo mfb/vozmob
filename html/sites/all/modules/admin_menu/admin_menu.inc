@@ -1,5 +1,5 @@
 <?php
-// $Id: admin_menu.inc,v 1.11.2.22 2009/02/26 16:27:07 sun Exp $
+// $Id: admin_menu.inc,v 1.11.2.24 2009/04/18 03:24:00 sun Exp $
 
 /**
  * The key function that builds the menu links whenever there is a menu rebuild.
@@ -243,7 +243,20 @@ function admin_menu_admin_menu(&$deleted) {
     // Add switch_user items.
     if ($devel_user_links = module_invoke('devel', 'switch_user_list')) {
       foreach ($devel_user_links as $link) {
-        if (preg_match('!href="'. base_path() .'([^\?]+)\?([^"]+)" title="([^"]+)">((<em>)?[^<]+(</em>)?)!', $link, $match)) {
+        if (is_array($link)) {
+          $links[] = array(
+            'title' => $link['title'],
+            'description' => $link['attributes']['title'],
+            'path' => $link['href'],
+            'options' => array(
+              'query' => $link['query'],
+              'html' => !empty($link['html']),
+            ),
+            'parent_path' => 'logout',
+          );
+        }
+        // @todo Remove when Devel 6.x-1.16 has been released.
+        elseif (preg_match('!href="' . base_path() . '([^\?]+)\?([^"]+)" title="([^"]+)">((<em>)?[^<]+(</em>)?)!', $link, $match)) {
           $links[] = array(
             'title' => $match[4],
             'description' => $match[3],

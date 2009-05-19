@@ -1,5 +1,5 @@
 <?php
-// $Id: mm_node.module,v 1.1.2.46.2.28 2009/04/18 16:25:30 arthuregg Exp $
+// $Id: mm_node.module,v 1.1.2.46.2.30 2009/05/12 14:43:04 arthuregg Exp $
 
 /**
  * @file
@@ -240,14 +240,14 @@ function mm_node_harvest_mm_files($action, $configuration, $job, $nid) {
 
   // get files from the requested CID, that are processed at least to status
   // selected to harvest and are not already saved in current CID.
-  $results = db_query('SELECT mmf.nid, mmf.fid, mmf.'. $file_type .' AS harvest_file FROM {media_mover_files} mmf
-      WHERE mmf.cid = %d '. $harvest_conditions .'
-      AND '. $file_type .' <> \'\'
-      AND '. $file_type .' NOT IN
-        (SELECT mmf1.'. $file_type .'
-          FROM {media_mover_files} mmf1 WHERE mmf1.cid = %d AND mmf1.nid = mmf.nid)',
-    $configuration['mm_harvest_cid'], $configuration['cid']);
-
+	$results = db_query('SELECT mmf.nid, mmf.fid, mmf.complete_file AS harvest_file 
+    FROM media_mover_files mmf
+    WHERE mmf.cid = %d '. 
+	  $harvest_conditions .'    
+    AND mmf.complete_file NOT IN
+      (SELECT mmf1.harvest_file FROM media_mover_files mmf1 WHERE mmf1.cid = %d AND mmf1.harvest_file = mmf.complete_file)',
+	  $configuration['mm_harvest_cid'], $configuration['cid']);
+  
   // we have our files, now pull them out of the db;
   while ($result = db_fetch_array($results)) {
     $files[] = $result;

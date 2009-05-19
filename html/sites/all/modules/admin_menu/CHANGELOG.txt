@@ -1,4 +1,4 @@
-// $Id: CHANGELOG.txt,v 1.33.2.50 2009/02/26 16:27:07 sun Exp $
+// $Id: CHANGELOG.txt,v 1.33.2.54 2009/05/15 21:14:42 sun Exp $
 
 Admin Menu x.x-x.x, xxxx-xx-xx
 ------------------------------
@@ -6,6 +6,13 @@ Admin Menu x.x-x.x, xxxx-xx-xx
 
 Admin Menu 6.x-1.x, xxxx-xx-xx
 ------------------------------
+
+
+Admin Menu 6.x-1.4, 2009-05-15
+------------------------------
+by Dave Reid: Updated for getInfo() for tests.
+#433016 by ultimateboy: Fixed Devel switch user links added to wrong parent.
+#349169 by sun: Fixed Devel switch user links contain multiple path prefixes.
 #384100 by kepol, sun: Fixed content-type items displayed in wrong place.
 #373339 by sun: Fixed double-escaped 'Edit <content-type>' link titles.
 by sun: Fixed admin menu tests (and updated to 6.x for SimpleTest 2.x).

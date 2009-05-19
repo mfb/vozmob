@@ -1,6 +1,6 @@
 <?php
 
-// $Id: media_mover_api_menus.inc,v 1.1.4.11 2009/02/08 23:52:22 arthuregg Exp $
+// $Id: media_mover_api_menus.inc,v 1.1.4.12 2009/05/13 16:22:58 arthuregg Exp $
 
 /**
  * contains all the menu functions for the module
@@ -58,7 +58,7 @@ function media_mover_api_menus() {
   $items['admin/build/media_mover/files'] = array(
     'title' => 'All Files',
     'page callback' => 'media_mover_api_files_list',
-    'page arguments' => array(arg(3)),
+    'page arguments' => array(arg(4)),
     'access arguments' => array('administer media_mover'),
     'type' => MENU_LOCAL_TASK,
   );

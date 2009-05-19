@@ -1,6 +1,6 @@
 <?php
 
-/* $Id: media_mover_api.module,v 1.1.2.110.2.48 2009/04/15 03:23:53 arthuregg Exp $ */
+/* $Id: media_mover_api.module,v 1.1.2.110.2.50 2009/05/17 18:38:29 arthuregg Exp $ */
 
 
 /*
@@ -697,6 +697,10 @@ function media_mover_api_set_file_perm($filepath){
  * @return boolean
  */
 function media_mover_api_file_validate_extensions($file_name, $extensions) {
+  // all files are allowed
+  if ($extensions == '*') {
+    return true;
+  }
   $regex = '/\.('. ereg_replace(' +', '|', preg_quote($extensions)) .')$/i';
   if (preg_match($regex, $file_name)) {
     return true;
@@ -895,7 +899,7 @@ function media_mover_api_event_trigger($type, $event, $verb, $data) {
  * @return cid value
  */
 function media_mover_api_config_add($name, $description, $settings, $status) {
-  db_query("INSERT INTO {media_mover_config_list} (name, description, settings, status) VALUES ('%s', '%s', %d, '%s')",
+  db_query("INSERT INTO {media_mover_config_list} (name, description, settings, status) VALUES ('%s', '%s', '%s', '%s')",
     $name, $description, serialize($settings), $status
   );
   $cid = db_last_insert_id('media_mover_config_list', 'cid');
@@ -925,8 +929,8 @@ function media_mover_api_configuration_process_add($cid, $verb, $module, $action
  */
 function media_mover_api_file_db_add($file, $config, $verb, $status) {
   // add to db
-  db_query("INSERT INTO {media_mover_files} (nid, fid, cid, harvest_file, status, date, data)  VALUES (%d, %d, %d, '%s', %d, %d, '%s')",
-    $file['nid'], $file['fid'], $config->cid, $file['harvest_file'], $status, time(), serialize($file)
+  db_query('INSERT INTO {media_mover_files} (nid, fid, cid, harvest_file, status, date, data)  VALUES (%d, %d, %d, "%s", %d, %d, "%s")',
+    $file['nid'], $file['fid'], $config->cid, $file['harvest_file'], $status, time(), serialize($file['data'])
   );
 
   // return the mmfid
@@ -994,9 +998,9 @@ function media_mover_api_node_files_fetch($nid, $status = MMA_FILE_STATUS_COMPLE
   // we can haz cache?
   if (! $data->data) {
     $data = array();
-    $items = db_query('SELECT mmfid, cid FROM {media_mover_files} WHERE nid = %d '. $file_status .' ORDER BY cid', $nid);
-    while ($item = db_fetch_array($items)) {
-      $data[$item['cid']][] = media_mover_api_file_fetch($item['mmfid']);
+    $results = db_query('SELECT mmfid, cid FROM {media_mover_files} WHERE nid = %d '. $file_status .' ORDER BY cid', $nid);
+    while ($result = db_fetch_array($results)) {
+      $data[$item['cid']][] = media_mover_api_file_fetch($result['mmfid']);
     }
     cache_set($cache_name, $data, 'cache_media_mover', CACHE_TEMPORARY);
     return $data;

@@ -1,6 +1,7 @@
-; $Id: imagecache.info,v 1.5 2008/05/30 15:46:59 dopry Exp $
+; $Id: imagecache.info,v 1.6 2009/05/07 15:01:12 drewish Exp $
 name = ImageCache
 description = Dynamic image manipulator and cache.
 package = ImageCache
 dependencies[] = imageapi
+dependencies[] = transliteration
 core = 6.x
