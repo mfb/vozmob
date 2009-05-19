@@ -129,7 +129,7 @@ function phptemplate_preprocess_node(&$vars) {
   // drupal_add_js(drupal_get_path('theme', 'blueprint') . '/scripts/jquery.sound.js', 'theme');
 
   $vars['overlay_launcher'] = FALSE;
-  if (empty($node->field_image) && !empty($node->media_mover)) {
+  if (empty($node->field_image[0]['view']) && !empty($node->media_mover)) {
     foreach ($node->media_mover as $cid) {
       foreach ($cid as $mmfid) {
         if (substr($mmfid['complete_file'], -4, 4) == '.mp3') {
