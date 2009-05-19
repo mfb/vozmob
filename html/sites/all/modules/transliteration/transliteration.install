@@ -1,0 +1,113 @@
+<?php
+// $Id: transliteration.install,v 1.1 2008/03/20 09:44:43 smk Exp $
+
+/**
+ * Implementation of hook_install().
+ */
+function transliteration_install() {
+  transliteration_install_compat();
+  $errors = transliteration_install_retroactive();
+  if (!$errors) {
+    drupal_set_message('Existing filenames have been successfully transliterated.');
+  }
+  else {
+    $message = 'Not all existing filenames could be transliterated. The following files could not be accessed:';
+    $message .= theme_item_list($errors);
+    drupal_set_message($message, 'error');
+  }
+}
+
+/**
+ * Helper function; add database-specific compatibility functions.
+ */
+function transliteration_install_compat() {
+  switch ($GLOBALS['db_type']) {
+    case 'pgsql':
+      // Taken from the MySQL Compatibility project
+      // http://pgfoundry.org/projects/mysqlcompat/
+      if (!db_result(db_query("SELECT COUNT(*) FROM pg_proc WHERE proname = 'substring_index'"))) {
+        db_query("CREATE OR REPLACE FUNCTION substring_index(text, text, integer)
+          RETURNS text AS $$
+            DECLARE
+              tokens text[];
+            BEGIN
+              tokens := pg_catalog.string_to_array($1, $2); 
+
+              IF $3 >= 0 THEN
+                RETURN pg_catalog.array_to_string(tokens[1:$3], $2);
+              ELSE
+                RETURN pg_catalog.array_to_string(tokens[($3 * -1):pg_catalog.array_upper(tokens, 1)], $2);
+              END IF;
+            END;
+          $$ IMMUTABLE STRICT LANGUAGE PLPGSQL;"
+        );
+        break;
+      }
+  }
+}
+
+/**
+ * Helper function; retroactive transliteration of existing filenames.
+ */
+function transliteration_install_retroactive() {
+  require_once(drupal_get_path('module', 'transliteration') .'/transliteration.inc');
+
+  // Regexp operators differ between database manufacturers.
+  switch ($GLOBALS['db_type']) {
+    case 'mysql':
+    case 'mysqli':
+      $op = 'RLIKE';
+      break;
+    case 'pgsql':
+      $op = '~*';
+      break;
+  }
+
+  // Get all of the files that need to be converted, that is those that
+  // contain characters other than alphanumerics, underscores, dots, or
+  // hyphens.
+  $result = db_query("SELECT fid, filepath FROM {files} WHERE SUBSTRING_INDEX(filepath, '/', -1) $op '[^0-9A-Za-z_.-]'");
+  $errors = array();
+
+  while ($file = db_fetch_object($result)) {
+    // Transliterate the file's name.
+    $filepath = $file->filepath;
+    $filepath_new = dirname($filepath) .'/'. transliteration_clean_filename(basename($filepath));
+
+    // Move the file to a new location but do a shortcut check first to avoid
+    // unneccessary error messages. It's probably better to not mess with
+    // records for missing files.
+    $realpath = realpath($filepath);
+    if ($realpath && file_exists($realpath) && file_move($filepath, $filepath_new, FILE_EXISTS_RENAME)) {
+      // Get the file's new path; it may have changed.
+      $filepath_new = $filepath;
+
+      // Update the files table with the new path.
+      db_query("UPDATE {files} SET filepath = '%s' WHERE fid = %d", $filepath_new, $file->fid);
+    }
+    else {
+      $errors[] = $file->filepath;
+    }
+  }
+
+  return $errors;
+}
+
+/**
+ * Retroactively transliterate existing filenames.
+ */
+function transliteration_update_1() {
+  $ret = array();
+  transliteration_install_compat();
+  $errors = transliteration_install_retroactive();
+  if (!$errors) {
+    drupal_set_message('Existing filenames have been successfully transliterated.');
+  }
+  else {
+    $message = 'Not all existing filenames could be transliterated. The following files could not be accessed:';
+    $message .= theme_item_list($errors);
+    drupal_set_message($message, 'error');
+  }
+  return $ret;
+}
+
