@@ -36,7 +36,9 @@ function sms_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
     watchdog('debug', 'el titulo del nodo es ');
     watchdog('debug', print_r($node->title,TRUE));
 
-    $lan = sms_mailsave_get_language($to[0]);
+    $lan = $node->language;
+    watchdog('debug', 'language ');
+    watchdog('debug', print_r($node->language, TRUE));
 
     //changed the name of the user that created the node to vozmob and a random number -- gaba
     //'name' => implode('-', array(dechex(mt_rand()), dechex(mt_rand()))),
@@ -121,18 +123,4 @@ function sms_mailsave_get_toaddress($header, $mailbox) {
 		$from = $header->to;
 		}
 	return array($to[0]->mailbox .'@'. $to[0]->host, $to[0]->personal);
-}
-
-function sms_mailsave_get_language($email_address) {
-	switch ($email_address) {
-		case "reg-prueba":
-			$lang = "es";
-			break;
-		case "reg-test":
-			$lang = "en";
-			break;
-		default:
-			$lang = $language->language;
-	}
-	return $lang;
 }
