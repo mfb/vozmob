@@ -18,6 +18,13 @@
 
   <div class="content clear-block">
     <?php print $picture ?>
+
+    <?php if ($overlay_launcher): ?>
+      <div class="overlay-launcher">
+        <a href="<?php print $node_url ?>"><?php print theme('image', drupal_get_path('theme', 'blueprint') . '/images/'. $overlay_launcher_image, t('Listen to presentation.'), t('Listen to presentation.')); ?></a>
+      </div>
+    <?php endif; ?>
+
     <?php print $content ?>
     <?php print views_embed_view('overlay', 'default', $node->nid); ?>
   </div>
