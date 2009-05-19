@@ -420,6 +420,11 @@ function _mailsave_sanitise_filename($filename) {
   // Decode multibyte encoded filename
   $filename = mb_decode_mimeheader($filename);
 
+  if (module_exists('transliteration')) {
+    module_load_include('inc', 'transliteration');
+    return transliteration_clean_filename($filename);
+  }
+
   // Replaces all characters up through space and all past ~ along with the above reserved characters to sanitise filename
   // from php.net/manual/en/function.preg-replace.php#80431
 
