@@ -49,6 +49,9 @@
             <?php endif; ?>
             <?php $playlist[] = array('url' => file_create_url($mmfid['complete_file'])); ?>
           <?php endif; ?>
+          <?php if (substr($mmfid['complete_file'], -4, 4) == '.flv'): ?>
+            <?php $playlist[] = array('url' => file_create_url($mmfid['complete_file'])); ?>
+          <?php endif; ?>
         <?php endforeach; ?>
       <?php endforeach; ?>
       <?php if (!empty($playlist)): ?>
