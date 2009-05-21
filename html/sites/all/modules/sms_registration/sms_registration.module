@@ -174,4 +174,5 @@ function sms_registration_open_mailbox($mailbox) {
   return $result;
 
 }
+
 ?>

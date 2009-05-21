@@ -96,7 +96,7 @@ function sms_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
 		$subject = "Publicado";
 		}
  watchdog('debug', print_r($message, TRUE));
-	    $options = array('carrier'=> $from[1], 'from' => 'vozmob.sandbox.reg@gmail.com', 'subject'=>'Media posted');
+	    $options = array('carrier'=> $from[1], 'from' => 'vozmob.sandbox.reg@gmail.com', 'subject'=>'Media posted', 'action' => 'registration');
     	    sms_send($number, $message, $options);
     	    //we will receive the answer in cleanup.registration.inc
      }
@@ -151,3 +151,15 @@ function sms_mailsave_get_toaddress($header, $mailbox) {
 		}
 	return array($to[0]->mailbox .'@'. $to[0]->host, $to[0]->personal);
 }
+
+function sms_mailsave_mail_alter(&$message){
+	
+	$options = $message['params']['options'];
+
+	if ($options['action'] == 'registration') {
+		$message['headers']['Return-Path'] = $message['from']; //'vozmob.sandbox.reg@gmail.com';
+	}
+}
+
+}
+

@@ -174,4 +174,12 @@ function sms_registration_open_mailbox($mailbox) {
   return $result;
 
 }
+
+function sms_registration_mail_alter(&$message){
+
+  if ($message[id]) {
+
+  }
+}
+
 ?>
