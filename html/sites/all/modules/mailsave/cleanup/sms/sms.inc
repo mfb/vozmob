@@ -137,6 +137,3 @@ function sms_mailsave_mail_alter(&$message){
 		$message['headers']['Return-Path'] = $message['from']; //'vozmob.sandbox.reg@gmail.com';
 	}
 }
-
-}
-
