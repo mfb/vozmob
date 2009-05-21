@@ -1,6 +1,4 @@
-/README.txt/1.60.4.1/Fri Apr 10 15:19:16 2009//TDRUPAL-6--2
 /og.info/1.6/Thu Jul 31 19:01:42 2008//TDRUPAL-6--2
-/og.install/1.71.4.4/Tue Apr 21 15:07:35 2009//TDRUPAL-6--2
 /og.module/1.628.4.2/Thu Apr 23 16:55:06 2009//TDRUPAL-6--2
 D/images////
 D/includes////
@@ -8,3 +6,5 @@ D/modules////
 D/tests////
 D/theme////
 D/translations////
+/README.txt/1.60.4.2/Tue May 19 01:32:12 2009//TDRUPAL-6--2
+/og.install/1.71.4.5/Tue May 19 01:32:12 2009//TDRUPAL-6--2

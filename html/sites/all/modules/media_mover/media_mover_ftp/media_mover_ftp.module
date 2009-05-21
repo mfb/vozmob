@@ -1,6 +1,6 @@
 <?php
 
-// $Id: media_mover_ftp.module,v 1.1.2.7.2.14 2009/04/01 02:18:57 arthuregg Exp $;
+// $Id: media_mover_ftp.module,v 1.1.2.7.2.20 2009/05/17 17:29:50 arthuregg Exp $;
 
 /**
  * @FILE This module allows for harvesting from FTP servers with media mover
@@ -166,6 +166,10 @@ function media_mover_ftp_config($configuration) {
     '#title' => t('FTP username'),
     '#type' => 'textfield',
     '#default_value' => $configuration['mm_ftp_user'],
+    '#description' => t('It is strongly advised that you limit the access of the 
+      FTP user, otherwise you are risking an even larger security issue. Note 
+      that the password for the FTP user is stored in the database, making a 
+      compromize to your webserver a compromize to your FTP server.')
   );
   $form['mm_ftp_conf']['mm_ftp_pass'] = array(
     '#title' => t('FTP password'),
@@ -192,24 +196,61 @@ function media_mover_ftp_config($configuration) {
       '#description' => t('A list of allowed file types, separated by a space'),
       '#default_value' => $configuration['mm_ftp_allowed_files'] ? $configuration['mm_ftp_allowed_files'] : variable_get('upload_extensions_default', 'mov mp4 mp3 avi 3gp 3g2 divx xvid wmv asf mpg mpeg mpeg4 jpeg'),
     );
-    $form['mm_ftp_conf']["mm_ftp_harvest_without_tokens"] = array(
+    $form['mm_ftp_conf']['mm_ftp_harvest_without_tokens'] = array(
       '#type' => 'checkbox',
       '#title' => t('Harvest files without tokens'),
       '#description' => t('If a file on the remote server does not have a valid token, it will still be harvested. This is useful if you are using an FTP server with non-user content.'),
       '#default_value' => $configuration['mm_ftp_harvest_without_tokens'],
     );
-    $form['mm_ftp_conf']["mm_ftp_delete_files"] = array(
+    $form['mm_ftp_conf']['mm_ftp_delete_files'] = array(
       '#type' => 'checkbox',
       '#title' => t('Delete files'),
       '#description' => t('Delete the files on server after harvest'),
       '#default_value' => $configuration['mm_ftp_delete_files'],
     );
-    $form['mm_ftp_conf']["mm_ftp_delete_files_no_token"] = array(
+    $form['mm_ftp_conf']['mm_ftp_delete_files_no_token'] = array(
       '#type' => 'checkbox',
       '#title' => t('Delete files without tokens'),
       '#description' => t('Remove files from the FTP server that do not have tokens. These will not be harvested. These files will be lost forever. Leaving this unchecked will leave the files on the FTP server.'),
       '#default_value' => $configuration['mm_ftp_delete_files_no_token'],
     );
+    $form['mm_ftp_conf']['mm_ftp_harvest_depth'] = array(
+      '#type' => 'select',
+      '#title' => t('File harvest depth'),
+      '#options' => array(-1 => t('All levels'), 1 => t('1, Top level, default'), 2 => t('2 levels'), 3 => t('3 Levels')),
+      '#default_value' => $configuration['mm_ftp_harvest_depth'] ? $configuration['mm_ftp_harvest_depth'] : 1,
+      '#description' => t('Set the depth of the harvest of files from directories. 
+        The deeper your search the slower the process of finding files is.
+        It is a good idea to use a directory structure as flat as possible.')
+    );
+    $form['mm_ftp_conf']['mm_ftp_user_from_dir'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Attempt to connect FTP directory names to user accounts'),
+      '#description' => t('When harvesting files from directories, try to 
+        associate the directory name with a user name. Media Mover will look for
+        directories relative to the base directory you have set. Please note that 
+        FTP servers with large filesystems can cause a significant delay as the 
+        directory structure is built.'),
+      '#default_value' => $configuration['mm_ftp_user_from_dir'],
+    );
+    $form['mm_ftp_conf']['mm_ftp_harvest_folders'] = array(
+     '#type' => 'checkbox',
+     '#title' => t('Harvest files from folders'),
+     '#description' => t('Allow files to be uploaded as a token folder. A token folder is a folder with the folder name and token (eg: my_folder.2xz3f) which will identify all the enclosed files. If an individual file has a token this will override the folder token data.'),
+     '#default_value' => $configuration['mm_ftp_harvest_folders'],
+   );
+   $form['mm_ftp_conf']['mm_ftp_harvest_delete_folders'] = array(
+     '#type' => 'checkbox',
+     '#title' => t('Delete token folders after harvest'),
+     '#description' => t('Removes folders with tokens (and their contents) after harvest  **WARNING THIS WILL DELETE EVERYTHING IN THE FOLDER**'),
+     '#default_value' => $configuration['mm_ftp_harvest_delete_folders'],
+   );
+   $form['mm_ftp_conf']['mm_ftp_harvest_delete_non_token_folders'] = array(
+     '#type' => 'checkbox',
+     '#title' => t('Delete any non token folders'),
+     '#description' => t('Removes folders (and their contents) without tokens - **WARNING THIS WILL DELETE EVERYTHING THE FOLDER**'),
+     '#default_value' => $configuration['mm_ftp_harvest_delete_non_token_folders'],
+   );    
   }
 
   // storage specific settings
@@ -297,21 +338,24 @@ function media_mover_ftp_connect($configuration, $display = false) {
   // build the ftp connection
   $connection['ftp_connection'] = ftp_connect($configuration['mm_ftp_host']);
   $connection['ftp_login'] = ftp_login($connection['ftp_connection'], $configuration['mm_ftp_user'], $configuration['mm_ftp_pass']);
-  $connection['ftp_list'] = ftp_rawlist($connection['ftp_connection'], $configuration['mm_ftp_dir']);
+  $connection['ftp_files'] = media_mover_ftp_get_files($connection['ftp_connection'], $configuration, $configuration['mm_ftp_dir'], $configuration['mm_ftp_harvest_depth']);
 
   // check the connection to the server
   if (! $connection['ftp_connection']) {
     $message = 'Unable to connect to server %server';
     $params = array('%server' => $configuration['mm_ftp_host']);
   }
+  // can we login?
   elseif (! $connection['ftp_login']) {
     $message = 'Unable to login to server %server with username %user';
     $params =  array('%server' => $configuration['mm_ftp_host'], '%user' => $configuration['mm_ftp_user']);
   }
-  elseif ( $connection['ftp_list'] === FALSE) {
+  // can we get a list of files?
+  elseif ($connection['ftp_list'] === FALSE) {
     $message = 'Unable to get file list from server %server with username %user';
     $params = array('%server' => $configuration['mm_ftp_host'], '%user' => $configuration['mm_ftp_user']);
   }
+  
   // did we have an error condition?
   if ($message) {
     if ($display) { drupal_set_message(t($message, $params), 'error'); }
@@ -325,36 +369,92 @@ function media_mover_ftp_connect($configuration, $display = false) {
 
 /**
  * Takes an FTP file result and returns an array of data
- * @param string $file_item
- *   the FTP file string
- * @param array $configuration
- *   media mover configuration
+ * @param $ftp_file_listing
+ *   string, the FTP file listing string
+ * @param $configuration
+ *   array, configuration being run
+ * @param $directory
+ *   string, directory to harvest from
+ * @param $recursive
+ *   int, should harvest recursively, set the depth of the search as well
+ * @param $strict
+ *   boolean, if set, any files currently being uploaded will stop the process
  * @return array
  */
-function mm_ftp_parse_file($file_item, $configuration, $return = 'path') {
-  $info = array();
-  // parse the $file_item
-  $vinfo = preg_split("/[\s]+/", $file_item, 9);
-  if ($vinfo[0][0] == "-") {
-    $info['chmod'] = $vinfo[0];
-    $info['name'] = $vinfo[8];
-    $info['dir'] = $configuration['mm_ftp_dir'];
-    list($info['hour'], $info['minute']) = split(":", $vinfo[7]);
-    $info['hour'] = $info['hour'] + 0; // mktime expects hour to be long, not a string
-    $info['minute'] = $info['minute'] + 0; // mktime expects minute to be long, not a string
-    $info['month'] = $vinfo[5] + 0; // mktime expects month to be long, not a string
-    $info['day'] = $vinfo[6] + 0; // mktime expects day to be long, not a string
-    $info['created'] = mktime($info['hour'], $info['minute'], 0, $info['month'], $info['day'], date(Y));
-    $info['size'] = $vinfo[4];
-    // we just need the file path
-    if ($return == 'path') {
-      return $info['dir'] .'/'. $info['name'];
-    }
-    return $info;
+function media_mover_ftp_get_files(&$connection, $configuration, $directory, $recursive  = 1,  $strict = false) {
+	$files = array();
+	// get the list of files 
+	// if we have reached our maxium depth, stop 
+	if ($recursive === 0) {
+		return;
+	}
+	$ftp_files = media_mover_ftp_completed_file_list($connection, $directory, $strict);
+	foreach ($ftp_files as $ftp_file_listing) {
+		$ftp_file = array();
+		// we need to parse the listing of a file. This listing looks like:
+		// -rw-r--r--   1 USER     GROUP     652594 Mar  5 20:33 tnt.wmv.95ccde
+		// the below pattern breaks out each of these items 
+		$pattern = "/^([0-9dlrwx-]*)[\s]*([0-9]{1})\s*([a-zA-z0-9]*)\s*([a-zA-z0-9]*)\s*([0-9]*)\s*([a-zA-z0-9\s]*\:[0-9]{2})\s*(.*)$/";
+		if (preg_match($pattern, $ftp_file_listing, $matches)) {
+			// do not find files that start with .
+			if ($matches[7][0] != '.') {
+				// build the file data     	
+      	$ftp_file['filename'] = $matches[7];      
+				$ftp_file['filesize'] = $matches[5];
+				$ftp_file['created'] = strtotime($matches[6]);
+				$ftp_file['filepath'] = $directory .'/'. $ftp_file['filename'];				
+				// check for file token
+			  media_mover_ftp_file_token($ftp_file);				
+				// set a possible user name from the directory
+				if (preg_match("/.*\/(.*)$/", dirname($ftp_file['filepath']), $user)) {
+					$ftp_file['user_name'] = $user[1];
+				}
+			  // is this a directory?
+	      if ($matches[2] && $matches[2] != 1 && $recursive) {
+	        $ftp_file['dir'] = media_mover_ftp_get_files($connection, $configuration, $directory .'/'. $ftp_file['filename'], $recursive - 1, $strict);             
+	      }
+			}
+      // if we have a file listing, append it
+      if ($ftp_file) {      	
+      	$files[] = $ftp_file;
+      }
+		}
+	}	
+	return $files;
+}
+
+
+/**
+ * A wrapper for the ftp_rawlist() php function to only return files which have
+ * finished uploading.
+ * It does this by calling ftp_rawlist twice with a 1 second pause, then checking
+ * the results for inconsitancies (uploading file will have increased in size).
+ *
+ * @param resource $stream
+ * @param string $dir
+ * @param bool $strict
+ *  If strict is TRUE the if any files are still uploading then false is returned
+ * @return array 
+ */
+function media_mover_ftp_completed_file_list(&$connection, $directory, $strict = FALSE) {
+	$results = array();
+  // get 2 listings 1 second appart. If there are no results, exit  
+  if (! $pass1 = ftp_rawlist($connection, $directory) ) {
+  	return array(); 
   }
-  else {
-    // We are not looking at a file but at a directory ("d") or a link ("l") for instance
+  // wait for a moment to get the second listing.
+  sleep(1);
+  $pass2 = ftp_rawlist($connection, $directory);
+  
+  // get a list of only the results in both listings (ie fully uploaded files)
+  $results = array_intersect($pass1, $pass2);
+
+  // set results to false if in there is a difference and in strict mode
+  if ($strict AND count($result) !== count($pass2) || ! count($result)) {
+    $results = FALSE;
   }
+  
+  return $results;
 }
 
 /* ************************************************ */
@@ -408,6 +508,7 @@ function media_mover_ftp_token_ftp_form_submit($form, &$form_state) {
   );
   return;
 }
+
 
 /**
  * Outbound mail functions
@@ -545,8 +646,38 @@ function media_mover_ftp_test_form_submit($form, &$form_state) {
 
 
 /* ********************************************************** */
-/* Token functions */
+/* User functions */
 /* ********************************************************** */
+
+/**
+ * Takes an incoming file from from FTP and tries to find a
+ * user from the file name or path
+ *
+ * @param $ftp_file_path
+ *   string, ftp file path
+ * @param $item
+ *   array, file item 
+ */
+function media_mover_ftp_extract_user($ftp_file, &$file, $configuration) {
+  // check the top level director for a user name
+  if ($configuration['mm_ftp_user_from_dir'] || true) {  	
+  	// remove the base directory from the file path
+  	if ($configuration['mm_ftp_dir'] != '.' ) {
+  		// this is abit dangerous to do because we are altering the path
+  		$ftp_file['filepath'] = str_replace($configuration['mm_ftp_dir'] .'/', '', $ftp_file['filepath']);
+  	}
+    if ($account = user_load(array('name' => $ftp_file['user_name']))) {
+      $file['data']['user'] = $account;
+      $file['data']['node']->uid = $user->uid;
+      return;
+    }
+  }
+  elseif($user = media_mover_ftp_token_check($ftp_file['token'])) {
+    $file['data']['user'] = $user;
+    $file['node']->uid = $user->uid;
+  }
+}
+
 
 /**
  * Checkes a token string against the database to see if it is a user id
@@ -582,5 +713,44 @@ function media_mover_ftp_token_extract($filename, $type = 'file') {
   if ($type == 'token') {
     return $token;
   }
-  return $filename;
+  
+  // check for folder based token
+  if ($configuration['mm_ftp_harvest_folders'] AND $token == '') {
+    // remove base ftp dir to avoid false positives
+    $filename = substr($filename, strlen($configuration['mm_ftp_dir']));
+    
+    // new patern to search for the size digit code between two /'s
+    $folder_pattern = '/\/([0-9a-zA-z]{'. MM_FTP_TOKEN_LENGTH .'})\//';
+    preg_match($folder_pattern, $filename, $matches);
+    
+    if ($matches[1]) {
+      $token = $matches[1];
+      $filename = str_replace('.'. $token, '', $filename);
+    }
+  }
+  
+  // return just the filename, not full path
+  return basename($filename);
+}
+
+
+/**
+ * Look for a token pattern on the file name and 
+ * return the token
+ * @param $filename
+ * @return string
+ */
+function media_mover_ftp_file_token(&$ftp_file) {
+  // build a pattern to look for the six digit code at the end of the file name
+  $pattern = '/(.*)\.([0-9a-zA-z]{'. MM_FTP_TOKEN_LENGTH .'})$/';
+  // look for a token on the file path
+  if (! preg_match($pattern, $ftp_file['filename'], $matches)) {
+  	// look for a token on the parent directory
+  	if (! preg_match($pattern, basename(dirname($ftp_file['filepath'])), $matches)) {
+  		return;
+  	}
+  }
+  $ftp_file['token'] = $matches[2];
+  $ftp_file['filepath_no_token'] = $matches[1];
+  return;
 }

@@ -1,6 +1,6 @@
 <?php
 
-/* $Id: media_mover_api.install,v 1.1.2.16.2.5 2009/02/09 00:39:34 arthuregg Exp $ */
+/* $Id: media_mover_api.install,v 1.1.2.16.2.6 2009/05/17 18:38:29 arthuregg Exp $ */
 
 /**
  * @FILE media mover db files
@@ -187,4 +187,16 @@ function media_mover_api_update_17 () {
   return $ret;
 }
 
-
+/**
+ * fixes the status col
+ */
+function media_mover_api_update_6110 () {
+  $results = db_query('SELECT mmfid, data FROM {media_mover_files}');
+  while ($result = db_fetch_array($results)) {
+    $data = unserialize($result['data']);
+    $data = $data['data'];
+    db_query('UPDATE {media_mover_files} SET data = "%s" WHERE mmfid = %d', $result['mmfid'], $data);
+  }
+  $ret[] = update_sql('UPDATE {media_mover_files} SET status = 8 WHERE status = 7');
+  return $ret;
+}

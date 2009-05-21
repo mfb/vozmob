@@ -1,4 +1,4 @@
-//$Id: CHANGELOG.txt,v 1.1.6.327 2009/04/30 10:29:40 karens Exp $
+//$Id: CHANGELOG.txt,v 1.1.6.331 2009/05/16 16:41:30 yched Exp $
 
 CCK 6.x-2.x
 ===========
@@ -21,6 +21,10 @@ Bugfixes:
 - #397358 by Darren Oh, yched, markus_petrux - Views integration: Use node title / user name in argument title replacements for nodereference and userreference argument fields.
 - #428400 Views integration : Fix fatal error with Views 2.4 (views_handler_filter_float has moved). Preserved compatibility with Views 2.3.
 - #447562 by markus_petrux: fix non-XHTML markup on 'Manage fields' screen.
+- #369364 Views integration: fix non-XHTML markup when displaying fields with the 'group multiple values' option.
+- #441412 by jcnventura - Add 'Print' display context on 'Display fields' pages when book.module is enabled.
+- #458952 Let different modules defined the same build_mode information.
+- #383038 by markDrupal - Userreference: fix broken 'reverse links' with fields in per-type table.
 
 CCK 6.x-2.2
 ===========

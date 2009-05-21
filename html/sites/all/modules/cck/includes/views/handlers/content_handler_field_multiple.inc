@@ -1,5 +1,5 @@
 <?php
-// $Id: content_handler_field_multiple.inc,v 1.1.2.17 2009/04/11 14:50:55 yched Exp $
+// $Id: content_handler_field_multiple.inc,v 1.1.2.18 2009/05/07 15:06:36 yched Exp $
 
 /**
  * @file
@@ -169,6 +169,23 @@ class content_handler_field_multiple extends content_handler_field {
       unset($item['_delta']);
       $this->field_values[$vid][$delta] = $item;
     }
+  }
+
+  /**
+   * Return DIV or SPAN based upon the field's element type.
+   *
+   * Fields rendered with the 'group multiple' option use <div> markers,
+   * and thus shouldn't be wrapped in a <span>.
+   */
+  function element_type() {
+    if (!$this->defer_query) {
+      return parent::element_type();
+    }
+
+    if (isset($this->definition['element type'])) {
+      return $this->definition['element type'];
+    }
+    return 'div';
   }
 
   function render($values) {

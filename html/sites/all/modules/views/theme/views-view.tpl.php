@@ -1,5 +1,5 @@
 <?php
-// $Id: views-view.tpl.php,v 1.11 2008/12/02 18:35:50 merlinofchaos Exp $
+// $Id: views-view.tpl.php,v 1.12 2009/05/06 19:33:00 merlinofchaos Exp $
 /**
  * @file views-view.tpl.php
  * Main view template
@@ -80,4 +80,4 @@
     </div>
   <?php endif; ?>
 
-</div> <?php // class view ?>
+</div> <?php /* class view */ ?>

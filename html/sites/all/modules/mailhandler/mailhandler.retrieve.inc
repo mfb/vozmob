@@ -55,7 +55,7 @@ function mailhandler_admin_retrieve($mid) {
 function mailhandler_get_part($stream, $msg_number, $mime_type, $structure = false, $part_number = false) {
 
   if (!$structure) {
-    $structure = imap_fetchstructure($stream, $msg_number);
+    $structure = imap_fetchstructure($stream, $msg_number, FT_UID);
   }
   if ($structure) {
     foreach ($structure->parameters as $parameter) {
@@ -68,7 +68,7 @@ function mailhandler_get_part($stream, $msg_number, $mime_type, $structure = fal
       if (!$part_number) {
         $part_number = '1';
       }
-      $text = imap_fetchbody($stream, $msg_number, $part_number);
+      $text = imap_fetchbody($stream, $msg_number, $part_number, FT_UID);
       if ($structure->encoding == ENCBASE64) {
         return drupal_convert_to_utf8(imap_base64($text), $encoding);
       }
@@ -116,7 +116,7 @@ function mailhandler_get_parts($stream, $msg_number, $max_depth = 10, $depth = 0
   $parts = array();
 
   // Load Structure.
-  if (!$structure && !$structure = imap_fetchstructure($stream, $msg_number)) {
+  if (!$structure && !$structure = imap_fetchstructure($stream, $msg_number, FT_UID)) {
     watchdog('mailhandler', 'Could not fetch structure for message number %msg_number', array('%msg_number' => $msg_number), WATCHDOG_NOTICE);
     return $parts;
   }
@@ -183,7 +183,7 @@ function mailhandler_get_parts($stream, $msg_number, $max_depth = 10, $depth = 0
   }
 
   // Retrieve part and convert MIME encoding to UTF-8
-  if(!$part->data = imap_fetchbody($stream, $msg_number, $part_number)) {
+  if(!$part->data = imap_fetchbody($stream, $msg_number, $part_number, FT_UID)) {
     watchdog('mailhandler', 'No Data!!', array(), WATCHDOG_ERROR);
     return $parts;
   }
@@ -342,9 +342,17 @@ function mailhandler_process_message($header, $body, $mailbox) {
       $node->title .= $subjectarr[$i]->text;
   }
 
-  $node->date = format_date($header->udate, 'custom', 'Y-m-d H:i:s O');
+  $node->date = $node->changed = format_date($header->udate, 'custom', 'Y-m-d H:i:s O');
   $node->format = $mailbox['format'];
-
+  
+  // If an nid command was supplied, and type is not 'comment', append the revision number
+  if ($node->nid && $node->type != 'comment') {
+    $vid = db_result(db_query('SELECT n.vid FROM {node} n WHERE n.nid = %d', $node->nid));
+    if ($vid) {
+      $node->revision = $node->vid = $vid;
+    }
+  }
+  
   return $node;
 }
 
@@ -385,7 +393,9 @@ function mailhandler_authenticate($node, $header, $origbody, $mailbox) {
 function mailhandler_comment_submit($node, $header, $mailbox, $origbody) {
   global $user;
   if (!$node->subject) $node->subject = $node->title;
-  if (!$node->comment) $node->comment = $node->body;
+  // When submitting comments, 'comment' means actualy the comment's body, and not the comments status for a node.
+  // We need to reset the comment's body, so it doesn't colide with a default 'comment' command. 
+  $node->comment = $node->body;
   // We want the comment to have the email time, not the current time
   $node->timestamp = $node->created;
   // comment_save gets an array
@@ -592,18 +602,17 @@ function mailhandler_get_unread_messages($mailbox) {
       $header = imap_header($result, $i);
 
       // only process new messages
-      if (!$mailbox['delete_after_read'] && $header->Unseen != 'U' && $header->Recent != 'N') {
+      if ($header->Unseen != 'U' && $header->Recent != 'N') {
         continue;
       }
 
-      $unread_messages[] = $i;
+      $unread_messages[] = imap_uid($result, $i);
     }
   }
 
   imap_close($result);
   return $unread_messages;
 }
-
 
 function mailhandler_retrieve_message($mailbox, $i, &$context) {
 
@@ -612,8 +621,7 @@ function mailhandler_retrieve_message($mailbox, $i, &$context) {
   $result = mailhandler_open_mailbox($mailbox);
 
   if ($result) {
-
-      $header = imap_header($result, $i);
+      $header = imap_header($result, imap_msgno($result, $i));
       // Initialize the subject in case it's missing.
       if (!isset($header->subject)) {
         $header->subject = '';
@@ -675,7 +683,7 @@ function mailhandler_retrieve_message($mailbox, $i, &$context) {
       }
       // don't delete while we're only getting new messages
       if ($mailbox['delete_after_read']) {
-        imap_delete($result, $i);
+        imap_delete($result, $i, FT_UID);
       }
 
       // switch back to original user

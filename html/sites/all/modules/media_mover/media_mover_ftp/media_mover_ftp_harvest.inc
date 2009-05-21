@@ -1,6 +1,6 @@
 <?php
 
-// $Id: media_mover_ftp_harvest.inc,v 1.1.2.9.2.9 2009/04/18 00:06:27 arthuregg Exp $;
+// $Id: media_mover_ftp_harvest.inc,v 1.1.2.9.2.15 2009/05/17 17:29:50 arthuregg Exp $;
 
 
 /**
@@ -10,32 +10,51 @@
  * @return array of files
  *
  * */
-function media_mover_ftp_harvest($configuration) {
+function media_mover_ftp_harvest($configuration, $test = false) {
   // can we connect
   if (! $connection = media_mover_ftp_connect($configuration)) {
     return;
   }
-
-  // extract out the connection
-  extract($connection);
-
   // make sure we have files being handed back
-  if (! count($ftp_list)) {
+  if (! count($connection['ftp_files'])) {
     return;
   }
+  // get the full list of files
+  $files = media_mover_ftp_harvest_file_recurse($connection['ftp_connection'], $connection['ftp_files'], $directory, $configuration, $test);
 
-  $del = $configuration['mm_ftp_delete_files'];
-  $file_types = explode(' ' , $configuration['mm_ftp_allowed_files']);
+  ftp_close($connection['ftp_connection']);
+  return $files;
+}
 
-  foreach($ftp_list as $file_item) {
-    $ftp_file_path = mm_ftp_parse_file($file_item, $configuration);
-    // get each file and add it on to the items
-    if ($item = media_mover_ftp_harvest_ftp_file($ftp_connection, $ftp_file_path, $configuration)) {
-      $items[] = $item;
-    }
-  }
-  ftp_close($ftp_connection);
-  return $items;
+
+/**
+ * 
+ * @param $ftp_connection
+ * @param $ftp_files
+ *   array, list of ftp files
+ * @param $configuration
+ *   array, media mover configuration
+ * @param $test
+ *   boolean, is this in testing mode
+ * @return unknown_type
+ */
+function media_mover_ftp_harvest_file_recurse(&$ftp_connection, $ftp_files, $directory, $configuration, $test) {
+	// first get this file, then recurse if necessary
+	if (count($ftp_files)) {
+		$files = array();
+		foreach($ftp_files as $ftp_file) {
+			if ($ftp_file['dir']) {				
+				// merge files together
+				$files = array_merge($files, media_mover_ftp_harvest_file_recurse($ftp_connection, $ftp_file['dir'], $directory .'/'. $ftp_file['filename'], $configuration, $test));
+			}
+			else {
+			  if ($new_file =  media_mover_ftp_harvest_ftp_file($ftp_connection, $ftp_file, $configuration, $test)) {
+			  	$files[] = $new_file;
+			  }
+			}
+		}
+		return $files;	
+	}
 }
 
 
@@ -49,27 +68,26 @@ function media_mover_ftp_harvest($configuration) {
  *   boolean, should this log or display errors
  * @return array should be just a single item
  */
-function media_mover_ftp_harvest_ftp_file(&$ftp_connection, $ftp_file_path, $configuration, $test = false) {
+function media_mover_ftp_harvest_ftp_file(&$ftp_connection, $ftp_file, $configuration, $test = false) {
   // Get each item and save it locally
-  if ($item = media_mover_ftp_create_file($ftp_connection, $ftp_file_path, $configuration, $test)) {
+  if ($file = media_mover_ftp_create_file($ftp_connection, $ftp_file, $configuration, $test)) {
     // should we delete the file after we've harvested it?
     if ($configuration['mm_ftp_delete_files']) {
-      if (! ftp_delete($ftp_connection, $ftp_file_path)) {
+      if (! ftp_delete($ftp_connection, $ftp_file['filepath'])) {
         $message = 'Error deleting file: @file';
-        $params = array('@file' => $ftp_file_path);
+        $params = array('@file' => $file['filepath']);
         // log or display errors
         if ($test) { drupal_set_message(t($message, $params)); }
         else { watchdog(MM_FTP_WATCHDOG_TYPE, t($message, $params), WATCHDOG_ERROR); }
         return FALSE;
       }
       if ($test) {drupal_set_message(t('Removed the file from the FTP server.')); }
-    }
+    } 
     // return the item if we have it
-    if ($item) {
-      return $item;
+    if ($file) {
+      return $file;
     }
   }
-  return FALSE;
 }
 
 
@@ -81,27 +99,26 @@ function media_mover_ftp_harvest_ftp_file(&$ftp_connection, $ftp_file_path, $con
  *   boolean, display or log errors
  * @return array $item is a item array
  */
-function media_mover_ftp_create_file(&$ftp_connection, $ftp_file_path, $configuration, $test) {
+function media_mover_ftp_create_file(&$ftp_connection, $ftp_file, $configuration, $test) {
 
   // does this file have a token, or are we allowed ot harvest files without tokens?
-  if (! media_mover_ftp_token_extract(basename($ftp_file_path), 'token') && ! $configuration['mm_ftp_harvest_without_tokens'] ) {
+  if (! $ftp_file['token'] && ! $configuration['mm_ftp_harvest_without_tokens'] ) {
     // should we delete files that do not have a token from the ftp server?
     if ($configuration['mm_ftp_delete_files_no_token']) {
-      ftp_delete($ftp_connection, $ftp_file_path);
+      ftp_delete($ftp_connection, $ftp_file['filepath']);
       watchdog(MM_FTP_WATCHDOG_TYPE, 'Deleted FTP file without token.', array(), WATCHDOG_NOTICE);
     }
     // now we need to return because we are not supposed to harvest this file type
-    return false;
+   // return false;
   }
-
-  // get the file name from the harvested file
-  $local_file = media_mover_ftp_token_extract(basename($ftp_file_path), 'file');
-
+  
+  // which file path should be used?
+  $local_file_path = $ftp_file['filepath_no_token'] ? $ftp_file['filepath_no_token'] : $ftp_file['filename'];
   // create the complete path
-  $local_file_path = file_create_filename($local_file,  media_mover_api_dir_path() . MM_FTP_FILES_SUBDIRECTORY);
+  $local_file_path = file_create_filename($local_file_path,  media_mover_api_dir_path() . MM_FTP_FILES_SUBDIRECTORY);
 
   // only harvested file types that match the requested types
-  if (! media_mover_api_file_validate_extensions($local_file, $configuration['mm_ftp_allowed_files'])) {
+  if (! media_mover_api_file_validate_extensions($local_file_path, $configuration['mm_ftp_allowed_files'])) {
     $message = 'FTP file harvest failed: unsupported file extension !file';
     $params = array('!file' => $local_file_path);
     // display errors
@@ -111,10 +128,10 @@ function media_mover_ftp_create_file(&$ftp_connection, $ftp_file_path, $configur
   }
 
   // make sure directory exists
-  file_check_directory(dirname($local_file_path), true);
-  
+  @mkdir(dirname($local_file_path), 0775, true);
+
   // download the file via FTP
-  if (! ftp_get($ftp_connection, $local_file_path, $ftp_file_path, FTP_BINARY)) {
+  if (! ftp_get($ftp_connection, $local_file_path, $ftp_file['filepath'], FTP_BINARY)) {
     $message = 'FTP file harvest failed to download file: !file';
     $params = array('!file' => $local_file_path);
     // display errors
@@ -149,18 +166,16 @@ function media_mover_ftp_create_file(&$ftp_connection, $ftp_file_path, $configur
   // log the harvested file
   watchdog(MM_FTP_WATCHDOG_TYPE, 'FTP file harvested: '. $local_file_path);
 
-  $item['filemime'] = $mime;
-  $item['filesize'] = filesize($local_file_path);
-  $item['filename'] = basename($local_file_path);
-  $item['filepath'] =  $local_file_path;
-  $item['harvest_file'] = $local_file_path;
-  $item['node']->title = $local_file;
-
-  // get a user id from the token
-  if ($user = media_mover_ftp_token_check(media_mover_ftp_token_extract($ftp_file_path, 'token'))) {
-    $item['user'] = $user;
-    $item['node']->uid = $user->uid;
-  }
-
-  return $item;
+  $file = array();
+  $file['filemime'] = $mime;
+  $file['filesize'] = filesize($local_file_path);
+  $file['filename'] = basename($local_file_path);
+  $file['filepath'] =  $local_file_path;
+  $file['harvest_file'] = $ftp_file['filepath'];
+  $file['data']['node']->title = $local_file_path;
+  
+  // try to associate data with a user name
+  media_mover_ftp_extract_user($ftp_file, $file, $configuration);
+  
+  return $file;
 }

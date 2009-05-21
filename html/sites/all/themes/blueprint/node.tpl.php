@@ -18,6 +18,13 @@
 
   <div class="content clear-block">
     <?php print $picture ?>
+
+    <?php if ($overlay_launcher): ?>
+      <div class="overlay-launcher">
+        <a href="<?php print $node_url ?>"><?php print theme('image', $overlay_launcher_image, t('Launch presentation.'), t('Launch presentation.')); ?></a>
+      </div>
+    <?php endif; ?>
+
     <?php print $content ?>
     <?php print views_embed_view('overlay', 'default', $node->nid); ?>
   </div>

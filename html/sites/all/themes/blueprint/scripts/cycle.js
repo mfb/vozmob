@@ -2,7 +2,7 @@
 
 Drupal.behaviors.overlayCycle = function() {
   // Set up the overlay and expose behaviors.
-  $('div.field-field-image div.field-items a').each(function() {
+  $('div.field-field-image div.field-items a, div.overlay-launcher a').each(function() {
     // Get the nid for this image field and set the rel attribute to the overlay for this node.
     var nid = $(this).parents('div.node').attr('id').slice(5);
     $(this).attr('rel', '#overlay-' + nid);
@@ -12,6 +12,18 @@ Drupal.behaviors.overlayCycle = function() {
   $('div.view-overlay div.views-field-title').each(function() {
     $(this).before('<div class="overlay-links">' + $(this).parents('div.node').find('div.node-links').html() + '</div>');
   });
+
+  $('div.overlay-launcher a[rel]').each(function() {
+    $(this).overlay({
+      onBeforeLoad: function() {
+        this.getBackgroundImage().expose({color: '#000'});
+      },
+      onClose: function() {
+        $.expose.close();
+      }
+    });
+  });
+
   $('div.field-field-image div.field-items a[rel]').each(function() {
     $(this).overlay({
       onBeforeLoad: function() {

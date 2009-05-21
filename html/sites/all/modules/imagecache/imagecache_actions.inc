@@ -1,5 +1,29 @@
 <?php
-// $Id: imagecache_actions.inc,v 1.22 2009/04/19 19:19:51 drewish Exp $
+// $Id: imagecache_actions.inc,v 1.24 2009/05/03 17:27:46 drewish Exp $
+
+function imagecache_resize_form($action) {
+  $form['width'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Width'),
+    '#default_value' => isset($action['width']) ? $action['width'] : '100%',
+    '#description' => t('Enter a width in pixels or as a percentage. i.e. 500 or 80%.'),
+  );
+  $form['height'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Height'),
+    '#default_value' => isset($action['height']) ? $action['height'] : '100%',
+    '#description' => t('Enter a height in pixels or as a percentage. i.e. 500 or 80%.'),
+  );
+  return $form;
+}
+
+function imagecache_resize_image(&$image, $data) {
+  if (!imageapi_image_resize($image, $data['width'], $data['height'])) {
+    watchdog('imagecache', 'imagecache_resize_image failed. image: %image, data: %data.', array('%path' => $image, '%data' => print_r($data, TRUE)), WATCHDOG_ERROR);
+    return FALSE;
+  }
+  return TRUE;
+}
 
 function theme_imagecache_resize($element) {
   $data = $element['#value'];
@@ -9,7 +33,7 @@ function theme_imagecache_resize($element) {
 /**
  * ImageCache Scale
  */
-function imagecache_scale_form($data) {
+function imagecache_scale_form($data = array()) {
   $form = imagecache_resize_form($data);
   $form['upscale'] = array(
     '#type' => 'checkbox',
@@ -41,7 +65,7 @@ function imagecache_scale_image(&$image, $data) {
 /**
  * ImageCache Scale and Crop
  */
-function imagecache_scale_and_crop_form($data) {
+function imagecache_scale_and_crop_form($data = array()) {
   return imagecache_resize_form($data);
 }
 
@@ -64,7 +88,7 @@ function imagecache_scale_and_crop_image(&$image, $data) {
  * ImageCache Deprecated Scale.
  * This will be removed in imagecache 2.1
  */
-function imagecache_deprecated_scale_form($data) {
+function imagecache_deprecated_scale_form($data = array()) {
   $helptext = array();
   $helptext['inside'] = t('<strong>Inside dimensions</strong>: Final dimensions will be less than or equal to the entered width and height. Useful for ensuring a maximum height and/or width.');
   $helptext['outside'] = t('<strong>Outside dimensions</strong>: Final dimensions will be greater than or equal to the entered width and height. Ideal for cropping the result to a square.');
@@ -121,7 +145,7 @@ function imagecache_deprecated_scale_image(&$image, $data) {
 /**
  * ImageCache Crop
  */
-function imagecache_crop_form($data) {
+function imagecache_crop_form($data = array()) {
   $data += array(
     'width' => '',
     'height' => '',
@@ -172,7 +196,7 @@ function imagecache_crop_image(&$image, $data) {
 /**
  * ImageCache Desaturate
  */
-function imagecache_desaturate_form($data) {
+function imagecache_desaturate_form($data = array()) {
   return array();
 }
 
@@ -194,7 +218,7 @@ function imagecache_desaturate_image(&$image, $data = array()) {
 /**
  * ImageCache Rotate
  */
-function imagecache_rotate_form($data) {
+function imagecache_rotate_form($data = array()) {
   $form['degrees'] = array(
     '#type' => 'textfield',
     '#default_value' => (isset($data['degrees'])) ? $data['degrees'] : 0,

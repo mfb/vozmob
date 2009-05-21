@@ -1,27 +1,6 @@
 <?php
 // $Id$
 
-// SUPPORTED GATEWAYS:
-// 'msg.acsalaska.com' => t('Alaska Communications Systems'),
-// 'message.alltel.com' => t('Alltel Wireless'),
-// 'txt.att.net' => t('AT&T/Cingular'),
-// 'myboostmobile.com' => t('Boost Mobile'),
-// 'mobile.celloneusa.com' => t('CellularOne'),
-// 'cwemail.com' => t('Centennial Wireless'),
-// 'sms.mycricket.com' => t('Cricket'),
-// 'messaging.sprintpcs.com' => t('Helio'),
-// 'mymetropcs.com' => t('Metro PCS'),
-// 'page.nextel.com' => t('Nextel'),
-// 'qwestmp.com' => t('Qwest'),
-// 'messaging.sprintpcs.com' => t('Sprint'),
-// 'tmomail.net' => t('T-Mobile'),
-// 'vmobl.com' => t('Virgin Mobile'),
-// 'vtext.com' => t('Verizon'),
-// SUPPORTED ALIASES:
-// mms.att.net => AT&T
-// messaging.nextel.com => Nextel
-// vzwpix.com => Verizon
-
 /**
  * Implementation of hook_mailsave_clean().
  * Attempt to match sender to a phone number stored by sms_user module.
@@ -29,6 +8,11 @@
  * create a user account.
  */
 function registration_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
+
+  // Ignore empty messages.
+  if (empty($node)) {
+    return; 
+  }
 
   watchdog('debug','starting registration_mailsave_clean');
   // If there is already a node created
@@ -41,15 +25,9 @@ function registration_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
     $email_registration_accounts = array(
       'vozmob.sandbox.reg' => 'vozmob.sandbox.reg'
     );
-    $email_gateway_aliases = array(
-      'messaging.nextel.com' => 'page.nextel.com',
-      'mms.att.net' => 'txt.att.net',
-      'vzwpix.com' => 'vtext.com',
-    );
-    if (isset($email_gateway_aliases[$from[1]])) {
-      $from[1] = $email_gateway_aliases[$from[1]];
-    }
 
+    // Recognize MMS e-mail gateways as valid SMS e-mail gateways.
+    $from[1] = mms_email_gateway_rewrite_to_sms($from[1]);
 
     $number = $from[0];
     registration_mailsave_receive($account, $number);
