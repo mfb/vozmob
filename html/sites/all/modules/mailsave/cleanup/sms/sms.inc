@@ -41,8 +41,6 @@ function sms_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
     watchdog('debug', print_r($node->title,TRUE));
 
     $lan = $node->language;
-    watchdog('debug', 'language ');
-    watchdog('debug', print_r($node->language, TRUE));
 
     //changed the name of the user that created the node to vozmob and a random number -- gaba
     //'name' => implode('-', array(dechex(mt_rand()), dechex(mt_rand()))),
@@ -72,8 +70,8 @@ function sms_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
 		$message = "Gracias! Quiere tener un blog en vozmob? Si es asi envie una palabra identificando su blog.";
 		$subject = "Publicado";
 		}
- watchdog('debug', print_r($message, TRUE));
-	    $options = array('carrier'=> $from[1], 'from' => 'vozmob.sandbox.reg@gmail.com', 'subject'=>'Media posted');
+
+	    $options = array('carrier'=> $from[1], 'from' => 'vozmob.sandbox.reg@gmail.com', 'subject'=>'Media posted', 'action' => 'registration');
     	    sms_send($number, $message, $options);
     	    //we will receive the answer in cleanup.registration.inc
      }
@@ -127,4 +125,14 @@ function sms_mailsave_get_toaddress($header, $mailbox) {
 		$from = $header->to;
 		}
 	return array($to[0]->mailbox .'@'. $to[0]->host, $to[0]->personal);
+}
+
+function sms_mailsave_mail_alter(&$message){
+	
+	$options = $message['params']['options'];
+watchdog('debug','message es:');
+watchdog('debug', print_r($message, TRUE));
+	if ($options['action'] == 'registration') {
+		$message['headers']['Return-Path'] = $message['from']; //'vozmob.sandbox.reg@gmail.com';
+	}
 }

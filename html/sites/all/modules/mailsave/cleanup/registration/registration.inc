@@ -46,7 +46,7 @@ function registration_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
 		if ($user->language == 'en')
 		        $message = "Your blog was created. Your password is ".$user->pass;
 		else
-			$message = "Tu blog ha sido creado. Tu clave es ".$user->pass;
+			$message = "Tu blog ha sido creado. Su clave es ".$user->pass;
 		$options = array('carrier'=> $from[1], 'from' => 'vozmob.sandbox.reg@gmail.com');
 	    	sms_send($number, $message, $options);
 	}
