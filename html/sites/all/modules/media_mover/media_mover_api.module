@@ -1,6 +1,6 @@
 <?php
 
-/* $Id: media_mover_api.module,v 1.1.2.110.2.50 2009/05/17 18:38:29 arthuregg Exp $ */
+/* $Id: media_mover_api.module,v 1.1.2.110.2.51 2009/05/21 14:07:51 arthuregg Exp $ */
 
 
 /*
@@ -133,8 +133,13 @@ function media_mover_api_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
 
 /**
  * implementation of hook_form_alter
- * @param string $form_id
- * @param array $form drupal form array
+ * @param $form 
+ *   array
+ * @param $form_state
+ *   array
+ * @param $form_id
+ *   string
+ * 
  */
 function media_mover_api_form_alter(&$form, $form_state, $form_id) {
   // check and see if this is a node delete form
@@ -1038,10 +1043,10 @@ function media_mover_api_config_current_file($file, $type = 'previous') {
  *   drupal node object
  */
 function media_mover_api_get_node_from_file($file) {
-  // Node data is stored on $file['node']. It can be the case
+  // Node data is stored on $file['data']['node']. It can be the case
   // that this is not complete data. Try to load any data we find
   if (! $nid = $file['node']->nid ) {
-    if (! $nid = $file['nid']) {
+    if (! $nid = $file['data']['nid']) {
       return false;
     }
   }

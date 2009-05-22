@@ -1,6 +1,6 @@
 <?php
 
-/* $Id: mm_ffmpeg.module,v 1.1.2.60.2.15 2009/05/08 20:42:53 arthuregg Exp $ */
+/* $Id: mm_ffmpeg.module,v 1.1.2.60.2.16 2009/05/21 14:07:07 arthuregg Exp $ */
 
 
 /*
@@ -277,13 +277,15 @@ function mm_ffmpeg_video(&$file, $configuration) {
   media_mover_api_set_file_perm($output_file);
 
   // can we get the mime type for this?
-  $file['filemime'] = file_get_mimetype($output_file);
-  $file['filename'] = pathinfo($output_file, PATHINFO_FILENAME);
-  $file['filesize'] = filesize($output_file);
+  if (function_exists('file_get_mimetype')) {
+    $file['data']['file']['filemime'] = file_get_mimetype($output_file);
+  }
+  $file['data']['file']['filename'] = pathinfo($output_file, PATHINFO_FILENAME);
+  $file['data']['file']['filesize'] = filesize($output_file);
   
   
   // get any meta data for this file
-  $file['data']['meta'] = ffmpeg_wrapper_file_data($output_file);
+  $file['data']['file']['meta'] = ffmpeg_wrapper_file_data($output_file);
 
   // return the completed file
   return $output_file;

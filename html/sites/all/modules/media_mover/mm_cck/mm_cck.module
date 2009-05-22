@@ -119,21 +119,22 @@ function mm_cck_config_save_node($configuration) {
     '#options' => mm_cck_fields(),
     '#default_value' => $configuration['mm_cck_field_save_'. $configuration['verb']],
   );
-  $form['mm_cck_'. $configuration['verb']]['cck_new_node_'. $configuration['verb']] = array(
+  $form['mm_cck_'. $configuration['verb']]['mm_cck_new_node_'. $configuration['verb']] = array(
     '#type' => 'checkbox',
     '#title' => t('Create new node if none exists'),
     '#description' => t('If this file has no node data associated with it, create a new node with this file.'),
-    '#default_value' => $configuration['cck_new_node_'. $configuration['verb']] ? $configuration['cck_new_node_'. $configuration['verb']] : 0,
+    '#default_value' => $configuration['mm_cck_new_node_'. $configuration['verb']] ? $configuration['mm_cck_new_node_'. $configuration['verb']] : 0,
   );
+  
   // ----------------------------------
   // Node creation options
   $form['mm_cck_'. $configuration['verb']]['node_create_'. $configuration['verb']] = array(
     '#type' => 'fieldset',
     '#title' => t('Node creation options'),
-    '#collapsed' => false,
+    '#collapsed' => $configuration['mm_cck_new_node_'. $configuration['verb']] ? false : true,
+    '#collapsible' => true,
     '#description' => t('When creating a new node, these options will be used'),
   );
-
   // get content types
   if ($types = node_get_types()) {
 	  foreach ($types as $type) {
@@ -192,11 +193,11 @@ function mm_cck_config_save_node($configuration) {
   }
 
   // ------------
-  $form['mm_cck_'. $configuration['verb']]['file_replace_'. $configuration['verb']] = array(
+  $form['mm_cck_'. $configuration['verb']]['mm_cck_file_replace_'. $configuration['verb']] = array(
     '#type' => 'checkbox',
     '#title' => t('Replace original file'),
     '#description' => t('If the file was originally harvested from this CCK field, attempt to replace the original with the converted file. Make sure your harvest operation will not harvested this file again. If the file can not be replaced, it will be appended.'),
-    '#default_value' => $configuration['file_replace_'. $configuration['verb']] ? $configuration['file_replace_'. $configuration['verb']] : 0,
+    '#default_value' => $configuration['mm_cck_file_replace_'. $configuration['verb']] ? $configuration['mm_cck_file_replace_'. $configuration['verb']] : 0,
   );
   $form['mm_cck_'. $configuration['verb']]['field_save_list_'. $configuration['verb']] = array(
     '#type' => 'checkbox',
@@ -281,18 +282,21 @@ function mm_cck_harvest($action, $configuration, $running_config, $nid) {
  * @return string
  *   new file location
  */
-function mm_cck_node_save($configuration, $file) {
+function mm_cck_node_save($configuration, &$file) {
   // get the path to the file to operate on. We need this to pass out of the function
   $filepath = media_mover_api_config_current_file($file);
 
+  // is there a node attached to this file?
+  $node = media_mover_api_get_node_from_file($file);
+  
   // is there a node attached to the $file array and we are not supposed to create a new node
-  /* if (! $node = media_mover_api_get_node_from_file($file) && ! $configuration['cck_new_node_'. $configuration['verb']]) {
+  if (! $node && ! $configuration['mm_cck_new_node_'. $configuration['verb']]) {
     // set an alert
     watchdog('Media Mover CCK', 'No node data was passed for storing file data in a specified CCK field: !file',
       array('!file', l(t($file['mmfid']),  'admin/media_mover/file/edit/'. $file['mmfid'])), WATCHDOG_ERROR);
     // we can not save the file; exit
     return;
-  } */
+  } 
   
   // if we do not have a node, we need to start building one
   if (! $node) {
@@ -336,15 +340,16 @@ function mm_cck_node_save($configuration, $file) {
     $node->name = $user->name;
     $node->mail = $user->mail;
 
-	  // save the new node to prepare to add the CCK data
-	  node_save($node);
+	// save the new node to prepare to add the CCK data
+	node_save($node);
+	$file['nid'] = $node->nid;
   }  
-
+  
   // get the field that we will save to
   $field = content_fields($configuration['mm_cck_field_save_'. $configuration['verb']]);
-   
+
   // if we have an fid try to replace that file
-  if ($file['fid']) {
+  if ($file['fid'] && $configuration['mm_cck_file_replace_'. $configuration['verb']]) {
     if ($node->{$field['field_name']}[$file['fid']] ) {
       db_query('UPDATE files SET filename = "%s", filepath = "%s", filesize = %d, filemime = "%s", timesamp = "%s" WHERE fid = %d',
         $file['filename'], $file['filepath'], $file['filesize'], $file['filemime'], time()
@@ -366,15 +371,16 @@ function mm_cck_node_save($configuration, $file) {
       // handle CCK image and CCK file field cases
     	case 'image':
     	case 'filefield':
-    	  if (! $file = mm_cck_field_filefield($node, $field, $filepath, $configuration)) {
+    	  if (! $new_file = mm_cck_field_filefield($node, $field, $filepath, $configuration)) {
     	  	return;
     	  }
     	break;
     }
   }
-  
+
+  $file['data']['node'] = $node;
   // return the file
-  return $file['filepath'];
+  return $new_file['filepath'];
 }
 
 
@@ -403,23 +409,23 @@ function mm_cck_field_filefield(&$node, $field, $filepath, $configuration) {
   else { $validators = filefield_widget_upload_validators($field);}
 
   // now get the new field
-  if (! $file = field_file_save_file($filepath, $validators, $destination_path)) {
+  if (! $new_file = field_file_save_file($filepath, $validators, $destination_path)) {
     watchdog('MM Content', 'Could not save file', null, WATCHDOG_ERROR);
     return;
   }
 
   // we need to alter the file object slightly so it will display correctly
-  $file['data'] = array('description' => '');
+  $new_file['data'] = array('description' => '');
   // do we list the file?
-  $file['list'] = $configuration['field_save_list'];
+  $new_file['list'] = $configuration['field_save_list'];
 
   // add the file on to the node
-  $node->{$field['field_name']}[] = $file;
+  $node->{$field['field_name']}[] = $new_file;
   // save the node
   node_save($node);
   // clear the cache
   cache_clear_all('content:'. $node->nid .':'. $node->vid, 'cache_content');
-  return $file;
+  return $new_file;
 }
 
 
