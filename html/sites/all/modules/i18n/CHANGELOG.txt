@@ -1,7 +1,13 @@
-// $Id: CHANGELOG.txt,v 1.15.4.58 2009/02/18 12:42:12 jareyero Exp $
+// $Id: CHANGELOG.txt,v 1.15.4.61 2009/05/18 09:29:24 jareyero Exp $
 
 6.x-1.0 to ........
 --------------------
+- Added location to i18nsync fields, by zedzed, #426294
+- Added new dependence (i18ntaxonomy) and some taxonomy handling to i18nviews
+- Fixed missing brackets around table name in query, #371429
+- Fixed incompatible table locking, using proper API, #416912
+- Fixed typos, by ao2, #429850, dboulet, #396402
+- New feature: allow to select existing node as translation, #295682
 - Fixed: translation relationship broken with i18nsync, by smh67, Beban, #367118
 - Fixed: translated node forgets its menu settings, by brucepearson, #364375
 - Fixed: missing node languages for LANGUAGE_SUPPORT_EXTENDED_NOT_DISPLAYED, by Roger Lopez, #365574

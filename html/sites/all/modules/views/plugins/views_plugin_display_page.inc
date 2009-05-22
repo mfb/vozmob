@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_display_page.inc,v 1.5 2009/01/27 18:40:31 merlinofchaos Exp $
+// $Id: views_plugin_display_page.inc,v 1.6 2009/05/20 02:53:30 merlinofchaos Exp $
 /**
  * @file
  * Contains the page display plugin.
@@ -194,7 +194,7 @@ class views_plugin_display_page extends views_plugin_display {
       'title' => t('Page settings'),
     );
 
-    $path = $this->get_option('path');
+    $path = strip_tags($this->get_option('path'));
     if (empty($path)) {
       $path = t('None');
     }

@@ -1,5 +1,5 @@
 <?php
-// $Id: delete.action.inc,v 1.1.2.5 2009/02/17 22:16:59 kratib Exp $
+// $Id: delete.action.inc,v 1.1.2.6 2009/05/11 00:27:23 kratib Exp $
 
 function views_bulk_operations_delete_action_info() {
   return array(
@@ -7,16 +7,19 @@ function views_bulk_operations_delete_action_info() {
       'type' => 'node',
       'description' => t('Delete node'),
       'configurable' => FALSE,
+      'behavior' => array('deletes_node_property'),
     ),
     'views_bulk_operations_delete_user_action' => array(
       'type' => 'user',
       'description' => t('Delete user'),
       'configurable' => FALSE,
+      'behavior' => array('deletes_node_property'),
     ),
     'views_bulk_operations_delete_comment_action' => array(
       'type' => 'comment',
       'description' => t('Delete comment'),
       'configurable' => FALSE,
+      'behavior' => array('deletes_node_property'),
     ),
   );
 }

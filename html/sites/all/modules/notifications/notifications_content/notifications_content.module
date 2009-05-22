@@ -1,5 +1,5 @@
 <?php
-// $Id: notifications_content.module,v 1.4.2.9.2.36.2.8 2009/04/28 10:22:01 jareyero Exp $
+// $Id: notifications_content.module,v 1.4.2.9.2.36.2.9 2009/05/18 17:14:02 jareyero Exp $
 /**
  * @file
  * Subscriptions to content events
@@ -145,7 +145,7 @@ function notifications_content_form_alter(&$form, &$form_state, $form_id) {
       if (isset($form['type']) && isset($form['#node']) && $form['type']['#value'] .'_node_form' == $form_id) {
         $types = notifications_content_types(NULL);
         if (notifications_content_type_enabled($form['#node']->type)) {
-          _notifications_content_add_disable_field($form);
+          _notifications_content_add_disable_field($form, !empty($form['#node']->notifications_content_disable));
         }
       }
   }
@@ -154,17 +154,18 @@ function notifications_content_form_alter(&$form, &$form_state, $form_id) {
 /**
  * Add disable (skip notifications) field set
  */
-function _notifications_content_add_disable_field(&$form) {
-  // Add fieldset without affecting any other elements there
-  $form['notifications']['#type'] = 'fieldset';
-  $form['notifications']['#title'] = t('Notifications');
-  $form['notifications']['#collapsible'] = TRUE;  
-  $form['notifications']['notifications_content_disable'] = array(
-    '#type'          => 'checkbox',
-    '#title'         => t('Do not send notifications for this update.'),
-    '#default_value' => 0,
-    '#access' => user_access('skip notifications'),
-  );  
+function _notifications_content_add_disable_field(&$form, $default = 0) {
+  if (user_access('skip notifications')) {
+    // Add fieldset without affecting any other elements there
+    $form['notifications']['#type'] = 'fieldset';
+    $form['notifications']['#title'] = t('Notifications');
+    $form['notifications']['#collapsible'] = TRUE;  
+    $form['notifications']['notifications_content_disable'] = array(
+      '#type'          => 'checkbox',
+      '#title'         => t('Do not send notifications for this update.'),
+      '#default_value' => $default,
+    );
+  }  
 }
 
 /**

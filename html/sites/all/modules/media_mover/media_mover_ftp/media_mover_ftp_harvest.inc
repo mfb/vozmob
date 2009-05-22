@@ -1,6 +1,6 @@
 <?php
 
-// $Id: media_mover_ftp_harvest.inc,v 1.1.2.9.2.15 2009/05/17 17:29:50 arthuregg Exp $;
+// $Id: media_mover_ftp_harvest.inc,v 1.1.2.9.2.17 2009/05/21 15:14:02 arthuregg Exp $;
 
 
 /**
@@ -19,6 +19,7 @@ function media_mover_ftp_harvest($configuration, $test = false) {
   if (! count($connection['ftp_files'])) {
     return;
   }
+  
   // get the full list of files
   $files = media_mover_ftp_harvest_file_recurse($connection['ftp_connection'], $connection['ftp_files'], $directory, $configuration, $test);
 
@@ -100,7 +101,11 @@ function media_mover_ftp_harvest_ftp_file(&$ftp_connection, $ftp_file, $configur
  * @return array $item is a item array
  */
 function media_mover_ftp_create_file(&$ftp_connection, $ftp_file, $configuration, $test) {
-
+  // If this is a folder, do nothing
+  if (is_array($ftp_file['dir'])) {
+    return;
+  }
+  
   // does this file have a token, or are we allowed ot harvest files without tokens?
   if (! $ftp_file['token'] && ! $configuration['mm_ftp_harvest_without_tokens'] ) {
     // should we delete files that do not have a token from the ftp server?
@@ -114,12 +119,13 @@ function media_mover_ftp_create_file(&$ftp_connection, $ftp_file, $configuration
   
   // which file path should be used?
   $local_file_path = $ftp_file['filepath_no_token'] ? $ftp_file['filepath_no_token'] : $ftp_file['filename'];
+  
   // create the complete path
   $local_file_path = file_create_filename($local_file_path,  media_mover_api_dir_path() . MM_FTP_FILES_SUBDIRECTORY);
 
   // only harvested file types that match the requested types
   if (! media_mover_api_file_validate_extensions($local_file_path, $configuration['mm_ftp_allowed_files'])) {
-    $message = 'FTP file harvest failed: unsupported file extension !file';
+    $message = 'FTP file harvest: unsupported file extension !file';
     $params = array('!file' => $local_file_path);
     // display errors
     if ($test) { drupal_set_message(t($message, $params), 'error'); }
@@ -171,8 +177,8 @@ function media_mover_ftp_create_file(&$ftp_connection, $ftp_file, $configuration
   $file['filesize'] = filesize($local_file_path);
   $file['filename'] = basename($local_file_path);
   $file['filepath'] =  $local_file_path;
-  $file['harvest_file'] = $ftp_file['filepath'];
-  $file['data']['node']->title = $local_file_path;
+  $file['harvest_file'] = $local_file_path;
+  $file['node']->title = $local_file_path;
   
   // try to associate data with a user name
   media_mover_ftp_extract_user($ftp_file, $file, $configuration);

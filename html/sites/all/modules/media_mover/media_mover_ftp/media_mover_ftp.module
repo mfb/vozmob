@@ -1,6 +1,6 @@
 <?php
 
-// $Id: media_mover_ftp.module,v 1.1.2.7.2.20 2009/05/17 17:29:50 arthuregg Exp $;
+// $Id: media_mover_ftp.module,v 1.1.2.7.2.23 2009/05/21 15:14:02 arthuregg Exp $;
 
 /**
  * @FILE This module allows for harvesting from FTP servers with media mover
@@ -393,8 +393,11 @@ function media_mover_ftp_get_files(&$connection, $configuration, $directory, $re
 		$ftp_file = array();
 		// we need to parse the listing of a file. This listing looks like:
 		// -rw-r--r--   1 USER     GROUP     652594 Mar  5 20:33 tnt.wmv.95ccde
-		// the below pattern breaks out each of these items 
-		$pattern = "/^([0-9dlrwx-]*)[\s]*([0-9]{1})\s*([a-zA-z0-9]*)\s*([a-zA-z0-9]*)\s*([0-9]*)\s*([a-zA-z0-9\s]*\:[0-9]{2})\s*(.*)$/";
+		// however it can also look like:
+		// -rw-r--r--  1 arthur  staff  9124159 Feb 23  2008 pinback.flv
+		
+		// this pattern breaks out each of these items 
+		$pattern = "/^([0-9dlrwx-]*)[\s]*([0-9]{1})\s*([a-zA-z0-9]*)\s*([a-zA-z0-9]*)\s*([0-9]*)\s*([a-zA-z0-9\s]*\:[0-9]{2}|[a-zA-Z].*)\s(.*)$/";
 		if (preg_match($pattern, $ftp_file_listing, $matches)) {
 			// do not find files that start with .
 			if ($matches[7][0] != '.') {
@@ -453,7 +456,7 @@ function media_mover_ftp_completed_file_list(&$connection, $directory, $strict =
   if ($strict AND count($result) !== count($pass2) || ! count($result)) {
     $results = FALSE;
   }
-  
+ 
   return $results;
 }
 
@@ -660,21 +663,14 @@ function media_mover_ftp_test_form_submit($form, &$form_state) {
  */
 function media_mover_ftp_extract_user($ftp_file, &$file, $configuration) {
   // check the top level director for a user name
-  if ($configuration['mm_ftp_user_from_dir'] || true) {  	
-  	// remove the base directory from the file path
-  	if ($configuration['mm_ftp_dir'] != '.' ) {
-  		// this is abit dangerous to do because we are altering the path
-  		$ftp_file['filepath'] = str_replace($configuration['mm_ftp_dir'] .'/', '', $ftp_file['filepath']);
-  	}
+  if ($configuration['mm_ftp_user_from_dir']) {  	
     if ($account = user_load(array('name' => $ftp_file['user_name']))) {
       $file['data']['user'] = $account;
-      $file['data']['node']->uid = $user->uid;
       return;
     }
   }
-  elseif($user = media_mover_ftp_token_check($ftp_file['token'])) {
-    $file['data']['user'] = $user;
-    $file['node']->uid = $user->uid;
+  if ($user = media_mover_ftp_token_check($ftp_file['token'])) {
+    $file['data']['user'] = $account;
   }
 }
 

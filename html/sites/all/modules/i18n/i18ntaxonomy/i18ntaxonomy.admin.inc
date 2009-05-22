@@ -1,5 +1,5 @@
 <?php
-// $Id: i18ntaxonomy.admin.inc,v 1.1.2.8 2009/01/21 16:26:17 jareyero Exp $
+// $Id: i18ntaxonomy.admin.inc,v 1.1.2.9 2009/04/27 16:50:49 jareyero Exp $
 
 /**
  * @file
@@ -119,11 +119,11 @@ function i18ntaxonomy_translation_save($terms, $trid = 0) {
   // Now set a translation set with all these terms. We need some table locking to avoid race conditions.
   // when other translations created simulaneously. @TODO Find a better way.
   if (count($translations)) {
-    db_query('LOCK TABLES {term_data} WRITE');
+    db_lock_table('term_data');
     $trid = (is_numeric($trid) && $trid) ? $trid : i18ntaxonomy_next_trid();
     $params = array_merge(array($trid), $translations);
     db_query('UPDATE {term_data} SET trid = %d WHERE tid IN('. db_placeholders($translations) .')', $params);
-    db_query('UNLOCK TABLES');
+    db_unlock_tables();
   }
 }
 

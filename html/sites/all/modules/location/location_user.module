@@ -1,5 +1,5 @@
 <?php
-// $Id: location_user.module,v 1.2 2008/12/05 18:22:31 bdragon Exp $
+// $Id: location_user.module,v 1.2.2.1 2009/04/03 15:45:05 bdragon Exp $
 
 /**
  * @file
@@ -88,5 +88,22 @@ function location_user_user($op, &$edit, &$account, $category = NULL) {
         }
       }
       break;
+  }
+}
+
+/**
+ * Implementation of hook_locationapi().
+ */
+function location_user_locationapi(&$obj, $op, $a3 = NULL, $a4 = NULL, $a5 = NULL) {
+  switch ($op) {
+    case 'instance_links':
+      foreach ($obj as $k => $v) {
+        if ($v['uid'] != 0) {
+          $account = user_load(array('uid' => $v['uid']));
+          $obj[$k]['href'] = 'user/'. $v['uid'];
+          $obj[$k]['title'] = $account->name;
+          $obj[$k]['type'] = t('User location');
+        }
+      }
   }
 }
