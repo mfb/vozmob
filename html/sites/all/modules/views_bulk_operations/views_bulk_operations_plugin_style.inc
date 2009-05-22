@@ -1,9 +1,18 @@
 <?php
-// $Id: views_bulk_operations_plugin_style.inc,v 1.1.2.27 2009/04/14 06:54:29 kratib Exp $
+// $Id: views_bulk_operations_plugin_style.inc,v 1.1.2.31 2009/05/11 00:27:23 kratib Exp $
 
-define('VBO_EXECUTION_DIRECT', 1);
-define('VBO_EXECUTION_BATCH', 2);
-define('VBO_EXECUTION_QUEUE', 3);
+define('VBO_EXECUTION_DIRECT',    1);
+define('VBO_EXECUTION_BATCH',     2);
+define('VBO_EXECUTION_QUEUE',     3);
+
+define('VBO_AGGREGATE_FORCED',    1);
+define('VBO_AGGREGATE_FORBIDDEN', 0);
+define('VBO_AGGREGATE_OPTIONAL',  2);
+
+define('VBO_ACCESS_OP_VIEW',      0x01);
+define('VBO_ACCESS_OP_UPDATE',    0x02);
+define('VBO_ACCESS_OP_CREATE',    0x04);
+define('VBO_ACCESS_OP_DELETE',    0x08);
 
 class views_bulk_operations_plugin_style extends views_plugin_style_table {
   function options(&$options) {
@@ -89,7 +98,7 @@ class views_bulk_operations_plugin_style extends views_plugin_style_table {
   function get_selected_operations() {
     $selected = array();
     foreach (array_filter($this->options['selected_operations']) as $key => $operation) {
-      if (module_exists('actions_permissions') && $this->options['all_operations'][$key]['type'] == 'action') {
+      if (module_exists('actions_permissions')) {
         $perm = 'execute ' . $this->options['all_operations'][$key]['label'] . ' ('. $this->options['all_operations'][$key]['callback'] .')';
         if (!user_access($perm)) continue;
       }
@@ -136,13 +145,18 @@ class views_bulk_operations_plugin_style extends views_plugin_style_table {
       foreach (module_invoke_all($hook_name) as $operation) {
         if (empty($operation['callback'])) continue;
         $key = md5($operation['callback'] . (isset($operation['callback arguments']) ? serialize($operation['callback arguments']) : ''));
+        if (!isset($operation['behavior'])) { // assume operations modify nodes by default
+          $operation['behavior'] = array('changes_node_property');
+        }
         $operations[$key] = array(
           'label'              => $operation['label'],
           'callback'           => $operation['callback'],
           'callback arguments' => isset($operation['callback arguments']) ? $operation['callback arguments'] : array(),
-          'configurable'       => isset($operation['configurable']) ? $operation['configurable'] : false,
+          'configurable'       => isset($operation['configurable']) ? $operation['configurable'] : FALSE,
           'type'               => 'operation',
           'object'             => $object_type,
+          'aggregate'          => isset($operation['aggregate']) ? (int)$operation['aggregate'] : VBO_AGGREGATE_OPTIONAL,
+          'access op'          => $this->get_access_op($operation),
         );
       }
     }
@@ -154,15 +168,35 @@ class views_bulk_operations_plugin_style extends views_plugin_style_table {
         'label'              => $operation['description'],
         'callback'           => $callback,
         'callback arguments' => isset($operation['parameters']) ? $operation['parameters'] : array(),
-        'configurable'       => isset($operation['configurable']) ? $operation['configurable'] : false,
+        'configurable'       => isset($operation['configurable']) ? $operation['configurable'] : FALSE,
         'type'               => 'action',
         'object'             => $operation['type'],
-        'modifies object'    => isset($operation['behavior']) && in_array('changes_node_property', $operation['behavior']),
+        'aggregate'          => isset($operation['aggregate']) ? (int)$operation['aggregate'] : VBO_AGGREGATE_FORBIDDEN,
+        'access op'          => $this->get_access_op($operation),
       );
     }
 
     uasort($operations, create_function('$a, $b', 'return strcasecmp($a["label"], $b["label"]);'));
     $options['all_operations'] = $operations;
+  }
+
+  private function get_access_op($operation) {
+    $access_op = 0;
+    if (isset($operation['behavior'])) {
+      if (in_array('views_node_property', $operation['behavior'])) {
+        $access_op |= VBO_ACCESS_OP_VIEW;
+      }
+      if (in_array('changes_node_property', $operation['behavior'])) {
+        $access_op |= VBO_ACCESS_OP_UPDATE;
+      }
+      if (in_array('creates_node_property', $operation['behavior'])) {
+        $access_op |= VBO_ACCESS_OP_CREATE;
+      }
+      if (in_array('deletes_node_property', $operation['behavior'])) {
+        $access_op |= VBO_ACCESS_OP_DELETE;
+      }
+    }
+    return $access_op;
   }
 
   private function get_custom_actions() {
@@ -176,7 +210,8 @@ class views_bulk_operations_plugin_style extends views_plugin_style_table {
         'configurable' => FALSE,
         'parameters' => unserialize($action->parameters),
       );
-      $actions[$action->aid]['behavior'] = isset($static_actions[$action->callback]['behavior']) ? $static_actions[$action->callback]['behavior'] : null;
+      if (isset($static_actions[$action->callback]['behavior'])) $actions[$action->aid]['behavior'] = $static_actions[$action->callback]['behavior'];
+      if (isset($static_actions[$action->callback]['aggregate'])) $actions[$action->aid]['aggregate'] = $static_actions[$action->callback]['aggregate'];
     }
     return $actions;
   }

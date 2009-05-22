@@ -1,6 +1,7 @@
-; $Id: views_bulk_operations.info,v 1.2.4.1.2.1 2008/07/25 07:12:52 kratib Exp $
+; $Id: views_bulk_operations.info,v 1.2.4.1.2.2 2009/05/01 23:36:09 kratib Exp $
 name = Views Bulk Operations
 description = Exposes new Views style 'Bulk Operations' for selecting multiple nodes and applying operations on them.
 dependencies[] = views
 package = Views
 core = 6.x
+php = 5.0
