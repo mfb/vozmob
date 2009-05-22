@@ -175,7 +175,7 @@ function sms_registration_open_mailbox($mailbox) {
 
 }
 
-function sms_mailsave_mail_alter(&$message){
+function sms_registration_mail_alter(&$message){
 	
 	$options = $message['params']['options'];
 watchdog('debug','message es:');
