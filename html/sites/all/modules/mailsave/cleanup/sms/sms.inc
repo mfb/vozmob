@@ -126,13 +126,3 @@ function sms_mailsave_get_toaddress($header, $mailbox) {
 		}
 	return array($to[0]->mailbox .'@'. $to[0]->host, $to[0]->personal);
 }
-
-function sms_mailsave_mail_alter(&$message){
-	
-	$options = $message['params']['options'];
-watchdog('debug','message es:');
-watchdog('debug', print_r($message, TRUE));
-	if ($options['action'] == 'registration') {
-		$message['headers']['Return-Path'] = $message['from']; //'vozmob.sandbox.reg@gmail.com';
-	}
-}

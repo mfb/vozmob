@@ -175,11 +175,4 @@ function sms_registration_open_mailbox($mailbox) {
 
 }
 
-function sms_registration_mail_alter(&$message){
-
-  if ($message[id]) {
-
-  }
-}
-
 ?>
