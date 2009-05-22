@@ -19,6 +19,12 @@ function sms_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
   $email_registration_accounts = array(
 	'vozmob.sandbox.reg' => 'vozmob.sandbox.reg'
 );
+    if (empty($node->title)) {
+    	$node->title = 'Nueva Historia / New Story';
+    }
+    watchdog('debug', 'el titulo del nodo es ');
+    watchdog('debug', print_r($node->title,TRUE));
+
   // The node does not exist
   // The sms_user and sms_email_gateway modules are required.
   // The mail that this sms was sent to is not one of the registration accounts
@@ -33,12 +39,6 @@ function sms_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
     $number = $from[0];
 
     sms_mailsave_receive($node, $number);
-    
-    if (empty($node->title)) {
-    	$node->title = 'Nueva Historia / New Story';
-    }
-    watchdog('debug', 'el titulo del nodo es ');
-    watchdog('debug', print_r($node->title,TRUE));
 
     $lan = $node->language;
 
@@ -50,7 +50,7 @@ function sms_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
      while (!$user) { 
       $user = user_save(NULL, array(
         'name' => implode('-', array('vozmob', mt_rand(1,10000))),
-        'pass' => substr(dechex(mt_rand()),0,8),
+        'pass' => user_password(8), //substr(dechex(mt_rand()),0,8),
         'mail' => $from_address,
         'roles' => drupal_map_assoc(array(3)),
         'status' => 1,
@@ -58,6 +58,10 @@ function sms_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
         'sms_user' => array('number' => sms_formatter($from[0]), 'status' => 1, 'gateway' => array('carrier' => $from[1])),
     ));
     }
+
+    watchdog('debug', 'el password del ususario es ');
+    watchdog('debug', print_r($user->pass,TRUE));
+
       $node->uid = $user->uid;
 
       if (module_exists('sms_registration')) {
