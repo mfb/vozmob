@@ -1,5 +1,5 @@
 <?php
-// $Id: i18n.module,v 1.41.2.32 2009/02/18 12:42:12 jareyero Exp $
+// $Id: i18n.module,v 1.41.2.33 2009/04/27 14:22:28 jareyero Exp $
 
 /**
  * @file
@@ -94,7 +94,14 @@ function i18n_menu() {
     'file' => 'i18n.admin.inc',
     'type' => MENU_DEFAULT_LOCAL_TASK,
   );
-
+  // Autocomplete callback for nodes
+  $items['i18n/node/autocomplete'] = array(
+    'title' => 'Node title autocomplete',
+    'page callback' => 'i18n_node_autocomplete',
+    'access arguments' => array('access content'),
+    'type' => MENU_CALLBACK,
+    'file' => 'i18n.pages.inc',
+  );
   return $items;
 }
 
@@ -179,7 +186,7 @@ function i18n_translation_link_alter(&$links, $path) {
 
   // Check for a node related path, and for its translations.
   if ((preg_match("!^node/([0-9]+)(/.+|)$!", $path, $matches)) && ($node = node_load((int)$matches[1])) && !empty($node->tnid)) {
-    // make sure language support is set to LANUAGE_SUPPORT_EXTENDED, so links
+    // make sure language support is set to LANGUAGE_SUPPORT_EXTENDED, so links
     // dont get added for LANGUAGE_SUPPORT_EXTENDED_NOT_DISPLAYED
     if (variable_get('i18n_node_'. $node->type, LANGUAGE_SUPPORT_NORMAL) == LANGUAGE_SUPPORT_EXTENDED) {
       $languages = language_list();
@@ -572,9 +579,23 @@ function i18n_form_alter(&$form, $form_state, $form_id) {
  * - administer all languages
  *   Disables language conditions for administration pages, so the user can view objects for all languages at the same time.
  *   This applies for: menu items, taxonomy
+ * - administer translations
+ *   Will allow to add/remove existing nodes to/from translation sets.
  */
 function i18n_perm() {
-  return array('administer all languages');
+  return array('administer all languages', 'administer translations');
+}
+
+/**
+ * Implementation of hook_theme()
+ */
+function i18n_theme() {
+  return array(
+    'i18n_node_select_translation' => array(
+      'arguments' => array('element' => NULL),
+      'file' => 'i18n.pages.inc',
+    ),
+  );
 }
 
 /**

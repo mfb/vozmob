@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_display.inc,v 1.20 2009/04/07 22:48:04 merlinofchaos Exp $
+// $Id: views_plugin_display.inc,v 1.21 2009/05/20 02:53:30 merlinofchaos Exp $
 /**
  * @file
  * Contains the base display plugin.
@@ -578,7 +578,7 @@ class views_plugin_display extends views_plugin {
     $options['display_title'] = array(
       'category' => 'basic',
       'title' => t('Name'),
-      'value' => $this->display->display_title,
+      'value' => check_plain($this->display->display_title),
       'desc' => t('Change the name of this display.'),
     );
 
@@ -701,7 +701,7 @@ class views_plugin_display extends views_plugin {
 
       if ($count > 1) {
         $display_id = $this->get_link_display();
-        $link_display = empty($this->view->display[$display_id]) ? t('None') : $this->view->display[$display_id]->display_title;
+        $link_display = empty($this->view->display[$display_id]) ? t('None') : check_plain($this->view->display[$display_id]->display_title);
         $options['link_display'] = array(
           'category' => 'basic',
           'title' => t('Link display'),
@@ -731,7 +731,7 @@ class views_plugin_display extends views_plugin {
         $format_val = filter_resolve_format($fmt_string);
         $format = filter_formats($format_val);
         if ($format) {
-          $field = $format->name;
+          $field = check_plain($format->name);
         }
         else {
           $field = t('Unknown/missing format');

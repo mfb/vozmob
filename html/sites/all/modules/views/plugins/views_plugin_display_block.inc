@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_display_block.inc,v 1.2 2008/11/19 19:50:54 merlinofchaos Exp $
+// $Id: views_plugin_display_block.inc,v 1.3 2009/05/20 02:53:30 merlinofchaos Exp $
 /**
  * @file
  * Contains the block display plugin.
@@ -68,7 +68,7 @@ class views_plugin_display_block extends views_plugin_display {
       'title' => t('Block settings'),
     );
 
-    $block_description = $this->get_option('block_description');
+    $block_description = strip_tags($this->get_option('block_description'));
     if (empty($block_description)) {
       $block_description = t('None');
     }

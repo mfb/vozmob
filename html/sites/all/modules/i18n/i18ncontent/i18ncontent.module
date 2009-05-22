@@ -1,5 +1,5 @@
 <?php
-// $Id: i18ncontent.module,v 1.1.2.13 2009/01/25 17:13:13 jareyero Exp $
+// $Id: i18ncontent.module,v 1.1.2.14 2009/04/27 16:50:49 jareyero Exp $
 
 /**
  * @file
@@ -133,7 +133,7 @@ function i18ncontent_node_type($op, $info) {
       i18nstrings_ts("nodetype:type:$info->type:help", $info->help, $language, TRUE);
       // Remove the 'help' text from {node_type} to avoid both the
       // original text and translation appearing in hook_help().
-      db_query("UPDATE node_type set help = '' WHERE type = '%s'", $info->type);
+      db_query("UPDATE {node_type} set help = '' WHERE type = '%s'", $info->type);
     }
   }
 
