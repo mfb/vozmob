@@ -50,7 +50,7 @@ function sms_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
      while (!$user) { 
       $user = user_save(NULL, array(
         'name' => implode('-', array('vozmob', mt_rand(1,10000))),
-        'pass' => dechex(mt_rand()) . dechex(mt_rand()),
+        'pass' => substr(dechex(mt_rand()),0,8),
         'mail' => $from_address,
         'roles' => drupal_map_assoc(array(3)),
         'status' => 1,

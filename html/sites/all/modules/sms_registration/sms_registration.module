@@ -178,8 +178,7 @@ function sms_registration_open_mailbox($mailbox) {
 function sms_registration_mail_alter(&$message){
 	
 	$options = $message['params']['options'];
-watchdog('debug','message es:');
-watchdog('debug', print_r($message, TRUE));
+
 	if ($options['action'] == 'registration') {
 		$message['headers']['Return-Path'] = 'vozmob.sandbox.reg@gmail.com';
 	}
