@@ -1,0 +1,6 @@
+; $Id: potx.info,v 1.1.2.3.2.2.2.1 2009/04/02 11:05:29 goba Exp $
+name = Translation template extractor
+description = Provides a web interface and an API to extract translatable text from the sources of installed components.
+dependencies[] = locale
+core = 6.x
+package = Multilanguage

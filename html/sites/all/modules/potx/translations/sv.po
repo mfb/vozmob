@@ -1,0 +1,103 @@
+# $Id: sv.po,v 1.1.2.1 2008/07/28 16:55:43 seals Exp $
+#
+# Swedish translation of Drupal (potx)
+# Copyright 2008 Magnus Gunnarsson <seals@passagen.se>
+# Generated from files:
+#  potx.module,v 1.1.2.12.2.2.2.2 2008/01/25 16:47:22 goba
+#  potx.info,v 1.1.2.3.2.2 2007/11/12 20:19:06 goba
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Potx 6.x\n"
+"POT-Creation-Date: 2008-03-10 22:48+0100\n"
+"PO-Revision-Date: 2008-03-10 23:22+0100\n"
+"Last-Translator: Magnus Gunnarsson <seals@passagen.se>\n"
+"Language-Team: drupalsverige.se\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+"X-Poedit-Language: Swedish\n"
+"X-Poedit-Country: SWEDEN\n"
+"X-Poedit-SourceCharset: utf-8\n"
+
+#: potx.module:20
+msgid "This page allows you to generate translation templates for module and theme files. Select the module or theme you wish to generate a template file for. A single Gettext Portable Object (Template) file is generated, so you can easily save it and start translation."
+msgstr "Den här sidan låter dig generera översättningsmallar för moduler och temafiler. Välj den modul eller tema du vill generera en filmall för. En enstaka fil av typen Gettext Portable Object (Template) genereras så du enkelt kan spara den och starta översättningen."
+
+#: potx.module:52
+msgid "Language independent template"
+msgstr "Språkoberonde mall"
+
+#: potx.module:58
+msgid "Template file for !langname translations"
+msgstr "Filmall för !langname översättningar"
+
+#: potx.module:62
+msgid "Template language"
+msgstr "Mallens språk"
+
+#: potx.module:65
+msgid "Export a language independent or language dependent (plural forms, language team name, etc.) template."
+msgstr "Exportera en språkoberoende eller språkberoende (pluralformer, gruppens namn, etcetera) mall."
+
+#: potx.module:69
+msgid "Include translations"
+msgstr "Inkludera översättningar"
+
+#: potx.module:70
+msgid "Include translations of strings in the file generated. Not applicable for language independent templates."
+msgstr "Inkludera översättningar av strängar i filen som genereras. Ej lämpligt för mallar som är språkoberoende."
+
+#: potx.module:76;29
+msgid "Extract"
+msgstr "Extrahera"
+
+#: potx.module:87
+msgid "You should select a component to export."
+msgstr "Du måste välja en komponent att exportera."
+
+#: potx.module:185
+msgid "Extract from %name in the %directory directory"
+msgstr "Extrahera från %name i katalogen %directory"
+
+#: potx.module:186
+msgid "Generates output from all files found in this directory."
+msgstr "Genererar utmatning från alla filer som hittas i den här katalogen."
+
+#: potx.module:201
+msgid "Extract from all in directory \"@directory\""
+msgstr "Extrahera från alla i katalogen \"@directory\""
+
+#: potx.module:202
+msgid "To extract from a single component in this directory, choose the desired entry in the fieldset below."
+msgstr "Välj komponentens post i formuläret nedan för att extrahera från en enstaka komponent i den här katalogen."
+
+#: potx.module:211
+msgid "Directory \"@directory\""
+msgstr "Katalogen \"@directory\""
+
+#: potx.module:232
+msgid "Extract from %name"
+msgstr "Extrahera från %name"
+
+#: potx.module:233
+msgid "Extract from files named %pattern in the %directory directory."
+msgstr "Extrahera från filer namgivna %pattern i katalogen %directory."
+
+#: potx.module:303
+msgid "Interface text translatability"
+msgstr "Gränssnitt för möjlighet att översätta text."
+
+#: potx.module:0
+msgid "potx"
+msgstr "potx"
+
+#: potx.info:0
+msgid "Translation template extractor"
+msgstr "Extraherare för översättningsmallar"
+
+#: potx.info:0
+msgid "Provides a web interface and an API to extract translatable text from the sources of installed components."
+msgstr "Erbjuder ett webbgränssnitt och ett API för att extrahera översättningsbar text från källorna av installerade komponenter."
+

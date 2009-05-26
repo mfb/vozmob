@@ -1,0 +1,31 @@
+<?php
+// $Id: potx.install,v 1.1.2.1 2008/09/25 06:49:33 goba Exp $
+
+/**
+ * @file
+ *   Install requirements checking for the module.
+ */
+
+/**
+ * Implementation of hook_requirements().
+ * 
+ * The translation template extractor requires the PHP token extension to
+ * be enabled. We should not let Drupal to install the module if this is
+ * not available. Also, if it was available, but the site was moved or
+ * PHP was changed, we should nag again: so we run in install and runtime as well.
+ */
+function potx_requirements($phase) {
+  $requirements = array();
+  $t = get_t();
+  
+  $requirements['potx_tokenizer'] = array(
+    'title' => $t('PHP tokenizer for Translation template extractor'),
+    'value' => function_exists('token_get_all') ? $t('Available') : $t('Not available')
+  );
+  if (!function_exists('token_get_all')) {
+    $requirements['potx_tokenizer']['description'] = $t('The <a href="@tokenizer">PHP tokenizer functions</a> are required.', array('@tokenizer' => 'http://php.net/tokenizer'));
+    $requirements['potx_tokenizer']['severity'] = REQUIREMENT_ERROR;
+  }
+  
+  return $requirements;
+}
