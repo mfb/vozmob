@@ -14,174 +14,119 @@ function sms_registration_perm() {
  * Implementation of hook_menu().
  */
 function sms_registration_menu() {
-
-  $items = array();
-
-  $items['admin/content/sms_registration'] = array(
-    'title' => t('SMS Registration'),
-    'description' => t('Manage mailboxes that will be receiving the registration.'),
-    'page callback' => 'sms_registration_list_mailboxes',
-    'access arguments' => array('administer sms_registration'),
-    'file' => 'sms_registration.admin.inc',
-  );
-
-$items['admin/content/sms_registration/list'] = array(
-    'title' => t('List'),
-    'description' => t('Manage mailboxes and retrieve messages.'),
-    'type' => MENU_DEFAULT_LOCAL_TASK,
-    'access arguments' => array('administer sms registration'),
-    'weight' => -10,
-  );
-
-  $items['admin/content/sms_registration/add'] = array(
-    'title' => t('Add mailbox'),
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('sms_registration_add_edit_mailbox', NULL),
-    'access arguments' => array('administer sms_registration'),
-    'type' => MENU_LOCAL_TASK,
-    'file' => 'sms_registration.admin.inc',
-  );
-
-  $items['admin/content/sms_registration/clone/%'] = array(
-    'title' => t('Add mailbox'),
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('sms_registration_add_edit_mailbox', 4, TRUE),
-    'access arguments' => array('administer sms_registration'),
-    'type' => MENU_CALLBACK,
-    'file' => 'sms_registration.admin.inc',
-  );
-
-  $items['admin/content/sms_registration/retrieve/%'] = array(
-    'title' => t('Retrieve'),
-    'page callback' => 'sms_registration_admin_retrieve',
-    'page arguments' => array(4),
-    'access arguments' => array('administer sms_registration'),
-    'type' => MENU_CALLBACK,
-    'file' => 'sms_registration.retrieve.inc',
-  );
-
-  $items['admin/content/sms_registration/edit/%'] = array(
-    'title' => t('Edit mailbox'),
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('sms_registration_add_edit_mailbox', 4),
-    'access arguments' => array('administer sms_registration'),
-    'type' => MENU_CALLBACK,
-    'file' => 'sms_registration.admin.inc',
-  );
-
-  $items['admin/content/sms_registration/delete/%'] = array(
-    'title' => t('Delete mailbox'),
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('sms_registration_admin_delete_confirm', 4),
-    'access arguments' => array('administer sms_registration'),
-    'type' => MENU_CALLBACK,
-    'file' => 'sms_registration.admin.inc',
-  );
-
   $items['admin/settings/sms_registration'] = array(
-    'title' => 'sms_registration',
-    'description' => t('Set the cron limit.'),
+    'title' => 'SMS Registration',
+    'description' => 'Configure SMS registration settings',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('sms_registration_admin_settings'),
+    'page arguments' => array('sms_registration_settings'),
     'access arguments' => array('administer sms_registration'),
     'file' => 'sms_registration.admin.inc',
   );
-
   return $items;
 }
 
-
-/**
- * Implementation of hook_help().
- */
-function sms_registration_help($path = 'admin/help#sms_registration', $arg) {
-  $output = '';
-  $link->add = l(t('Add mailbox'), 'admin/content/sms_registration/add');
-
-  $commands_list = '<dl>';
-  foreach ($commands as $command) {
-    $commands_list .= '<dt>'. $command['command'] .'</dt>';
-    $commands_list .= '<dl>'. $command['description'] .'</dl>';
-  }
-  $commands_list .= '</dl>';
-
-  switch ($path) {
-    case 'admin/help#sms_registration':
-      $output = '<p>'. t('The sms_registration module allows users to register themselves via e-mail.  This module is useful because e-mail is the preferred method of communication by community members.') .'</p>';
-      $output .= '<p>'. t('The sms_registration module requires the use of a custom mailbox.  Administrators can add mailboxes that should be customized to meet the needs of a mailing list. This mailbox will then be checked on every cron job. Administrators may also initiate a manual retrieval of messages.') .'</p>';
-      $output .= '<p>'. t('This is particularly useful when you want multiple sets of default commands. For example , if you want to authenticate based on a non-standard mail header like Sender: which is useful for accepting submissions from a listserv. Authentication is usually based on the From: e-mail address.  Administrators can edit the individual mailboxes when they administer sms_registration.') .'</p>';
-      $output .= t('<p>You can</p>
-<ul>
-<li><a href="@run-cron">run cron</a> to retrieve messages from all cron enabled mailboxes.</li>
-<li>list mailboxes at <a href="@admin-sms_registration">Administer &gt;&gt; Content management &gt;&gt; sms_registration</a>.</li>
-<li>add a mailbox at <a href="@admin-sms_registration-add">Administer &gt;&gt; Content management &gt;&gt; sms_registration &gt;&gt; Add  mailbox.</a></li>
-<li>set default commands, (password, type, taxonomy, promote, status), for how to work with incoming mail at <a href="%admin-sms_registration">Administer &gt;&gt; Content management &gt;&gt; sms_registration</a> and select <strong>edit</strong> for the email address being handled.  Set commands in the default command field.</li>
-<li>post email, such as from a mailing list, to a forum by adding the term id (number found in the URL) to the default commands using <strong>tid: #</strong>.</li>
-<li>alter sms_registration settings (default content type and cron threshold) at <a href="@admin-sms_registration-settings">Administer &gt;&gt; Site configuration &gt;&gt; sms_registration</a>.</li>
-</ul>',
-   array(
-     '@run-cron' => url('admin/logs/status/run-cron'),
-     '@admin-sms_registration-add' => url('admin/content/sms_registration/add'),
-     '@admin-sms_registration' => url('admin/content/sms_registration'),
-     '@admin-sms_registration-settings' => url('admin/settings/sms_registration'),
-   ));
-      $output .= '<h3 id="commands">'. t('Useful Commands') .'</h3>';
-      $output .= $commands_list;
-      $output .= '<p>'. t('For more information please read the configuration and customization handbook <a href="%sms_registration">sms_registration page</a>.', array('%sms_registration' => 'http://www.drupal.org/handbook/modules/sms_registration/')) .'</p>';
-      return $output;
-    case 'admin/content/sms_registration':
-      return t('The sms_registration module allows registered users to create or edit nodes and comments via email. Authentication is usually based on the From: email address. There is also an email filter that can be used to prettify incoming email. Users may post taxonomy terms, teasers, and other node parameters using the Command capability.');
-    case 'admin/content/sms_registration/add':
-      return t('Add a mailbox whose mail you wish to import into Drupal. Can be IMAP, POP3, or local folder.');
-    case 'admin/content/sms_registration/edit/%':
-      return t('Edit the mailbox whose mail you wish to import into Drupal. Can be IMAP, POP3, or local folder.');
-    case 'admin/settings/sms_registration':
-      return t('The sms_registration module allows registered users to create or edit nodes and comments via e-mail.');
+function sms_registration_mail_alter(&$message) {
+  $options = $message['params']['options'];
+  if ($options['action'] == 'registration') {
+    $message['headers']['Return-Path'] = variable_get('sms_registration_address', '');
   }
 }
 
 /**
- * Implementation of hook_init to add sms_registration.css
+ * Implementation of hook_mailsave_clean().
+ * 
+ * Attempt to match sender to a phone number stored by sms_user module.
+ * If no match found and sender is a recognized SMS email gateway, 
+ * create a user account.
  */
-function sms_registration_init() {
-  drupal_add_css(drupal_get_path('module', 'sms_registration') .'/sms_registration.css');
-  return;
+function sms_registration_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
+  // Ignore empty messages.
+  if (empty($node)) {
+    return; 
+  }
+
+  if (empty($node->title)) {
+    $node->title = 'Nueva Historia / New Story';
+  }
+
+  // If the user was not authenticated via user account email address.
+  if (!$node->uid) {
+    list($from_address, $from_name) = mailhandler_get_fromaddress($header, $mailbox);
+    $from = explode('@', $from_address);
+
+    // Recognize MMS e-mail gateways as valid SMS e-mail gateways.
+    $from[1] = mms_email_gateway_rewrite_to_sms($from[1]);
+    $providers = module_invoke_all('sms_email_gateway_providers');
+    asort($providers);
+
+    // If message is from SMS gateway.
+    if (isset($providers[$from[1]])) {
+      $number = $from[0];
+
+      // Look up the user by phone number.
+      if (($uid = sms_user_get_uid($number)) && ($account = user_load(array('uid' => $uid, 'status' => 1)))) {
+        $node->uid = $account->uid;
+        $node->name = $account->name;
+        mailhandler_switch_user($node->uid);
+      }
+
+      list($to_address, $to_name) = sms_registration_get_toaddress($header, $mailbox);
+      $email_registration_account = variable_get('sms_registration_address', '');
+
+      // If message is from an SMS/MMS gateway, create a user account.
+      if (!$node->uid) {
+        $user = FALSE;
+        while (!$user) { 
+          $user = user_save(NULL, array(
+            'name' => variable_get('sms_registration_username', 'Drupal-') . mt_rand(1, db_result(db_query('SELECT MAX(uid) FROM {users}')) * 10),
+            'pass' => user_password(8),
+            'mail' => $from_address,
+            'roles' => ($role = variable_get('sms_registration_role', NULL)) ? array($role => 1) : NULL,
+            'status' => 1,
+	    'language' => $node->language,
+            'sms_user' => array('number' => sms_formatter($from[0]), 'status' => 1, 'gateway' => array('carrier' => $from[1])),
+          ));
+        }
+        $node->uid = $user->uid;
+        $node->name = $user->name;
+        mailhandler_switch_user($node->uid);
+        if (!isset($email_registration_accounts[$to[0]])) {
+          $message = t('Thanks! Do you want to have a blog in vozmob? If yes please send one word identifying the blog.');
+          $options = array('carrier' => $from[1], 'from' => variable_get('sms_registration_address', ''), 'subject' => t('Media posted'), 'action' => 'registration');
+          sms_send($number, $message, $options);
+        }
+      }
+
+      // If user has authenticated via mobile number and message was sent to a registration address.
+      if (!empty($account->uid) && isset($email_registration_accounts[$to[0]])) {
+        $username =  $node->body;
+        //if it comes from a valid sms email gateway and it was sent to one of the email registration accounts
+        $password = user_password(8);
+        $user = user_save($account, array('name' => $username, 'pass' => $password));
+        if ($user) {
+          $message = t('Welcome, !name. Your blog was created. Your password is !pass', array('!name' => $username, '!pass' => $password));
+        }
+        else {
+          $message = t('The blog was not created. Please choose another name.');
+        }
+        $options = array('carrier'=> $from[1], 'from' => variable_get('sms_registration_address', ''));
+        sms_send($number, $message, $options);
+        // Do not post content from the registration address.
+        $node = FALSE;
+      }
+    }
+  }
 }
 
-// The following functions are called by both sms_registration.admin.inc and sms_registration.retrieve.inc so they
-// are defined here to make them available to both
-
 /**
- * Establish a connection to the mailbox specified by the array $mailbox
+ * Return the "To: " address from the received email message.
  */
-function sms_registration_open_mailbox($mailbox) {
-
-  if ($mailbox['domain']) {
-    if ($mailbox['imap'] == 1) {
-      $box = '{'. $mailbox['domain'] .':'. $mailbox['port'] . $mailbox['extraimap'] .'}'. $mailbox['folder'];
-    }
-    else {
-      $box = '{'. $mailbox['domain'] .':'. $mailbox['port'] .'/pop3'. $mailbox['extraimap'] .'}'. $mailbox['folder'];
-    }
-    $result = imap_open($box, $mailbox['name'], $mailbox['pass']);
-    $err = 'domain';
+function sms_registration_get_toaddress($header, $mailbox) {
+  if (($toheader = strtolower($mailbox['mailto'])) && isset($header->$toheader)) {
+    $to = $header->$toheader;
   }
   else {
-    $box = $mailbox['folder'];
-    $result = imap_open($box, '', '');
+    $from = $header->to;
   }
-
-  return $result;
-
+  return array($to[0]->mailbox .'@'. $to[0]->host, $to[0]->personal);
 }
-
-function sms_registration_mail_alter(&$message){
-	
-	$options = $message['params']['options'];
-
-	if ($options['action'] == 'registration') {
-		$message['headers']['Return-Path'] = 'vozmob.sandbox.reg@gmail.com';
-	}
-}
-
-?>
