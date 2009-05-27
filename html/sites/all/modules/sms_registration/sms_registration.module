@@ -1,15 +1,6 @@
 <?php
 // $Id: sms_registration.module
 
-
-/**
- * Implementation of hook_perm().
- */
-function sms_registration_perm() {
-  return array('administer sms registration');
-}
-
-
 /**
  * Implementation of hook_menu().
  */
@@ -25,6 +16,9 @@ function sms_registration_menu() {
   return $items;
 }
 
+/**
+ * Implementation of hook_mail_alter().
+ */
 function sms_registration_mail_alter(&$message) {
   $options = $message['params']['options'];
   if ($options['action'] == 'registration') {
