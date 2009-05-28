@@ -1,5 +1,5 @@
 <?php
-// $Id: mm_node.module,v 1.1.2.46.2.30 2009/05/12 14:43:04 arthuregg Exp $
+// $Id: mm_node.module,v 1.1.2.46.2.31 2009/05/26 23:51:43 arthuregg Exp $
 
 /**
  * @file
@@ -64,7 +64,7 @@ function mm_node_media_mover($op = null, $action = null, $configuration = null, 
 
         // this calls the storage
         case '4':
-          return mm_node_config_save_node($action, $configuration);
+          return mm_node_config_save_node($configuration);
         break;
 
         case '5':
@@ -236,18 +236,24 @@ function mm_node_harvest_mm_files($action, $configuration, $job, $nid) {
 
   // determine which column to use for processing already harvested files
   // could be harvest, process, storage, or complete, complete is default
-  $file_type = $configuration['mm_harvest_file_type'] . '_file';
+  if ($configuration['mm_harvest_file_type']) {
+    $file_type = $configuration['mm_harvest_file_type'] . '_file';
+  }
+  // if there is not a file type set, use the complete file
+  else {
+    $file_type = 'complete_file';
+  }
 
   // get files from the requested CID, that are processed at least to status
   // selected to harvest and are not already saved in current CID.
-	$results = db_query('SELECT mmf.nid, mmf.fid, mmf.complete_file AS harvest_file 
+  $results = db_query('SELECT mmf.nid, mmf.fid, mmf.complete_file AS harvest_file 
     FROM media_mover_files mmf
     WHERE mmf.cid = %d '. 
-	  $harvest_conditions .'    
+    $harvest_conditions .'    
     AND mmf.complete_file NOT IN
       (SELECT mmf1.harvest_file FROM media_mover_files mmf1 WHERE mmf1.cid = %d AND mmf1.harvest_file = mmf.complete_file)',
-	  $configuration['mm_harvest_cid'], $configuration['cid']);
-  
+    $configuration['mm_harvest_cid'], $configuration['cid']);
+
   // we have our files, now pull them out of the db;
   while ($result = db_fetch_array($results)) {
     $files[] = $result;
@@ -639,7 +645,7 @@ function mm_node_config_complete($action, $configuration) {
 /**
  * config form for the storage option
  */
-function mm_node_config_save_node($action, $configuration) {
+function mm_node_config_save_node($configuration) {
 
   $form['storage'] = array(
     '#type' => 'fieldset',
@@ -668,15 +674,16 @@ function mm_node_config_save_node($action, $configuration) {
   );
 
   // language options
-  if (module_exists('locale')) {
-    $options = locale_language_list();
-    $form['storage']['node_save_language'] = array(
-      '#type' => 'select',
-      '#title' => t('Save node in language'),
-      '#description' => t('Save the node in this language when creating it'),
-      '#options' => $options['name'],
-      '#default_value' => $configuration['node_save_language'],
-    );
+  if (function_exists('locale_language_list')) {
+    if ($options = locale_language_list()) {    
+      $form['storage']['node_save_language'] = array(
+        '#type' => 'select',
+        '#title' => t('Save node in language'),
+        '#description' => t('Save the node in this language when creating it'),
+        '#options' => $options['name'],
+        '#default_value' => $configuration['node_save_language'],
+      );
+    }
   }
 
   $form['storage']['node_save_override'] = array(
@@ -695,7 +702,7 @@ function mm_node_config_save_node($action, $configuration) {
       'promoted' => t('Promoted to front page'),
       'sticky' => t('Sticky at the top of lists'),
       ),
-    '#default_value' => $configuration['node_save_options'],
+    '#default_value' => $configuration['node_save_options'] ? $configuration['node_save_options'] : array(),
   );
 
   $form['storage']['node_save_name'] = array(

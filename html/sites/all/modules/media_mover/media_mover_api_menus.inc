@@ -119,7 +119,7 @@ function media_mover_api_menus() {
         'page callback' => 'media_mover_api_configuration_view',
         'page arguments' => array($cid),
         'access arguments' => array('administer media_mover'),
-        'description' => $type->description,
+        'description' => $configuration->description,
       );
     }
   }

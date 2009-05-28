@@ -6,9 +6,65 @@
  * Options for harvesting from and storing to are provided
  */
 
-define(MM_CCK_HARVEST, 1);
-define(MM_CCK_STORE, 2);
-define(MM_CCK_COMPLETE, 3);
+define('MM_CCK_HARVEST', 1);
+define('MM_CCK_STORE', 2);
+define('MM_CCK_COMPLETE', 3);
+
+/**
+ * This overrides the CCK FileField file formater so that non-local files
+ * can be used in CCK fields. This is yucky, but I do not see any way around
+ * this at the moment. Is likely to be a problem in Views display
+ * @param $file
+ *   array, drupal file
+ */
+function phptemplate_filefield_file($file) {
+  // Views may call this function with a NULL value, return an empty string.
+  if (empty($file['fid'])) {
+    return '';
+  }
+
+  // can we find a MM file for this file?
+  // This is the only change to this theme function 
+  if ($mm_file = media_mover_api_file_fetch(array('fid' => $file['fid']))) {
+    // get the last file
+    if ($url = media_mover_api_config_current_file($mm_file, 'final')) {
+      // should we set an absolute url?
+      if (strstr('http', $url)) {
+        $options['absolute'] = true;
+      }
+    }
+  }
+  else { 
+    $path = $file['filepath'];
+    $url = file_create_url($path);
+  }
+  
+  $icon = theme('filefield_icon', $file);
+
+  // Set options as per anchor format described at
+  // http://microformats.org/wiki/file-format-examples
+  // TODO: Possibly move to until I move to the more complex format described 
+  // at http://darrelopry.com/story/microformats-and-media-rfc-if-you-js-or-css
+  $options = array(
+    'attributes' => array(
+      'type' => $file['filemime'] . '; length=' . $file['filesize'],
+    ),
+  );
+
+  // Use the description as the link text if available.
+  if (empty($file['data']['description'])) {
+    $link_text = $file['filename'];
+  }
+  else {
+    $link_text = $file['data']['description'];
+    $options['attributes']['title'] = $file['filename'];
+  }
+
+  return '<div class="filefield-file clear-block">'. $icon . l($link_text, $url, $options) .'</div>';
+}
+
+
+
 
 /**
  * Implementation of media_mover hook
@@ -49,7 +105,7 @@ function mm_cck_media_mover($op, $action = null, $configuration = null, &$file =
         break;
 
       case 'harvest':
-        return mm_cck_harvest($action, $configuration, $running_config, $nid);        
+        return mm_cck_harvest($configuration, $nid);        
       break;
 
       case 'complete':
@@ -74,12 +130,25 @@ function mm_cck_media_mover($op, $action = null, $configuration = null, &$file =
  */
 function mm_cck_config_harvest($action, $configuration) {
   $form = array();
-  $form['mm_harvest_conf'] = array(
+  $form['mm_cck_harvest_conf'] = array(
     '#type' => 'fieldset',
     '#title' => t('Harvest Configuration'),
     '#description' => t('This module harvests files attached to a CCK field'),
   );
-  $form['mm_harvest_conf']['mm_config_harvest_field'] = array(
+  // get content types
+  if ($types = node_get_types()) {
+    foreach ($types as $type) {
+      $options[$type->type] = $type->name;
+    }
+  }
+  $form['mm_cck_harvest_conf']['mm_cck_havest_node_type'] = array(
+    '#title' => t('Select content types to harvest from'),
+    '#type' => 'select',
+    '#options' => $options,
+    '#default_value' => $configuration['mm_cck_havest_node_type'],
+    '#description' => t('Choose which content types to harvest from.'),
+  );
+  $form['mm_cck_harvest_conf']['mm_config_harvest_field'] = array(
     '#type' => 'select',
     '#multiple' => true,
     '#title' => t('Select files from these CCK fields'),
@@ -87,7 +156,7 @@ function mm_cck_config_harvest($action, $configuration) {
     '#options' => mm_cck_fields(),
     '#default_value' => $configuration['mm_config_harvest_field'],
   );
-  $form['mm_harvest_conf']['file_types'] = array(
+  $form['mm_cck_harvest_conf']['file_types'] = array(
     '#title' => t('File types'),
     '#type' => 'textfield',
     '#default_value' => $configuration['file_types'] ? $configuration['file_types'] : 'avi mov wmv mpeg mp4 mpeg2 dv 3gp 3g2 mpeg4',
@@ -121,8 +190,8 @@ function mm_cck_config_save_node($configuration) {
   );
   $form['mm_cck_'. $configuration['verb']]['mm_cck_new_node_'. $configuration['verb']] = array(
     '#type' => 'checkbox',
-    '#title' => t('Create new node if none exists'),
-    '#description' => t('If this file has no node data associated with it, create a new node with this file.'),
+    '#title' => t('Create new node with data'),
+    '#description' => t('Create a new node with the data that was harvested.'),
     '#default_value' => $configuration['mm_cck_new_node_'. $configuration['verb']] ? $configuration['mm_cck_new_node_'. $configuration['verb']] : 0,
   );
   
@@ -178,7 +247,7 @@ function mm_cck_config_save_node($configuration) {
       'promoted' => t('Promoted to front page'),
       'sticky' => t('Sticky at the top of lists'),
       ),
-    '#default_value' => $configuration['mm_cck_save_options_'. $configuration['verb']],
+     '#default_value' => $configuration['mm_cck_save_options_'. $configuration['verb']] ? $configuration['mm_cck_save_options_'. $configuration['verb']] : array(),    
   );
   // language options
   if (module_exists('locale')) {
@@ -211,15 +280,13 @@ function mm_cck_config_save_node($configuration) {
 
 /**
  * Harvest files from a CCK field
- * @param array $config
+ * @param array $configuration
  *   the configuration array
- * @param array $running_config
- *   the full configuration object that is running
  * @param int $nid
  *   node id if a single node is being processed
  * @return array
  */
-function mm_cck_harvest($action, $configuration, $running_config, $nid) {
+function mm_cck_harvest($configuration, $nid) {
   $files = array();
   $fields = content_fields();
 
@@ -257,10 +324,11 @@ function mm_cck_harvest($action, $configuration, $running_config, $nid) {
           LEFT JOIN {'. $db_info['table'] .'} c ON c.'. $db_info['columns']['fid']['column'] .' = f.fid
           LEFT JOIN {node} n ON c.nid = n.nid
           LEFT JOIN {media_mover_files} m ON m.fid = f.fid AND m.cid = %d
-          WHERE  (n.nid IS NOT NULL AND m.nid IS NULL) OR
-            (n.nid IS NOT NULL AND n.nid = m.nid AND f.filepath <> m.harvest_file)
+          WHERE  ((n.nid IS NOT NULL AND m.nid IS NULL)
+            OR (n.nid IS NOT NULL AND n.nid = m.nid AND f.filepath <> m.harvest_file))
+            AND n.type = "%s" 
             '. $file_type_conditions .'
-          ORDER BY f.timestamp', $configuration['cid']);
+          ORDER BY f.timestamp', $configuration['cid'], $configuration['mm_cck_havest_node_type']);
 
         // now build the out going file data
         while ($result = db_fetch_array($results)) {
@@ -283,12 +351,13 @@ function mm_cck_harvest($action, $configuration, $running_config, $nid) {
  *   new file location
  */
 function mm_cck_node_save($configuration, &$file) {
+
   // get the path to the file to operate on. We need this to pass out of the function
   $filepath = media_mover_api_config_current_file($file);
 
   // is there a node attached to this file?
   $node = media_mover_api_get_node_from_file($file);
-  
+
   // is there a node attached to the $file array and we are not supposed to create a new node
   if (! $node && ! $configuration['mm_cck_new_node_'. $configuration['verb']]) {
     // set an alert
@@ -298,8 +367,8 @@ function mm_cck_node_save($configuration, &$file) {
     return;
   } 
   
-  // if we do not have a node, we need to start building one
-  if (! $node) {
+  // Should we start building a new node?
+  if ($configuration['mm_cck_new_node_'. $configuration['verb']]) {
 	  // start building the node
 	  $node = new STDClass();
 	  // set node type
@@ -340,27 +409,31 @@ function mm_cck_node_save($configuration, &$file) {
     $node->name = $user->name;
     $node->mail = $user->mail;
 
-	// save the new node to prepare to add the CCK data
-	node_save($node);
-	$file['nid'] = $node->nid;
+  	// save the new node to prepare to add the CCK data
+  	node_save($node);
+  	$file['nid'] = $node->nid;
+  	
   }  
-  
+ 
   // get the field that we will save to
   $field = content_fields($configuration['mm_cck_field_save_'. $configuration['verb']]);
 
-  // if we have an fid try to replace that file
-  if ($file['fid'] && $configuration['mm_cck_file_replace_'. $configuration['verb']]) {
-    if ($node->{$field['field_name']}[$file['fid']] ) {
-      db_query('UPDATE files SET filename = "%s", filepath = "%s", filesize = %d, filemime = "%s", timesamp = "%s" WHERE fid = %d',
-        $file['filename'], $file['filepath'], $file['filesize'], $file['filemime'], time()
-      );
-    }
+  // if we have an fid, and should just replace, return the current file.
+  if ($file['fid'] &&  
+    $configuration['mm_cck_file_replace_'. $configuration['verb']] &&
+    mm_cck_find_file_id($node, $field, $file['fid']) &&
+    ! $configuration['mm_cck_new_node_'. $configuration['verb']]) {
+      $file['data']['node'] = $node;
+      return $filepath;
   }
-  // we don't have an fid, append the file to the appropriate field
-  else {
+
+  // if we are creating a new node, but the file is non-local, we need to either
+  // find a local file or fail.
+  if ($local_file = mm_cck_find_local_file($file)) {
+    // we need to add an new file to the node
     switch ($field['type']) {
       case 'text':
-        $node->{$field['field_name']} = array(array('value' => $filepath));
+        $node->{$field['field_name']} = array(array('value' => $local_file));
     	  // save the node
         node_save($node);
         // clear the cache
@@ -371,16 +444,26 @@ function mm_cck_node_save($configuration, &$file) {
       // handle CCK image and CCK file field cases
     	case 'image':
     	case 'filefield':
-    	  if (! $new_file = mm_cck_field_filefield($node, $field, $filepath, $configuration)) {
+    	  if (! $new_file = mm_cck_field_filefield($node, $field, $local_file, $configuration)) {
     	  	return;
     	  }
     	break;
     }
-  }
 
-  $file['data']['node'] = $node;
-  // return the file
-  return $new_file['filepath'];
+    // attach the data to the node
+    $file['data']['node'] = $node;
+    // assign the new fid
+    $file['fid'] = $new_file['fid'];
+
+    // return the cck file
+    if (! strstr($filepath, 'http://')) {
+      return $new_file['filepath'];
+    }
+    // the file is not local, return the 
+    // last used file
+    return $filepath;
+    
+  }
 }
 
 
@@ -453,4 +536,44 @@ function mm_cck_fields() {
     $fields[$field['field_name']] = $field['widget']['label'];
   }
   return $fields;
+}
+
+
+/**
+ * Helper function to find a CCK file field with a specific $fid
+ * @param $node
+ *   object, drupal node
+ * @param $field
+ *   array, CCK field
+ * @param $fid
+ *   int, file id
+ * @return int
+ */
+function mm_cck_find_file_id($node, $field, $fid) {
+  if ($node->{$field['field_name']}) {
+    foreach ($node->{$field['field_name']} as $id => $nodefile) { 
+      // make sure that this file exists on this node
+      if ($nodefile['fid'] == $fid) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+
+/**
+ * This is a helper function to find a local file in the files list so that
+ * CCK does not die when we try to save the file to it.
+ * @param $file
+ * @return unknown_type
+ */
+function mm_cck_find_local_file($file) {
+  for ($i = MMA_FILE_STATUS_COMPLETE_COMPLETE; $i >= 0; $i--) {
+    if ($filename = $file[media_mover_api_verb_base_status($i) .'_file']) {         
+      if (! strstr($filename, 'http://') && count($filename)) {
+        return $filename;
+      }
+    }
+  }
 }

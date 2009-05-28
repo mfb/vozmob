@@ -1,6 +1,6 @@
 <?php
 
-/* $Id: media_mover_api.module,v 1.1.2.110.2.51 2009/05/21 14:07:51 arthuregg Exp $ */
+/* $Id: media_mover_api.module,v 1.1.2.110.2.54 2009/05/27 19:42:21 arthuregg Exp $ */
 
 
 /*
@@ -320,37 +320,30 @@ function media_mover_api_item_status($status = null) {
 
 
 /**
- * this returns the base status for a verb. This is always
- * the completed action previous to the one being asked for-
- * process would return harvested as you need to get the items
- * that are ready for that stage
+ * this returns either the status id for a verb or the name of the status
  *
  * @param string $verb
  * @param boolean $id
  * @return string
  */
-function media_mover_api_verb_base_status($verb, $id = null) {
-  static $status;
-  if (! $status) {
-    $status = array(
-      // note that the harvest is a special case as the file
-      // would not exist previous to the harvest
-      'harvest' => 0,
-      'process' => MMA_FILE_STATUS_HARVESTED,
-      'storage' => MMA_FILE_STATUS_PROCESS_COMPLETE,
-      'complete' => MMA_FILE_STATUS_STORAGE_COMPLETE
-    );
-  }
+function media_mover_api_verb_base_status($id = null) {
+  $status = array(
+    // note that the harvest is a special case as the file
+    // would not exist previous to the harvest
+    'harvest' => 0,
+    'process' => MMA_FILE_STATUS_HARVESTED,
+    'storage' => MMA_FILE_STATUS_PROCESS_COMPLETE,
+    'complete' => MMA_FILE_STATUS_STORAGE_COMPLETE
+  );
 
-  // do we need to hand back verbs or ids?
-  if ($id) {
-   // return the $verb for the ID
-   $return = array_flip($status);
+  // do we need to hand back english?
+  if (is_numeric($id)) {
+    // return the $verb for the ID
+    $status = array_flip($status);
+    // add the completition state.
+    $status[MMA_FILE_STATUS_COMPLETE_COMPLETE] = 'complete';
   }
-  else {
-    $return = $status;
-  }
-  return $return[$verb];
+  return $status[$id];
 }
 
 
@@ -379,6 +372,8 @@ function media_mover_api_modules() {
  * @return boolean
  */
 function media_mover_api_run_control_extend($configuration, $action, $file = null) {
+  // disabling for now
+  return true;
 	foreach (module_implements('run_control') as $module) {
 	  // function name includes the module name
 		$function  = $module .'_run_control';
@@ -462,7 +457,7 @@ function media_mover_api_run_config($config, $debug = true, $nid = null, $cron =
     else {
       // -----------------------------------------------------
       // run all the other configuration actions
-      // pass back the status of the previous step to get the previous files
+      // pass back the status of the previous step to get the previous files      
       $output .= media_mover_api_run_config_verb($config, $verb, media_mover_api_verb_base_status($verb), $cron);
     }
 
@@ -495,7 +490,7 @@ function media_mover_api_run_config_harvest($config, $verb, $nid) {
       foreach ($files as $file) {
         // save harvested file
         media_mover_api_file_db_add($file, $config, $verb, MMA_FILE_STATUS_HARVESTED);
-        media_mover_api_event_trigger('config', 'run', $verb, $file);
+        //media_mover_api_event_trigger('config', 'run', $verb, $file);
       }
     }
     // set the stop time on this harvest so that we
@@ -530,8 +525,9 @@ function media_mover_api_run_config_verb($config, $verb, $status) {
   foreach ($files as $file) {
   	// only run this if cron isn't requeseting this OR run_control does not try to stop it
   	// @TODO think through if we need to be passing cron here- might make more sense to have a $configuration->operator
+  	media_mover_api_run_config_verb_file($file, $config, $verb);
   	if ( ! media_mover_api_run_control_extend($config, $verb .'_run', $file) ) {
-      media_mover_api_run_config_verb_file($file, $config, $verb);
+      //media_mover_api_run_config_verb_file($file, $config, $verb);
   	}
   }
   return $output;
@@ -557,18 +553,18 @@ function media_mover_api_run_config_verb_file($file, $config, $verb ) {
   if (media_mover_api_file_lock($file['mmfid'], $status, $status + 1) )  {
     // now we run the actual verb on this file
     // @NOTE not using module_invoke here b/c it doesn't seem to pass by reference correctly ($file)
-    $file_path = call_user_func_array($config->{$verb}->module .'_media_mover', array($verb, $config->{$verb}->action, $config->{$verb}->configuration, &$file, $config));
-    if ($file_path) {
+    $filepath = call_user_func_array($config->{$verb}->module .'_media_mover', array($verb, $config->{$verb}->action, $config->{$verb}->configuration, &$file, $config));
+    if ($filepath) {
       // sucessful. Increase the file status
       $new_status = $status + 2;
       // add the new file path to the file array. Some modules may return
       // true instead of a file path. If this is the case, get the current file
       // from this file
-      if ($file_path === true) {
-        $file_path == media_mover_api_config_current_file($file);
+      if ($filepath === true) {
+        $filepath == media_mover_api_config_current_file($file);
       }
       // we do this here to keep the api simple for module developers
-      $file[$verb .'_file'] = $file_path;
+      $file[$verb .'_file'] = $filepath;
     }
     else {
       // failed
@@ -786,13 +782,13 @@ function media_mover_api_file_lock($mmfid, $status, $new_status) {
   db_lock_table('media_mover_files');
 
   // check the status of the file
-  $result = db_result(db_query('SELECT status FROM {media_mover_files} WHERE mmfid = %d', $mmfid));
+  $result = db_result(db_query('SELECT status FROM {media_mover_files} WHERE mmfid = %d AND status = %d', $mmfid, $status));
 
-  if ($result == $status ) {
+  if ($result['status']) {
     // set status to in process
-   db_query('UPDATE {media_mover_files} SET status = %d WHERE mmfid = %d', $new_status, $mmfid);
-   db_unlock_tables('media_mover_files');
-   return true;
+    db_query('UPDATE {media_mover_files} SET status = %d WHERE mmfid = %d', $new_status, $mmfid);
+    db_unlock_tables('media_mover_files');
+    return true;
   }
 
   // unlock
@@ -1027,7 +1023,11 @@ function media_mover_api_node_files_fetch($nid, $status = MMA_FILE_STATUS_COMPLE
 function media_mover_api_config_current_file($file, $type = 'previous') {
   switch ($type) {
     case 'previous':
-      return $file[media_mover_api_verb_base_status($file['status'] - 2, true) .'_file'];
+      $status  = $file['status'] -2;       
+      return $file[media_mover_api_verb_base_status($file['status'] -2) .'_file'];
+    break;
+    case 'final':
+      return $file[media_mover_api_verb_base_status(MMA_FILE_STATUS_COMPLETE_COMPLETE, true) .'_file'];
     break;
   }
 }
@@ -1045,9 +1045,11 @@ function media_mover_api_config_current_file($file, $type = 'previous') {
 function media_mover_api_get_node_from_file($file) {
   // Node data is stored on $file['data']['node']. It can be the case
   // that this is not complete data. Try to load any data we find
-  if (! $nid = $file['node']->nid ) {
-    if (! $nid = $file['data']['nid']) {
-      return false;
+  if (! $nid = $file['nid']) {
+    if (! $nid = $file['node']->nid ) {
+      if (! $nid = $file['data']['nid']) {
+        return false;
+      }
     }
   }
   return node_load($nid);
@@ -1108,9 +1110,9 @@ function media_mover_api_update_file($file, $status) {
   $file['data'] = serialize($file['data']);
   // first lock the table so that nobody can get in the mix
   db_lock_table('media_mover_files');
-  db_query("UPDATE {media_mover_files} SET ".
-    "nid = %d, harvest_file = '%s', process_file = '%s', storage_file = '%s', complete_file = '%s', status = %d, data = '%s' WHERE mmfid = %d ",
-    $file['nid'], $file['harvest_file'], $file['process_file'], $file['storage_file'],
+  db_query('UPDATE {media_mover_files} SET '.
+    'nid = %d, fid = %d, harvest_file = "%s", process_file = "%s", storage_file = "%s", complete_file = "%s", status = %d, data = "%s" WHERE mmfid = %d ',
+    $file['nid'], $file['fid'], $file['harvest_file'], $file['process_file'], $file['storage_file'],
     $file['complete_file'], $status, $file['data'], $file['mmfid']
   );
   foreach (media_mover_api_verbs() as $verb) {
@@ -2724,25 +2726,54 @@ function media_mover_api_files_status () {
 
 /**
  * fetch function for a single media mover file
- * @param int $mmfid
- *   media mover file id
+ * @param $id
+ *   array or int, sets what kind of input is coming in, default is int, as an
+ *   mmfid
  * @param boolean $reset
  *   turns the caching off, needed to reload files for updating
  * @return array file array
  */
-function media_mover_api_file_fetch($mmfid, $reset = false) {
-  static $cached;
-  // can we return the cached item
-  if (! $cached[$mmfid] || $reset) {
-    $item = db_fetch_array(db_query('SELECT * FROM {media_mover_files} WHERE mmfid = %d', $mmfid));
-    $item['data'] = unserialize($item['data']);
-    $additional_items = media_mover_api_file_fetch_get_additional($item);
-    if ($additional_items) {
-      $item['additional_items'] = $additional_items;
-    }
-    $cached[$mmfid] = $item;
+function media_mover_api_file_fetch($id, $reset = false) {
+  static $cacheda;
+  
+  // is the $id numeric? if so, use it as an mmfid
+  if (is_numeric($id)) {
+    $id = array('mmfid' => $id);
   }
-  return $cached[$mmfid];
+  
+  // can we use cached data?
+  if (! $reset) {
+    if ($file = $cached['mmfid'][$id['mmfid']]) {
+      return $file;
+    }
+    if ($file = $cached['fid'][$id['fid']]) {
+      return $file;
+    }
+  }
+  
+  // we did not find a cached file. Let's look for one
+  // if we get an array of conditions, build some SQL
+  foreach ($id as $key => $value) {
+    $cond[] = 'mmf.'. db_escape_table($key) ." = '%s'";
+    $arguments[] = $value;
+  }
+  $cond = implode(' AND ', $cond);
+  
+  // fetch the file
+  $file = db_fetch_array(db_query('SELECT * FROM {media_mover_files} mmf WHERE '. $cond, $arguments));
+  // no file, exit
+  if (! $file['mmfid']) { print "here"; return false; }
+  // get the data in the right form
+  $file['data'] = unserialize($file['data']);
+  // add any additional items via the hook
+  if ($additional_items = media_mover_api_file_fetch_get_additional($file)) {
+    $file['additional_items'] = $additional_items;
+  }
+  // add the data to the cache
+  $cached['mmfid'][$file['mmfid']] = $file;
+  $cached['fid'][$file['fid']] = $file;
+ 
+  return $file;
 }
 
 
