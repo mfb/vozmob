@@ -1,0 +1,5 @@
+; $Id: mapstraction.info,v 1.2 2009/02/21 13:51:13 zstolar Exp $
+name = Mapstraction
+core = 6.x
+description = Mapstraction allows you to display maps using a number of different mapping APIs.
+dependencies[] = views

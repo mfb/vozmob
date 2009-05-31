@@ -1,0 +1,158 @@
+<?php
+// $Id: mapstraction.module,v 1.2 2009/02/21 13:51:13 zstolar Exp $
+
+function mapstraction_menu(){
+  $items = array();
+  $items['admin/settings/mapstraction'] = array( 
+    'title' => t('Mapstraction settings'), 
+    'description' => t('Mapstraction settings'), 
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mapstraction_admin_settings'), 
+    'access arguments' => array('administer site configuration'),
+    'file' => 'mapstraction.admin.inc',
+  ); 
+  
+  return ($items);
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function mapstraction_theme() {
+  return array(
+    'mapstraction_map' => array(
+      'arguments' => array('points' => array(),
+        'map' => array(), 'width' => 200, 'height' => 200),
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_views_api().
+ */
+function mapstraction_views_api() {
+  return array('api' => 2);
+}
+
+/**
+ * Implementation of hook_views_plugins().
+ */
+function mapstraction_views_plugins() {
+  return array(
+    'module' => 'mapstraction',
+    'style' => array(
+      'mapstraction' => array(
+        'title' => 'Mapstraction',
+        'help' => 'Displays nodes as a Maptraction map.',
+        'handler' => 'mapstraction_style_map',
+        'theme' => 'mapstraction_map',
+        'theme file' => 'mapstraction.module',
+        'uses fields' => TRUE,
+        'uses options' => TRUE,
+        'type' => 'normal',
+      ),
+    ),
+  );
+}
+
+/**
+ * Provides information about the available mapping API's. API defiitions
+ * are stored in mapstraction.apis.inc.
+ * 
+ * @param $full
+ *   Whether to return the full API definition or just an array for use as the
+ *   value for a Form API #options.
+ */
+function mapstraction_apis($full = FALSE) {
+  $apis = array(
+    'google' => array(
+      'title' => t('Google Maps'),
+      'settings form' => 'mapstraction_google_settings_form',
+      'render' => 'mapstraction_google_render',
+    ),
+    'yahoo' => array(
+      'title' => t('Yahoo Maps'),
+      'settings form' => 'mapstraction_yahoo_settings_form',
+      'render' => 'mapstraction_yahoo_render',
+    ),
+    'mapquest' => array(
+      'title' => t('MapQuest'),
+      'render' => 'mapstraction_mapquest_render',
+    ),
+    'microsoft' => array(
+      'title' => t('Microsoft Virtual Earth'),
+      'render' => 'mapstraction_microsoft_render',
+    ),
+    'openlayers' => array(
+      'title' => t('OpenLayers'),
+      'render' => 'mapstraction_openlayers_render',
+    ),
+    'freeearth' => array(
+      'title' => t('FreeEarth'),
+      'render' => 'mapstraction_freeearth_render',
+    ),
+    'cloudmade' => array(
+      'title' => t('CloudMade'),
+      'api' => 'openlayers',
+      'settings form' => 'mapstraction_cloudmade_settings_form',
+      'render' => 'mapstraction_cloudmade_render',
+    ),
+  );
+  
+  if (!$full) {
+    foreach ($apis as $key => $api) {
+      $apis[$key] = $api['title'];
+    }
+  }
+  
+  return $apis;
+}
+
+/**
+ * Theme a map from Mapstraction view.
+ */
+function theme_mapstraction_map($view, $options, $rows) {
+  drupal_add_js(drupal_get_path('module', 'mapstraction') . '/mapstraction.js');
+  drupal_add_js(drupal_get_path('module', 'mapstraction') . '/mapstraction.drupal.js');
+
+  $api_name = $view->style_plugin->options['api'];
+  $apis = mapstraction_apis(TRUE);
+  $api = $apis[$api_name];
+  
+  // Allow the API definition to override the API name.
+  $api_settings = $options['api_settings'][$api_name];
+  $api_name = $api['api'] ? $api['api'] : $api_name;
+  
+  // Clean up controls for JS
+  foreach ($options['controls'] as $control => $value) {
+    if ($control == 'zoom') {
+      $controls[$control] = $value;
+    }
+    elseif ($value) {
+      $controls[$control] = TRUE;
+    }
+  }
+  
+  $map = array(
+    'viewName' => $view->name,
+    'currentDisplay' => $view->current_display,
+    'apiName' => $api_name,
+    'markers' => $view->style_plugin->map_points($rows),
+    'controls' => $controls,
+  );
+
+  // Add the map to Drupal.settings object in JS.
+  drupal_add_js(array('mapstraction' => array($map)), 'setting');
+  
+  // Run API-specific rendering code
+  $id = 'mapstraction-' . $view->name . '-' . $view->current_display;
+  module_load_include('inc', 'mapstraction', 'mapstraction.apis');
+  if (function_exists($api['render'])) {
+    $output = $api['render']($api_settings, $id);
+  }
+  
+  list($width, $height) = explode('x', $options['dimensions']);
+  $output .= '<div id="' . $id . '" style="width: ' . $width . 'px; height: ' . $height . 'px;"></div>';
+
+  return $output;
+}
