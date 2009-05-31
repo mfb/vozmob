@@ -1,6 +1,6 @@
 <?php
 
-// $Id: media_mover_api_menus.inc,v 1.1.4.12 2009/05/13 16:22:58 arthuregg Exp $
+// $Id: media_mover_api_menus.inc,v 1.1.4.14 2009/05/28 12:05:37 arthuregg Exp $
 
 /**
  * contains all the menu functions for the module
@@ -50,7 +50,7 @@ function media_mover_api_menus() {
     'title' => 'Add Config',
     'page callback' => 'drupal_get_form',
     'access arguments' => array('administer media_mover'),
-    'page arguments' => array('media_mover_api_add_config_form', 3),
+    'page arguments' => array('media_mover_api_add_config_form'),
     'type' => MENU_LOCAL_TASK,
   );
 

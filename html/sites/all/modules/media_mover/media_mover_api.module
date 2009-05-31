@@ -1,6 +1,6 @@
 <?php
 
-/* $Id: media_mover_api.module,v 1.1.2.110.2.54 2009/05/27 19:42:21 arthuregg Exp $ */
+/* $Id: media_mover_api.module,v 1.1.2.110.2.55 2009/05/28 12:05:37 arthuregg Exp $ */
 
 
 /*
@@ -1628,14 +1628,16 @@ function media_mover_api_configuration_view($cid) {
  * @param string $id is a cache id for the import functions
  * @return array drupal form array
  */
-function media_mover_api_add_config_form($form, $id) {
+function media_mover_api_add_config_form($form, $id = null) {
   // do we have an incoming cache id that we should load
   // an imported configuration from?
   if ($id) {
-    $configuration = cache_get('media_mover_config_'. $id, 'cache_media_mover');
+    $configuration = cache_get('media_mover_config_'. $id, 'cache');
     if ($configuration->data) {
       $configuration = $configuration->data;
       drupal_set_message(t('You are now configuring the configuration you just imported. Please make any changes and save the configuration.'));
+      // delete the cached configuration
+      cache_clear_all('media_mover_config_'. $id, 'cache');
     }
   }
 

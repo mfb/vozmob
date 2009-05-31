@@ -1,6 +1,6 @@
 <?php
 
-// $Id: media_mover_api_io.inc,v 1.1.2.7.2.5 2009/03/24 04:33:11 arthuregg Exp $
+// $Id: media_mover_api_io.inc,v 1.1.2.7.2.6 2009/05/28 12:05:37 arthuregg Exp $
 
 /**
  * @file this file contains all the media mover import and export functions
@@ -76,13 +76,11 @@ function media_mover_api_import_config_form_submit($form, &$form_state) {
   // create a cache id
   $id = time();
 
-  // serialize the data and store it, don't save it for long
-  // this is kind of a hack, but it works well
-  cache_set("media_mover_config_$id", $configuration, 'cache', CACHE_TEMPORARY);
-
-  drupal_set_message(t('Successfully imported Media Mover configuration: !name .', array('!name' => $configuration->name)));
-
-  $form_state['redirect'] = 'admin/media_mover/add/'. $id;
+  // Store the configuration
+  // this is kind of a hack, but it works well enough
+  cache_set("media_mover_config_$id", $configuration, 'cache');
+  drupal_set_message(t('Successfully imported Media Mover configuration: !name.', array('!name' => $configuration->name)));
+  $form_state['redirect'] = 'admin/build/media_mover/add/'. $id;
 }
 
 
