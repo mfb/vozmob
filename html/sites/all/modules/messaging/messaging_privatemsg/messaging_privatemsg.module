@@ -43,7 +43,9 @@ function messaging_privatemsg_send_msg($destination, $message) {
   } elseif (!empty($message->sender)) {
     $sender = messaging_load_user($message->sender);
   } 
-  return (bool)privatemsg_new_thread($message->subject, $message->body, $recipients, $sender);
+  // this could be broken by minor changes to privatemsg_new_thread, which has an API different from its implementation at present
+  $ret = privatemsg_new_thread($recipients, $message->subject, $message->body, array('author' => $sender));
+  return $ret['success'];
 }
 
 /**
