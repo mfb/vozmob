@@ -1,5 +1,5 @@
 <?php
-// $Id: notifications.admin.inc,v 1.5.2.6.2.19.2.5 2009/04/29 16:24:08 jareyero Exp $
+// $Id: notifications.admin.inc,v 1.5.2.6.2.19.2.6 2009/05/28 17:15:49 davidg Exp $
 
 /**
  * Admin settings
@@ -306,6 +306,7 @@ function notifications_admin_status_page() {
   // Summary by sending method
   $header = array(t('Method'), t('Number'));
   $result = db_query("SELECT send_method, count(*) AS count FROM {notifications} GROUP BY send_method");
+  $rows = array();
   while ($subs = db_fetch_object($result)) {
     $name = messaging_method_info($subs->send_method, 'title');
     $rows[] = array(
