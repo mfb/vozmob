@@ -12,11 +12,6 @@ function mms_uk_o2_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
   // Test message against pattern
   if (preg_match($pattern, $header->fromaddress)) {
 
-    // If no title set on this message then set a generic one
-    if (!$node->title) {
-      $node->title = 'MMS from O2 UK';
-    }
-
     // Empty the body and teaser in case there is no body (this discards O2 junk)
     $node->body = '';
     $node->teaser = '';

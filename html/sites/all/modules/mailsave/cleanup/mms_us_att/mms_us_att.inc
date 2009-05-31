@@ -11,19 +11,9 @@ function mms_us_att_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
     $node->body = trim(preg_replace('/--.*?This mobile text message is brought to you by AT&T/s', '', $node->body));
     $node->teaser = node_teaser($node->body);
 
-    if (empty($node->title)) {
-      // Discard empty messages.
-      if (empty($node->body) && empty($node->mailsave_attachments)) {
-        $node = FALSE;
-      }
-      // If there is no body, set a default title.
-      elseif (empty($node->body)) {
-        $node->title = t('Mobile Submission');
-      }
-      // If there is a body use it to set a title.
-      else {
-        $node->title = truncate_utf8($node->body, 60, TRUE, TRUE);
-      }
+    // Discard empty messages.
+    if (empty($node->title) && empty($node->body) && empty($node->mailsave_attachments)) {
+      $node = FALSE;
     }
   }
 }
