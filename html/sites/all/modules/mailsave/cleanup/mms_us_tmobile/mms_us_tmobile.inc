@@ -50,7 +50,7 @@ function mms_us_tmobile_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
       $node->teaser = node_teaser($node->body);
 
     }
-
+/**
     // Set node title and reset the body if the author just puts short text in the body
     if (empty($node->title) && !empty($node->body) && strlen($node->body) <= 60) {
       $node->title = truncate_utf8(strip_tags($body), 60, TRUE, TRUE);
@@ -61,7 +61,7 @@ function mms_us_tmobile_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
     if (empty($node->title) && !empty($node->body)) {
       $node->title = truncate_utf8(strip_tags($body), 60, TRUE, TRUE);
     }
-
+**/
     // If there is no title and no body, create a generic title
     // Maybe this needs to be generic in mailsave or mailsave_to_image?
     if (empty($node->title) && empty($node->body)) {
