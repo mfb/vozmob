@@ -64,9 +64,9 @@ function mms_us_tmobile_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
 **/
     // If there is no title and no body, create a generic title
     // Maybe this needs to be generic in mailsave or mailsave_to_image?
-    if (empty($node->title) && empty($node->body)) {
-      $node->title = t('Mobile Submission');
-    }
+   // if (empty($node->title) && empty($node->body)) {
+     // $node->title = t('Mobile Submission');
+    //}
 
     // Get rid of extra text attachments
     foreach ($node->mailsave_attachments as $key => $file) {
