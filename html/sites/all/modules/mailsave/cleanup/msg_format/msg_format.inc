@@ -18,13 +18,13 @@ function msg_format_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
     }
     // Set node title and reset the body if the author just puts short text in the body
     if (empty($node->title) && !empty($node->body) && strlen($node->body) <= 60) {
-      $node->title = truncate_utf8($body, 60, TRUE, TRUE);
+      $node->title = urldecode(truncate_utf8($body, 60, TRUE, TRUE));
       $node->body = '';
     }
 
     // If there is no title and a long body, use body to set the title
     if (empty($node->title) && !empty($node->body)) {
-      $node->title = truncate_utf8($body, 60, TRUE, TRUE);
+      $node->title = urldecode(truncate_utf8($body, 60, TRUE, TRUE));
     }
 }
 

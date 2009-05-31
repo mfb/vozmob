@@ -11,6 +11,7 @@ function mms_us_virgin_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
 
   if (preg_match($pattern, $header->fromaddress)) {
 
+    watchdog('debug', 'inside the virgin mobile message');
      // Build a regex to extract message body
     // This regex identifies the actual message text in the email
     $end_pattern = preg_quote('This message is from a Virgin Mobile user. Enjoy.');
@@ -29,6 +30,7 @@ function mms_us_virgin_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
       $node->body = $body;
       $node->teaser = node_teaser($node->body);
 
+    watchdog('debug', print_r($body, TRUE));
     }
 
     // Set node title and reset the body if the author just puts short text in the body
