@@ -9,6 +9,8 @@ function mms_us_virgin_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
   // Build regex to see if this was from virgin mobile
   $pattern = '@vmpix.com$@';
 
+  watchdog('debug', print_r(preg_match($pattern, $header->fromaddress),TRUE));
+
   if (preg_match($pattern, $header->fromaddress)) {
 
     watchdog('debug', 'inside the virgin mobile message');
