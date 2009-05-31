@@ -1,19 +1,11 @@
 <?php
-// $Id: mapstraction.module,v 1.2 2009/02/21 13:51:13 zstolar Exp $
+// $Id: mapstraction.module,v 1.1.2.6 2009/02/27 15:17:46 diggersf Exp $
 
-function mapstraction_menu(){
-  $items = array();
-  $items['admin/settings/mapstraction'] = array( 
-    'title' => t('Mapstraction settings'), 
-    'description' => t('Mapstraction settings'), 
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('mapstraction_admin_settings'), 
-    'access arguments' => array('administer site configuration'),
-    'file' => 'mapstraction.admin.inc',
-  ); 
-  
-  return ($items);
-}
+/**
+ * @file
+ * Main module file for Mapstraction. Contains hook implemetations and mapping
+ * theme function.
+ */
 
 /**
  * Implementation of hook_theme().
@@ -67,9 +59,34 @@ function mapstraction_apis($full = FALSE) {
   $apis = array(
     'google' => array(
       'title' => t('Google Maps'),
-      'settings form' => 'mapstraction_google_settings_form',
-      'render' => 'mapstraction_google_render',
+      'settings form' => 'mapstraction_basic_settings_form',
+      'render' => 'mapstraction_basic_render',
+      'src' => 'http://maps.google.com/maps?file=api&v=2&key=%key',
     ),
+    'map24' => array(
+      'title' => t('Map24'),
+      'settings form' => 'mapstraction_basic_settings_form',
+      'render' => 'mapstraction_basic_render',
+      'src' => 'http://api.maptp.map24.com/ajax?appkey=%key',
+    ),
+    'multimap' => array(
+      'title' => t('MultiMap'),
+      'settings form' => 'mapstraction_basic_settings_form',
+      'render' => 'mapstraction_basic_render',
+      'src' => 'http://developer.multimap.com/API/maps/1.2/%key',
+    ),
+    'openspace' => array(
+      'title' => t('OpenSpace'),
+      'settings form' => 'mapstraction_basic_settings_form',
+      'render' => 'mapstraction_basic_render',
+      'src' => 'http://openspace.ordnancesurvey.co.uk/osmapapi/openspace.js?key=%key',
+    ),
+    'viamichelin' => array(
+      'title' => t('ViaMichelin'),
+      'settings form' => 'mapstraction_basic_settings_form',
+      'render' => 'mapstraction_basic_render',
+      'src' => 'http://api.viamichelin.com/apijs/js/api.js?VMApiKey=%key',
+    ),    
     'yahoo' => array(
       'title' => t('Yahoo Maps'),
       'settings form' => 'mapstraction_yahoo_settings_form',
@@ -77,7 +94,9 @@ function mapstraction_apis($full = FALSE) {
     ),
     'mapquest' => array(
       'title' => t('MapQuest'),
-      'render' => 'mapstraction_mapquest_render',
+      'settings form' => 'mapstraction_basic_settings_form',
+      'render' => 'mapstraction_basic_render',
+      'src' => 'http://btilelog.beta.mapquest.com/tilelog/transaction?transaction=script&key=%key&itk=true&v=5.3.0_RC5&ipkg=controls1',
     ),
     'microsoft' => array(
       'title' => t('Microsoft Virtual Earth'),
@@ -139,6 +158,7 @@ function theme_mapstraction_map($view, $options, $rows) {
     'apiName' => $api_name,
     'markers' => $view->style_plugin->map_points($rows),
     'controls' => $controls,
+    'initialPoint' => $options['initial_point'],
   );
 
   // Add the map to Drupal.settings object in JS.
@@ -148,7 +168,7 @@ function theme_mapstraction_map($view, $options, $rows) {
   $id = 'mapstraction-' . $view->name . '-' . $view->current_display;
   module_load_include('inc', 'mapstraction', 'mapstraction.apis');
   if (function_exists($api['render'])) {
-    $output = $api['render']($api_settings, $id);
+    $output = $api['render']($api_settings, $api_name, $id);
   }
   
   list($width, $height) = explode('x', $options['dimensions']);

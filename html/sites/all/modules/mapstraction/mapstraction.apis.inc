@@ -1,20 +1,42 @@
 <?php
+// $Id: mapstraction.apis.inc,v 1.1.2.6 2009/03/11 01:51:56 diggersf Exp $
 
-function mapstraction_google_settings_form($settings) {
+/**
+ * @file
+ * Contains APIs specific callbacks for settings forms and rendering.
+ */
+
+/**
+ * A basic settings form that provides an API Key field.
+ */
+function mapstraction_basic_settings_form($settings, $api_id) {
+  $apis = mapstraction_apis(TRUE);
+  $api = $apis[$api_id];
   $form = array();
   $form['api_key'] = array(
     '#type' => 'textfield',
-    '#title' => t('Google Maps API Key'),
+    '#title' => t('@api_title API Key', array('@api_title' => $api['title'])),
     '#size' => 40,
     '#maxlength' => 255,
     '#default_value' => $settings['api_key'],
+    '#process' => array('views_process_dependency'),
+    '#dependency' => array(
+      'edit-style-options-api' => array($api_id),
+    ),
   );
   
   return $form;
 }
 
-function mapstraction_google_render($settings) {
-  $src = 'http://maps.google.com/maps?file=api&v=2&key=' . $settings['api_key'];
+/**
+ * A basic rendering callback that imports a JavaScript file using an API key.
+ */
+function mapstraction_basic_render($settings, $api_id) {
+  $apis = mapstraction_apis(TRUE);
+  $api = $apis[$api_id];
+  
+  // Find %key flag in 'src'
+  $src = strtr($api['src'], array('%key' => $settings['api_key']));
   return '<script type="text/javascript" src="' . $src . '"></script>';
 }
 
@@ -26,6 +48,10 @@ function mapstraction_yahoo_settings_form($settings) {
     '#size' => 40,
     '#maxlength' => 255,
     '#default_value' => $settings['appid'],
+    '#process' => array('views_process_dependency'),
+    '#dependency' => array(
+      'edit-style-options-api' => array('yahoo'),
+    ),
   );
   
   return $form;
@@ -33,11 +59,6 @@ function mapstraction_yahoo_settings_form($settings) {
 
 function mapstraction_yahoo_render($settings) {
   $src = 'http://api.maps.yahoo.com/ajaxymap?v=3.0&appid=' . $settings['appid'];
-  return '<script type="text/javascript" src="' . $src . '"></script>';
-}
-
-function mapstraction_mapquest_render() {
-  $src = 'http://btilelog.beta.mapquest.com/tilelog/transaction?transaction=script&key=mjtd%7Clu6t210anh%2Crn%3Do5-labwu&itk=true&v=5.3.0_RC5&ipkg=controls1';
   return '<script type="text/javascript" src="' . $src . '"></script>';
 }
 
@@ -59,6 +80,10 @@ function mapstraction_cloudmade_settings_form($settings) {
     '#size' => 40,
     '#maxlength' => 255,
     '#default_value' => $settings['api_key'],
+    '#process' => array('views_process_dependency'),
+    '#dependency' => array(
+      'edit-style-options-api' => array('cloudmade'),
+    ),
   );
   
   $form['style_id'] = array(
@@ -67,12 +92,16 @@ function mapstraction_cloudmade_settings_form($settings) {
     '#size' => 40,
     '#maxlength' => 255,
     '#default_value' => $settings['style_id'],
+    '#process' => array('views_process_dependency'),
+    '#dependency' => array(
+      'edit-style-options-api' => array('cloudmade'),
+    ),
   );
   
   return $form;
 }
 
-function mapstraction_cloudmade_render($settings, $id) {
+function mapstraction_cloudmade_render($settings, $api_id, $id) {
   $output = mapstraction_openlayers_render($settings);
   $src = drupal_get_path('module', 'mapstraction') . '/cloudmade.js';
   $output .= "<script type='text/javascript' src='$src'></script>\n";
@@ -80,12 +109,12 @@ function mapstraction_cloudmade_render($settings, $id) {
       $(document).ready(function() {
         var cloudmade = new OpenLayers.Layer.CloudMade("CloudMade", {
           key: "' . $settings['api_key'] . '",
-      		styleId: ' . $settings['style_id'] . ',
-      	});
-      	Drupal.mapstraction["' . $id . '"].maps["openlayers"].addLayer(cloudmade);
+          styleId: ' . $settings['style_id'] . ',
+        });
+        Drupal.mapstraction["' . $id . '"].maps["openlayers"].addLayer(cloudmade);
       });';
-  
-  drupal_add_js($js, 'inline', 'footer');	
+
+  drupal_add_js($js, 'inline', 'footer');
   
   return $output;
 }
