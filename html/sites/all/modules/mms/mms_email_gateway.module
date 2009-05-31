@@ -9,6 +9,7 @@ function mms_email_gateway_get_map() {
     'messaging.nextel.com' => 'page.nextel.com',
     'mms.att.net' => 'txt.att.net',
     'vzwpix.com' => 'vtext.com',
+    'mms.tigo.com.co' => 'sms.tigo.com.co',
   );
 }
 
