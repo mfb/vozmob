@@ -44,7 +44,7 @@ msgid "SMS Registration"
 msgstr ""
 
 #: sms_registration.module:19
-msgid "Configure SMS registration settings"
+msgid "Configure SMS registration settings."
 msgstr ""
 
 #: sms_registration.info:0
