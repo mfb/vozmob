@@ -90,7 +90,14 @@ function sms_registration_mailsave_clean(&$node, $result, $i, $header, $mailbox)
         $node->uid = $user->uid;
         $node->name = $user->name;
         mailhandler_switch_user($node->uid);
-        if (!isset($email_registration_accounts[$to[0]])) {
+
+      watchdog('debug','this the email registration 2');
+      watchdog('debug',print_r($email_registration_accounts,TRUE));
+      watchdog('debug',print_r($email_registration_accounts[$to[0]],TRUE));
+      watchdog('debug',print_r($to[0],TRUE));
+      watchdog('debug',print_r(isset($email_registration_accounts[$to[0]]),TRUE));
+      
+        if ($email_registration_accounts != $to[0]) {
             watchdog('debug','AAAAAAAAAAAAAAAAAAAACA ENVIANDO MENSAJE');
           $message = t('Thanks! Do you want to have a blog in vozmob? If yes please send one word identifying the blog.');
           $options = array('carrier' => $from[1], 'from' => variable_get('sms_registration_address', ''), 'subject' => t('Media posted'), 'action' => 'registration');
@@ -98,10 +105,7 @@ function sms_registration_mailsave_clean(&$node, $result, $i, $header, $mailbox)
         }
       }
 
-      watchdog('debug','this the email registration 2');
-      watchdog('debug',print_r($email_registration_accounts[$to[0]],TRUE));
-      watchdog('debug',print_r($to[0],TRUE));
-      watchdog('debug',print_r(isset($email_registration_accounts[$to[0]]),TRUE));
+
 
       // If user has authenticated via mobile number and message was sent to a registration address.
       if (!empty($account->uid) && isset($email_registration_accounts[$to[0]])) {
