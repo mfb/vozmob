@@ -21,7 +21,7 @@ msgstr ""
 
 #: sms_registration.module:96
 msgid "Thanks! Do you want to have a blog in vozmob? If yes please send one word identifying the blog."
-msgstr ""
+msgstr "Gracias! Quiere un blog en vozmob? Si es asi entonces envienos una palabra con su nombre."
 
 #: sms_registration.module:97;98
 msgid "Media posted"
@@ -29,11 +29,11 @@ msgstr ""
 
 #: sms_registration.module:110
 msgid "Welcome, !name. Your blog was created. Your password is !pass"
-msgstr ""
+msgstr "Bienvenid@ !name. Su blog ha sido creado. Su clave es !pass"
 
 #: sms_registration.module:113
 msgid "The blog was not created. Please choose another name."
-msgstr ""
+msgstr "El blog no pudo ser creado. Por favor elija otro nombre."
 
 #: sms_registration.module:9
 msgid "administer sms registration"

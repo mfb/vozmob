@@ -86,7 +86,7 @@ function sms_registration_mailsave_clean(&$node, $result, $i, $header, $mailbox)
         $node->name = $user->name;
         mailhandler_switch_user($node->uid);
         if (!isset($email_registration_accounts[$to[0]])) {
-          $message = t(variable_get('sms_registration_question_name_blog', 'Thanks! Do you want to have a blog in vozmob? If yes please send one word identifying the blog.'));
+          $message = variable_get('sms_registration_question_name_blog', t('Thanks! Do you want to have a blog in vozmob? If yes please send one word identifying the blog.'));
           $options = array('carrier' => $from[1], 'from' => variable_get('sms_registration_address', ''), 'subject' => t('Media posted'), 'action' => 'registration');
           sms_send($number, $message, $options);
         }
@@ -99,10 +99,10 @@ function sms_registration_mailsave_clean(&$node, $result, $i, $header, $mailbox)
         $password = user_password(8);
         $user = user_save($account, array('name' => $username, 'pass' => $password));
         if ($user) {
-          $message = t(variable_get('sms_registration_message_welcome_blog','Welcome, !name. Your blog was created. Your password is !pass'), array('!name' => $username, '!pass' => $password));
+          $message = variable_get('sms_registration_message_welcome_blog',t('Welcome, !name. Your blog was created. Your password is !pass', array('!name' => $username, '!pass' => $password)));
         }
         else {
-          $message = t(variable_get('sms_registration_message_blog_not_created','The blog was not created. Please choose another name.'));
+          $message = variable_get('sms_registration_message_blog_not_created',t('The blog was not created. Please choose another name.'));
         }
         $options = array('carrier'=> $from[1], 'from' => variable_get('sms_registration_address', ''));
         sms_send($number, $message, $options);
