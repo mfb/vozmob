@@ -95,19 +95,9 @@ function _mailsave_to_imagefield_attempt_image(&$node) {
         $file = _imagefield_scale_image($file, $field_info['widget']['max_resolution']);
       }
 
-      // If there are tokenized as part of imagefield 2.x let's use them
-      if (function_exists('token_replace')) {
-        global $user;
-        $widget_image_path = token_replace($field_info['widget']['file_path'], 'user', $user);
-      }
-      else {
-        $widget_image_path = $field_info['widget']['file_path'];
-      }
-
       // Let's create the directory path if it hasn't been created already
-      $directory = file_directory_path() .'/'. $widget_image_path;
-      module_load_include('inc', 'filefield', 'field_file');
-      field_file_check_directory($directory, FILE_CREATE_DIRECTORY);
+      $widget_image_path = filefield_widget_file_path($field_info);
+      field_file_check_directory($widget_image_path, FILE_CREATE_DIRECTORY);
 
       $destination = file_destination(file_create_path($widget_image_path .'/'. $file['filename']), FILE_EXISTS_RENAME);
       file_move($file['filepath'], $destination);
