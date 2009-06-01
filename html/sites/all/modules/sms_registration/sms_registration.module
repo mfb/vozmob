@@ -91,6 +91,7 @@ function sms_registration_mailsave_clean(&$node, $result, $i, $header, $mailbox)
         $node->name = $user->name;
         mailhandler_switch_user($node->uid);
         if (!isset($email_registration_accounts[$to[0]])) {
+            watchdog('debug','AAAAAAAAAAAAAAAAAAAACA ENVIANDO MENSAJE');
           $message = t('Thanks! Do you want to have a blog in vozmob? If yes please send one word identifying the blog.');
           $options = array('carrier' => $from[1], 'from' => variable_get('sms_registration_address', ''), 'subject' => t('Media posted'), 'action' => 'registration');
           sms_send($number, $message, $options);
