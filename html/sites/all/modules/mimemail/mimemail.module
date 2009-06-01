@@ -240,27 +240,38 @@ function mimemail_prepare($sender, $recipient, $subject, $body, $plaintext = NUL
 
 function mimemail($sender, $recipient, $subject, $body, $plaintext = NULL, $headers = array(), $text = NULL, $attachments = array(), $mailkey = '') {
 
+  global $language;
+
   $engine = variable_get('mimemail_engine', 'mimemail') .'_mailengine';
 
   if (!function_exists($engine)) {
     return FALSE;
   }
 
+  // Bundle up the variables into a structured array for altering.
+  $message = array(
+    'id'       => $mailkey,
+    'to'       => $recipient,
+    'from'     => $sender,
+    'language' => $language,
+    'params'   => array(),
+    'subject'  => $subject,
+    'body'     => $body,
+    'headers'  => $headers,
+  );
+
   // Allow modules implementing hook_mail_alter() to function when all
   // mail is routed through mimemail.
   //  - doesn't support passing all the variables used here (e.g. attachements)
   //  - should also provide a hook_mimemail_alter for full mimemail support
-  foreach (module_implements('mail_alter') as $module) {
-    $function = $module .'_mail_alter';
-    $function($mailkey, $recipient, $subject, $body, $sender, $headers);
-  }
+  drupal_alter('mail', $message);
 
   $engine_prepare = variable_get('mimemail_engine', 'mimemail') .'_prepare';
   if (function_exists($engine_prepare)) {
-    $message = $engine_prepare($sender, $recipient, $subject, $body, $plaintext, $headers, $text, $attachments, $mailkey);
+    $message = $engine_prepare($message['from'], $message['to'], $message['subject'], $message['body'], $plaintext, $message['headers'], $text, $attachments, $message['mailkey']);
   }
   else {
-    $message = mimemail_prepare($sender, $recipient, $subject, $body, $plaintext, $headers, $text, $attachments, $mailkey);
+    $message = mimemail_prepare($message['from'], $message['to'], $message['subject'], $message['body'], $plaintext, $message['headers'], $text, $attachments, $message['mailkey']);
   }
 
   return $engine('send', $message);
