@@ -20,8 +20,7 @@ function sms_registration_menu() {
  * Implementation of hook_mail_alter().
  */
 function sms_registration_mail_alter(&$message) {
-    watchdog('debug',print_r($message, TRUE));
-  if (is_array($message) && isset($message['params']['options']['action']) && $message['params']['options']['action'] == 'registration') {
+  if (isset($message['params']['options']['action']) && $message['params']['options']['action'] == 'registration') {
     $message['headers']['Return-Path'] = variable_get('sms_registration_address', '');
   }
 }
