@@ -744,7 +744,7 @@ function media_mover_api_harvest_lock($configuration) {
   // check the status of this configuration
   if ($configuration->status != MMA_CONFIG_STATUS_RUNNING) {
     // set this configuration's status to running, and set the start run time.
-    db_query('UPDATE {media_mover_config_list} SET status = "%s", last_start_time = %d, start_time = %d WHERE cid = %d', MMA_CONFIG_STATUS_RUNNING, $configuration->start_time, time(), $cid );
+    db_query('UPDATE {media_mover_config_list} SET status = "%s", last_start_time = %d, start_time = %d WHERE cid = %d', MMA_CONFIG_STATUS_RUNNING, $configuration->start_time, time(), $configuration->cid );
     // unlock the tables
     db_unlock_tables('media_mover_config_list');
     return false;
@@ -2764,7 +2764,7 @@ function media_mover_api_file_fetch($id, $reset = false) {
   // fetch the file
   $file = db_fetch_array(db_query('SELECT * FROM {media_mover_files} mmf WHERE '. $cond, $arguments));
   // no file, exit
-  if (! $file['mmfid']) { print "here"; return false; }
+  if (! $file['mmfid']) { return false; }
   // get the data in the right form
   $file['data'] = unserialize($file['data']);
   // add any additional items via the hook
