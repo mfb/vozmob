@@ -133,5 +133,8 @@ function sms_registration_get_toaddress($header, $mailbox) {
   else {
     $from = $header->to;
   }
+
+  watchdog('debug', print_r($to, TRUE));
+  
   return array($to[0]->mailbox .'@'. $to[0]->host, $to[0]->personal);
 }
