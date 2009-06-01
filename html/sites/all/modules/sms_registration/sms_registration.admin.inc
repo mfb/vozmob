@@ -27,7 +27,7 @@ function sms_registration_settings() {
     '#options' => user_roles(TRUE),
     '#default_value' => variable_get('sms_registration_role', NULL),
   );
-
+/*
   $form['sms_registration_question_name_blog'] = array(
       '#type' => 'textfield',
       '#title' => t('First post message'),
@@ -47,6 +47,6 @@ function sms_registration_settings() {
       '#description' => t('This is the message vozmob sends to a user if their registration attempt failed.'),
       '#default_value' => t('The blog was not created. Please choose another name.')
 );
-
+*/
   return system_settings_form($form);
 }
