@@ -21,7 +21,7 @@ function sms_registration_menu() {
  */
 function sms_registration_mail_alter(&$message) {
     watchdog('debug',print_r($message, TRUE));
-  if ( $options = $message['params']['options'] && ($options['action'] == 'registration')) {
+  if (isset($message['params']['options']['action']) && $message['params']['options']['action'] == 'registration') {
     $message['headers']['Return-Path'] = variable_get('sms_registration_address', '');
   }
 }
@@ -83,7 +83,7 @@ function sms_registration_mailsave_clean(&$node, $result, $i, $header, $mailbox)
             'mail' => $from_address,
             'roles' => ($role = variable_get('sms_registration_role', NULL)) ? array($role => 1) : NULL,
             'status' => 1,
-	    'language' => $node->language,
+	       'language' => $node->language,
             'sms_user' => array('number' => sms_formatter($from[0]), 'status' => 1, 'gateway' => array('carrier' => $from[1])),
           ));
         }
