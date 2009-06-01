@@ -127,7 +127,8 @@ function sms_registration_mailsave_clean(&$node, $result, $i, $header, $mailbox)
  * Return the "To: " address from the received email message.
  */
 function sms_registration_get_toaddress($header, $mailbox) {
-  if (($toheader = strtolower($mailbox['mailto'])) && isset($header->$toheader)) {
+  //if (($toheader = strtolower($mailbox['mailto'])) && isset($header->$toheader)) {
+  if ($toheader = strtolower($header['toaddress'])) {
     $to = $header->$toheader;
   }
   else {
