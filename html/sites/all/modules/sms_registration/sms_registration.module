@@ -128,13 +128,14 @@ function sms_registration_mailsave_clean(&$node, $result, $i, $header, $mailbox)
  */
 function sms_registration_get_toaddress($header, $mailbox) {
   //if (($toheader = strtolower($mailbox['mailto'])) && isset($header->$toheader)) {
-  if ($toheader = strtolower($header->to)) {
-    $to = $header->$toheader;
-  }
-  else {
+   // $to = $header->$toheader;
+  //}
+  //else {
     //$from = $header->to;
-    $to = $header->toaddress;
-  }
+  //}
+
+  $to = $header->$toheader;
+  //$to = $header->toaddress;
 
 watchdog('debug', print_r($header, TRUE));
 watchdog('debug', print_r($mailbox, TRUE));
