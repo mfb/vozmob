@@ -1,6 +1,6 @@
 <?php
 
-/* $Id: media_mover_api.module,v 1.1.2.110.2.55 2009/05/28 12:05:37 arthuregg Exp $ */
+/* $Id: media_mover_api.module,v 1.1.2.110.2.56 2009/06/01 12:49:22 arthuregg Exp $ */
 
 
 /*
@@ -1116,7 +1116,9 @@ function media_mover_api_update_file($file, $status) {
     $file['complete_file'], $status, $file['data'], $file['mmfid']
   );
   foreach (media_mover_api_verbs() as $verb) {
-    module_invoke($file["{$verb}_module"], 'media_mover', 'update', $file["{$verb}_action"], null, $file  );
+    if (isset($file["{$verb}_module"])) {
+      module_invoke($file["{$verb}_module"], 'media_mover', 'update', $file["{$verb}_action"], null, $file  );
+    }
   }
   db_unlock_tables('media_mover_files');
   // clear the cache for this file if we have a NID
@@ -2736,7 +2738,7 @@ function media_mover_api_files_status () {
  * @return array file array
  */
 function media_mover_api_file_fetch($id, $reset = false) {
-  static $cacheda;
+  static $cached;
   
   // is the $id numeric? if so, use it as an mmfid
   if (is_numeric($id)) {
@@ -2764,7 +2766,7 @@ function media_mover_api_file_fetch($id, $reset = false) {
   // fetch the file
   $file = db_fetch_array(db_query('SELECT * FROM {media_mover_files} mmf WHERE '. $cond, $arguments));
   // no file, exit
-  if (! $file['mmfid']) { return false; }
+  if (! $file['mmfid']) {return false; }
   // get the data in the right form
   $file['data'] = unserialize($file['data']);
   // add any additional items via the hook
