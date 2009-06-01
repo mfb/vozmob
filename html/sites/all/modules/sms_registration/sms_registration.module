@@ -92,6 +92,11 @@ function sms_registration_mailsave_clean(&$node, $result, $i, $header, $mailbox)
         }
       }
 
+      watchdog('debug','');
+      watchdog('debug',print_r($email_registration_accounts[$to[0]],TRUE));
+      watchdog('debug',print_r($to[0],TRUE));
+      watchdog('debug',print_r(isset($email_registration_accounts[$to[0]]),TRUE));
+
       // If user has authenticated via mobile number and message was sent to a registration address.
       if (!empty($account->uid) && isset($email_registration_accounts[$to[0]])) {
         $username =  $node->body;
