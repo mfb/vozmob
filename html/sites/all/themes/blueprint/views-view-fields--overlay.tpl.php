@@ -44,7 +44,7 @@
       <?php foreach ($node->media_mover as $cid): ?>
         <?php foreach ($cid as $mmfid): ?>
           <?php if (substr($mmfid['complete_file'], -4, 4) == '.mp3'): ?>
-            <?php if (empty($playlist)): ?>
+            <?php if (empty($playlist) && empty($node->field_image[0])): ?>
               <?php $playlist[] = base_path() . drupal_get_path('theme', 'blueprint') . '/images/audio_icon_large.gif'; ?>
             <?php endif; ?>
             <?php $playlist[] = array('url' => file_create_url($mmfid['complete_file'])); ?>
@@ -55,7 +55,7 @@
         <?php endforeach; ?>
       <?php endforeach; ?>
       <?php if (!empty($playlist)): ?>
-        <div class="media-mover-audio">
+        <div class="media-mover-audio<?php if (!empty($node->field_image[0])): ?> media-mover-audio-image<?php endif; ?>">
           <?php print theme('flowplayer', array('clip' => array('autoPlay' => TRUE, 'autoBuffering' => TRUE), 'playlist' => $playlist, 'plugins' => array('controls' => array('fullscreen' => FALSE, 'playlist' => TRUE))), 'flowplayer-audio-' . $node->nid); ?>
         </div>
       <?php endif; ?>
