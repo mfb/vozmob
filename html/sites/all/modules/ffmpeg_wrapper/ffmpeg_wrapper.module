@@ -342,11 +342,13 @@ function ffmpeg_wrapper_can_decode($path) {
   // get the data on this file
   $file_data = ffmpeg_wrapper_file_data($path);
 
-  // some files have multiple formats attached to them
-  foreach(explode(',', $file_data['video']['codec']) as $type) {
-    // is this type in the array of items that we can decode?
-    if (in_array($type, $file_types)) {
-      return true;
+  foreach (array('video', 'audio') as $media) {
+    // some files have multiple formats attached to them
+    foreach(explode(',', $file_data[$media]['codec']) as $type) {
+      // is this type in the array of items that we can decode?
+      if (in_array($type, $file_types)) {
+        return true;
+      }
     }
   }
   return false;
