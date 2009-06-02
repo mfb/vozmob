@@ -31,7 +31,7 @@ Drupal.behaviors.overlayCycle = function() {
       },
       onLoad: function() {
         // Set up the slideshow.
-        this.getContent().find('div.views-field-field-image-fid span.field-content').each(function() {
+        this.getContent().find('div.views-field-field-image-fid div.field-content').each(function() {
           if (!this.loaded) {
             $(this).before('<div class="cycle-nav" id="cycle-nav-' + cycleIndex + '"></div>').cycle({ 
               fx:    'fade',
@@ -46,7 +46,7 @@ Drupal.behaviors.overlayCycle = function() {
       },
       onClose: function() {
         $.expose.close();
-        this.getContent().find('div.views-field-field-image-fid span.field-content').each(function() {
+        this.getContent().find('div.views-field-field-image-fid div.field-content').each(function() {
           $(this).cycle('pause');
         });
       }
