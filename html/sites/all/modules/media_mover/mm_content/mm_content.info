@@ -1,8 +1,0 @@
-; $Id: mm_content.info,v 1.4 2008/02/29 16:41:22 bdragon Exp $
-name = Media Mover CCK
-description = "Media Mover content (CCK) interfaces"
-package = "Media Mover"
-dependencies[] = media_mover_api
-dependencies[] = content
-; Not ready yet.
-;core = 6.x

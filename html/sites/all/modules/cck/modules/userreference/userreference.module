@@ -1,5 +1,5 @@
 <?php
-// $Id: userreference.module,v 1.106.2.41 2009/04/29 20:51:53 karens Exp $
+// $Id: userreference.module,v 1.106.2.42 2009/05/16 16:41:30 yched Exp $
 
 /**
  * @file
@@ -860,14 +860,16 @@ function userreference_user($type, &$edit, &$account) {
           // Only add tables when reverse link has been selected.
           if ($field['type'] == 'userreference' && !empty($field['widget']['reverse_link'])) {
             $db_info = content_database_info($field);
-            $search_tables[$db_info['table']] = $db_info['columns']['uid']['column'];
+            $search_tables[$db_info['table']][] = $db_info['columns']['uid']['column'];
           }
         }
       }
-      foreach ($search_tables as $table => $column) {
-        $ids = db_query(db_rewrite_sql("SELECT DISTINCT(n.nid), n.title, n.type FROM {node} n LEFT JOIN {". $table ."} f ON n.vid = f.vid WHERE f.". $column ."=". $account->uid. " AND n.status = 1"));
-        while ($data = db_fetch_object($ids)) {
-          $additions[$data->type][$data->nid] = $data->title;
+      foreach ($search_tables as $table => $columns) {
+        foreach ($columns as $column) {
+          $ids = db_query(db_rewrite_sql("SELECT DISTINCT(n.nid), n.title, n.type FROM {node} n LEFT JOIN {". $table ."} f ON n.vid = f.vid WHERE f.". $column ."=". $account->uid. " AND n.status = 1"));
+          while ($data = db_fetch_object($ids)) {
+            $additions[$data->type][$data->nid] = $data->title;
+          }
         }
       }
       $account->userreference = $additions;

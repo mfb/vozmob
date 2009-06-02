@@ -1,6 +1,6 @@
 <?php
 
-/* $Id: ffmpeg_wrapper.module,v 1.1.2.20.2.22 2009/03/16 13:10:02 zoo33 Exp $ */
+/* $Id: ffmpeg_wrapper.module,v 1.1.2.20.2.27 2009/04/20 21:18:45 zoo33 Exp $ */
 
 // This implements a wrapper for FFmpeg so that we don't have to reinvent the
 // the wheel every time we want to do something with video, audio, or images
@@ -75,6 +75,63 @@ function ffmpeg_wrapper_perm() {
 
 
 /**
+ * add a link to do conversion testing on the standard file display
+ * checks to make sure the file is usable by ffmpeg
+ *
+ * @param string $form_id
+ * @param array $form
+ */
+function ffmpeg_wrapper_form_alter(&$form, $form_state, $form_id) {
+  // if user does not have rights to test with ffmpeg
+  if (! user_access('administer ffmpeg wrapper')) {
+    return;
+  }
+
+  // Are there attached files?
+  if (isset($form['attachments']) && $files = $form['attachments']['wrapper']['files']) {
+    foreach ($files as $fid => $file) {
+      // check to make sure this is a file array and if this file is decodeable by ffmpeg
+      // we are dealing with a form element, so we have to make sure that this is the part that we want
+      if (is_array($file)) {
+        // can ffmpeg decode this?
+        if (ffmpeg_wrapper_can_decode($file['filepath']['#value'])) {
+          $arguments = array();
+          // are we on a node page? Add a $nid to the arguments
+          if ($nid = $form['#node']->nid) { $arguments[] = "nid=$nid"; }
+          // we need a path to the file to the arguments
+          $arguments[] = 'path='. $file['filepath']['#value'];
+           // create the link for test conversion
+          $link = '<br />'. l(t('Test convert file with FFmpeg'), 'admin/settings/ffmpeg_wrapper/test', array('query' => implode('&', $arguments)));
+          // now we alter the description of this item
+          $form['attachments']['wrapper']['files'][$fid]['description']['#description'] .= $link;
+        }
+      }
+    }
+  }
+}
+
+
+/**
+ * Implementation of Drupal 6's theme registry
+ * @return array
+ */
+function ffmpeg_wrapper_theme() {
+  return array(
+    'ffmpeg_wrapper_files_checkboxes' => array(
+      'arguments' => array('form' => NULL),
+    ),
+    'ffmpeg_wrapper_files_radios' => array(
+      'arguments' => array('form' => NULL),
+    ),
+  );
+}
+
+
+/* ************************************************ */
+/* FFmpeg Wrapper Admin Functions                   */
+/* ************************************************ */
+
+/**
  * Build the admin form.
  */
 function ffmpeg_wrapper_admin() {
@@ -82,7 +139,7 @@ function ffmpeg_wrapper_admin() {
   cache_clear_all('ffmpeg_wrapper_codecs', 'cache');
   cache_clear_all('ffmpeg_wrapper_output_formats', 'cache');
   cache_clear_all('ffmpeg_wrapper_file_formats', 'cache');
-  
+
   $form['ffmpeg_wrapper'] = array(
     '#type' => 'fieldset',
     '#title' => t('FFmpeg'),
@@ -172,63 +229,8 @@ function ffmpeg_wrapper_admin_validate($form, &$form_state) {
 }
 
 
-/**
- * add a link to do conversion testing on the standard file display
- * checks to make sure the file is usable by ffmpeg
- *
- * @param string $form_id
- * @param array $form
- */
-function ffmpeg_wrapper_form_alter(&$form, $form_state, $form_id) {
-  // if user does not have rights to test with ffmpeg
-  if (! user_access('administer ffmpeg wrapper')) {
-    return;
-  }
-
-  // Are there attached files?
-  if (isset($form['attachments']) && $files = $form['attachments']['wrapper']['files']) {
-    foreach ($files as $fid => $file) {
-      // check to make sure this is a file array and if this file is decodeable by ffmpeg
-      // we are dealing with a form element, so we have to make sure that this is the part that we want
-      if (is_array($file)) {
-        // can ffmpeg decode this?
-        if (ffmpeg_wrapper_can_decode($file['filepath']['#value'])) {
-          $arguments = array();
-          // are we on a node page? Add a $nid to the arguments
-          if ($nid = $form['#node']->nid) { $arguments[] = "nid=$nid"; }
-          // we need a path to the file to the arguments
-          $arguments[] = 'path='. $file['filepath']['#value'];
-           // create the link for test conversion
-          $link = '<br />'. l(t('Test convert file with FFmpeg'), 'admin/settings/ffmpeg_wrapper/test', array('query' => implode('&', $arguments)));
-          // now we alter the description of this item
-          $form['attachments']['wrapper']['files'][$fid]['description']['#description'] .= $link;
-        }
-      }
-    }
-  }
-
-  // @TODO do something for media mover here
-}
-
-
-/**
- * Implementation of Drupal 6's theme registry
- * @return array
- */
-function ffmpeg_wrapper_theme() {
-  return array(
-    'ffmpeg_wrapper_files_checkboxes' => array(
-      'arguments' => array('form' => NULL),
-    ),
-    'ffmpeg_wrapper_files_radios' => array(
-      'arguments' => array('form' => NULL),
-    ),
-  );
-}
-
-
 /* ************************************************ */
-/* FFmpeg Wrapper Internal Functions                */
+/* Interactions with ffmpeg                         */
 /* ************************************************ */
 
 /**
@@ -285,6 +287,8 @@ function ffmpeg_wrapper_run_command($command = '', $error_check = true, $path = 
 
 /**
  * builds a list of the ffmpeg vhook options installed on this machine
+ * @TODO we need to get more information on how the vhook system works and how
+ *       admins can utilize it
  *
  * @param string $path
  * @return array
@@ -332,23 +336,17 @@ function ffmpeg_wrapper_vhook_list($path = '') {
  *   TRUE if file is in the list of decodeable files.
  */
 function ffmpeg_wrapper_can_decode($path) {
-  $file_types = ffmpeg_wrapper_get_file_formats('decode');
-  $path_parts = pathinfo($path);
+  // get the kind of files
+  $file_types = ffmpeg_wrapper_get_codecs('decode');
 
-  // exception handling
-  // WMVs are sometimes asf files
-  $exception = '';
-  if (preg_match('/wmv/i', $path_parts['extension'])) {
-    $exception = 'asf';
-  }
+  // get the data on this file
+  $file_data = ffmpeg_wrapper_file_data($path);
 
-  if ($file_types) {
-    foreach ($file_types as $file_type) {
-      if ($path_parts['extension']) {
-        if (stristr($file_type, $path_parts['extension']) || stristr($file_type, $exception) ) {
-          return true;
-        }
-      }
+  // some files have multiple formats attached to them
+  foreach(explode(',', $file_data['video']['codec']) as $type) {
+    // is this type in the array of items that we can decode?
+    if (in_array($type, $file_types)) {
+      return true;
     }
   }
   return false;
@@ -505,16 +503,16 @@ function ffmpeg_wrapper_output_formats() {
  *   Array of key values.
  */
 function ffmpeg_wrapper_output_rates($type) {
-	static $rates;
-	if (! $rates) {
-	  $rates = array(
-	   'ab'  => array('16k' => '16k', '22k' => '22k', '32k' => '32k', '64k' => t('64k (default)'), '128k' => '128k', '192k' => '192k', '256k' => '256k'),
-	   'ar' => array('11025' => t('11khz'), '22050' => t('22khz'), '32000' => t('32khz'), '44100' => t('44.1khz (default)') ),
-       'fps' => array(10 =>10, 15 => 15, 20 => 20, 25 => t('25 (default)'), 29.97 => 29.97),
-       'br' => array('50k' => t('50kps'), '100k' => t('100kps'), '150k' => t('150kps'), '200k' => t('200kps'), '250k' => t('250kps (default)'), '300k' => t('300kps'), '500k' => t('500kps'), '750k' => t('750kps'), '1000k' => t('1000kps'), '1250k' => t('1250kps'), '1500k' => t('1500kps'), '2000k' => t('2000kps')),
-      );
-	}
-	return $rates[$type];
+  static $rates;
+  if (! $rates) {
+    $rates = array(
+     'ab'  => array('16k' => '16k', '22k' => '22k', '32k' => '32k', '64k' => t('64k (default)'), '128k' => '128k', '192k' => '192k', '256k' => '256k'),
+     'ar' => array('11025' => t('11khz'), '22050' => t('22khz'), '32000' => t('32khz'), '44100' => t('44.1khz (default)') ),
+     'fps' => array(10 => 10, 15 => 15, 20 => 20, 25 => t('25 (default)'), 29.97 => 29.97),
+     'br' => array('50k' => t('50kps'), '100k' => t('100kps'), '150k' => t('150kps'), '200k' => t('200kps'), '250k' => t('250kps (default)'), '300k' => t('300kps'), '500k' => t('500kps'), '750k' => t('750kps'), '1000k' => t('1000kps'), '1250k' => t('1250kps'), '1500k' => t('1500kps'), '2000k' => t('2000kps')),
+    );
+  }
+  return $rates[$type];
 }
 
 
@@ -549,11 +547,11 @@ function ffmpeg_wrapper_frame_sizes(){
  * @return
  *   Array of options.
  */
-function ffmpeg_wrapper_get_file_formats($ret = null) {
+function ffmpeg_wrapper_get_file_formats($ret = 'row') {
   $cache_id = 'ffmpeg_wrapper_file_formats';
   $cache = cache_get($cache_id, 'cache');
   // do we have cached data?
-  if (!isset($cache->data)) {
+  if (! isset($cache->data)) {
     // if we can't get formats, do not bother
     if (! $formats = ffmpeg_wrapper_run_command('-formats') ) {
       return;
@@ -565,13 +563,11 @@ function ffmpeg_wrapper_get_file_formats($ret = null) {
     //remove the header
     $formats = str_replace('File formats:', '', $formats);
 
-    $formats = explode("\n", $formats);
-
     $decode_formats = array();
     $encode_formats = array();
 
     $rows = array();
-    foreach ($formats as $format) {
+    foreach (explode("\n", $formats) as $format) {
       // match the decode, encode, format, description
       $pattern ='/[ ]*([D ])([E ])[ ]*([a-zA-Z0-9_,]*)[ ]*([a-zA-Z0-9,_ ]*)/';
       preg_match($pattern, $format, $matches);
@@ -579,29 +575,38 @@ function ffmpeg_wrapper_get_file_formats($ret = null) {
       $a_format['type'] = $matches[3];
       $a_format['name'] = $matches[4];
 
-      if (!empty($matches)) {
-        if ($matches[1] == 'D') {
-          $a_format['decode'] = t('yes');
+      // check for decoding
+      if ($matches[1] == 'D') {
+        $a_format['decode'] = t('yes');
+        // we can have multiple types per format
+        $types = explode(',', $a_format['name']);
+        foreach ($types as $type) {
           $decode_formats[] = $a_format['type'];
         }
-        else {
-          $a_format['decode'] = t('no');
-        }
-  
-        if ($matches[2] == 'E') {
-          $a_format['encode'] = t('yes');
+      }
+      else {
+        $a_format['decode'] = t('no');
+      }
+
+      // check for encoding
+      if ($matches[2] == 'E') {
+        $a_format['encode'] = t('yes');
+        // we can have multiple types per format
+        $types = explode(',', $a_format['name']);
+        foreach ($types as $type) {
           $encode_formats[] = $a_format['type'];
         }
-        else {
-          $a_format['encode'] = t('no');
-        }
-  
-        $a_format['description'] = $matches[4];
-        if ($a_format['description']) {
-          $rows[] = $a_format;
-        }
+      }
+      else {
+        $a_format['encode'] = t('no');
+      }
+
+      $a_format['description'] = $matches[4];
+      if ($a_format['description']) {
+        $rows[] = $a_format;
       }
     }
+
     $output = array();
     $output['encode'] = $encode_formats;
     $output['decode'] = $decode_formats;
@@ -611,7 +616,6 @@ function ffmpeg_wrapper_get_file_formats($ret = null) {
   else {
     $output = $cache->data;
   }
-
   // return the requested data
   return $output[$ret];
 }
@@ -668,7 +672,7 @@ function ffmpeg_wrapper_file_duration($path, $timecode = null, $output = null) {
  * @return array
  */
 function ffmpeg_wrapper_file_data($path = null) {
-  if ($path) {
+  if (file_exists($path)) {
     // get duration from ffmpeg
     $output = ffmpeg_wrapper_run_command("-i $path");
 
@@ -680,13 +684,11 @@ function ffmpeg_wrapper_file_data($path = null) {
     // get file duration
     $file['duration'] = ffmpeg_wrapper_file_duration(null, null, $output);
 
-    unset($matches);
     // get bit rate
     $pattern = "/bitrate: ([0-9].*\/s)/";
     preg_match($pattern, $output, $matches);
     $file['bitrate'] = !empty($matches[1]) ? $matches[1] : 'na';
 
-    unset($matches);
     // get audio settings
     // format is: codec, sample rate, stereo/mono, bitrate
     $pattern = "/Audio: (.*), ([0-9]*) Hz, (stereo|mono)/";
@@ -695,22 +697,47 @@ function ffmpeg_wrapper_file_data($path = null) {
     $file['audio']['ar'] = !empty($matches[2]) ? $matches[2] : 'na';
     $file['audio']['ac'] = (!empty($matches[3]) && $matches[3] == 'stereo') ? 2 : 1;
 
-    unset($matches);
     // take the last match and extract the bit rate if present
     $pattern = "/Audio: .* (.*) kb\/s/";
     preg_match($pattern, $output, $matches);
     $file['audio']['ab'] = !empty($matches[1]) ? $matches[1] : 'na';
 
-    // get video settings
-    // format is: codec, filetype?, frame size, kb/s
-    // Everything after frame size is optional, as it isn't always there.
-    $pattern = "/Video: ([^, ]*), ([^, ]*), ([0-9x]*)( \[.*\], ([0-9]*))?/";
-    preg_match($pattern, $output, $matches);
-    $file['video']['codec'] = !empty($matches[1]) ? $matches[1] : 'na';
-    // $file['video']['type'] = $matches[2];
-    $file['video']['s'] = !empty($matches[3]) ? $matches[3] : 'na';
-    $file['video']['br'] = !empty($matches[5]) ? $matches[5] : 'na';
+    // VIDEO ----------------------------------------
+    // The formating of video can be difficult. We use 3 different
+    // patterns to look for the video information
 
+    // try pattern that takes into account a codec's color space (example: yuv420p)
+    // eg: Video: mpeg1video, yuv420p, 320x240 [PAR 1:1 DAR 4:3], 990 kb/s, 30.00 tb(r)
+    // the above is: codec, color space, frame size, bitrate, frame rate
+    $pattern1 = "/Video: ([^,]+), ([^,]+), ([0-9x]+)[^,]*, ([0-9]*.*\/s|[A-Za-z]+[^,]*), ([0-9\.]*)/";
+
+    // pattern that omits video bitrate but not color space.
+    // eg: Video: mpeg4, yuv420p, 640x480 [PAR 1:1 DAR 4:3], 23.98 tb(r)
+    // the above is: codec, color space, frame size, frame rate
+    $pattern2 = "/Video: ([^,]+), ([^0-9][^,]*), ([0-9x]+)[^,]*, ([0-9\.]*)/";
+
+    // pattern that omits a codec's color space and video bitrate
+    // eg: Video: mpeg4, 640x480, 29.97 tb(r)
+    // the above is: codec, frame size, frame rate
+    $pattern3 = "/Video: ([^,]+), ([0-9x]+)[^,]*, ([0-9\.]*)/";
+
+    // did we find the video information on the first try ?
+    if (preg_match($pattern1, $output, $matches)) {
+      $file['video']['codec'] = !empty($matches[1]) ? $matches[1] : 'na';
+      // $file['video']['type'] = $matches[2];
+      $file['video']['s'] = !empty($matches[3]) ? $matches[3] : 'na';
+      $file['video']['br'] = !empty($matches[4]) ? $matches[4] : 'na';
+    }
+    elseif (preg_match($pattern2, $output, $matches)) {
+      $file['video']['codec'] = !empty($matches[1]) ? $matches[1] : 'na';
+      $file['video']['s'] = !empty($matches[3]) ? $matches[3] : 'na';
+      $file['video']['br'] = 'na';
+    }
+    elseif (preg_match($pattern3, $output, $matches)) {
+      $file['video']['codec'] = !empty($matches[1]) ? $matches[1] : 'na';
+      $file['video']['s'] = !empty($matches[3]) ? $matches[3] : 'na';
+      $file['video']['br'] = 'na';
+    }
     return $file;
   }
 }
@@ -723,19 +750,19 @@ function ffmpeg_wrapper_file_data($path = null) {
  *   Path to the file to be converted.
  * @param $size
  *   The maximum dimensions of the output file, expressed as XXXxYYY. This will
- *   be cropped to match the original file's proportions and the remaining 
+ *   be cropped to match the original file's proportions and the remaining
  *   space will be used to calculate the padding.
  * @param $return
  *   Either 'padding' or 'size'.
  * @return
- *   Depending on the value of $return, the function returns either the size 
- *   expressed as XXXxYYY, or the actual padding argument for FFmpeg, ie. 
- *   "-padtop XX -padbottom XX". The result is statically cached, so you can 
+ *   Depending on the value of $return, the function returns either the size
+ *   expressed as XXXxYYY, or the actual padding argument for FFmpeg, ie.
+ *   "-padtop XX -padbottom XX". The result is statically cached, so you can
  *   call it multiple times without permormance issues.
  */
 function ffmpeg_wrapper_padded_size($file, $size, $return = 'padding') {
   static $file_proportions;
-  
+
   // Cache file proportions statically.
   if (!isset($file_proportions)) {
     $file_proportions = array();
@@ -743,43 +770,48 @@ function ffmpeg_wrapper_padded_size($file, $size, $return = 'padding') {
   if (isset($file_proportions[$file])) {
     return ($return == 'size') ? $file_proportions[$file][0] : $file_proportions[$file][1];
   }
-  
+
   else {
     $pad = '';
-    
+
     // Determine source file's dimensions and proportions.
     $info = ffmpeg_wrapper_file_data($file);
     if ($info) {
       list($orig_x, $orig_y) = explode('x', $info['video']['s']);
       $orig_q = $orig_x / $orig_y;
-      
+
       // Determine output dimensions and proportions.
       list($dest_x, $dest_y) = explode('x', $size);
       $dest_q = $dest_x / $dest_y;
-      
+
       // Calculate new output size and padding.
       if ($orig_q > $dest_q) {
         // Width is the determining factor.
         $dest_y_calc = round($dest_x / $orig_q);
         // Make sure height is divisible by 2, otherwise ffmpeg freaks out.
         $dest_y_calc &= ~1;
-        $padding1 = floor(($dest_y - $dest_y_calc) / 2);
-        $padding2 = $dest_y - $dest_y_calc - $padding1;
-        $pad = sprintf('-padtop %d -padbottom %d', $padding, $padding);
         $size = $dest_x . 'x' . $dest_y_calc;
+        $padding = $dest_y - $dest_y_calc;
+        $padoptions = '-padtop %d -padbottom %d';
       }
       elseif ($dest_q > $orig_q) {
         // Height is the determining factor.
         $dest_x_calc = round($dest_y * $orig_q);
         // Make sure width is divisible by 2, otherwise ffmpeg freaks out.
         $dest_x_calc &= ~1;
-        $padding1 = round(($dest_x - $dest_x_calc) / 2);
-        $padding2 = $dest_x - $dest_x_calc - $padding1;
-        $pad = sprintf('-padleft %d -padright %d', $padding, $padding);
         $size = $dest_x_calc . 'x' . $dest_y;
+        $padding = $dest_x - $dest_x_calc;
+        $padoptions = '-padleft %d -padright %d';
       }
+      
+      // Calculate padding on each side. Each value has to be a multiple of 2.
+      $padding &= ~1;
+      $padding1 = floor($padding / 2);
+      $padding1 &= ~1;
+      $padding2 = $padding - $padding1;
+      $pad = sprintf($padoptions, $padding1, $padding2);
     }
-    
+
     // Save and return the results.
     $file_proportions[$file] = array($size, $pad);
     return ($return == 'size') ? $size : $pad;
@@ -866,7 +898,7 @@ function ffmpeg_wrapper_error_check(&$ffmpeg_object, $watchdog = true) {
 
   // check for error conditions
   foreach ($errors as $error) {
-  	preg_match($error, $ffmpeg_object->output, $matches);
+    preg_match($error, $ffmpeg_object->output, $matches);
     if (count($matches)) {
       $ffmpeg_object->errors[] = print_r($matches[0], true);
       if ($watchdog) {
@@ -993,7 +1025,7 @@ function ffmpeg_wrapper_enable_js($prefix = '', $bind_element = '') {
   drupal_add_js(array('ffmpeg_wrapper' => array(
     'ffmpeg_wrapper_output_url' => url('ffmpeg_wrapper/output/'),
     'default_string' => t('default'),
-	 )), 'setting');
+   )), 'setting');
   drupal_add_js(drupal_get_path('module', 'ffmpeg_wrapper') .'/ffmpeg_wrapper.js');
 }
 

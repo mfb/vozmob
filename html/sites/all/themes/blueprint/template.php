@@ -128,6 +128,35 @@ function phptemplate_preprocess_node(&$vars) {
   // jquery_plugin_add('jquery.sound');
   // drupal_add_js(drupal_get_path('theme', 'blueprint') . '/scripts/jquery.sound.js', 'theme');
 
+  // Hackish way of adding video thumbnail into the node view.
+  // This should get cleaned up (e.g. using CCK to render media mover video).
+  $vars['overlay_launcher'] = FALSE;
+  if (empty($node->field_image[0]['view']) &&  !empty($node->media_mover)) {
+    foreach ($node->media_mover as $cid) {
+      foreach ($cid as $mmfid) {
+        if (substr($mmfid['complete_file'], -4, 4) == '.jpg') {
+          $vars['overlay_launcher'] = TRUE;
+          $vars['overlay_launcher_image'] = $mmfid['complete_file'];
+          break 2;
+        }
+      }
+    }
+  }
+
+  // Hackish way of adding audio overlay launcher into the node view.
+  // This should get cleaned up (e.g. using CCK to render media mover audio).
+  if (!$vars['overlay_launcher'] && empty($node->field_image[0]['view']) && !empty($node->media_mover)) {
+    foreach ($node->media_mover as $cid) {
+      foreach ($cid as $mmfid) {
+        if (substr($mmfid['complete_file'], -4, 4) == '.mp3') {
+          $vars['overlay_launcher'] = TRUE;
+          $vars['overlay_launcher_image'] = drupal_get_path('theme', 'blueprint') . '/images/' . ($vars['teaser'] ? 'audio_icon_whitebg.gif' : 'audio_icon_large.gif');
+          break 2;
+        }
+      }
+    }
+  }
+
   switch ($node->type) {
     case 'page':
       break;

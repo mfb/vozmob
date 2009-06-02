@@ -51,23 +51,6 @@ function mms_us_tmobile_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
 
     }
 
-    // Set node title and reset the body if the author just puts short text in the body
-    if (empty($node->title) && !empty($node->body) && strlen($node->body) <= 60) {
-      $node->title = truncate_utf8(strip_tags($body), 60, TRUE, TRUE);
-      $node->body = '';
-    }
-
-    // If there is no title and a long body, use body to set the title
-    if (empty($node->title) && !empty($node->body)) {
-      $node->title = truncate_utf8(strip_tags($body), 60, TRUE, TRUE);
-    }
-
-    // If there is no title and no body, create a generic title
-    // Maybe this needs to be generic in mailsave or mailsave_to_image?
-    if (empty($node->title) && empty($node->body)) {
-      $node->title = t('Mobile Submission');
-    }
-
     // Get rid of extra text attachments
     foreach ($node->mailsave_attachments as $key => $file) {
       if ($file['filemime'] == 'text/plain') {

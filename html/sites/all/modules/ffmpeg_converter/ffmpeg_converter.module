@@ -1,6 +1,6 @@
 <?php
 
-// $Id: ffmpeg_converter.module,v 1.35 2009/03/15 08:56:32 zoo33 Exp $
+// $Id: ffmpeg_converter.module,v 1.39 2009/04/20 21:11:45 zoo33 Exp $
 
 /**
  * @file
@@ -129,7 +129,7 @@ function ffmpeg_converter_field_settings(&$form, $form_state) {
  */
 function ffmpeg_converter_fieldconfig_validate($form, &$form_state) {
   $form_item_id = 'ffmpeg_converter_' . $form['#field']['field_name'];
-  if ($form_state['values'][$form_item_id] != 'disabled') {
+  if ($form_state['values'][$form_item_id]['preset'] != 'disabled') {
     if ($form_state['values']['multiple'] != 1 && $form_state['values']['multiple'] < 5) {
       form_set_error('multiple', t('In order to use a FFmpeg Converter preset with this field, the Multiple value has to be at least 5 or Unlimited. You must either change the Multiple value or disable the FFmpeg Converter setting.'));
     }
@@ -458,12 +458,15 @@ function ffmpeg_converter_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
               // TODO: Respect user's option to hide or show original files.
               if (!empty($original) && empty($converted)) {
                 list($field_instance, $file) = array_pop($original);
-                unset($node->content[$field['field_name']]['field']['items'][$field_instance]);
-                // Add message to node content for files that are being converted.
-                $view_messages[] = array(
-                  'message' => t('The file %file is waiting to be converted.', array('%file' => $file['filename'])),
-                  'filename' => $file['filename'],
-                );
+                // Make sure that original file even needs to be converted.
+                if(ffmpeg_converter_check_file($file['filename'], $preset_key)) {
+                  unset($node->content[$field['field_name']]['field']['items'][$field_instance]);
+                  // Add message to node content for files that are being converted.
+                  $view_messages[] = array(
+                    'message' => t('The file %file is waiting to be converted.', array('%file' => $file['filename'])),
+                    'filename' => $file['filename'],
+                  );
+                }
               }
               break;
           }      
@@ -622,6 +625,9 @@ function ffmpeg_converter_convert_filefield($nid, $field_name, $field_instance, 
   
   $node = node_load($nid);
   
+  // Clear the cached list of queued files.
+  cache_clear_all('ffmpeg_converter_queued_files', 'cache');
+  
   // Check the necessary prerequisites.
   if (empty($node) || empty($node->{$field_name}[$field_instance]['fid']) || !function_exists('content_fields')) {
     return false;
@@ -739,8 +745,6 @@ function ffmpeg_converter_convert_filefield($nid, $field_name, $field_instance, 
   watchdog('ffmpeg_converter','FFmpeg converted the file %file to @format.',
            array('%file' => basename($input_file), '@format' => $configuration['ffmpeg_output_type']), 
            WATCHDOG_NOTICE, l(t('Source node'), 'node/' . $node->nid));
-
-  cache_clear_all('ffmpeg_converter_queued_files', 'cache');
 }
 
 
@@ -1060,22 +1064,26 @@ function ffmpeg_converter_get_padded_size($file, $size, $return = 'padding') {
         $dest_y_calc = round($dest_x / $orig_q);
         // Make sure height is divisible by 2, otherwise ffmpeg freaks out.
         $dest_y_calc &= ~1;
-        $padding1 = floor(($dest_y - $dest_y_calc) / 2);
-        $padding2 = $dest_y - $dest_y_calc - $padding1;
-        $pad = sprintf('-padtop %d -padbottom %d', $padding, $padding);
         $size = $dest_x . 'x' . $dest_y_calc;
+        $padding = $dest_y - $dest_y_calc;
+        $padoptions = '-padtop %d -padbottom %d';
       }
       elseif ($dest_q > $orig_q) {
         // Height is the determining factor.
         $dest_x_calc = round($dest_y * $orig_q);
         // Make sure width is divisible by 2, otherwise ffmpeg freaks out.
         $dest_x_calc &= ~1;
-        $padding1 = round(($dest_x - $dest_x_calc) / 2);
-        $padding2 = $dest_x - $dest_x_calc - $padding1;
-        $pad = sprintf('-padleft %d -padright %d', $padding, $padding);
         $size = $dest_x_calc . 'x' . $dest_y;
+        $padding = $dest_x - $dest_x_calc;
+        $padoptions = '-padleft %d -padright %d';
       }
       
+      // Calculate padding on each side. Each value has to be a multiple of 2.
+      $padding &= ~1;
+      $padding1 = floor($padding / 2);
+      $padding1 &= ~1;
+      $padding2 = $padding - $padding1;
+      $pad = sprintf($padoptions, $padding1, $padding2);
     }
 
     // Save and return the results.

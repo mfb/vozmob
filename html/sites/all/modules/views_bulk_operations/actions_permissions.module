@@ -1,5 +1,5 @@
 <?php
-// $Id: actions_permissions.module,v 1.1.2.1 2009/03/02 05:35:03 kratib Exp $
+// $Id: actions_permissions.module,v 1.1.2.2 2009/05/10 06:47:43 kratib Exp $
 
 /**
  * Implementation of hook_perm().
@@ -9,6 +9,13 @@ function actions_permissions_perm() {
   $actions = actions_list() + _actions_permissions_get_custom_actions();
   foreach ($actions as $callback => $action) {
     $perms[] = 'execute ' . $action['description'] . ' ('. $callback . ')';
+  }
+  module_load_include('inc', 'node', 'node.admin');
+  foreach (array('node', 'user') as $type) {
+    foreach (module_invoke_all($type .'_operations') as $operation) {
+      if (is_array($operation['label']) || empty($operation['callback'])) continue;
+      $perms[] = 'execute ' . $operation['label'] . ' ('. $operation['callback'] . ')';
+    }
   }
   return $perms;
 }

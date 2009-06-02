@@ -1,0 +1,169 @@
+<?php
+
+// $Id$
+
+/**
+ * Implementation of media_mover hook
+ * @param $op is the operator to return
+ * @param $action is which action is being called
+ * @param $verb is the verb being run
+ * @param $configuration is the specific configuration saved for the action for this configuration
+ * @param $file is the file in use
+ * @param $job is the full configuration data currently running
+ */
+function mm_antiword_media_mover($op = null, $action = null, $configuration = null, &$file = array(), $job = null, $nid = null ) {
+  switch ($op) {
+
+    // give your module a distinct name
+    case 'name':
+      return "Media Mover Antiword";
+    break;
+
+    // defines the actions that this module does
+    case 'actions':
+      return array(
+        'process' => array(
+          1 => t('Convert incoming file'),
+        ),
+      );
+    break;
+
+    // create edit configuration option set
+    case 'config':
+      return mm_antiword_config($action, $configuration, $op);
+    break;
+
+    case 'process':
+      return mm_antiword_process($file, $configuration);
+
+    case 'admin':
+      return mm_antiword_admin();
+    break;
+  }
+}
+
+
+/**
+ * Creates the configuration form
+ * @param $action
+ * @param $configuration
+ * @param $verb
+ *   what verb is currently being called
+ * @return array
+ */
+function mm_antiword_config($action, $configuration, $verb) {
+  $form['mm_antiword'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Antiword Conversion'),
+    '#description' => t('This will convert incoming files into the selected filetype .'),
+    '#collapsed' => false,
+  );
+  $form['mm_antiword']['mm_antiword_output_type'] = array(
+    '#type' => 'select',
+    '#title' => t('Output File Type'),
+    '#options' => array('pdf' => 'pdf', 'txt' => 'txt', 'ps' => 'ps'),
+    '#default_value' => $configuration['mm_antiword_output_type'],
+    '#description' => t('Antiword will do its best to convert the incoming document. Complex documents may not convert perfectly'),
+  );
+  $form['mm_antiword']['mm_antiword_page_size'] = array(
+    '#type' => 'select',
+    '#title' => t('Output Page Size'),
+    '#options' => array('letter' => 'letter', 'a4' => 'a4'),
+    '#default_value' => $configuration['mm_antiword_page_size'],
+    '#description' => t('For ps and pdf output, a page size needs to be set.'),
+  );
+  $form['mm_antiword']['mm_antiword_output_char_type'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Text Encoding'),
+    '#default_value' => $configuration['mm_antiword_output_char_type'] ? $configuration['mm_antiword_output_char_type'] : 'MacRoman',
+    '#description' => t('Please specify the chararacter set you are converting with.'),
+  );
+  return $form;
+}
+
+
+/**
+ * Provides the administration settings
+ * @return unknown_type
+ */
+function mm_antiword_admin() {
+  $form['mm_antiword'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Media Mover Antiword Document Converter'),
+  );
+  $form['mm_antiword']['mm_antiword_path'] = array(
+    '#title' => t('Path to Antiword binary'),
+    '#type' => 'textfield',
+    '#default_value' => variable_get('mm_antiword_path', '/usr/bin/antiword'),
+    '#descript' => t('Path to the Antiword binary. You can find it by using the command line and typing "which antiword"'),
+  );
+
+  return $form;
+}
+
+
+/**
+ * Runs the actual processing of the file
+ * @param $file
+ *   media mover file array
+ * @param $configuration
+ *   media mover configuration
+ * @return string
+ */
+function mm_antiword_process($file, $configuration) {
+  // Is the path correct to the Zip binary?
+  if (! file_exists(variable_get('mm_antiword_path', '/usr/bin/antiword'))) {
+    watchdog('MM Antiword', 'Path to anitword binary was not found', null, WATCHDOG_ERROR);
+    return;
+  }
+  // get the path to Zip
+  $path_to_antiword = variable_get('mm_antiword_path', '/usr/bin/antiword');
+
+  // get the path to the file to operate on. We need this
+  // to pass out of the function
+  $file_path = media_mover_api_config_current_file($file);
+
+  // create the output file path in the media mover files directory
+  $output_file = media_mover_api_dir_path($configuration['module'] .'/'. $configuration['action']) .'/'. basename($file_path) .'.'. $configuration['mm_antiword_output_type'];
+
+  // build the command
+  $command = array(
+    $path_to_antiword,
+    '-m '. $configuration['mm_antiword_output_char_type'],
+    mm_antiword_output_configuration($configuration),
+    escapeshellarg($file_path),
+    '>',
+    escapeshellarg($output_file),
+  );
+
+  // run the command
+  ob_start();
+    passthru(implode(' ', $command), $command_return);
+    $output = ob_get_contents();
+  ob_end_clean();
+
+  // return the converted file
+  return $output_file;
+}
+
+
+/**
+ * Sets specific configuration information for the specified output type
+ * @param $configuration
+ *   array, media mover configuration values
+ * @return string
+ *
+ */
+function mm_antiword_output_configuration($configuration) {
+  switch ($configuration['mm_antiword_output_type']) {
+    case 'pdf':
+      $configuration = '-a '. $configuration['mm_antiword_page_size'];
+    break;
+    case 'ps':
+      $configuration = '-p '. $configuration['mm_antiword_page_size'];
+    break;
+    case 'txt':
+    break;
+  }
+  return $configuration;
+}

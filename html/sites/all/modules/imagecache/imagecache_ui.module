@@ -1,5 +1,5 @@
 <?php
-// $Id: imagecache_ui.module,v 1.30 2009/03/31 03:11:26 drewish Exp $
+// $Id: imagecache_ui.module,v 1.32 2009/05/03 16:31:43 drewish Exp $
 
 /**
  * Administrative interface to imagecache.
@@ -40,7 +40,7 @@ function imagecache_ui_menu() {
     'title' => 'Add new preset',
     'file' => 'imagecache_ui.pages.inc',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('imagecache_ui_preset_add_form'),
+    'page arguments' => array('imagecache_ui_preset_form'),
     'access arguments' => array('administer imagecache'),
     'type' => MENU_LOCAL_TASK,
   );
@@ -95,8 +95,8 @@ function imagecache_ui_menu() {
     'title callback' => 'imagecache_preset_title_callback',
     'title arguments' => array('Add !actionname to !presetname', 3, 5),
     'file' => 'imagecache_ui.pages.inc',
-    'page callback' => 'drupal_get_form',
-    'page arguments' => array('imagecache_ui_action_add_form', 3, 5),
+    'page callback' => 'imagecache_ui_action_add_page',
+    'page arguments' => array(3, 5),
     'access arguments' => array('administer imagecache'),
     'type' => MENU_CALLBACK,
   );

@@ -1,5 +1,5 @@
 <?php
-// $Id: sms.module,v 1.8.2.11 2009/03/10 18:49:02 diggersf Exp $
+// $Id: sms.module,v 1.8.2.9.2.1 2009/03/10 19:13:28 diggersf Exp $
 
 /**
  * @file
@@ -44,6 +44,10 @@ function sms_send($number, $message, $options = array()) {
  *   The content of the text message.
  */
 function sms_incoming($number, $message, $options = array()) {
+  if (module_exists('rules')) {
+    rules_invoke_event('sms_incoming', $number, $message);
+  }
+
   // Execute three phases
   module_invoke_all('sms_incoming', 'pre process', $number, $message, $options);
   module_invoke_all('sms_incoming', 'process', $number, $message, $options);

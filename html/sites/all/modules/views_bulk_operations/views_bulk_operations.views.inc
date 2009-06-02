@@ -1,5 +1,5 @@
 <?php
-// $Id: views_bulk_operations.views.inc,v 1.1.2.8 2008/09/21 07:13:30 kratib Exp $
+// $Id: views_bulk_operations.views.inc,v 1.1.2.9 2009/05/04 06:32:48 kratib Exp $
 
 function views_bulk_operations_views_plugins() {
   return array(
@@ -13,6 +13,7 @@ function views_bulk_operations_views_plugins() {
         'uses fields' => TRUE,
         'uses options' => TRUE,
         'type' => 'normal',
+        'theme' => 'views_view_bulk',
       ),
     ),
   );

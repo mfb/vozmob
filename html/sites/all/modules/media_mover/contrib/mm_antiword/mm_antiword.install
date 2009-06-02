@@ -1,0 +1,21 @@
+<?php
+
+// $Id: mm_antiword.install,v 1.1.2.1 2009/03/01 17:18:16 arthuregg Exp $
+
+/**
+ * implementation of hook_uninstall()
+ */
+function mm_antiword_uninstall() {
+  db_query('DELETE FROM {variable} WHERE name LIKE "mm_antiword_%"');
+}
+
+/**
+ * implementation of hook_install
+ */
+function mm_antiword_install() {
+  // see if we can find antiword
+  if ($path = exec('export PATH=$PATH:/sw/bin:/bin:/usr/bin; which antiword')) {
+    variable_set('mm_antiword_path', $path);
+    drupal_set_message(t('Media Mover Antiword was installed and the path to the binary has been set. You should now be able to convert files'));
+  }
+}

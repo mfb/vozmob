@@ -1,0 +1,6 @@
+; $Id: mm_zip.info,v 1.1.2.1 2008/12/08 15:58:01 arthuregg Exp $
+name = Media Mover Zip Compression
+description = Provides Zip compression for Media Mover files
+package = "Media Mover"
+core = 6.x
+dependencies[] = media_mover_api

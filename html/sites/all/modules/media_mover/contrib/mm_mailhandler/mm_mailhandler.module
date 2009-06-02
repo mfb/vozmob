@@ -1,0 +1,416 @@
+<?php
+
+// $Id: mm_mailhandler.module,v 1.1.2.3 2009/04/01 13:56:04 arthuregg Exp $;
+
+define('MM_EMAIL_ATTACHMENTS_SUBDIRECTORY', 'email_attachements');
+define('MM_EMAIL_WATCHDOG_TYPE', 'media_mover');
+
+
+/* ************************************************ */
+/* Drupal Hooks */
+/* ************************************************ */
+
+
+/**
+ * Implementation of hook_help().
+ */
+function mm_mailhandler_help($path, $arg) {
+  switch ($path) {
+    case 'admin/modules#description' :
+      return t('Harvest module for Media Mover. Allows users to retrieve email attachments for furthur processing.');
+  }
+  return;
+}
+
+
+/**
+ * Implementation of hook_menu()
+ *
+ * @return array
+ */
+function mm_mailhandler_menu() {
+  $items = array();
+  $items['admin/build/media_mover/tests/mm_mailhandler'] = array(
+    'title' => 'MailHandler Test',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mm_mailhandler_test_form'),
+    'access arguments' => array('administer media_mover'),
+    'type' => MENU_LOCAL_TASK,
+  );
+  return $items;
+}
+
+
+/* ************************************************ */
+/* Media Mover hook  functions */
+/* ************************************************ */
+
+/**
+ * Implementation of media_mover hook
+ */
+function mm_mailhandler_media_mover($op, $action_id = null, $configuration = null, &$file = array(), $running_config = null) {
+  switch ($op) {
+    // give your driver a distinct name
+    case 'name':
+      return "Harvest email content";
+    break;
+
+    // create edit configuration option set
+    case 'config':
+      return mm_mailhandler_harvest_config($action_id, $configuration);
+    break;
+
+    // defines the actions that this module does
+    case 'actions' :
+      return array (
+        'harvest' => array(t('Harvest attachements from an email account.'))
+      );
+    break;
+
+    // functions called on harvest op
+    // returns an array of $files
+    case 'harvest':
+      return mm_mailhandler_harvest($configuration);
+    break;
+
+  }
+  return;
+}
+
+
+/**
+ * Config config form for media mover
+ * creates the options for each configuration instance
+ *
+ */
+function mm_mailhandler_harvest_config($action_id, $configuration) {
+  // alert the user if this isn't going to work
+  mm_mailhandler_check();
+
+  $form['mm_mailhandler'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Email Harvest Configuration'),
+    '#collapsed' => false,
+    '#element_validate' => array('mm_mailhandler_configuration_validate'),
+  );
+
+  $form['mm_mailhandler']['mm_mailhandler_formats'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Allowed File Types'),
+    '#description' => t('A list of allowed file types, separated by a space'),
+    '#default_value' => $configuration['mm_mailhandler_formats'] ? $configuration['mm_mailhandler_formats'] : variable_get('mm_mailhandler_formats', 'mov mp4 mp3 avi 3gp 3g2 divx xvid wmv asf mpg mpeg mpeg4 jpeg'),
+  );
+
+  $form['mm_mailhandler']['domain'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Server address'),
+    '#default_value' => $configuration['domain'],
+    '#description' => t('The domain of the server used to collect mail, eg: google.com'),
+  );
+
+  $form['mm_mailhandler']['name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Username for mailbox'),
+    '#default_value' => $configuration['name'],
+    '#description' => t('This username is used while logging into this mailbox during mail retrieval.'),
+  );
+  
+   $form['mm_mailhandler']['pass'] = array(
+    '#type' => 'textfield',
+    '#title' => t('User password for mailbox'),
+    '#default_value' => $configuration['pass'],
+    '#description' => t('The password corresponding to the username above. Consider using a non-vital password, since this field is stored without encryption in the database.'),
+  );
+  
+  $form['mm_mailhandler']['port'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Mailbox port'),
+    '#size' => 5, '#maxlength' => 5,
+    '#default_value' => $configuration['port'],
+    '#description' => t('The port of the mailbox used to collect mail (usually 110 for POP3, 143 for IMAP).'),
+  );
+
+  
+  $form['mm_mailhandler']['imap'] = array(
+    '#type' => 'select',
+    '#title' => t('POP3 or IMAP Mailbox'),
+    '#options' => array('POP3', 'IMAP'),
+    '#default_value' => $configuration['imap'],
+    '#description' => t('If you wish to retrieve mail from a POP3 or IMAP mailbox instead of a Folder, select POP3 or IMAP. Also, complete the Mailbox items below.'),
+  );
+  
+  // Allow administrators to configure the mailbox with extra IMAP commands (notls, novalidate-cert etc.)
+  $form['mm_mailhandler']['extraimap'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Extra commands'),
+    '#default_value' => $configuration['extraimap'],
+    '#description' => t('Optional. In some circumstances you need to issue extra commands to connect to your mail server (e.g. "/notls", "/novalidate-cert" etc.). See documentation for <a href="http://php.net/imap_open">imap_open</a>. Begin the string with a "/", separating each subsequent command with another "/".'),
+  );
+
+  $form['mm_mailhandler']['mime'] = array(
+    '#type' => 'select',
+    '#title' => t('Mime preference'),
+    '#options' => array(
+      'TEXT/HTML,TEXT/PLAIN' => 'HTML',
+      'TEXT/PLAIN,TEXT/HTML' => t('Plain text'),
+    ),
+    '#default_value' => $configuration['mime'],
+    '#description' => t('When a user sends an e-mail containing both HTML and plain text parts, use this part as the node body.'),
+  );
+
+  $form['mm_mailhandler']['delete_after_read'] = array('#type' => 'checkbox', '#title' => t('Delete messages after they are processed?'), '#default_value' => $configuration['delete_after_read'], '#description' => t('Uncheck this box to leave read messages in the mailbox. They will not be processed again unless they become marked as unread.'));
+
+  return $form;
+}
+
+
+/**
+ * validates the settings of this configuration
+ * @param $configuration
+ * @return unknown_type
+ */
+function mm_mailhandler_configuration_validate($element, &$form_state) {
+  // get the data for this module, if it was called
+  if ($values = media_mover_api_extract_form_data($form_state['values'], 'mm_mailhandler')) { 
+    mm_mailhandler_test_mailbox($values);
+  }
+}
+
+
+/**
+ * checks to make sure that we can access imap libraries
+ */
+function mm_mailhandler_check() {
+  if (! function_exists('imap_open')) {
+    drupal_set_message(t('Your PHP installation does not support IMAP/POP mail functionality. Please reconfigure your PHP installation. Media Mover email functionality will not work.'));
+  }
+}
+
+
+/* ************************************************ */
+/* Mail Handling Functions                          */
+/* ************************************************ */
+
+
+/**
+ * Retrieve all msgs from a given mailbox and process them.
+ * this is the mailhandler function refactored for this module's needs
+ * @param $configuration
+ *   array, media mover configuration
+ */
+function mm_mailhandler_harvest($configuration) {
+  // Include mailhandler retrieval functions
+  module_load_include('inc', 'mailhandler', 'mailhandler.retrieve');
+  
+  // see mailhandler_cron_retrieve() for more information on these functions
+  //$result = mailhandler_open_mailbox($configuration);
+
+  // Find out how many messages need retrieval
+  $new_messages = mailhandler_get_unread_messages($configuration);
+  
+  // Initialise counters for maximum message retrieval
+  $max_messages = variable_get('mailhandler_max_retrieval', 2);
+  $retrieved_messages = 0;
+
+  $items = array();
+  // Begin retrieval of messages
+  while ($new_messages && (!$max_messages || $retrieved_messages < $max_messages)) {
+    $node = mm_mailhandler_retrieve_message($configuration, array_shift($new_messages), $context);
+    $items = array_merge($items, mm_mailhandler_attachments($node, $configuration));
+    $retrieved_messages++;
+  }
+  return $items;
+}
+
+
+/**
+ * Duplication of the mailhandler function- slimed down for these purposes
+ *
+ * @param unknown_type $mailbox
+ * @param unknown_type $i
+ * @param unknown_type $context
+ * @return unknown
+ */
+function mm_mailhandler_retrieve_message($mailbox, $i, &$context) {
+  $result = mailhandler_open_mailbox($mailbox);
+
+  if ($result) {
+
+    $header = imap_header($result, $i);
+    // Initialize the subject in case it's missing.
+    if (!isset($header->subject)) {
+      $header->subject = '';
+    }
+
+    $mime = explode(',', $mailbox['mime']);
+
+    // Get the first text part - this will be the node body
+    $origbody = mailhandler_get_part($result, $i, $mime[0]);
+
+    // If we didn't get a body from our first attempt, try the alternate format (HTML or PLAIN)
+    if (!$origbody) {
+      $origbody = mailhandler_get_part($result, $i, $mime[1]);
+    }
+
+    // Parse MIME parts, so all mailhandler modules have access to
+    // the full array of mime parts without having to process the email.
+    $mimeparts = mailhandler_get_parts($result, $i);
+
+    // Is this an empty message with no body and no mimeparts?
+    if (!$origbody && !$mimeparts) {
+      // @TODO: Log that we got an empty email?
+      imap_close($result);
+      return;
+    }
+
+    // we must process before authenticating because the password may be in Commands
+    $node = mailhandler_process_message($header, $origbody, $mailbox);
+
+    // check if mail originates from an authenticated user
+    $node = mailhandler_authenticate($node, $header, $origbody, $mailbox);
+
+    // Put $mimeparts on the node
+    $node->mimeparts = $mimeparts;
+
+    // don't delete while we're only getting new messages
+    if ($mailbox['delete_after_read']) {
+//      imap_delete($result, $i);
+    }
+
+  }
+
+  imap_close($result, CL_EXPUNGE);
+  
+  return $node;
+}
+
+/**
+ * Retrieve all attachments from the mail
+ * Then call mailsave handlers to process attachments
+ * Then try to store remaining attachments
+ * @param object $node 
+ *   is the incoming email
+ * @param array $configuration 
+ *   is the mailbox being acted on
+ */
+function mm_mailhandler_attachments($node, $configuration) {
+  $items = array();
+  if ($node->mimeparts) {
+    foreach ($node->mimeparts as $part_id => $part) {
+      // can we harvest this file?
+      if ( media_mover_api_file_validate_extensions($part->filename, $configuration['mm_mailhandler_formats'])) {
+        // now we need to save the file
+        $path =  media_mover_api_dir_path() . MM_EMAIL_ATTACHMENTS_SUBDIRECTORY;
+        // get file path from media mover.
+        $file = $path .'/'. $part->filename;
+        // build the file name
+        $file = file_destination($file, FILE_EXISTS_RENAME);
+        // make sure the directory exists
+        file_check_directory($path, FILE_CREATE_DIRECTORY);
+        // save the file data
+        $file = file_save_data($part->data, $file);
+       
+        // add metadata and node data to item
+        $item['filesize'] = filesize($file);
+        $item['harvest_file'] = $file;
+        $item['mime'] = file_get_mimetype($file);
+        $item['user']->uid = $node->uid;
+        $item['node']->title = $node->title;
+        $item['node']->uid = $node->uid;
+                
+        // remove the data from the node so we are not passing extra data around
+        unset($node->mimeparts->{$part_id}->data);
+        
+        $items[] = $item;
+      }
+    }
+  }
+  return $items;
+}
+
+/* ************************************************ */
+/* Test functions                                   */
+/* ************************************************ */
+
+/**
+ * build a form that will allow testing of Media Mover configurations
+ * MailHandler  settings
+ * @return unknown_type
+ */
+function mm_mailhandler_test_form() {
+  // find all the media mover configurations that use MailHandler
+  if (! $options = media_mover_api_get_configurations_by_module('mm_mailhandler')) {
+    drupal_set_message(t('You need to have Media Mover configurations which use MailHandler in order to test your connection'));
+  }
+
+  $form['display'] = array(
+    '#type' => 'markup',
+    '#value' => t('This test make sure that you can connect to your mail server. It does not attempt to download files'),
+  );
+
+  $form['cid'] = array(
+    '#type' => 'select',
+    '#title' => t('Select a configuration to test'),
+    '#options' => $options,
+    '#description' => t('Choose a configuration to test the connection.'),
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Test'),
+  );
+
+  return $form;
+}
+
+/**
+ * Run the mail connection test
+ * @param $form_id
+ * @param $form_values
+ * @return unknown_type
+ */
+function mm_mailhandler_test_form_submit($form, &$form_state) {
+  // get the requested configuration
+  $configuration = media_mover_api_get_configuration($form_state['values']['cid']);
+  // find the mailhandler settings
+  foreach (media_mover_api_verbs() as $verb) {
+    if ($configuration->{$verb}->module == 'mm_mailhandler') {
+      $conf = $configuration->{$verb}->configuration;
+      break;
+    }
+  }
+  
+  mm_mailhandler_test_mailbox($conf);
+}
+
+
+/**
+ * Test connection to a mailbox, and output results as a message
+ * reproduces the mailhandler function to tweak the fuctionality
+ * and provide validation functions
+ * @param $conf  
+ *   array, mediamover conf
+ * @return boolean
+ */
+function mm_mailhandler_test_mailbox($conf) {
+  // Include mailhandler retrieval functions
+  module_load_include('inc', 'mailhandler', 'mailhandler.retrieve');
+
+  $result = mailhandler_open_mailbox($conf);
+
+  if ($result) {
+    drupal_set_message('Mailhandler was able to connect to the mailbox.');
+    imap_close($result);
+    return true;
+  }
+  else {
+    if ($conf['domain']) {
+      form_set_error('mm_mailhandler', t('%c connection to %m failed.', array('%c' => ($conf['imap'] ? 'IMAP' : 'POP3'), '%m' => $conf['mail'])));
+    }
+    else {
+      form_set_error('mm_mailhandler', t('Mailhandler could not access local folder: %m', array('%m' => $conf['mail'])));
+    }
+  }
+
+  return;
+}

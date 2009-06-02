@@ -21,35 +21,39 @@ function views_bulk_operations_taxonomy_action(&$node, $context) {
     $node->taxonomy = array();
     return;
   }
+  if (isset($context['terms']['tags'])) {
+    $tags = $context['terms']['tags'];
+    unset($context['terms']['tags']);
+  }
   $terms = array();
   foreach ($context['terms'] as $tid) {
     $terms[$tid] = taxonomy_get_term($tid);
   }
   // check for add or delete
-  if ($context['do'] == TAXONOMY_ACTION_ADD || $context['do'] == TAXONOMY_ACTION_DELETE) {
+  switch ($context['do']) {
+  case TAXONOMY_ACTION_DELETE:
     $existing_terms = taxonomy_node_get_terms($node);
-    if ($context['do'] == TAXONOMY_ACTION_DELETE) {
-      // delete terms
-      while (list($delete_tid) = each($terms)) {
-        if (array_key_exists($delete_tid,$existing_terms)) {
-          unset($existing_terms[$delete_tid]);
-        }
+    while (list($delete_tid) = each($terms)) {
+      if (array_key_exists($delete_tid,$existing_terms)) {
+        unset($existing_terms[$delete_tid]);
       }
-      $terms = $existing_terms;
-      if (empty($terms)) {
-        taxonomy_node_delete($node);
-      }
-    } else {
-      // add terms
-      foreach ($terms as $add_tid => $term) {
-        if (array_key_exists($add_tid, $existing_terms)) {
-          unset($terms[$add_tid]);
-        }
-      }
-      $terms = array_merge($terms, $existing_terms);
     }
-  }
-  else if ($context['do'] == TAXONOMY_ACTION_REPLACE_VOCABULARY) {
+    $terms = $existing_terms;
+    if (empty($terms)) {
+      taxonomy_node_delete($node);
+    }
+    break;
+  case TAXONOMY_ACTION_ADD:
+    $existing_terms = taxonomy_node_get_terms($node);
+    foreach ($terms as $add_tid => $term) {
+      if (array_key_exists($add_tid, $existing_terms)) {
+        unset($terms[$add_tid]);
+      }
+    }
+    $terms = array_merge($terms, $existing_terms);
+    if (isset($tags)) $terms['tags'] = $tags;
+    break;
+  case TAXONOMY_ACTION_REPLACE_VOCABULARY:
     $existing_terms = taxonomy_node_get_terms($node);
     foreach ($existing_terms as $existing_term) {
       foreach ($terms as $term) {
@@ -57,8 +61,13 @@ function views_bulk_operations_taxonomy_action(&$node, $context) {
           unset($existing_terms[$existing_term->tid]);
         }
       }
-    }       
+    }
     $terms = array_merge($terms, $existing_terms);
+    if (isset($tags)) $terms['tags'] = $tags;
+    break;
+  case TAXONOMY_ACTION_REPLACE:
+    if (isset($tags)) $terms['tags'] = $tags;
+    break;
   }
 
   $node->taxonomy = $terms;
@@ -82,11 +91,27 @@ function views_bulk_operations_taxonomy_action_form($context) {
   $form['taxonomy'] = array(
     '#type' => 'fieldset',
     '#title' => t('Vocabularies'),
-    '#tree' => true,
+    '#tree' => TRUE,
   );  
   while (list(,$vocabulary) = each($vocabularies)) {
     $form['taxonomy'][$vocabulary->vid] = taxonomy_form($vocabulary->vid);
     $form['taxonomy'][$vocabulary->vid]['#weight'] = $vocabulary->weight;
+    if ($vocabulary->tags) { // If tags, give the ability to add new terms
+      if ($vocabulary->help) {
+        $help = $vocabulary->help;
+      }
+      else {
+        $help = t('A comma-separated list of terms describing this content. Example: funny, bungee jumping, "Company, Inc.".');
+      }
+      $help .= t('<br />Note that this field has no effect when deleting terms.');
+      $form['taxonomy']['tags'][$vocabulary->vid] = array('#type' => 'textfield',
+        '#title' => $vocabulary->name .' '. t('(new tags)'),
+        '#autocomplete_path' => 'taxonomy/autocomplete/'. $vocabulary->vid,
+        '#weight' => $vocabulary->weight,
+        '#maxlength' => 1024,
+        '#description' => $help,
+      );
+    }
   }
   $form['do'] = array(
     '#type' => 'radios',
@@ -110,8 +135,11 @@ function views_bulk_operations_taxonomy_action_form($context) {
  */
 function _taxonomy_action_parse_terms($taxonomy) {
   $ret = array();
-  while (list(,$vocab) = each($taxonomy)) {
-    if (!is_array($vocab)) {
+  while (list($key,$vocab) = each($taxonomy)) {
+    if ($key == 'tags') {
+      $ret['tags'] = $vocab;
+    }
+    else if (!is_array($vocab)) {
       if (!empty($vocab)) $ret[] = $vocab;
     } 
     else {

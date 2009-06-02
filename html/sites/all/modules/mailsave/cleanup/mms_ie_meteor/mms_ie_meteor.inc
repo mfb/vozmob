@@ -12,11 +12,6 @@ function mms_ie_meteor_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
   // Test message against patten
   if (preg_match($pattern, $header->fromaddress)) {
 
-    // If no title set on this message then set a generic one
-    if (!$node->title) {
-      $node->title = 'MMS from Meteor Ireland';
-    }
-
     // Empty the body and teaser
     $node->body = '';
     $node->teaser = '';

@@ -1,0 +1,252 @@
+<?php
+
+// ;$Id: mm_dir.module,v 1.1.2.12.2.7 2009/04/01 06:06:33 arthuregg Exp $
+
+
+define('MM_DIR_HARVEST_ACTION', 1 );
+define('MM_DIR_STORAGE_ACTION', 2 );
+define('MM_DIR_COMPLETE_ACTION', 3 );
+
+/**
+ * Implementation of media_mover hook
+ * @param $op is the operator to return
+ * @param $action is which action is being called
+ * @param $verb is the verb being run
+ * @param $configuration is the specific configuration saved for the action for this configuration
+ * @param $file is the file in use
+ * @param $job is the full configuration data currently running
+ */
+function mm_dir_media_mover($op = null, $action = null, $configuration = null, &$file=array(), $job = null, $nid = null ) {
+  switch ($op) {
+
+    // give your module a distinct name
+    case 'name':
+      return "Media Mover directory module";
+    break;
+
+    // defines the actions that this module does
+    // these are numbered for easy identification of what
+    // action is being called
+    case 'actions':
+      return array(
+        'harvest' => array( 1 => t('Harvest files from a local directory'),),
+        'storage' => array( 2 => t('Store files to a local directory'),),
+        'complete' => array( 3 => t('Store files to a local directory'),),
+      );
+    break;
+
+    // create edit configuration option set
+    case 'config':
+      switch ($action) {
+        // harvest from a directory
+        case '1':
+          return mm_dir_config_harvest($configuration);
+        break;
+
+        // store or complete files
+        case '2':
+        case '3':
+          return mm_dir_config_storage($configuration);
+        break;
+      }
+    break;
+
+    // validate the selections
+    case 'config_validate':
+      switch ($action) {
+      	case MM_DIR_HARVEST_ACTION:
+      		return mm_dir_config_harvest_validate($configuration);
+        break;
+      	case 2:
+      	case 3:
+      		return mm_dir_config_storage_validate($configuration);
+        break;
+      }
+    break;
+
+    // functions called on harvest op
+    // returns an array of $files
+    case 'harvest':
+      return mm_dir_harvest($configuration);
+    break;
+
+    // functions called on storage op
+    case 'storage':
+    case 'complete':
+      return mm_dir_save($file, $configuration, $action);
+    break;
+
+    // implements a delete call from media mover
+    case 'delete':
+      return mm_dir_storage_delete($file, $configuration);
+    break;
+
+  }
+  return;
+}
+
+
+/**
+ * Builds the configuration form for the directory harvest
+ *
+ * @param array $configuration
+ * @return array $form
+ */
+function mm_dir_config_harvest($configuration) {
+	$form['mm_dir_conf'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Directory harvest configuration'),
+    '#description' => t('This harvests files from a local directory.'),
+  );
+  $form['mm_dir_conf']['path'] = array(
+    '#title' => t('Directory path'),
+    '#type' => 'textfield',
+    '#default_value' => $configuration['path'],
+    '#description' => t('Absolute path to the directory you wish to harvest from. Note you may encounter open base dir issues wtih some PHP installations if your directory is not inside of your web root.'),
+  );
+  $form['mm_dir_conf']['file_types'] = array(
+    '#title' => t('File types'),
+    '#type' => 'textfield',
+    '#default_value' => $configuration['file_types'] ? $configuration['file_types'] : 'avi mov wmv mpeg mp4 mpeg2 dv 3gp 3g2 mpeg4',
+    '#description' => t('Space separated list of file types that can be harvested. These are file extensions and are values like "avi mov wmv mpeg mp4 mpeg2 dv".'),
+  );
+  return $form;
+}
+
+
+/**
+ * Validates the path
+ *
+ * @param array $configuration
+ * @return array
+ */
+function mm_dir_config_harvest_validate($configuration) {
+  // is the path valid?
+  if (! file_check_directory($configuration['path'], FILE_CREATE_DIRECTORY) ) {
+    $errors[] = array(
+      'element' => 'path',
+      'message' => t('Sorry, the path you have chosen does not exist or is not writable.')
+	);
+  }
+  return $errors;
+}
+
+
+/**
+ * Creates the configuration form for the storage option.
+ *
+ * @param unknown_type $configuration
+ * @return array $form
+ */
+function mm_dir_config_storage($configuration) {
+	$form['mm_dir_conf'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Directory storage configuration'),
+    '#description' => t('This stores files in a local directory.'),
+    '#collapsed' => false,
+  );
+  $form['mm_dir_conf']['path'] = array(
+    '#title' => t('Directory path'),
+    '#type' => 'textfield',
+    '#default_value' => $configuration['path'],
+    '#description' => t('Absolute path to the directory you wish to store in. Note you may encounter open base dir issues wtih some PHP installations if your directory is not inside of your web root.'),
+  );
+  return $form;
+}
+
+
+/**
+ * Validates the path and makes sure that directory is writeable
+ *
+ * @param array $configuration
+ * @return array
+ */
+function mm_dir_config_storage_validate($configuration) {
+  // is destination valid?
+  if (! file_check_directory($configuration['path'], FILE_CREATE_DIRECTORY) ) {
+    $errors[] = array(
+      'element' => 'path',
+      'message' => t('Sorry, either the target directory can not be created or the webserver does not have sufficient permissions to create it.'),
+    );
+  }
+  return $errors;
+}
+
+
+/**
+ * This does the actual harvesting of the files from a directory
+ *
+ * @param array $configuration
+ * @return array
+ */
+function mm_dir_harvest ($configuration) {
+	// check to see if the directory exists
+	if (is_dir($configuration['path'])) {
+    // build the file types to harvest
+    $search = array(' ', ',');
+    $replace = array('|', '|');
+    $filetypes = str_replace($search, $replace, $configuration['file_types']);
+
+    // make sure that we have both lower and upper case versions of the file
+    // extensions. file_scan_directory uses ereg() for the mask which
+    // means we have to pass both upper and lower case version
+    $filetypes = strtoupper($filetypes) .'|'. strtolower($filetypes);
+
+    // now add the regex to the pattern
+    $pattern = ".*($filetypes)$";
+    // get files restricted by file extension
+    $found_files = file_scan_directory($configuration['path'], $pattern);
+
+    // check the returned files
+    if ($found_files) {
+      foreach ($found_files as $file) {
+        // now we need to see if we have this file in the database. Note that in
+        // this instance, we are not checking dates on files vs. the database
+        $result = db_fetch_array(db_query('SELECT mmfid FROM {media_mover_files} WHERE cid = %d AND harvest_file = "%s"', $configuration['cid'], $file->filename));
+  	    if (! $result) {
+          $files[] = array('harvest_file' => $file->filename);
+        }
+	    }
+    }
+    // if we have files, return them
+  	if (count($files)) {
+  	  return $files;
+  	}
+  }
+}
+
+
+/**
+ * this saves a harvested file to a directory location specified
+ * in the configuration
+ *
+ * @param array $file
+ * @param array $configuration
+ * @param int $action
+ * @return string
+ */
+function mm_dir_save ($file, $configuration, $action) {
+	// make sure destination directory exists
+	if (is_dir($configuration['path'])) {
+		// figure out what verb is currently running
+	  $verb = $action == 2 ? 'storage' : 'complete';
+	  // get the last file that was used by media mover
+		$orig_file = $verb == 'storage' ? $file['process_file'] : $file['storage_file'];
+		// assign the new path to the file name
+		$new_file = file_create_filename(basename($orig_file), $configuration['path']);
+		// now copy this file from the old to the new location
+	  copy($orig_file, $new_file);
+		media_mover_api_set_file_perm($new_file);
+		// return the file
+		return $new_file;
+	}
+}
+
+
+/**
+ * delete a file when the media mover delete hook is called
+ * @TODO complete this functionality
+ */
+function mm_dir_storage_delete($file, $configuration) {
+
+}

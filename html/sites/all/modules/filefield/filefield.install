@@ -1,5 +1,5 @@
 <?php
-// $Id: filefield.install,v 1.34 2009/04/28 04:32:14 quicksketch Exp $
+// $Id: filefield.install,v 1.36 2009/05/29 22:32:23 quicksketch Exp $
 /**
  * @file
  * FileField: Defines a CCK file field type.
@@ -70,12 +70,12 @@ function filefield_requirements($phase) {
     }
     elseif (!$implementation) {
       $value = $t('Not enabled');
-      $description = t('Your server is capable of displaying file upload progress, but does not have the required libraries. It is recommended to install the <a href="http://pecl.php.net/package/uploadprogress">PECL uploadprogress library</a> (prefered) or to install <a href="http://us2.php.net/apc">APC</a>.');
+      $description = t('Your server is capable of displaying file upload progress, but does not have the required libraries. It is recommended to install the <a href="http://pecl.php.net/package/uploadprogress">PECL uploadprogress library</a> (preferred) or to install <a href="http://us2.php.net/apc">APC</a>.');
       $severity = REQUIREMENT_WARNING;
     }
     elseif ($implementation == 'apc') {
       $value = $t('Enabled (<a href="http://php.net/manual/en/apc.configuration.php#ini.apc.rfc1867">APC RFC1867</a>)');
-      $description = t('Your server is capable of displaying file upload progress using APC RFC1867. Note that only one upload at a time is supported. It is recommended to use the <a href="http://pecl.php.net/package/uploadprogress">PECL uploadprogress library<a> if possible.');
+      $description = t('Your server is capable of displaying file upload progress using APC RFC1867. Note that only one upload at a time is supported. It is recommended to use the <a href="http://pecl.php.net/package/uploadprogress">PECL uploadprogress library</a> if possible.');
       $severity = REQUIREMENT_OK;
     }
     elseif ($implementation == 'uploadprogress') {

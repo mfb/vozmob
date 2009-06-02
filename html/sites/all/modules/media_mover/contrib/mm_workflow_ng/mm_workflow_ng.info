@@ -1,0 +1,5 @@
+name = Media Mover Workflow-NG
+description = Allowes Workflow-ng to react to media mover events.  Also provides some conditions for evaluating media mover actions in workflow-ng sans tokens
+dependencies = media_mover_api workflow_ng
+package = Media Mover
+core=6.x

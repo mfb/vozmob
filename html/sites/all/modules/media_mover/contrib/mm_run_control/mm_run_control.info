@@ -1,0 +1,6 @@
+; $Id: mm_run_control.info,v 1.1.2.1 2008/11/30 18:22:56 arthuregg Exp $
+name = Media Mover Run Control
+description = Enables restricting of Media Mover configurations based on rules
+package = "Media Mover"
+dependencies[] = media_mover_api
+core = 6.x

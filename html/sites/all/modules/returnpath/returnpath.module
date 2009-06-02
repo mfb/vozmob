@@ -1,0 +1,52 @@
+<?php
+// $Id: returnpath.module,v 1.7 2008/08/29 08:41:21 deciphered Exp $
+
+/**
+ * @file
+ * Resolve sendmail 'return-path' header in emails sent from server.
+ *
+ * This allows bounceback emails to be returned to the sender, rather
+ * than the server which originally relayed the mail.
+ *
+ * @author: Mike Carter <www.ixis.co.uk/contact>
+ */
+
+/**
+ * Implementation of hook_help().
+ */
+function returnpath_help($path, $arg) {
+  switch ($arg) {
+    case 'admin/modules#description':
+      return t('Correctly passes a return-path: header when processing email.');
+  }
+}
+
+/**
+ * Replaces the default user_mail() and adds the sendmail -f command to the PHP mail() call.
+ */
+function drupal_mail_wrapper($message) {
+  unset($messages['headers']['From']);
+
+  $mimeheaders = array();
+  foreach ($message['headers'] as $name => $value) {
+    $mimeheaders[] = $name .': '. mime_header_encode($value);
+  }
+
+  // If no explicit Return-path set, use From header and add Return-Path.
+  $return_path = empty($message['headers']['Return-Path'])
+    ? $message['from']
+    : $message['headers']['Return-Path'];
+
+  return mail(
+    $message['to'],
+    mime_header_encode($message['subject']),
+    // Note: e-mail uses CRLF for line-endings, but PHP's API requires LF.
+    // They will appear correctly in the actual e-mail that is sent.
+    str_replace("\r", '', $message['body']),
+    // For headers, PHP's API suggests that we use CRLF normally,
+    // but some MTAs incorrecly replace LF with CRLF. See #234403.
+    join("\n", $mimeheaders),
+    // Adds the sendmail -f command.
+    "-f". $return_path
+  );
+}

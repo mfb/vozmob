@@ -1,5 +1,5 @@
 <?php
-// $Id: notifications.manage.inc,v 1.1.2.3.2.3 2009/04/24 17:19:40 jareyero Exp $
+// $Id: notifications.manage.inc,v 1.1.2.3.2.4 2009/05/18 18:41:33 jareyero Exp $
 
 /**
  * @file
@@ -54,8 +54,8 @@ function notifications_manage_subscriptions_access($sids) {
   }
   else {
     $params = array_merge(array($user->uid), array_values($sids));
-    $count = db_query("SELECT COUNT(*) FROM {notifications} WHERE uid = %d AND sid IN (" . db_placeholders($sids) . ')', $params);
-    return $count === count($sids);
+    $count = db_result(db_query("SELECT COUNT(*) FROM {notifications} WHERE uid = %d AND sid IN (" . db_placeholders($sids) . ')', $params));
+    return $count == count($sids);
   }
 } 
 

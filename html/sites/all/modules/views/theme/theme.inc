@@ -1,5 +1,5 @@
 <?php
-// $Id: theme.inc,v 1.72 2009/04/08 04:24:52 merlinofchaos Exp $
+// $Id: theme.inc,v 1.73 2009/05/06 19:33:00 merlinofchaos Exp $
 
 /**
  * @file theme.inc
@@ -139,7 +139,8 @@ function template_preprocess_views_view(&$vars) {
             'view_args' => implode('/', $view->args),
             'view_path' => $_GET['q'],
             // Pass through URL to ensure we get e.g. language prefixes.
-            'view_base_path' => isset($view->display['page']) ? substr(url($view->display['page']->display_options['path']), strlen($base_path)) : '',
+//            'view_base_path' => isset($view->display['page']) ? substr(url($view->display['page']->display_options['path']), strlen($base_path)) : '',
+            'view_base_path' => $view->get_path(),
             'view_dom_id' => $vars['dom_id'],
             // To fit multiple views on a page, the programmer may have
             // overridden the display's pager_element.

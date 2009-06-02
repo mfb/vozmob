@@ -1,0 +1,6 @@
+; $Id: sms_international.info,v 1.1.2.1 2009/02/09 15:17:19 diggersf Exp $
+name = "SMS International"
+description = "Provides international number validation."
+dependencies[] = sms
+package = SMS Framework
+core = 6.x

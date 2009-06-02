@@ -1,5 +1,5 @@
 <?php
-// $Id: i18nsync.module,v 1.1.2.22 2009/02/18 12:42:12 jareyero Exp $
+// $Id: i18nsync.module,v 1.1.2.24 2009/05/18 09:29:23 jareyero Exp $
 
 /**
  * @file
@@ -205,7 +205,7 @@ function i18nsync_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
             }
           }
           $i18nsync = FALSE;
-          drupal_set_message(format_plural(count($translations) - 1, 'One node translation have been synchronized.', 'All @count node translations have been synchronized.'));
+          drupal_set_message(format_plural(count($translations) - 1, 'One node translation has been synchronized.', 'All @count node translations have been synchronized.'));
         }
         break;
     }
@@ -430,7 +430,10 @@ function i18nsync_node_available_fields($type) {
       'timezone' => t('Timezone')
     );
   }
-
+  // Location module
+  if (module_exists('location')) {
+    $options['locations'] = t('Location settings');
+  }
   // Get CCK fields.
   if (($contentfields = _i18nsync_cck_fields($type))) {
     // Get context information.

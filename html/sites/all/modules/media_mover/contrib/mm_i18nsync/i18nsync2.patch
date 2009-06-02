@@ -1,0 +1,211 @@
+Index: i18nsync.module
+===================================================================
+RCS file: /cvs/drupal-contrib/contributions/modules/i18n/experimental/Attic/i18nsync.module,v
+retrieving revision 1.1.2.6
+diff -r1.1.2.6 i18nsync.module
+35d34
+< 
+41c40
+<         '#description' => t('Select which fields to synchronize for all translations of this content type.')
+---
+>         '#description' => t('Select which items to synchronize for all translations of this content type.')
+43,58c42,46
+<       // Each set provides title and options. We build a big checkboxes control for it to be
+<       // saved as an array. Special themeing for group titles.
+<       foreach (i18nsync_node_available_fields($type) as $group => $data) {
+<         $title = $data['#title'];
+<         foreach ($data['#options'] as $field => $name) {
+<           $form['workflow']['i18n']['i18nsync_nodeapi'][$field] = array(
+<             '#group_title' => $title,
+<             '#title' => $name,
+<             '#type' => 'checkbox',
+<             '#default_value' => in_array($field, $current),
+<             '#theme' => 'i18nsync_workflow_checkbox',
+<           );
+<           $title = '';  
+<         }     
+<       }
+< 
+---
+>       
+>       // now call the hook_i18n_sync and get all the configuration options
+>       $items = i18nsync_extend('node_type_config', array('type' => $type, 'current' => $current ));
+>       $form['workflow']['i18n']['i18nsync_nodeapi'] = array_merge($form['workflow']['i18n']['i18nsync_nodeapi'], $items);
+>       
+62a51,56
+> /**
+>  * themes an individual check box for the node type form
+>  *
+>  * @param array $element is a form arraay
+>  * @return html
+>  */
+67a62,63
+> 
+> 
+114,115c110,111
+<         // Let's go with field synchronization
+<         if (($fields = i18nsync_node_fields($node->type)) && $translations = translation_node_get_translations(array('nid' => $node->nid), FALSE)) {
+---
+>         // Let's go with item synchronization
+>         if ($translations = translation_node_get_translations(array('nid' => $node->nid), FALSE)) {
+124,125c120,128
+<           foreach ($translations as $trnode) {
+<             i18nsync_node_translation($node, $trnode, $fields);
+---
+>           foreach ($translations as $translation) {
+> 					  // Load full node, we need all data here
+> 					  $translation = node_load($translation->nid);
+> 					  
+> 					  // $translation will be modified because it's passed by reference by PHP 5
+> 					  i18nsync_extend('sync', null, $node, $translation);
+> 					  
+> 					  // now save the changes
+> 					  node_save($translation);          	          	
+135,173d137
+< function i18nsync_node_translation($node, $translation, $fields) {
+<   // Load full node, we need all data here
+<   $translation = node_load($translation->nid);
+<   foreach ($fields as $field) {
+<     switch($field) {
+<       case 'parent': // Book outlines, translating parent page if exists
+<       case 'iid': // Attached image nodes  
+<         i18nsync_node_translation_attached_node(&$node, &$translation, $field);
+<         break;
+<       case 'files':
+<         // Sync existing attached files
+<         foreach ($node->files as $fid => $file) {
+<           if (isset($translation->files[$fid])) {
+<             $translation->files[$fid]->list = $file->list;
+<           } else {
+<             // New file. Create new revision of file for the translation
+<             $translation->files[$fid] = $file;
+<             // If it's a new node revision it will just be created, but if it's not
+<             // we have to update the table directly. The revision field was before this one in the list
+<             if (!isset($translation->revision) || !$translation->revision) {
+<               db_query("INSERT INTO {file_revisions} (fid, vid, list, description) VALUES (%d, %d, %d, '%s')", $file->fid, $translation->vid, $file->list, $file->description);
+<             }
+<           }
+<         }
+<         // Drop removed files
+<         foreach($translation->files as $fid => $file) {
+<           if (!isset($node->files[$fid])) {
+<             $translation->files[$fid]->remove = TRUE;
+<           }
+<         }
+<         break;
+<       default: // For fields that don't need special handling
+<         if (isset($node->$field)) {
+<           $translation->$field = $node->$field;
+<         }
+<     }
+<   }
+<   node_save($translation);
+< }
+242a207,208
+> 
+> 
+305a272,375
+> 
+> /**
+>  * This extends i18n_sync to allow other modules to join in the data sync bandwangon
+>  * There are currently two main operations that this does:
+>  * 
+>  * $op = 'node_type_config' This is a configuration form that appears on the admin/content/types/type page. Modules should return a drupal form array for this
+>  * $op = 'sync' This is when syncing should be done on insert/update. No data return
+>  * 
+>  * @param $op is the string name of the op that is being called
+>  * @param $config is an array of values to be passed to the module being called
+>  * @param $node is a drupal node object
+>  * @param $translation is a drupal node object
+>  * @return an array
+>  */
+> function i18nsync_extend($op = null,  $config = null, $node = null, $translation = null) {
+>   $items = array();
+>   $hook_name = 'i18n_sync';
+>   foreach (module_implements($hook_name) as $module) {
+>     // we are adding any output onto an array that gets returned
+>     if ($new = module_invoke($module, $hook_name, $op, $config, $node, $translation)) {
+>       $items = array_merge($items, $new);
+>     }
+>   }
+>   // make sure we return an array
+>   if (! is_array($items)) { return array(); }
+>   return $items;
+> }
+> 
+> 
+> /**
+>  * Implementation of hook_i18n_sync, handles the configuration options and the syncing process for node fields
+>  *
+>  * @param string $op is the operation being called
+>  * @param array $config is a configuration array
+>  * @param object $node is a drupal node object
+>  * @param object $translation is a drupal node object whos data is being synced to the data in $node
+>  * @return 
+>  */
+> function i18nsync_i18n_sync($op, $config, $node, $translation) {
+> 	switch($op) {
+> 	
+> 		case 'node_type_config':
+> 		  // Each set provides title and options. We build a big checkboxes control for it to be
+> 		  // saved as an array. Special themeing for group titles.
+> 		  foreach (i18nsync_node_available_fields($config['type']) as $group => $data) {
+> 		    $title = $data['#title'];
+> 		    foreach ($data['#options'] as $field => $name) {
+> 		      $form[$field] = array(
+> 		        '#group_title' => $title,
+> 		            '#title' => $name,
+> 		            '#type' => 'checkbox',
+> 		            '#default_value' => in_array($field, $config['current']),
+> 		            '#theme' => 'i18nsync_workflow_checkbox',
+> 		          );
+> 		          $title = '';  
+> 		        }     
+> 		      }
+> 		  return $form;
+> 		break;
+> 		
+> 		case 'sync':
+> 	    $fields = i18nsync_node_fields($node->type);
+> 		  foreach ($fields as $field) {
+> 		    switch($field) {
+> 		      case 'parent': // Book outlines, translating parent page if exists
+> 		      case 'iid': // Attached image nodes  
+> 		        i18nsync_node_translation_attached_node(&$node, &$translation, $field);
+> 		        break;
+> 		      case 'files':
+> 		        // Sync existing attached files
+> 		        foreach ($node->files as $fid => $file) {
+> 		          if (isset($translation->files[$fid])) {
+> 		            $translation->files[$fid]->list = $file->list;
+> 		          } else {
+> 		            // New file. Create new revision of file for the translation
+> 		            $translation->files[$fid] = $file;
+> 		            // If it's a new node revision it will just be created, but if it's not
+> 		            // we have to update the table directly. The revision field was before this one in the list
+> 		            if (!isset($translation->revision) || !$translation->revision) {
+> 		              db_query("INSERT INTO {file_revisions} (fid, vid, list, description) VALUES (%d, %d, %d, '%s')", $file->fid, $translation->vid, $file->list, $file->description);
+> 		            }
+> 		          }
+> 		        }
+> 		        // Drop removed files
+> 		        foreach($translation->files as $fid => $file) {
+> 		          if (!isset($node->files[$fid])) {
+> 		            $translation->files[$fid]->remove = TRUE;
+> 		          }
+> 		        }
+> 		      break;
+> 		      
+> 		      default: // For fields that don't need special handling
+> 		        if (isset($node->$field)) {
+> 		          $translation->$field = $node->$field;
+> 		        }
+> 		      break;
+> 		      
+> 		    }
+>       }
+> 	  break;
+> 		
+> 	}
+> }
+> 

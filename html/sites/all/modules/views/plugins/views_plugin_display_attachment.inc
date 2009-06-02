@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_display_attachment.inc,v 1.3 2009/01/06 04:45:39 merlinofchaos Exp $
+// $Id: views_plugin_display_attachment.inc,v 1.4 2009/05/20 02:53:30 merlinofchaos Exp $
 /**
  * @file
  * Contains the attachment display plugin.
@@ -82,7 +82,7 @@ class views_plugin_display_attachment extends views_plugin_display {
     else if (count($displays) == 1) {
       $display = array_shift($displays);
       if (!empty($this->view->display[$display])) {
-        $attach_to = $this->view->display[$display]->display_title;
+        $attach_to = check_plain($this->view->display[$display]->display_title);
       }
     }
 

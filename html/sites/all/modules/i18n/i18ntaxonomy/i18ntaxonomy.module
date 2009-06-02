@@ -1,5 +1,5 @@
 <?php
-// $Id: i18ntaxonomy.module,v 1.5.2.30 2009/01/25 17:13:12 jareyero Exp $
+// $Id: i18ntaxonomy.module,v 1.5.2.31 2009/04/27 16:50:49 jareyero Exp $
 
 /**
  * @file
@@ -577,7 +577,12 @@ function _i18ntaxonomy_term_set_lang($tid, $langcode) {
  */
 
 /**
- * Get term translations.
+ * Get term translations for multilingual terms. This works for multilingual vocabularies.
+ * 
+ * @param $params
+ *   Array of query conditions. I.e. array('tid' => xxx)
+ * @param $getall
+ *   Whether to get the original term too in the set or not.
  *
  * @return
  *   An array of the from lang => Term.

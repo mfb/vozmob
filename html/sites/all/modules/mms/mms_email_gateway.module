@@ -1,0 +1,49 @@
+<?php
+// $Id$
+
+/**
+ * Return map of MMS gateways and corresponding SMS gateways.
+ */
+function mms_email_gateway_get_map() {
+  return array(
+    'messaging.nextel.com' => 'page.nextel.com',
+    'mms.att.net' => 'txt.att.net',
+    'vzwpix.com' => 'vtext.com',
+    'mms.tigo.com.co' => 'sms.tigo.com.co',
+  );
+}
+
+/**
+ * Rewrite an MMS gateway to its corresponding SMS gateway.
+ */
+function mms_email_gateway_rewrite_to_sms($gateway) {
+  $gateways = mms_email_gateway_get_map();
+  if (isset($gateways[$gateway])) {
+    return $gateways[$gateway];
+  }
+  return $gateway;
+}
+
+/**
+ * Rewrite an SMS gateway to its corresponding MMS gateway.
+ */
+function mms_email_gateway_rewrite_to_mms($gateway) {
+  $gateways = array_flip(mms_email_gateway_get_map());
+  if (isset($gateways[$gateway])) {
+    return $gateways[$gateway];
+  }
+  return $gateway;
+}
+
+/**
+ * Implementation of hook_mailsave_clean().
+ */
+function mms_email_gateway_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
+  foreach ($node->mailsave_attachments as $key => $attachments) {
+    if (pathinfo($attachments['filename'], PATHINFO_EXTENSION) === '') {
+      if ($attachments['filemime'] == 'video/3gpp') {
+        $node->mailsave_attachments[$key]['filename'] .= '.3gp';
+      }
+    }
+  }
+}

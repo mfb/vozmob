@@ -1,5 +1,5 @@
 <?php
-// $Id: location.admin.inc,v 1.17.2.2 2009/03/02 20:42:46 bdragon Exp $
+// $Id: location.admin.inc,v 1.17.2.3 2009/04/17 19:12:54 bdragon Exp $
 
 /**
  * @file
@@ -297,4 +297,48 @@ function theme_location_geocoding_options(&$form) {
   }
   $output .= drupal_render($form);
   return $output;
+}
+
+/**
+ * Location Utilities form.
+ */
+function location_util_form() {
+  $form['province_clear'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Clear province cache'),
+    '#description' => t('If you have modified location.xx.inc files, you will need to clear the province cache to get Location to recognize the modifications.'),
+  );
+  $form['province_clear']['province_clear_submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Clear province cache'),
+    '#submit' => array('location_util_form_clear_province_cache_submit'),
+  );
+
+  $form['supported_countries_clear'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Clear supported country list'),
+    '#description' => t('If you have added support for a new country, you will need to clear the supported country list to get Location to recognize the modifications.'),
+  );
+  $form['supported_countries_clear']['supported_countries_clear_submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Clear supported country list'),
+    '#submit' => array('location_util_form_clear_supported_countries_submit'),
+  );
+  return $form;
+}
+
+/**
+ * Location utilities form: Clear province cache.
+ */
+function location_util_form_clear_province_cache_submit() {
+  drupal_set_message(t('Location province cache cleared.'));
+  cache_clear_all('provinces:', 'cache_location', TRUE);
+}
+
+/**
+ * Location utilities form: Clear supported countries cache.
+ */
+function location_util_form_clear_supported_countries_submit() {
+  drupal_set_message(t('Location supported country list cleared.'));
+  cache_clear_all('location:supported-countries', 'cache_location');
 }

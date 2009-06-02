@@ -1,5 +1,5 @@
 <?php
-// $Id: location_node.module,v 1.1.2.4 2009/03/06 18:15:14 bdragon Exp $
+// $Id: location_node.module,v 1.1.2.6 2009/04/03 20:16:45 bdragon Exp $
 
 /**
  * @file
@@ -72,6 +72,23 @@ function location_node_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
         }
       }
       return $items;
+  }
+}
+
+/**
+ * Implementation of hook_locationapi().
+ */
+function location_node_locationapi(&$obj, $op, $a3 = NULL, $a4 = NULL, $a5 = NULL) {
+  switch ($op) {
+    case 'instance_links':
+      foreach ($obj as $k => $v) {
+        if ($v['nid'] != 0) {
+          $node = node_load($v['nid']);
+          $obj[$k]['href'] = 'node/'. $v['nid'];
+          $obj[$k]['title'] = $node->title;
+          $obj[$k]['type'] = t('Node location');
+        }
+      }
   }
 }
 
@@ -182,22 +199,22 @@ function location_node_form_content_field_overview_form_alter(&$form, &$form_sta
 }
 
 /**
- * Implementation of hook_content_extra_fields()
+ * Implementation of hook_content_extra_fields().
  *
- * For being able to edit location weight in node forms and node view
+ * For being able to edit location weight in node forms and node view.
  */
 function location_node_content_extra_fields($type_name) {
   $settings = variable_get('location_settings_node_'. $type_name, array());
-  if ($settings['multiple']['max'] > 0) {
+  if (isset($settings['multiple']) && $settings['multiple']['max'] > 0) {
     $weight = isset($settings['form']['weight']) ? $settings['form']['weight'] : 0;
     $extra['locations'] = array(
       'label' => t('Locations'),
       'description' => t('Node Locations module form.'),
       'weight' => $weight,
     );
+    return $extra;
   }
-  return $extra;
- }
+}
 
 /**
  * Saving the fields management's weight for location node data in forms and node view

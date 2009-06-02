@@ -217,8 +217,8 @@ function sms_actions_send_action($object, $context) {
     if (!isset($account)) {
       $account = user_load(array('uid' => $node->uid));
     }
-    if ($context['author'] && $account->sms_user[0]['status'] == 2) {
-      $number = $account->sms_user[0]['number'];
+    if ($context['author'] && $account->sms_user['status'] == 2) {
+      $number = $account->sms_user['number'];
     }
 
     $variables = array_merge($variables, array(

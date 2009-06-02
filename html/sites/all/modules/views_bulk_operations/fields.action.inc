@@ -1,5 +1,5 @@
 <?php
-// $Id: fields.action.inc,v 1.1.2.8 2009/04/09 20:14:24 kratib Exp $
+// $Id: fields.action.inc,v 1.1.2.9 2009/04/22 04:16:00 kratib Exp $
 /**
  * @file Drupal action to set individual field values. 
  * 
@@ -145,9 +145,16 @@ function views_bulk_operations_fields_action(&$node, $context) {
         $value = $context[$field_name];
       }
       $node->$field_name = $value;
+      if ($field_name == 'name') { // special case: fix uid when given author name
+        if ($account = user_load(array('name' => $node->name))) {
+          $node->uid = $account->uid;
+        }
+        else {
+          $node->uid = 0;
+        }
+      }
     }
   }
-  node_submit($node);
 }
 
 function _views_bulk_operations_fields_action_non_cck($type) {

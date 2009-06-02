@@ -1,0 +1,752 @@
+<?php
+
+// $Id: media_mover_ftp.module,v 1.1.2.7.2.23 2009/05/21 15:14:02 arthuregg Exp $;
+
+/**
+ * @FILE This module allows for harvesting from FTP servers with media mover
+ */
+
+// define the storage space for files harvested from ftp servers
+define('MM_FTP_FILES_SUBDIRECTORY', 'mm_ftp');
+// define the watchdog type
+define('MM_FTP_WATCHDOG_TYPE', 'MM FTP');
+// define the token length
+define('MM_FTP_TOKEN_LENGTH', 6);
+
+/* ************************************************ */
+/* DRUPAL hook functions                            */
+/* ************************************************ */
+
+/**
+ * implementation of drupal hook_perm
+ * @return array of permissions
+ */
+function media_mover_ftp_perm() {
+  return array('upload files to ftp');
+}
+
+
+/**
+ * implementation of hook menu
+ * @return an array of menu items
+ */
+function media_mover_ftp_menu() {
+  $items = array();
+
+  // token page
+  $items['ftp_token'] = array(
+    'title' => 'Get an FTP token',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('media_mover_ftp_token_ftp_form'),
+    'access arguments' => array('upload files to ftp'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+  $items['admin/settings/mm_ftp'] = array(
+    'title' => 'Media Mover FTP settings',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('media_mover_ftp_admin', true),
+    'access' => array('administer media_mover'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+  $items['admin/build/media_mover/tests/mm_ftp'] = array(
+    'title' => 'FTP Test',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('media_mover_ftp_test_form'),
+    'access arguments' => array('administer media_mover'),
+    'type' => MENU_LOCAL_TASK,
+  );
+  return $items;
+}
+
+
+/**
+ * implementation of hook_cron
+ * cleans up the token db
+ */
+function media_mover_ftp_cron() {
+  // check the database for expired tokens
+  $date = time() - (variable_get('mm_ftp_token_duration', 2880) * 60);
+  db_query('DELETE FROM {media_mover_ftp_tokens} WHERE date < %d', $date);
+}
+
+
+/* ************************************************ */
+/* MEDIA MOVER HOOK                                 */
+/* ************************************************ */
+
+/**
+ * Implementation of media_mover hook
+ */
+function media_mover_ftp_media_mover($op, $action_id = null, $configuration = null, &$file = array(), $running_config = null) {
+
+  switch ($op) {
+
+    // give your driver a distinct name
+    case 'name' :
+      return "Harvest from a FTP server";
+    break;
+
+    // configuration for harvest and storage
+    case 'config' :
+      return media_mover_ftp_config($configuration);
+    break;
+
+    // defines the actions that this module does
+    // these are numbered for easy identification of what
+    // action is being called
+    case 'actions' :
+      return array (
+        'harvest' => array(1 => t('Harvest files from an FTP server')),
+        'storage' => array(2 => t('Store files on an FTP server')),
+        'complete' => array(2 => t('Store files on an FTP server')),
+      );
+      break;
+
+      // defines directories (under master media_mover directory) this module uses
+      // array of directories, will be created under the default
+      // media_mover directory, set in admin
+    case 'directories':
+      return array(MM_FTP_FILES_SUBDIRECTORY);
+    break;
+
+    //admin
+    case 'admin' :
+      return media_mover_ftp_admin();
+    break;
+
+    // functions called on harvest op
+    // returns an array of $files
+    case 'harvest':
+      require_once('media_mover_ftp_harvest.inc');
+      return media_mover_ftp_harvest($configuration);
+    break;
+
+    // functions called on storage op
+    case 'storage':
+    case 'complete':
+      require_once('mm_ftp_storage.inc');
+      return mm_ftp_storage($file, $configuration);
+    break;
+
+  }
+  return;
+}
+
+/* ************************************************ */
+/* Media Mover: Media Mover hook  functions */
+/* ************************************************ */
+
+
+/**
+ * Implementation of hook_help().
+ */
+function media_mover_ftp_help($path, $arg) {
+  switch ($path) {
+    case 'admin/modules#description' :
+      return t('Harvest module for Media Mover. Allows users to retrieve files through FTP for furthur processing.');
+  }
+  return;
+}
+
+
+/**
+ * Config form for FTP settings
+ * @param array $configuration
+ *  has all the data for edit ops
+ * @return array
+ *   Drupal form array
+ */
+function media_mover_ftp_config($configuration) {
+  $form['mm_ftp_conf'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('FTP Configuration'),
+    '#collapsed' => false,
+  );
+  $form['mm_ftp_conf']['mm_ftp_user'] = array(
+    '#title' => t('FTP username'),
+    '#type' => 'textfield',
+    '#default_value' => $configuration['mm_ftp_user'],
+    '#description' => t('It is strongly advised that you limit the access of the 
+      FTP user, otherwise you are risking an even larger security issue. Note 
+      that the password for the FTP user is stored in the database, making a 
+      compromize to your webserver a compromize to your FTP server.')
+  );
+  $form['mm_ftp_conf']['mm_ftp_pass'] = array(
+    '#title' => t('FTP password'),
+    '#type' => 'textfield',
+    '#default_value' => $configuration['mm_ftp_pass'],
+  );
+  $form['mm_ftp_conf']['mm_ftp_host'] = array(
+    '#title' => t('FTP hostname'),
+    '#type' => 'textfield',
+    '#default_value' => $configuration['mm_ftp_host'],
+  );
+  $form['mm_ftp_conf']['mm_ftp_dir'] = array(
+    '#title' => t('FTP directory'),
+    '#type' => 'textfield',
+    '#description' => t('Enter "." for the homedir. No trailing slash.'),
+    '#default_value' => $configuration['mm_ftp_dir'] ? $configuration['mm_ftp_dir'] : '.',
+  );
+
+  // harvest specific settings
+  if ($configuration['verb'] == 'harvest') {
+    $form['mm_ftp_conf']["mm_ftp_allowed_files"] = array(
+      '#type' => 'textfield',
+      '#title' => t('Allowed File Types'),
+      '#description' => t('A list of allowed file types, separated by a space'),
+      '#default_value' => $configuration['mm_ftp_allowed_files'] ? $configuration['mm_ftp_allowed_files'] : variable_get('upload_extensions_default', 'mov mp4 mp3 avi 3gp 3g2 divx xvid wmv asf mpg mpeg mpeg4 jpeg'),
+    );
+    $form['mm_ftp_conf']['mm_ftp_harvest_without_tokens'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Harvest files without tokens'),
+      '#description' => t('If a file on the remote server does not have a valid token, it will still be harvested. This is useful if you are using an FTP server with non-user content.'),
+      '#default_value' => $configuration['mm_ftp_harvest_without_tokens'],
+    );
+    $form['mm_ftp_conf']['mm_ftp_delete_files'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Delete files'),
+      '#description' => t('Delete the files on server after harvest'),
+      '#default_value' => $configuration['mm_ftp_delete_files'],
+    );
+    $form['mm_ftp_conf']['mm_ftp_delete_files_no_token'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Delete files without tokens'),
+      '#description' => t('Remove files from the FTP server that do not have tokens. These will not be harvested. These files will be lost forever. Leaving this unchecked will leave the files on the FTP server.'),
+      '#default_value' => $configuration['mm_ftp_delete_files_no_token'],
+    );
+    $form['mm_ftp_conf']['mm_ftp_harvest_depth'] = array(
+      '#type' => 'select',
+      '#title' => t('File harvest depth'),
+      '#options' => array(-1 => t('All levels'), 1 => t('1, Top level, default'), 2 => t('2 levels'), 3 => t('3 Levels')),
+      '#default_value' => $configuration['mm_ftp_harvest_depth'] ? $configuration['mm_ftp_harvest_depth'] : 1,
+      '#description' => t('Set the depth of the harvest of files from directories. 
+        The deeper your search the slower the process of finding files is.
+        It is a good idea to use a directory structure as flat as possible.')
+    );
+    $form['mm_ftp_conf']['mm_ftp_user_from_dir'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Attempt to connect FTP directory names to user accounts'),
+      '#description' => t('When harvesting files from directories, try to 
+        associate the directory name with a user name. Media Mover will look for
+        directories relative to the base directory you have set. Please note that 
+        FTP servers with large filesystems can cause a significant delay as the 
+        directory structure is built.'),
+      '#default_value' => $configuration['mm_ftp_user_from_dir'],
+    );
+    $form['mm_ftp_conf']['mm_ftp_harvest_folders'] = array(
+     '#type' => 'checkbox',
+     '#title' => t('Harvest files from folders'),
+     '#description' => t('Allow files to be uploaded as a token folder. A token folder is a folder with the folder name and token (eg: my_folder.2xz3f) which will identify all the enclosed files. If an individual file has a token this will override the folder token data.'),
+     '#default_value' => $configuration['mm_ftp_harvest_folders'],
+   );
+   $form['mm_ftp_conf']['mm_ftp_harvest_delete_folders'] = array(
+     '#type' => 'checkbox',
+     '#title' => t('Delete token folders after harvest'),
+     '#description' => t('Removes folders with tokens (and their contents) after harvest  **WARNING THIS WILL DELETE EVERYTHING IN THE FOLDER**'),
+     '#default_value' => $configuration['mm_ftp_harvest_delete_folders'],
+   );
+   $form['mm_ftp_conf']['mm_ftp_harvest_delete_non_token_folders'] = array(
+     '#type' => 'checkbox',
+     '#title' => t('Delete any non token folders'),
+     '#description' => t('Removes folders (and their contents) without tokens - **WARNING THIS WILL DELETE EVERYTHING THE FOLDER**'),
+     '#default_value' => $configuration['mm_ftp_harvest_delete_non_token_folders'],
+   );    
+  }
+
+  // storage specific settings
+  if ($configuration['verb'] == 'storage' || $configuration['verb'] == 'complete') {
+    // add a disclaimer for file handling
+    $form['mm_ftp_conf']['#description'] = t('When storing files on an FTP server, Media Mover is limited in the manipulations that it can perform on files- largely you can only perform changes to nodes at this point.');
+
+    // set the ftp url
+    $form['mm_ftp_conf']['mm_ftp_url'] = array(
+      '#type' => 'textfield',
+      '#title' => t('URL prefix'),
+      '#description' => t('When storing files on a FTP server you can set a web accessible path to your files. Use <strong>http://yourserver.com</strong> to create the path. If your files are not web accessible, use <strong><none></strong> and the system will use <strong>ftp://path/to/dir/filename</strong>.'),
+      '#default_value' => $configuration['mm_ftp_url'] ? $configuration['mm_ftp_url'] : '<none>',
+    );
+  }
+
+  return $form;
+}
+
+
+/**
+ * defines the admin operations for the ftp module
+ * @param $settings
+ *   is this being called as a stand alone setting page?
+ * @return array
+ *   drupal form array
+ */
+function media_mover_ftp_admin($settings = false) {
+  $form['mm_ftp_admin'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('FTP Harvesting'),
+    '#collapsible' => true,
+    '#collapsed' => $settings ? false : true,
+    '#description' => t('FTP tokens are items that an end user adds to a file name and the uploads the file to your FTP server. The token associates the file with that specific user.'),
+  );
+  $form['mm_ftp_admin']['mm_ftp_token_duration'] = array(
+    '#title' => t('Token duration'),
+    '#type' => 'textfield',
+    '#default_value' => variable_get('mm_ftp_token_duration', 2880),
+    '#description' => t('The token duration is time in minutes that a users token is valid for uploading. This associates a user with the content that they uploaded on the ftp server.'),
+  );
+
+  $text = t("You can upload files via our FTP server with the following information. \nAppend the on to the end of your file name. We will associate your user account with your file through this token.\n".
+    "Our FTP server is located at:\n ftp://myserver.com \nYou can use the user name anonymous and password anonymous\n".
+    "Your file should look like\n  myfile.mov.32a18b");
+  $form['mm_ftp_admin']['mm_ftp_info'] = array(
+    '#title' => t('FTP information'),
+    '#type' => 'textarea',
+    '#default_value' => variable_get('mm_ftp_info', $text),
+    '#description' => t('This text is displayed on your !token_page. It will also be mailed to the user when they request a token. You can use the following tokens in your text to be replaced by the values: [user name], [token], [site name], [site url].', array('!token_page' => l(t('token page'), 'ftp_token'))),
+  );
+  $text = t("Hi [user name], \nYou can upload files via our FTP server with the following information. \nAppend this token: [token] on to the end of your file name. We will associate your user account with your file through this token.\n".
+    "Our FTP server is located at:\n ftp://myserver.com \nYou can use the user name anonymous and password anonymous\n".
+    "Your file should look like\n  myfile.mov.[token] \n Thanks! [site name] [site url]");
+  $form['mm_ftp_admin']['mm_ftp_email_text'] = array(
+    '#title' => t('Email explanation'),
+    '#type' => 'textarea',
+    '#default_value' => variable_get('mm_ftp_email_text', $text),
+    '#description' => t('This text will be mailed to the user when they request a token. You can use the following tokens in your text to be replaced by the values: [user name], [token], [site name], [site url].'),
+  );
+
+  if ($settings) {
+    return system_settings_form($form);
+  }
+  return $form;
+}
+
+
+/* ************************************************ */
+/* INTERNAL FUNCTIONS                               */
+/* ************************************************ */
+
+
+/**
+ * Make the FTP connection
+ * @param $configuration
+ *   array, media mover configuration data
+ * @param $display
+ *   boolean, should errors be displayed or logged?
+ * @return array
+ *   ftp connection data array
+ */
+function media_mover_ftp_connect($configuration, $display = false) {
+  $connection = array();
+  // build the ftp connection
+  $connection['ftp_connection'] = ftp_connect($configuration['mm_ftp_host']);
+  $connection['ftp_login'] = ftp_login($connection['ftp_connection'], $configuration['mm_ftp_user'], $configuration['mm_ftp_pass']);
+  $connection['ftp_files'] = media_mover_ftp_get_files($connection['ftp_connection'], $configuration, $configuration['mm_ftp_dir'], $configuration['mm_ftp_harvest_depth']);
+
+  // check the connection to the server
+  if (! $connection['ftp_connection']) {
+    $message = 'Unable to connect to server %server';
+    $params = array('%server' => $configuration['mm_ftp_host']);
+  }
+  // can we login?
+  elseif (! $connection['ftp_login']) {
+    $message = 'Unable to login to server %server with username %user';
+    $params =  array('%server' => $configuration['mm_ftp_host'], '%user' => $configuration['mm_ftp_user']);
+  }
+  // can we get a list of files?
+  elseif ($connection['ftp_list'] === FALSE) {
+    $message = 'Unable to get file list from server %server with username %user';
+    $params = array('%server' => $configuration['mm_ftp_host'], '%user' => $configuration['mm_ftp_user']);
+  }
+  
+  // did we have an error condition?
+  if ($message) {
+    if ($display) { drupal_set_message(t($message, $params), 'error'); }
+    else { watchdog(MM_FTP_WATCHDOG_TYPE, $message, $params, WATCHDOG_ERROR); }
+    return;
+  }
+  // no error, return the connection
+  return $connection;
+}
+
+
+/**
+ * Takes an FTP file result and returns an array of data
+ * @param $ftp_file_listing
+ *   string, the FTP file listing string
+ * @param $configuration
+ *   array, configuration being run
+ * @param $directory
+ *   string, directory to harvest from
+ * @param $recursive
+ *   int, should harvest recursively, set the depth of the search as well
+ * @param $strict
+ *   boolean, if set, any files currently being uploaded will stop the process
+ * @return array
+ */
+function media_mover_ftp_get_files(&$connection, $configuration, $directory, $recursive  = 1,  $strict = false) {
+	$files = array();
+	// get the list of files 
+	// if we have reached our maxium depth, stop 
+	if ($recursive === 0) {
+		return;
+	}
+	$ftp_files = media_mover_ftp_completed_file_list($connection, $directory, $strict);
+	foreach ($ftp_files as $ftp_file_listing) {
+		$ftp_file = array();
+		// we need to parse the listing of a file. This listing looks like:
+		// -rw-r--r--   1 USER     GROUP     652594 Mar  5 20:33 tnt.wmv.95ccde
+		// however it can also look like:
+		// -rw-r--r--  1 arthur  staff  9124159 Feb 23  2008 pinback.flv
+		
+		// this pattern breaks out each of these items 
+		$pattern = "/^([0-9dlrwx-]*)[\s]*([0-9]{1})\s*([a-zA-z0-9]*)\s*([a-zA-z0-9]*)\s*([0-9]*)\s*([a-zA-z0-9\s]*\:[0-9]{2}|[a-zA-Z].*)\s(.*)$/";
+		if (preg_match($pattern, $ftp_file_listing, $matches)) {
+			// do not find files that start with .
+			if ($matches[7][0] != '.') {
+				// build the file data     	
+      	$ftp_file['filename'] = $matches[7];      
+				$ftp_file['filesize'] = $matches[5];
+				$ftp_file['created'] = strtotime($matches[6]);
+				$ftp_file['filepath'] = $directory .'/'. $ftp_file['filename'];				
+				// check for file token
+			  media_mover_ftp_file_token($ftp_file);				
+				// set a possible user name from the directory
+				if (preg_match("/.*\/(.*)$/", dirname($ftp_file['filepath']), $user)) {
+					$ftp_file['user_name'] = $user[1];
+				}
+			  // is this a directory?
+	      if ($matches[2] && $matches[2] != 1 && $recursive) {
+	        $ftp_file['dir'] = media_mover_ftp_get_files($connection, $configuration, $directory .'/'. $ftp_file['filename'], $recursive - 1, $strict);             
+	      }
+			}
+      // if we have a file listing, append it
+      if ($ftp_file) {      	
+      	$files[] = $ftp_file;
+      }
+		}
+	}	
+	return $files;
+}
+
+
+/**
+ * A wrapper for the ftp_rawlist() php function to only return files which have
+ * finished uploading.
+ * It does this by calling ftp_rawlist twice with a 1 second pause, then checking
+ * the results for inconsitancies (uploading file will have increased in size).
+ *
+ * @param resource $stream
+ * @param string $dir
+ * @param bool $strict
+ *  If strict is TRUE the if any files are still uploading then false is returned
+ * @return array 
+ */
+function media_mover_ftp_completed_file_list(&$connection, $directory, $strict = FALSE) {
+	$results = array();
+  // get 2 listings 1 second appart. If there are no results, exit  
+  if (! $pass1 = ftp_rawlist($connection, $directory) ) {
+  	return array(); 
+  }
+  // wait for a moment to get the second listing.
+  sleep(1);
+  $pass2 = ftp_rawlist($connection, $directory);
+  
+  // get a list of only the results in both listings (ie fully uploaded files)
+  $results = array_intersect($pass1, $pass2);
+
+  // set results to false if in there is a difference and in strict mode
+  if ($strict AND count($result) !== count($pass2) || ! count($result)) {
+    $results = FALSE;
+  }
+ 
+  return $results;
+}
+
+/* ************************************************ */
+/* Pages and forms                                  */
+/* ************************************************ */
+
+
+/**
+ * build the token creation form
+ * @return array
+ *   drupal form array
+ */
+function media_mover_ftp_token_ftp_form($form_state) {
+  global $user;
+  $form['mmftp_info']['text'] = array(
+    '#type' => 'markup',
+    '#value' => check_markup(variable_get('mm_ftp_info', '')),
+  );
+  $form['uid'] = array(
+    '#type' => 'hidden',
+    '#value' => $user->uid,
+  );
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Get token'),
+  );
+  return $form;
+}
+
+
+/**
+ * handles the form submit, enters token into the db
+ * @param string $form_id is the form id
+ * @param array $form_values is a form array
+ */
+function media_mover_ftp_token_ftp_form_submit($form, &$form_state) {
+  global $user;
+
+  // create a token
+  $token = substr(drupal_get_token(time()), 0, MM_FTP_TOKEN_LENGTH);
+  
+  // save the token
+  db_query('INSERT INTO {media_mover_ftp_tokens} (uid, token, date) VALUES (%d, "%s", "%s")', $user->uid, $token, time() );
+
+  // email the user the token
+  drupal_mail('media_mover_ftp', 'ftp_token', $user->mail, user_preferred_language($account), array('account' => $user, 'token' => $token) );
+
+  drupal_set_message(
+    t('We have created the token @token for you. We will also email you your token. You are free to start uploading.',
+    array('@token' => $token) )
+  );
+  return;
+}
+
+
+/**
+ * Outbound mail functions
+ *
+ * @param unknown_type $key
+ * @param unknown_type $message
+ * @param unknown_type $params
+ */
+function media_mover_ftp_mail($key, &$message, $params) {
+  // create the body
+  // @TODO implement real token replacement
+  $body = variable_get('mm_ftp_email_text', t('Your token is: [token]'));
+  $search = array('[token]', '[user name]', '[site name]', '[site url]');
+  $replace = array($params['token'], $user->name, variable_get('site_name', '' ), url('', array('absolute' => true) ));
+  $body = str_replace($search, $replace, $body);
+  
+  if ($key == 'ftp_token') {
+    $message['subject'] = t('[!sitename] Your FTP token', array('!sitename' => variable_get('site_name', 'Drupal')));
+    $message['body'] = $body;
+  }
+}
+
+
+/**
+ * Implementation of hook_token_values().
+ */
+function media_mover_ftp_token_values($type, $object = NULL) {
+  $values = array();
+  switch ($type) {
+
+    case 'mm_config':
+      if (!is_array($object)) {
+        return array();
+      }
+      $config = $object;
+      foreach ($config as $k => $v) {
+        $values[$k] = $v;
+      }
+     break;
+
+  }
+  return $values;
+}
+
+
+/**
+ * build a form that will allow testing of Media Mover configurations
+ * ftp settings
+ * @return unknown_type
+ */
+function media_mover_ftp_test_form() {
+  // find all the media mover configurations that us FTP
+  if (! $options = media_mover_api_get_configurations_by_module('media_mover_ftp')) {
+    drupal_set_message(t('You need to have Media Mover configurations which use FTP in order to test your connection'));
+  }
+
+  $form['display'] = array(
+    '#type' => 'markup',
+    '#value' => t('This test moves a file to your FTP server, copies the file back, and then removes the file from the FTP server'),
+  );
+
+  $form['cid'] = array(
+    '#type' => 'select',
+    '#title' => t('Select a configuration to test'),
+    '#options' => $options,
+    '#description' => t('Choose a configuration to test sending and receiving a file from.'),
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Test'),
+  );
+
+  return $form;
+}
+
+
+/**
+ * Run the FTP test
+ * @param $form_id
+ * @param $form_values
+ * @return unknown_type
+ */
+function media_mover_ftp_test_form_submit($form, &$form_state) {
+  // load the harvest and store libraries
+  require_once('media_mover_ftp_harvest.inc');
+  require_once('mm_ftp_storage.inc');
+
+  $configuration = media_mover_api_get_configuration($form_state['values']['cid']);
+  // find the FTP settings
+  foreach (media_mover_api_verbs() as $verb) {
+    if ($configuration->{$verb}->module == 'media_mover_ftp') {
+      $conf = $configuration->{$verb}->configuration;
+      break;
+    }
+  }
+
+  // now connect to FTP
+  if (! $connection = media_mover_ftp_connect($conf, true)) {
+    drupal_set_message(t('Error connecting. Please adjust your settings'));
+    return;
+  }
+  drupal_set_message(t('Connected to FTP server'));
+
+  // -------------------------------------------
+  // get our test file
+  $path = drupal_get_path('module', 'media_mover_ftp') .'/test.png';
+  // copy the file to the server
+  if ($file_path = mm_ftp_storage($path, $conf, true)) {
+    drupal_set_message(t('Copied file to: %server%path', array('%server' => $conf['mm_ftp_host'] .'/', '%path' => $file_path)));
+  }
+
+  // -------------------------------------------
+  // now copy back from FTP
+  // first we need to allow harvesting with out tokens, regardless of configuration settings
+  $conf['mm_ftp_harvest_without_tokens'] = true;
+  // delete the file after we have retrieved it
+  $conf['mm_ftp_delete_files'] = true;
+  // make sure that we can harvest PNG files
+  $conf['mm_ftp_allowed_files'] .= ' png';
+
+  // now get the file
+  if (! $return_file = media_mover_ftp_harvest_ftp_file($connection['ftp_connection'], $file_path, $conf, true)){
+    drupal_set_message(t('There was a problem downloading the file from the server. You may need to check your permissions.'), 'error');
+  }
+  else {
+    drupal_set_message(t('Copied the file back to the local directory: %directory', array('%directory' => $return_file['harvest_file'])));
+    file_delete($return_file['harvest_file']);
+    drupal_set_message(t('Deleted the file from the local filesystem.'));
+  }
+
+  // close the connection manually
+  ftp_close($connection['ftp_connection']);
+}
+
+
+/* ********************************************************** */
+/* User functions */
+/* ********************************************************** */
+
+/**
+ * Takes an incoming file from from FTP and tries to find a
+ * user from the file name or path
+ *
+ * @param $ftp_file_path
+ *   string, ftp file path
+ * @param $item
+ *   array, file item 
+ */
+function media_mover_ftp_extract_user($ftp_file, &$file, $configuration) {
+  // check the top level director for a user name
+  if ($configuration['mm_ftp_user_from_dir']) {  	
+    if ($account = user_load(array('name' => $ftp_file['user_name']))) {
+      $file['data']['user'] = $account;
+      return;
+    }
+  }
+  if ($user = media_mover_ftp_token_check($ftp_file['token'])) {
+    $file['data']['user'] = $account;
+  }
+}
+
+
+/**
+ * Checkes a token string against the database to see if it is a user id
+ *
+ * @param string $token
+ * @return object
+ *   drupal user object
+ */
+function media_mover_ftp_token_check($token) {
+  $uid = db_result(db_query('SELECT uid FROM {media_mover_ftp_tokens} WHERE token = "%s"', $token));
+  if ($uid) { return user_load(array('uid' => $uid)); }
+}
+
+
+/**
+ * extracts the file name from a file with a token string
+ *
+ * @param string $filename
+ * @return string
+ */
+function media_mover_ftp_token_extract($filename, $type = 'file') {
+  // build a pattern to look for the six digit code at the end
+  // of the string
+  $pattern = '/\.([0-9a-zA-z]{'. MM_FTP_TOKEN_LENGTH .'})$/';
+  preg_match($pattern, $filename, $matches);
+
+  if ($matches[1]) {
+    $token = $matches[1];
+    $filename = str_replace('.'. $token, '', $filename);
+  }
+
+  // return the token
+  if ($type == 'token') {
+    return $token;
+  }
+  
+  // check for folder based token
+  if ($configuration['mm_ftp_harvest_folders'] AND $token == '') {
+    // remove base ftp dir to avoid false positives
+    $filename = substr($filename, strlen($configuration['mm_ftp_dir']));
+    
+    // new patern to search for the size digit code between two /'s
+    $folder_pattern = '/\/([0-9a-zA-z]{'. MM_FTP_TOKEN_LENGTH .'})\//';
+    preg_match($folder_pattern, $filename, $matches);
+    
+    if ($matches[1]) {
+      $token = $matches[1];
+      $filename = str_replace('.'. $token, '', $filename);
+    }
+  }
+  
+  // return just the filename, not full path
+  return basename($filename);
+}
+
+
+/**
+ * Look for a token pattern on the file name and 
+ * return the token
+ * @param $filename
+ * @return string
+ */
+function media_mover_ftp_file_token(&$ftp_file) {
+  // build a pattern to look for the six digit code at the end of the file name
+  $pattern = '/(.*)\.([0-9a-zA-z]{'. MM_FTP_TOKEN_LENGTH .'})$/';
+  // look for a token on the file path
+  if (! preg_match($pattern, $ftp_file['filename'], $matches)) {
+  	// look for a token on the parent directory
+  	if (! preg_match($pattern, basename(dirname($ftp_file['filepath'])), $matches)) {
+  		return;
+  	}
+  }
+  $ftp_file['token'] = $matches[2];
+  $ftp_file['filepath_no_token'] = $matches[1];
+  return;
+}

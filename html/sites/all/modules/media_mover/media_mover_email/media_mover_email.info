@@ -1,6 +1,0 @@
-; $Id$
-name = Email Media Mover
-description = Adds email attachment harvesting to Media Mover.
-package = "Media Mover"
-dependencies[] = media_mover_api
-core = 6.x

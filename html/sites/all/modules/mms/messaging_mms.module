@@ -1,0 +1,61 @@
+<?php
+/**
+ * @file
+ * MMS Messsaging using SMS Framework. Messaging method plug-in
+ */
+
+/**
+ * Implementation of hook_messaging().
+ */
+function messaging_mms_messaging($op = 'info') {
+  switch($op) {
+    case 'send methods':
+      $info['mms'] = array(
+        'title' => 'MMS via SMS Framework E-mail Gateway',
+        'name' => t('MMS'),
+        'group' => 'sms', // Class of send method
+        'type' => MESSAGING_TYPE_SEND,
+        'glue' => "\n", // Glue for message body lines
+        'footer' => "\n--",  // Separator for message footer
+        'description' => t('Send MMS using SMS Framework E-mail Gateway.'),
+        'send callback' => 'messaging_mms_send_msg',  // Sending callback
+        'destination callback' => 'messaging_mms_user_destination',
+      );
+      return $info;  
+  }
+}
+
+/**
+ * Send mime mail message to user account
+ *
+ * @param $destination
+ *   Destination email address
+ * @param $message
+ *   Message array
+ */
+function messaging_mms_send_msg($destination, $message, $params = array()) {
+  // Get parameters without invoking hook_mail_alter()
+  $mail = messaging_mail_prepare($destination, $message, $params, FALSE);
+  // Add e-mail gateway to destination.
+  $mail['to'] .= '@' . mms_email_gateway_rewrite_to_mms($params['carrier']);
+  // mimemail($sender, $recipient, $subject, $body, $plaintext = NULL, $headers = array(), $text = NULL, $attachments = array(), $mailkey = '')
+  return mimemail($mail['from'], $mail['to'], $mail['subject'], $mail['body'], TRUE, $mail['headers'], NULL, $mail['attachments'], '');
+}
+
+/**
+ * Map user account to MMS destination (phone number)
+ */
+function messaging_mms_user_destination($account, $message) {
+  // Check for active mobile infomation. Simply return it so that the send
+  // callback has a destination array and access everything.
+  if (!empty($account->sms_user) && $account->sms_user['status'] == 2 && !empty($account->sms_user['number']) && !empty($account->sms_user['gateway']['carrier'])) {
+    return $account->sms_user['number'] . '@' . mms_email_gateway_rewrite_to_mms($account->sms_user['gateway']['carrier']);
+  }
+}
+
+/**
+ * Implementation of hook_disable()
+ */
+function messaging_mms_disable() {
+  messaging_method_disable('mms');
+}

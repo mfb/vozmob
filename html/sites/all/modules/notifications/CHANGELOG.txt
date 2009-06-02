@@ -1,12 +1,12 @@
-// $Id: CHANGELOG.txt,v 1.1.2.11.2.51.2.14 2009/04/29 16:24:08 jareyero Exp $
+// $Id: CHANGELOG.txt,v 1.1.2.11.2.51.2.16 2009/05/18 18:41:33 jareyero Exp $
 
-TO DO
-------
-* Use actions and triggers instead of old notifications' events, see http://drupal.org/node/260100
-* Support for persistent notifications that will be triggered with a given interval until the user takes some action. Look into the subscription system to see whether this is currently possible with a plug-in or we need some api extensions.
-* Support for notifications in multiple languages, depending on user language
+6.x-2.0 to .......
+-------------------------------
+- Fixed wrong permission checking for user managing subscriptions, by ozzin, #455160
+- Fixed: Empty Notifications fieldset, #453578
+- Fixed: Do not send notifications field value not kept for node preview, #455648
 
-6.x-1.2-beta5 to 6.x-1.2-beta6
+6.x-1.1 to 6.x-2.0
 -------------------------------
 - Removed logging functions, now using messaging logging facility.
 - Added content type subscription update when content type name changes, #429296
@@ -14,9 +14,6 @@ TO DO
 - Fixed inconsistent fieldset for 'Skip notifications' in node and comment form.
 - Added comment about Immediate notifications not working with AJAX forms, #444010
 - Fixed wrong names for sending methods on subscriptions form, #443802
-
-6.x-1.2-beta4 to 6.x-1.2-beta5
--------------------------------
 - Fixed: notification subscription error in postgreSQL, #442852
 - Fixed: notifications lite messages were not digested properly
 - Renamed template parts for group footer: 'footer' => 'closing' to avoid overlap
@@ -27,16 +24,10 @@ TO DO
 - Added event information to objects for token replacement in digests, #348722
 - Fixed multiple minor usability and formatting issues in subscriptions form
 - Renamed custom subscriptions field names: explanation -> description.
-
-6.x-1.2-beta3 to 6.x-1.2-beta4
-------------------------------
 - Fixed bug: double emails, #440168
 - Fixed some notices, variables not initialized.
 - New option to limit the displayed terms to subscribed ones only, by mehmeta, #328708
 - Change in notifications ui to avoid loading subscriptions twice.
-
-6.x-1.2-beta1 to 6.x-1.2-beta3
-------------------------------
 - Added temporary enable / disable options
 - Fixed some issues with administration and edit forms
 - Improved event handling functions, removed global variable, fixed event schema
@@ -54,9 +45,6 @@ TO DO
 - Added taxonomy subscription links/options to nodes, by Jody Lynn, #406606
 - Fixed WSOD with notifications_ui, renamed old functions, #434766
 - Fixing releases, moved new development to DRUPAL--6-2 branch
-
-6.x-1.1 to 6.x-1.2-beta1
----------------------------
 - Added subscription options to user account, optionally in block too.
 - Reworked UI module, more options, moved some stuff from other modules there.
 - Improved query builder used for notifications_get_subscriptions() and notifications_delete_subscriptions()

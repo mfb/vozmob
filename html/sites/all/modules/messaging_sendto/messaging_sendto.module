@@ -103,7 +103,7 @@ function messaging_sendto_block($op = 'list', $delta = 0, $edit = array()) {
 function messaging_sendto_nodeapi(&$node, $op, $teaser, $page) {
   switch ($op) {
     case 'view':
-      if (!$teaser) {
+      if (!$teaser && user_access('forward content')) {
         $formtype = variable_get('messaging_sendto_type_'. $node->type, FALSE);
         if ($formtype > 1) {
           $node->content['messaging_sendto'] = array(
@@ -365,17 +365,22 @@ function messaging_sendto_autocomplete($sendto = '') {
 
 function messaging_sendto_js() {
   // Load the form from the Form API cache.
-  if (!($cached_form = form_get_cache($_POST['form_build_id'], $cached_form_state))) {
+  $form_state = array('storage' => NULL, 'submitted' => FALSE);
+  $form_build_id = $_POST['form_build_id'];
+  $form = form_get_cache($form_build_id, $form_state);
+  if (!($form = form_get_cache($form_build_id, $form_state))) {
     form_set_error('form_token', t('Validation error, please try again. If this error persists, please contact the site administrator.'));
     $output = theme('status_messages');
     print drupal_to_js(array('status' => TRUE, 'data' => $output));
     exit();
   }
-
-  $form_state = array('values' => $_POST);
-
-  // Handle new uploads, and merge tmp files into node-files.
-  messaging_sendto_form_submit($cached_form, $form_state);
+  $args = $form['#parameters'];
+  $form_id = array_shift($args);
+  $form_state['post'] = $form['#post'] = $_POST;
+  $form['#programmed'] = $form['#redirect'] = FALSE;
+  // Process form, which calls submit handlers.
+  drupal_process_form($form_id, $form, $form_state);
+  // $form = drupal_rebuild_form($form_id, $form_state, $args, $form_build_id);
   $output = theme('status_messages');
   print drupal_to_js(array('status' => TRUE, 'data' => $output));
   exit();
@@ -422,8 +427,8 @@ function _messaging_sendto_match($destination) {
     return array('email', $destination, $method);
   } 
   // May be a phone number
-  elseif (($method = _messaging_sendto_available('sms')) && user_access('forward content by sms') && sms_validate_number($destination)) {
-    return array('number', $number, $method);
+  elseif (($method = _messaging_sendto_available('sms')) && user_access('forward content by sms') && !sms_validate_number($destination)) {
+    return array('number', $destination, $method);
   }
   // May be nonsense
   else {
@@ -502,7 +507,18 @@ function _messaging_sendto_compose($method, $destination, $values, $preview = FA
   $message['destinations'] = array($destination);
   $message['sender_account'] = $values['sender'];
   $message['sending_method'] = $method;
- 
+  if (isset($values['gateway'])) {
+    $message['params']['sms'] = $values['gateway'];
+  }
+  if (!empty($values['node']->files)) {
+    $message['attachments'] = $values['node']->files;
+  }
+  // This is site-specific code, should be moved to some hook implementation. 
+  if (!empty($values['node']->field_image)) {
+    foreach ($values['node']->field_image as $file) {
+      $message['attachments'][] = (object) $file;
+    }
+  }
   // Compose message text. Do all this in one replacement
   // Hidden feature: token replacement on custom text
   $text = array(

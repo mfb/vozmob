@@ -1,0 +1,88 @@
+<?php
+
+// $Id: mm_i18nsync.module,v 1.1.2.4.2.1 2008/09/26 16:58:18 arthuregg Exp $;
+
+// This module provides support for syncronizing media mover
+// items across translations
+
+
+/**
+ * Implementation of hook_i18n_sync, handles the configuration options and the syncing process for mm items
+ *
+ * @param string $op is the operation being called
+ * @param array $config is a configuration array
+ * @param object $node is a drupal node object
+ * @param object $translation is a drupal node object whos data is being synced to the data in $node
+ * @return 
+ */
+function mm_i18nsync_i18n_sync($op, $config, $node, $translation) {
+  switch($op) {
+  
+    case 'node_type_config':
+      $form['mm_i18nsync'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Media Mover configurations'),
+      );
+      // create an option per media mover configuration
+      $configurations = media_mover_api_get_configurations();
+      foreach ($configurations as $configuration ) {
+        $form['mm_i18nsync']['mm_i18nsync_config_'. $configuration->cid] = array(
+          '#title' => $configuration->name,
+          '#type' => 'checkbox',
+          '#default_value' => variable_get('mm_i18nsync_config_'. $configuration->cid, null)
+        ); 
+      }  
+      return $form;
+    break;
+    
+    case 'sync':
+      // check if file matches on the translation, if not, add it
+      if ($node->media_mover) {
+        foreach ($node->media_mover as $cid => $configuration) {
+          foreach ($configuration as $item) {
+            // check if each item exists, if not, add it
+            if (! mm_i18nsync_check_item($translation, $item)) {
+              db_query('INSERT INTO {media_mover_files} (mmfid, nid, fid, cid, harvest_value, process_file, storage_file, complete_file, url, status, date, data) VALUES (%d, %d, %d, %d, "%s", "%s", "%s", "%s", %d, "%s", "%s")',
+                 db_last_insert_id('media_mover_files', 'mmfid'), $translation->nid, $item['fid'], $item['cid'],
+                 $item['harvest_file'], $item['process_file'], $item['storage_file'], $item['complete_file'],
+                 $item['url'], $item['status'], $item['date'], serialize($item['data'])       
+              );
+            }
+          }
+        }
+      }
+      
+      // now check the translation and see if it has files that need to be deleted
+      if ($translation->media_mver) {
+        foreach ($translation->media_mover as $cid => $configuration) {
+          foreach ($configuration as $item) {
+            if (! mm_i18nsync_check_item($node, $item)) {
+              // file does not exist, remove it from translation
+              db_query('DELETE FROM {media_mover_files} WHERE mmfid = %d', $item['mmfid']);
+            }
+          }
+        }
+      }    
+     break;
+  }
+}
+
+
+/**
+ * check the media_mover item list to see if this item is on it
+ */
+function mm_i18nsync_check_item($node, $item) {
+  if ($node->media_mover) {
+    foreach ($node->media_mover as $cid => $configuration) {
+      foreach ($configuration as $node_item) {
+        // check to see if this file matches
+        if ($node_item['harvest_file'] == $item['harvest_file'] && 
+            $node_item['complete_file'] == $item['complete_file'] &&
+            $node_item['cid'] == $item['cid']) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}

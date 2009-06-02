@@ -1,14 +1,15 @@
-D/media_mover_email////
-D/mm_content////
 D/mm_ffmpeg////
-D/mm_imagemagick////
 D/mm_node////
-D/mm_s3////
-D/mm_sox////
-/.cvsignore/1.1/Wed Apr  1 07:47:46 2009//
-/README.txt/1.17/Wed Apr  1 07:47:46 2009//
-/media_mover_api.css/1.2/Wed Apr  1 07:47:46 2009//
-/media_mover_api.info/1.4/Wed Apr  1 07:47:46 2009//
-/media_mover_api.install/1.13/Wed Apr  1 07:47:46 2009//
-/media_mover_api.module/1.27/Wed Apr  1 07:47:46 2009//
-/media_mover_api_admin.inc/1.11/Wed Apr  1 07:47:46 2009//
+/.cvsignore/1.1.6.1/Thu May  7 23:17:37 2009//TDRUPAL-6--1
+/README.txt/1.8.2.14.2.1/Thu May  7 23:17:37 2009//TDRUPAL-6--1
+/media_mover_api.css/1.1.2.1/Thu May  7 23:17:37 2009//TDRUPAL-6--1
+/media_mover_api.info/1.1.2.1.2.2/Thu May  7 23:17:37 2009//TDRUPAL-6--1
+/media_mover_api.js/1.1.2.3/Wed Feb 20 13:36:58 2008//TDRUPAL-6--1
+D/contrib////
+D/media_mover_ftp////
+D/mm_cck////
+D/tests////
+/media_mover_api.install/1.1.2.16.2.6/Tue May 19 01:31:59 2009//TDRUPAL-6--1
+/media_mover_api_io.inc/1.1.2.7.2.6/Sun May 31 06:35:44 2009//TDRUPAL-6--1
+/media_mover_api_menus.inc/1.1.4.14/Sun May 31 06:36:58 2009//TDRUPAL-6--1
+/media_mover_api.module/1.1.2.110.2.56/Result of merge+Mon Jun  1 21:01:28 2009//TDRUPAL-6--1

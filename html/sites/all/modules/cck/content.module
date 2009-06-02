@@ -1,5 +1,5 @@
 <?php
-// $Id: content.module,v 1.301.2.103 2009/04/29 20:51:52 karens Exp $
+// $Id: content.module,v 1.301.2.105 2009/05/11 22:40:33 yched Exp $
 /**
  * @file
  * Allows administrators to associate custom fields to content types.
@@ -1789,7 +1789,11 @@ function content_build_modes($selector = NULL) {
   static $info;
 
   if (!isset($info)) {
-    $data = module_invoke_all('content_build_modes');
+    $data = array();
+    foreach (module_implements('content_build_modes') as $module) {
+      $function = $module .'_content_build_modes';
+      $data = array_merge($data, (array) $function());
+    }
     $flat = array();
     foreach ($data as $tab) {
       // Use the + operator to preserve numeric indexes (core build modes).
@@ -1882,6 +1886,19 @@ function search_content_build_modes() {
         NODE_BUILD_SEARCH_RESULT => array(
           'title' => t('Search Result'),
           'views style' => FALSE,
+        ),
+      ),
+    ),
+  );
+}
+function book_content_build_modes() {
+  return array(
+    'print' => array(
+      'title' => t('Print'),
+      'build modes' => array(
+        NODE_BUILD_PRINT => array(
+          'title' => t('Print'),
+          'views style' => TRUE,
         ),
       ),
     ),
