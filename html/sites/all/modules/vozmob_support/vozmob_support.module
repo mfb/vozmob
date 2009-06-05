@@ -45,5 +45,7 @@ function vozmob_support_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
 }
 
 function messaging_mail_alter(&$message){
-	$message['headers']['Return-Path'] = $message['from'];
+    if (!empty($message['from'])){
+        $message['headers']['Return-Path'] = $message['from'];
+    }
 }
