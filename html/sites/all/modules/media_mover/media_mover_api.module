@@ -86,7 +86,7 @@ function media_mover_api_cron() {
   $configurations = media_mover_api_get_configurations();
   foreach ($configurations as $configuration) {
     // check to see if we should run on cron for this configuration
-    if (! media_mover_api_run_control_extend($configuration, 'cron_run')) {
+    if (media_mover_api_run_control_extend($configuration, 'cron_run')) {
       media_mover_api_run_config($configuration, null, null, true);
     }
   }
