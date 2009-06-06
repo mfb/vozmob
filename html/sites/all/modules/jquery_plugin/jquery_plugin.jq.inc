@@ -1,5 +1,5 @@
 <?php
-// $Id: jquery_plugin.jq.inc,v 1.1.2.13 2009/03/05 05:48:31 mfb Exp $
+// $Id: jquery_plugin.jq.inc,v 1.1.2.14 2009/06/06 08:57:35 mfb Exp $
 
 /**
  * Implementation of hook_jq().
@@ -38,7 +38,7 @@ function jquery_plugin_jq($op, $plugin = NULL) {
       'cycle' => array(
         'name' => t('Cycle'),
         'description' => t('Easy to use light-weight slideshow implementation. It supports pause-on-hover, auto-stop, auto-fit, before/after callbacks, click triggers and many transition effects including fade, shuffle, scroll, turn and zoom. It also allows you to define and run your own custom transitions. In addition, it supports, but does not require, the Metadata Plugin and the Easing Plugin.'),
-        'version' => '2.56',
+        'version' => '2.65',
         'url' => 'http://plugins.jquery.com/project/cycle',
         'files' => array(
           'js' => array(
@@ -64,7 +64,7 @@ function jquery_plugin_jq($op, $plugin = NULL) {
       'expose' => array(
         'name' => t('Expose'),
         'description' => t('Make your HTML elements stand out.'),
-        'version' => '1.0.0',
+        'version' => '1.0.2',
         'url' => 'http://plugins.jquery.com/project/expose',
         'files' => array(
           'js' => array(
@@ -77,7 +77,7 @@ function jquery_plugin_jq($op, $plugin = NULL) {
       'flashembed' => array(
         'name' => t('Flash embed'),
         'description' => t('A javascript tool that you can use to embed Flash objects to your website.'),
-        'version' => '1.0.1',
+        'version' => '1.0.3',
         'url' => 'http://plugins.jquery.com/project/flashembed',
         'files' => array(
           'js' => array(
@@ -116,7 +116,7 @@ function jquery_plugin_jq($op, $plugin = NULL) {
       'overlay' => array(
         'name' => t('Overlay'),
         'description' => t('Overlay your HTML with eye candy.'),
-        'version' => '1.0.1',
+        'version' => '1.0.2',
         'url' => 'http://plugins.jquery.com/project/overlay',
         'files' => array(
           'js' => array(
@@ -129,7 +129,7 @@ function jquery_plugin_jq($op, $plugin = NULL) {
       'scrollable' => array(
         'name' => t('Scrollable'),
         'description' => t('Make your HTML elements move.'),
-        'version' => '1.0.2',
+        'version' => '1.0.3',
         'url' => 'http://plugins.jquery.com/project/scrollable',
         'files' => array(
           'js' => array(
@@ -139,10 +139,36 @@ function jquery_plugin_jq($op, $plugin = NULL) {
         ),
         'invocation' => NULL,
       ),
+      'tabs' => array(
+        'name' => t('Tabs'),
+        'description' => t('jQuery Tools tabs plugin.'),
+        'version' => '1.0.0',
+        'url' => 'http://plugins.jquery.com/project/tabs',
+        'files' => array(
+          'js' => array(
+            $path .'/jquery.tabs.min.js',
+          ),
+          'css' => NULL,
+        ),
+        'invocation' => NULL,
+      ),
+      'tooltip' => array(
+        'name' => t('Tooltip'),
+        'description' => t('jQuery Tools tooltip plugin.'),
+        'version' => '1.0.0',
+        'url' => 'http://plugins.jquery.com/project/tooltips',
+        'files' => array(
+          'js' => array(
+            $path .'/jquery.tooltip.min.js',
+          ),
+          'css' => NULL,
+        ),
+        'invocation' => NULL,
+      ),
       'validate' => array(
         'name' => t('Validate'),
         'description' => t('Setup powerful client-side form validation. From a protoype in a few minutes to heavily customized validation rules, methods and messages.'),
-        'version' => '1.5.1',
+        'version' => '1.5.2',
         'url' => 'http://plugins.jquery.com/project/validate',
         'files' => array(
           'js' => array(
