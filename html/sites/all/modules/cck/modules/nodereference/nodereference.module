@@ -1,5 +1,5 @@
 <?php
-// $Id: nodereference.module,v 1.138.2.54 2009/04/29 20:51:53 karens Exp $
+// $Id: nodereference.module,v 1.138.2.55 2009/06/02 12:24:04 yched Exp $
 
 /**
  * @file
@@ -49,6 +49,15 @@ function nodereference_theme() {
       'function' => 'theme_nodereference_formatter_full_teaser',
     ),
   );
+}
+
+/**
+ * Implementaion of hook_ctools_plugin_directory().
+ */
+function nodereference_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'ctools' && $plugin == 'relationships') {
+    return 'panels/' . $plugin;
+  }
 }
 
 /**

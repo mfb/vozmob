@@ -1,5 +1,5 @@
 <?php
-// $Id: content.module,v 1.301.2.105 2009/05/11 22:40:33 yched Exp $
+// $Id: content.module,v 1.301.2.106 2009/06/02 12:24:04 yched Exp $
 /**
  * @file
  * Allows administrators to associate custom fields to content types.
@@ -50,15 +50,6 @@ function content_init() {
   }
   if (module_exists('diff') && !function_exists('content_diff')) {
     module_load_include('inc', 'content', 'includes/content.diff');
-  }
-}
-
-/**
- * Implementation of hook_ctools_plugin_directory().
- */
-function content_ctools_plugin_directory($module, $plugin) {
-  if ($module == 'ctools' && $plugin == 'content_types') {
-    return 'includes/panels/' . $plugin;
   }
 }
 
@@ -226,6 +217,15 @@ function content_views_api() {
     'api' => 2,
     'path' => drupal_get_path('module', 'content') . '/includes/views',
   );
+}
+
+/**
+ * Implementation of hook_ctools_plugin_directory().
+ */
+function content_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'ctools' && $plugin == 'content_types') {
+    return 'includes/panels/' . $plugin;
+  }
 }
 
 /**

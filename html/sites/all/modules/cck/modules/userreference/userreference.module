@@ -1,5 +1,5 @@
 <?php
-// $Id: userreference.module,v 1.106.2.42 2009/05/16 16:41:30 yched Exp $
+// $Id: userreference.module,v 1.106.2.43 2009/06/02 12:24:04 yched Exp $
 
 /**
  * @file
@@ -41,6 +41,15 @@ function userreference_theme() {
       'arguments' => array('element'),
     ),
   );
+}
+
+/**
+ * Implementaion of hook_ctools_plugin_directory().
+ */
+function userreference_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'ctools' && $plugin == 'relationships') {
+    return 'panels/' . $plugin;
+  }
 }
 
 /**

@@ -1,5 +1,5 @@
 <?php
-// $Id: theme.inc,v 1.73 2009/05/06 19:33:00 merlinofchaos Exp $
+// $Id: theme.inc,v 1.76 2009/06/02 20:28:52 merlinofchaos Exp $
 
 /**
  * @file theme.inc
@@ -24,6 +24,7 @@ function _views_theme_functions($hook, $view, $display = NULL) {
   if ($display) {
     $themes[] = $hook . '__' . $view->name . '__' . $display->id;
     $themes[] = $hook . '__' . $display->id;
+    $themes[] = $hook . '__' . preg_replace('/[^a-z0-9]/', '-', strtolower($view->tag));
     if ($display->id != $display->display_plugin) {
       $themes[] = $hook . '__' . $view->name . '__' . $display->display_plugin;
       $themes[] = $hook . '__' . $display->display_plugin;
@@ -106,7 +107,7 @@ function template_preprocess_views_view(&$vars) {
       ),
     );
 
-    drupal_alter('views_admin_links', $vars['admin_links_raw']);
+    drupal_alter('views_admin_links', $vars['admin_links_raw'], $view);
     $vars['admin_links'] = theme('links', $vars['admin_links_raw']);
     views_add_css('views');
   }
@@ -437,7 +438,8 @@ function template_preprocess_views_view_unformatted(&$vars) {
   $vars['classes'] = array();
   // Set up striping values.
   foreach ($rows as $id => $row) {
-    $vars['classes'][$id] = 'views-row-' . ($id + 1);
+    $vars['classes'][$id] = 'views-row';
+    $vars['classes'][$id] .= ' views-row-' . ($id + 1);
     $vars['classes'][$id] .= ' views-row-' . ($id % 2 ? 'even' : 'odd');
     if ($id == 0) {
       $vars['classes'][$id] .= ' views-row-first';

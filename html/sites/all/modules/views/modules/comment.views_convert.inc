@@ -1,5 +1,5 @@
 <?php
-//$Id: comment.views_convert.inc,v 1.2 2009/04/07 23:21:00 merlinofchaos Exp $
+//$Id: comment.views_convert.inc,v 1.3 2009/06/02 20:31:00 merlinofchaos Exp $
 
 /**
  * @file
@@ -19,6 +19,27 @@ function comment_views_convert($display, $type, &$view, $field, $id = NULL) {
       switch ($field['tablename']) {
         case 'comments':
           switch ($field['field']) {
+            case 'subject':
+              if ($field['options'] = 'nolink') {
+                $view->set_item_option($display, 'field', $id, 'link_to_comment', FALSE);
+              }
+              break;
+            case 'cid':
+              $view->set_item_option($display, 'field', $id, 'link_to_comment', FALSE);
+              break;
+            case 'timestamp':
+              $handlers = array(
+                'views_handler_field_date_small' => 'small',
+                'views_handler_field_date' => 'medium',
+                'views_handler_field_date_large' => 'large',
+                'views_handler_field_date_custom' => 'custom',
+                'views_handler_field_since' => 'time ago',
+              );
+              $view->set_item_option($display, 'field', $id, 'date_format', $handlers[$field['handler']]);
+              if (!empty($field['options'])) {
+                $view->set_item_option($display, 'field', $id, 'custom_date_format', $field['options']);
+              }
+              break;
             case 'add':
               $view->set_item_option($display, 'field', $id, 'field', 'replyto_comment');
               break;
@@ -26,30 +47,88 @@ function comment_views_convert($display, $type, &$view, $field, $id = NULL) {
           break;
         case 'node_comment_statistics':
           switch ($field['field']) {
+            case 'last_comment_timestamp':
+              $handlers = array(
+                'views_handler_field_date_small' => 'small',
+                'views_handler_field_date' => 'medium',
+                'views_handler_field_date_large' => 'large',
+                'views_handler_field_date_custom' => 'custom',
+                'views_handler_field_since' => 'time ago',
+              );
+              $view->set_item_option($display, 'field', $id, 'date_format', $handlers[$field['handler']]);
+              if (!empty($field['options'])) {
+                $view->set_item_option($display, 'field', $id, 'custom_date_format', $field['options']);
+              }
+              break;
             case 'last_changed':
+              $handlers = array(
+                'views_handler_field_date_small' => 'small',
+                'views_handler_field_date' => 'medium',
+                'views_handler_field_date_large' => 'large',
+                'views_handler_field_date_custom' => 'custom',
+                'views_handler_field_since' => 'time ago',
+              );
               $item = $view->get_item($display, 'field', $id);
-              $item['field'] = 'last_updated';
+              $item['date_format'] = $handlers[$field['handler']];
               if (!empty($field['options'])) {
                 $item['custom_date_format'] = $field['options'];
               }
-              switch ($field['handler']) {
-                case 'views_handler_field_date_small':
-                  $item['date_format'] = 'small';
-                  break;
-                case 'views_handler_field_date':
-                  $item['date_format'] = 'medium';
-                  break;
-                case 'views_handler_field_date_large':
-                  $item['date_format'] = 'large';
-                  break;
-                case 'views_handler_field_date_custom':
-                  $item['date_format'] = 'custom';
-                  break;
-                case 'views_handler_field_since':
-                  $item['date_format'] = 'time ago';
-                  break;
-              }
+              $item['field'] = 'last_updated';
               $view->set_item($display, 'field', $id, $item);
+              break;
+          }
+          break;
+      }
+      break;
+    case 'filter':
+      switch ($field['tablename']) {
+        case 'comments':
+          switch ($field['field']) {
+            case 'status':
+              $view->set_item_option($display, 'filter', $id, 'value', $field['value']);
+              break;
+          }
+          break;
+        case 'node_comment_statistics':
+          switch ($field['field']) {
+            case 'comment_count':
+              $view->set_item_option($display, 'filter', $id, 'operator', $field['operator']);
+              $view->set_item_option($display, 'filter', $id, 'value', $field['value']);
+              break;
+            case 'last_changed':
+              $field['field'] = 'last_updated';
+            case 'last_comment_timestamp':
+              $item = $view->get_item($display, 'filter', $id);
+              $item['operator'] = $field['operator'];
+              $item['value']['type'] = $field['value'] == 'now' ? 'offset' : 'date';
+              $item['value']['value'] = $field['value'];
+              if (!empty($field['options'])) {
+                $item['value']['value'] = intval($field['options']) .' seconds';
+              }
+              $item['field'] = $field['field'];
+              $view->set_item($display, 'filter', $id, $item);
+              break;
+          }
+          break;
+      }
+      break;
+    case 'sort':
+      switch ($field['tablename']) {
+        case 'comments':
+          switch ($field['field']) {
+            case 'timestamp':
+              $field['options'] = $field['options'] == 'normal' ? 'second' : $field['options'];
+              $view->set_item_option($display, 'sort', $id, 'granularity', $field['options']);
+              break;
+          }
+          break;
+        case 'node_comment_statistics':
+          switch ($field['field']) {
+            case 'last_changed':
+              $view->set_item_option($display, 'sort', $id, 'field', 'last_updated');
+            case 'last_comment_timestamp':
+              $field['options'] = $field['options'] == 'normal' ? 'second' : $field['options'];
+              $view->set_item_option($display, 'sort', $id, 'granularity', $field['options']);
               break;
           }
           break;

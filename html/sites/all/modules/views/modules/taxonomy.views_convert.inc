@@ -1,5 +1,5 @@
 <?php
-//$Id: taxonomy.views_convert.inc,v 1.2 2009/04/07 23:21:00 merlinofchaos Exp $
+//$Id: taxonomy.views_convert.inc,v 1.3 2009/06/02 20:31:00 merlinofchaos Exp $
 
 /**
  * @file
@@ -20,8 +20,6 @@ function taxonomy_views_convert($display, $type, &$view, $field, $id = NULL) {
         switch ($field['field']) {
           case 'name':
             $item = $view->get_item($display, 'field', $id);
-            $item['table'] = 'term_node';
-            $item['field'] = 'tid';
             if ($field['options'] != 'nolink') {
               $item['link_to_taxonomy'] = TRUE;
             }
@@ -33,79 +31,65 @@ function taxonomy_views_convert($display, $type, &$view, $field, $id = NULL) {
             break;
         }
       }
+      elseif ($field['tablename'] == 'term_data') {
+        switch ($field['field']) {
+          case 'name':
+            if ($field['field'] == 'views_handler_field_tid_link') {
+              $view->set_item_option($display, 'field', $id, 'link_to_taxonomy', TRUE);
+            }
+            break;
+        }
+      }
       break;
     case 'filter':
       if ($field['tablename'] == 'term_node' || !strncmp($field['tablename'], 'term_node_', 10)) {
         switch ($field['field']) {
           case 'tid':
+            $operators = array('AND' => 'and', 'OR' => 'or', 'NOR' => 'not');
             $item = $view->get_item($display, 'filter', $id);
-            $item['table'] = 'term_node';
-            $item['field'] = 'tid';
             if ($vid = (integer) substr($field['tablename'], 10)) {
+              $item['table'] = 'term_node';
               $item['vid'] = $vid;
             }
             else {
               $item['limit'] = FALSE;
             }
-            $item['operator'] = strtolower($field['operator']);
+            $item['operator'] = $operators[$field['operator']];
             $item['type'] = 'select';
             $item['value'] = $field['value'];
             $view->set_item($display, 'filter', $id, $item);
             break;
         }
       }
+      elseif ($field['tablename'] == 'term_data') {
+        switch ($field['field']) {
+          case 'vid':
+            $operators = array('AND' => 'in', 'OR' => 'in', 'NOR' => 'not in');
+            $view->set_item_option($display, 'filter', $id, 'operator', $operators[$field['operator']]);
+            $view->set_item_option($display, 'filter', $id, 'value', $field['value']);
+            break;
+        }
+      }
       break;
     case 'argument':
+      $options = $field['argoptions'];
       switch ($field['type']) {
         case 'taxid':
-          $actions = array('ignore', 'not found', 'ignore', 'summary asc', 'summary asc', 'summary desc', 'summary asc', 'empty');
-          $options['default_action'] = $actions[$field['argdefault']];
-          if (!empty($field['title'])) {
-            $options['title'] = $field['title'];
-          }
-          if (!empty($field['wildcard'])) {
-            $options['wildcard'] = $field['wildcard'];
-          }
-          if (!empty($field['wildcard_substitution'])) {
-            $options['wildcard_substitution'] = $field['wildcard_substitution'];
-          }
           if (!empty($field['options'])) {
             $options['depth'] = $field['options'];
           }
           $options['break_phrase'] = TRUE;
-          $view->add_item($display, 'argument', 'node', 'term_node_tid_depth', $options, $id);
+          $view->add_item($display, 'argument', 'node', 'term_node_tid_depth', $options, $field['id']);
           break;
         case 'taxletter':
-          $actions = array('ignore', 'not found', 'ignore', 'summary asc', 'summary asc', 'summary desc', 'summary asc', 'empty');
-          $options['default_action'] = $actions[$field['argdefault']];
-          if (!empty($field['title'])) {
-            $options['title'] = $field['title'];
-          }
-          if (!empty($field['wildcard'])) {
-            $options['wildcard'] = $field['wildcard'];
-          }
-          if (!empty($field['wildcard_substitution'])) {
-            $options['wildcard_substitution'] = $field['wildcard_substitution'];
-          }
           if (!empty($field['options'])) {
             $options['glossary'] = TRUE;
             $options['limit'] = $field['options'];
           }
-          $view->add_item($display, 'argument', 'term_data', 'name', $options, $id);
+          $view->add_item($display, 'argument', 'term_data', 'name', $options, $field['id']);
           break;
         case 'vocid':
-          $actions = array('ignore', 'not found', 'ignore', 'summary asc', 'summary asc', 'summary desc', 'summary asc', 'empty');
-          $options['default_action'] = $actions[$field['argdefault']];
-          if (!empty($field['title'])) {
-            $options['title'] = $field['title'];
-          }
-          if (!empty($field['wildcard'])) {
-            $options['wildcard'] = $field['wildcard'];
-          }
-          if (!empty($field['wildcard_substitution'])) {
-            $options['wildcard_substitution'] = $field['wildcard_substitution'];
-          }
-          $view->add_item($display, 'argument', 'vocabulary', 'vid', $options, $id);
+          $view->add_item($display, 'argument', 'vocabulary', 'vid', $options, $field['id']);
           break;
       }
       break;

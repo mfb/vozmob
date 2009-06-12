@@ -1,4 +1,61 @@
 CHANGELOG for Views 2 for Drupal 6
+
+Views 2.6
+  Bugs fixed:
+    o #419226 by kelvincool: Respect admin theme during views ajax operations.
+    o #419270 by voxpelli: set_where_group() could fail if no previous groups.
+    o #422054 by yhahn: Protect exports from impropertly indenting multiline strings.
+    o #437070 by mikeryan: Base table formerly limited to 32 characters.
+    o #317271 by quicksketch: ensure_my_table() limited to one relationship per table.
+    o #441520 by jonathan1055: Allow the "time ago" date format to work on future dates as well.
+    o #445398 by casey: reduce_value_options() using wrong value array.
+    o #451370 by skwashd: base.js had some DOS line endings.
+    o #454754 by dww: Fix PGSQL related errors with comment author filtering.
+    o #384286 by dww: Make it possible to expose the filter for "Node: Has new content"
+    o #463634 by alienbrain: "Empty field name" incorrectly specified.
+    o #463580 by ximo: AJAX summary links broken in some displays.
+    o #468336 by psynaptic: Fix broken hook_views_admin_links_alter
+    o #422868 by mattman: Breadcrumbs not properly substuting % replacements.
+    o #440676 by dereine and Razorraser: View import form crashed on empty view input.
+    o #461842 by dereine: Use gmtime() instead of format_date() to prevent localization of dates in RSS feeds.
+    o #316556 by darrenoh and JirkaRybka: More 1.x upgrade fixes.
+    o #382398 by elcuco: Force LTR in the views admin.
+    o #461144: Fix trimming to correctly remove tags when they are trimmed in half.
+    o #330956: Theme: Information only scanned information from the default theme.
+    o SA-CONTRIB-2009-037: Filter checkboxes could be displayed unfiltered allowing XSS attacks.
+
+  Other changes:
+    o #298616: Add argument for node updated time similar to node created time.
+    o #325607 by bangpound: Automatically sort exports from bulk export.
+    o #323049 by yched: Allow Empty/Not Empty on select many to one.
+    o #340701 by swentel: Restore allowing Views to set block caching mode.
+    o #347892 by dww: Allow <any> option in Boolean filters.
+    o #358314 by brmassa: Catch the exposed filter form so it doesn't process twice on a single view.
+    o #154865 by Zack Rosen, josh_k and KarenS: Allow user contact form as a field.
+    o #411880 by fgm: Add "options callback" to items using in_operator handler.
+    o #360657 by yhahn: new hook_views_default_views_alter().
+    o #430068 by dereine: New global counter field for displaying row number.
+    o #420340 by derine: Translate node type filter.
+    o #325796 by yang_yi_cn: Translate node type argument.
+    o #446726 by yhahn: Improved performance for js dependencies.
+    o #437760 by leeneman: Remove duplicate terms from taxonomy term argument title.
+    o #354270 by dereine: Allow "tag" to be added to the theme template suggestions.
+    o #408180 by joachim: Allow taxonomy term parent argument.
+    o #469456 by dereine: Automatically give .info file during views bulk export.
+    o #424460 by thePanz: Customizable breadcrumb title for arguments.
+    o #436398 by Pasqualle: Support for aggregator category table.
+    o #424648 by quicksketch and dereine: Allow format selection on filesize field.
+    o #478312 by yhahn: Provide specific node access filter.
+    o #479878 by dereine: User language field.
+    o #468824 by eaton: Pluggable caching mechanism which can cache both the query result and rendered result.
+    o #399534 by clemens.tolboom and drewish: Add fragment and query string as options when making fields into links.
+    o #315915 by dixon_: Add another base row class to rows.
+    o #353403 by agentrickard: Field to provide "more" text.
+    o #377896 by dereine: When ticked "link to node" show node title as a href title attribute.
+    o #386098 by dereine: Add "watchdog" as a debug logging options.
+    o #409428 by gpk: Missing field: node input format.
+    o #271833 by grugnog, agentrickard and others: Taxonomy depth in filter.
+
 Views 2.5
   Bugs fixed:
     o #363817 by thePanz: Empty fields in table could still trigger separators.

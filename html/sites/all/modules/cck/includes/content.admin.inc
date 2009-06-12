@@ -1,5 +1,5 @@
 <?php
-// $Id: content.admin.inc,v 1.181.2.67 2009/03/23 23:22:37 yched Exp $
+// $Id: content.admin.inc,v 1.181.2.68 2009/06/02 14:49:07 yched Exp $
 
 /**
  * @file
@@ -215,7 +215,7 @@ function content_field_overview_form(&$form_state, $type_name) {
   foreach ($extra as $name => $label) {
     $weight = $extra[$name]['weight'];
     $form[$name] = array(
-      'label' => array('#value' => t($extra[$name]['label'])),
+      'label' => array('#value' => check_plain(t($extra[$name]['label']))),
       'description' => array('#value' => isset($extra[$name]['description']) ? $extra[$name]['description'] : ''),
       'weight' => array('#type' => 'textfield', '#default_value' => $weight, '#size' => 3),
       'parent' => array('#type' => 'hidden', '#default_value' => ''),

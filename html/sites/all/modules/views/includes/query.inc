@@ -1,5 +1,5 @@
 <?php
-// $Id: query.inc,v 1.42 2009/03/24 23:06:24 merlinofchaos Exp $
+// $Id: query.inc,v 1.45 2009/06/02 18:17:06 merlinofchaos Exp $
 /**
  * @file query.inc
  * Defines the query object which is the underlying layer in a View.
@@ -205,12 +205,6 @@ class views_query {
       'base' => $base,
     );
     return $alias;
-
-    return $alias;
-/*
-    if ($alias = $this->add_table($join->table, $link_point, $join, $alias)) {
-    }
-*/
   }
 
   /**
@@ -293,7 +287,12 @@ class views_query {
     }
 
     if (!$alias && $join && $relationship && !empty($join->adjusted) && $table != $join->table) {
-      $alias = $table;
+      if ($relationship == $this->base_table) {
+        $alias = $table;
+      }
+      else {
+        $alias = $relationship . '_' . $table;
+      }
     }
 
     // Check this again to make sure we don't blow up existing aliases for already
@@ -670,7 +669,7 @@ class views_query {
     $groups = &$this->$where;
 
     if (!isset($group)) {
-      $group = max(array_keys($groups)) + 1;
+      $group = empty($groups) ? 1 : max(array_keys($groups)) + 1;
     }
 
     // Create an empty group

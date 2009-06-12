@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_row_node_rss.inc,v 1.6 2009/04/07 22:02:40 merlinofchaos Exp $
+// $Id: views_plugin_row_node_rss.inc,v 1.7 2009/06/02 20:14:43 merlinofchaos Exp $
 /**
  * @file
  * Contains the node RSS row style plugin.
@@ -98,7 +98,7 @@ class views_plugin_row_node_rss extends views_plugin_row {
     $extra = node_invoke_nodeapi($node, 'rss item');
     $item->elements = array_merge($extra,
       array(
-        array('key' => 'pubDate', 'value' => format_date($node->created, 'custom', 'r', variable_get('date_default_timezone', 0))),
+        array('key' => 'pubDate', 'value' => gmdate('r', $node->created)),
         array(
           'key' => 'dc:creator',
           'value' => $node->name,

@@ -1,12 +1,24 @@
-//$Id: CHANGELOG.txt,v 1.1.6.331 2009/05/16 16:41:30 yched Exp $
+//$Id: CHANGELOG.txt,v 1.1.6.336 2009/06/05 20:36:02 yched Exp $
 
 CCK 6.x-2.x
 ===========
+- #482774 Update breaks when CCK is disabled.
+
+CCK 6.x-2.3
+===========
+
+Please visit update.php apply pending updates after uploading the new files.
+
+This release:
+- fixes a few bugs,
+- adss initial Panels 3 support (Panels 2 not supported),
+- removes the unfinished Multigroup feature (work on this will continue in an experimental branch)
 
 Features:
 - #414298 by Michelle, merlinofchaos - Add Panels 3 integration for fields and fieldgroups.
 - #419678 Views integration: expose CCK fields to 'Node revision' Views.
 - #399778 by Benjamin Melençon - Nodereference / Userreference: Add 'size' setting to autocomplete widgets.
+- #479044 by merlinofchaos - Add Panels 3 relatioships for nodereference and userreference fields.
 
 Bugfixes:
 - #407446 by quicksketch: prevent double serialization during per-field to per-type migration.
@@ -19,12 +31,14 @@ Bugfixes:
 - #413792 Views integration: fix fields using 'multiple formatters' and not 'group multiple fields'. Thanks Crell and quicksketch for the detective work.
 - #421126 Views integration: Use value aliases in argument title replacements for text / number fields.
 - #397358 by Darren Oh, yched, markus_petrux - Views integration: Use node title / user name in argument title replacements for nodereference and userreference argument fields.
-- #428400 Views integration : Fix fatal error with Views 2.4 (views_handler_filter_float has moved). Preserved compatibility with Views 2.3.
+- #428400 Views integration: Fix fatal error with Views 2.4 (views_handler_filter_float has moved). Preserved compatibility with Views 2.3.
 - #447562 by markus_petrux: fix non-XHTML markup on 'Manage fields' screen.
 - #369364 Views integration: fix non-XHTML markup when displaying fields with the 'group multiple values' option.
 - #441412 by jcnventura - Add 'Print' display context on 'Display fields' pages when book.module is enabled.
 - #458952 Let different modules defined the same build_mode information.
 - #383038 by markDrupal - Userreference: fix broken 'reverse links' with fields in per-type table.
+- #479074 by rickward: prevent minor XSS vulnerability when displaying user-submitted 'Body field' labels.
+- #479994 by quicksketch: fix "add more' button with devel.module's query logging.
 
 CCK 6.x-2.2
 ===========

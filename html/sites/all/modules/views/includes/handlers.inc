@@ -1,5 +1,5 @@
 <?php
-// $Id: handlers.inc,v 1.109 2009/04/10 20:22:54 merlinofchaos Exp $
+// $Id: handlers.inc,v 1.114 2009/06/04 20:20:45 merlinofchaos Exp $
 /**
  * @file handlers.inc
  * Defines the various handler objects to help build and display views.
@@ -1065,6 +1065,9 @@ function views_views_handlers() {
       'views_handler_field_custom' => array(
         'parent' => 'views_handler_field',
       ),
+      'views_handler_field_counter' => array(
+        'parent' => 'views_handler_field',
+      ),
 
       // filter handlers
       'views_handler_filter' => array(
@@ -1214,9 +1217,14 @@ class views_join {
    * Build the SQL for the join this object represents.
    */
   function join($table, &$query) {
-    $left = $query->get_table_info($this->left_table);
-    $output = " $this->type JOIN {" . $this->table . "} $table[alias] ON $left[alias].$this->left_field = $table[alias].$this->field";
-
+    if ($this->left_table) {
+      $left = $query->get_table_info($this->left_table);
+      $output = " $this->type JOIN {" . $this->table . "} $table[alias] ON $left[alias].$this->left_field = $table[alias].$this->field";
+    }
+    else {
+      // This can be used if left_field is a formula or something. It should be used only *very* rarely.
+      $output = " $this->type JOIN {" . $this->table . "} $table[alias] ON $this->left_field = $table[alias].$this->field";
+    }
     // Tack on the extra.
     if (isset($this->extra)) {
       if (is_array($this->extra)) {
@@ -1327,6 +1335,8 @@ function comment_views_api() { return views_views_api(); }
 
 function locale_views_api() { return views_views_api(); }
 
+function filter_views_api() { return views_views_api(); }
+
 function node_views_api() { return views_views_api(); }
 
 function poll_views_api() { return views_views_api(); }
@@ -1346,3 +1356,5 @@ function translation_views_api() { return views_views_api(); }
 function upload_views_api() { return views_views_api(); }
 
 function user_views_api() { return views_views_api(); }
+
+function contact_views_api() { return views_views_api(); }

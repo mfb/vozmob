@@ -1,5 +1,5 @@
 <?php
-// $Id: flowplayer.admin.inc,v 1.1.2.1 2009/02/19 16:33:33 robloach Exp $
+// $Id: flowplayer.admin.inc,v 1.1.2.2 2009/04/17 16:56:03 robloach Exp $
 
 /**
  * @file
@@ -98,8 +98,8 @@ function flowplayer_admin_settings() {
   // Create the preview
   $config = array(
     'clip' => array(
-      'url' => 'http://blip.tv/file/get/Kwang0274-NYCThemingSeminarDay1Part2816.flv',
-      'autoPlay' => FALSE,
+      'url' => 'http://player-e7.simplecdn.net/flowplayer.flv',
+      'autoPlay' => TRUE,
     ),
     'onLoad' => 'flowplayer_admin_init',
   );

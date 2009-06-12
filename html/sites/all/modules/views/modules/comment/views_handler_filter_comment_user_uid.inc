@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_filter_comment_user_uid.inc,v 1.1 2009/02/06 21:13:04 merlinofchaos Exp $
+// $Id: views_handler_filter_comment_user_uid.inc,v 1.2 2009/06/02 18:50:56 merlinofchaos Exp $
 
 /**
  * Filter handler to accept a user id to check for nodes that user posted or
@@ -17,7 +17,7 @@ class views_handler_filter_comment_user_uid extends views_handler_filter_user_na
     $args = array_merge($args, $args);
 
     $this->query->add_where($this->options['group'], "$this->table_alias.uid " . $condition . " OR
-      (SELECT COUNT(*) FROM {comments} c WHERE c.uid " . $condition . " AND c.nid = $this->table_alias.nid)",
+      ((SELECT COUNT(*) FROM {comments} c WHERE c.uid " . $condition . " AND c.nid = $this->table_alias.nid) > 0)",
       $args);
   }
 }

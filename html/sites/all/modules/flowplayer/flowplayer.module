@@ -1,5 +1,5 @@
 <?php
-// $Id: flowplayer.module,v 1.2.2.1 2009/02/19 16:33:33 robloach Exp $
+// $Id: flowplayer.module,v 1.2.2.3 2009/05/07 07:25:47 robloach Exp $
 
 /**
  * @file
@@ -26,7 +26,7 @@ function flowplayer_help($path, $arg) {
       $output .= '<h3>'. t('Theme Funciton') .'</h3>';
       $output .= '<p>'. t("Calling <code>theme('flowplayer')</code> will not only add the correct JavaScript to the page, but also construct the markup for you. The second argument passed through here is the video URL, but you can pass the <a href='http://flowplayer.org/documentation/configuration.html'>configuration options</a> instead as seen below.") .'</p>';
       // Construct the video and output it using theme('flowplayer').
-      $output .= theme('flowplayer', 'http://blip.tv/file/get/Kwang0274-NYCThemingSeminarPart1675.flv');
+      $output .= theme('flowplayer', 'http://player-e7.simplecdn.net/flowplayer.flv');
       // The second parameter can either be the video URL or configuration options from:
       //   http://flowplayer.org/documentation/configuration.html
 
@@ -36,12 +36,12 @@ function flowplayer_help($path, $arg) {
       $output .= '<h3>'. t('Flowplayer Add') .'</h3>';
       $output .= '<p>'. t("The <code>flowplayer_add()</code> function will add the Flowplayer JavaScript to the page, as well as register the Drupal JavaScript behaviors to load the Flowplayer appropriately. The first argument is the jQuery selector to apply the Flowplayer element to. The second argument is the <a href='http://flowplayer.org/documentation/configuration.html'>configuration options</a>. Using <code>flowplayer_add</code> requires you to already have the markup created.") .'</p>';
       // Construct the video markup first.
-      $output .= '<a href="http://blip.tv/file/get/Kwang0274-NYCThemingSeminarDay1Part2816.flv" id="player" class="flowplayer"></a>';
+      $output .= '<a href="http://player-e7.simplecdn.net/flowplayer.flv" id="player" class="flowplayer"></a>';
       // Now add the required JavaScript using some configuration options (http://flowplayer.org/documentation/configuration.html).
       flowplayer_add('#player', array(
         'clip' => array(
           'autoPlay' => FALSE,
-          'linkUrl' => 'http://blip.tv/file/1710846',
+          'linkUrl' => 'http://flowplayer.org',
         ),
       ));
       return $output;
@@ -68,12 +68,12 @@ function flowplayer_add($selector = NULL, $config = NULL) {
   // Add Flowplayer to the page if it hasn't been added yet.
   if ($flowplayer_added === FALSE) {
     // Add the FlowPlayer JavaScript and CSS to the page.
-    drupal_add_js(drupal_get_path('module', 'flowplayer') .'/flowplayer/example/flowplayer-3.1.0.min.js');
+    drupal_add_js(drupal_get_path('module', 'flowplayer') .'/flowplayer/example/flowplayer-3.1.1.min.js');
     drupal_add_css(drupal_get_path('module', 'flowplayer') .'/flowplayer.css');
 
     // Tell the JavaScript where flowplayer.swf is.
     $settings = array(
-      'flowplayerSwf' => drupal_get_path('module', 'flowplayer') .'/flowplayer/flowplayer-3.1.0.swf',
+      'flowplayerSwf' => drupal_get_path('module', 'flowplayer') .'/flowplayer/flowplayer-3.1.1.swf',
     );
     drupal_add_js($settings, 'setting');
     $flowplayer_added = TRUE;
@@ -134,10 +134,10 @@ function flowplayer_add($selector = NULL, $config = NULL) {
     }
 
     // Border radius.
-    if (!isset($config['canvas']['borderRadius'])) {
+    if (!isset($config['plugins']['controls']['borderRadius'])) {
       $radius = variable_get('flowplayer_border_radius', NULL);
       if (!empty($radius)) {
-        $config['canvas']['borderRadius'] = $radius;
+        $config['plugins']['controls']['borderRadius'] = $radius;
       }
     }
 

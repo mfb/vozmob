@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_display_page.inc,v 1.6 2009/05/20 02:53:30 merlinofchaos Exp $
+// $Id: views_plugin_display_page.inc,v 1.7 2009/06/02 20:37:15 merlinofchaos Exp $
 /**
  * @file
  * Contains the page display plugin.
@@ -258,7 +258,9 @@ class views_plugin_display_page extends views_plugin_display {
           '#type' => 'textfield',
           '#description' => t('This view will be displayed by visiting this path on your site. You may use "%" in your URL to represent values that will be used for arguments: For example, "node/%/feed".'),
           '#default_value' => $this->get_option('path'),
-          '#field_prefix' => url(NULL, array('absolute' => TRUE)) . (variable_get('clean_url', 0) ? '' : '?q='),
+	  '#field_prefix' => '<span dir="ltr">' . url(NULL, array('absolute' => TRUE)) . (variable_get('clean_url', 0) ? '' : '?q='),
+	  '#field_suffix' => '</span>&lrm;',
+	  '#attributes' => array('dir'=>'ltr'),
         );
         break;
       case 'menu':

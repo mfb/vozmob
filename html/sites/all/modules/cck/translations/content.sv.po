@@ -1,4 +1,4 @@
-# $Id: content.sv.po,v 1.1.2.1 2009/04/20 21:16:26 seals Exp $
+# $Id: content.sv.po,v 1.1.2.2 2009/05/27 13:37:56 seals Exp $
 #
 # Swedish translation of Drupal (content)
 # Generated from files:
@@ -20,7 +20,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: CCK - Content 6.x\n"
 "POT-Creation-Date: 2009-03-09 22:08+0100\n"
-"PO-Revision-Date: 2009-04-20 20:41+0100\n"
+"PO-Revision-Date: 2009-05-27 15:37+0100\n"
 "Last-Translator: Magnus Gunnarsson <seals@passagen.se>\n"
 "Language-Team: drupalsverige.se\n"
 "MIME-Version: 1.0\n"
@@ -45,19 +45,19 @@ msgstr "Anpassade fälttyper är tillgängliga genom ett antal valfria moduler s
 
 #: content.module:25
 msgid "<em>number</em>, which adds numeric field types, in integer, decimal or floating point form. You may define a set of allowed inputs, or specify an allowable range of values. A variety of common formats for displaying numeric data are available."
-msgstr "<em>Nummer</em>, som lägger till numeriska fälttyper som heltal, decimaltal eller flyttal. Du kan definiera en uppsättning av tillåtna värden eller specificera en tillåten spännvidd av värden. Ett antal vanliga format för att visa numerisk data finns tillgängliga."
+msgstr "<em>tal</em>, som lägger till numeriska fälttyper som heltal, decimaltal eller flyttal. Du kan definiera en uppsättning av tillåtna värden eller specificera en tillåten spännvidd av värden. Ett antal vanliga format för att visa numerisk data finns tillgängliga."
 
 #: content.module:26
 msgid "<em>text</em>, which adds text field types. A text field may contain plain text only, or optionally, may use Drupal's input format filters to securely manage rich text input. Text input fields may be either a single line (text field), multiple lines (text area), or for greater input control, a select box, checkbox, or radio buttons. If desired, CCK can validate the input to a set of allowed values."
-msgstr "<em>Text</em>, som lägger till typer av sorten textfält. Ett textfält kan innehålla enbart ren text, eller använda Drupals inmatningsformat för att säkert hantera formaterad text. Textfält kan vara antingen en rad (textfält), flera rader (textområde), eller för större kontroll av det som matas in, ett listval, kryssruta eller radioknapp. Om så önskas kan CCK validera den inmatade datan enligt en uppsättning tillåtna värden."
+msgstr "<em>text</em>, som lägger till typer av sorten textfält. Ett textfält kan innehålla enbart ren text, eller använda Drupals inmatningsformat för att säkert hantera formaterad text. Textfält kan vara antingen en rad (textfält), flera rader (textområde), eller för större kontroll av det som matas in, ett listval, kryssruta eller radioknapp. Om så önskas kan CCK validera den inmatade datan enligt en uppsättning tillåtna värden."
 
 #: content.module:27
 msgid "<em>nodereference</em>, which creates custom references between Drupal nodes. By adding a <em>nodereference</em> field and two different content types, for instance, you can easily create complex parent/child relationships between data (multiple \"employee\" nodes may contain a <em>nodereference</em> field linking to an \"employer\" node)."
-msgstr "<em>Nodreferens</em>, som skapar hänvisningar mellan noder i Drupal. Genom att lägga till en fält av typen <em>nodreferens</em> och två olika innehållstyper, till exempel, kan du enkelt skapa komplexa ovan- eller underliggande relationer mellan data (flera noder med \"anställda\" kan innehålla ett fält av typen <em>nodreferens</em> som länkar till en nod för \"arbetsgivare\")."
+msgstr "<em>hänvisning av nod</em>, som skapar hänvisningar mellan noder i Drupal. Genom att lägga till en fält av typen <em>nodreferens</em> och två olika innehållstyper, till exempel, kan du enkelt skapa komplexa ovan- eller underliggande relationer mellan data (flera noder med \"anställda\" kan innehålla ett fält av typen <em>nodreferens</em> som länkar till en nod för \"arbetsgivare\")."
 
 #: content.module:28
 msgid "<em>userreference</em>, which creates custom references to your sites' user accounts. By adding a <em>userreference</em> field, you can create complex relationships between your site's users and posts. To track user involvement in a post beyond Drupal's standard <em>Authored by</em> field, for instance, add a <em>userreference</em> field named \"Edited by\" to a content type to store a link to an editor's user account page."
-msgstr "<em>Användarreferens</em>, som skapar anpassade hänvisningar till användarkonton på din webbplats. Genom att lägga till ett fält av typen <em>användarreferens</em> kan du skapa komplexa relationer mellan din webbplats användare och inlägg. Till exempel: för att spåra användares inblandning i ett inlägg utöver Drupals standardfält <em>Författad av</em>, lägg till ett fält av typen <em>användarreferens</em> med namnet \"Redigerad av\" till en innehållstyp för att lagra en länk till en redigerares användarsida."
+msgstr "<em>hänvisning av användare</em>, som skapar anpassade hänvisningar till användarkonton på din webbplats. Genom att lägga till ett fält av typen <em>användarreferens</em> kan du skapa komplexa relationer mellan din webbplats användare och inlägg. Till exempel: för att spåra användares inblandning i ett inlägg utöver Drupals standardfält <em>Författad av</em>, lägg till ett fält av typen <em>användarreferens</em> med namnet \"Redigerad av\" till en innehållstyp för att lagra en länk till en redigerares användarsida."
 
 #: content.module:29
 msgid "<em>fieldgroup</em>, which creates collapsible fieldsets to hold a group of related fields. A fieldset may either be open or closed by default. The order of your fieldsets, and the order of fields within a fieldset, is managed via a drag-and-drop interface provided by content module."

@@ -1,5 +1,5 @@
 <?php
-// $Id: content.install,v 1.85.2.31 2009/04/23 18:37:10 yched Exp $
+// $Id: content.install,v 1.85.2.32 2009/06/05 20:36:02 yched Exp $
 
 function content_requirements($phase) {
   $requirements = array();
@@ -525,7 +525,12 @@ function content_update_6009() {
  * See http://drupal.org/node/407446.
  */
 function content_update_6010(&$sandbox) {
+  if ($abort = content_check_update()) {
+    return $abort;
+  }
   $ret = array();
+
+  drupal_load('module', 'content');
 
   // Gather list of tables and columns that need to be updated.
   if (!isset($sandbox['tables'])) {

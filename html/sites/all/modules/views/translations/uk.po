@@ -1,4 +1,4 @@
-# $Id: uk.po,v 1.2 2009/05/18 21:55:37 podarok Exp $
+# $Id: uk.po,v 1.4 2009/05/25 11:10:06 podarok Exp $
 #
 # Ukrainian translation of Drupal (general)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
@@ -157,14 +157,15 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: views uk Ukrainian translation\n"
-"POT-Creation-Date: 2009-05-17 14:10+0300\n"
-"PO-Revision-Date: 2009-05-19 00:54+0200\n"
+"Project-Id-Version: views uk Ukrainian Translation\n"
+"POT-Creation-Date: 2009-05-25 13:53+0300\n"
+"PO-Revision-Date: 2009-05-25 13:55+0200\n"
 "Last-Translator: podarok <podarok@ua.fm>\n"
 "Language-Team: uk <podarok@ua.fm>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=((((n%10)==1)&&((n%100)!=11))?(0):(((((n%10)>=2)&&((n%10)<=4))&&(((n%100)<10)||((n%100)>=20)))?(1):2));\n"
 "X-Poedit-Language: Ukrainian\n"
 "X-Poedit-Country: UKRAINE\n"
 "X-Poedit-SourceCharset: utf-8\n"
@@ -1847,7 +1848,7 @@ msgstr ""
 
 #: includes/admin.inc:2672
 msgid "Clear Views' cache"
-msgstr ""
+msgstr "Очистити кеш"
 
 #: includes/admin.inc:2678
 msgid "Add Views signature to all SQL queries"
@@ -2113,7 +2114,7 @@ msgstr ""
 #: includes/plugins.inc:224
 #: plugins/views_plugin_access_role.inc:40
 msgid "Role"
-msgstr ""
+msgstr "Роль"
 
 #: includes/plugins.inc:225
 msgid "Access will be granted to users with any of the specified roles."
@@ -2625,7 +2626,7 @@ msgstr ""
 
 #: modules/locale.views.inc:147
 msgid "Translation"
-msgstr ""
+msgstr "Переклад"
 
 #: modules/locale.views.inc:148
 msgid "The full translation string."
@@ -2806,7 +2807,7 @@ msgstr ""
 #: modules/node.views.inc:377
 #: modules/node/views_plugin_row_node_view.inc:52
 msgid "Teaser"
-msgstr ""
+msgstr "Анонс"
 
 #: modules/node.views.inc:378
 msgid "The stored teaser field. This may not be valid or useful data on all node types."
@@ -3103,11 +3104,11 @@ msgstr ""
 
 #: modules/system.views.inc:204
 msgid "Temporary"
-msgstr ""
+msgstr "Тимчасово"
 
 #: modules/system.views.inc:205
 msgid "Permanent"
-msgstr ""
+msgstr "Постійно"
 
 #: modules/taxonomy.views.inc:24;67;156;174;230;270;307;318
 msgid "Taxonomy"
@@ -3123,7 +3124,7 @@ msgstr ""
 
 #: modules/taxonomy.views.inc:56
 msgid "Vocabulary ID"
-msgstr ""
+msgstr "ID словника"
 
 #: modules/taxonomy.views.inc:57
 msgid "The taxonomy vocabulary ID"
@@ -3140,7 +3141,7 @@ msgstr ""
 #: modules/taxonomy.views.inc:96;200
 #: modules/taxonomy/views_plugin_argument_validate_taxonomy_term.inc:35
 msgid "Term ID"
-msgstr ""
+msgstr "ID терміну"
 
 #: modules/taxonomy.views.inc:97;201
 msgid "The taxonomy term ID"
@@ -3653,7 +3654,7 @@ msgstr "докладніше"
 
 #: modules/node/views_plugin_row_node_view.inc:53
 msgid "Full node"
-msgstr ""
+msgstr "Повний матеріал"
 
 #: modules/node/views_plugin_row_node_view.inc:59
 msgid "Build mode"
@@ -3802,6 +3803,7 @@ msgid "Unable to find term: @terms"
 msgid_plural "Unable to find terms: @terms"
 msgstr[0] ""
 msgstr[1] ""
+msgstr[2] ""
 
 #: modules/taxonomy/views_plugin_argument_validate_taxonomy_term.inc:26
 msgid "If you wish to validate for specific vocabularies, check them; if none are checked, all terms will pass."
@@ -3900,6 +3902,7 @@ msgid "Unable to find user: @users"
 msgid_plural "Unable to find users: @users"
 msgstr[0] ""
 msgstr[1] ""
+msgstr[2] ""
 
 #: modules/user/views_plugin_argument_default_user.inc:17
 msgid "Also look for a node and use the node author"

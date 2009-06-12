@@ -1,5 +1,5 @@
 <?php
-// $Id: docs.php,v 1.13 2009/02/06 21:56:36 merlinofchaos Exp $
+// $Id: docs.php,v 1.15 2009/06/01 23:33:37 merlinofchaos Exp $
 /**
  * @file
  * This file contains no working PHP code; it exists to provide additional documentation
@@ -231,11 +231,21 @@ function hook_views_handlers() {
 
 /**
  * Register View API information. This is required for your module to have
- * its include files loaded.
+ * its include files loaded; for example, when implementing
+ * hook_views_default_views().
  *
- * The full documentation for this hook is in the advanced help.
+ * @return
+ *   An array with the following possible keys:
+ *   - api:  (required) The version of the Views API the module implements.
+ *   - path: (optional) If includes are stored somewhere other than within
+ *       the root module directory or a subdirectory called includes, specify
+ *       its path here.
  */
 function hook_views_api() {
+  return array(
+    'api' => 2,
+    'path' => drupal_get_path('module', 'example') . '/includes/views', 
+  );
 }
 
 /**
@@ -493,6 +503,17 @@ function hook_views_default_views() {
 
   // At the end, return array of default views.
   return $views;
+}
+
+/**
+ * This hook is called right before all default views are cached to the
+ * database. It takes a keyed array of views by reference.
+ */
+function hook_views_default_views_alter(&$views) {
+  if (isset($views['taxonomy_term'])) {
+    $views['taxonomy_term']->set_display('default');
+    $views['taxonomy_term']->display_handler->set_option('title', 'Categories');
+  }
 }
 
 /**

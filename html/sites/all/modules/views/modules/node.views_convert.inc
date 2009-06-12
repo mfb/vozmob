@@ -1,5 +1,5 @@
 <?php
-//$Id: node.views_convert.inc,v 1.5 2009/04/07 23:21:00 merlinofchaos Exp $
+//$Id: node.views_convert.inc,v 1.6 2009/06/02 20:31:00 merlinofchaos Exp $
 
 /**
  * @file
@@ -24,18 +24,31 @@ function node_views_convert($display, $type, &$view, $field, $id = NULL) {
                 $view->set_item_option($display, 'field', $id, 'link_to_node', TRUE);
               }
               break;
+            case 'created':
+            case 'changed':
+              $handlers = array(
+                'views_handler_field_date_small' => 'small',
+                'views_handler_field_date' => 'medium',
+                'views_handler_field_date_large' => 'large',
+                'views_handler_field_date_custom' => 'custom',
+                'views_handler_field_since' => 'time ago',
+              );
+              $view->set_item_option($display, 'field', $id, 'date_format', $handlers[$field['handler']]);
+              if (!empty($field['options'])) {
+                $view->set_item_option($display, 'field', $id, 'custom_date_format', $field['options']);
+              }
+              break;
             case 'body':
-              $item = $view->get_item($display, 'field', $id);
-              $item['table'] = 'node_revisions';
-              $item['field'] = $field['handler'] == 'views_handler_field_teaser' ? 'teaser' : $item['field'];
-              $view->set_item($display, 'field', $id, $item);
+              $field['field'] = $field['handler'] == 'views_handler_field_teaser' ? 'teaser' : $field['field'];
+              $view->set_item_option($display, 'field', $id, 'field', $field['field']);
+              $view->set_item_option($display, 'field', $id, 'table', 'node_revisions');
               break;
             case 'link':
-              $field['field'] = 'view';
             case 'edit':
             case 'delete':
             case 'view':
-              $view->set_item_option($display, 'field', $id, 'field', "$field[field]_node");
+              $field['field'] = $field['field'] == 'link' ? 'view_node' : "$field[field]_node";
+              $view->set_item_option($display, 'field', $id, 'field', $field['field']);
               if (!empty($field['options'])) {
                 $view->set_item_option($display, 'field', $id, 'text', $field['options']);
               }
@@ -48,7 +61,49 @@ function node_views_convert($display, $type, &$view, $field, $id = NULL) {
       switch ($field['tablename']) {
         case 'node':
           switch ($field['field']) {
+            case 'status':
+            case 'promote':
+            case 'sticky':
+            case 'moderate':
+              $view->set_item_option($display, 'filter', $id, 'value', $field['value']);
+              break;
+            case 'type':
+              $operators = array('OR' => 'in', 'NOR' => 'not in');
+              $view->set_item_option($display, 'filter', $id, 'operator', $operators[$field['operator']]);
+              $view->set_item_option($display, 'filter', $id, 'value', $field['value']);
+              break;
+            case 'anon':
+              $item = $view->get_item($display, 'filter', $id);
+              $item['value'] = array(0);
+              $item['table'] = 'users';
+              $item['field'] = 'uid';
+              $view->set_item($display, 'filter', $id, $item);
+              break;
+            case 'currentuid':
+              $operators = array('=' => TRUE, '!=' => FALSE);
+              $item = $view->get_item($display, 'filter', $id);
+              $item['value'] = $operators[$field['operator']];
+              $item['table'] = 'users';
+              $item['field'] = 'uid_current';
+              $view->set_item($display, 'filter', $id, $item);
+              break;
+            case 'currentuidtouched':
+              $view->set_item_option($display, 'filter', $id, 'value', '=');
+              $view->set_item_option($display, 'filter', $id, 'field', 'uid_touch');
+              break;
+            case 'distinct':
+              $view->display_handler->set_option('distinct', $field['operator'] == '=' && $field['value'] == 'distinct');
+              $view->set_item($display, 'filter', $id, NULL);
+              break;
+            case 'title':
+              $item = $view->get_item($display, 'filter', $id);
+              $item['operator'] = $field['operator'];
+              $item['value'] = $field['value'];
+              $item['case'] = FALSE;
+              $view->set_item($display, 'filter', $id, $item);
+              break;
             case 'created':
+            case 'changed':
               $item = $view->get_item($display, 'filter', $id);
               $item['operator'] = $field['operator'];
               $item['value']['type'] = $field['value'] == 'now' ? 'offset' : 'date';
@@ -58,151 +113,75 @@ function node_views_convert($display, $type, &$view, $field, $id = NULL) {
               }
               $view->set_item($display, 'filter', $id, $item);
               break;
-            case 'type':
-              switch ($field['operator']) {
-                case 'AND':
-                case 'OR':
-                  $view->set_item_option($display, 'filter', $id, 'operator', 'in');
-                  break;
-                case 'NOR':
-                  $view->set_item_option($display, 'filter', $id, 'operator', 'not in');
-                  break;
-              }
-              $view->set_item_option($display, 'filter', $id, 'value', $field['value']);
+            case 'body':
+              $item = $view->get_item($display, 'filter', $id);
+              $item['operator'] = $field['operator'];
+              $item['value'] = $field['value'];
+              $item['case'] = FALSE;
+              $item['table'] = 'node_revisions';
+              $view->set_item($display, 'filter', $id, $item);
               break;
-            case 'status':
-            case 'promote':
-            case 'sticky':
-              $view->set_item_option($display, 'filter', $id, 'value', $field['value']);
+          }
+          break;
+        case 'history':
+          switch ($field['field']) {
+            case 'timestamp':
+              $view->set_item_option($display, 'filter', $id, 'table', 'history_user');
               break;
-            case 'distinct':
-              $view->display_handler->set_option('distinct', $field['operator'] == '=' && $field['value'] == 'distinct');
-              $view->set_item($display, 'filter', $id, NULL);
+          }
+          break;
+      }
+      break;
+    case 'sort':
+      switch ($field['tablename']) {
+        case 'node':
+          switch ($field['field']) {
+            case 'created':
+            case 'changed':
+              $field['options'] = $field['options'] == 'normal' ? 'second' : $field['options'];
+              $view->set_item_option($display, 'sort', $id, 'granularity', $field['options']);
+              break;
+            case 'random':
+              $view->set_item_option($display, 'sort', $id, 'table', 'views');
               break;
           }
           break;
       }
       break;
     case 'argument':
+      $options = $field['argoptions'];
       switch ($field['type']) {
         case 'nodetype':
-          $actions = array('ignore', 'not found', 'ignore', 'summary asc', 'summary asc', 'summary desc', 'summary asc', 'empty');
-          $options['default_action'] = $actions[$field['argdefault']];
-          if (!empty($field['title'])) {
-            $options['title'] = $field['title'];
-          }
-          if (!empty($field['wildcard'])) {
-            $options['wildcard'] = $field['wildcard'];
-          }
-          if (!empty($field['wildcard_substitution'])) {
-            $options['wildcard_substitution'] = $field['wildcard_substitution'];
-          }
-          $view->add_item($display, 'argument', 'node', 'type', array(), $id);
+          $view->add_item($display, 'argument', 'node', 'type', $options, $field['id']);
           break;
         case 'nodeletter':
-          $actions = array('ignore', 'not found', 'ignore', 'summary asc', 'summary asc', 'summary desc', 'summary asc', 'empty');
-          $options['default_action'] = $actions[$field['argdefault']];
-          if (!empty($field['title'])) {
-            $options['title'] = $field['title'];
-          }
-          if (!empty($field['wildcard'])) {
-            $options['wildcard'] = $field['wildcard'];
-          }
-          if (!empty($field['wildcard_substitution'])) {
-            $options['wildcard_substitution'] = $field['wildcard_substitution'];
-          }
           if (!empty($field['options'])) {
             $options['glossary'] = TRUE;
             $options['limit'] = $field['options'];
           }
-          $view->add_item($display, 'argument', 'node', 'title', array(), $id);
+          $options['case'] = 'upper';
+          $view->add_item($display, 'argument', 'node', 'title', $options, $field['id']);
           break;
         case 'year':
-          $actions = array('ignore', 'not found', 'ignore', 'summary asc', 'summary asc', 'summary desc', 'summary asc', 'empty');
-          $options['default_action'] = $actions[$field['argdefault']];
-          if (!empty($field['title'])) {
-            $options['title'] = $field['title'];
-          }
-          if (!empty($field['wildcard'])) {
-            $options['wildcard'] = $field['wildcard'];
-          }
-          if (!empty($field['wildcard_substitution'])) {
-            $options['wildcard_substitution'] = $field['wildcard_substitution'];
-          }
-          $view->add_item($display, 'argument', 'node', 'created_year', array(), $id);
+          $view->add_item($display, 'argument', 'node', 'created_year', $options, $field['id']);
           break;
         case 'month':
-          $actions = array('ignore', 'not found', 'ignore', 'summary asc', 'summary asc', 'summary desc', 'summary asc', 'empty');
-          $options['default_action'] = $actions[$field['argdefault']];
-          if (!empty($field['title'])) {
-            $options['title'] = $field['title'];
-          }
-          if (!empty($field['wildcard'])) {
-            $options['wildcard'] = $field['wildcard'];
-          }
-          if (!empty($field['wildcard_substitution'])) {
-            $options['wildcard_substitution'] = $field['wildcard_substitution'];
-          }
-          $view->add_item($display, 'argument', 'node', 'created_month', array(), $id);
+          $view->add_item($display, 'argument', 'node', 'created_month', $options, $field['id']);
           break;
         case 'week':
-          $actions = array('ignore', 'not found', 'ignore', 'summary asc', 'summary asc', 'summary desc', 'summary asc', 'empty');
-          $options['default_action'] = $actions[$field['argdefault']];
-          if (!empty($field['title'])) {
-            $options['title'] = $field['title'];
-          }
-          if (!empty($field['wildcard'])) {
-            $options['wildcard'] = $field['wildcard'];
-          }
-          if (!empty($field['wildcard_substitution'])) {
-            $options['wildcard_substitution'] = $field['wildcard_substitution'];
-          }
-          $view->add_item($display, 'argument', 'node', 'created_week', array(), $id);
+          $view->add_item($display, 'argument', 'node', 'created_week', $options, $field['id']);
           break;
         case 'monthyear':
-          $actions = array('ignore', 'not found', 'ignore', 'summary asc', 'summary asc', 'summary desc', 'summary asc', 'empty');
-          $options['default_action'] = $actions[$field['argdefault']];
-          if (!empty($field['title'])) {
-            $options['title'] = $field['title'];
-          }
-          if (!empty($field['wildcard'])) {
-            $options['wildcard'] = $field['wildcard'];
-          }
-          if (!empty($field['wildcard_substitution'])) {
-            $options['wildcard_substitution'] = $field['wildcard_substitution'];
-          }
-          $view->add_item($display, 'argument', 'node', 'created_year_month', array(), $id);
+          $view->add_item($display, 'argument', 'node', 'created_year_month', $options, $field['id']);
           break;
         case 'fulldate':
-          $actions = array('ignore', 'not found', 'ignore', 'summary asc', 'summary asc', 'summary desc', 'summary asc', 'empty');
-          $options['default_action'] = $actions[$field['argdefault']];
-          if (!empty($field['title'])) {
-            $options['title'] = $field['title'];
-          }
-          if (!empty($field['wildcard'])) {
-            $options['wildcard'] = $field['wildcard'];
-          }
-          if (!empty($field['wildcard_substitution'])) {
-            $options['wildcard_substitution'] = $field['wildcard_substitution'];
-          }
-          $view->add_item($display, 'argument', 'node', 'created_fulldate', array(), $id);
+          $view->add_item($display, 'argument', 'node', 'created_fulldate', $options, $field['id']);
           break;
         case 'nid':
-          $actions = array('ignore', 'not found', 'ignore', 'summary asc', 'summary asc', 'summary desc', 'summary asc', 'empty');
-          $options['default_action'] = $actions[$field['argdefault']];
-          if (!empty($field['title'])) {
-            $options['title'] = $field['title'];
-          }
-          if (!empty($field['wildcard'])) {
-            $options['wildcard'] = $field['wildcard'];
-          }
-          if (!empty($field['wildcard_substitution'])) {
-            $options['wildcard_substitution'] = $field['wildcard_substitution'];
-          }
           if (!empty($field['options'])) {
             $options['not'] = TRUE;
           }
-          $view->add_item($display, 'argument', 'node', 'nid', array(), $id);
+          $view->add_item($display, 'argument', 'node', 'nid', $options, $field['id']);
           break;
       }
       break;

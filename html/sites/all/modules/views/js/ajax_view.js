@@ -1,4 +1,4 @@
-// $Id: ajax_view.js,v 1.17 2009/03/25 00:11:25 merlinofchaos Exp $
+// $Id: ajax_view.js,v 1.18 2009/06/02 19:30:44 merlinofchaos Exp $
 
 /**
  * @file ajaxView.js
@@ -107,8 +107,8 @@ Drupal.behaviors.ViewsAjaxView = function() {
           var target = this;
           $(this)
             .addClass('views-processed')
-            // Process pager, tablesort, and summary links.
-            .find('ul.pager > li > a, th.views-field a, .views-summary a')
+            // Process pager, tablesort, and attachment summary links.
+            .find('ul.pager > li > a, th.views-field a, .attachment .views-summary a')
             .each(function () {
               var viewData = {};
               // Construct an object using the settings defaults and then overriding

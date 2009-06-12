@@ -1,4 +1,4 @@
-// $Id: flowplayer.js,v 1.1.2.4 2009/02/24 18:00:56 robloach Exp $
+// $Id: flowplayer.js,v 1.1.2.5 2009/05/26 03:20:38 robloach Exp $
 
 /**
  * @file
@@ -64,7 +64,17 @@ Drupal.behaviors.flowplayer = function() {
         if (typeof(config['clip'][event]) == 'string') {
           config['clip'][event] = eval(config['clip'][event]);
         }
-        // @TODO: Check the config['playlist'] array of clips.
+      });
+    }
+
+    // Register the playlist clip events.
+    if (config['playlist']) {
+      jQuery.each(config['playlist'], function(index, clip) {
+        jQuery.each(clipEvents, function(e_index, event) {
+          if (typeof(config['playlist'][index][event]) == 'string') {
+            config['playlist'][index][event] = eval(config['playlist'][index][event]);
+          }
+        });
       });
     }
 

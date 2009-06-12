@@ -1,5 +1,5 @@
 <?php
-// $Id: views-view.tpl.php,v 1.12 2009/05/06 19:33:00 merlinofchaos Exp $
+// $Id: views-view.tpl.php,v 1.13 2009/06/02 19:30:44 merlinofchaos Exp $
 /**
  * @file views-view.tpl.php
  * Main view template
@@ -39,7 +39,7 @@
   <?php endif; ?>
 
   <?php if ($attachment_before): ?>
-    <div class="attachment-before">
+    <div class="attachment attachment-before">
       <?php print $attachment_before; ?>
     </div>
   <?php endif; ?>
@@ -59,7 +59,7 @@
   <?php endif; ?>
 
   <?php if ($attachment_after): ?>
-    <div class="attachment-after">
+    <div class="attachment attachment-after">
       <?php print $attachment_after; ?>
     </div>
   <?php endif; ?>

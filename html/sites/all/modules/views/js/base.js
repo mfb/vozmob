@@ -1,4 +1,4 @@
-// $Id: base.js,v 1.10 2009/01/27 22:11:26 merlinofchaos Exp $
+// $Id: base.js,v 1.11 2009/06/02 18:45:38 merlinofchaos Exp $
 /**
  * @file base.js
  *
@@ -121,5 +121,3 @@ Drupal.Views.getPath = function (href) {
   }
   return href;
 };
-
-

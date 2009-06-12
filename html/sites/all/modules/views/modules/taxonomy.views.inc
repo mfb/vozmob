@@ -1,5 +1,5 @@
 <?php
-// $Id: taxonomy.views.inc,v 1.50 2009/01/08 00:36:02 merlinofchaos Exp $
+// $Id: taxonomy.views.inc,v 1.54 2009/06/05 01:26:35 merlinofchaos Exp $
 /**
  * @file
  *
@@ -130,7 +130,7 @@ function taxonomy_views_data() {
       'handler' => 'views_handler_argument_string',
       'help' => t('Taxonomy term name.'),
       'many to one' => TRUE,
-      'empty name field' => t('Uncategorized'),
+      'empty field name' => t('Uncategorized'),
     ),
   );
 
@@ -209,7 +209,7 @@ function taxonomy_views_data() {
       'handler' => 'views_handler_argument_term_node_tid',
       'name table' => 'term_data',
       'name field' => 'name',
-      'empty name field' => t('Uncategorized'),
+      'empty field name' => t('Uncategorized'),
       'numeric' => TRUE,
       'skip base' => 'term_data',
     ),
@@ -219,6 +219,7 @@ function taxonomy_views_data() {
       'hierarchy table' => 'term_hierarchy',
       'numeric' => TRUE,
       'skip base' => 'term_data',
+      'allow empty' => TRUE,
     ),
   );
 
@@ -262,6 +263,10 @@ function taxonomy_views_data() {
       'field' => 'parent',
       'label' => t('Parent'),
     ),
+    'argument' => array(
+      'help' => t('The parent term of the term.'),
+      'handler' => 'views_handler_argument_numeric',
+    ),    
   );
 
   // ----------------------------------------------------------------------
@@ -293,7 +298,7 @@ function taxonomy_views_data() {
     'argument' => array(
       'handler' => 'views_handler_argument_string',
       'many to one' => TRUE,
-      'empty name field' => t('Uncategorized'),
+      'empty field name' => t('Uncategorized'),
     ),
   );
   return $data;
@@ -311,6 +316,9 @@ function taxonomy_views_data_alter(&$data) {
     'argument' => array(
       'handler' => 'views_handler_argument_term_node_tid_depth',
       'accept depth modifier' => TRUE,
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_term_node_tid_depth',
     ),
   );
 
@@ -360,6 +368,9 @@ function taxonomy_views_handlers() {
       ),
       'views_handler_filter_term_node_tid' => array(
         'parent' => 'views_handler_filter_many_to_one',
+      ),
+      'views_handler_filter_term_node_tid_depth' => array(
+        'parent' => 'views_handler_filter_term_node_tid',
       ),
     ),
   );

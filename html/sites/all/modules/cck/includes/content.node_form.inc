@@ -1,5 +1,5 @@
 <?php
-// $Id: content.node_form.inc,v 1.7.2.18 2009/02/10 22:53:04 yched Exp $
+// $Id: content.node_form.inc,v 1.7.2.19 2009/06/02 20:18:27 yched Exp $
 
 /**
  * @file
@@ -367,7 +367,7 @@ function content_add_more_js($type_name_url, $field_name) {
   // Using drupal_json() breaks filefield's file upload, because the jQuery
   // Form plugin handles file uploads in a way that is not compatible with
   // 'text/javascript' response type.
-  $_GLOBALS['devel_shutdown'] =  FALSE;
+  $GLOBALS['devel_shutdown'] =  FALSE;
   print drupal_to_js(array('status' => TRUE, 'data' => $output));
   exit;
 }

@@ -1,5 +1,5 @@
 <?php
-//$Id: upload.views_convert.inc,v 1.2 2009/04/07 23:21:00 merlinofchaos Exp $
+//$Id: upload.views_convert.inc,v 1.3 2009/06/02 20:31:00 merlinofchaos Exp $
 
 /**
  * @file
@@ -17,8 +17,17 @@ function upload_views_convert($display, $type, &$view, $field, $id = NULL) {
   switch ($type) {
     case 'field':
       switch ($field['tablename']) {
+        case 'file_revisions':
+          switch ($field['field']) {
+            case 'fid':
+              $relationship = $view->add_item($display, 'relationship', 'node', 'upload_fid', array(), 'node_upload_fid');
+              $view->set_item_option($display, 'field', $id, 'relationship', $relationship);
+              $view->set_item_option($display, 'field', $id, 'table', 'files');
+              break;
+          }
+          break;
         case 'files':
-          switch($field['field']) {
+          switch ($field['field']) {
             case 'all_files':
               $item = $view->get_item($display, 'field', $id);
               switch ($field['options']) {
@@ -35,8 +44,68 @@ function upload_views_convert($display, $type, &$view, $field, $id = NULL) {
               if ($field['handler'] == 'views_handler_file_listed_files') {
                 $item['only_listed'] = TRUE;
               }
-              $view->set_item($display, 'field', $id, NULL);
-              $view->add_item($display, 'field', 'node', 'upload_fid', $item, $id);
+              $item['table'] = 'node';
+              $item['field'] = 'upload_fid';
+              $view->set_item($display, 'field', $id, $item);
+              break;
+            case 'filename':
+              if ($field['handler'] == 'views_handler_file_filename_download') {
+                $view->set_item_option($display, 'field', $id, 'link_to_file', TRUE);
+              }
+              $relationship = $view->add_item($display, 'relationship', 'node', 'upload_fid', array(), 'node_upload_fid');
+              $view->set_item_option($display, 'field', $id, 'relationship', $relationship);
+              break;
+          }
+          break;
+      }
+      break;
+    case 'filter':
+      switch ($field['tablename']) {
+        case 'file_revisions':
+          switch ($field['field']) {
+            case 'fid':
+              $item = $view->get_item($display, 'filter', $id);
+              $item['value'] = $field['value'];
+              $item['table'] = 'node';
+              $item['field'] = 'upload_fid';
+              $view->set_item($display, 'filter', $id, $item);
+              break;
+            case 'list':
+              $view->set_item_option($display, 'filter', $id, 'value', $field['value']);
+              $view->set_item_option($display, 'filter', $id, 'table', 'upload');
+              break;
+          }
+          break;
+        case 'files':
+          switch ($field['field']) {
+            case 'filename':
+            case 'filemime':
+              $item = $view->get_item($display, 'filter', $id);
+              $item['operator'] = $field['operator'];
+              $item['value'] = $field['value'];
+              $item['case'] = FALSE;
+              $item['relationship'] = $view->add_item($display, 'relationship', 'node', 'upload_fid', array(), 'node_upload_fid');
+              $view->set_item($display, 'filter', $id, $item);
+              break;
+            case 'filesize':
+              $item = $view->get_item($display, 'filter', $id);
+              $item['operator'] = $field['operator'];
+              $item['value'] = $field['value'];
+              $item['relationship'] = $view->add_item($display, 'relationship', 'node', 'upload_fid', array(), 'node_upload_fid');
+              $view->set_item($display, 'filter', $id, $item);
+              break;
+          }
+          break;
+      }
+      break;
+    case 'sorts':
+      switch ($field['tablename']) {
+        case 'file_revisions':
+          switch ($field['field']) {
+            case 'fid':
+              $relationship = $view->add_item($display, 'relationship', 'node', 'upload_fid', array(), 'node_upload_fid');
+              $view->set_item_option($display, 'field', $id, 'relationship', $relationship);
+              $view->set_item_option($display, 'field', $id, 'table', 'files');
               break;
           }
           break;

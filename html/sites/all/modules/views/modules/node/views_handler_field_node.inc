@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_node.inc,v 1.3 2009/01/30 00:01:42 merlinofchaos Exp $
+// $Id: views_handler_field_node.inc,v 1.4 2009/06/02 20:54:38 merlinofchaos Exp $
 /**
  * @file
  * Contains the basic 'node' field handler.
@@ -45,6 +45,7 @@ class views_handler_field_node extends views_handler_field {
     if (!empty($this->options['link_to_node']) && $data !== NULL && $data !== '') {
       $this->options['alter']['make_link'] = TRUE;
       $this->options['alter']['path'] = "node/" . $values->{$this->aliases['nid']};
+      $this->options['alter']['alt'] = check_plain($data);
     }
     return $data;
   }

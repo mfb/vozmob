@@ -1,5 +1,5 @@
 <?php
-// $Id: views.install,v 1.46 2009/04/07 20:39:51 merlinofchaos Exp $
+// $Id: views.install,v 1.49 2009/06/02 20:30:59 merlinofchaos Exp $
 /**
  * @file views.install
  * Contains install and update functions for Views.
@@ -62,7 +62,7 @@ function views_schema_1() {
       ),
       'base_table' => array(
         'type' => 'varchar',
-        'length' => '32',
+        'length' => '64',
         'default' => '',
         'not null' => TRUE,
         'description' => 'What table this view is based on, such as node, user, comment, or term.',
@@ -126,6 +126,11 @@ function views_schema_1() {
   );
 
   $schema['cache_views'] = drupal_get_schema_unprocessed('system', 'cache');
+  
+  $schema['cache_views_data'] = drupal_get_schema_unprocessed('system', 'cache');
+  $schema['cache_views_data']['description'] = 'Cache table for views to store pre-rendered queries, results, and display output.';
+  $schema['cache_views_data']['fields']['serialized']['default'] = 1;
+
 
   $schema['views_object_cache'] = array(
     'description' => 'A special cache used to store objects that are being edited; it serves to save state in an ordinarily stateless environment.',
@@ -202,6 +207,7 @@ function views_update_6001() {
     $new = strtr($block->delta, '$', '-');
     $ret[] = update_sql("UPDATE {blocks} SET delta = '" . db_escape_string($new) . "' WHERE module = 'views' AND delta = '" . db_escape_string($block->delta) . "'");
   }
+  $ret[] = update_sql("UPDATE {blocks} SET delta = CONCAT(delta, '-block_1') WHERE module = 'views'");
 
   return $ret;
 }
@@ -236,6 +242,38 @@ function views_update_6004() {
   // db_change_field that causes this to fail when trying to cast the data.
   db_drop_field($ret, 'views_object_cache', 'data');
   db_add_field($ret, 'views_object_cache', 'data', $new_field);
+
+  return $ret;
+}
+
+/**
+ * Enlarge the base_table column
+ */
+function views_update_6005() {
+  $ret = array();
+  
+  $new_field = array(
+    'type' => 'varchar',
+    'length' => '64',
+    'default' => '',
+    'not null' => TRUE,
+    'description' => 'What table this view is based on, such as node, user, comment, or term.',
+  );
+  db_change_field($ret, 'views_view', 'base_table', 'base_table', $new_field);
+  return $ret;
+}
+
+/**
+ * Add the cache_views_data table to support standard caching.
+ */
+function views_update_6006() {
+  $ret = array();
+  
+  $table = drupal_get_schema_unprocessed('system', 'cache');
+  $table['description'] = 'Cache table for views to store pre-rendered queries, results, and display output.';
+  $table['fields']['serialized']['default'] = 1;
+
+  db_create_table($ret, 'cache_views_data', $table);
 
   return $ret;
 }

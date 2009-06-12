@@ -1,5 +1,5 @@
 <?php
-// $Id: content_field.inc,v 1.1.2.3 2009/04/30 10:27:38 karens Exp $
+// $Id: content_field.inc,v 1.1.2.4 2009/06/02 15:05:27 yched Exp $
 
 /**
  * @file
@@ -18,7 +18,6 @@ function content_content_field_ctools_content_types() {
 
 /**
  * Return all field content types available.
- *
  */
 function content_content_field_content_type_content_types() {
   // This will hold all the individual field content types.
@@ -109,7 +108,7 @@ function content_content_field_content_type_edit_form(&$form, &$form_state) {
   // Extract the node type and field name from the subtype
   list($node_type, $field_name) = explode(':', $form_state['subtype_name'], 2);
 
-  // Get all the information avbout our field.
+  // Get all the information about our field.
   $field = content_fields($field_name);
 
   // Get information about all the field types on the site.

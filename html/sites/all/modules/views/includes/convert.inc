@@ -1,5 +1,5 @@
 <?php
-// $Id: convert.inc,v 1.14 2009/04/07 23:21:00 merlinofchaos Exp $
+// $Id: convert.inc,v 1.15 2009/06/02 20:31:00 merlinofchaos Exp $
 /**
  * @file convert.inc
  *
@@ -130,7 +130,7 @@ function views1_import($imported) {
   $view->name = $imported->name;
   $view->description = $imported->description;
 
-  if (!empty($imported->page)) {
+  if (!empty($imported->page) && !empty($imported->url)) {
     $page_display = $view->add_display('page');
   }
   if (!empty($imported->block)) {
@@ -159,7 +159,7 @@ function views1_import($imported) {
   }
 
   $handler->set_option('access', $access);
-  if (!empty($imported->page)) {
+  if (!empty($imported->page) && !empty($imported->url)) {
     $handler = &$view->display[$page_display]->handler;
     $url = str_replace('$arg', '%', $imported->url);
     $handler->set_option('path', $url);
@@ -171,7 +171,7 @@ function views1_import($imported) {
       if ($imported->menu_tab_default) {
         $menu['type'] = 'default tab';
       }
-      $menu['title'] = $imported->menu_title;
+      $menu['title'] = $imported->menu_title ? $imported->menu_title : $imported->page_title;
       $handler->set_option('menu', $menu);
 
       if ($menu['type'] == 'default tab') {
@@ -187,14 +187,14 @@ function views1_import($imported) {
       $tab_options['weight'] = $imported->menu_parent_tab_weight;
       $handler->set_option('tab_options', $tab_options);
     }
-
-    views1_convert_style($view, $handler, $imported->page_type);
   }
+
+  views1_convert_style($view, $handler, $imported->page_type);
 
   if (!empty($imported->block)) {
     $handler = &$view->display[$block_display]->handler;
 
-    if ($imported->block_title) {
+    if (!empty($imported->block_title)) {
       if (!empty($imported->page)) {
         $handler->set_override('title');
       }
@@ -207,9 +207,6 @@ function views1_import($imported) {
     $handler->set_option('use_pager', FALSE);
 
     if ($imported->nodes_per_block != $imported->nodes_per_page) {
-      if (!empty($imported->page)) {
-        $handler->set_override('items_per_page');
-      }
       $handler->set_option('items_per_page', $imported->nodes_per_block);
       $handler->set_option('offset', 0);
     }
@@ -218,25 +215,31 @@ function views1_import($imported) {
       if (!empty($imported->page)) {
         $handler->set_override('header');
       }
-      $handler->set_option('header', $imported->block_header);
-      $handler->set_option('header_format', $imported->block_header_format);
+      if (!empty($imported->block_header)) {
+        $handler->set_option('header', $imported->block_header);
+        $handler->set_option('header_format', $imported->block_header_format);
+      }
     }
     if (empty($imported->block_use_page_footer)) {
       if (!empty($imported->page)) {
         $handler->set_override('footer');
       }
-      $handler->set_option('footer', $imported->block_footer);
-      $handler->set_option('footer_format', $imported->block_footer_format);
+      if (!empty($imported->block_footer)) {
+        $handler->set_option('footer', $imported->block_footer);
+        $handler->set_option('footer_format', $imported->block_footer_format);
+      }
     }
     if (empty($imported->block_use_page_empty)) {
       if (!empty($imported->page)) {
         $handler->set_override('empty');
       }
-      $handler->set_option('empty', $imported->block_empty);
-      $handler->set_option('empty_format', $imported->block_empty_format);
+      if (!empty($imported->block_empty)) {
+        $handler->set_option('empty', $imported->block_empty);
+        $handler->set_option('empty_format', $imported->block_empty_format);
+      }
     }
 
-    $handler->set_option('more', $imported->block_more);
+    $handler->set_option('use_more', $imported->block_more);
 
     if (!empty($imported->page)) {
       $handler->set_override('style_plugin');
@@ -249,37 +252,50 @@ function views1_import($imported) {
   // then see if any other modules want to adapt it using hook_views_convert().
 
   foreach ($imported->field as $field) {
-    $id = $view->add_item('default', 'field', $field['tablename'], $field['field']);
+    $id = $view->add_item('default', 'field', $field['tablename'], $field['field'], array('label' => $field['label']));
     if ($view->display_handler->get_option('style_plugin') == 'table') {
       $options = $view->display_handler->get_option('style_options');
-      if (!empty($field['defaultsort'])) {
-        $options['default'] = $id;
-      }
       if (!empty($field['sortable'])) {
         $options['info'][$id]['sortable'] = TRUE;
+        if (!empty($field['defaultsort'])) {
+          $options['default'] = $id;
+        }
       }
       $view->display_handler->set_option('style_options', $options);
-    }
-
-    if (!empty($field['label'])) {
-    $item = $view->get_item('default', 'field', $id);
-      $item['label'] = $field['label'];
-      $view->set_item('default', 'field', $id, $item);
     }
     foreach (module_implements('views_convert') as $module) {
       module_invoke($module, 'views_convert', 'default', 'field', $view, $field, $id);
     }
   }
   foreach ($imported->sort as $field) {
-    $id = NULL;
-    if (views_get_handler($field['tablename'], $field['field'], 'sort')) {
-      $id = $view->add_item('default', 'sort', $field['tablename'], $field['field']);
-    }
+    $id = $view->add_item('default', 'sort', $field['tablename'], $field['field'], array('order' => $field['sortorder']));
     foreach (module_implements('views_convert') as $module) {
       module_invoke($module, 'views_convert', 'default', 'sort', $view, $field, $id);
     }
   }
-  foreach ($imported->argument as $field) {
+  $actions = array('ignore', 'not found', 'ignore', 'summary asc', 'summary asc', 'summary desc', 'summary asc', 'empty');
+  foreach ($imported->argument as $id => $field) {
+    if (!empty($imported->view_args_php)) {
+      $field['argoptions']['default_action'] = 'default';
+      $field['argoptions']['default_argument_type'] = 'php';
+      $field['argoptions']['default_argument_php'] = '$args = eval(\''. str_replace("'", "\\'", $imported->view_args_php) .'\');'."\n";
+      $field['argoptions']['default_argument_php'] .= 'if (isset($args['. $field['position'] .'])) {'."\n";
+      $field['argoptions']['default_argument_php'] .= '  return $args['. $field['position'] .'];'."\n";
+      $field['argoptions']['default_argument_php'] .= '}';
+      $field['argoptions']['validate_fail'] = $actions[$field['argdefault']];
+    }
+    else {
+      $field['argoptions']['default_action'] = $actions[$field['argdefault']];
+    }
+    if (!empty($field['title'])) {
+      $field['argoptions']['title'] = $field['title'];
+    }
+    if (!empty($field['wildcard'])) {
+      $field['argoptions']['wildcard'] = $field['wildcard'];
+    }
+    if (!empty($field['wildcard_substitution'])) {
+      $field['argoptions']['wildcard_substitution'] = $field['wildcard_substitution'];
+    }
     // Arguments didn't used to be identified by table.name so we just have to
     // leave that out.
     foreach (module_implements('views_convert') as $module) {
@@ -287,10 +303,7 @@ function views1_import($imported) {
     }
   }
   foreach ($imported->filter as $field) {
-    $id = NULL;
-    if (views_get_handler($field['tablename'], $field['field'], 'filter')) {
-      $id = $view->add_item('default', 'filter', $field['tablename'], $field['field']);
-    }
+    $id = $view->add_item('default', 'filter', $field['tablename'], $field['field']);
     foreach (module_implements('views_convert') as $module) {
       module_invoke($module, 'views_convert', 'default', 'filter', $view, $field, $id);
     }
@@ -301,7 +314,7 @@ function views1_import($imported) {
     list(, $id) = explode('.', $field['field'], 2);
     $item = $view->get_item('default', 'filter', $id);
     if (views_get_handler($item['table'], $item['field'], 'filter')) {
-      $item['exposed'] = 1;
+      $item['exposed'] = TRUE;
 
       // Use the count to emulate the old, hardcoded filter naming.
       $item['expose']['identifier'] = 'filter' . $count;
@@ -467,7 +480,7 @@ function views1_delete($arg) {
     return NULL;
   }
 
-  
+
 
   $result = db_query("DELETE FROM {view_sort} WHERE vid = $view->vid");
   $result = db_query("DELETE FROM {view_argument} WHERE vid = $view->vid");

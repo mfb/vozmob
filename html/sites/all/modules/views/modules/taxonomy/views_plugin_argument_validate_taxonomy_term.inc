@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_argument_validate_taxonomy_term.inc,v 1.4 2009/04/08 05:10:07 merlinofchaos Exp $
+// $Id: views_plugin_argument_validate_taxonomy_term.inc,v 1.5 2009/06/02 18:36:36 merlinofchaos Exp $
 /**
  * @file
  * Contains the 'taxonomy term' argument validator plugin.
@@ -91,6 +91,9 @@ class views_plugin_argument_validate_taxonomy_term extends views_plugin_argument
           $titles[] = check_plain($term->name);
           unset($test[$term->tid]);
         }
+
+        // Remove duplicate titles
+        $titles = array_unique($titles);
 
         $this->argument->validated_title = implode($tids->operator == 'or' ? ' + ' : ', ', $titles);
         // If this is not empty, we did not find a tid.

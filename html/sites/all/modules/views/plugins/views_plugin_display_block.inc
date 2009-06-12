@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_display_block.inc,v 1.3 2009/05/20 02:53:30 merlinofchaos Exp $
+// $Id: views_plugin_display_block.inc,v 1.4 2009/06/01 21:38:44 merlinofchaos Exp $
 /**
  * @file
  * Contains the block display plugin.
@@ -83,7 +83,6 @@ class views_plugin_display_block extends views_plugin_display {
       'value' => $block_description,
     );
 
-/* -- removed until core fixes this.
     $cache_type = $this->get_option('block_caching');
     if (empty($cache_type)) {
       $cache_type = BLOCK_NO_CACHE;
@@ -95,7 +94,6 @@ class views_plugin_display_block extends views_plugin_display {
       'title' => t('Caching'),
       'value' => $types[$this->get_cache_type()],
     );
-*/
   }
 
   /**
@@ -167,6 +165,7 @@ class views_plugin_display_block extends views_plugin_display {
         break;
       case 'block_caching':
         $this->set_option('block_caching', $form_state['values']['block_caching']);
+        $this->save_block_cache($form_state['view']->name.'-'.$form_state['display_id'], $form_state['values']['block_caching']);
         break;
     }
   }
@@ -180,5 +179,15 @@ class views_plugin_display_block extends views_plugin_display {
     }
 
     return FALSE;
+  }
+  
+  /**
+   * Save the block cache setting in the blocks table if this block allready 
+   * exists in the blocks table. Dirty fix untill http://drupal.org/node/235673 gets in.
+   */
+  function save_block_cache($delta, $cache_setting) {
+    if ($bid = db_fetch_object(db_query("SELECT bid, cache FROM {blocks} WHERE module = 'views' AND delta = '%s'", $delta))) {
+      db_query("UPDATE {blocks} set cache = %d WHERE module = 'views' AND delta = '%s'", $cache_setting, $delta);
+    }
   }
 }

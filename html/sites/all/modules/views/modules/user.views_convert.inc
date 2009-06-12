@@ -1,5 +1,5 @@
 <?php
-// $Id: user.views_convert.inc,v 1.1 2009/04/07 23:24:55 merlinofchaos Exp $
+// $Id: user.views_convert.inc,v 1.2 2009/06/02 20:31:00 merlinofchaos Exp $
 
 /**
  * @file
@@ -11,36 +11,51 @@
  */
 function user_views_convert($display, $type, &$view, $field, $id = NULL) {
   switch ($type) {
+    case 'field':
+      switch ($field['tablename']) {
+        case 'users':
+          switch ($field['field']) {
+            case 'uid':
+              $view->set_item_option($display, 'field', $id, 'field', 'picture');
+              break;
+          }
+          break;
+      }
+      break;
+    case 'filter':
+      if ($field['tablename'] == 'users' || !strncmp($field['tablename'], 'users_role_', 11)) {
+        switch ($field['field']) {
+          case 'uid':
+            $operators = array('OR' => 'in', 'NOR' => 'not in');
+            $view->set_item_option($display, 'filter', $id, 'operator', $operators[$field['operator']]);
+            $view->set_item_option($display, 'filter', $id, 'value', $field['value']);
+            if ($rid = (integer) substr($field['tablename'], 11)) {
+              $view->add_item($display, 'filter', 'users_roles', 'rid', array('value' => $rid));
+            }
+            break;
+        }
+      }
+      elseif ($field['tablename'] == 'users_roles') {
+        switch ($field['field']) {
+          case 'rid':
+            $operators = array('AND' => 'and', 'OR' => 'or', 'NOR' => 'not');
+            $view->set_item_option($display, 'filter', $id, 'operator', $operators[$field['operator']]);
+            $view->set_item_option($display, 'filter', $id, 'value', $field['value']);
+            break;
+        }
+      }
+      break;
     case 'argument':
+      $options = $field['argoptions'];
       switch ($field['type']) {
         case 'uid':
+          $view->add_item($display, 'argument', 'users', 'uid', $options, $field['id']);
+          break;
         case 'uidtouch':
-          $actions = array('ignore', 'not found', 'ignore', 'summary asc', 'summary asc', 'summary desc', 'summary asc', 'empty');
-          $options['default_action'] = $actions[$field['argdefault']];
-          if (!empty($field['title'])) {
-            $options['title'] = $field['title'];
-          }
-          if (!empty($field['wildcard'])) {
-            $options['wildcard'] = $field['wildcard'];
-          }
-          if (!empty($field['wildcard_substitution'])) {
-            $options['wildcard_substitution'] = $field['wildcard_substitution'];
-          }
-          $views->add_item($display, 'argument', 'users', 'uid');
+          $view->add_item($display, 'argument', 'node', 'uid_touch', $options, $field['id']);
           break;
         case 'username':
-          $actions = array('ignore', 'not found', 'ignore', 'summary asc', 'summary asc', 'summary desc', 'summary asc', 'empty');
-          $options['default_action'] = $actions[$field['argdefault']];
-          if (!empty($field['title'])) {
-            $options['title'] = $field['title'];
-          }
-          if (!empty($field['wildcard'])) {
-            $options['wildcard'] = $field['wildcard'];
-          }
-          if (!empty($field['wildcard_substitution'])) {
-            $options['wildcard_substitution'] = $field['wildcard_substitution'];
-          }
-          $views->add_item($display, 'argument', 'users', 'name');
+          $view->add_item($display, 'argument', 'users', 'name', $options, $field['id']);
           break;
       }
       break;
