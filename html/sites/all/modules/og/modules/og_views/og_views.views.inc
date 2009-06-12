@@ -1,5 +1,5 @@
 <?php
-// $Id: og_views.views.inc,v 1.13.4.2 2009/04/10 03:07:25 weitzman Exp $
+// $Id: og_views.views.inc,v 1.13.4.5 2009/06/10 22:50:00 weitzman Exp $
 
 /**
  * Implementation of hook_views_handlers().
@@ -27,6 +27,9 @@ function og_views_views_handlers() {
         'parent' => 'views_handler_filter',
       ),
       'og_views_handler_filter_og_is_admin' => array(
+        'parent' => 'views_handler_filter_in_operator',
+      ),
+      'og_views_handler_filter_autosubscribe' => array(
         'parent' => 'views_handler_filter_in_operator',
       ),
       // field
@@ -69,6 +72,9 @@ function og_views_views_handlers() {
       'og_views_handler_field_og_uid_groups' => array(
         'parent' => 'views_handler_field_prerender_list',
       ),
+      'og_views_handler_field_autosubscribe' => array(
+        'parent' => 'views_handler_field',
+      ),
       // argument
       'og_views_handler_argument_og_group_nid' => array(
         'parent' => 'views_handler_argument_numeric',
@@ -102,6 +108,9 @@ function og_views_views_plugins() {
 function og_views_views_data() {
   $data = array();
   $tables = array('og', 'og_ancestry', 'og_uid', 'og_access_post');
+  if (module_exists('og_notifications')) {
+    $tables[] = 'og_notifications';
+  }
   foreach ($tables as $table) {
     $function = "og_views_data_$table";
     $data += $function();
@@ -153,7 +162,7 @@ function og_views_data_og() {
     'field' => array(
       'handler' => 'og_views_handler_field_og_post_count',
       'click sortable' => TRUE,
-      'help' => t('Number of published posts in a group. Can be restricted by node type using the <em>Option</em> dropdown.'),
+      'help' => t('Number of published posts in a group.'),
       'notafield' => TRUE,
      ),
   );
@@ -500,6 +509,37 @@ function og_views_data_og_uid() {
     
   return $data;
 }
+
+// --------- Table og_notifications
+
+function og_views_data_og_notifications() {
+  $data['og_notifications']['table']['group']  = t('Organic groups');
+  $data['og_notifications']['table']['join'] = array(
+    'node' => array(
+      'left_table' => 'og_uid',
+      'left_field' => 'uid',
+      'field' => 'uid',
+    ),
+    'users' => array(
+      'left_table' => 'og_uid',
+      'left_field' => 'uid',
+      'field' => 'uid',
+    ),
+  );
+  $data['og_notifications']['autosubscribe'] = array(
+    'title' => t('OG: Notifications autosubscribe'),
+    'help' => t('Does member receive email notifications for a group.'),
+    'field' => array(
+      'handler' => 'og_views_handler_field_autosubscribe',
+    ),
+    'filter' => array(
+      'handler' => 'og_views_handler_filter_autosubscribe',
+    ),
+  );
+  return $data;
+}
+
+// -------- Utility functions.
 
 function og_views_set_breadcrumb($nid) {
   $node = node_load((int)$nid);

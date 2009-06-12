@@ -1,5 +1,5 @@
 <?php
-// $Id: og_notifications.module,v 1.24.4.15 2009/05/13 15:34:32 karthik Exp $
+// $Id: og_notifications.module,v 1.24.4.16 2009/06/10 16:13:12 weitzman Exp $
 
 /**
  * @file
@@ -533,4 +533,14 @@ function _og_notification_check_message($message) {
   }
 
   return $sid > 0 ? $sid : 0;
+}
+
+// Used by Views field/filter.
+// TODO: Use constants instead of integers.
+function og_notifications_autosubscribe_map() {
+  return array(
+    -1 => t('Site default'), 
+    0 => t('Disabled'),
+    1 => t('Enabled'),
+  );
 }

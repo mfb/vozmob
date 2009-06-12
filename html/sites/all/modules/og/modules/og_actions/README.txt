@@ -1,16 +1,18 @@
-; $ID$
+; $Id: README.txt,v 1.2.4.1 2009/06/10 16:23:06 weitzman Exp $
 
-The og_actions module is a collection of actions for use with the trigger and organic groups modules. 
+The og_actions module is a collection of actions. Their most common use case is in conjunction with the Views Bulk Operations module. Together, these modules make a terrific admin dashboard for putitng content into and out of groups, and adding removing members from groups. 
 
 Requirements:
 og.module
 
 Suggested:
-trigger.module 
-workflow.module
+trigger.module OR
+workflow.module OR
+rules.module OR
+views_bulk_options.module
 
 Actions
-There are 5 actions in this module:
+There are 11 actions in this module. Here is a sampling.
 
 Non-configurable actions:
 -------------------------

@@ -1,5 +1,5 @@
 <?php
-// $Id: og.post.test,v 1.14 2008/11/03 00:26:47 weitzman Exp $
+// $Id: og.post.test,v 1.14.4.1 2009/06/10 13:48:29 weitzman Exp $
 
 /**
  * @file
@@ -13,7 +13,7 @@ class OgPost extends OgTestCase {
   /**
    * Implementation of getInfo().
    */
-  function getInfo() {
+  public static function getInfo() {
     return array(
       'name'  => t('Organic groups posting test'),
       'description' => t('Tests posting a group post into a group node.'),

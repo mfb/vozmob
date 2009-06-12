@@ -1,5 +1,5 @@
 <?php
-// $Id: og.context.test,v 1.1 2009/03/31 13:44:05 weitzman Exp $
+// $Id: og.context.test,v 1.1.4.1 2009/06/10 13:48:29 weitzman Exp $
 
 /**
  * @file
@@ -9,7 +9,7 @@
 require_once drupal_get_path('module', 'og') . '/tests/og_testcase.php';
 
 class OgContext extends OgTestCase {
-  function getInfo() {
+  public static function getInfo() {
     return array(
       'name'  => t('Organic groups context tests'),
       'description' => t('Tests the context system that determines how a group should be presented to the user.'),

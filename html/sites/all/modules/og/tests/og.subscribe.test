@@ -1,5 +1,5 @@
 <?php
-// $Id: og.subscribe.test,v 1.21 2008/11/03 00:26:48 weitzman Exp $
+// $Id: og.subscribe.test,v 1.21.4.1 2009/06/10 13:48:29 weitzman Exp $
 
 /**
  * @file
@@ -9,7 +9,7 @@
 require_once drupal_get_path('module', 'og') . '/tests/og_testcase.php';
 
 class OgSubscribe extends OgTestCase {
-  function getInfo() {
+  public static function getInfo() {
     return array(
       'name' => t('Organic groups membership tests'),
       'description' => t("Tests membership functionality and asserts correct behavior with all the different selective settings (e.g. open, moderated, etc'). Note: requires Views"),

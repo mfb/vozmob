@@ -1,5 +1,4 @@
 /og_views_handler_argument_og_group_nid.inc/1.2/Wed Oct 29 20:00:40 2008//TDRUPAL-6--2
-/og_views_handler_argument_og_uid_nid.inc/1.2/Wed Oct 29 20:00:43 2008//TDRUPAL-6--2
 /og_views_handler_field_og_group_nids.inc/1.2/Wed Oct 29 20:00:46 2008//TDRUPAL-6--2
 /og_views_handler_field_og_is_active.inc/1.2/Wed Oct 29 20:00:49 2008//TDRUPAL-6--2
 /og_views_handler_field_og_is_admin.inc/1.2/Wed Oct 29 20:00:52 2008//TDRUPAL-6--2
@@ -13,11 +12,14 @@
 /og_views_handler_field_og_selective.inc/1.2/Wed Oct 29 20:01:16 2008//TDRUPAL-6--2
 /og_views_handler_field_og_subscribe.inc/1.2/Wed Oct 29 20:01:19 2008//TDRUPAL-6--2
 /og_views_handler_field_og_uid_groups.inc/1.1/Mon Mar 16 16:50:03 2009//TDRUPAL-6--2
-/og_views_handler_filter_og_group_nid.inc/1.3.4.1/Mon Apr 20 02:30:14 2009//TDRUPAL-6--2
 /og_views_handler_filter_og_is_admin.inc/1.2/Wed Oct 29 20:01:25 2008//TDRUPAL-6--2
 /og_views_handler_filter_og_picg.inc/1.2/Wed Oct 29 20:01:28 2008//TDRUPAL-6--2
 /og_views_handler_filter_og_selective.inc/1.2/Wed Oct 29 20:01:32 2008//TDRUPAL-6--2
 /og_views_handler_filter_og_type.inc/1.3/Wed Oct 29 20:01:36 2008//TDRUPAL-6--2
 /og_views_handler_filter_og_type_all.inc/1.2/Wed Oct 29 20:01:39 2008//TDRUPAL-6--2
 /og_views_plugin_argument_validate_og_group_types.inc/1.2/Wed Oct 29 20:01:42 2008//TDRUPAL-6--2
+/og_views_handler_argument_og_uid_nid.inc/1.2.4.1/Fri Jun 12 02:50:25 2009//TDRUPAL-6--2
+/og_views_handler_field_autosubscribe.inc/1.1.2.1/Wed Jun 10 16:25:13 2009//TDRUPAL-6--2
+/og_views_handler_filter_autosubscribe.inc/1.1.2.1/Wed Jun 10 16:25:13 2009//TDRUPAL-6--2
+/og_views_handler_filter_og_group_nid.inc/1.3.4.2/Fri Jun 12 02:50:25 2009//TDRUPAL-6--2
 D
