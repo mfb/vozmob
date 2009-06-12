@@ -1,6 +1,6 @@
 <?php
 
-// $Id: mm_s3.module,v 1.1.2.2.2.14 2009/04/01 14:07:02 arthuregg Exp $
+// $Id: mm_s3.module,v 1.1.2.2.2.15 2009/06/11 15:46:02 arthuregg Exp $
 
 define('ACL_PRIVATE', 'private');
 define('ACL_PUBLIC_READ', 'public-read');
@@ -254,25 +254,25 @@ function mm_s3_config($action_id, $configuration, $verb) {
  */
 function mm_s3_validate_configuration($element, &$form_state) {
   // get the data for this module, if it was called
-  if ($values = media_mover_api_extract_form_data($form_state['values'], 'mm_s3')) {
-    
+  if ($values = media_mover_api_extract_form_data($element, $form_state)) {
+
     // buckets must be lower case
     if ($values['mm_s3_bucket'] != strtolower($values['mm_s3_bucket'])) {
       form_error($element, t('Your bucket name must be lower case.'));
     }
-  
+
     // alert on delete
     if ($values['mm_s3_delete_source']) {
       drupal_set_message('You have choosen to delete your source material. Please be aware that this will remove files from your server\'s file system');
     }
-  
+
     // validate S3 config
     if ($s3 = mm_s3_class_check()) {
       // does this bucket exist?
       if (! mm_s3_bucket_exists($values['mm_s3_bucket'], $s3)) {
         // try to create the bucket
         if (! $s3->putBucket($values['mm_s3_bucket'],  $values['mm_s3_perm'], false, false)) {
-          form_error($element, t('Could not create your bucket on the Amazon servers. You need to choose a different name'));
+         // form_error($element, t('Could not create your bucket on the Amazon servers. You need to choose a different name'));
         }
       }
     }

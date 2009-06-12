@@ -1,6 +1,6 @@
 <?php
 
-// $Id: mm_mailhandler.module,v 1.1.2.3 2009/04/01 13:56:04 arthuregg Exp $;
+// $Id: mm_mailhandler.module,v 1.1.2.5 2009/06/11 15:46:38 arthuregg Exp $;
 
 define('MM_EMAIL_ATTACHMENTS_SUBDIRECTORY', 'email_attachements');
 define('MM_EMAIL_WATCHDOG_TYPE', 'media_mover');
@@ -114,14 +114,14 @@ function mm_mailhandler_harvest_config($action_id, $configuration) {
     '#default_value' => $configuration['name'],
     '#description' => t('This username is used while logging into this mailbox during mail retrieval.'),
   );
-  
+
    $form['mm_mailhandler']['pass'] = array(
     '#type' => 'textfield',
     '#title' => t('User password for mailbox'),
     '#default_value' => $configuration['pass'],
     '#description' => t('The password corresponding to the username above. Consider using a non-vital password, since this field is stored without encryption in the database.'),
   );
-  
+
   $form['mm_mailhandler']['port'] = array(
     '#type' => 'textfield',
     '#title' => t('Mailbox port'),
@@ -130,7 +130,7 @@ function mm_mailhandler_harvest_config($action_id, $configuration) {
     '#description' => t('The port of the mailbox used to collect mail (usually 110 for POP3, 143 for IMAP).'),
   );
 
-  
+
   $form['mm_mailhandler']['imap'] = array(
     '#type' => 'select',
     '#title' => t('POP3 or IMAP Mailbox'),
@@ -138,7 +138,7 @@ function mm_mailhandler_harvest_config($action_id, $configuration) {
     '#default_value' => $configuration['imap'],
     '#description' => t('If you wish to retrieve mail from a POP3 or IMAP mailbox instead of a Folder, select POP3 or IMAP. Also, complete the Mailbox items below.'),
   );
-  
+
   // Allow administrators to configure the mailbox with extra IMAP commands (notls, novalidate-cert etc.)
   $form['mm_mailhandler']['extraimap'] = array(
     '#type' => 'textfield',
@@ -171,7 +171,7 @@ function mm_mailhandler_harvest_config($action_id, $configuration) {
  */
 function mm_mailhandler_configuration_validate($element, &$form_state) {
   // get the data for this module, if it was called
-  if ($values = media_mover_api_extract_form_data($form_state['values'], 'mm_mailhandler')) { 
+  if ($values = media_mover_api_extract_form_data($element, $form_state)) {
     mm_mailhandler_test_mailbox($values);
   }
 }
@@ -201,13 +201,13 @@ function mm_mailhandler_check() {
 function mm_mailhandler_harvest($configuration) {
   // Include mailhandler retrieval functions
   module_load_include('inc', 'mailhandler', 'mailhandler.retrieve');
-  
+
   // see mailhandler_cron_retrieve() for more information on these functions
   //$result = mailhandler_open_mailbox($configuration);
 
   // Find out how many messages need retrieval
   $new_messages = mailhandler_get_unread_messages($configuration);
-  
+
   // Initialise counters for maximum message retrieval
   $max_messages = variable_get('mailhandler_max_retrieval', 2);
   $retrieved_messages = 0;
@@ -280,7 +280,7 @@ function mm_mailhandler_retrieve_message($mailbox, $i, &$context) {
   }
 
   imap_close($result, CL_EXPUNGE);
-  
+
   return $node;
 }
 
@@ -288,9 +288,9 @@ function mm_mailhandler_retrieve_message($mailbox, $i, &$context) {
  * Retrieve all attachments from the mail
  * Then call mailsave handlers to process attachments
  * Then try to store remaining attachments
- * @param object $node 
+ * @param object $node
  *   is the incoming email
- * @param array $configuration 
+ * @param array $configuration
  *   is the mailbox being acted on
  */
 function mm_mailhandler_attachments($node, $configuration) {
@@ -309,7 +309,7 @@ function mm_mailhandler_attachments($node, $configuration) {
         file_check_directory($path, FILE_CREATE_DIRECTORY);
         // save the file data
         $file = file_save_data($part->data, $file);
-       
+
         // add metadata and node data to item
         $item['filesize'] = filesize($file);
         $item['harvest_file'] = $file;
@@ -317,10 +317,10 @@ function mm_mailhandler_attachments($node, $configuration) {
         $item['user']->uid = $node->uid;
         $item['node']->title = $node->title;
         $item['node']->uid = $node->uid;
-                
+
         // remove the data from the node so we are not passing extra data around
         unset($node->mimeparts->{$part_id}->data);
-        
+
         $items[] = $item;
       }
     }
@@ -379,7 +379,7 @@ function mm_mailhandler_test_form_submit($form, &$form_state) {
       break;
     }
   }
-  
+
   mm_mailhandler_test_mailbox($conf);
 }
 
@@ -388,7 +388,7 @@ function mm_mailhandler_test_form_submit($form, &$form_state) {
  * Test connection to a mailbox, and output results as a message
  * reproduces the mailhandler function to tweak the fuctionality
  * and provide validation functions
- * @param $conf  
+ * @param $conf
  *   array, mediamover conf
  * @return boolean
  */

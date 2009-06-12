@@ -1,6 +1,6 @@
 <?php
 
-/* $Id: media_mover_api.module,v 1.1.2.110.2.56 2009/06/01 12:49:22 arthuregg Exp $ */
+/* $Id: media_mover_api.module,v 1.1.2.110.2.57 2009/06/11 15:46:02 arthuregg Exp $ */
 
 
 /*
@@ -107,7 +107,7 @@ function media_mover_api_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
 
     case "view":
       // Add the attachments list to node body
-      if (count($node->media_mover) > 0) {
+      if (!empty($node->media_mover)) {
        $node->body .= theme('media_mover_files', $node->media_mover);
       }
       return $node;
@@ -133,13 +133,13 @@ function media_mover_api_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
 
 /**
  * implementation of hook_form_alter
- * @param $form 
+ * @param $form
  *   array
  * @param $form_state
  *   array
  * @param $form_id
  *   string
- * 
+ *
  */
 function media_mover_api_form_alter(&$form, $form_state, $form_id) {
   // check and see if this is a node delete form
@@ -457,7 +457,7 @@ function media_mover_api_run_config($config, $debug = true, $nid = null, $cron =
     else {
       // -----------------------------------------------------
       // run all the other configuration actions
-      // pass back the status of the previous step to get the previous files      
+      // pass back the status of the previous step to get the previous files
       $output .= media_mover_api_run_config_verb($config, $verb, media_mover_api_verb_base_status($verb), $cron);
     }
 
@@ -1023,7 +1023,7 @@ function media_mover_api_node_files_fetch($nid, $status = MMA_FILE_STATUS_COMPLE
 function media_mover_api_config_current_file($file, $type = 'previous') {
   switch ($type) {
     case 'previous':
-      $status  = $file['status'] -2;       
+      $status  = $file['status'] -2;
       return $file[media_mover_api_verb_base_status($file['status'] -2) .'_file'];
     break;
     case 'final':
@@ -1852,7 +1852,7 @@ function media_mover_api_build_add_config($configuration) {
 
     // now itterate on each module
     foreach (media_mover_api_modules() as $module) {
-      $actions =  module_invoke($module, 'media_mover', 'actions', null, null );
+      $actions = module_invoke($module, 'media_mover', 'actions', null, null );
 
       if ($actions[$verb]) {
         foreach ($actions[$verb] as $action_id => $action) {
@@ -2067,28 +2067,29 @@ function media_mover_api_collect_form_data($verb, $form_values) {
  * values back to a requestor
  * @TODO this will become legacy once configurations are built dynamically
  *       instead of the static method used now
- * @param $values
- * @param $module
- *   string, values for this module
+ * @param $element
+ * @param $form_state
  * @return array
  */
-function media_mover_api_extract_form_data($values, $module) {
-  if (is_array($values)) {
-    foreach($values as $id => $value) {
-      // split the $id into the sections
-      $data = explode('--', $id);
+function media_mover_api_extract_form_data($element, $form_state) {
+  $values = array();
 
-      // was a specific module requested?
-      if ($module) {
-        if ($data[1] == $module) {
-          $return[$data[3]] = $value;
-        }
-      }
-      else {
-        $return[$data[3]] = $value;
-      }
+  // figure out what module and action we are using
+  $parts = explode('--', key($element['#element_validate']));
+  $verb = $parts[0];
+  $module = $parts[1];
+  $action = $parts[2];
+
+  // is this the module in use?
+  if ($form_state['values'][$verb .'_choice'] == $module .'--'. $action) {
+    // get each of the form element data for this element
+    foreach(element_children($element) as $name) {
+      // get the name of the value that is being extracted
+      // harvest--mm_mailhandler--0--mm_mailhandler_formats
+      $data = explode('--', $name);
+      $values[$data[3]] = $element[$name]['#value'];
     }
-    return $return;
+    return $values;
   }
 }
 
@@ -2739,12 +2740,12 @@ function media_mover_api_files_status () {
  */
 function media_mover_api_file_fetch($id, $reset = false) {
   static $cached;
-  
+
   // is the $id numeric? if so, use it as an mmfid
   if (is_numeric($id)) {
     $id = array('mmfid' => $id);
   }
-  
+
   // can we use cached data?
   if (! $reset) {
     if ($file = $cached['mmfid'][$id['mmfid']]) {
@@ -2754,7 +2755,7 @@ function media_mover_api_file_fetch($id, $reset = false) {
       return $file;
     }
   }
-  
+
   // we did not find a cached file. Let's look for one
   // if we get an array of conditions, build some SQL
   foreach ($id as $key => $value) {
@@ -2762,7 +2763,7 @@ function media_mover_api_file_fetch($id, $reset = false) {
     $arguments[] = $value;
   }
   $cond = implode(' AND ', $cond);
-  
+
   // fetch the file
   $file = db_fetch_array(db_query('SELECT * FROM {media_mover_files} mmf WHERE '. $cond, $arguments));
   // no file, exit
@@ -2776,7 +2777,7 @@ function media_mover_api_file_fetch($id, $reset = false) {
   // add the data to the cache
   $cached['mmfid'][$file['mmfid']] = $file;
   $cached['fid'][$file['fid']] = $file;
- 
+
   return $file;
 }
 
