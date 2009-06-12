@@ -1,5 +1,5 @@
 <?php
-// $Id$
+// $Id: filebanlist.module,v 1.1.2.2 2009/06/12 01:41:05 mfb Exp $
 
 /**
  * @file
@@ -113,7 +113,7 @@ function filebanlist_file_add_action(&$file) {
 /**
  * Provide a missing Drupal core API function.
  */
-function filebanlist_file_load($fid) {
+function filebanlist_load_file($fid) {
   return db_fetch_object(db_query('SELECT * FROM {files} WHERE fid = %d', $fid));
 }
 
@@ -125,7 +125,7 @@ function filebanlist_views_bulk_operations_object_info() {
     'file' => array(
       'type' => 'file',
       'base_table' => 'files',
-      'load' => 'filebanlist_file_load',
+      'load' => 'filebanlist_load_file',
       'title' => 'filename',
     ),
   );

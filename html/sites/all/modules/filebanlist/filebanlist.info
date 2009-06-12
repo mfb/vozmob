@@ -1,4 +1,4 @@
-; $Id$
+; $Id: filebanlist.info,v 1.1.2.2 2009/06/12 01:41:05 mfb Exp $
 name = File ban list
 description = Create a ban list of files which are not permitted to be uploaded.
 core = 6.x

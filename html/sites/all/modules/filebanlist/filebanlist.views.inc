@@ -1,5 +1,5 @@
 <?php
-// $Id$
+// $Id: filebanlist.views.inc,v 1.1.2.2 2009/06/12 01:41:05 mfb Exp $
 
 /**
  * @file
