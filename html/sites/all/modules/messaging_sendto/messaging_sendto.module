@@ -511,12 +511,12 @@ function _messaging_sendto_compose($method, $destination, $values, $preview = FA
     $message['params']['sms'] = $values['gateway'];
   }
   if (!empty($values['node']->files)) {
-    $message['attachments'] = $values['node']->files;
+    $message['files'] = $values['node']->files;
   }
   // This is site-specific code, should be moved to some hook implementation. 
   if (!empty($values['node']->field_image)) {
     foreach ($values['node']->field_image as $file) {
-      $message['attachments'][] = (object) $file;
+      $message['files'][$file['fid']] = (object) $file;
     }
   }
   // Compose message text. Do all this in one replacement
