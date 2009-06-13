@@ -3,6 +3,7 @@ name = MMS Messaging
 description = Sending Method: MMS
 package = Messaging
 dependencies[] = messaging
+dependencies[] = mimemail
 dependencies[] = sms_email_gateway
 dependencies[] = mms_email_gateway
 core = 6.x

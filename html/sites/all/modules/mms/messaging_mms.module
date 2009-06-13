@@ -34,6 +34,8 @@ function messaging_mms_messaging($op = 'info') {
  *   Message array
  */
 function messaging_mms_send_msg($destination, $message, $params = array()) {
+  // Include messaging mail library.
+  module_load_include('mail.inc', 'messaging');
   // Get parameters without invoking hook_mail_alter()
   $mail = messaging_mail_prepare($destination, $message, $params, FALSE);
   // Add e-mail gateway to destination.
