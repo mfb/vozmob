@@ -1,5 +1,5 @@
 <?php
-// $Id: notifications_content.module,v 1.4.2.9.2.36.2.9 2009/05/18 17:14:02 jareyero Exp $
+// $Id: notifications_content.module,v 1.4.2.9.2.36.2.10 2009/06/11 16:28:03 jareyero Exp $
 /**
  * @file
  * Subscriptions to content events
@@ -79,7 +79,7 @@ function notifications_content_perm() {
 function notifications_content_help($path, $arg) {
   if ($path == 'admin/messaging/notifications/content') {
     $output = '<p>' . t('Content subscriptions are subscriptions to nodes that will produce notifications when a node is posted or updated or when a comment is posted for that nodes. Notifications will be sent only for published content so if you need to be notified of unpublished content waiting for approval you better use Triggers and Actions or some other module for that.') . '</p>';
-    $output .= '<p>'. t('On this page you can set which of the available subscription types are allowed. Alternatively you can select the <i>Set up for each content type</i> option and use the <a href="@content-type-settings">Administer Content types</a> page. These settings will be combined with permissions and other options (See user interface options if enabled) to determine which subscriptions will be finally available for users.', array('@content-type-settings' => url( 'admin/content/types'))) .'</p>';
+    $output .= '<p>'. t('On this page you can set which of the available subscription types are allowed. Alternatively you can select the <em>Set up for each content type</em> option and use the <a href="@content-type-settings">Administer Content types</a> page. These settings will be combined with permissions and other options (See user interface options if enabled) to determine which subscriptions will be finally available for users.', array('@content-type-settings' => url( 'admin/content/types'))) .'</p>';
     return $output;
   }
   elseif (array($arg[0], $arg[1], $arg[2], $arg[3]) == array('admin', 'messaging', 'template', 'edit') && ($group = $arg[4])) {

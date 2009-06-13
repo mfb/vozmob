@@ -1,5 +1,5 @@
 <?php
-// $Id: notifications.pages.inc,v 1.1.2.8.2.4 2009/04/22 14:58:18 jareyero Exp $
+// $Id: notifications.pages.inc,v 1.1.2.8.2.5 2009/06/10 18:49:42 jareyero Exp $
 /**
  * @file
  * User pages for Notifications
@@ -53,7 +53,7 @@ function notifications_user_overview($form_state, $account) {
       $tips['enable'] = l(t('Enable all your subscriptions'), "$path/notifications/update/enable");
     }    
   }
-  $link = notifications_get_link('unsubscribe', array('uid' => $account->uid));
+  $link = notifications_get_link('unsubscribe', array('uid' => $account->uid, 'destination' => TRUE));
   $tips['cancel'] = l(t('Cancel all your subscriptions'), $link['href'], $link['options']);
   
   //$output .= theme('item_list', $tips, t('You can'));

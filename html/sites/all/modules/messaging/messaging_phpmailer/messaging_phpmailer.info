@@ -1,6 +1,6 @@
-; $Id: messaging_phpmailer.info,v 1.1.2.1.2.2 2009/01/26 15:51:40 jareyero Exp $
+; $Id: messaging_phpmailer.info,v 1.1.2.1.2.2.2.1 2009/06/10 19:54:35 davidg Exp $
 name = Messaging PHPMailer
-description = Mail Sending Method: Integration with PHPMailer for HMTL Mail
+description = Mail Sending Method: Integration with PHPMailer for HTML Mail
 package = "Messaging"
 dependencies[] = messaging
 core = 6.x

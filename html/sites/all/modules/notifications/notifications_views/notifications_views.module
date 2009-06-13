@@ -63,7 +63,7 @@ function notifications_views_views_data() {
   
   $data['messaging_store']['created'] = array(
     'title' => t('Creation date'),
-    'help' => t('The date that the messag was created.'),
+    'help' => t('The date that the message was created.'),
     'field' => array(
       'handler' => 'views_handler_field',
     ),

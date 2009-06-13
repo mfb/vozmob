@@ -1,5 +1,5 @@
 <?php
-// $Id: notifications_tags.module,v 1.1.2.5.2.12.2.3 2009/04/20 18:55:26 jareyero Exp $
+// $Id: notifications_tags.module,v 1.1.2.5.2.12.2.4 2009/06/11 16:38:16 davidg Exp $
 /**
  * @file
  * Subscriptions to taxonomy terms
@@ -100,6 +100,22 @@ function notifications_tags_notifications($op, &$arg0, $arg1 = NULL, $arg2 = NUL
       return array($access);      
       break;
  
+  }
+}
+
+/**
+* Implementation of hook_taxonomy().
+*/
+function notifications_tags_taxonomy($op, $type, $array = NULL) {
+  switch ($op) {
+    case 'delete':
+      switch ($type) {
+        case 'term':
+          // takes care of individual term deletion and vocab deletion because taxonomy iterates through all term delete hooks on the latter
+          notifications_delete_subscriptions(array('event_type' => 'node'), array('tid' => $array['tid']), FALSE);
+          break;
+      }
+      break;
   }
 }
 

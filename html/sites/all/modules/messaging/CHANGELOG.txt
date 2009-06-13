@@ -1,14 +1,19 @@
-// $Id: CHANGELOG.txt,v 1.1.2.8.2.29.2.8 2009/04/30 10:42:35 jareyero Exp $
+// $Id: CHANGELOG.txt,v 1.1.2.8.2.29.2.10 2009/06/13 14:49:13 jareyero Exp $
 
-6.x-2.x-beta6 to ............
-------------------------------
+6.x-2.0 to ....
+--------------------------
+- Fixed: message params not properly handled in the store table, by greenSkin, #449112
+- Added attachments support for some mail methods, by Dane Powell, #371596
+- Added messaging debug test page to messaging settings
+- PHPMailer: Added SMTP authentication, by batje, #467438
+- Fix to private messaging send method interface, by David Goode
+
+6.x-1.1 to 6.x-2.0
+--------------------------
 - Added new module, messaging_xmpp, to replace xmppframework xmpp_messaging
 - Added a new callback in message method info ('user callback') for use with xmppframework
 - Fixed some issues with SMS messages, gateway parameter is not used anymore.
 - Added some utility functions for text handling: messaging_text_build(), messaging_text_clean()
-
-6.x-2.x-beta5 to 6.x-2.x-beta6
-------------------------------
 - Reworked logging and log formatting and moved debug module to Development package
 - Fixed: default filter set to default variable if empty
 - Added line endings for 'Plain text' filter, #428440
@@ -18,17 +23,11 @@
 - Reworked SMS formatting, removed text limit, #390438
 - Fixed: messaging_phpmailer does not use passed headers, by jmcclelland, #363001
 - Added table and field descriptions to schema, #429184
-
-6.x-2.x-beta1 to 6.x-2.x-beta5
-------------------------------
 - Fixed regexp for compatibility, by Ogredude, #393384
 - Fixed broken function: messaging_pull_pending()
 - Moved messaging notify module to a different package, http://drupal.org/project/notifications_extra
 - Fixed minor issues with storing message templates (trim) by mehmeta #243743
 - Added support for anonymous accounts with 'destination' property set
-
-6.x-1.1 to 6.x-2.x-beta1
---------------------------
 - Added PHPMailer settings and debug settings,  #358386 and #248743
 - Moved send method settings to its own tab, and moved mail functions to messaging.mail.inc
 - Defined some new constants for sending method types, updated plug-ins

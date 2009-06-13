@@ -1,5 +1,5 @@
 <?php
-// $Id: messaging_debug.module,v 1.1.2.4.2.11.2.1 2009/04/29 16:24:40 jareyero Exp $
+// $Id: messaging_debug.module,v 1.1.2.4.2.11.2.2 2009/06/05 17:28:29 jareyero Exp $
 /**
  * @file
  * Simple messaging using html page. Messaging method plug-in
@@ -21,6 +21,15 @@ function messaging_debug_menu() {
     'page arguments' => array(1),
     'access callback' => 'messaging_debug_access',
     'access arguments' => array(1),
+  );
+  $items['admin/messaging/settings/test'] = array(
+    'title' => 'Test',
+    'description' => 'Test message sending',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('messaging_debug_post_form'),
+    'access arguments' => array('administer messaging'),
+    'weight' => -10,
+    'type' => MENU_LOCAL_TASK,
   );
   return $items;
 }

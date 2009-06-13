@@ -1,5 +1,5 @@
 <?php
-// $Id: notifications.cron.inc,v 1.6.2.6.2.20.2.6 2009/04/29 16:24:08 jareyero Exp $
+// $Id: notifications.cron.inc,v 1.6.2.6.2.20.2.7 2009/06/10 18:49:42 jareyero Exp $
 /**
  * Notifications module. Queue processing.
  * 
@@ -232,7 +232,7 @@ function notifications_process_rows($conditions, $limit = 0, $update = TRUE) {
         $module = $queue->module;
         // Users may be handled by a different module implementing the _load_user callback. 
         // I.e. for anonymous users it may load the name from somewhere
-        $account = notifications_callback($module, 'load_user', $queue->uid, $destination);
+        $account = notifications_callback($module, 'load_user', $queue->uid, $destination, $send_method);
       }
     }
     // For every row in queue, compile everyting that will be available for sending
@@ -601,15 +601,17 @@ function notifications_event_text($event) {
 /**
  * Get users with static caching for existing users
  * 
- * Build anonymous fake user (with destination) for anonymous users
+ * Build anonymous fake user (with destination, send_method) for anonymous users
+ * We need to pass the send method to produce the right tokens later
  */
-function notifications_load_user($uid, $destination = NULL) {
+function notifications_load_user($uid, $destination = NULL, $send_method = NULL) {
   if ($uid) {
     return messaging_load_user($uid);
   }
   elseif ($destination) {
     $account = drupal_anonymous_user();
     $account->destination = $destination;
+    $account->send_method = $send_methor;
   }
 }
 

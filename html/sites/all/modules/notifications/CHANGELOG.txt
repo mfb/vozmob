@@ -1,7 +1,10 @@
-// $Id: CHANGELOG.txt,v 1.1.2.11.2.51.2.16 2009/05/18 18:41:33 jareyero Exp $
+// $Id: CHANGELOG.txt,v 1.1.2.11.2.51.2.18 2009/06/11 16:28:02 jareyero Exp $
 
 6.x-2.0 to .......
 -------------------------------
+- Fixed word "undisclose" and other string issues, #451932, #452102
+- Fixed: wrong parameters in notifications_user_form, #479246
+- Fixed: implode error from notifications, by kaare, #453498
 - Fixed wrong permission checking for user managing subscriptions, by ozzin, #455160
 - Fixed: Empty Notifications fieldset, #453578
 - Fixed: Do not send notifications field value not kept for node preview, #455648

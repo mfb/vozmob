@@ -1,5 +1,5 @@
 <?php
-// $Id: messaging_phpmailer.install,v 1.1.2.1.2.2 2009/01/22 18:53:39 jareyero Exp $
+// $Id: messaging_phpmailer.install,v 1.1.2.1.2.2.2.1 2009/06/10 19:54:35 davidg Exp $
 /**
  * Implementation of hook_install()
  */
@@ -33,7 +33,7 @@ function messaging_phpmailer_requirements($phase) {
     $path = drupal_get_path('module', 'messaging_phpmailer') .'/PHPMailer';
 
     if (!file_exists($path .'/class.phpmailer.php')) {
-      $requirements['messaging_hmtl_mail'] = array(
+      $requirements['messaging_html_mail'] = array(
         'title' => $t('Messaging PHPMailer'),
         'value' => $t('PHP Mailer missing'),
         'severity' => REQUIREMENT_ERROR,

@@ -9,11 +9,11 @@ D/translations////
 D/messaging_privatemsg////
 D/messaging_twitter////
 D/messaging_xmpp////
-/CHANGELOG.txt/1.1.2.8.2.29.2.8/Mon May  4 22:07:43 2009//TDRUPAL-6--2
-/README.txt/1.1.4.2/Wed Apr  1 07:47:46 2009//TDRUPAL-6--2
-/messaging.admin.inc/1.1.2.13.2.2/Mon May  4 22:07:43 2009//TDRUPAL-6--2
-/messaging.info/1.1.4.1/Wed Apr  1 07:47:46 2009//TDRUPAL-6--2
-/messaging.install/1.2.2.4.2.13.2.1/Mon May  4 22:07:43 2009//TDRUPAL-6--2
-/messaging.mail.inc/1.1.2.1/Fri May  1 22:05:29 2009//TDRUPAL-6--2
-/messaging.store.inc/1.1.2.4.2.9/Fri May  1 22:05:29 2009//TDRUPAL-6--2
-/messaging.module/1.7.2.8.2.27.2.6/Tue May 12 05:46:32 2009//TDRUPAL-6--2
+/CHANGELOG.txt/1.1.2.8.2.29.2.10/Sat Jun 13 16:45:30 2009//TDRUPAL-6--2
+/README.txt/1.1.4.2/Sun May 31 23:15:32 2009//TDRUPAL-6--2
+/messaging.admin.inc/1.1.2.13.2.2/Sun May 31 23:15:32 2009//TDRUPAL-6--2
+/messaging.info/1.1.4.1/Sun May 31 23:15:32 2009//TDRUPAL-6--2
+/messaging.install/1.2.2.4.2.13.2.1/Sun May 31 23:15:32 2009//TDRUPAL-6--2
+/messaging.mail.inc/1.1.2.1.2.1/Result of merge+Sat Jun 13 16:45:30 2009//TDRUPAL-6--2
+/messaging.module/1.7.2.8.2.27.2.6/Sun May 31 23:15:32 2009//TDRUPAL-6--2
+/messaging.store.inc/1.1.2.4.2.9.2.1/Sat Jun 13 16:45:30 2009//TDRUPAL-6--2

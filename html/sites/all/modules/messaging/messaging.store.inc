@@ -1,5 +1,5 @@
 <?php
-// $Id: messaging.store.inc,v 1.1.2.4.2.9 2009/03/25 13:06:46 jareyero Exp $
+// $Id: messaging.store.inc,v 1.1.2.4.2.9.2.1 2009/06/13 14:49:13 jareyero Exp $
 /**
  * @file
  *   Database storage for the messaging framework
@@ -173,6 +173,7 @@ function messaging_store_query($fields) {
  *   Array as retrieved from the db store
  * @param $full
  *   True for loading the account data if this message is intended for a user
+ *   And loading the file objects associated too
  */
 function messaging_store_unpack(&$message, $full = FALSE) {
   // Preprocessing stored parameters
@@ -184,6 +185,15 @@ function messaging_store_unpack(&$message, $full = FALSE) {
       if (!empty($params[$field])) {
         $message->$field = $params[$field];
         unset($params[$field]);
+      }
+    }
+    // Load files attached to this message if any
+    // This will serve as a check of whether the files still exist
+    if (!empty($message->params['files']) && $full) {
+      $message->files = array();
+      $result = db_query('SELECT * FROM {upload} WHERE fid IN (' . db_placeholders($message->params['files']) . ')', $message->params['files']);
+      while ($file = db_fetch_object($result)) {
+        $message->files[$file->fid] = $file;
       }
     }
     // We only saved params for current sending method group
@@ -251,20 +261,8 @@ function messaging_store_del($params) {
  * 
  * If there are many destinations they will be stored as 'multiple'
  * 
- * @param $method
- *   Sending method
- * @param $destinations
- *   Array of destinations, the type of elements will depend on sending method
  * @param $message
- *   Message array
- * @param $sent
- *   Sent timestamp when used for logging
- * @param $queue
- *   Should be 1 when this is a regular queue entry
- * @param $log
- *   Should be 1 when this entry is to be kept as a log
- * @param $cron
- *   Should be 1 when this entry is to be processed on cron (queueing for push methods)
+ *   Message object
  */
 function messaging_store_save($message) {
   // Normalize some values. Boolean parameters must be 0|1
@@ -277,7 +275,7 @@ function messaging_store_save($message) {
   }
   // We just save the params for current sending method group
   $group = messaging_method_info($message->method, 'group');
-  $params = !empty($params[$group]) ? $params[$group] : array();
+  $params = !empty($message->params[$group]) ? $message->params[$group] : array();
   
   // And there's one more optional param that is sender_name
   if (!empty($message->sender_name)) {
@@ -307,7 +305,10 @@ function messaging_store_save($message) {
       }
     }
   }
-  
+  // If there are files, serialize $file->fids in an array
+  if (!empty($message->files)) {
+    $params['files'] = array_keys($message->files);
+  }
   // Add parameters, timestamp and save
   $message->params = $params ? $params : NULL;
   $message->created = time();

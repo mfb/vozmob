@@ -55,6 +55,29 @@ function messaging_phpmailer_settings_form($form_state) {
     '#type' => 'textfield',
     '#default_value' => variable_get('messaging_phpmailer_smtp_server', ini_get('SMTP')),
   );
+  $form['messaging_phpmailer_auth'] = array(
+    '#type'        => 'fieldset',
+    '#title'       => t('SMTP Authentication'),
+    '#description' => t('Leave blank if your SMTP server does not require authentication.'),
+  );
+  $form['messaging_phpmailer_auth']['messaging_phpmailer_smtp_username'] = array(
+    '#type'          => 'textfield',
+    '#title'         => t('Username'),
+    '#default_value' => variable_get('messaging_phpmailer_smtp_username', ''),
+    '#description'   => t('SMTP Username.'),
+  );
+  $form['messaging_phpmailer_auth']['messaging_phpmailer_smtp_password'] = array(
+    '#type'          => 'textfield',
+    '#title'         => t('Password'),
+    '#default_value' => variable_get('messaging_phpmailer_smtp_password', ''),
+    '#description'   => t('SMTP password.'),
+  );
+  $form['messaging_phpmailer_attach'] = array(
+      '#title' => t('Include attachments'),
+      '#type' => 'checkbox',
+      '#default_value' => variable_get('messaging_phpmailer_attach', 0),
+      '#description' => t('If enabled, attachments will be included with outgoing messages.')
+  );  
   $form['messaging_phpmailer_debug'] = array(
       '#title' => t('Debug mode'),
       '#type' => 'radios',
@@ -101,7 +124,18 @@ function messaging_phpmailer_drupal_mail($message) {
   $mail->IsSMTP(); // telling the class to use SMTP
   $mail->CharSet = 'utf-8';
   $mail->ContentType = 'text/html';
+  
+    // Set the authentication settings.
+  $username = variable_get('messaging_phpmailer_smtp_username', '');
+  $password = variable_get('messaging_phpmailer_smtp_password', '');
 
+  // If username and password are given, use SMTP authentication.
+  if ($username && $password) {
+    $mail->SMTPAuth = TRUE;
+    $mail->Username = $username;
+    $mail->Password = $password;
+  }
+  
   $host = variable_get('messaging_phpmailer_smtp_server', ini_get('SMTP'));
   if ($host) {
     $mail->Host = $host; // SMTP server
@@ -139,6 +173,12 @@ function messaging_phpmailer_drupal_mail($message) {
   // The subject has been already filtered by messaging module
   $mail->Subject = $subject;
   $mail->Body = str_replace("\r", '', $body);
+
+  if(!empty($message['attachments']) && variable_get('messaging_phpmailer_attach', 0)){
+    foreach($message['attachments'] as $attachment) {
+      $mail->AddAttachment($attachment->filepath, $attachment->filename, 'base64', $attachment->filemime);
+    }
+  }
   
   // If enabled debug option, log everything...
   if (variable_get('messaging_phpmailer_debug', 0)) {

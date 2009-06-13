@@ -1,5 +1,5 @@
 <?php
-// $Id: notifications.module,v 1.6.2.9.2.50.2.8 2009/04/29 16:24:08 jareyero Exp $
+// $Id: notifications.module,v 1.6.2.9.2.50.2.9 2009/06/10 18:49:42 jareyero Exp $
 
 /**
  * @file
@@ -1178,17 +1178,19 @@ function notifications_token_values($type, $object = NULL, $options = array()) {
     case 'subscription':
       $values = array();
       if ($subscription = $object) {
-        $link = notifications_get_link('unsubscribe', array('sid' => $subscription->sid, 'signed' => TRUE, 'destination' => FALSE, 'absolute' => TRUE));
+        $link = notifications_get_link('unsubscribe', array('sid' => $subscription->sid, 'signed' => TRUE, 'absolute' => TRUE));
         $values['unsubscribe-url'] = url($link['href'], $link['options']);      
       }
       return $values;
     case 'user':
-      if ($account = $object) {
-        $values['subscriptions-manage'] = $account->uid ? url("user/$account->uid/notifications", array('absolute' => TRUE)) : '';
-        $link = notifications_get_link('unsubscribe', array('uid' => $account->uid, 'signed' => TRUE, 'destination' => FALSE, 'absolute' => TRUE));
+      $values = array();
+      if (($account = $object) && !empty($object->uid)) { 
+        // We have a real user, so we produce full links
+        $values['subscriptions-manage'] = url("user/$account->uid/notifications", array('absolute' => TRUE));
+        $link = notifications_get_link('unsubscribe', array('uid' => $account->uid, 'signed' => TRUE, 'absolute' => TRUE));
         $values['unsubscribe-url-global'] = url($link['href'], $link['options']);
-        return $values;
       }
+      return $values;
   }
 }
 
@@ -1264,18 +1266,24 @@ function notifications_cron() {
  *   Aditional parameters for the subscription, may be
  *   - uid, the user for which the link is generated
  *   - confirm, whether to show confirmation page or not
+ *   - destination, form destination or TRUE to use current path
  *   - signed, to produce a signed link that can be used by anonymous users (Example: unsubscribe link in emails)
  *   - Other subscription parameters: type, fields...
  */
 function notifications_get_link($type, $params) {
-  global $user;
+  // Add some default values
   $params += array(
-    'uid' => $user->uid,
+    'uid' => 0,
     'confirm' => TRUE,
     'signed' => FALSE,
-    'destination' => $_GET['q'],
+    'destination' => FALSE,
     'query' => array(),
   );
+  if ($params['destination'] === TRUE) {
+    $params['destination'] = $_GET['q'];
+  }
+  $elements = array();
+
   switch ($type) {
     case 'subscribe':
       $elements = array(
@@ -1287,12 +1295,15 @@ function notifications_get_link($type, $params) {
       );
       break;
     case 'unsubscribe':
+      $elements[] = 'unsubscribe';
       // The unsubscribe link can be for a single subscription or all subscriptions for a user
       if (!empty($params['sid'])) {      
-        $elements = array('unsubscribe', 'sid', $params['sid']);        
+        $elements[] = 'sid';
+        $elements[] = $params['sid'];   
       }
       elseif (!empty($params['uid'])) {
-        $elements = array('unsubscribe', 'uid', $params['uid']); 
+        $elements[] = 'uid';
+        $elements[] = $params['uid'];
       }
       break;
   }
@@ -1568,7 +1579,7 @@ function notifications_user_form($form_state, $account, $type, $subscriptions, $
   $field_title = !empty($options['title']) ? $options['title'] : '';
   if (is_null($subscriptions)) {
     // Fetch subscriptions with given parameters
-    $subscriptions = notifications_get_subscriptions(array('type' => $type, 'event_type' => $info['event_type'], 'uid' => $account->uid), TRUE, 'value');
+    $subscriptions = notifications_get_subscriptions(array('type' => $type, 'event_type' => $info['event_type'], 'uid' => $account->uid), array(), FALSE, 'value');
   }
   $defaults += array(
     'sid' => 0,
@@ -1590,8 +1601,7 @@ function notifications_user_form($form_state, $account, $type, $subscriptions, $
     '#tree' => TRUE,
     '#theme' => 'notifications_form_table',
     '#header' => $header,
-  );  
-
+  );
 
   foreach ($list as $key => $title) {
     $rowdefaults = isset($subscriptions[$key]) ? (array)($subscriptions[$key]) : $defaults;
