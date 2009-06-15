@@ -242,6 +242,7 @@ function sms_email_gateway_sms_email_gateway_providers() {
     'vmobl.com' => t('Virgin Mobile'),
     'vodafone-sms.de' => t('Vodafone Germany'),
     'sms.ycc.ru' => t('YCC'),
+    'vmpix.com' => t('Virgin Mobile'),
   );
 }
 

@@ -10,7 +10,7 @@ function mms_us_virgin_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
   $pattern = '@\.vmpix\.com$@';
   
   watchdog('debug', 'debug inside us virgin mobile');
-  watchdog('debug', print_r(preg_match($pattern, $header->fromaddress),TRUE));
+  watchdog('debug', print_r($header->fromaddress,TRUE));
 
   if (preg_match($pattern, $header->fromaddress)) {
 
@@ -56,7 +56,7 @@ function mms_us_virgin_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
  * Report back module information when requested
  */
 function mms_us_virgin_mailsave_clean_info() {
-  $items['mms_us_tmobile'] = array(
+  $items['mms_us_virgin'] = array(
     'provider'     => t('Virgin Mobile'),
     'country'      => 'US',
     'author'       => 'Gabriela Rodriguez',
