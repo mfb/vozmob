@@ -1,5 +1,5 @@
 <?php
-// $Id: jquery_plugin.jq.inc,v 1.1.2.14 2009/06/06 08:57:35 mfb Exp $
+// $Id: jquery_plugin.jq.inc,v 1.1.2.17 2009/06/15 22:53:39 mfb Exp $
 
 /**
  * Implementation of hook_jq().
@@ -64,7 +64,7 @@ function jquery_plugin_jq($op, $plugin = NULL) {
       'expose' => array(
         'name' => t('Expose'),
         'description' => t('Make your HTML elements stand out.'),
-        'version' => '1.0.2',
+        'version' => '1.0.3',
         'url' => 'http://plugins.jquery.com/project/expose',
         'files' => array(
           'js' => array(
@@ -116,7 +116,7 @@ function jquery_plugin_jq($op, $plugin = NULL) {
       'overlay' => array(
         'name' => t('Overlay'),
         'description' => t('Overlay your HTML with eye candy.'),
-        'version' => '1.0.2',
+        'version' => '1.0.4',
         'url' => 'http://plugins.jquery.com/project/overlay',
         'files' => array(
           'js' => array(
@@ -129,7 +129,7 @@ function jquery_plugin_jq($op, $plugin = NULL) {
       'scrollable' => array(
         'name' => t('Scrollable'),
         'description' => t('Make your HTML elements move.'),
-        'version' => '1.0.3',
+        'version' => '1.0.5',
         'url' => 'http://plugins.jquery.com/project/scrollable',
         'files' => array(
           'js' => array(
@@ -142,7 +142,7 @@ function jquery_plugin_jq($op, $plugin = NULL) {
       'tabs' => array(
         'name' => t('Tabs'),
         'description' => t('jQuery Tools tabs plugin.'),
-        'version' => '1.0.0',
+        'version' => '1.0.1',
         'url' => 'http://plugins.jquery.com/project/tabs',
         'files' => array(
           'js' => array(
@@ -155,7 +155,7 @@ function jquery_plugin_jq($op, $plugin = NULL) {
       'tooltip' => array(
         'name' => t('Tooltip'),
         'description' => t('jQuery Tools tooltip plugin.'),
-        'version' => '1.0.0',
+        'version' => '1.0.2',
         'url' => 'http://plugins.jquery.com/project/tooltips',
         'files' => array(
           'js' => array(
@@ -168,7 +168,7 @@ function jquery_plugin_jq($op, $plugin = NULL) {
       'validate' => array(
         'name' => t('Validate'),
         'description' => t('Setup powerful client-side form validation. From a protoype in a few minutes to heavily customized validation rules, methods and messages.'),
-        'version' => '1.5.2',
+        'version' => '1.5.3',
         'url' => 'http://plugins.jquery.com/project/validate',
         'files' => array(
           'js' => array(

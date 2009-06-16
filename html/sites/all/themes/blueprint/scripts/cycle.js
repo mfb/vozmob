@@ -14,21 +14,12 @@ Drupal.behaviors.overlayCycle = function() {
   });
 
   $('div.overlay-launcher a[rel]').each(function() {
-    $(this).overlay({
-      onBeforeLoad: function() {
-        this.getBackgroundImage().expose({color: '#000'});
-      },
-      onClose: function() {
-        $.expose.close();
-      }
-    });
+    $(this).overlay({expose: '#000'});
   });
 
   $('div.field-field-image div.field-items a[rel]').each(function() {
     $(this).overlay({
-      onBeforeLoad: function() {
-        this.getBackgroundImage().expose({color: '#000'});
-      },
+      expose: '#000',
       onLoad: function() {
         // Set up the slideshow.
         this.getContent().find('div.views-field-field-image-fid div.field-content').each(function() {
@@ -45,7 +36,6 @@ Drupal.behaviors.overlayCycle = function() {
         });
       },
       onClose: function() {
-        $.expose.close();
         this.getContent().find('div.views-field-field-image-fid div.field-content').each(function() {
           $(this).cycle('pause');
         });
