@@ -10,22 +10,22 @@ function mms_us_virgin_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
   $pattern = '@vmpix.com@';
   
   watchdog('debug', 'debug inside us virgin mobile');
-  watchdog('debug', print_r($header->fromaddress,TRUE));
 
   if (preg_match($pattern, $header->fromaddress)) {
 
     watchdog('debug', 'inside the virgin mobile message');
      // Build a regex to extract message body
     // This regex identifies the actual message text in the email
-    $end_pattern = preg_quote('This message is from a Virgin Mobile user. Enjoy.');
+    $end_pattern = preg_quote('^M ^M This message is from^M a Virgin Mobile user. Enjoy.^M _____________________________________________________________');
     $pattern = '@^(.*)' . $end_pattern . '@Us';
 
+  watchdog('debug', print_r($node->body,TRUE));
     // Check for regex success in case the provider changes their format
     // Worst case is that match fails and nothing is changed
     if (preg_match($pattern, $node->body)) {
 
     // Find the HTML element containing user-supplied text.
-      preg_match_all('!<p>(.*?)<p></center></body></html>!s', $node->body, $matches);
+      preg_match_all('!\^M \^M \^M(.*?)\^M \^M \^M!s', $node->body, $matches);
       // Get the new body as a string
       $body = $matches[1][1];
 
