@@ -18,10 +18,7 @@ function mms_email_gateway_get_map() {
  */
 function mms_email_gateway_rewrite_to_sms($gateway) {
   $gateways = mms_email_gateway_get_map();
-  if (isset($gateways[$gateway])) {
-    return $gateways[$gateway];
-  }
-  return $gateway;
+  return isset($gateways[$gateway]) ? $gateways[$gateway] : $gateway;
 }
 
 /**
@@ -29,10 +26,7 @@ function mms_email_gateway_rewrite_to_sms($gateway) {
  */
 function mms_email_gateway_rewrite_to_mms($gateway) {
   $gateways = array_flip(mms_email_gateway_get_map());
-  if (isset($gateways[$gateway])) {
-    return $gateways[$gateway];
-  }
-  return $gateway;
+  return isset($gateways[$gateway]) ? $gateways[$gateway] : $gateway;
 }
 
 /**
