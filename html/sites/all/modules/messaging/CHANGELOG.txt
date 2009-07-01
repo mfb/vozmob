@@ -1,7 +1,8 @@
-// $Id: CHANGELOG.txt,v 1.1.2.8.2.29.2.10 2009/06/13 14:49:13 jareyero Exp $
+// $Id: CHANGELOG.txt,v 1.1.2.8.2.29.2.11 2009/06/22 10:05:18 jareyero Exp $
 
-6.x-2.0 to ....
+6.x-2.0 to 6.x-2.1
 --------------------------
+- Fixed: outdated permission in privatemsg module, by askibinski, #491364
 - Fixed: message params not properly handled in the store table, by greenSkin, #449112
 - Added attachments support for some mail methods, by Dane Powell, #371596
 - Added messaging debug test page to messaging settings

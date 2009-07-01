@@ -1,7 +1,8 @@
-// $Id: CHANGELOG.txt,v 1.1.2.11.2.51.2.18 2009/06/11 16:28:02 jareyero Exp $
+// $Id: CHANGELOG.txt,v 1.1.2.11.2.51.2.19 2009/06/16 15:23:09 jareyero Exp $
 
 6.x-2.0 to .......
 -------------------------------
+- Extended field value and formatting callbacks (cck support), by David Goode, #329516
 - Fixed word "undisclose" and other string issues, #451932, #452102
 - Fixed: wrong parameters in notifications_user_form, #479246
 - Fixed: implode error from notifications, by kaare, #453498

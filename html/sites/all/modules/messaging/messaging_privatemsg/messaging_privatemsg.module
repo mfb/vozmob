@@ -17,7 +17,7 @@ function messaging_privatemsg_messaging($op) {
         'name' => t('Private message'),
         'group' => 'web',
         'type' => MESSAGING_TYPE_SEND,
-        'access' => 'access private messages',
+        'access' => 'read privatemsg',
         'glue' => "\n",
         'description' => t('Send messages through Privatemsg'),
         'send callback' => 'messaging_privatemsg_send_msg', // Sending callback

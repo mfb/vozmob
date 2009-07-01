@@ -1,5 +1,5 @@
 <?php
-// $Id: notifications.pages.inc,v 1.1.2.8.2.5 2009/06/10 18:49:42 jareyero Exp $
+// $Id: notifications.pages.inc,v 1.1.2.8.2.6 2009/06/16 15:23:09 jareyero Exp $
 /**
  * @file
  * User pages for Notifications
@@ -124,7 +124,11 @@ function notifications_add_subscription_form_validate($form, &$form_state) {
     // We may need additional validation or field - value mappging for some fields
     $value = $field['value'];
     if ($callback = notifications_subscription_fields($field['type'], 'value callback')) {
-      $value = call_user_func($callback, $value, "fields][$fid][value");
+      if ($args = notifications_subscription_fields($field['type'], 'value callback args')) {
+        $value = call_user_func($callback, $value, "fields][$fid][value", $args);
+      } else {
+        $value = call_user_func($callback, $value, "fields][$fid][value");
+      }
     }
     // If we still have a value (mapping may have failed, go and save)
     if ($value) {

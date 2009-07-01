@@ -1,5 +1,5 @@
 <?php
-// $Id: notifications.module,v 1.6.2.9.2.50.2.9 2009/06/10 18:49:42 jareyero Exp $
+// $Id: notifications.module,v 1.6.2.9.2.50.2.10 2009/06/16 15:23:09 jareyero Exp $
 
 /**
  * @file
@@ -1693,7 +1693,11 @@ function notifications_subscription_form_field($type, $value = NULL) {
         $value = call_user_func($info['autocomplete callback'], $value);
       }
       elseif (!empty($info['format callback']))  {
-        $value = call_user_func($info['format callback'], $value, FALSE);
+        if (!empty($info['format callback args'])) {
+          $value = call_user_func($info['format callback'], $value, FALSE, $info['format callback args']);
+        } else {
+          $value = call_user_func($info['format callback'], $value, FALSE);
+        }
       }      
     }
   }
@@ -1759,8 +1763,12 @@ function notifications_format_subscription_field($type, $value, $html = TRUE) {
   if ($info = notifications_subscription_fields($type)) {
     $format_name = $info['name'];
     if (!empty($info['format callback'])) {
-      $format_value = call_user_func($info['format callback'], $value, $html);
-    } 
+      if (!empty($info['format callback args'])) {
+        $format_value = call_user_func($info['format callback'], $value, $html, $info['format callback args']);
+      } else {
+        $format_value = call_user_func($info['format callback'], $value, $html);
+      }
+    }
     elseif (!empty($info['options callback'])) {
       $options = call_user_func($info['options callback']);
       $format_value = isset($options[$value]) ? $options[$value] : t('Not available');
