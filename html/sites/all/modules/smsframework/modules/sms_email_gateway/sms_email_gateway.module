@@ -163,7 +163,10 @@ function sms_email_gateway_process_incoming_message($from, $to, $subject, $messa
  */
 function sms_email_gateway_send($number, $message, $options) {
   $from = !empty($options['from']) ? $options['from'] : NULL;
-  $to = $number .'@'. $options['carrier'];
+  $to = $number;
+  if (strpos($number, '@') === FALSE && isset($options['carrier'])) {
+    $to .= '@'. $options['carrier'];
+  }
   $params['message'] = $message;
   $params['options'] = $options;
   $message = drupal_mail('sms_email_gateway', 'sms', $to, language_default(), $params, $from);

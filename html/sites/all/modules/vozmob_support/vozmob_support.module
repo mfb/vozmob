@@ -44,8 +44,13 @@ function vozmob_support_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
   }
 }
 
-function messaging_mail_alter(&$message){
-    if (!empty($message['from'])){
-        $message['headers']['Return-Path'] = $message['from'];
-    }
+/**
+ * Implementation of hook_mail_alter().
+ */
+function vozmob_support_mail_alter(&$message){
+  if (!empty($message['from'])){
+    $message['headers']['Return-Path'] = $message['from'];
+  }
+  // Add some temporary debugging :P
+  watchdog('vozmob', '<pre>'.check_plain(print_r($message, TRUE)).'</pre>', NULL);
 }
