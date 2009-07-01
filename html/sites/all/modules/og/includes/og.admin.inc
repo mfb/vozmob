@@ -1,5 +1,5 @@
 <?php
-// $Id: og.admin.inc,v 1.15.4.1 2009/06/09 04:14:15 weitzman Exp $
+// $Id: og.admin.inc,v 1.15.4.2 2009/06/22 15:59:27 weitzman Exp $
 
 /**
  * Menu callback to load settings form.
@@ -12,7 +12,8 @@ function og_admin_settings() {
   }
   $form['og_settings']['content_types'] = array(
     '#type' => 'fieldset', 
-    '#title' => t('Content types'), 
+    '#title' => t('Content types'),
+    '#description' => t('You may <a href="!create">create new content types</a> as needed. Note that you may have multiple types acting as groups and multiple types are allowed as group posts.', array('!create' => url('admin/content/types/add', array('query' => drupal_get_destination())))),
     '#collapsible' => TRUE, 
     '#collapsed' => $is_configured,
   );
