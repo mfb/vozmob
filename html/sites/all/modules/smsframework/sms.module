@@ -173,16 +173,6 @@ function sms_perm() {
 }
 
 /**
- * Implementation of hook_theme().
- */
-function sms_theme() {
-  $items['sms_admin_default_form'] =
-  $items['sms_carriers_admin_form'] = array('arguments' => array('form' => NULL));
-
-  return $items;
-}
-
-/**
  * SMS gateway menutitle callback.
  */
 function sms_admin_gateway_title($gateway_id) {

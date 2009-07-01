@@ -38,6 +38,16 @@ function sms_update_1() {
 }
 
 /**
+ * Add sms_carriers table.
+ */
+function sms_update_2() {
+  $ret = array();
+  $table = drupal_get_schema_unprocessed('sms', 'sms_carriers');
+  db_create_table($ret, 'sms_carriers', $table);
+  return $ret;
+}
+
+/**
  * Implementation of hook_uninstall().
  */
 function sms_uninstall() {
