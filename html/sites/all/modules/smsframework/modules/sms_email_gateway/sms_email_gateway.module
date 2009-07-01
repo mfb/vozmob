@@ -1,5 +1,5 @@
 <?php
-// $Id: sms_email_gateway.module,v 1.4.2.2.2.6 2009/04/24 18:56:14 thehunmonkgroup Exp $
+// $Id: sms_email_gateway.module,v 1.4.2.2.2.8 2009/06/01 21:47:20 diggersf Exp $
 
 function sms_email_gateway_gateway_info() {
   return array(
@@ -18,9 +18,13 @@ function sms_email_gateway_gateway_info() {
  */
 function sms_email_gateway_send_form() {
   $options = array();
-  $providers = module_invoke_all('sms_email_gateway_providers');
-  asort($providers);
-  $options += $providers;
+  $carriers = sms_carriers();
+  
+  foreach ($carriers as $id => $carrier) {
+    if ($carrier['status']) {
+      $options[$id] = $carrier['name'];
+    }
+  }
 
   $form['carrier'] = array(
     '#type' => 'select',
@@ -55,6 +59,12 @@ function sms_email_gateway_admin_form(&$form_state) {
     '#title' => t('Default mail domain'),
     '#default_value' => variable_get('sms_email_gateway_mail_domain', 'example.com'),
     '#description' => t('Enter the default domain where the email gateway messages are received.'),
+  );
+  $form['sms_email_gateway_debug'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Enable debugging'),
+    '#default_value' => variable_get('sms_email_gateway_debug', 0),
+    '#description' => t('If enabled, records details of all incoming messages in the log files.'),
   );
 
   return system_settings_form($form);
@@ -156,6 +166,17 @@ function sms_email_gateway_process_incoming_message($from, $to, $subject, $messa
   );
 
   sms_incoming($number, $message, $options);
+
+  if (variable_get('sms_email_gateway_debug', 0)) {
+    $data = '';
+    $data .= "Number: $number \n";
+    $data .= "To: $to \n";
+    $data .= "Subject: $subject \n\n";
+    $data .= "Message: \n $message \n";
+    $data .= "Headers: \n $headers \n";
+    $data .= "Options: \n" . var_export($options, TRUE);
+    watchdog('email_gateway', "Email received from $from, details: <br /><br /><pre>". htmlentities($data)). "</pre>";
+  }
 }
 
 /**
@@ -181,72 +202,6 @@ function sms_email_gateway_send($number, $message, $options) {
 function sms_email_gateway_mail($key, &$message, &$params) {
   $message['body'] = $params['message'];
   unset($message['params']['message']);
-}
-
-/**
- * Implementation of hook_sms_email_gateway_providers()
- */
-function sms_email_gateway_sms_email_gateway_providers() {
-  return array(
-    'sms.3rivers.net' => t('3 River Wireless'),
-    'cingularme.com' => t('Cingular (GoPhone prepaid)'),
-    'airtelkk.com' => t('Airtel (Karnataka, India)'),
-    'msg.acsalaska.com' => t('Alaska Communications Systems'),
-    'message.alltel.com' => t('Alltel Wireless'),
-    'txt.att.net' => t('AT&T/Cingular'),
-    'txt.bell.ca' => t('Solo Mobile'),
-    'myboostmobile.com' => t('Boost Mobile'),
-    'mobile.celloneusa.com' => t('CellularOne'),
-    'cwemail.com' => t('Centennial Wireless'),
-    'gocbw.com' => t('Cincinnati Bell Wireless'),
-    'ideasclaro-ca.com' => t('Claro (Nicaragua)'),
-    'mms.claro.com.uy' => t('Claro (Uruguay)'),
-    'comcel.com.co' => t('Comcel'),
-    'sms.mycricket.com' => t('Cricket'),
-    'sms.ctimovil.com.ar' => t('CTI'),
-    'emtelworld.net' => t('Emtel (Mauritius)'),
-    'smsmail.eplus.de' => t('E-Plus'),
-    'fido.ca' => t('Fido (Canada)'),
-    'msg.gci.net' => t('General Communications Inc.'),
-    'msg.globalstarusa.com' => t('Globalstar'),
-    'myhelio.com' => t('Helio'),
-    'ivctext.com' => t('Illinois Valley Cellular'),
-    'sms.mymeteor.ie' => t('Meteor (Ireland)'),
-    'sms.spicenepal.com' => t('Mero Mobile (Nepal)'),
-    'mymetropcs.com' => t('MetroPCS'),
-    'mobilinkworld.com' => t('Mobilink World'),
-    'sms.mobitel.lk' => t('Mobitel (Sri Lanka)'),
-    'movimensaje.com.ar' => t('Movicom'),
-    'movistar.com.co' => t('Movistar (Colombia)'),
-    'sms.co.za' => t('MTN (South Africa)'),
-    'text.mtsmobility.com' => t('MTS (Canada)'),
-    'page.nextel.com' => t('Nextel'),
-    'nextel.net.ar' => t('Nextel (Argentina)'),
-    'orange.pl' => t('Orange (Poland)'),
-    'orange.net' => t('Orange (UK)'),
-    'personal-net.com.ar' => t('Personal (Argentina)'),
-    'text.plusgsm.pl' => t('Plus GSM (Poland)'),
-    'qwestmp.com' => t('Qwest'),
-    'pcs.rogers.com' => t('Rogers (Canada)'),
-    'sms.sasktel.com' => t('Sasktel (Canada)'),
-    'mas.aw' => t('Setar Mobile email (Aruba)'),
-    'messaging.sprintpcs.com' => t('Sprint'),
-    'tms.suncom.com' => t('Suncom'),
-    'tmomail.net' => t('T-Mobile'),
-    'sms.t-mobile.at' => t('T-Mobile (Austria)'),
-    't-mobile-sms.de' => t('T-Mobile Germany'),
-    'msg.telus.com' => t('Telus Mobility (Canada)'),
-    'sms.thumbcellular.com' => t('Thumb Cellular'),
-    'sms.tigo.com.co' => t('Tigo (Formerly Ola)'),
-    'utext.com' => t('Unicel'),
-    'email.uscc.net' => t('US Cellular'),
-    'vtext.com' => t('Verizon'),
-    'vmobile.ca' => t('Virgin Mobile (Canada)'),
-    'vmobl.com' => t('Virgin Mobile'),
-    'vodafone-sms.de' => t('Vodafone Germany'),
-    'sms.ycc.ru' => t('YCC'),
-    'vmpix.com' => t('Virgin Mobile'),
-  );
 }
 
 /**

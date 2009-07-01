@@ -1,0 +1,52 @@
+<?php
+// $Id: sms.install,v 1.8.4.2 2009/06/01 21:52:11 diggersf Exp $
+
+/**
+ * Implementation of hook_install().
+ */
+function sms_install() {
+  drupal_install_schema('sms');
+}
+
+/**
+ * Implementation of hook_schema().
+ */
+function sms_schema() {
+  $schema['sms_carriers'] = array(
+    'fields' => array(
+      'name'    => array('type' => 'varchar', 'not null' => TRUE, 'length' => 64),
+      'domain'  => array('type' => 'varchar', 'not null' => TRUE, 'length' => 128),
+    ),
+    'primary key' => array('domain'),
+  );
+
+  return $schema;
+}
+
+/**
+ * Implementation of hook_update().
+ *
+ * Drop the now dead delta field, and change primary key to number.
+ */
+function sms_update_1() {
+  $ret = array();
+  db_drop_primary_key($ret, 'sms_user');
+  db_add_primary_key($ret, 'sms_user', array('number'));
+  db_add_index($ret, 'sms_user', 'uid', array('uid'));
+  db_drop_field($ret, 'sms_user', 'delta');
+  return $ret;
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function sms_uninstall() {
+  drupal_uninstall_schema('sms');
+
+  $variables = array();
+
+  foreach ($variables as $variable) {
+    variable_del($variable);
+  }
+
+}

@@ -1,10 +1,13 @@
 <?php
-// $Id: sms_user.module,v 1.3.2.10.2.6 2009/04/27 16:24:04 diggersf Exp $
+// $Id: sms_user.module,v 1.3.2.10.2.10 2009/06/01 21:42:28 thehunmonkgroup Exp $
 
 /**
  * @file
  * Provides integration between the SMS Framework and Drupal users.
  */
+
+define('SMS_USER_PENDING', 1);
+define('SMS_USER_CONFIRMED', 2);
 
 /**
  * Send a message to a user.
@@ -23,8 +26,14 @@ function sms_user_send($uid, $message) {
 /**
  * Returns the uid of the owner of a number.
  */
-function sms_user_get_uid($number) {
-  $data = db_fetch_array(db_query("SELECT uid FROM {sms_user} WHERE number = '%s'", $number));
+function sms_user_get_uid($number, $status = NULL) {
+  $sql = "SELECT uid FROM {sms_user} WHERE number = '%s'";
+  $arguments = array($number);
+  if (isset($status)) {
+    $sql .= " AND status = %d";
+    $arguments[] = $status;
+  }
+  $data = db_fetch_array(db_query($sql, $arguments));
   return $data['uid'];
 }
 
@@ -92,10 +101,10 @@ function sms_user_settings($account) {
     case 0:
       $output = drupal_get_form('sms_user_settings_add_form', $account);
       break;
-    case 1:
+    case SMS_USER_PENDING:
       $output = drupal_get_form('sms_user_settings_confirm_form', $account);
       break;
-    case 2:
+    case SMS_USER_CONFIRMED:
       $output = drupal_get_form('sms_user_settings_reset_form', $account);
       break;
   }
@@ -171,7 +180,7 @@ function sms_user_settings_confirm_form_submit($form, &$form_state) {
   else {
     $data = array(
       'number'  => $account->sms_user['number'],
-      'status'  => 2,
+      'status'  => SMS_USER_CONFIRMED,
       'gateway' => $account->sms_user['gateway'],
     );
 
@@ -266,7 +275,7 @@ function sms_user_send_confirmation($account, $number, $options) {
   $number = sms_formatter($number);
   $data = array(
     'number'  => $number,
-    'status'  => 1,
+    'status'  => SMS_USER_PENDING,
     'code'    => $code,
     'gateway' => $options,
   );
@@ -279,7 +288,7 @@ function sms_user_validate_number(&$number) {
   if ($error = sms_validate_number($number)) {
     return $error;
   }
-  elseif (sms_user_get_uid($number)) {
+    elseif (sms_user_get_uid($number, SMS_USER_CONFIRMED)) {
     return t('This phone number is already registered to another user.');
   }
 }
@@ -332,11 +341,10 @@ function sms_user_save(&$edit, &$account, $category) {
   if (($category == 'mobile' || $category == 'account') && $edit['sms_user']) {
     $number = $edit['sms_user'];
     $db_values = array($number['number'], $number['status'], isset($number['code']) ? $number['code'] : NULL, serialize($number['gateway']));
-    if (isset($account->sms_user)) {
-      db_query("UPDATE {sms_user} SET number = '%s', status = %d, code = '%s', gateway = '%s'
+
+    db_query("UPDATE {sms_user} SET number = '%s', status = %d, code = '%s', gateway = '%s'
         WHERE uid = %d AND number = '%s'", array_merge($db_values, array($account->uid, $number['number'])));
-    }
-    else {
+    if ($number['number'] && !db_affected_rows()) {
       db_query("INSERT INTO {sms_user} (number, status, code, gateway, uid)
         VALUES ('%s', %d, '%s', '%s', %d)", array_merge($db_values, array($account->uid)));
     }
@@ -601,32 +609,9 @@ function sms_user_register_new_user($number, $message, $options) {
 
   $edit = array();
 
-  // Add password if enabled.
-  if (variable_get('sms_user_allow_password', 0)) {
-    $lines = explode("\n", $message);
-    $words = explode(" ", $lines[0]);
-    foreach ($words as $word) {
-      if (trim($word)) {
-        $edit['pass'] = preg_replace('/\s+/', '-', $word);
-        break;
-      }
-    }
-  }
-  // Auto-generated password.
-  if (!$edit['pass']) {
-    $edit['pass'] = user_password();
-  }
-
-  // Pick a pseudo-random name for the user -- using the email
-  // address would be a privacy violation.
-  $edit['name'] = substr(md5($number), 0, 10);
-
-  // Save the user.
-  $edit['status'] = variable_get('user_register', 1) == 1;
   // If we have a from address from the e-mail gateway, use it, otherwise
   // leave the e-mail fields blank.
   $mail = isset($options['sms_email_gateway_from']) ? $options['sms_email_gateway_from'] : '';
-  $edit['mail'] = $edit['init'] = $mail;
 
   // Pass in sms_user specific data for saving.
   $edit['sms_user'] = array(
@@ -636,7 +621,39 @@ function sms_user_register_new_user($number, $message, $options) {
     'gateway' => '',
   );
 
-  $account = user_save('', $edit);
+  // If by chance there's already a user with the same email address, then use
+  // it instead of creating a new user.
+  if ($mail && ($account = user_load(array('mail' => $mail)))) {
+    $account = user_save($account, $edit);
+  }
+  else {
+    $edit['mail'] = $edit['init'] = $mail;
+
+    // Add password if enabled.
+    if (variable_get('sms_user_allow_password', 0)) {
+      $lines = explode("\n", $message);
+      $words = explode(" ", $lines[0]);
+      foreach ($words as $word) {
+        if (trim($word)) {
+          $edit['pass'] = preg_replace('/\s+/', '-', $word);
+          break;
+        }
+      }
+    }
+    // Auto-generated password.
+    if (!$edit['pass']) {
+      $edit['pass'] = user_password();
+    }
+
+    // Pick a pseudo-random name for the user -- using the email
+    // address would be a privacy violation.
+    $edit['name'] = substr(md5($number . strval(time())), 0, 10);
+
+    // Save the user.
+    $edit['status'] = variable_get('user_register', 1) == 1;
+    $account = user_save('', $edit);
+  }
+
 
   // Verify that the account was created.
   if (is_object($account)) {

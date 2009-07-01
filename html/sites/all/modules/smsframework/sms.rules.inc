@@ -63,7 +63,6 @@ function sms_action_user_send($user, $message) {
 }
 
 function sms_action_match_user($number) {
-  var_dump($number);
   $uid = sms_user_get_uid($number);
   return array('user_loaded' => user_load(array('uid' => $uid)));
 }
@@ -77,9 +76,6 @@ function sms_token_values($type, $object = NULL, $options = array()) {
     foreach ($words as $key => $word) {
       $values['word-' . $key] = $word;
     }
-    
-    var_dump($values);
-    
   }
   elseif ($type == 'sms_number') {
     $values['number'] = $object;
