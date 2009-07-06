@@ -1,5 +1,5 @@
 <?php
-// $Id: admin_menu.module,v 1.43.2.17 2009/01/31 08:29:25 sun Exp $
+// $Id: admin_menu.module,v 1.43.2.18 2009/06/21 18:58:04 sun Exp $
 
 /**
  * @file
@@ -94,7 +94,7 @@ function admin_menu_init() {
     if ($setting = variable_get('admin_menu_tweak_tabs', 0)) {
       drupal_add_js(array('admin_menu' => array('tweak_tabs' => $setting)), 'setting');
     }
-    if ($_GET['q'] == 'admin/build/modules') {
+    if ($_GET['q'] == 'admin/build/modules' || strpos($_GET['q'], 'admin/build/modules/list') === 0) {
       drupal_add_js(array('admin_menu' => array('tweak_modules' => variable_get('admin_menu_tweak_modules', 0))), 'setting');
     }
   }

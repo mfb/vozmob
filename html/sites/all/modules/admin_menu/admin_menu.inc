@@ -1,5 +1,5 @@
 <?php
-// $Id: admin_menu.inc,v 1.11.2.24 2009/04/18 03:24:00 sun Exp $
+// $Id: admin_menu.inc,v 1.11.2.25 2009/06/09 18:21:29 sun Exp $
 
 /**
  * The key function that builds the menu links whenever there is a menu rebuild.
@@ -532,8 +532,8 @@ function admin_menu_flush_cache($name = NULL) {
     default:
       // Flush all caches; no need to re-implement this.
       module_load_include('inc', 'system', 'system.admin');
-      $form_state = array();
-      system_clear_cache_submit($form_state, NULL);
+      $form = $form_state = array();
+      system_clear_cache_submit($form, $form_state);
       break;
   }
   drupal_goto();

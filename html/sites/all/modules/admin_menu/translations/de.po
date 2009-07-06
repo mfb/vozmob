@@ -2,8 +2,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: admin_menu v1.x\n"
 "POT-Creation-Date: 2009-01-21 22:26+0100\n"
-"PO-Revision-Date: 2009-01-21 23:11+0100\n"
-"Last-Translator: unleashed mind <dev@unleashedmind.com>\n"
+"PO-Revision-Date: 2009-06-06 19:27+0100\n"
+"Last-Translator: Alexander Haß\n"
 "Language-Team: unleashed mind <dev@unleashedmind.com>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -44,11 +44,11 @@ msgstr "Erweiterte Einstellungen"
 
 #: admin_menu.inc:362
 msgid "Collapse fieldsets on modules page"
-msgstr "Feldgruppen auf der Seite Module zuklappen"
+msgstr "Feldgruppen auf der Modul-Seite zuklappen"
 
 #: admin_menu.inc:364
 msgid "If enabled, fieldsets on the <a href=\"!modules-url\">modules</a> page are automatically collapsed when loading the page."
-msgstr "Falls aktiviert, werden Feldgruppen auf der Seite <a href=\"!modules-url\">Module</a> beim Laden automatisch zugeklappt."
+msgstr "Falls aktiviert, werden Feldgruppen auf der <a href=\"!modules-url\">Modul</a>-Seite beim Laden automatisch zugeklappt."
 
 #: admin_menu.inc:367
 msgid "If the Utility module was installed for this purpose, it can be safely disabled and uninstalled."
@@ -132,7 +132,7 @@ msgstr "Die <a href=\"@settings\">Einstellungsseite</a> des Administrationsmenü
 
 #: admin_menu.module:22
 msgid "The menu items displayed in the administration menu depend upon the actual permissions of the viewer. First, the administration menu is only displayed to users in roles with the <em>Access administration menu</em> (admin_menu module) permission. Second, a user must be a member of a role with the <em>Access administration pages</em> (system module) permission to view administrative links. And, third, only currently permitted links are displayed; for example, if a user is not a member of a role with the permissions <em>Administer permissions</em> (user module) and <em>Administer users</em> (user module), the <em>User management</em> menu item is not displayed."
-msgstr "Die angezeigten Menüpunkte hängen von den tatsächlichen Berechtigungen des Benutzers ab. Zum einen wird das Administrationsmenü nur für Benutzern mit der Berechtigung <em>Zugriff auf das Administrationsmenü</em> (admin_menu module) angezeigt. Zum anderen muss der Benutzer die Berechtigung <em>Zugriff auf den Verwaltungsbereich</em> (system module) besitzen um die administrativen Links zu sehen. Ferner werden ausschließlich erlaubte Links angezeigt; zum Beispiel, wenn ein Benutzer nicht in einer Rolle mit den Berechtigungen <em>Berechtigungen verwalten</em> (user module) und <em>Benutzer verwalten</em> (user module) ist, dann wird der Menüpunkt <em>Benutzerverwaltung</em> nicht angezeigt."
+msgstr "Die angezeigten Menüpunkte hängen von den tatsächlichen Berechtigungen des Benutzers ab. Zum einen wird das Administrationsmenü nur Benutzern mit der Berechtigung <em>Zugriff auf das Administrationsmenü</em> (admin_menu module) angezeigt. Zum anderen muss der Benutzer die Berechtigung <em>Zugriff auf den Verwaltungsbereich</em> (system module) besitzen, um die administrativen Links zu sehen. Ferner werden ausschließlich erlaubte Links angezeigt; zum Beispiel, wenn ein Benutzer nicht in einer Rolle mit den Berechtigungen <em>Berechtigungen verwalten</em> (user module) und <em>Benutzer verwalten</em> (user module) ist, dann wird der Menüpunkt <em>Benutzerverwaltung</em> nicht angezeigt."
 
 #: admin_menu.module:306
 msgid "Current anonymous / authenticated users"
@@ -154,7 +154,8 @@ msgstr "Zugriff auf das Administrationsmenü"
 msgid "display drupal links"
 msgstr "Links zu drupal.org anzeigen"
 
-#: admin_menu.module:54 admin_menu.info:0
+#: admin_menu.module:54
+#: admin_menu.info:0
 msgid "Administration menu"
 msgstr "Administrationsmenü"
 
