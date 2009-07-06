@@ -38,8 +38,10 @@ function messaging_mms_send_msg($destination, $message, $params = array()) {
   module_load_include('mail.inc', 'messaging');
   // Get parameters without invoking hook_mail_alter()
   $mail = messaging_mail_prepare($destination, $message, $params, FALSE);
-  // Add e-mail gateway to destination.
-  $mail['to'] .= '@' . mms_email_gateway_rewrite_to_mms($params['carrier']);
+  if (strpos($number, '@') === FALSE && isset($options['carrier'])) {
+    // Add e-mail gateway to destination.
+    $mail['to'] .= '@'. mms_email_gateway_rewrite_to_mms($params['carrier']);
+  }
   // mimemail($sender, $recipient, $subject, $body, $plaintext = NULL, $headers = array(), $text = NULL, $attachments = array(), $mailkey = '')
   return mimemail($mail['from'], $mail['to'], $mail['subject'], $mail['body'], TRUE, $mail['headers'], NULL, $mail['attachments'], '');
 }
