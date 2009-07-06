@@ -33,7 +33,7 @@ function sms_registration_mail_alter(&$message) {
  * create a user account.
  */
 function sms_registration_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
-    watchdog('debug','going into sms_registratino mailsave clean');
+   // watchdog('debug','going into sms_registratino mailsave clean');
     
   // Ignore empty messages.
   if (empty($node)) {
@@ -64,13 +64,21 @@ function sms_registration_mailsave_clean(&$node, $result, $i, $header, $mailbox)
         mailhandler_switch_user($node->uid);
       }
 
-      list($to_address, $to_name) = sms_registration_get_toaddress($header, $mailbox);
-      $to  = explode('@', $to_address);
+      //list($to_address, $to_name) = sms_registration_get_toaddress($header, $mailbox);
+	$to_address = sms_registration_get_toaddress($header, $mailbox);
+/*
+watchdog('debug','Donde falla el $to: ');
+      watchdog('debug',print_r($to_address, TRUE));
+watchdog('debug',print_r($header, TRUE));
+watchdog('debug',print_r($mailbox, TRUE));
+*/
+      //$to  = explode('@', $to_address);
       $email_registration_accounts = variable_get('sms_registration_address', '');
-      watchdog('debug','this the email registration 1 and to');
+     /* watchdog('debug','this the email registration 1 and to');
       watchdog('debug',print_r($email_registration_accounts, TRUE));
-      watchdog('debug',print_r($to, TRUE));
-
+      watchdog('debug',print_r($to_address, TRUE));
+      watchdog('debug', print_r(isset($email_registration_accounts[$to]), TRUE));
+      */
       // If message is from an SMS/MMS gateway, create a user account.
       if (!$node->uid) {
         $user = FALSE;
@@ -89,8 +97,8 @@ function sms_registration_mailsave_clean(&$node, $result, $i, $header, $mailbox)
         $node->name = $user->name;
         mailhandler_switch_user($node->uid);
       
-        if ($email_registration_accounts != $to[0]) { //isset($email_registration_accounts[$to[0]])
-            watchdog('debug','AAAAAAAAAAAAAAAAAAAACA ENVIANDO MENSAJE');
+
+        if (!isset($email_registration_accounts[$to])) { //$email_registration_accounts == $to_address) {
           $message = t('Thanks! Do you want to have a blog in vozmob? If yes please send one word identifying the blog.');
           $options = array('carrier' => $from[1], 'from' => variable_get('sms_registration_address', ''), 'subject' => t('Media posted'), 'action' => 'registration');
           sms_send($number, $message, $options);
@@ -100,7 +108,7 @@ function sms_registration_mailsave_clean(&$node, $result, $i, $header, $mailbox)
 
 
       // If user has authenticated via mobile number and message was sent to a registration address.
-      if ((!empty($account->uid)) && ($email_registration_accounts == $to[0])) {  //isset($email_registration_accounts[$to[0]])) {
+      if ((!empty($account->uid)) && (isset($email_registration_accounts[$to]))) {
         $username =  trim($node->body);
         //if it comes from a valid sms email gateway and it was sent to one of the email registration accounts
         $password = user_password(8);
@@ -124,12 +132,17 @@ function sms_registration_mailsave_clean(&$node, $result, $i, $header, $mailbox)
  * Return the "To: " address from the received email message.
  */
 function sms_registration_get_toaddress($header, $mailbox) {
-  if (($toheader = strtolower($mailbox['mailto'])) && isset($header->$toheader)) {
+  /*if (($toheader = strtolower($mailbox['mailto'])) && isset($header->$toheader)) {
     $to = $header->$toheader;
   }
   else {
     $from = $header->to;
   }
-  
-  return array($to[0]->mailbox .'@'. $to[0]->host, $to[0]->personal);
+  */
+
+  $to = $mailbox[mail];
+
+//watchdog('debug',print_r($to, TRUE));
+  return $to;
+//  return array($to[0]->mailbox .'@'. $to[0]->host, $to[0]->personal);
 }
