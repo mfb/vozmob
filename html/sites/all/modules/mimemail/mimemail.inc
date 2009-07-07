@@ -1,5 +1,5 @@
 <?php
-/* $Id: mimemail.inc,v 1.31.2.2 2009/02/22 01:58:24 jerdavis Exp $ */
+/* $Id: mimemail.inc,v 1.31.2.3 2009/04/14 23:08:59 jerdavis Exp $ */
 
 /**
  * @file
@@ -108,6 +108,7 @@ function mimemail_extract_files($html) {
  */
 function _mimemail_file($url = NULL, $name = '', $type = '', $disposition = 'related') {
   static $files = array();
+  static $filenames = array();
 
   if ($url) {
     $url = _mimemail_url($url, 'TRUE');
@@ -123,6 +124,9 @@ function _mimemail_file($url = NULL, $name = '', $type = '', $disposition = 'rel
   }
 
   if ($file && file_exists($file)) {
+    // Prevent duplicate items
+    if (isset($filenames[$file])) return 'cid:'. $filenames[$file];
+    
     $content_id = md5($file) .'@'. $_SERVER['HTTP_HOST'];
 
     if (!$name) $name = substr($file, strrpos($file, '/') + 1);
@@ -133,9 +137,10 @@ function _mimemail_file($url = NULL, $name = '', $type = '', $disposition = 'rel
       'Content-ID' => $content_id,
       'Content-Disposition' => $disposition,
     );
-    $new_file['Content-Type'] = _mimemail_mimetype($file, $type);
+    $new_file['Content-Type'] = file_get_mimetype($file);
 
     $files[] = $new_file;
+    $filenames[$file] = $content_id;
 
     return 'cid:'. $content_id;
   }
@@ -228,7 +233,7 @@ function mimemail_multipart_body($parts, $content_type = 'multipart/mixed; chars
       }
 
       if (!isset($part['Content-Type'])) {
-        $part['Content-Type'] = _mimemail_mimetype($part['file'], $type);
+        $part['Content-Type'] = file_get_mimetype($part['file']);
       }
 
       if (isset($part['name'])) {
@@ -523,35 +528,55 @@ function _mimemail_url($url, $embed_file = NULL) {
 }
 
 /**
- * Attempt to determine the mimetime from or filename .  While not ideal,
- * using the filename as a fallback ensures that images will appear inline
- * in HTML messages
+ * Formats an address string.
+ * TODO could use some enhancement and stress testing.
  *
- * @param $name Name of the file
- *
- * @return best-guess mimetype string
+ * @param $address
+ *   A user object, a text email address or an array containing name, mail.
+ * @return
+ *   A formatted address string or FALSE.
  */
-function _mimemail_mimetype($file, $type = '') {
-  if ($type) {
-    return $type;
+function mimemail_address($address) {
+
+  if (is_array($address)) {
+
+    // it's an array containing 'mail' and/or 'name'
+    if (isset($address['mail'])) {
+      $output = '';
+      if (empty($address['name'])) {
+        return $address['mail'];
+      }
+      else {
+        return '"'. addslashes(mime_header_encode($address['name'])) .'" <'. $address['mail'] .'>';
+      }
+    }
+
+    // it's an array of address items
+    $addresses = array();
+    foreach ($address as $a) {
+      $addresses[] = mimemail_address($a);
+    }
+    return $addresses;
   }
 
-  if (function_exists('mime_content_type')) {
-      return mime_content_type($file);
+  // it's a user object
+  if (is_object($address) && isset($address->mail)) {
+    return '"'. addslashes(mime_header_encode($address->name)) .'" <'. $address->mail .'>';
   }
 
-  // some common embedded/attachment types
-  $types = array(
-    'jpg'  => 'image/jpeg',
-    'jpeg' => 'image/jpeg',
-    'gif'  => 'image/gif',
-    'png'  => 'image/png',
-  );
-  $ext = strtolower(substr(strrchr($file, '.'), 1));
-
-  if (isset($types[$ext])) {
-    return $types[$ext];
+  // it's formatted or unformatted string
+  // TODO shouldn't assume it's valid - should try to re-parse
+  if (is_string($address)) {
+    return $address;
   }
 
-  return 'application/octet-stream';
+  // it's null.  return the site default address
+  if (is_null($address)) {
+    return array(
+      'name' => mime_header_encode(variable_get('site_name', 'Drupal')),
+      'mail' => variable_get('site_mail', ini_get('sendmail_from')),
+    );
+  }
+
+  return FALSE;
 }

@@ -519,6 +519,10 @@ function _messaging_sendto_compose($method, $destination, $values, $preview = FA
       $message['files'][$file['fid']] = (object) $file;
     }
   }
+  // Add node object for later message altering purposes.
+  if (!empty($values['node'])) {
+    $message['params']['node'] = $values['node'];
+  }
   // Compose message text. Do all this in one replacement
   // Hidden feature: token replacement on custom text
   $text = array(

@@ -1,4 +1,4 @@
-<?php /* $Id: mimemail.module,v 1.31.2.2 2009/02/22 01:58:24 jerdavis Exp $ */
+<?php /* $Id: mimemail.module,v 1.31.2.3 2009/04/14 23:08:59 jerdavis Exp $ */
 
 /**
  * @file
@@ -9,129 +9,25 @@
  * Implementation of hook_menu()
  */
 function mimemail_menu() {
+  $path = drupal_get_path('module', 'mimemail') .'/includes';
   $items['admin/settings/mimemail'] = array(
     'title' => 'Mime Mail',
     'description' => 'HTML E-mail settings',
     'page callback' => 'drupal_get_form',
-    'page arguments' => array('mimemail_settings'),
+    'page arguments' => array('mimemail_admin_settings'),
     'access arguments' => array('administer site configuration'),
     'type' => MENU_NORMAL_ITEM,
+    'file' => 'mimemail.admin.inc',
+    'file path' => $path,
   );
   $items['mimemail'] = array(
     'page callback' => 'mimemail_post',
     'access callback' => variable_get('mimemail_incoming', FALSE),
     'type' => MENU_CALLBACK,
+    'file' => 'mimemail.incoming.inc',
+    'file path' => $path,
   );
   return $items;
-}
-
-/**
- * Administration settings.
- *
- * @return
- *   The administration from.
- */
-function mimemail_settings() {
-
-  // override the smtp_library value if mimemail is chosen to handle all mail
-  // this will cause drupal_mail to call mimemail()
-  if (variable_get('mimemail_alter', 0)) {
-    if (!strpos(variable_get('smtp_library', ''), 'mimemail')) {
-      variable_set('smtp_library', drupal_get_filename('module', 'mimemail'));
-    }
-  }
-  else {
-    if (strpos(variable_get('smtp_library', ''), 'mimemail')) {
-      db_query("DELETE FROM {variable} WHERE name = 'smtp_library'");
-    }
-  }
-
-  $engines = mimemail_get_engines();
-
-  $form = array();
-  $form['site_mail'] = array(
-    '#type'          => 'textfield',
-    '#title'         => t('E-mail address'),
-    '#default_value' => variable_get('site_mail', ini_get('sendmail_from')),
-    '#size'          => 60,
-    '#maxlength'     => 128,
-    '#description'   => t('A valid e-mail address for this website, used by the auto-mailer during registration, new password requests, notifications, etc.')
-  );
-  $form['mimemail']['mimemail_alter'] = array(
-    '#type'          => 'checkbox',
-    '#title'         => t('Use mime mail for all messages'),
-    '#default_value' => variable_get('mimemail_alter', 0),
-    '#description'   => t('Use the mime mail module to deliver all site messages.  With this option, system emails will have styles and formatting'),
-  );
-
-  $filter_format = variable_get('mimemail_format', FILTER_FORMAT_DEFAULT);
-  $form['mimemail']['mimemail_format'] =  filter_form($filter_format, NULL, array("mimemail_format"));
-
-  $form['mimemail']['mimemail_textonly'] = array(
-    '#type'          => 'checkbox',
-    '#title'         => t('Plaintext email only'),
-    '#default_value' => variable_get('mimemail_textonly', 0),
-    '#description'   => t('This option disables the use of email messages with graphics and styles.  All messages will be converted to plain text.'),
-  );
-
-  $form['mimemail']['incoming'] = array(
-    '#type'          => 'fieldset',
-    '#title'         => t('Advanced Settings'),
-    '#collapsible'   => TRUE,
-    '#collapsed'     => TRUE,
-  );
-  $form['mimemail']['incoming']['mimemail_incoming'] = array(
-    '#type'          => 'checkbox',
-    '#title'         => t('Process incoming messages posted to this site'),
-    '#default_value' => variable_get('mimemail_incoming', 0),
-    '#description'   => t('This is an advanced setting that should not be enabled unless you know what you are doing'),
-  );
-  $form['mimemail']['incoming']['mimemail_key'] = array(
-    '#type'          => 'textfield',
-    '#title'         => t('Message validation string'),
-    '#default_value' => variable_get('mimemail_key', md5(rand())),
-    '#required'      => TRUE,
-    '#description'   => t('This string will be used to validate incoming messages.  It can be anything, but must be used on both sides of the transfer'),
-  );
-
-  // hide the settings if only 1 engine is available
-  if (count($engines) == 1) {
-    variable_set('mimemail_engine', key($engines));
-    $form['mimemail_engine'] = array(
-        '#type'          => 'hidden',
-        '#title'         => t('E-mail engine'),
-        '#default_value' => variable_get('mimemail_engine', 'mail'),
-        '#options'       => $engines,
-        '#description'   => t('Choose an e-mail engine for sending mails from your site.')
-    );
-  }
-  else {
-    $form['mimemail_engine'] = array(
-        '#type'          => 'select',
-        '#title'         => t('E-mail engine'),
-        '#default_value' => variable_get('mimemail_engine', 'mail'),
-        '#options'       => $engines,
-        '#description'   => t('Choose an e-mail engine for sending mails from your site.')
-    );
-  }
-
-  if (variable_get('mimemail_engine', 0)) {
-    $settings = module_invoke(variable_get('mimemail_engine', 'mail'), 'mailengine', 'settings');
-    if ($settings) {
-        $form['mimemail_engine_settings'] = array(
-          '#type'        => 'fieldset',
-          '#title'       => t('Engine specific settings'),
-      );
-      foreach ($settings as $name => $value) {
-        $form['mimemail_engine_settings'][$name] = $value;
-      }
-    }
-  }
-  else {
-    drupal_set_message(t('Please choose a mail engine.'), 'error');
-  }
-
-  return system_settings_form($form);
 }
 
 /**
@@ -197,8 +93,7 @@ function mimemail_user($op, &$edit, &$account, $category = '') {
  *   An array containing the MIME encoded message, including headers and body.
  */
 function mimemail_prepare($sender, $recipient, $subject, $body, $plaintext = NULL, $headers = array(), $text = NULL, $attachments = array(), $mailkey = '') {
-
-  require_once dirname(__FILE__) .'/mimemail.inc';
+  module_load_include('inc', 'mimemail');
 
   if (is_null($sender)) {        // use site default for sender
     $sender = array(
@@ -222,10 +117,15 @@ function mimemail_prepare($sender, $recipient, $subject, $body, $plaintext = NUL
     }
   }
   $subject = mime_header_encode(drupal_html_to_text($subject));
+  $body = theme('mimemail_message', $body, $mailkey);
+  foreach (module_implements('mail_post_process') as $module) {
+    $function = $module .'_mail_post_process';
+    $function($body, $mailkey);
+  }
 
   $plaintext = $plaintext || variable_get('mimemail_textonly', 0);
   $sender    = mimemail_address($sender);
-  $mail      = mimemail_html_body(theme('mimemail_message', $body, $mailkey), $subject, $plaintext, $text, $attachments);
+  $mail      = mimemail_html_body($body, $subject, $plaintext, $text, $attachments);
   $headers   = array_merge($headers, $mail['headers']);
   $message   = array(
     'address' => mimemail_address($recipient),
@@ -333,14 +233,27 @@ function mimemail_mailengine($op, $message = array()) {
         $message['address'] = array($message['address']);
       }
       $status = TRUE;
+      if (variable_get('mimemail_envelope_sender', 0) && !ini_get('safe_mode') && isset($message['headers']['Return-Path'])) {
+        $additional_parameters = '-f'. $message['headers']['Return-Path'];
+      }
       foreach ($message['address'] as $a) {
-        $status = mail(
-          $a,
-          $message['subject'],
-          $message['body'],
-          mimemail_rfc_headers($message['headers'])
-        ) && $status;
-
+        if (isset($additional_parameters)) {
+          $status = mail(
+            $a,
+            $message['subject'],
+            $message['body'],
+            mimemail_rfc_headers($message['headers']),
+            $additional_parameters
+          ) && $status;
+        }
+        else {
+          $status = mail(
+            $a,
+            $message['subject'],
+            $message['body'],
+            mimemail_rfc_headers($message['headers'])
+          ) && $status;
+        }
       }
       return $status;
   }
@@ -387,163 +300,49 @@ if (strpos(variable_get('smtp_library', ''), 'mimemail')
 }
 
 /**
- * Receive messages POSTed from an external source.
- *
- * This function enables messages to be sent via POST or some other RFC822
- * source input (e.g. directly from a mail server).
- *
- * @return
- *   The POSTed message.
- */
-function mimemail_post() {
-  $message = $_POST['message'];
-  $token   = $_POST['token'];
-  $hash    = md5(variable_get('mimemail_key', '**') . $message );
-
-  if ($hash != $token) {
-    watchdog('access denied', 'Authentication error for POST e-mail', WATCHDOG_WARNING);
-    return drupal_access_denied();
-  }
-  return mimemail_incoming($message);
-}
-
-/**
- * Parses an externally received message.
- *
- * @param $message
- *   The message to parse.
- */
-function mimemail_incoming($message) {
-  require_once dirname(__FILE__) .'/mimemail.inc';
-  $mail = mimemail_parse($message);
-
-  foreach (module_implements('mimemail_incoming_alter') as $module) {
-    call_user_func_array($module .'_mimemail_incoming_alter', $mail);
-  }
-
-  module_invoke_all('mimemail_incoming', $mail);
-}
-
-/**
- * Formats an address string.
- * TODO could use some enhancement and stress testing.
- *
- * @param $address
- *   A user object, a text email address or an array containing name, mail.
- * @return
- *   A formatted address string or FALSE.
- */
-function mimemail_address($address) {
-
-  if (is_array($address)) {
-
-    // it's an array containing 'mail' and/or 'name'
-    if (isset($address['mail'])) {
-      $output = '';
-      if (empty($address['name'])) {
-        return $address['mail'];
-      }
-      else {
-        return '"'. addslashes(mime_header_encode($address['name'])) .'" <'. $address['mail'] .'>';
-      }
-    }
-
-    // it's an array of address items
-    $addresses = array();
-    foreach ($address as $a) {
-      $addresses[] = mimemail_address($a);
-    }
-    return $addresses;
-  }
-
-  // it's a user object
-  if (is_object($address) && isset($address->mail)) {
-    return '"'. addslashes(mime_header_encode($address->name)) .'" <'. $address->mail .'>';
-  }
-
-  // it's formatted or unformatted string
-  // TODO shouldn't assume it's valid - should try to re-parse
-  if (is_string($address)) {
-    return $address;
-  }
-
-  // it's null.  return the site default address
-  if (is_null($address)) {
-    return array(
-      'name' => mime_header_encode(variable_get('site_name', 'Drupal')),
-      'mail' => variable_get('site_mail', ini_get('sendmail_from')),
-    );
-  }
-
-  return FALSE;
-}
-
-/**
  * Implementation of hook_theme().
  */
 function mimemail_theme() {
+  $path = drupal_get_path('module', 'mimemail') .'/theme';
+
   return array(
     'mimemail_message' => array(
-      'arguments' => array('body' => NULL, 'mailkey' => NULL)
+      'arguments' => array('body' => NULL, 'mailkey' => NULL),
+      'template' => 'mimemail',
+      'pattern' => 'mimemail__',
+      'path' => $path,
     )
   );
 }
 
 /**
- * Themes the message body.
+ * A preprocess function for theme('mimemail_message').
  *
- * @param $body
- *   The message body to theme.
- * @param $mailkey
- *   An identifier for the message.
- * @return
- *   The themed HTML message body.
+ * The $variables array initially contains the following arguments:
+ * - $body:  The message body
+ * - $mailkey:  The mailkey associated with the message
+ *
+ * See includes/mimemail.tpl.php for additional variables
  */
-function theme_mimemail_message($body, $mailkey = NULL) {
-  //require_once drupal_get_path('module','mimemail') .'/mimemail_css_combine.inc';
-  // attempt to include a mail-specific version of the css.
-  // if you want smaller mail messages, add a mail.css file to your theme
-  $theme  = variable_get('theme_default', NULL);
+function template_preprocess_mimemail_message(&$variables) {
+  $theme = variable_get('theme_default', NULL);
 
-  // If we have a $mailkey, check for a mailkey-specific style sheet and
-  // set it as a class for <body>.
-  if ($mailkey) {
-    $key = check_plain($mailkey);
-    $key = str_replace(' ','-', trim($key));
-    print_r($key); die;
-    $styles = drupal_get_path('theme', $theme) .'/mail-'. $key .'.css';
-    $class  = ' class="mail-'. $key .'"';
-  }
+  // Check for the existence of a mail.css file in the current theme folder
   if (!file_exists($styles)) {
     $styles = drupal_get_path('theme', $theme) .'/mail.css';
   }
 
+  // If no mail.css was found, gather all style sheets
   if (!file_exists($styles)) {
     // embed a version of all style definitions
-    $styles = preg_replace('|<link.*href="'. base_path() .'([^"?]*)[?"].*|', '\1', drupal_get_css());
+    $styles = preg_replace('|<link.*href="'. base_path()
+                           .'([^"?]*)[?"].*|', '\1', drupal_get_css());
   }
+
+  // Process each style sheet
   foreach (explode("\n", $styles) as $style) {
     if (file_exists($style)) $css .= file_get_contents($style);
   }
 
-  $html  = '<html><head>';
-  $html .= '<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />';
-
-  if (module_exists('mimemail_css_combiner')) {
-    $css = preg_replace('|\{|',"\n{\n", $css);
-    $css = preg_replace('|\}|',"\n}\n", $css);
-    $html .= '</head><body id="mimemail-body"'. $class .'><div id="center">';
-    $html .= '<div id="main">'. $body .'</div></div></body></html>';
-    $html = preg_replace('|</p>|','',$html);
-    $output = new mimemail_css_combiner($html, $css);
-    $output = $output->combine();
-  }
-  else {
-    $html .= '<style type="text/css"><!--'. $css .'--></style>';
-    $html .= '</head><body id="mimemail-body"><div id="center">';
-    $html .= '<div id="main">'. $body .'</div></div></body></html>';
-    $output = $html;
-  }
-
-  return $output; // preg_replace('/\s+|\n|\r|^\s|\s$/', ' ', $output);
+  $variables['css'] = str_replace(' ','', str_replace("\n", '', $css));
 }
