@@ -1,0 +1,35 @@
+
+#bot-log-day tr.even,
+#bot-log-day tr.odd {
+  background-color: transparent;
+}
+
+#bot-log-day tr.bot-log-none {
+  background-color: #edf5fa;
+}
+
+#bot-log-day tr.bot-log-nick-odd {
+  background-color: #edf5fa;
+}
+
+#bot-log-day .bot-log-action {
+  color: green;
+}
+
+#bot-log-day .bot-log-status {
+  color: red;
+}
+
+#bot-log-filter-form {
+  margin-bottom: 1em !important;
+  margin-top: 1em;
+}
+
+#bot-log-filter-form .container-inline .container-inline {
+  margin-left: 1em;
+}
+
+#bot-log-filter-form #edit-bot-log-submit {
+  margin: 0;
+  margin-right: 1em;
+}

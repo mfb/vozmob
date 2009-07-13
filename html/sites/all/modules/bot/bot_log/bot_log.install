@@ -1,0 +1,85 @@
+<?php
+// $Id: bot_log.install,v 1.1.2.3.2.2 2009/03/05 14:02:37 morbus Exp $
+
+/**
+ * Implementation of hook_schema().
+ */
+function bot_log_schema() {
+  $schema['bot_log'] = array(
+    'description' => t('The single table necessary for IRC channel logging.'),
+    'fields' => array(
+      'id' => array(
+        'description' => t('A unique ID for this log message, across all channels.'),
+        'not null'    => TRUE,
+        'size'        => 'big',
+        'type'        => 'serial',
+        'unsigned'    => TRUE,
+      ),
+      'type' => array(
+        'default'     => 0,
+        'description' => t('The message ID value, as provided by Net_SmartIRC.'),
+        'not null'    => TRUE,
+        'type'        => 'int',
+      ),
+      'timestamp' => array(
+        'default'     => 0,
+        'description' => t('The Unix timestamp when this log message occurred.'),
+        'not null'    => TRUE,
+        'type'        => 'int',
+        'unsigned'    => TRUE,
+      ),
+      'channel' => array(
+        'default'     => '',
+        'description' => t('The IRC channel or channels where this log message occurred.'),
+        'length'      => 255,
+        'not null'    => TRUE,
+        'type'        => 'varchar',
+      ),
+      'nick' => array(
+        'default'     => '',
+        'description' => t('The IRC user that caused this log message to occur.'),
+        'length'      => 60,
+        'not null'    => TRUE,
+        'type'        => 'varchar',
+      ),
+      'message' => array(
+        'default'     => '',
+        'description' => t('The log message itself.'),
+        'not null'    => TRUE,
+        'type'        => 'text',
+      ),
+    ),
+    'primary key' => array('id'),
+  );
+
+  return $schema;
+}
+
+/**
+ * Implementation of hook_install().
+ */
+function bot_log_install() {
+  drupal_install_schema('bot_log');
+
+  // if we don't set the logging module first, then we'll get into situations
+  // where a bot factoid response will log BEFORE the actual factoid trigger.
+  db_query("UPDATE {system} SET weight = -10 WHERE name = 'bot_log'");
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function bot_log_uninstall() {
+  drupal_uninstall_schema('bot_log');
+  variable_del('bot_log_channels');
+  variable_del('bot_log_dont_change_the_content');
+}
+
+/**
+ * Add index to 'timestamp'.
+ */
+function bot_log_update_6100() {
+  $ret = array(); // mah server was getting creamed with logs.
+  db_add_index($ret, 'bot_log', 'timestamp', array('timestamp'));
+  return $ret;
+}

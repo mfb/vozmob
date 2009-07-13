@@ -1,0 +1,5 @@
+
+/*  long titles can cause Last Seen to wrap - force a width for 'em.  */
+#project_urls_popular .last_seen, #project_urls_recent .last_seen {
+  width: 165px;
+}

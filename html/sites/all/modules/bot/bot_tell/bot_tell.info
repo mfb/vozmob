@@ -1,0 +1,6 @@
+; $Id: bot_tell.info,v 1.1.2.1 2008/07/11 02:47:30 morbus Exp $
+name = Bot Tell
+package = Bot
+description = "Enables queued messages for unavailable users."
+dependencies[] = bot
+core = 6.x

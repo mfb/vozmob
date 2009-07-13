@@ -1,0 +1,63 @@
+<?php
+// $Id: bot_tell.install,v 1.1.2.1 2008/07/11 02:47:30 morbus Exp $
+
+/**
+ * Implementation of hook_schema().
+ */
+function bot_tell_schema() {
+  $schema['bot_tell_queue'] = array(
+    'description' => t('The single table necessary for message storage.'),
+    'fields' => array(
+      'mid' => array(
+        'description' => t('A unique ID for this message.'),
+        'not null'    => TRUE,
+        'type'        => 'serial',
+        'unsigned'    => TRUE,
+      ),
+      'author' => array(
+        'default'     => '',
+        'description' => t('The IRC user that is writing this message to another user.'),
+        'length'      => 60,
+        'not null'    => TRUE,
+        'type'        => 'varchar',
+      ),
+      'recipient' => array(
+        'default'     => '',
+        'description' => t('The IRC user who is to be delivered the message.'),
+        'length'      => 60,
+        'not null'    => TRUE,
+        'type'        => 'varchar',
+      ),
+      'message' => array(
+        'default'     => '',
+        'description' => t('The entirety of the message being sent.'),
+        'not null'    => TRUE,
+        'type'        => 'text',
+      ),
+      'timestamp' => array(
+        'default'     => 0,
+        'description' => t('The Unix timestamp when this message was queued.'),
+        'not null'    => TRUE,
+        'type'        => 'int',
+        'unsigned'    => TRUE,
+      ),
+    ),
+    'primary key' => array('mid'),
+  );
+
+  return $schema;
+}
+
+/**
+ * Implementation of hook_install().
+ */
+function bot_tell_install() {
+  drupal_install_schema('bot_tell');
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function bot_tell_uninstall() {
+  drupal_uninstall_schema('bot_tell');
+}

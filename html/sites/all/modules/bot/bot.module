@@ -1,0 +1,355 @@
+<?php
+// $Id: bot.module,v 1.9.2.9.2.15 2009/05/08 17:13:16 morbus Exp $
+
+/**
+ * @file
+ * Enables a network and plugin framework for IRC bots.
+ */
+
+/**
+ * Implementation of hook_help().
+ */
+function bot_help($path, $arg) {
+  switch ($path) {
+    case 'bot':
+      return '<p>' . t('Listed here are the bot\'s enabled features and settings. Information about the bot\'s features is also available by asking it directly for "help", and then for more detail with "help &lt;feature&gt;" (such as "help Project URLs"). This would best be done in a private message, so as not to disrupt regular channel activity.') . '</p>';
+    case 'admin/settings/bot':
+      return '<p>' . t('Configure your bot framework with these settings.') . '</p>';
+  }
+}
+
+/**
+ * Implementation of hook_perm().
+ */
+function bot_perm() {
+  return array('administer bot');
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+function bot_menu() {
+  $items['bot'] = array(
+    'access arguments'  => array('access content'),
+    'description'       => "View the bot's enabled features and settings.",
+    'page callback'     => 'bot_overview',
+    'title'             => 'Bot',
+  );
+  $items['admin/settings/bot'] = array(
+    'access arguments'  => array('administer bot'),
+    'description'       => 'Configure your bot framework with these settings.',
+    'page callback'     => 'drupal_get_form',
+    'page arguments'    => array('bot_settings'),
+    'title'             => 'Bot',
+  );
+
+  return $items;
+}
+
+/**
+ * Displays a quick page listing all the enabled features of the bot.
+ *
+ * This is a wrapper around the IRC help features, and spits those helps
+ * verbatim (meaning URLs won't be linked, etc.). @todo Someday, urlfilter.
+ */
+function bot_overview() {
+  $output = '<p>' . t('The bot connects to server %server as nick %name.', array('%server' => variable_get('bot_server', 'irc.freenode.net'), '%name' => variable_get('bot_nickname', 'bot_module'))) . '</p>';
+  $output .= '<ul id="bot_features">'; // witness this incredibly long line above this equally long, but mirthfully useless, comment! ha ha!
+
+  $irc_features = array_filter(module_invoke_all('help', 'irc:features', NULL));
+  asort($irc_features); // alphabetical listing of all features. the machete is family.
+  foreach ($irc_features as $irc_feature) {
+    $feature_help = array_filter(module_invoke_all('help', 'irc:features#' . preg_replace('/[^\w\d]/', '_', drupal_strtolower(trim($irc_feature))), NULL));
+    $output .= '<li><strong>' . check_plain($irc_feature) . ':</strong> ' . check_plain(array_shift($feature_help)) . '</li>';
+  }
+
+  $output .= '</ul>';
+  return $output;
+}
+
+/**
+ * Run an IRC-only crontab every five minutes.
+ */
+function bot_irc_bot_cron() {
+  // recreates the variable cache.
+  variable_set('bot_cache_cleared', time());
+  $GLOBALS['conf'] = variable_init();
+
+  // attempt to always be the nick configured...
+  bot_name_check(); // ...in our settings.
+}
+
+/**
+ * Run an IRC-only crontab every 15 seconds.
+ */
+function bot_irc_bot_cron_fastest() {
+  // When the bot has a number of channels to join (nearing 20+), the initial
+  // connection handshake, where it retrieves information about every user in
+  // every channel, can cause it to overload and disconnect. To solve this,
+  // we join channels every 15 seconds instead, which gives some breathing
+  // room for the nick caching to take place. A nice side-effect of this is
+  // that if the bot errors out of a channel, or a new channel is added to
+  // the list, it'll automatically (re)connect without needing a restart.
+  global $irc;
+
+  // to support passwords, we have to make a single join per channel.
+  $channels = preg_split('/\s*,\s*/', variable_get('bot_channels', '#test'));
+
+  foreach ($channels as $channel) { // for every one we're configured to join...
+    $channel_parts = explode(' ', $channel); // passwords are space-separated on list.
+    if (!$irc->channel($channel_parts[0])) { // ... check to see if we're in it. if not...
+      $irc->join($channel_parts[0], isset($channel_parts[1]) ? $channel_parts[1] : NULL);
+      break; // we only join one channel per 15 seconds, to prevent overloading.
+    }
+  }
+}
+
+/**
+ * Framework related messages and features.
+ *
+ * @param $data
+ *   The regular $data object prepared by the IRC library.
+ * @param $from_query
+ *   Boolean; whether this was a queried request.
+ */
+function bot_irc_msg_channel($data, $from_query = FALSE) {
+  $to = $from_query ? $data->nick : $data->channel;
+  $addressed = bot_name_regexp();
+
+  // our IRC help interface which piggybacks off of Drupal's hook_help().
+  if (preg_match("/^${addressed}help\s*([^\?]*)\s*\??/i", $data->message, $help_matches)) {
+    if (!$help_matches[2]) { // no specific help was asked for so give 'em a list.
+      $irc_features = array_filter(module_invoke_all('help', 'irc:features', NULL));
+      asort($irc_features); // alphabetical listing of features. the chainsaw is family.
+      bot_message($to, t('Detailed information is available by asking for "help <feature>" where <feature> is one of: !features.', array('!features' => implode(', ', $irc_features))));
+    }
+    else { // a specific type of help was required, so load up just that bit of text.
+      $feature_name = 'irc:features#'. preg_replace('/[^\w\d]/', '_', drupal_strtolower(trim($help_matches[2])));
+      $feature_help = array_filter(module_invoke_all('help', $feature_name, NULL));
+      bot_message($to, array_shift($feature_help));
+    }
+  }
+}
+
+/**
+ * All responses are available via a query.
+ */
+function bot_irc_msg_query($data) {
+  bot_irc_msg_channel($data, TRUE);
+}
+
+/**
+ * Implementation of hook_irc_msg_nickchange().
+ *
+ * If we've changed our nick (per bot_name_check()), we
+ * should attempt to authenticate with a supplied password.
+ *
+ * @see bot_name_check()
+ */
+function bot_irc_msg_nickchange($data) {
+  global $irc;
+  if (variable_get('bot_password', '') !== '' && $irc->_nick === variable_get('bot_nickname', 'bot_module')) {
+    $tokens = array('!bot_nickname' => variable_get('bot_nickname', 'bot_module'), '!bot_password' => variable_get('bot_password', ''));
+    $message = strtr(variable_get('bot_identify', '/msg NickServ IDENTIFY !bot_password'), $tokens);
+    $message = explode(' ', $message); // explode on whitespace so we can chop off the command and nick.
+    array_shift($message); // no more "/msg". ideally, we do this crap to make the UI/config more understandable.
+    $to = array_shift($message); // now we've got the $to and the remaining payload, so splice it back together.
+    bot_message($to, implode(" ", $message));
+  }
+}
+
+/**
+ * Send an action to a channel or user.
+ *
+ * @param $to
+ *   A channel or user.
+ * @param $action
+ *   The action to perform.
+ */
+function bot_action($to, $action) {
+  global $irc; // from bot_start.php.
+  $irc->message(SMARTIRC_TYPE_ACTION, $to, $action);
+
+  // allow modules to react to bot responses. do NOT use
+  // bot_action() in your implementation as you'll cause
+  // an infinite loop! and that'd look really really retarded.
+  module_invoke_all('irc_bot_reply_action', $to, $action);
+}
+
+/**
+ * Send a message to a channel or user.
+ *
+ * @param $to
+ *   A channel or user.
+ * @param $message
+ *   The message string to send.
+ */
+function bot_message($to, $message) {
+  global $irc; // from bot_start.php.
+  $type = strpos($to, '#') == 0 ? 'CHANNEL' : 'QUERY';
+  $irc->message(constant('SMARTIRC_TYPE_' . $type), $to, $message);
+
+  // allow modules to react to bot responses. do NOT use
+  // bot_message() in your implementation as you'll cause
+  // an infinite loop! and that'd look really really retarded.
+  module_invoke_all('irc_bot_reply_message', $to, $message);
+}
+
+/**
+ * Check if current nickname matches the one in the settings.
+ *
+ * This starts off an annoying attempt to change nickname to the correct
+ * one, along with support for GHOSTing and IDENTIFY. This design is pretty
+ * ugly, but Net_SmartIRC doesn't support much else.
+ *
+ * @see bot_irc_msg_nickchange()
+ */
+function bot_name_check() {
+  global $irc; // check for current name, changeNick, etc.
+  if ($irc->_nick !== variable_get('bot_nickname', 'bot_module')) {
+    // we'll attempt a GHOST first which, if the primary nick isn't logged in
+    // will just error out naturally. the alternative to pre- GHOSTing would
+    // be a "nickname in use" error checking using bot_irc_msg_error().
+    if (variable_get('bot_password', '') !== '') {
+      $tokens = array('!bot_nickname' => variable_get('bot_nickname', 'bot_module'), '!bot_password' => variable_get('bot_password', ''));
+      $message = strtr(variable_get('bot_ghost', '/msg NickServ GHOST !bot_nickname !bot_password'), $tokens);
+      $message = explode(' ', $message); // explode on whitespace so we can chop off the command and nick.
+      array_shift($message); // no more "/msg". ideally, we do this crap to make the UI/config more understandable.
+      $to = array_shift($message); // now we've got the $to and the remaining payload, so splice it back together.
+      bot_message($to, implode(" ", $message));
+      sleep(5); // hope its GHOSTed by now.
+    }
+
+    // annoyingly, Net_SmartIRC always assumes this nick change was successful
+    // by modifying the global $irc with the new nick. if it WAS actually
+    // successful, then bot_irc_msg_nickchange() kicks in to perform any auth.
+    // if it wasn't, well, we'll keep attempting to change it on next cron.
+    $irc->changeNick(variable_get('bot_nickname', 'bot_module'));
+  }
+}
+
+/**
+ * Returns a regexp suitable for matching the bot's name.
+ *
+ * Handles escaping (for "BOTNAME|Work"), various suffixes ("BOTNAME: ahem",
+ * "BOTNAME, ahem", "BOTNAME ahem", etc.), and nickname clashes (matching
+ * both the configured bot name, but also the /connected/ bot name).
+ *
+ * This function does NOT care about placement (if you want to enforce
+ * boundaries, use ^ and $ yourself). Since, however, it does match against
+ * potentially MORE THAN ONE BOT NAME, it DOES capture the name, so you
+ * will have to worry about that in preg_match $matches results.
+ */
+function bot_name_regexp() {
+  global $irc; // to get the connected name.
+  $names[] = $irc->_nick; // said connected name.
+  $names[] = variable_get('bot_nickname', 'bot_module');
+  $names = array_unique($names); // remove duplicates.
+  foreach ($names as $index => $name) {
+    $names[$index] = preg_quote($name, '/');
+  } // escape any non-word entities in the bot name.
+
+  $names = implode('|', $names);
+  return "\s*(${names})[:;,-]?\s*";
+}
+
+/**
+ * Given a list of possible responses, randomize one with substitutions.
+ *
+ * @param $substitutions
+ *   An array of substitution keys and values to be replaced in the response.
+ * @param $possibilities
+ *   An array of possibilities to randomize one out of. If a string is passed
+ *   in, we assume it is a newline-separated list of values to explode().
+ * @return $message
+ *   A message ready for printing with bot_message().
+ */
+function bot_randomized_choice($substitutions, $possibilities) {
+  if (!is_array($possibilities)) {
+    $possibilities = explode("\n", $possibilities);
+  }
+
+  $chosen = array_rand($possibilities);
+  return strtr(trim($possibilities[$chosen]), $substitutions);
+}
+
+/**
+ * Configures the bot framework.
+ */
+function bot_settings() {
+  $form['bot_connection'] = array(
+    '#collapsed'      => FALSE,
+    '#collapsible'    => TRUE,
+    '#title'          => t('Connection settings'),
+    '#type'           => 'fieldset',
+  );
+  $form['bot_connection']['bot_server'] = array(
+    '#default_value'  => variable_get('bot_server', 'irc.freenode.net'),
+    '#description'    => t('Enter the IRC server the bot will connect to.'),
+    '#title'          => t('IRC server'),
+    '#type'           => 'textfield',
+  );
+  $form['bot_connection']['bot_server_port'] = array(
+    '#default_value'  => variable_get('bot_server_port', 6667),
+    '#description'    => t('Enter the IRC port of the IRC server. 6667 is the most common configuration.'),
+    '#title'          => t('IRC server port'),
+    '#type'           => 'textfield',
+  );
+  $form['bot_connection']['bot_nickname'] = array(
+    '#default_value'  => variable_get('bot_nickname', 'bot_module'),
+    '#description'    => t('Enter the nickname the bot will login as.'),
+    '#title'          => t('Bot nickname'),
+    '#type'           => 'textfield',
+  );
+  $form['bot_connection']['bot_password'] = array(
+    '#default_value'  => variable_get('bot_password', ''),
+    '#description'    => t('(Optional) Enter the password the bot will login to the server with.'),
+    '#title'          => t('Bot password'),
+    '#type'           => 'textfield',
+  );
+  $form['bot_connection']['bot_channels'] = array(
+    '#default_value'  => variable_get('bot_channels', '#test'),
+    '#description'    => t('Enter a comma-separated list of channels the bot will join. For channels with a key, use "&lt;#channel> &lt;key>".'),
+    '#rows'           => 3,
+    '#title'          => t('Bot channels'),
+    '#type'           => 'textarea',
+  );
+  $form['bot_connection']['bot_auto_retry'] = array(
+    '#default_value'  => variable_get('bot_auto_retry', 1),
+    '#title'          => t('Keep retrying if the IRC server connection fails'),
+    '#type'           => 'checkbox',
+  );
+  $form['bot_connection']['bot_auto_reconnect'] = array(
+    '#default_value'  => variable_get('bot_auto_reconnect', 1),
+    '#title'          => t('Reconnect to the IRC server if disconnected'),
+    '#type'           => 'checkbox',
+  );
+  $form['bot_connection']['bot_debugging'] = array(
+    '#default_value'  => variable_get('bot_debugging', 0), // spits out a TON of (useful) stuff.
+    '#description'    => t('Low-level reporting by Net_SmartIRC\'s SMARTIRC_DEBUG_ALL.'),
+    '#title'          => t('Send debugging information to the shell'),
+    '#type'           => 'checkbox',
+  );
+
+  $form['bot_nick_recovery'] = array(
+    '#collapsed'      => FALSE,
+    '#collapsible'    => TRUE,
+    '#description'    => 'The following variables are available for use in these commands: !bot_nickname, !bot_password.',
+    '#title'          => t('Nick recovery'),
+    '#type'           => 'fieldset',
+  );
+  $form['bot_nick_recovery']['bot_ghost'] = array(
+    '#default_value' => variable_get('bot_ghost', '/msg NickServ GHOST !bot_nickname !bot_password'),
+    '#description'   => t("Command to force a connected user to relinquish the bot's nick (/msg only)."),
+    '#title'         => t('GHOST command'),
+    '#type'          => 'textfield',
+  );
+  $form['bot_nick_recovery']['bot_identify'] = array(
+    '#default_value' => variable_get('bot_identify', '/msg NickServ IDENTIFY !bot_password'),
+    '#description'   => t('Command to authenticate with a server-based nickname service (/msg only).'),
+    '#title'         => t('IDENTIFY command'),
+    '#type'          => 'textfield',
+  );
+
+  return system_settings_form($form);
+}

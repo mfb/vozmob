@@ -1,0 +1,178 @@
+<?php
+// $Id: bot_agotchi.module,v 1.4.2.5.2.9 2009/02/06 00:36:39 morbus Exp $
+
+/**
+ * @file
+ * Proper care and feeding lets your bot grow and be happy!
+ *
+ * Usage note: code and variable wise, it's "bot_agotchi" (so as to have
+ * proper alphabetizing with the rest of the plugins in a directory). To
+ * a human, however, it is always called a "botagotchi".
+ */
+
+/**
+ * Implementation of hook_help().
+ */
+function bot_agotchi_help($path, $arg) {
+  switch ($path) {
+    case 'irc:features':
+      return array(t('Botagotchi'));
+    case 'irc:features#botagotchi':
+      return t('Proper care and feeding lets your botagotchi grow and be happy!');
+    case 'admin/settings/bot/agotchi':
+      return '<p>' . t('Configure your botagotchi with these settings.') . '</p>';
+  }
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+function bot_agotchi_menu() {
+  $items['admin/settings/bot/agotchi'] = array(
+    'access arguments'  => array('administer bot'),
+    'description'       => 'Configure your botagotchi with these settings.',
+    'page callback'     => 'drupal_get_form',
+    'page arguments'    => array('bot_agotchi_settings'),
+    'title'             => 'Botagotchi',
+  );
+
+  return $items;
+}
+
+/**
+ * Listen for conversation directed at, or about, the bot.
+ *
+ * @param $data
+ *   The regular $data object prepared by the IRC library.
+ * @param $from_query
+ *   Boolean; whether this was a queried request.
+ */
+function bot_agotchi_irc_msg_channel($data, $from_query = FALSE) {
+  $substitutions = array('!who' => $data->nick, '!channel' => $data->channel);
+  $to = $from_query ? $data->nick : $data->channel;
+  $addressed = bot_name_regexp();
+
+  // feeding makes the bot's tumbly less rumbly.
+  if (preg_match("/^($addressed)?(bot(\s|\-)?snack)/i", $data->message)) {
+    bot_message($to, bot_randomized_choice($substitutions, variable_get('bot_agotchi_feeding_responses', _bot_agotchi_feeding_responses())));
+  }
+
+  // spit out a greeting in response to another (addressed or not).
+  $greeting_triggers = str_replace(array("\r\n", "\r", "\n"), '|', variable_get('bot_agotchi_greeting_triggers', _bot_agotchi_greeting_triggers()));
+  if (preg_match("/^\s*($greeting_triggers)($addressed)?[!\?\.]*$/i", $data->message)) { // turn the triggers into a suitable pipe-delimited expression.
+    if (rand(0, 100) < variable_get('bot_agotchi_greeting_randomness', 65)) {
+      bot_message($to, bot_randomized_choice($substitutions, variable_get('bot_agotchi_greeting_responses', _bot_agotchi_greeting_responses())));
+    }
+  }
+
+  // we've been thanked, so you're welcome 'em.
+  if (preg_match("/^($addressed)thank(s| you)/i", $data->message)) {
+    bot_message($to, bot_randomized_choice($substitutions, variable_get('bot_agotchi_thankful_responses', _bot_agotchi_thankful_responses())));
+  }
+}
+
+/**
+ * All responses are available via a query.
+ */
+function bot_agotchi_irc_msg_query($data) {
+  bot_agotchi_irc_msg_channel($data, TRUE);
+}
+
+/**
+ * Configures the botagotchi's personality.
+ */
+function bot_agotchi_settings() {
+  $form['#prefix'] = t('The following variables are available for use in responses: !who, !channel.');
+
+  $form['bot_agotchi_feeding_responses'] = array(
+    '#default_value' => variable_get('bot_agotchi_feeding_responses', _bot_agotchi_feeding_responses()),
+    '#description'   => t('List the randomized responses, one per line, your botagotchi will say when fed a botsnack.'),
+    '#title'         => t('Feeding responses'),
+    '#type'          => 'textarea',
+  );
+  $form['bot_agotchi_greeting_triggers'] = array(
+    '#default_value' => variable_get('bot_agotchi_greeting_triggers', _bot_agotchi_greeting_triggers()),
+    '#description'   => t('List the triggers, one per line, which your botagotchi will consider a greeting. Regular expressions are OK.'),
+    '#title'         => t('Greeting triggers'),
+    '#type'          => 'textarea',
+  );
+  $form['bot_agotchi_greeting_responses'] = array(
+    '#default_value' => variable_get('bot_agotchi_greeting_responses', _bot_agotchi_greeting_responses()),
+    '#description'   => t('List the randomized responses, one per line, your botagotchi will say when it hears a greeting.'),
+    '#title'         => t('Greeting responses'),
+    '#type'          => 'textarea',
+  );
+  $form['bot_agotchi_greeting_randomness'] = array(
+    '#default_value' => variable_get('bot_agotchi_greeting_randomness', 65),
+    '#description'   => t('The percentage that your botagotchi will actually respond to a heard greeting.'),
+    '#title'         => t('Greeting randomness'),
+    '#type'          => 'textfield',
+  );
+  $form['bot_agotchi_thankful_responses'] = array(
+    '#default_value' => variable_get('bot_agotchi_thankful_responses', _bot_agotchi_thankful_responses()),
+    '#description'   => t('List the randomized responses, one per line, your botagotchi will say when it has been thanked.'),
+    '#title'         => t('Thankful responses'),
+    '#type'          => 'textarea',
+  );
+
+  return system_settings_form($form);
+}
+
+/**
+ * Returns the default list of feeding responses.
+ */
+function _bot_agotchi_feeding_responses() {
+  return implode("\n", array(
+    'this is why I love !channel',
+    'thanks !who :)',
+    ':)',
+  ));
+}
+
+/**
+ * Returns the default list of greeting triggers.
+ */
+function _bot_agotchi_greeting_triggers() {
+  return implode("\n", array(
+    'h([aeu]llo|i( there)?|owdy|ey|ola)',
+    'salut',
+    'bonjour',
+    'niihau',
+    'que\s*tal',
+  ));
+}
+
+/**
+ * Returns the default list of greeting responses.
+ */
+function _bot_agotchi_greeting_responses() {
+  return implode("\n", array(
+    'hi',
+    'hey',
+    'hola',
+    'hello',
+    'salut',
+    'eh oh',
+    'niihau',
+    'privet',
+    'bonjour',
+    'que tal',
+    "what's up",
+  ));
+}
+
+/**
+ * Returns the default list of thankful responses.
+ */
+function _bot_agotchi_thankful_responses() {
+  return implode("\n", array(
+    'bitte',
+    'de nada',
+    'de rien',
+    'no problem',
+    'no worries',
+    'sure thing',
+    'my pleasure',
+    'pas de quoi',
+  ));
+}

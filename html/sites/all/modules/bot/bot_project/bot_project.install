@@ -1,0 +1,71 @@
+<?php
+// $Id: bot_project.install,v 1.1.2.2.2.1 2008/05/02 00:33:47 morbus Exp $
+
+/**
+ * Implementation of hook_schema().
+ */
+function bot_project_schema() {
+  $schema['bot_urls'] = array(
+    'description' => t('Stores URLs mentioned in IRC channels.'),
+    'fields' => array(
+      'url' => array(
+        'default'     => '',
+        'description' => t('The URL mentioned in an IRC channel.'),
+        'length'      => 255,
+        'not null'    => TRUE,
+        'type'        => 'varchar',
+      ),
+      'title' => array(
+        'default'     => '',
+        'description' => t('The title of the URL, cached for quicker lookups.'),
+        'length'      => 128,
+        'not null'    => TRUE,
+        'type'        => 'varchar',
+      ),
+      'count' => array(
+        'description' => t('The number of times the URL has been mentioned.'),
+        'not null'    => TRUE,
+        'type'        => 'int',
+        'unsigned'    => TRUE,
+      ),
+      'last_seen' => array(
+        'default'     => 0,
+        'description' => t('The Unix timestamp when the URL was last mentioned.'),
+        'not null'    => TRUE,
+        'type'        => 'int',
+        'unsigned'    => TRUE,
+      ),
+    ),
+  );
+
+  return $schema;
+}
+
+/**
+ * Implementation of hook_install().
+ */
+function bot_project_install() {
+  drupal_install_schema('bot_project');
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function bot_project_uninstall() {
+  drupal_uninstall_schema('bot_project');
+  variable_del('bot_project_api_default_branch');
+  variable_del('bot_project_project_enable');
+  variable_del('bot_project_project_nid_min');
+  variable_del('bot_project_project_nid_max');
+  variable_del('bot_project_project_url');
+  variable_del('bot_project_project_url_regexp');
+  variable_del('bot_project_too_lazy_to_recompile_for_ssl');
+  variable_del('bot_project_trac_enable');
+  variable_del('bot_project_trac_num_min');
+  variable_del('bot_project_trac_num_max');
+  variable_del('bot_project_trac_url');
+  variable_del('bot_project_trac_url_regexp');
+
+  // branch names create dynamic variables. get 'em all here.
+  db_query("DELETE FROM {variable} WHERE name LIKE 'bot_project_api_branch_%'");
+}

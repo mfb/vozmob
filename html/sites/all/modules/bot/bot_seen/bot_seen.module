@@ -1,0 +1,120 @@
+<?php
+// $Id: bot_seen.module,v 1.1.2.12.2.7 2009/02/06 17:44:31 morbus Exp $
+
+/**
+ * @file
+ * Enables users to find out the last time a channel member was active.
+ */
+
+/**
+ * Implementation of hook_help().
+ */
+function bot_seen_help($path, $arg) {
+  switch ($path) {
+    case 'irc:features':
+      return array(t('Seen'));
+    case 'irc:features#seen':
+      return t('If someone asks "seen Morbus", the bot will report the last time they\'ve been seen, where, and what their last known message was. Directly addressing the bot will also allow the more complex syntax of "seen Morbus? seen d8uv?", "have you seen sbp?" and similar forms. * can be used as a wildcard, but only with a minimum of three other characters. A maximum of three results are displayed for any one request.');
+  }
+}
+
+/**
+ * Listen for conversation directed at, or around, the bot.
+ *
+ * @param $data
+ *   The regular $data object prepared by the IRC library.
+ * @param $from_query
+ *   Boolean; whether this was a queried request.
+ */
+function bot_seen_irc_msg_channel($data, $from_query = FALSE) {
+  $to = $from_query ? $data->nick : $data->channel;
+  $nicks = array(); // list of nicks to search for.
+  $addressed = bot_name_regexp();
+
+  // log the message, whatever it is. no UPDATEs; just start anew, eh?
+  if (!$from_query) { // we only want to record public activity, not private messages.
+    db_query("DELETE FROM {bot_seen} WHERE LOWER(nick) = '%s'", drupal_strtolower($data->nick));
+    $seen = new stdClass(); // we don't UPDATE cos it's "cheaper" to just trash the old one.
+    $seen->nick       = $data->nick;
+    $seen->channel    = $data->channel;
+    $seen->message    = $data->message;
+    $seen->timestamp  = time();
+    drupal_write_record('bot_seen', $seen);
+  }
+
+  // Match 'seen foo' in any mode, regardless if the bot was addressed.
+  if (preg_match("/^seen ([a-zA-Z0-9\[\]\{\}\\\|\^\`\-\_\*]*)( ?\?|$)/i", trim($data->message), $matches)) {
+    $nicks[] = $matches[1]; // the bot will listen to the first request only when unaddressed.
+  }
+
+  // Our more complicated regexp allows multiple types of syntax and
+  // more than one lookup per query, but require direct addressing.
+  if (preg_match("/^$addressed/i", $data->message) || $from_query) {
+    if (preg_match_all('!.*?seen ([a-zA-Z0-9\[\]\{\}\\\|\^\`\-\_\*]*)( ?\?|$| ?\,)!i', trim($data->message), $matches)) {
+      foreach ($matches[1] as $match) { // for every construct we've found in our message, find the user.
+        $nicks[] = $match; // the bot will respond addressed to multiple requests and styles in one query.
+      }
+    }
+  }
+
+  // An array of all current nicks so that we can regexp them
+  // away to prevent "seen pings" (when Person B's nick is in
+  // the last message of Person A, Person C's "seen Person A"
+  // will ping Person B, which is slightly annoying.
+  $all_nicks = bot_seen_all_nicks_for_regexp();
+
+  // fetch 'em.
+  $messages = array();
+  foreach (array_unique($nicks) as $nick) {
+    // allow % SQL matching, but only if the nick is three non-* characters or longer.
+    if (strlen(str_replace('*', '', $nick)) >= 3) { $nick = str_replace('*', '%', $nick); }
+    $results = db_query("SELECT nick, channel, message, timestamp FROM {bot_seen} WHERE LOWER(nick) LIKE '%s' ORDER BY timestamp DESC", drupal_strtolower($nick));
+    while ($result = db_fetch_object($results)) { // throw 'em on the bar-b... we'll shrink the result set later. to keep it relevant, we order by timestamp.
+      $message = preg_replace($all_nicks, '\1_\2', $result->message); // prevent seen-pings by obfuscating the nick and hope they're not pattern matching on anything but exact.
+      $messages[] = t("!nick was last seen in !channel !this_long ago saying '!message'.", array('!nick' => $result->nick, '!this_long' => format_interval(time() - $result->timestamp), '!channel' => $result->channel, '!message' => $message, ));
+    } if (count($messages) == 0) { $messages[] = t("Sorry, I haven't seen !match.", array('!match' => str_replace('%', '*', $nick), )); }
+  }
+
+  // three results only to prevent flooding.
+  $count = count($messages); // just for fun.
+  $messages = array_splice($messages, 0, 3);
+  foreach ($messages as $message) { bot_message($to, $message); }
+  // @todo include a message stating number of results not shown.
+}
+
+/**
+ * All responses are available via a query.
+ */
+function bot_seen_irc_msg_query($data) {
+  bot_seen_irc_msg_channel($data, TRUE);
+}
+
+/**
+ * Catch user actions too.
+ */
+function bot_seen_irc_msg_action($data) {
+  if (strpos($data->channel, '#') === FALSE) { return; } // ignore actions PM'd to the bot.
+  db_query("DELETE FROM {bot_seen} WHERE LOWER(nick) = '%s'", drupal_strtolower($data->nick));
+  $seen = new stdClass(); // we don't UPDATE cos it's "cheaper" to just trash the old one.
+  $seen->nick       = $data->nick;
+  $seen->channel    = $data->channel; // there's lots of garbagey odd bits for actions.
+  $seen->message    = preg_replace('/^ACTION/', '* ' . $data->nick, trim($data->message, ''));
+  $seen->timestamp  = time();
+  drupal_write_record('bot_seen', $seen);
+}
+
+/**
+ * Return an array of all current nicks.
+ */
+function bot_seen_all_nicks_for_regexp() {
+  global $irc; $nicks = array();
+  foreach ($irc->channel as $channel_name => $data) {
+    foreach ($irc->channel[$channel_name]->users as $nick_name => $data) {
+      $nick_name = preg_quote($nick_name, '/');
+      $nick_name = preg_replace('/^(.)(.*)/', '(\1)(\2)', $nick_name);
+      $nicks[] = '/\b' . $nick_name . '\b/i';
+    }
+  }
+
+  return array_unique($nicks);
+}

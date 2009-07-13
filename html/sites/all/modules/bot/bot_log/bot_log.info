@@ -1,0 +1,6 @@
+; $Id: bot_log.info,v 1.1.2.1.2.1 2008/04/26 01:32:31 morbus Exp $
+name = Bot Log
+package = Bot
+dependencies[] = bot
+description = "Enables the logging of IRC channels."
+core = 6.x

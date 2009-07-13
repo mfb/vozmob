@@ -1,0 +1,6 @@
+; $Id: bot_agotchi.info,v 1.2.2.1.2.2 2008/04/25 01:29:03 morbus Exp $
+name = Botagotchi
+package = Bot
+dependencies[] = bot
+description = "Proper care and feeding lets your botagotchi grow and be happy!"
+core = 6.x

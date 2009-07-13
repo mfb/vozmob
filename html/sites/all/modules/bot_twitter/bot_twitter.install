@@ -1,0 +1,37 @@
+<?php
+// $Id: bot_twitter.install,v 1.1.2.3.2.3 2008/05/02 01:21:17 morbus Exp $
+
+/**
+ * Implementation of hook_schema().
+ */
+function bot_twitter_schema() {
+  $schema['bot_twitter'] = array(
+    'description' => t('The single table necessary for Bot Twitter storage.'),
+    'fields' => array(
+      'iid' => array(
+        'default'     => 0,
+        'description' => t('An aggregator item id.'),
+        'not null'    => TRUE,
+        'type'        => 'int',
+      ),
+    ),
+    'primary key' => array('iid'),
+  );
+
+  return $schema;
+}
+
+/**
+ * Implementation of hook_install().
+ */
+function bot_twitter_install() {
+  drupal_install_schema('bot_twitter');
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function bot_twitter_uninstall() {
+  drupal_uninstall_schema('bot_twitter');
+  db_query("DELETE FROM {variable} WHERE name LIKE '%s'", 'bot_twitter_channel_%');
+}

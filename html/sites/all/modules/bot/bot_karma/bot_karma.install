@@ -1,0 +1,43 @@
+<?php
+// $Id: bot_karma.install,v 1.1.2.1 2008/06/27 16:32:37 morbus Exp $
+
+/**
+ * Implementation of hook_schema().
+ */
+function bot_karma_schema() {
+  $schema['bot_karma'] = array(
+    'description' => t('The single table necessary for karma storage.'),
+    'fields' => array(
+      'term' => array(
+        'default'     => '',
+        'description' => t('The term whose total points are being stored.'),
+        'length'      => 255,
+        'not null'    => TRUE,
+        'type'        => 'varchar',
+      ),
+      'karma' => array(
+        'default'     => 0,
+        'description' => t('The points, or karma, associated with this term.'),
+        'not null'    => TRUE,
+        'type'        => 'int',
+      ),
+    ),
+    'key' => array('term'),
+  );
+
+  return $schema;
+}
+
+/**
+ * Implementation of hook_install().
+ */
+function bot_karma_install() {
+  drupal_install_schema('bot_karma');
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function bot_karma_uninstall() {
+  drupal_uninstall_schema('bot_karma');
+}

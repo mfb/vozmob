@@ -1,0 +1,157 @@
+<?php
+// $Id: bot_tell.module,v 1.1.2.6 2009/02/06 17:04:09 morbus Exp $
+
+/**
+ * @file
+ * Enables queued messages for unavailable users.
+ */
+
+/**
+ * Implementation of hook_help().
+ */
+function bot_tell_help($path, $arg) {
+  switch ($path) {
+    case 'irc:features':
+      return array(t('Tell'));
+    case 'irc:features#tell':
+      return t('Queue messages with "BOTNAME: tell Morbus that his bot_module help messages are awesome." Queued messages will be delivered publicly when the recipient sends a message to the channel.');
+  }
+}
+
+/**
+ * Listen for conversation directed at, or about, the bot.
+ *
+ * @param $data
+ *   The regular $data object prepared by the IRC library.
+ * @param $from_query
+ *   Boolean; whether this was a queried request.
+ */
+function bot_tell_irc_msg_channel($data, $from_query = FALSE) {
+  $to = $from_query ? $data->nick : $data->channel;
+  $addressed = bot_name_regexp();
+
+  // check for existing messages.
+  $messages = bot_tell_load($data->nick);
+  if (!empty($messages)) { // mmMMmMMm.
+    foreach ($messages as $message) {
+      bot_message($to, t('!recipient: !timestamp ago <!author> !message', array(
+        '!recipient'  => $data->nick, // use their case, not author's.
+        '!timestamp'  => format_interval(time() - $message->timestamp),
+        '!author'     => $message->author,
+        '!message'    => $message->message,
+      )));
+    }
+
+    // remove queued messages.
+    bot_tell_delete($data->nick);
+  }
+
+  // check for tells to queue up.
+  if (preg_match("/^($addressed)tell\s+([a-zA-Z0-9\[\]\{\}\\\|\^\`\-\_\*]*)\s+(.*)$/i", $data->message, $matches)) {
+
+    // if bot_factoid.module is enabled, we'll check to see if this could be about a factoid.
+    // if it is, we'll let bot_factoid handle it and skip over this message's processing here.
+    // @todo ideally, this would be smoother with http://drupal.org/node/218595.
+    if (module_exists('bot_factoid') && substr($matches[4], 0, 5) == 'about' && $factoid = bot_factoid_load(substr($matches[4], 6))) {
+      return; // we're just not gonna do anything with this, cos bot_factoid will gladly take over.
+    }
+
+    // queued message accepted, keptin.
+    bot_tell_save($data->nick, $matches[3], preg_replace("/^($addressed)\s*/", '', $data->message)); // see that? it's saved! in one line!
+    bot_message($to, t("!nick: I'll pass that on when !recipient is around.", array('!nick' => $data->nick, '!recipient' => $matches[3])));
+  }
+}
+
+/**
+ * All responses are available via a query.
+ */
+function bot_tell_irc_msg_query($data) {
+  bot_tell_irc_msg_channel($data, TRUE);
+}
+
+/**
+ * Deletes queued messages for the given recipient.
+ *
+ * @param $recipient
+ *   The recipient whose messages are being deleted.
+ */
+function bot_tell_delete($recipient) {
+  db_query("DELETE FROM {bot_tell_queue} WHERE LOWER(recipient) = '%s'", drupal_strtolower($recipient));
+  bot_tell_pending_cache($recipient, 'delete'); // maintain the static cache.
+}
+
+/**
+ * Retrieves queued messages for the given recipient.
+ *
+ * @param $recipient
+ *   The recipient whose messages are being loaded.
+ * @return
+ *   An array of all messages for the recipient.
+ */
+function bot_tell_load($recipient) {
+  $messages = array();
+
+  if (bot_tell_pending_cache($recipient)) {
+    $results = db_query("SELECT * FROM {bot_tell_queue} WHERE LOWER(recipient) = '%s' ORDER BY timestamp ASC", drupal_strtolower($recipient));
+
+    while ($result = db_fetch_object($results)) {
+      $messages[] = $result;
+    }
+  }
+
+  return $messages;
+}
+
+/**
+ * Saves a queued message to be sent later.
+ *
+ * @param $author
+ *   The IRC user that is writing this message to the recipient.
+ * @param $recipient
+ *   The IRC user who is to be delivered the message.
+ * @param $message
+ *   The entirety of the message being sent.
+ */
+function bot_tell_save($author, $recipient, $message) {
+  $tell = new stdClass();
+  $tell->author     = $author;
+  $tell->recipient  = $recipient;
+  $tell->message    = $message;
+  $tell->timestamp  = time();
+  drupal_write_record('bot_tell_queue', $tell);
+  bot_tell_pending_cache($recipient, 'insert');
+}
+
+/**
+ * Maintain a list of recipients with waiting messages.
+ *
+ * This function primarily exists to ensure that we're not running a SELECT
+ * on every message that the bot receives. The static cache is maintained by
+ * bot_tell_delete() and bot_tell_save(), and checked with bot_tell_load().
+ *
+ * @param $recipient
+ *   The IRC user we're checking for pending messages for.
+ * @param $op
+ *   Optional; whether $recipient should be inserted to or deleted from cache.
+ */
+function bot_tell_pending_cache($recipient, $op = NULL) {
+  static $pending;
+
+  if (!is_array($pending)) {
+    $results = db_query('SELECT DISTINCT(recipient) FROM {bot_tell_queue}');
+    while ($result = db_fetch_object($results)) {
+      $pending[drupal_strtolower($result->recipient)] = 1;
+    }
+  }
+
+  $recipient = drupal_strtolower($recipient);
+  if ($op == 'insert' && !isset($pending[$recipient])) {
+    $pending[$recipient] = 1;
+  }
+
+  if ($op == 'delete' && isset($pending[$recipient])) {
+    unset($pending[$recipient]);
+  }
+
+  return isset($pending[$recipient]);
+}

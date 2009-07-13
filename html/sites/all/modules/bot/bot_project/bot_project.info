@@ -1,0 +1,6 @@
+; $Id: bot_project.info,v 1.1.2.1.2.1 2008/05/02 00:33:47 morbus Exp $
+name = Bot Project
+package = Bot
+dependencies[] = bot
+description = "Enables various project toolkit compatible actions."
+core = 6.x

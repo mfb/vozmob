@@ -1,0 +1,93 @@
+// $Id: CHANGELOG.txt,v 1.14.2.16.2.33 2009/05/08 17:13:16 morbus Exp $
+
+Bot 6.x-1.x, xxxx-xx-xx
+-----------------------
+  * Channels are now joined every 15 seconds instead of at initial connection.
+  * Logging checks for channels are now case-insensitive (thanks mozillamonks).
+  * #362661: Attempt to GHOST and IDENTIFY on nick clashes (thanks seutje).
+  * #380330: Added perms for factoids, karma, and project (thanks lut4rp).
+  * #391916: bot_log needed another index for speedier table SELECTs.
+
+Bot 6.x-1.1, 2009-02-10
+-----------------------
+  * bot_seen ping prevention matched inside strings; now only word boundaries.
+  * #284666: We now use preg_quote() for various nickname escaping.
+  * #349245: bot_tell doesn't consume username whitespace (thanks drewish).
+  * #356003: bot_tell sorts queued messages by oldest first (thanks litwol).
+  * #343245: Better regex for usernames like betz--; supports betz---- now.
+  * #338723: Missing decode_entities() on project statuses (thanks RobLoach).
+  * #313025: Better regex for log filtering to prevent substring matches.
+  * #300206: Better factoid-ignoring of tell-like messages (thanks RobLoach).
+  * #275042: Randomized messages now centralized in bot_randomized_choice().
+  * #274888: Move all INSERTs and UPDATEs to use drupal_write_record().
+  * #218577: bot_tell.module added (thanks Rob Loach). Additions/changes:
+    - pending message queue now exists to remove SELECT on every message.
+    - received messages use format_interval(), not a date (thanks litwol).
+  * bot_factoid: PM a factoid with "BOTNAME: tell <who> about <factoid>".
+  * #190825: Get URL to current logged discussion with "BOTNAME: log pointer?"
+  * bot_name_regexp() now exists for matching inside a regular expression.
+    - #117876: if bot has a nick clash, it now responds to both nicks.
+    - #184015: bot name with non-word characters failed regexp addressing.
+  * #137171: bot_karma.module added (thanks walkah/Rob Loach). Additions:
+    - patch supported only words: committed version supports phrases.
+    - if someone tries to karma themselves, the response is customizable.
+    - drupal_write_record() is your friend; get used to using it!
+    - "BOTNAME: karma foo?" is required to prevent bad parsing.
+    - highest/lowest karmas are available at example.com/bot/karma.
+    - terms less than 3 and more than 15 characters are ignored.
+  * #267560: OS-specific newlines broke comparisons (thanks Gurpartap Singh).
+  * #245610: bot_agotchi greeting triggers now customizable (thanks Alan Evans).
+  * #184032: ignore improper hook_help implementations (thanks John Morahan).
+  * #229880: bot_factoid stopwords were case sensitive (thanks John Morahan).
+  * #187137: Drupal 7 style concats, and other style fixes (thanks dmitrig01).
+  * #167097: fixed undefined index and better host check (thanks czarphanguye).
+  * #142812: auto reconnect and retry are now configurable (Morbus/Shiny).
+
+Bot 6.x-1.0, 2008-05-01
+-----------------------
+  * First release for Drupal 6.x; equivalent to 5.x-1.0.
+
+Bot 5.x-1.0, 2008-04-08
+-----------------------
+  * #193209: an attempt at solving seen pings has been implemented.
+  * #155045: bot_seen no longer fails with "asd%" on fuzzy matching.
+  * #106993: bot_seen ignores messages and actions sent to the bot.
+  * #106992: bot_seen now logs actions as seenable offenses.
+  * added hook_uninstall() to everything.
+
+Bot 5.x-1.x, 2007
+-----------------
+  * bot_log.module added; Logs multiple channels, day browsing, etc.
+  * bot_project now has Trac integration (for tickets and revisions).
+  * added another MySQL timeout preventer, thanks to killes.
+  * bot_project now has configurable project.module scraping.
+  * bot_project can now define URL endpoints per api branch.
+  * bot_drupal renamed to bot_project, made much more generic.
+  * bot: supports server passwords and channel keys, thanks to Bdragon.
+  * bot_drupal: better handling of improper Doxygen summaries.
+  * bot_drupal from Bdragon: integrate with api.module.
+  * bot_factoid.module added; an infobot clone with all the fixins.
+  * hook_irc_bot_cron() now exists and runs every five minutes.
+  * #136856 and #136870 from Shiny: various PostgreSQL quote fixes.
+  * bot_seen: now properly reports when it hasn't seen something.
+  * bot_seen: now supports wildcard searches with * (three char minimum).
+  * bot_seen: freeform "seen?" syntax is moved to direct addressing only.
+  * hook_irc_bot_reply() exists to facilitate logging of own messages.
+  * Issue metadata and IRC count per suggestions by ChrisKennedy.
+  * bot_drupal: "Bot Drupal URLs" renamed to just "Drupal URLs".
+  * bot: bot/ URL now exists and displays connection/feature details.
+  * bot_agotchi: greeting and thankful responses added, user configurable.
+  * bot_agotchi: variable substitution is now possible in responses.
+  * bot_drupal: popular URLs are now constrained to last 14 days.
+  * bot_start: fixed error where SCRIPT_NAME was not being set properly.
+  * bot_drupal: now shows page of popular/recent URLs at bot/drupal_urls.
+  * bot_drupal: now stores the retrieved title in the database.
+  * bot_agotchi.module added; botsnacks, greetings, personality.
+  * bot_drupal: URLs are remembered and counted in the database now.
+  * Shipped plugins moved to their own directories for less clutter.
+  * Help interface added; module developers, please see README.txt.
+  * bot_drupal.module added; Drupal developer helper.
+  * Removed layer of abstraction from the hook system.
+  * Renamed some files, got rid of bot_version.module.
+  * Initial proof of concept release.
+

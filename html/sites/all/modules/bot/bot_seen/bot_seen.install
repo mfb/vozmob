@@ -1,0 +1,57 @@
+<?php
+// $Id: bot_seen.install,v 1.1.2.3.2.1 2008/05/02 01:21:17 morbus Exp $
+
+/**
+ * Implementation of hook_schema().
+ */
+function bot_seen_schema() {
+  $schema['bot_seen'] = array(
+    'description' => t('The single table necessary for user seen state.'),
+    'fields' => array(
+      'nick' => array(
+        'default'     => '',
+        'description' => t('The IRC user that we know seen state for.'),
+        'length'      => 60,
+        'not null'    => TRUE,
+        'type'        => 'varchar',
+      ),
+      'channel' => array(
+        'default'     => '',
+        'description' => t('The IRC channel where the user was last seen.'),
+        'length'      => 255,
+        'not null'    => TRUE,
+        'type'        => 'varchar',
+      ),
+      'message' => array(
+        'default'     => '',
+        'description' => t('The last message or action of the IRC user.'),
+        'not null'    => TRUE,
+        'type'        => 'text',
+      ),
+      'timestamp' => array(
+        'default'     => 0,
+        'description' => t('The Unix timestamp when this IRC user was last seen.'),
+        'not null'    => TRUE,
+        'type'        => 'int',
+        'unsigned'    => TRUE,
+      ),
+    ),
+    'key' => array('nick'),
+  );
+
+  return $schema;
+}
+
+/**
+ * Implementation of hook_install().
+ */
+function bot_seen_install() {
+  drupal_install_schema('bot_seen');
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function bot_seen_uninstall() {
+  drupal_uninstall_schema('bot_seen');
+}

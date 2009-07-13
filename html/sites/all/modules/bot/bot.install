@@ -1,0 +1,17 @@
+<?php
+// $Id: bot.install,v 1.1.2.1.2.1 2008/06/23 00:52:19 morbus Exp $
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function bot_uninstall() {
+  variable_del('bot_auto_retry');
+  variable_del('bot_auto_reconnect');
+  variable_del('bot_cache_cleared');
+  variable_del('bot_channels');
+  variable_del('bot_debugging');
+  variable_del('bot_nickname');
+  variable_del('bot_password');
+  variable_del('bot_server');
+  variable_del('bot_server_port');
+}

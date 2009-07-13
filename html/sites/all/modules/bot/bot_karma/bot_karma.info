@@ -1,0 +1,6 @@
+; $Id: bot_karma.info,v 1.1.2.1 2008/06/27 16:32:37 morbus Exp $
+name = Bot Karma
+package = Bot
+description = "Enables positive and negative tracking of words and phrases."
+dependencies[] = bot
+core = 6.x
