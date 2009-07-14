@@ -61,28 +61,29 @@ function bot_aggregator_settings() {
   }
   while ($feed = db_fetch_object($feeds)) {
     $form['feed_' . $feed->fid] = array(
-      '#title'       => t('Settings for feed %title', array('%title' => $feed->title)),
-      '#type'        => 'fieldset',
-      '#collapsible' => TRUE,
-      '#collapsed'   => TRUE,
+      '#title'         => t('@title settings', array('@title' => $feed->title)),
+      '#description'   => t('Settings for feed %url.', array('%url' => $feed->url)),
+      '#type'          => 'fieldset',
+      '#collapsible'   => TRUE,
+      '#collapsed'     => !variable_get('bot_aggregator_channel_' . $feed->fid, ''),
     );
-    $form['bot_aggregator_channel_' . $feed->fid] = array(
+    $form['feed_' . $feed->fid]['bot_aggregator_channel_' . $feed->fid] = array(
       '#title'         => t('IRC channel', array('%title' => $feed->title)),
       '#description'   => t('Select an IRC channel to which messages from feed %url will be relayed.', array('%url' => $feed->url)),
       '#type'          => 'select',
       '#options'       => $options,
       '#default_value' => variable_get('bot_aggregator_channel_' . $feed->fid, ''),
     );
-    $form['bot_aggregator_cron_' . $feed->fid] = array(
+    $form['feed_' . $feed->fid]['bot_aggregator_cron_' . $feed->fid] = array(
       '#title'         => t('Update frequency'),
-      '#description'   => t('Select the frequency with which new messages should be relayed to IRC.'),
+      '#description'   => t('Select the frequency with which new items should be relayed to IRC.'),
       '#type'          => 'select',
-      '#options'       => drupal_map_array(array(300, 60, 15), 'format_interval'),
+      '#options'       => drupal_map_assoc(array(300, 60, 15), 'format_interval'),
       '#default_value' => variable_get('bot_aggregator_cron_' . $feed->fid, 300),
     );
-    $form['bot_aggregator_limit_' . $feed->fid] = array(
+    $form['feed_' . $feed->fid]['bot_aggregator_limit_' . $feed->fid] = array(
       '#title'         => t('Message limit'),
-      '#description'   => t('Maximum number of tweets to relay to IRC every 15 seconds. The default <em>1</em> is highly recommended to avoid channel flooding. For very active feeds, a slightly larger limit may be required.'),
+      '#description'   => t('Maximum number of items to relay to IRC on each update. The default <em>1</em> is highly recommended to avoid channel flooding. For very active feeds, a slightly larger limit may be required.'),
       '#type'          => 'textfield',
       '#size'          => 10,
       '#default_value' => variable_get('bot_aggregator_limit_' . $feed->fid, 1),
