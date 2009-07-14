@@ -2,6 +2,18 @@
 // $Id$
 
 /**
+ * Implementation of hook_help().
+ */
+function bot_aggregator_help($path, $arg) {
+  switch ($path) {
+    case 'irc:features':
+      return array(t('Follow'));
+    case 'irc:features#follow':
+      return t('Follow an Atom or RSS feed with ".follow <feed_URL> <channel> <fast|faster|fastest>"');
+  }
+}
+
+/**
  * Relay feed items to IRC.
  */
 function bot_aggregator_irc_bot_cron($cron = 300) {
@@ -35,6 +47,48 @@ function bot_aggregator_irc_bot_cron_fastest() {
 }
 
 /**
+ * Implementation of hook_irc_msg_channel().
+ */
+function bot_aggregator_irc_msg_channel($data, $from_query = FALSE) {
+  if (preg_match('/^\.follow (.*) (.*) (.*)/', $data->message, $matches)) {
+    $to = $from_query ? $data->nick : $data->channel;
+    if (!valid_url($matches[1], TRUE)) {
+      bot_message($to, $data->nick . ': ' . t("Hrm that doesn't appear to be a valid feed URL :("));
+    }
+    else {
+      $channels = bot_aggregator_get_channels();
+      if (!isset($channels[$matches[2]])) {
+        bot_message($to, $data->nick . ': ' . t("Hrm that doesn't appear to be a valid channel :("));
+      }
+      else {
+        $speed = array('fast' => 300, 'faster' => 60, 'fastest' => 15);
+        if (!isset($speed[$matches[3]])) {
+          bot_message($to, $data->nick . ': ' . t("Hrm that doesn't appear to be a valid update frequency :("));
+        }
+        else {
+          if (!$feed = db_fetch_array(db_query("SELECT * from {aggregator_feed} WHERE url = '%s'", $matches[1]))) {
+            $feed['url'] = $matches[1];
+            drupal_write_record('aggregator_feed', $feed);
+          }
+          variable_set('bot_aggregator_channel_' . $feed['fid'], $matches[2]);
+          variable_set('bot_aggregator_cron_' . $feed['fid'], $speed[$matches[3]]);
+          bot_message($to, $data->nick . ': ' . t('Following !url on !channel every !frequency seconds.', array('!url' => $feed['url'], '!channel' => $matches[2], '!frequency' => $speed[$matches[3]])));
+          variable_set('bot_cache_cleared', time());
+          $GLOBALS['conf'] = variable_init();
+        }
+      }
+    }
+  }
+}
+
+/**
+ * All responses are available via a query.
+ */
+function bot_aggregator_irc_msg_query($data) {
+  bot_aggregator_irc_msg_channel($data, TRUE);
+}
+
+/**
  * Implementation of hook_menu().
  */
 function bot_aggregator_menu() {
@@ -53,12 +107,7 @@ function bot_aggregator_menu() {
  */
 function bot_aggregator_settings() {
   $feeds = bot_aggregator_get_feeds();
-  $channels = preg_split('/\s*,\s*/', variable_get('bot_channels', '#test'));
-  $options = array('' => t('None'));
-  foreach ($channels as $channel) {
-    list($channel) = explode(' ', $channel);
-    $options[$channel] = $channel;
-  }
+  $options = array('' => t('None')) + bot_aggregator_get_channels();
   while ($feed = db_fetch_object($feeds)) {
     $form['feed_' . $feed->fid] = array(
       '#title'         => t('@title settings', array('@title' => $feed->title)),
@@ -93,11 +142,24 @@ function bot_aggregator_settings() {
 }
 
 /**
- * Get all search.twitter.com feeds from Aggregator module.
+ * Get all Aggregator module feeds.
  */
 function bot_aggregator_get_feeds() {
   return db_query('SELECT fid, title, url FROM {aggregator_feed}');
 }
+
+/**
+ * Get all Bot module channels.
+ */
+function bot_aggregator_get_channels() {
+  $bot_channels = preg_split('/\s*,\s*/', variable_get('bot_channels', '#test'));
+  foreach ($bot_channels as $channel) {
+    list($channel) = explode(' ', $channel);
+    $channels[$channel] = $channel;
+  }
+  return $channels;
+}
+
 
 /**
  * Implementation of hook_form_FORM_ID_alter().
@@ -110,7 +172,7 @@ function bot_aggregator_form_aggregator_form_feed_alter(&$form, &$form_state) {
  * Implementation of hook_cron().
  */
 function bot_aggregator_cron() {
-  // We only need to run this garbage collection occasionally.
+  // We need only occasional garbage collection.
   if (!mt_rand(0, 99)) {
     // Delete items that have been purged from the aggregator_item table.
     db_query('DELETE b FROM {bot_aggregator} b LEFT JOIN {aggregator_item} a ON b.iid = a.iid WHERE a.iid IS NULL');
