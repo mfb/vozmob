@@ -25,6 +25,8 @@ function bot_aggregator_irc_bot_cron($cron = 300) {
       $items = db_query('SELECT a.iid, a.fid, a.title, a.link, a.author FROM {aggregator_item} a LEFT JOIN {bot_aggregator} b ON a.iid = b.iid WHERE a.fid = %d AND b.iid IS NULL ORDER BY a.timestamp asc LIMIT %d', $feed->fid, variable_get('bot_aggregator_limit', 1));
       while ($item = db_fetch_object($items)) {
         $message = ($item->author ? '<' . $item->author . '> ' : '') . $item->title . ' ' . $item->link;
+        // Replace line breaks with spaces.
+        $message = str_replace(array("\n", "\r"), ' ', $message);
         // Allow other modules to alter (and act on) the message.
         drupal_alter('bot_aggregator_message', $message, $feed, $item);
         bot_message($channel, $message);
