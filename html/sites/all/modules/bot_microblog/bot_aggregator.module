@@ -7,9 +7,11 @@
 function bot_aggregator_help($path, $arg) {
   switch ($path) {
     case 'irc:features':
-      return array(t('Follow'));
+      return array(t('Follow'), t('Unfollow'));
     case 'irc:features#follow':
       return t('Follow an Atom or RSS feed with ".follow <feed_URL> <channel> <fast|faster|fastest>"');
+    case 'irc:features#unfollow':
+      return t('Unfollow an Atom or RSS feed with ".unfollow <feed_URL> <channel>"');
   }
 }
 
@@ -76,6 +78,17 @@ function bot_aggregator_irc_msg_channel($data, $from_query = FALSE) {
           variable_set('bot_cache_cleared', time());
           $GLOBALS['conf'] = variable_init();
         }
+      }
+    }
+  }
+  if (preg_match('/^\.unfollow (.*) (.*)/', $data->message, $matches)) {
+    $to = $from_query ? $data->nick : $data->channel;
+    if ($feed = db_fetch_array(db_query("SELECT * from {aggregator_feed} WHERE url = '%s'", $matches[1]))) {
+      if (variable_get('bot_aggregator_channel_' . $feed['fid'], '') == $matches[2]) {
+        variable_set('bot_aggregator_channel_' . $feed['fid'], '');
+        bot_message($to, $data->nick . ': ' . t('Unfollowing !url on !channel.', array('!url' => $feed['url'], '!channel' => $matches[2])));
+        variable_set('bot_cache_cleared', time());
+        $GLOBALS['conf'] = variable_init();
       }
     }
   }

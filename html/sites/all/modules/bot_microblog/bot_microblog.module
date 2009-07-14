@@ -52,20 +52,20 @@ function bot_microblog_menu() {
  */
 function bot_microblog_settings() {
   $form['twitter'] = array(
-    'title'          => t('Twitter'),
-    'type'           => 'fieldset',
+    '#title'          => t('Twitter'),
+    '#type'           => 'fieldset',
   );
   $form['twitter']['bot_microblog_twitter_username'] = array(
     '#title'         => t('Twitter username'),
     '#description'   => t('Enter your Twitter username.'),
     '#type'          => 'textfield',
-    '#default_value' => variable_get('bot_microblog_username', ''),
+    '#default_value' => variable_get('bot_microblog_twitter_username', ''),
   );
   $form['twitter']['bot_microblog_twitter_password'] = array(
     '#title'         => t('Twitter password'),
     '#description'   => t('Enter your Twitter password.'),
     '#type'          => 'textfield',
-    '#default_value' => variable_get('bot_microblog_password', ''),
+    '#default_value' => variable_get('bot_microblog_twitter_password', ''),
   );
   return system_settings_form($form);
 }
@@ -79,10 +79,7 @@ function bot_microblog_follow($username) {
   if (!isset($users[$username])) {
     try {
       $twitter = bot_microblog_factory();
-      $user = $twitter->users->show($username);
-      if (!$user->following) {
-        $twitter->friendships->create($username);
-      }
+      $twitter->friendships->create($username);
     }
     catch (Services_Twitter_Exception $e) {
       bot_microblog_exception($e);
