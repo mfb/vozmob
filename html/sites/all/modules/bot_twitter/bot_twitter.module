@@ -173,3 +173,11 @@ function bot_twitter_exception($e) {
 function bot_twitter_form_aggregator_form_feed_alter(&$form, &$form_state) {
   $form['refresh']['#options'][0] = t('0 sec');
 }
+
+/**
+ * Implementation of hook_cron().
+ */
+function bot_twitter_cron() {
+  // Delete items that have been purged from the aggregator_item table.
+  db_query('DELETE t FROM {bot_twitter} t LEFT JOIN {aggregator_item} a ON t.iid = a.iid WHERE a.iid IS NULL');
+}
