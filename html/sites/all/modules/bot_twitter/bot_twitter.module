@@ -2,6 +2,18 @@
 // $Id$
 
 /**
+ * Implementation of hook_help().
+ */
+function bot_twitter_help($path, $arg) {
+  switch ($path) {
+    case 'irc:features':
+      return array(t('Twitter'));
+    case 'irc:features#twitter':
+      return t('Post a Twitter message with ".twitter Just landed in Detroit #amc09"');
+  }
+}
+
+/**
  * Harvest related Twitter feeds.
  */
 function bot_twitter_irc_bot_cron_fastest() {
