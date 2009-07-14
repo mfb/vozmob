@@ -1,6 +1,0 @@
-; $Id$
-name = Bot Twitter
-package = Bot
-dependencies[] = bot
-description = "Relay messages from Twitter to IRC."
-core = 6.x

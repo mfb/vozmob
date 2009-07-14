@@ -1,0 +1,6 @@
+; $Id$
+name = Bot Microblog
+package = Bot
+dependencies[] = bot
+description = "Relay messages from IRC to micro-blogging services such as Twitter."
+core = 6.x
