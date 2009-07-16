@@ -1,5 +1,5 @@
 <?php
-// $Id: twitter.inc,v 1.3.2.6 2009/01/17 20:01:05 eaton Exp $
+// $Id: twitter.inc,v 1.3.2.13 2009/07/04 16:14:08 eaton Exp $
 
 /**
  * @file
@@ -134,12 +134,41 @@ function twitter_set_status($screen_name, $password, $text, $source = 'drupal') 
   $headers = array('Authorization' => 'Basic '. base64_encode($screen_name .':'. $password),
                    'Content-type' => 'application/x-www-form-urlencoded');
   $data = 'status='. urlencode($text);
-  if (!empty($source)) {
+  if (!empty($source) && variable_get('twitter_set_source', TRUE)) {
     $data .= "&source=". urlencode($source);
   }
 
   return drupal_http_request($url, $headers, 'POST', $data);
 }
+
+
+/**
+ * Send a direct message to another Twitter user.
+ *
+ * @param $screen_name
+ *   The screen name of a Twitter.com user.
+ * @param $password
+ *   The password of a Twitter.com user.
+ * @param $to
+ *   The ID or screen name of the recipient user. 
+ * @param $text
+ *   The text to post. Strings longer than 140 characters will be truncated by
+ *   Twitter.
+ * @return
+ *   The full results of the Drupal HTTP request, including the HTTP response
+ *   code returned by Twitter.com.
+ */
+function twitter_send_dm($screen_name, $password, $to, $text) {
+  $url = "http://" . variable_get('twitter_api_url', 'twitter.com') . "/direct_messages/new.xml";
+
+  $headers = array('Authorization' => 'Basic '. base64_encode($screen_name .':'. $password),
+                   'Content-type' => 'application/x-www-form-urlencoded');
+  $data = 'text='. urlencode($text);
+  $data .= '&user='.$to;
+
+  return drupal_http_request($url, $headers, 'POST', $data);
+}
+
 
 /**
  * Fetch the full information for a Twitter.com account.
@@ -197,7 +226,7 @@ function twitter_fetch_account_info($screen_name, $password, $cache = TRUE) {
  * @see twitter_fetch_timeline()
  */
 function twitter_fetch_statuses($screen_name, $password, $cache = TRUE) {
-  $url = "http://" . variable_get('twitter_api_url', 'twitter.com') . "/statuses/$screen_name.xml";
+  $url = "http://" . variable_get('twitter_api_url', 'twitter.com') . "/statuses/user_timeline.xml";
   $headers = array('Authorization' => 'Basic '. base64_encode($screen_name .':'. $password),
                    'Content-type' => 'application/x-www-form-urlencoded');
 
@@ -344,7 +373,16 @@ function _twitter_request_failure($results) {
  * @see twitter_cache_status()
  */
 function twitter_cache_account($twitter_account = array()) {
-  db_query("DELETE FROM {twitter_account} WHERE twitter_uid = %d", $twitter_account['twitter_uid']);
+  // convert boolean into int since it doesn't appear to be
+  // handled correctly otherwise
+  if ($twitter_account['protected']) {
+    $twitter_account['protected'] = 1;
+  }
+  else {
+    $twitter_account['protected'] = 0;
+  }
+  
+  db_query("DELETE FROM {twitter_account} WHERE twitter_uid = %n", $twitter_account['twitter_uid']);
   drupal_write_record('twitter_account', $twitter_account);
 }
 
@@ -381,7 +419,7 @@ function twitter_touch_account($screen_name = '') {
  * @see twitter_cache_status()
  */
 function twitter_cache_status($status = array(), $silent = FALSE) {
-  db_query("DELETE FROM {twitter} WHERE twitter_id = %d", $status['twitter_id']);
+  db_query("DELETE FROM {twitter} WHERE twitter_id = %n", $status['twitter_id']);
   drupal_write_record('twitter', $status);
   if (!$silent) {
     module_invoke_all('twitter_status_update', $status);
@@ -395,19 +433,9 @@ function twitter_cache_status($status = array(), $silent = FALSE) {
  * User/account relationship code
  */
 
-function twitter_get_user_accounts($uid, $only_with_passwords = FALSE) {
-  $sql = "SELECT ta.*, tu.uid, tu.password, tu.import FROM {twitter_user} tu LEFT JOIN {twitter_account} ta ON (tu.screen_name = ta.screen_name) WHERE tu.uid = %d";
-  if ($only_with_passwords) {
-    $sql .= " AND tu.password IS NOT NULL";
-  }
-  $args = array($uid);
-  $results = db_query($sql, $args);
-
-  $accounts = array();
-  while ($account = db_fetch_array($results)) {
-    $accounts[$account['screen_name']] = $account;
-  }
-  return $accounts;
+function twitter_get_user_accounts($uid, $full_access = FALSE) {
+  $drupal_user = user_load($uid);
+  return module_invoke_all('twitter_accounts', $drupal_user, $full_access);
 }
 
 function twitter_user_save($account = array(), $force_import = FALSE) {
@@ -485,6 +513,14 @@ function _twitter_convert_status($status) {
     $result['screen_name'] = NULL;
   }
   $result['created_time'] = strtotime($result['created_at']);
+  
+  // These come in as objects rather than strings IF they are empty, curiously
+  // enough. We want nulls, so we'll special case them.
+  foreach (array('in_reply_to_status_id', 'in_reply_to_user_id', 'in_reply_to_screen_name') as $key) {
+    if (is_object($result[$key])) {
+      $result[$key] = NULL;
+    }
+  }
   return $result;
 }
 

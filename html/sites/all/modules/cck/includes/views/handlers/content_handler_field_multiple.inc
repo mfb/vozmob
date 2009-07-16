@@ -1,5 +1,5 @@
 <?php
-// $Id: content_handler_field_multiple.inc,v 1.1.2.18 2009/05/07 15:06:36 yched Exp $
+// $Id: content_handler_field_multiple.inc,v 1.1.2.19 2009/07/12 19:51:27 markuspetrux Exp $
 
 /**
  * @file
@@ -157,7 +157,7 @@ class content_handler_field_multiple extends content_handler_field {
     $query = 'SELECT '. implode(', ', $query_columns) .
              ' FROM {'. $db_info['table'] ."}".
              " WHERE vid IN (". implode(',', $vids) .')'.
-             " ORDER BY nid ASC, delta ". ($options['multiple']['multiple_reversed'] ? 'DESC' : 'ASC');
+             " ORDER BY _nid ASC, _delta ". ($options['multiple']['multiple_reversed'] ? 'DESC' : 'ASC');
     $result = db_query($query);
 
     while ($item = db_fetch_array($result)) {

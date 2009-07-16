@@ -1,10 +1,8 @@
 <?php
-// $Id: schema_pgsql.inc,v 1.20 2009/05/10 15:51:15 mikeryan Exp $
+// $Id: schema_pgsql.inc,v 1.24 2009/07/13 22:12:22 mikeryan Exp $
 
 function schema_pgsql_engine_type_map() {
   $map = db_type_map(); // sigh
-  // work around a bug in pgsql's type map; see http://drupal.org/node/198234
-  $map['char:normal'] = 'character';
   return $map;
 }
 
@@ -42,7 +40,7 @@ function schema_pgsql_inspect($tbl_name = NULL) {
   // added to our array in the same order.
   //
   $sql = ('SELECT * FROM information_schema.COLUMNS '.
-	  'WHERE table_catalog=\'%s\' AND table_schema=\'public\'');
+	  'WHERE table_catalog=\'%s\' AND table_schema=current_schema()');
   if (isset($tbl_name)) {
     $sql .= 'AND table_name = \'%s\' ';
   }
@@ -58,7 +56,7 @@ function schema_pgsql_inspect($tbl_name = NULL) {
   while ($r = db_fetch_array($res)) {
     $col = array();
 
-    $r['table_name'] = schema_unprefix_table($r['table_name']);
+    $r['new_table_name'] = schema_unprefix_table($r['table_name']);
 
     // We treat numeric columns slightly differently and identify them
     // because they have a 'numeric_precision_radix' property.
@@ -141,14 +139,19 @@ function schema_pgsql_inspect($tbl_name = NULL) {
 
     // Save the column definition we just derived from $r.
     $tables[$r['table_name']]['fields'][$r['column_name']] = $col;
-    $tables[$r['table_name']]['name'] = $r['table_name'];
+    // At this point, $tables is indexed by the raw db table name - save the unprefixed
+    // name for later use
+    $tables[$r['table_name']]['name'] = $r['new_table_name'];
   }
 
   //
   // Make sur we caught all the unsigned columns.  I could not get
   // this to work as a left join on the previous query.
   //
-  $res = db_query('SELECT ccu.*, cc.check_clause FROM information_schema.constraint_column_usage ccu INNER JOIN information_schema.check_constraints cc ON ccu.constraint_name=cc.constraint_name WHERE table_schema=\'public\'');
+  $res = db_query('SELECT ccu.*, cc.check_clause 
+                   FROM information_schema.constraint_column_usage ccu 
+                   INNER JOIN information_schema.check_constraints cc ON ccu.constraint_name=cc.constraint_name 
+                   WHERE table_schema=current_schema()');
   while ($r = db_fetch_array($res)) {
     $r['table_name'] = schema_unprefix_table($r['table_name']);
 
@@ -170,7 +173,7 @@ function schema_pgsql_inspect($tbl_name = NULL) {
     '   pg_get_indexdef(i.indexrelid) AS inddef '.
     'FROM pg_class c, pg_class c2, pg_index i, pg_namespace n '.
     'WHERE c.oid = i.indrelid AND i.indexrelid = c2.oid AND '.
-    '      c.relnamespace=n.oid AND n.nspname=\'public\' '.
+    '      c.relnamespace=n.oid AND n.nspname=current_schema() '.
     'ORDER BY c2.relname');
   while ($r = db_fetch_array($res)) {
     $r['tblname'] = schema_unprefix_table($r['tblname']);
@@ -205,11 +208,18 @@ function schema_pgsql_inspect($tbl_name = NULL) {
         array('@stmt' => $r['inddef']));
     }
   }
+  
+  // Now, for tables which we have unprefixed, index $tables by the unprefixed name
+  foreach ($tables as $tablename => $table) {
+    $newname = $tables[$tablename]['name'];
+    if ($tablename != $newname) {
+      $tables[$newname] = $table;
+      unset($tables[$tablename]);
+    }
+  }
 
   // All done!  Visit admin/build/schema/inspect to see the
   // pretty-printed version of what gets returned here and verify if
   // it is correct.
   return $tables;
 }
-
-?>

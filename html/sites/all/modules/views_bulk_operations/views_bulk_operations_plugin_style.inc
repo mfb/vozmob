@@ -1,18 +1,5 @@
 <?php
-// $Id: views_bulk_operations_plugin_style.inc,v 1.1.2.31 2009/05/11 00:27:23 kratib Exp $
-
-define('VBO_EXECUTION_DIRECT',    1);
-define('VBO_EXECUTION_BATCH',     2);
-define('VBO_EXECUTION_QUEUE',     3);
-
-define('VBO_AGGREGATE_FORCED',    1);
-define('VBO_AGGREGATE_FORBIDDEN', 0);
-define('VBO_AGGREGATE_OPTIONAL',  2);
-
-define('VBO_ACCESS_OP_VIEW',      0x01);
-define('VBO_ACCESS_OP_UPDATE',    0x02);
-define('VBO_ACCESS_OP_CREATE',    0x04);
-define('VBO_ACCESS_OP_DELETE',    0x08);
+// $Id: views_bulk_operations_plugin_style.inc,v 1.1.2.39 2009/07/05 04:13:57 kratib Exp $
 
 class views_bulk_operations_plugin_style extends views_plugin_style_table {
   function options(&$options) {
@@ -23,6 +10,7 @@ class views_bulk_operations_plugin_style extends views_plugin_style_table {
     $options['skip_confirmation'] = FALSE;
     $options['display_result'] = TRUE;
     $options['merge_single_action'] = TRUE;
+    $options['hide_select_all'] = FALSE;
     $this->populate_operations($options);
   }
 
@@ -49,6 +37,12 @@ class views_bulk_operations_plugin_style extends views_plugin_style_table {
         t('Dropdown selectbox with Submit button'),
         t('Each action as a separate button'),
       ),
+    );
+    $form['hide_select_all'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Hide select all checkbox'),
+      '#description' => t('Check this box to hide the "select all" checkbox and associated "select across all pages" button.'),
+      '#default_value' => $this->options['hide_select_all'],
     );
     $form['skip_confirmation'] = array(
       '#type' => 'checkbox',
@@ -97,12 +91,14 @@ class views_bulk_operations_plugin_style extends views_plugin_style_table {
 
   function get_selected_operations() {
     $selected = array();
-    foreach (array_filter($this->options['selected_operations']) as $key => $operation) {
+    foreach (array_filter($this->options['selected_operations']) as $key) {
       if (module_exists('actions_permissions')) {
-        $perm = 'execute ' . $this->options['all_operations'][$key]['label'] . ' ('. $this->options['all_operations'][$key]['callback'] .')';
+        $perm = actions_permissions_get_perm($this->options['all_operations'][$key]['label'], $this->options['all_operations'][$key]['callback']);
         if (!user_access($perm)) continue;
       }
-      $selected[$key] = t($this->options['all_operations'][$key]['label']);
+      if (isset($this->options['all_operations'][$key])) {
+        $selected[$key] = $this->options['all_operations'][$key]['label'];
+      }
     }
     return $selected;
   }
@@ -125,7 +121,7 @@ class views_bulk_operations_plugin_style extends views_plugin_style_table {
         $operation['object'] = $info['type'];
       }
       if ($operation['object'] == $info['type']) {
-        $options[$key] = $operation['label'] .' ('. $operation['callback'] .')'; 
+        $options[$key] = $operation['label'] .' ('. $key .')'; 
       }
     }
     return $options;
@@ -144,7 +140,7 @@ class views_bulk_operations_plugin_style extends views_plugin_style_table {
       $hook_name = $object_type .'_operations';
       foreach (module_invoke_all($hook_name) as $operation) {
         if (empty($operation['callback'])) continue;
-        $key = md5($operation['callback'] . (isset($operation['callback arguments']) ? serialize($operation['callback arguments']) : ''));
+        $key = $operation['callback'] . (empty($operation['callback arguments']) ? '' : ':'. md5(serialize($operation['callback arguments'])));
         if (!isset($operation['behavior'])) { // assume operations modify nodes by default
           $operation['behavior'] = array('changes_node_property');
         }
@@ -157,13 +153,14 @@ class views_bulk_operations_plugin_style extends views_plugin_style_table {
           'object'             => $object_type,
           'aggregate'          => isset($operation['aggregate']) ? (int)$operation['aggregate'] : VBO_AGGREGATE_OPTIONAL,
           'access op'          => $this->get_access_op($operation),
+          'permissions'        => isset($operation['permissions']) ? $operation['permissions'] : NULL,
         );
       }
     }
 
     $action_operations = actions_list() + $this->get_custom_actions();
     foreach ($action_operations as $callback => $operation) {
-      $key = md5($callback);
+      $key = isset($operation['key']) ? $operation['key'] : $callback;
       $operations[$key] = array(
         'label'              => $operation['description'],
         'callback'           => $callback,
@@ -173,6 +170,7 @@ class views_bulk_operations_plugin_style extends views_plugin_style_table {
         'object'             => $operation['type'],
         'aggregate'          => isset($operation['aggregate']) ? (int)$operation['aggregate'] : VBO_AGGREGATE_FORBIDDEN,
         'access op'          => $this->get_access_op($operation),
+        'permissions'        => isset($operation['permissions']) ? $operation['permissions'] : NULL,
       );
     }
 
@@ -204,14 +202,17 @@ class views_bulk_operations_plugin_style extends views_plugin_style_table {
     $static_actions = actions_list();
     $result = db_query("SELECT * FROM {actions} WHERE parameters > ''");
     while ($action = db_fetch_object($result)) {
+      $parameters = unserialize($action->parameters);
       $actions[$action->aid] = array(
         'description' => $action->description,
         'type' => $action->type,
         'configurable' => FALSE,
-        'parameters' => unserialize($action->parameters),
+        'parameters' => $parameters,
+        'key' => $action->callback . (empty($parameters) ? '' : ':'. md5($action->parameters)),
       );
       if (isset($static_actions[$action->callback]['behavior'])) $actions[$action->aid]['behavior'] = $static_actions[$action->callback]['behavior'];
       if (isset($static_actions[$action->callback]['aggregate'])) $actions[$action->aid]['aggregate'] = $static_actions[$action->callback]['aggregate'];
+      if (isset($static_actions[$action->callback]['permissions'])) $actions[$action->aid]['permissions'] = $static_actions[$action->callback]['permissions'];
     }
     return $actions;
   }

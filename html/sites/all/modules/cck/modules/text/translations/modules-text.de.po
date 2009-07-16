@@ -1,4 +1,4 @@
-# $Id: modules-text.de.po,v 1.1.2.9 2009/03/09 22:04:26 hass Exp $
+# $Id: modules-text.de.po,v 1.1.2.10 2009/06/16 17:19:19 hass Exp $
 # German translation of CCK
 # Copyright 2006 Lukas Gangoly <lukas.gangoly@univie.ac.at>
 # Copyright 2006 Jakob Petsovits <jpetso@gmx.at>
@@ -16,8 +16,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: German translation of CCK\n"
-"POT-Creation-Date: 2009-03-09 22:08+0100\n"
-"PO-Revision-Date: 2009-03-09 23:00+0100\n"
+"POT-Creation-Date: 2009-06-16 19:00+0200\n"
+"PO-Revision-Date: 2009-06-16 19:10+0100\n"
 "Last-Translator: Alexander Haß\n"
 "Language-Team: \n"
 "MIME-Version: 1.0\n"
@@ -32,39 +32,35 @@ msgstr ""
 msgid "Store text in the database."
 msgstr "Text in der Datenbank speichern."
 
-#: modules/text/text.module:54
+#: modules/text/text.module:55
 msgid "Filtered text (user selects input format)"
 msgstr "Gefilterter Text (Benutzer wählt Eingabeformat aus)"
 
-#: modules/text/text.module:57
+#: modules/text/text.module:58
 msgid "Text processing"
 msgstr "Textverarbeitung"
 
-#: modules/text/text.module:63
+#: modules/text/text.module:64
 msgid "Maximum length"
 msgstr "Maximallänge"
 
-#: modules/text/text.module:67
+#: modules/text/text.module:68
 msgid "The maximum length of the field in characters. Leave blank for an unlimited size."
 msgstr "Die maximale Zeichenlänge des Feldes. Für eine unbegrenzte Länge freilassen."
 
-#: modules/text/text.module:159
+#: modules/text/text.module:160
 msgid "%name: the value may not be longer than %max characters."
 msgstr "%name: Der Wert darf nicht länger als %max Zeichen sein."
 
-#: modules/text/text.module:206
+#: modules/text/text.module:207
 msgid "Trimmed"
 msgstr "Getrimmt"
 
-#: modules/text/text.module:264
+#: modules/text/text.module:265
 msgid "Text area (multiple rows)"
 msgstr "Textfeld (mehrere Zeilen)"
 
-#: modules/text/text.module:316
-msgid "Size of textfield"
-msgstr "Größe des Textfeldes"
-
-#: modules/text/text.module:325
+#: modules/text/text.module:326
 msgid "Rows"
 msgstr "Zeilen"
 

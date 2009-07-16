@@ -1,5 +1,5 @@
 <?php
-// $Id: filefield_field.inc,v 1.31 2009/04/20 22:30:08 quicksketch Exp $
+// $Id: filefield_field.inc,v 1.32 2009/07/03 22:47:08 quicksketch Exp $
 
 /**
  * @file
@@ -155,14 +155,15 @@ function filefield_field_update($node, $field, &$items, $teaser, $page) {
   }
 
   // If this is a new node there are no old items to worry about.
-  if ($node->is_new) {
+  // On new revisions, old files are always maintained in the previous revision.
+  if ($node->is_new || !empty($node->revision)) {
     return;
   } 
 
-  // Delete items from original node if no new revision was created.
+  // Delete items from original node.
   $orig = node_load($node->nid); 
   // If there are, figure out which ones must go.
-  if (empty($node->revision) && !empty($orig->$field['field_name'])) {
+  if (!empty($orig->$field['field_name'])) {
     foreach ($orig->$field['field_name'] as $oitem) {
       if (isset($oitem['fid']) && !in_array($oitem['fid'], $curfids)) {
         // For hook_file_references, remember that this is being deleted.

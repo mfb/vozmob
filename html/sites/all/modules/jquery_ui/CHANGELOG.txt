@@ -1,11 +1,15 @@
-// $Id: CHANGELOG.txt,v 1.4 2008/11/03 23:21:02 sun Exp $
+// $Id: CHANGELOG.txt,v 1.11 2009/06/29 00:09:27 sun Exp $
 
 jQuery UI x.x-x.x, xxxx-xx-xx
 -----------------------------
 
 
-jQuery UI 6.x-1.x, xxxx-xx-xx
+jQuery UI 7.x-2.x, xxxx-xx-xx
 -----------------------------
+by sun: Updated for #315100.
+#434960 by sun: Added package information.
+#362509 by Rob Loach, Deciphered, sun, and adrinux: New release system with
+  jQuery UI 1.6.
 #322731 by sun: Fixed improper use of t() in module install file.
 #227687 by sun: Fixed improperly capitalized package name.
 

@@ -1,5 +1,5 @@
 <?php
-// $Id: mapstraction.module,v 1.1.2.6 2009/02/27 15:17:46 diggersf Exp $
+// $Id: mapstraction.module,v 1.1.2.7 2009/06/11 12:40:00 dixon Exp $
 
 /**
  * @file
@@ -151,7 +151,7 @@ function theme_mapstraction_map($view, $options, $rows) {
       $controls[$control] = TRUE;
     }
   }
-  
+
   $map = array(
     'viewName' => $view->name,
     'currentDisplay' => $view->current_display,
@@ -159,6 +159,7 @@ function theme_mapstraction_map($view, $options, $rows) {
     'markers' => $view->style_plugin->map_points($rows),
     'controls' => $controls,
     'initialPoint' => $options['initial_point'],
+    'behaviours' => $options['behaviours'],
   );
 
   // Add the map to Drupal.settings object in JS.

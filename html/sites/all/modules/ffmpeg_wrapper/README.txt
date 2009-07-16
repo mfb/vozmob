@@ -1,4 +1,4 @@
-;$Id: README.txt,v 1.1.2.3.2.2 2009/03/02 17:25:25 arthuregg Exp $
+;$Id: README.txt,v 1.1.2.3.2.3 2009/06/29 16:57:15 arthuregg Exp $
 
 -----------------------------------------------------------------------
  CONFIGURATION
@@ -21,7 +21,7 @@ it on a debian/ubuntu environment:
 
 http://www.24b6.net/?p=188
 
-If you need a compiled binary, check http://mediamover.24b6.net/ffmpeg
+If you need a compiled binary, check http://24b6.net/content/ffmpeg-binary
 
 If you are having PHP issues with openbasedir, you may want to look
 at this page: http://drupal.org/node/82223

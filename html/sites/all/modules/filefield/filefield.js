@@ -1,4 +1,4 @@
-// $Id: filefield.js,v 1.20 2009/04/28 01:39:31 quicksketch Exp $
+// $Id: filefield.js,v 1.21 2009/07/03 21:22:57 quicksketch Exp $
 
 /**
  * Auto-attach standard client side file input validation.
@@ -41,6 +41,13 @@ Drupal.behaviors.filefieldButtons = function(context) {
     .bind('mousedown', Drupal.filefield.disableFields)
     .bind('mousedown', Drupal.filefield.progressBar);
 };
+
+/**
+ * Open links to files within the node form in a new window.
+ */
+Drupal.behaviors.filefieldPreviewLinks = function(context) {
+  $('div.filefield-element div.widget-preview a').click(Drupal.filefield.openInNewWindow).attr('target', '_blank');
+}
 
 /**
  * Admin enhancement: only show the "Files listed by default" when needed.
@@ -117,5 +124,9 @@ Drupal.filefield = {
       }, 500);
 
     }
+  },
+  openInNewWindow: function(event) {
+    window.open(this.href, 'filefieldPreview', 'toolbar=0,scrollbars=1,location=1,statusbar=1,menubar=0,resizable=1,width=500,height=550');
+    return false;
   }
 };

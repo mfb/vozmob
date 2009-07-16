@@ -1,5 +1,5 @@
 <?php
-// $Id: flowplayer.module,v 1.2.2.3 2009/05/07 07:25:47 robloach Exp $
+// $Id: flowplayer.module,v 1.2.2.4 2009/06/25 19:54:07 robloach Exp $
 
 /**
  * @file
@@ -44,6 +44,23 @@ function flowplayer_help($path, $arg) {
           'linkUrl' => 'http://flowplayer.org',
         ),
       ));
+
+      /**
+       * Audio
+       */
+      $output .= '<h3>'. t('Audio Plugin') .'</h3>';
+      $output .= theme('flowplayer', array(
+        'playlist' => array(
+          array(
+            'url' => 'http://flowplayer.org/img/demos/national.jpg',
+            'scaling' => 'orig',
+          ),
+          array(
+            'url' => 'http://flowplayer.org/demos/plugins/fake_empire.mp3',
+            'autoPlay' => FALSE,
+          ),
+        ),
+      ), 'audio', array('style' => 'width:300px; height: 243px;'));
       return $output;
     break;
   }

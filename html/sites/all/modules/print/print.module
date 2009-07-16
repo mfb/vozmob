@@ -1,5 +1,31 @@
 <?php
-// $Id: print.module,v 1.25.2.66 2009/05/10 23:12:59 jcnventura Exp $
+// $Id: print.module,v 1.25.2.73 2009/07/09 12:00:52 jcnventura Exp $
+
+/**
+ * @defgroup print Printer, e-mail and PDF versions
+ *
+ * Welcome to the print module developer's documentation. The interesting
+ * functions for themers are those that start with 'theme_'.
+ *
+ * - Printer-friendly pages
+ *   - @link print.module Module main file @endlink
+ *   - @link print.admin.inc Settings form @endlink
+ *   - @link print.pages.inc HTML generation @endlink
+ *   - @link print.install (Un)Install routines @endlink
+ *   - @link print.tpl.php Page generation template @endlink
+ * - Send by e-mail
+ *   - @link print_mail.module Module main file @endlink
+ *   - @link print_mail.admin.inc Settings form @endlink
+ *   - @link print_mail.inc Mail form and send mail routine @endlink
+ *   - @link print_mail.install (Un)Install routines @endlink
+ * - PDF version
+ *   - @link print_pdf.module Module main file @endlink
+ *   - @link print_pdf.admin.inc Settings form @endlink
+ *   - @link print_pdf.pages.inc PDF generation @endlink
+ *   - @link print_pdf.class.inc Auxiliary PHP5 class @endlink
+ *   - @link print_pdf.class_php4.inc Auxiliary PHP4 class @endlink
+ *   - @link print_pdf.install (Un)Install routines @endlink
+ */
 
 /**
  * @file
@@ -7,6 +33,8 @@
  *
  * This is the core module of the PF package, with the Drupal hooks
  * and other administrative functions.
+ *
+ * @ingroup print
  */
 
 define('PRINT_PATH', 'print');
@@ -80,6 +108,9 @@ function print_menu() {
     'access arguments' => array('access print'),
     'type' => MENU_CALLBACK,
     'file' => 'print.pages.inc',
+  );
+  $items[PRINT_PATH .'/'. PRINT_PATH] = array(
+    'page callback' => 'drupal_access_denied',
   );
   $items['admin/settings/print'] = array(
     'title' => 'Printer, e-mail and PDF versions',
@@ -165,7 +196,7 @@ function print_block($op = 'list', $delta = 0, $edit = array()) {
         if (preg_match('!^print.*?_insert_link$!', $func)) {
           $link = $func(NULL, $node);
           if (!empty($link)) {
-            $block['content'] .= $link .'<br />';
+            $block['content'] .= $link;
           }
         }
       }
@@ -237,6 +268,9 @@ function print_link_alter(&$links, $node) {
       $print_html_book_link = variable_get('print_html_book_link', PRINT_HTML_BOOK_LINK_DEFAULT);
 
       if ($print_html_book_link) {
+        $print_html_link_pos = variable_get('print_html_link_pos', array(PRINT_HTML_LINK_POS_DEFAULT => PRINT_HTML_LINK_POS_DEFAULT));
+
+        if (!empty($print_html_link_pos['link'])) {
         $format = theme('print_format_link');
 
         switch ($print_html_book_link) {
@@ -255,6 +289,10 @@ function print_link_alter(&$links, $node) {
           'attributes' => $format['attributes'],
           'html' => $format['html'],
         );
+        }
+        else {
+          unset($links[$module]);
+        }
       }
     }
   }
@@ -292,9 +330,7 @@ function print_nodeapi(&$node, $op = 'view', $teaser, $page) {
   switch ($op) {
     case 'view':
       // Insert content corner links
-      if (($teaser === FALSE) &&
-          !isset($node->printing)) {
-//          isset($node->build_mode) && ($node->build_mode == NODE_BUILD_NORMAL)) {
+      if (($teaser === FALSE) && isset($node->build_mode) && ($node->build_mode == NODE_BUILD_NORMAL)) {
       $node->content['print_links'] = array(
         '#value' => "<span class='print-link'></span>",
         '#weight' => -101,
@@ -360,6 +396,7 @@ function print_form_alter(&$form, $form_state, $form_id) {
       $form['print']['print_display']['#default_value'] = variable_get('print_display_'. $form['#node_type']->type, PRINT_TYPE_SHOW_LINK_DEFAULT);
       $form['print']['print_display_comment']['#default_value'] = variable_get('print_display_comment_'. $form['#node_type']->type, PRINT_TYPE_COMMENT_LINK_DEFAULT);
       $form['print']['print_display_urllist']['#default_value'] = variable_get('print_display_urllist_'. $form['#node_type']->type, PRINT_TYPE_URLLIST_DEFAULT);
+      $form['print']['label']['#value'] = '<p><em>'. t('The settings below only apply when some of the corresponding module-wide link settings are enabled.') .'</em></p>'. $form['print']['label']['#value'];
     }
     else {
       $node = $form['#node'];
@@ -386,7 +423,7 @@ function print_content_extra_fields($type_name) {
 /**
  * Implementation of hook_content_build_modes().
  */
-/*function print_content_build_modes() {
+function print_content_build_modes() {
   return array(
     'print' => array(
       'title' => t('Print'),
@@ -398,7 +435,7 @@ function print_content_extra_fields($type_name) {
       ),
     ),
   );
-}*/
+}
 
 /**
  * Auxiliary function to assign the per-node settings to the node object fields
@@ -678,16 +715,11 @@ function print_link_allowed($args) {
     }
   }
   if (!empty($args['node'])) {
-    static $node_type = FALSE;
+    static $node_type = '';
 
     $node = $args['node'];
-    if ($node_type === FALSE) {
-      if (isset($node->type)) {
-        $node_type = $node->type;
-      }
-      else {
-        $node_type = '';
-      }
+    if (isset($node->type)) {
+      $node_type = $node->type;
     }
     // Node
     $print_html_node_link_visibility = variable_get('print_html_node_link_visibility', PRINT_HTML_NODE_LINK_VISIBILITY_DEFAULT);

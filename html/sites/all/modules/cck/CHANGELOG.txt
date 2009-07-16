@@ -1,7 +1,29 @@
-//$Id: CHANGELOG.txt,v 1.1.6.336 2009/06/05 20:36:02 yched Exp $
+//$Id: CHANGELOG.txt,v 1.1.6.349 2009/07/14 22:17:05 yched Exp $
 
 CCK 6.x-2.x
 ===========
+
+Features:
+- #428650 Conditional cache/menu rebuild for content CRUD methods.
+- #334945 Save default values when field is hidden because of access permissions.
+- #503258 by eaton: allow 'extra fields' to provide 'configure' and 'remove' links.
+- #505278 Panels 3 and multiple node type fields.
+- #495582 Reviewed Panels 3 integration (prep work for combo / multigroups).
+  Implementation of fieldgroup_view_group() that can be used to render field groups.
+- #417122 by quicksketch: allow drupal_alter on field and widget settings.
+
+Bugfixes:
+- #499696 by DeFr - Noderefernce / Userreference: fix Views mode when the view has exposed filters.
+- #498924 #multiple FAPI attribute is used for a radios and checkboxes in content export forms.
+- #409144 Review extra elements for node edit form provided by core modules.
+- #361473 CCK fieldgroup panels doesn't respect CCK field privacy settings.
+- #515984 Multiple field delta ORDER BY incorrect.
+- #414298 by Michelle, merlinofchaos - Follow up to remove fieldgroup.panels.inc (it was moved to panels/content_types).
+
+CCK 6.x-2.4
+===========
+
+Hotfix release for 2.3:
 - #482774 Update breaks when CCK is disabled.
 
 CCK 6.x-2.3

@@ -1,51 +1,53 @@
-# Hungarian translation of cck (6.x-2.2)
+# Hungarian translation of cck (6.x-2.3)
 # Copyright (c) 2009 by the Hungarian translation team
 # Generated from files:
-#  content.module,v 1.301.2.100 2009/03/18 19:20:52 yched
-#  content.admin.inc,v 1.181.2.64 2009/03/01 13:48:44 yched
-#  content.rules.inc,v 1.1.2.4 2008/10/24 11:11:48 fago
-#  number.module,v 1.91.2.33 2009/03/16 22:04:07 yched
-#  text.module,v 1.95.2.28 2008/12/30 00:00:54 yched
-#  userreference.module,v 1.106.2.36 2009/03/18 21:00:58 yched
+#  content.module,v 1.301.2.106 2009/06/02 12:24:04 yched
+#  content.admin.inc,v 1.181.2.68 2009/06/02 14:49:07 yched
+#  content.rules.inc,v 1.1.2.6 2009/04/30 09:56:07 fago
+#  number.module,v 1.91.2.35 2009/04/29 20:51:53 karens
+#  text.module,v 1.95.2.29 2009/04/29 20:51:53 karens
+#  userreference.module,v 1.106.2.43 2009/06/02 12:24:04 yched
 #  content-admin-field-overview-form.tpl.php,v 1.1.2.5 2008/10/16 14:40:54 yched
-#  fieldgroup.module,v 1.79.2.45 2009/02/28 23:56:17 yched
+#  fieldgroup.module,v 1.79.2.48 2009/04/29 20:51:52 karens
 #  content_copy.module,v 1.27.2.21 2009/02/26 23:15:54 yched
 #  content_copy_export_form.tpl.php,v 1.1.2.2 2008/10/28 02:11:49 yched
-#  content_multigroup.module,v 1.1.2.4 2008/10/22 11:02:41 yched
-#  content.panels.inc,v 1.1.2.6 2008/11/03 14:12:41 yched
+#  content_field.inc,v 1.1.2.4 2009/06/02 15:05:27 yched
 #  content.crud.inc,v 1.76.2.14 2008/11/07 15:02:02 yched
-#  content_handler_field.inc,v 1.1.2.14 2009/03/18 19:20:52 yched
+#  content_handler_field.inc,v 1.1.2.15 2009/03/30 22:54:16 yched
 #  content_handler_relationship.inc,v 1.1.2.3 2008/10/24 12:31:58 yched
 #  content_handler_sort.inc,v 1.1.2.6 2008/10/25 00:36:41 yched
 #  content.info,v 1.6 2007/07/04 23:46:29 yched
-#  content.views.inc,v 1.1.2.22 2009/01/14 13:19:47 karens
+#  content.views.inc,v 1.1.2.25 2009/04/11 14:50:53 yched
 #  fieldgroup.panels.inc,v 1.1.2.5 2009/01/10 22:47:06 yched
+#  content_fieldgroup.inc,v 1.1.2.1 2009/04/29 18:34:46 karens
+#  node_from_noderef.inc,v 1.1.2.1 2009/06/02 12:24:03 yched
+#  user_from_userref.inc,v 1.1.2.1 2009/06/02 12:24:04 yched
 #  optionwidgets.module,v 1.69.2.23 2009/03/18 21:00:58 yched
 #  text.info,v 1.9 2008/04/23 18:02:31 dww
-#  nodereference.module,v 1.138.2.50 2009/03/18 21:00:58 yched
+#  nodereference.module,v 1.138.2.55 2009/06/02 12:24:04 yched
 #  content.token.inc,v 1.5.2.8 2008/12/05 14:59:22 yched
 #  number.info,v 1.7 2008/04/23 18:02:16 dww
 #  content-admin-display-overview-form.tpl.php,v 1.1.2.3 2008/10/09 20:58:26 karens
 #  nodereference.rules.inc,v 1.1.2.2 2008/10/06 15:02:03 karens
 #  userreference.rules.inc,v 1.1.2.2 2008/10/06 15:02:03 karens
-#  content.install,v 1.85.2.30 2008/11/07 16:24:58 yched
+#  content.install,v 1.85.2.31 2009/04/23 18:37:10 yched
 #  content_copy.info,v 1.6 2008/04/23 18:01:48 dww
 #  content_permissions.info,v 1.2 2008/04/23 18:01:52 dww
 #  fieldgroup.info,v 1.6.2.1 2008/09/22 18:25:21 karens
 #  nodereference.info,v 1.8 2008/04/23 18:02:07 dww
 #  optionwidgets.info,v 1.7 2008/04/23 18:02:24 dww
 #  userreference.info,v 1.8 2008/04/23 18:02:38 dww
-#  content.node_form.inc,v 1.7.2.18 2009/02/10 22:53:04 yched
-#  content_handler_field_multiple.inc,v 1.1.2.16 2009/03/17 22:58:06 yched
+#  content.node_form.inc,v 1.7.2.19 2009/06/02 20:18:27 yched
+#  content_handler_field_multiple.inc,v 1.1.2.18 2009/05/07 15:06:36 yched
 #  content_permissions.module,v 1.5.2.5 2008/12/27 22:22:55 yched
 #  content_permissions.install,v 1.1.2.2 2008/10/04 13:14:22 karens
-#  theme.inc,v 1.1.2.12 2008/10/28 22:12:09 yched
+#  theme.inc,v 1.1.2.13 2009/04/28 23:06:37 yched
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: cck (6.x-2.2)\n"
-"POT-Creation-Date: 2009-05-16 15:52+0200\n"
-"PO-Revision-Date: 2009-05-15 19:32+0200\n"
+"Project-Id-Version: cck (6.x-2.3)\n"
+"POT-Creation-Date: 2009-06-12 19:46+0200\n"
+"PO-Revision-Date: 2009-06-08 21:10+0200\n"
 "Last-Translator: Balogh Zoltán\n"
 "Language-Team: Hungarian http://forditas.mindworks.hu\n"
 "MIME-Version: 1.0\n"
@@ -53,15 +55,15 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n!=1);\n"
 
-#: content.module:486
+#: content.module:492
 msgid "This field is required."
 msgstr "Szükséges mező."
 
-#: content.module:490
+#: content.module:496
 msgid "!title: !required"
 msgstr "!title: !required"
 
-#: includes/content.admin.inc:1662
+#: includes/content.admin.inc:1678
 msgid "Processing"
 msgstr "Feldolgozás"
 
@@ -73,13 +75,13 @@ msgstr "szerkesztés"
 msgid "delete"
 msgstr "törlés"
 
-#: includes/content.admin.inc:1089,1102; includes/content.rules.inc:99; modules/number/number.module:127,136; modules/text/text.module:92,101
+#: includes/content.admin.inc:1096,1109; includes/content.rules.inc:99; modules/number/number.module:130,139; modules/text/text.module:93,102
 msgid "Code"
 msgstr "Kód"
 
-#: modules/text/text.module:196; modules/userreference/userreference.module:221
+#: modules/text/text.module:197; modules/userreference/userreference.module:232
 msgid "Default"
-msgstr "Alapértelmezett"
+msgstr "Alapértelmezés"
 
 #: theme/content-admin-field-overview-form.tpl.php:11
 msgid "Weight"
@@ -89,15 +91,15 @@ msgstr "Súly"
 msgid "Operations"
 msgstr "Műveletek"
 
-#: includes/content.admin.inc:888; modules/fieldgroup/fieldgroup.module:203
+#: includes/content.admin.inc:895; modules/fieldgroup/fieldgroup.module:209
 msgid "Cancel"
 msgstr "Mégsem"
 
-#: content.module:2339
+#: content.module:2362
 msgid "Language"
 msgstr "Nyelv"
 
-#: content.module:1870
+#: content.module:1880
 msgid "Search"
 msgstr "Keresés"
 
@@ -109,19 +111,19 @@ msgstr "Import"
 msgid "Export"
 msgstr "Export"
 
-#: includes/content.admin.inc:344,670; modules/fieldgroup/fieldgroup.module:171,335
+#: includes/content.admin.inc:352,677; modules/fieldgroup/fieldgroup.module:177,341
 msgid "Save"
 msgstr "Mentés"
 
-#: modules/fieldgroup/fieldgroup.module:202
+#: modules/fieldgroup/fieldgroup.module:208
 msgid "This action cannot be undone."
 msgstr "A művelet nem visszavonható."
 
-#: modules/content_multigroup/content_multigroup.module:356; modules/fieldgroup/fieldgroup.module:260
+#: modules/fieldgroup/fieldgroup.module:266
 msgid "none"
 msgstr "nincs"
 
-#: includes/content.admin.inc:16; modules/fieldgroup/fieldgroup.module:152
+#: includes/content.admin.inc:16; modules/fieldgroup/fieldgroup.module:158
 msgid "Description"
 msgstr "Leírás"
 
@@ -129,19 +131,19 @@ msgstr "Leírás"
 msgid "Configure"
 msgstr "Beállítás"
 
-#: includes/content.panels.inc:52
+#: includes/panels/content_types/content_field.inc:100
 msgid "Block title"
 msgstr "Blokk címe"
 
-#: content.module:589,596,0; includes/content.crud.inc:589,633
+#: content.module:595,602,0; includes/content.crud.inc:589,633
 msgid "content"
 msgstr "tartalom"
 
-#: content.module:2360
+#: content.module:2383
 msgid "Book"
 msgstr "Könyv"
 
-#: includes/content.admin.inc:171,197,888; modules/fieldgroup/fieldgroup.module:203
+#: includes/content.admin.inc:171,197,895; modules/fieldgroup/fieldgroup.module:209
 msgid "Remove"
 msgstr "Eltávolítás"
 
@@ -149,7 +151,7 @@ msgstr "Eltávolítás"
 msgid "Custom"
 msgstr "Egyedi"
 
-#: includes/content.admin.inc:1116
+#: includes/content.admin.inc:1123
 msgid "Required"
 msgstr "Szükséges"
 
@@ -165,7 +167,7 @@ msgstr "Név"
 msgid "All"
 msgstr "Minden"
 
-#: content.module:2346
+#: content.module:2369
 msgid "Menu settings"
 msgstr "Menü beállítások"
 
@@ -173,25 +175,25 @@ msgstr "Menü beállítások"
 msgid "No content types available."
 msgstr "Nincs elérhető tartalomtípus."
 
-#: includes/content.admin.inc:1127; modules/content_multigroup/content_multigroup.module:73
+#: includes/content.admin.inc:1134
 msgid "Unlimited"
 msgstr "Korlátlan"
 
-#: includes/content.admin.inc:1663
+#: includes/content.admin.inc:1679
 msgid "The update has encountered an error."
 msgstr "A frissítés során hiba történt."
 
-#: includes/content.admin.inc:1681
+#: includes/content.admin.inc:1697
 msgid "1 item successfully processed:"
 msgid_plural "@count items successfully processed:"
 msgstr[0] "1 elem sikeresen feldolgozva:"
 msgstr[1] "@count elem sikeresen feldolgozva:"
 
-#: content.info:0; includes/content.rules.inc:19,200; includes/views/content.views.inc:178,254
+#: content.info:0; includes/content.rules.inc:19,212; includes/views/content.views.inc:180,261
 msgid "Content"
 msgstr "Tartalom"
 
-#: content.module:1857,1860
+#: content.module:1867,1870
 msgid "RSS"
 msgstr "RSS"
 
@@ -199,27 +201,27 @@ msgstr "RSS"
 msgid "Content types"
 msgstr "Tartalomtípusok"
 
-#: includes/content.panels.inc:39; modules/fieldgroup/fieldgroup.panels.inc:31
+#: includes/panels/content_types/content_field.inc:45; modules/fieldgroup/fieldgroup.panels.inc:31; modules/fieldgroup/panels/content_types/content_fieldgroup.inc:43; modules/nodereference/panels/relationships/node_from_noderef.inc:17; modules/userreference/panels/relationships/user_from_userref.inc:17
 msgid "Node"
 msgstr "Tartalom"
 
-#: modules/userreference/userreference.module:75
+#: modules/userreference/userreference.module:85
 msgid "Active"
 msgstr "Aktív"
 
-#: content.module:2377
+#: content.module:2400
 msgid "Poll settings"
 msgstr "Szavazás beállításai"
 
-#: includes/content.admin.inc:826; includes/content.rules.inc:66
+#: includes/content.admin.inc:833; includes/content.rules.inc:66
 msgid "Continue"
 msgstr "Folytatás"
 
-#: includes/content.admin.inc:1111
+#: includes/content.admin.inc:1118
 msgid "Global settings"
 msgstr "Általános beállítások"
 
-#: includes/content.admin.inc:1024; modules/fieldgroup/fieldgroup.module:139
+#: includes/content.admin.inc:1031; modules/fieldgroup/fieldgroup.module:145
 msgid "Help text"
 msgstr "Súgó szöveg"
 
@@ -227,15 +229,15 @@ msgstr "Súgó szöveg"
 msgid "- None -"
 msgstr "- Nincs -"
 
-#: content.module:2353
+#: content.module:2376
 msgid "Taxonomy"
 msgstr "Taxonómia"
 
-#: content.module:2384
+#: content.module:2407
 msgid "File attachments"
 msgstr "Csatolmányok"
 
-#: modules/userreference/userreference.module:75
+#: modules/userreference/userreference.module:85
 msgid "Blocked"
 msgstr "Blokkolt"
 
@@ -247,7 +249,7 @@ msgstr "Hozzáadás"
 msgid "N/A"
 msgstr "Nincs adat"
 
-#: includes/content.panels.inc:55
+#: includes/panels/content_types/content_field.inc:103
 msgid "Hidden"
 msgstr "Rejtett"
 
@@ -263,7 +265,7 @@ msgstr "Nincs"
 msgid "Format"
 msgstr "Formátum"
 
-#: modules/nodereference/nodereference.module:421; modules/userreference/userreference.module:347
+#: modules/nodereference/nodereference.module:433; modules/userreference/userreference.module:359
 msgid "Contains"
 msgstr "Tartalmazza"
 
@@ -271,7 +273,7 @@ msgstr "Tartalmazza"
 msgid "Token"
 msgstr "Vezérjel"
 
-#: modules/text/text.module:54,201; modules/userreference/userreference.module:226
+#: modules/text/text.module:55,202; modules/userreference/userreference.module:237
 msgid "Plain text"
 msgstr "Egyszerű szöveg"
 
@@ -283,11 +285,11 @@ msgstr "Szám"
 msgid "Content type"
 msgstr "Tartalomtípus"
 
-#: includes/content.admin.inc:244,285,315,797,978; includes/content.panels.inc:49; includes/views/handlers/content_handler_field.inc:56; modules/content_copy/content_copy_export_form.tpl.php:10; modules/fieldgroup/fieldgroup.module:111; theme/content-admin-display-overview-form.tpl.php:13; theme/content-admin-field-overview-form.tpl.php:10
+#: includes/content.admin.inc:244,285,315,804,985; includes/panels/content_types/content_field.inc:97; includes/views/handlers/content_handler_field.inc:56; modules/content_copy/content_copy_export_form.tpl.php:10; modules/fieldgroup/fieldgroup.module:117; theme/content-admin-display-overview-form.tpl.php:13; theme/content-admin-field-overview-form.tpl.php:10
 msgid "Label"
 msgstr "Címke"
 
-#: includes/content.admin.inc:1053
+#: includes/content.admin.inc:1060
 msgid "Default value"
 msgstr "Alapértelmezett érték"
 
@@ -295,49 +297,49 @@ msgstr "Alapértelmezett érték"
 msgid "Types"
 msgstr "Típusok"
 
-#: modules/nodereference/nodereference.module:115; modules/userreference/userreference.module:112
+#: modules/nodereference/nodereference.module:125; modules/userreference/userreference.module:122
 msgid "Provide a comma separated list of arguments to pass to the view."
 msgstr ""
 "Vesszővel elválasztott lista, amely a nézetnek küldendő "
 "paramétereket tartalmazza."
 
-#: content.module:1844
+#: content.module:1854
 msgid "Basic"
 msgstr "Alap"
 
-#: modules/number/number.module:71
+#: modules/number/number.module:74
 msgid "Precision"
 msgstr "Helyiértékek"
 
-#: modules/number/number.module:92
+#: modules/number/number.module:95
 msgid "Prefix"
 msgstr "Előtag"
 
-#: modules/number/number.module:99
+#: modules/number/number.module:102
 msgid "Suffix"
 msgstr "Toldalék"
 
-#: modules/nodereference/nodereference.module:420; modules/userreference/userreference.module:346
+#: modules/nodereference/nodereference.module:432; modules/userreference/userreference.module:358
 msgid "Starts with"
 msgstr "Avval kezdődik"
 
-#: content.module:493; modules/content_multigroup/content_multigroup.module:903
+#: content.module:499
 msgid "Order"
 msgstr "Sorrend"
 
-#: includes/content.rules.inc:53,266; modules/nodereference/nodereference.rules.inc:45; modules/userreference/userreference.rules.inc:47; theme/content-admin-display-overview-form.tpl.php:11
+#: includes/content.rules.inc:53,276; modules/nodereference/nodereference.rules.inc:45; modules/userreference/userreference.rules.inc:47; theme/content-admin-display-overview-form.tpl.php:11
 msgid "Field"
 msgstr "Mező"
 
-#: content.module:82
+#: content.module:79
 msgid "Fields"
 msgstr "Mezők"
 
-#: content.module:1847; modules/nodereference/nodereference.module:257
+#: content.module:1857; modules/nodereference/nodereference.module:268
 msgid "Teaser"
 msgstr "Bevezető"
 
-#: modules/fieldgroup/fieldgroup.module:129
+#: modules/fieldgroup/fieldgroup.module:135
 msgid "Style"
 msgstr "Stílus"
 
@@ -501,61 +503,61 @@ msgstr ""
 "<a href=\"@handbook-cck\">CCK</a> oldalán, vagy a <a "
 "href=\"@project-cck\">CCK projekt oldalán</a> érhető el."
 
-#: content.module:1851; modules/nodereference/nodereference.module:252
+#: content.module:1861; modules/nodereference/nodereference.module:263
 msgid "Full node"
 msgstr "Teljes tartalom"
 
-#: content.module:1873
+#: content.module:1883
 msgid "Search Index"
 msgstr "Keresés index"
 
-#: content.module:1877
+#: content.module:1887
 msgid "Search Result"
 msgstr "Keresés eredménye"
 
-#: content.module:2325,2332
+#: content.module:2348,2355
 msgid "Node module form."
 msgstr "<em>Node</em> modul űrlapja."
 
-#: content.module:2340
+#: content.module:2363
 msgid "Locale module form."
 msgstr "<em>Locale</em> modul űrlapja."
 
-#: content.module:2347
+#: content.module:2370
 msgid "Menu module form."
 msgstr "<em>Menu</em> modul űrlapja."
 
-#: content.module:2354
+#: content.module:2377
 msgid "Taxonomy module form."
 msgstr "<em>Taxonomy</em> modul űrlapja."
 
-#: content.module:2385
+#: content.module:2408
 msgid "Upload module form."
 msgstr "<em>Upload</em> modul űrlapja."
 
-#: content.module:589
+#: content.module:595
 msgid "Updating field type %type with module %module."
 msgstr "%type mezőtípus módosítása %module modulnál."
 
-#: content.module:596
+#: content.module:602
 msgid "Updating widget type %type with module %module."
 msgstr "%type felületi elemtípus módosítása %module modulnál."
 
-#: content.module:63
+#: content.module:60
 msgid "Use PHP input for field settings (dangerous - grant with care)"
 msgstr ""
 "PHP alapú bevitel használata a mező beállításaihoz. (Veszélyes "
 "&ndash; engedélyezésével körültekintően kell eljárni!)"
 
-#: content.module:104
+#: content.module:101
 msgid "Manage fields"
 msgstr "Mezők kezelése"
 
-#: content.module:113
+#: content.module:110
 msgid "Display fields"
 msgstr "Mezők megjelenítése"
 
-#: content.module:144
+#: content.module:141
 msgid "Remove field"
 msgstr "Mező törlése"
 
@@ -566,11 +568,12 @@ msgid ""
 "page</a>. When you enable them, you'll need to return to <a "
 "href=\"@update-php\">update.php</a> and run the remaining updates."
 msgstr ""
-"A CCK-hoz kapcsolódó frissítések addig nem futnak, amíg a modulok "
-"nincsenek engedélyezve a <a href=\"@admin-modules-path\">modulok "
-"adminisztrációs oldalán</a>. Az engedélyezés után vissza kell "
-"térni az <a href=\"@update-php\">update.php</a> oldalra és a "
-"maradék frissítéseket le kell futtatni."
+"A <em>CCK</em> modulokhoz kapcsolódó frissítések addig nem futnak, "
+"amíg a modulok nincsenek engedélyezve a <a "
+"href=\"@admin-modules-path\">modulok adminisztrációs oldalán</a>. "
+"Az engedélyezés után vissza kell térni az <a "
+"href=\"@update-php\">update.php</a> oldalra és a maradék "
+"frissítéseket le kell futtatni."
 
 #: content.install:239
 msgid ""
@@ -643,11 +646,11 @@ msgstr "mezők szerkesztése"
 msgid "» Add a new content type"
 msgstr "» Új tartalomtípus hozzáadása"
 
-#: includes/content.admin.inc:67,789,984
+#: includes/content.admin.inc:67,796,991
 msgid "Field name"
 msgstr "Mező neve"
 
-#: includes/content.admin.inc:67,804,990
+#: includes/content.admin.inc:67,811,997
 msgid "Field type"
 msgstr "Mező típusa"
 
@@ -703,25 +706,25 @@ msgstr "Új csoport"
 msgid "Group name (a-z, 0-9, _)"
 msgstr "Csoport neve (a-z, 0-9, _)"
 
-#: includes/content.admin.inc:365
+#: includes/content.admin.inc:373
 msgid "Add new field: you need to provide a label."
 msgstr "Új mező hozzáadása: meg kell adni egy címkét."
 
-#: includes/content.admin.inc:370
+#: includes/content.admin.inc:378
 msgid "Add new field: you need to provide a field name."
 msgstr "Új mező hozzáadása: meg kell adni egy mezőnevet."
 
-#: includes/content.admin.inc:384
+#: includes/content.admin.inc:392
 msgid ""
 "Add new field: the field name %field_name is invalid. The name must "
 "include only lowercase unaccentuated letters, numbers, and "
 "underscores."
 msgstr ""
 "Új mező hozzáadása: %field_name mezőnév érvénytelen. A név "
-"csak ékezetnélküli kisbetűket, számokat és aláhúzásjeleket "
+"csak ékezet nélküli kisbetűket, számokat és aláhúzásjeleket "
 "tartalmazhat."
 
-#: includes/content.admin.inc:387
+#: includes/content.admin.inc:395
 msgid ""
 "Add new field: the field name %field_name is too long. The name is "
 "limited to 32 characters, including the 'field_' prefix."
@@ -730,107 +733,107 @@ msgstr ""
 "csak 32 karakter hosszú lehet, beleértve a „field_” előtagot "
 "is."
 
-#: includes/content.admin.inc:391
+#: includes/content.admin.inc:399
 msgid "Add new field: the name 'field_instance' is a reserved name."
 msgstr "Új mező hozzáadása: a „field_instance” egy fenntartott név."
 
-#: includes/content.admin.inc:403
+#: includes/content.admin.inc:411
 msgid "Add new field: the field name %field_name already exists."
 msgstr "Új mező hozzáadása: %field_name nevű mező már létezik."
 
-#: includes/content.admin.inc:409
+#: includes/content.admin.inc:417
 msgid "Add new field: you need to select a field type."
 msgstr "Új mező hozzáadása: ki kell választani egy mezőtípust."
 
-#: includes/content.admin.inc:414
+#: includes/content.admin.inc:422
 msgid "Add new field: you need to select a widget."
 msgstr "Új mező hozzáadása: ki kell választani egy felületi elemet."
 
-#: includes/content.admin.inc:420
+#: includes/content.admin.inc:428
 msgid "Add new field: invalid widget."
 msgstr "Új mező hozzáadása: érvénytelen felületi elem."
 
-#: includes/content.admin.inc:441
+#: includes/content.admin.inc:449
 msgid "Add existing field: you need to provide a label."
 msgstr "Létező mező hozzáadása: meg kell adni egy címkét."
 
-#: includes/content.admin.inc:446
+#: includes/content.admin.inc:454
 msgid "Add existing field: you need to select a field."
 msgstr "Létező mező hozzáadása: ki kell választani egy mezőt."
 
-#: includes/content.admin.inc:451
+#: includes/content.admin.inc:459
 msgid "Add existing field: you need to select a widget."
 msgstr "Létező mező hozzáadása: ki kell választani egy felületi elemet."
 
-#: includes/content.admin.inc:457
+#: includes/content.admin.inc:465
 msgid "Add existing field: invalid widget."
 msgstr "Létező mező hozzáadása: érvénytelen felületi elem."
 
-#: includes/content.admin.inc:506
+#: includes/content.admin.inc:514
 msgid "There was a problem creating field %label."
 msgstr "Hiba történt a mező létrehozásakor: %label."
 
-#: includes/content.admin.inc:518
+#: includes/content.admin.inc:526
 msgid ""
 "The field %label cannot be added to a content type because it is "
 "locked."
 msgstr "%label mezőt nem lehet egy tartalomtípushoz sem adni, mert zárolt."
 
-#: includes/content.admin.inc:528
+#: includes/content.admin.inc:536
 msgid "There was a problem adding field %label."
 msgstr "A mező hozzáadásánál hiba történt: %label."
 
-#: includes/content.admin.inc:578,626; includes/content.panels.inc:53; modules/content_multigroup/content_multigroup.module:352
+#: includes/content.admin.inc:585,633; includes/panels/content_types/content_field.inc:101
 msgid "Above"
 msgstr "Felette"
 
-#: includes/content.admin.inc:579; includes/content.panels.inc:54
+#: includes/content.admin.inc:586; includes/panels/content_types/content_field.inc:102
 msgid "Inline"
 msgstr "Beágyazó"
 
-#: includes/content.admin.inc:580,607,627,635; modules/content_multigroup/content_multigroup.module:353,360
+#: includes/content.admin.inc:587,614,634,642
 msgid "<Hidden>"
 msgstr "< Rejtett >"
 
-#: includes/content.admin.inc:630
+#: includes/content.admin.inc:637
 msgid "no styling"
 msgstr "formázás nélkül"
 
-#: includes/content.admin.inc:631
+#: includes/content.admin.inc:638
 msgid "simple"
 msgstr "egyszerű"
 
-#: includes/content.admin.inc:632
+#: includes/content.admin.inc:639
 msgid "fieldset"
 msgstr "mezőcsoport"
 
-#: includes/content.admin.inc:633
+#: includes/content.admin.inc:640
 msgid "fieldset - collapsible"
 msgstr "mezőcsoport - összecsukható"
 
-#: includes/content.admin.inc:634
+#: includes/content.admin.inc:641
 msgid "fieldset - collapsed"
 msgstr "mezőcsoport - összecsukva"
 
-#: includes/content.admin.inc:690
+#: includes/content.admin.inc:697
 msgid "Your settings have been saved."
 msgstr "A beállítások el lettek mentve."
 
-#: includes/content.admin.inc:760
+#: includes/content.admin.inc:767
 msgid "@type: @field (@label)"
 msgstr "@type: @field (@label)"
 
-#: includes/content.admin.inc:786
+#: includes/content.admin.inc:793
 msgid "Edit basic information"
 msgstr "Alapadatok szerkesztése"
 
-#: includes/content.admin.inc:792
+#: includes/content.admin.inc:799
 msgid "The machine-readable name of the field. This name cannot be changed."
 msgstr ""
 "A mező programok által kezelt neve. Ezt a nevet nem lehet "
 "megváltoztatni."
 
-#: includes/content.admin.inc:800
+#: includes/content.admin.inc:807
 msgid ""
 "A human-readable name to be used as the label for this field in the "
 "%type content type."
@@ -838,7 +841,7 @@ msgstr ""
 "Az emberek számára olvasható név, mint a mező címkéje lesz "
 "felhasználva a %type tartalomtípusban."
 
-#: includes/content.admin.inc:807
+#: includes/content.admin.inc:814
 msgid ""
 "The type of data you would like to store in the database with this "
 "field. This option cannot be changed."
@@ -846,11 +849,11 @@ msgstr ""
 "A mezőben megadott adat tárolásához szükséges típus az "
 "adatbázisban. Ezt a beállítást nem lehet megváltoztatni."
 
-#: includes/content.admin.inc:812,996
+#: includes/content.admin.inc:819,1003
 msgid "Widget type"
 msgstr "Felületi elem típusa"
 
-#: includes/content.admin.inc:816
+#: includes/content.admin.inc:823
 msgid ""
 "The type of form element you would like to present to the user when "
 "creating this field in the %type content type."
@@ -858,21 +861,21 @@ msgstr ""
 "Az űrlapelem típusa, amely megjeleníti ezt a mezőt a felhasználó "
 "számára ebben a tartalomtípusban: %type."
 
-#: includes/content.admin.inc:854
+#: includes/content.admin.inc:861
 msgid "Updated basic settings for field %label."
 msgstr "%label mező alapvető értékei módosultak."
 
-#: includes/content.admin.inc:858
+#: includes/content.admin.inc:865
 msgid "There was a problem updating the basic settings for field %label."
 msgstr ""
 "Hiba történt a mező (%label) alapvető értékeinek módosítása "
 "közben."
 
-#: includes/content.admin.inc:885
+#: includes/content.admin.inc:892
 msgid "Are you sure you want to remove the field %field?"
 msgstr "Biztosan törölhető a mező: %field?"
 
-#: includes/content.admin.inc:887
+#: includes/content.admin.inc:894
 msgid ""
 "If you have any content left in this field, it will be lost. This "
 "action cannot be undone."
@@ -880,37 +883,37 @@ msgstr ""
 "Ha bármilyen adatot tartalmaz ez a mező, az el fog veszni. Ezt a "
 "műveletet nem lehet visszavonni."
 
-#: includes/content.admin.inc:894
+#: includes/content.admin.inc:901
 msgid "This field is <strong>locked</strong> and cannot be removed."
 msgstr "Ez a mező <strong>zárolva van</strong>, és nem lehet törölni."
 
-#: includes/content.admin.inc:915
+#: includes/content.admin.inc:922
 msgid "Removed field %field from %type."
 msgstr "A mező törölve lett: %field (%type tartalomtípusból)."
 
-#: includes/content.admin.inc:920
+#: includes/content.admin.inc:927
 msgid "There was a problem deleting %field from %type."
 msgstr ""
 "Hiba történt a mező (%label) %type tartalomtípusból való "
 "törlése közben."
 
-#: includes/content.admin.inc:939
+#: includes/content.admin.inc:946
 msgid "The field %field is locked and cannot be edited."
 msgstr "%field mező zárolva van és nem szerkeszthető."
 
-#: includes/content.admin.inc:973
+#: includes/content.admin.inc:980
 msgid "%type basic information"
 msgstr "%type alapvető információ"
 
-#: includes/content.admin.inc:1003,1182
+#: includes/content.admin.inc:1010,1189
 msgid "Change basic information"
 msgstr "Alapadatok megváltoztatása"
 
-#: includes/content.admin.inc:1009
+#: includes/content.admin.inc:1016
 msgid "%type settings"
 msgstr "%type beállításai"
 
-#: includes/content.admin.inc:1010
+#: includes/content.admin.inc:1017
 msgid ""
 "These settings apply only to the %field field as it appears in the "
 "%type content type."
@@ -918,7 +921,7 @@ msgstr ""
 "Ezek a mezőn (%field) végzett beállítások csak ebben a "
 "tartalomtípusban jelennek meg: %type."
 
-#: includes/content.admin.inc:1027
+#: includes/content.admin.inc:1034
 msgid ""
 "Instructions to present to the user below this field on the editing "
 "form.<br />Allowed HTML tags: @tags"
@@ -926,15 +929,15 @@ msgstr ""
 "A felhasználók számára az űrlap szerkesztéskor a mező alatt "
 "megjelenő útmutató.<br />Megengedett HTML elemek: @tags"
 
-#: includes/content.admin.inc:1074; modules/number/number.module:120; modules/text/text.module:85
+#: includes/content.admin.inc:1081; modules/number/number.module:123; modules/text/text.module:86
 msgid "PHP code"
 msgstr "PHP kód"
 
-#: includes/content.admin.inc:1083,1238; includes/content.rules.inc:93
+#: includes/content.admin.inc:1090,1245; includes/content.rules.inc:93
 msgid "'@column' => value for @column"
 msgstr "„@column” => @column értéke"
 
-#: includes/content.admin.inc:1085,1240; includes/content.rules.inc:95
+#: includes/content.admin.inc:1092,1247; includes/content.rules.inc:95
 msgid ""
 "return array(\n"
 "  0 => array(@columns),\n"
@@ -953,7 +956,7 @@ msgstr ""
 "  2 => ...\n"
 ");"
 
-#: includes/content.admin.inc:1093
+#: includes/content.admin.inc:1100
 msgid ""
 "Advanced usage only: PHP code that returns a default value. Should not "
 "include &lt;?php ?&gt; delimiters. If this field is filled out, the "
@@ -970,15 +973,15 @@ msgstr ""
 "<em>devel betöltés</em> fül, melyet a <a href=\"@link_devel\">devel "
 "modul</a> szolgáltat az ilyen típusú oldalakon: %type."
 
-#: includes/content.admin.inc:1103; modules/number/number.module:137; modules/text/text.module:102
+#: includes/content.admin.inc:1110; modules/number/number.module:140; modules/text/text.module:103
 msgid "&lt;none&gt;"
 msgstr "&lt;nincs&gt;"
 
-#: includes/content.admin.inc:1104; modules/number/number.module:138; modules/text/text.module:103
+#: includes/content.admin.inc:1111; modules/number/number.module:141; modules/text/text.module:104
 msgid "You're not allowed to input PHP code."
 msgstr "Nem engedélyezett a PHP kód bevitele."
 
-#: includes/content.admin.inc:1104
+#: includes/content.admin.inc:1111
 msgid ""
 "This PHP code was set by an administrator and will override any value "
 "specified above."
@@ -986,7 +989,7 @@ msgstr ""
 "Ezt a PHP kódot egy adminisztrátor állította be, és ez felül fog "
 "írni minden fentebb megadott értéket."
 
-#: includes/content.admin.inc:1112
+#: includes/content.admin.inc:1119
 msgid ""
 "These settings apply to the %field field in every content type in "
 "which it appears."
@@ -994,13 +997,13 @@ msgstr ""
 "Ezek a mezőn (%field) végzett beállítások minden olyan "
 "tartalomtípusban megjelennek, amelyben a mező megjelenik."
 
-#: includes/content.admin.inc:1119
+#: includes/content.admin.inc:1126
 msgid "Maximum number of values users can enter for this field."
 msgstr ""
 "A felhasználók által a mezőbe írható értékek maximális "
 "száma."
 
-#: includes/content.admin.inc:1121
+#: includes/content.admin.inc:1128
 msgid ""
 "'Unlimited' will provide an 'Add more' button so the users can add as "
 "many values as they like."
@@ -1009,7 +1012,7 @@ msgstr ""
 "elem hozzáadása” nyomógomb, amellyel annyi értéket adhatnak "
 "hozzá, amennyit csak akarnak."
 
-#: includes/content.admin.inc:1123
+#: includes/content.admin.inc:1130
 msgid ""
 "Warning! Changing this setting after data has been created could "
 "result in the loss of data!"
@@ -1017,15 +1020,15 @@ msgstr ""
 "Figyelem! Már létrehozott adatok esetén ezeknek a beállításoknak "
 "a megváltoztatása az adatok elvesztésével jár!"
 
-#: includes/content.admin.inc:1126
+#: includes/content.admin.inc:1133
 msgid "Number of values"
 msgstr "Értékek száma"
 
-#: includes/content.admin.inc:1144; modules/content_copy/content_copy.module:251
+#: includes/content.admin.inc:1151; modules/content_copy/content_copy.module:251
 msgid "Save field settings"
 msgstr "Mező beállításainak mentése"
 
-#: includes/content.admin.inc:1242
+#: includes/content.admin.inc:1249
 msgid ""
 "The default value PHP code returned an incorrect value.<br/>Expected "
 "format: <pre>!sample</pre> Returned value: @value"
@@ -1034,37 +1037,37 @@ msgstr ""
 "vissza.<br />Elvárt formátum: <pre>!sample</pre> Visszaadott "
 "érték: @value"
 
-#: includes/content.admin.inc:1281
+#: includes/content.admin.inc:1288
 msgid "The PHP code for 'default value' returned @value, which is invalid."
 msgstr ""
 "Az „alapértelmezett értéket” adó PHP kód ezt az értéket "
 "adta vissza, ami érvénytelen: @value."
 
-#: includes/content.admin.inc:1285
+#: includes/content.admin.inc:1292
 msgid "The default value is invalid."
 msgstr "Az alapértelmezett érték érvénytelen"
 
-#: includes/content.admin.inc:1309
+#: includes/content.admin.inc:1316
 msgid "Added field %label."
-msgstr "%label mező hozzá lett adva."
+msgstr "%label mező hozzáadva."
 
-#: includes/content.admin.inc:1313
+#: includes/content.admin.inc:1320
 msgid "Saved field %label."
 msgstr "%label mező el lett mentve."
 
-#: includes/content.admin.inc:1677
+#: includes/content.admin.inc:1693
 msgid "The database has been altered and data has been migrated or deleted."
 msgstr ""
 "Az adatbázis megváltozott és az adatok átemelve vagy törölve "
 "lettek."
 
-#: includes/content.admin.inc:1680
+#: includes/content.admin.inc:1696
 msgid "An error occurred and database alteration did not complete."
 msgstr ""
 "Hiba történt és az adatbázis megváltoztatása nem fejeződött "
 "be."
 
-#: includes/content.admin.inc:1783
+#: includes/content.admin.inc:1799
 msgid "Processing %title"
 msgstr "%title feldolgozása"
 
@@ -1084,35 +1087,19 @@ msgstr "A tartalom mezők %name táblája törölve lett."
 msgid "Add another item"
 msgstr "Újabb elem hozzáadása"
 
-#: includes/content.panels.inc:21,35
+#: includes/panels/content_types/content_field.inc:14
 msgid "Content field"
 msgstr "Tartalom mező"
 
-#: includes/content.panels.inc:38
-msgid "A content field from the referenced node."
-msgstr "Egy tartalom mező a hivatkozott oldalról."
-
-#: includes/content.panels.inc:40; modules/fieldgroup/fieldgroup.panels.inc:32
+#: modules/fieldgroup/fieldgroup.panels.inc:32
 msgid "Node context"
 msgstr "Tartalmi környezet"
-
-#: includes/content.panels.inc:73
-msgid "Field / Formatter"
-msgstr "Mező / Formázó"
-
-#: includes/content.panels.inc:76
-msgid "Select a field and formatter."
-msgstr "Mező és formázó kiválasztása."
-
-#: includes/content.panels.inc:92
-msgid "\"@s\" field @name"
-msgstr "„@s” mező @name"
 
 #: includes/content.rules.inc:15
 msgid "Populate a field"
 msgstr "Egy mező feltöltése"
 
-#: includes/content.rules.inc:23,212
+#: includes/content.rules.inc:23,224
 msgid ""
 "You should make sure that the used field exists in the given content "
 "type."
@@ -1151,11 +1138,11 @@ msgstr ""
 "Vissza kell adni az alapértelmezett értéket az elvárt "
 "formátumban."
 
-#: includes/content.rules.inc:198
+#: includes/content.rules.inc:210
 msgid "Field has value"
 msgstr "A mezőnek van értéke"
 
-#: includes/content.rules.inc:203
+#: includes/content.rules.inc:215
 msgid ""
 "You should make sure that the used field exists in the given content "
 "type. The condition returns TRUE, if the selected field has the given "
@@ -1165,19 +1152,19 @@ msgstr ""
 "tartalomtípusban. A feltétel igaz értéket ad vissza, ha a "
 "kiválasztott mezőnek az értéke egyezik a megadott értékkel."
 
-#: includes/content.rules.inc:207
+#: includes/content.rules.inc:219
 msgid "Field has changed"
 msgstr "A mező megváltozott"
 
-#: includes/content.rules.inc:209
+#: includes/content.rules.inc:221
 msgid "Content containing changes"
 msgstr "A tartalom változásokat tartalmaz"
 
-#: includes/content.rules.inc:210
+#: includes/content.rules.inc:222
 msgid "Content not containing changes"
 msgstr "A tartalom nem tartalmaz változásokat"
 
-#: includes/content.rules.inc:269
+#: includes/content.rules.inc:279
 msgid "Select the machine-name of the field to look at."
 msgstr ""
 "A programok által kezelt név kiválasztása a mezőhöz, melyet "
@@ -1239,11 +1226,11 @@ msgstr "Relatív útvonal álnév a hivatkozott felhasználóhoz."
 msgid "Absolute path alias to the referenced user."
 msgstr "Teljes útvonal álnév a hivatkozott felhasználóhoz."
 
-#: includes/views/content.views.inc:257
+#: includes/views/content.views.inc:264
 msgid "Appears in: @types"
 msgstr "Ez használja: @types"
 
-#: includes/views/content.views.inc:279
+#: includes/views/content.views.inc:286
 msgid "<No value>"
 msgstr "< Nincs érték >"
 
@@ -1255,19 +1242,19 @@ msgstr "Felületi elem cimke (@label)"
 msgid "Custom label"
 msgstr "Egyedi cimke"
 
-#: includes/views/handlers/content_handler_field_multiple.inc:58
+#: includes/views/handlers/content_handler_field_multiple.inc:63
 msgid "Group multiple values"
 msgstr "Többszörös értékek csoportosítása"
 
-#: includes/views/handlers/content_handler_field_multiple.inc:65
+#: includes/views/handlers/content_handler_field_multiple.inc:70
 msgid "Show @count value(s)"
 msgstr "@count értéket mutat"
 
-#: includes/views/handlers/content_handler_field_multiple.inc:76
+#: includes/views/handlers/content_handler_field_multiple.inc:81
 msgid "starting from @count"
 msgstr "@count értékről kezdve"
 
-#: includes/views/handlers/content_handler_field_multiple.inc:87
+#: includes/views/handlers/content_handler_field_multiple.inc:92
 msgid "Reversed (start from last values)"
 msgstr "Fordított (az utolsó értékektől kezdődik)"
 
@@ -1454,19 +1441,19 @@ msgstr ""
 
 #: modules/content_permissions/content_permissions.info:0
 msgid "Content Permissions"
-msgstr "Tartalom Jogosultságok"
+msgstr "Content Permissions"
 
 #: modules/content_permissions/content_permissions.info:0
 msgid "Set field-level permissions for CCK fields."
 msgstr "Mezőszintű jogosultságok beállítása."
 
-#: modules/fieldgroup/fieldgroup.panels.inc:10,27
+#: modules/fieldgroup/fieldgroup.panels.inc:10,27; modules/fieldgroup/panels/content_types/content_fieldgroup.inc:14
 msgid "Content fieldgroup"
 msgstr "Tartalom mezőcsoport"
 
 #: modules/fieldgroup/fieldgroup.panels.inc:30
 msgid "All fields from a fieldgroup on the referenced node."
-msgstr "Minden mező a mezőcsoportból a hivatkozott tartalmon."
+msgstr "Minden mező ebből a mezőcsoportból a hivatkozott tartalmon."
 
 #: modules/fieldgroup/fieldgroup.panels.inc:91
 msgid "@group_label (@group_type_name)"
@@ -1476,7 +1463,7 @@ msgstr "@group_label (@group_type_name)"
 msgid "Fieldgroup"
 msgstr "Mezőcsoport"
 
-#: modules/fieldgroup/fieldgroup.panels.inc:112
+#: modules/fieldgroup/fieldgroup.panels.inc:112; modules/fieldgroup/panels/content_types/content_fieldgroup.inc:102
 msgid ""
 "Text to display if group has no data. Note that title will not display "
 "unless overridden."
@@ -1488,63 +1475,63 @@ msgstr ""
 msgid "\"@s\" fieldgroup @name"
 msgstr "„@s” mezőcsoport @name"
 
-#: modules/fieldgroup/fieldgroup.module:124
+#: modules/fieldgroup/fieldgroup.module:130
 msgid "Form settings"
 msgstr "Űrlap beállításai"
 
-#: modules/fieldgroup/fieldgroup.module:125
+#: modules/fieldgroup/fieldgroup.module:131
 msgid "These settings apply to the group in the node editing form."
 msgstr ""
 "Ezek a beállítások lesznek értelmezve a csoportra a "
 "tartalomszerkesztő űrlapon."
 
-#: modules/fieldgroup/fieldgroup.module:132
+#: modules/fieldgroup/fieldgroup.module:138
 msgid "always open"
 msgstr "mindig nyitott"
 
-#: modules/fieldgroup/fieldgroup.module:133
+#: modules/fieldgroup/fieldgroup.module:139
 msgid "collapsible"
 msgstr "összecsukható"
 
-#: modules/fieldgroup/fieldgroup.module:134
+#: modules/fieldgroup/fieldgroup.module:140
 msgid "collapsed"
 msgstr "összecsukott"
 
-#: modules/fieldgroup/fieldgroup.module:142
+#: modules/fieldgroup/fieldgroup.module:148
 msgid "Instructions to present to the user on the editing form."
 msgstr "Az űrlap szerkesztésekor megjelenő útmutató."
 
-#: modules/fieldgroup/fieldgroup.module:147
+#: modules/fieldgroup/fieldgroup.module:153
 msgid "Display settings"
 msgstr "Megjelenítési beállítások"
 
-#: modules/fieldgroup/fieldgroup.module:148
+#: modules/fieldgroup/fieldgroup.module:154
 msgid "These settings apply to the group on node display."
 msgstr ""
 "Ezek a beállítások lesznek értelmezve a csoportra a tartalom "
 "megjelenítésekor."
 
-#: modules/fieldgroup/fieldgroup.module:155
+#: modules/fieldgroup/fieldgroup.module:161
 msgid "A description of the group."
 msgstr "A csoport leírása."
 
-#: modules/fieldgroup/fieldgroup.module:200
+#: modules/fieldgroup/fieldgroup.module:206
 msgid "Are you sure you want to remove the group %label?"
 msgstr "%label csoport biztosan törölhető?"
 
-#: modules/fieldgroup/fieldgroup.module:211
+#: modules/fieldgroup/fieldgroup.module:217
 msgid "The group %group_name has been removed."
 msgstr "%group_name csoport törölve lett."
 
-#: modules/fieldgroup/fieldgroup.module:353
+#: modules/fieldgroup/fieldgroup.module:359
 msgid "You need to provide a label."
 msgstr "Meg kell adni egy címkét."
 
-#: modules/fieldgroup/fieldgroup.module:358
+#: modules/fieldgroup/fieldgroup.module:364
 msgid "You need to provide a group name."
 msgstr "Meg kell adni a csoport nevét."
 
-#: modules/fieldgroup/fieldgroup.module:372
+#: modules/fieldgroup/fieldgroup.module:378
 msgid ""
 "The group name %group_name is invalid. The name must include only "
 "lowercase unaccentuated letters, numbers, and underscores."
@@ -1552,7 +1539,7 @@ msgstr ""
 "%group_name csoportnév érvénytelen. A név csak ékezet nélküli "
 "kisbetűket, számokat és aláhúzásjeleket tartalmazhat."
 
-#: modules/fieldgroup/fieldgroup.module:375
+#: modules/fieldgroup/fieldgroup.module:381
 msgid ""
 "The group name %group_name is too long. The name is limited to 32 "
 "characters, including the 'group_' prefix."
@@ -1560,33 +1547,33 @@ msgstr ""
 "%group_name csoportnév túl hosszú. A név csak 32 karakter hosszú "
 "lehet, beleértve a „group_” előtagot is."
 
-#: modules/fieldgroup/fieldgroup.module:381
+#: modules/fieldgroup/fieldgroup.module:387
 msgid "The group name %group_name already exists."
 msgstr "%group_name nevű csoport már létezik."
 
-#: modules/fieldgroup/fieldgroup.module:400,403
+#: modules/fieldgroup/fieldgroup.module:406,409
 msgid "Add new group:"
 msgstr "Új csoport hozzáadása:"
 
-#: modules/fieldgroup/fieldgroup.module:418
+#: modules/fieldgroup/fieldgroup.module:424
 msgid "Add new group: you need to provide a label."
 msgstr "Új csoport hozzáadása: meg kell adni egy címkét."
 
-#: modules/fieldgroup/fieldgroup.module:419
+#: modules/fieldgroup/fieldgroup.module:425
 msgid "Add new group: you need to provide a group name."
 msgstr "Új csoport hozzáadása: meg kell adni a csoport nevét."
 
-#: modules/fieldgroup/fieldgroup.module:648
+#: modules/fieldgroup/fieldgroup.module:654
 msgid "Standard group"
 msgstr "Alapvető csoport"
 
-#: modules/fieldgroup/fieldgroup.module:39,46
+#: modules/fieldgroup/fieldgroup.module:45,52
 msgid "Edit group"
 msgstr "Csoport szerkesztése"
 
 #: modules/fieldgroup/fieldgroup.module:0
 msgid "fieldgroup"
-msgstr "mezőcsoport"
+msgstr "fieldgroup"
 
 #: modules/fieldgroup/fieldgroup.info:0
 msgid "Create display groups for CCK fields."
@@ -1616,67 +1603,67 @@ msgstr ""
 msgid "There are no nodereference fields defined."
 msgstr "Nincsenek tartalomra hivatkozó mezők meghatározva."
 
-#: modules/nodereference/nodereference.module:60
+#: modules/nodereference/nodereference.module:69
 msgid "Node reference"
 msgstr "Tartalomra hivatkozás"
 
-#: modules/nodereference/nodereference.module:61
+#: modules/nodereference/nodereference.module:70
 msgid "Store the ID of a related node as an integer value."
 msgstr "A hivatkozott tartalom azonosítójának tárolása egész számként."
 
-#: modules/nodereference/nodereference.module:75
+#: modules/nodereference/nodereference.module:85
 msgid "Content types that can be referenced"
 msgstr "Tartalomtípusok, melyekre hivatkozni lehet"
 
-#: modules/nodereference/nodereference.module:87; modules/userreference/userreference.module:84
+#: modules/nodereference/nodereference.module:97; modules/userreference/userreference.module:94
 msgid "Default Views"
 msgstr "Alapértelmezett nézetek"
 
-#: modules/nodereference/nodereference.module:90; modules/userreference/userreference.module:87
+#: modules/nodereference/nodereference.module:100; modules/userreference/userreference.module:97
 msgid "Existing Views"
 msgstr "Létező nézetek"
 
-#: modules/nodereference/nodereference.module:97
+#: modules/nodereference/nodereference.module:107
 msgid "Advanced - Nodes that can be referenced (View)"
 msgstr "Haladó - tartalmak, melyekre hivatkozni lehet (Nézet)"
 
-#: modules/nodereference/nodereference.module:104
+#: modules/nodereference/nodereference.module:114
 msgid "View used to select the nodes"
 msgstr "Nézet használata a tartalmak kiválasztásához"
 
-#: modules/nodereference/nodereference.module:112; modules/userreference/userreference.module:109
+#: modules/nodereference/nodereference.module:122; modules/userreference/userreference.module:119
 msgid "View arguments"
 msgstr "A nézet paraméterei"
 
-#: modules/nodereference/nodereference.module:217
+#: modules/nodereference/nodereference.module:228
 msgid "%name: this post can't be referenced."
 msgstr "%name: erre a tartalomra nem lehet hivatkozni."
 
-#: modules/nodereference/nodereference.module:242
+#: modules/nodereference/nodereference.module:253
 msgid "Title (link)"
 msgstr "Cím (hivatkozással)"
 
-#: modules/nodereference/nodereference.module:247
+#: modules/nodereference/nodereference.module:258
 msgid "Title (no link)"
 msgstr "Cím (hivatkozás nélkül)"
 
-#: modules/nodereference/nodereference.module:347; modules/optionwidgets/optionwidgets.module:80; modules/userreference/userreference.module:273
+#: modules/nodereference/nodereference.module:358; modules/optionwidgets/optionwidgets.module:80; modules/userreference/userreference.module:284
 msgid "Select list"
 msgstr "Legördülő lista"
 
-#: modules/nodereference/nodereference.module:355; modules/optionwidgets/optionwidgets.module:88; modules/userreference/userreference.module:281
+#: modules/nodereference/nodereference.module:366; modules/optionwidgets/optionwidgets.module:88; modules/userreference/userreference.module:292
 msgid "Check boxes/radio buttons"
 msgstr "Jelölőnégyzetek/választógombok"
 
-#: modules/nodereference/nodereference.module:363; modules/userreference/userreference.module:289
+#: modules/nodereference/nodereference.module:374; modules/userreference/userreference.module:300
 msgid "Autocomplete text field"
 msgstr "Automatikusan kiegészülő szöveges mező"
 
-#: modules/nodereference/nodereference.module:671
+#: modules/nodereference/nodereference.module:691
 msgid "%name: title mismatch. Please check your selection."
 msgstr "%name: a cím nem egyezik."
 
-#: modules/nodereference/nodereference.module:678
+#: modules/nodereference/nodereference.module:698
 msgid "%name: found no valid post with that title."
 msgstr "%name: nincs érvényes tartalom ezzel a címmel."
 
@@ -1686,11 +1673,11 @@ msgstr "Automatikusan kiegészülő tartalomhivatkozás"
 
 #: modules/nodereference/nodereference.module:0
 msgid "nodereference"
-msgstr "tartalomhivatozás"
+msgstr "nodereference"
 
 #: modules/nodereference/nodereference.info:0
 msgid "Node Reference"
-msgstr "Tartalomra hivatkozás"
+msgstr "Node Reference"
 
 #: modules/nodereference/nodereference.info:0
 msgid "Defines a field type for referencing one node from another."
@@ -1706,31 +1693,31 @@ msgstr "Egész szám"
 msgid "Store a number in the database as an integer."
 msgstr "Egészként tárol számot az adatbázisban."
 
-#: modules/number/number.module:38
+#: modules/number/number.module:39
 msgid "Decimal"
 msgstr "Decimális"
 
-#: modules/number/number.module:39
+#: modules/number/number.module:40
 msgid "Store a number in the database in a fixed decimal format."
 msgstr "Rögzített tízes számot tárol az adatbázisban"
 
-#: modules/number/number.module:42
+#: modules/number/number.module:44
 msgid "Float"
 msgstr "Lebegőpontos"
 
-#: modules/number/number.module:43
+#: modules/number/number.module:45
 msgid "Store a number in the database in a floating point format."
 msgstr "Lebegőpontos számot tárol az adatbázisban."
 
-#: modules/number/number.module:57
+#: modules/number/number.module:60
 msgid "Minimum"
 msgstr "Minimum"
 
-#: modules/number/number.module:63
+#: modules/number/number.module:66
 msgid "Maximum"
 msgstr "Maximum"
 
-#: modules/number/number.module:72
+#: modules/number/number.module:75
 msgid ""
 "The total number of digits to store in the database, including those "
 "to the right of the decimal."
@@ -1738,23 +1725,23 @@ msgstr ""
 "Az adatbázisban tárolt számjegyek teljes száma, beleértve a "
 "tizedesponttól jobbra lévő számjegyeket is."
 
-#: modules/number/number.module:78
+#: modules/number/number.module:81
 msgid "Scale"
 msgstr "Felbontás"
 
-#: modules/number/number.module:79
+#: modules/number/number.module:82
 msgid "The number of digits to the right of the decimal."
 msgstr "A számjegyek száma."
 
-#: modules/number/number.module:85
+#: modules/number/number.module:88
 msgid "Decimal marker"
 msgstr "Decimális jelölő"
 
-#: modules/number/number.module:86
+#: modules/number/number.module:89
 msgid "The character users will input to mark the decimal point in forms."
 msgstr "Az űrlapokon a tizedespont jelölésére használt karakter."
 
-#: modules/number/number.module:95
+#: modules/number/number.module:98
 msgid ""
 "Define a string that should be prefixed to the value, like $ or €. "
 "Leave blank for none. Separate singular and plural values with a pipe "
@@ -1765,7 +1752,7 @@ msgstr ""
 "Függőleges vonallal lehet elválasztani egymástól az egyes és a "
 "többes számú alakot (font|fontok)."
 
-#: modules/number/number.module:102
+#: modules/number/number.module:105
 msgid ""
 "Define a string that should suffixed to the value, like m², m/s², "
 "kb/s. Leave blank for none. Separate singular and plural values with a "
@@ -1776,15 +1763,15 @@ msgstr ""
 "Függőleges vonallal lehet elválasztani egymástól az egyes és a "
 "többes számú alakot (font|fontok)."
 
-#: modules/number/number.module:106; modules/text/text.module:71
+#: modules/number/number.module:109; modules/text/text.module:72
 msgid "Allowed values"
 msgstr "Megengedett értékek"
 
-#: modules/number/number.module:112; modules/text/text.module:77
+#: modules/number/number.module:115; modules/text/text.module:78
 msgid "Allowed values list"
 msgstr "Megengedett értékek"
 
-#: modules/number/number.module:116; modules/text/text.module:81
+#: modules/number/number.module:119; modules/text/text.module:82
 msgid ""
 "The possible values this field can contain. Enter one value per line, "
 "in the format key|label. The key is the value that will be stored in "
@@ -1798,7 +1785,7 @@ msgstr ""
 "címke nem kötelező, ha nincs megadva, akkor a kulcs kerül "
 "felhasználásra, mint címke.<br />Engedélyezett HTML elemek: @tags"
 
-#: modules/number/number.module:130; modules/text/text.module:95
+#: modules/number/number.module:133; modules/text/text.module:96
 msgid ""
 "Advanced usage only: PHP code that returns a keyed array of allowed "
 "values. Should not include &lt;?php ?&gt; delimiters. If this field is "
@@ -1810,7 +1797,7 @@ msgstr ""
 "a mező ki van töltve, a kód által visszaadott tömb felülír "
 "minden fentebb megadott értéket."
 
-#: modules/number/number.module:138; modules/text/text.module:103
+#: modules/number/number.module:141; modules/text/text.module:104
 msgid ""
 "This PHP code was set by an administrator and will override the "
 "allowed values list above."
@@ -1818,37 +1805,37 @@ msgstr ""
 "Ezt a PHP kódot egy adminisztrátor állította be, és felül fogja "
 "írni a fentebb megadott elfogadható értékek listáját."
 
-#: modules/number/number.module:195
+#: modules/number/number.module:198
 msgid "\"Minimum\" must be a number."
 msgstr "„Minimum”-nak számot kell megadni."
 
-#: modules/number/number.module:202
+#: modules/number/number.module:205
 msgid "\"Maximum\" must be a number."
 msgstr "„Maximum”-nak számot kell megadni."
 
-#: modules/number/number.module:219
+#: modules/number/number.module:222
 msgid "%name: the value may be no smaller than %min."
 msgstr "%name: az érték nem lehet kisebb ennél: %min."
 
-#: modules/number/number.module:222
+#: modules/number/number.module:225
 msgid "%name: the value may be no larger than %max."
 msgstr "%name: az érték nem lehet nagyobb ennél: %max."
 
-#: modules/number/number.module:235; modules/text/text.module:156
+#: modules/number/number.module:238; modules/text/text.module:157
 msgid "%name: illegal value."
 msgstr "%name: érvénytelen érték."
 
-#: modules/number/number.module:270
+#: modules/number/number.module:273
 msgid "unformatted"
 msgstr "formázatlan"
 
-#: modules/number/number.module:353; modules/text/text.module:256
+#: modules/number/number.module:356; modules/text/text.module:257
 msgid "Text field"
 msgstr "Szövegmező"
 
 #: modules/number/number.module:0
 msgid "number"
-msgstr "szám"
+msgstr "number"
 
 #: modules/number/number.info:0
 msgid "Defines numeric field types."
@@ -1902,7 +1889,7 @@ msgstr "optionwidgets"
 
 #: modules/optionwidgets/optionwidgets.info:0
 msgid "Option Widgets"
-msgstr "Kapcsoló felületi elemek"
+msgstr "Option Widgets"
 
 #: modules/optionwidgets/optionwidgets.info:0
 msgid ""
@@ -1916,19 +1903,19 @@ msgstr ""
 msgid "Store text in the database."
 msgstr "Szöveget tárol az adatbázisban."
 
-#: modules/text/text.module:54
+#: modules/text/text.module:55
 msgid "Filtered text (user selects input format)"
 msgstr "Formázott szöveg (a felhasználó választja ki a beviteli formát)"
 
-#: modules/text/text.module:57
+#: modules/text/text.module:58
 msgid "Text processing"
 msgstr "Szövegfeldolgozás"
 
-#: modules/text/text.module:63
+#: modules/text/text.module:64
 msgid "Maximum length"
 msgstr "Maximális hossz"
 
-#: modules/text/text.module:67
+#: modules/text/text.module:68
 msgid ""
 "The maximum length of the field in characters. Leave blank for an "
 "unlimited size."
@@ -1936,29 +1923,29 @@ msgstr ""
 "A mező karakterben mért maximális hossza. Üresen hagyva nincs "
 "korlátozva."
 
-#: modules/text/text.module:159
+#: modules/text/text.module:160
 msgid "%name: the value may not be longer than %max characters."
 msgstr "%name: az érték nem lehet hosszabb %max karakternél."
 
-#: modules/text/text.module:206
+#: modules/text/text.module:207
 msgid "Trimmed"
 msgstr "Levágva"
 
-#: modules/text/text.module:264
+#: modules/text/text.module:265
 msgid "Text area (multiple rows)"
 msgstr "Szövegdoboz (többsoros)"
 
-#: modules/text/text.module:316
+#: modules/nodereference/nodereference.module:439; modules/text/text.module:317; modules/userreference/userreference.module:365
 msgid "Size of textfield"
 msgstr "A szövegmező mérete"
 
-#: modules/text/text.module:325
+#: modules/text/text.module:326
 msgid "Rows"
 msgstr "Sorok"
 
 #: modules/text/text.module:0
 msgid "text"
-msgstr "szöveg"
+msgstr "text"
 
 #: modules/text/text.info:0
 msgid "Defines simple text field types."
@@ -1988,41 +1975,41 @@ msgstr ""
 msgid "There are no userreference fields defined."
 msgstr "Nincsenek felhasználóhivatkozás mezők meghatározva."
 
-#: modules/userreference/userreference.module:52
+#: modules/userreference/userreference.module:61
 msgid "User reference"
 msgstr "Hivatkozás felhasználóra"
 
-#: modules/userreference/userreference.module:53
+#: modules/userreference/userreference.module:62
 msgid "Store the ID of a related user as an integer value."
 msgstr ""
 "A hivatkozott felhasználó azonosítójának tárolása egész "
 "számként."
 
-#: modules/userreference/userreference.module:67
+#: modules/userreference/userreference.module:77
 msgid "User roles that can be referenced"
 msgstr "Felhasználói csoport, amelyre hivatkozni lehet"
 
-#: modules/userreference/userreference.module:73
+#: modules/userreference/userreference.module:83
 msgid "User status that can be referenced"
 msgstr "Felhasználói állapot, amelyre hivatkozni lehet"
 
-#: modules/userreference/userreference.module:94
+#: modules/userreference/userreference.module:104
 msgid "Advanced - Users that can be referenced (View)"
 msgstr "Haladó - Felhasználók, akikre hivatkozni lehet (Nézet)"
 
-#: modules/userreference/userreference.module:101
+#: modules/userreference/userreference.module:111
 msgid "View used to select the users"
 msgstr "A felhasználók kiválasztásához használt nézet"
 
-#: modules/userreference/userreference.module:196
+#: modules/userreference/userreference.module:207
 msgid "%name: invalid user."
 msgstr "%name: érvénytelen felhasználó."
 
-#: modules/userreference/userreference.module:357
+#: modules/userreference/userreference.module:377
 msgid "Reverse link"
 msgstr "Visszamutató hivatkozás"
 
-#: modules/userreference/userreference.module:359
+#: modules/userreference/userreference.module:379
 msgid ""
 "If selected, a reverse link back to the referencing node will "
 "displayed on the referenced user record."
@@ -2030,7 +2017,7 @@ msgstr ""
 "Ha be van jelölve, akkor a felhasználó adatlapján egy hivatkozás "
 "visszamutat a hivatkozó tartalomra."
 
-#: modules/userreference/userreference.module:887
+#: modules/userreference/userreference.module:908
 msgid "Related content"
 msgstr "Kapcsolódó tartalom"
 
@@ -2040,11 +2027,11 @@ msgstr "Felhasználóhivatkozás automatikus kiegészítéssel"
 
 #: modules/userreference/userreference.module:0
 msgid "userreference"
-msgstr "felhasználóhivatkozás"
+msgstr "userreference"
 
 #: modules/userreference/userreference.info:0
 msgid "User Reference"
-msgstr "Felhasználói hivatkozás"
+msgstr "User Reference"
 
 #: modules/userreference/userreference.info:0
 msgid "Defines a field type for referencing a user from a node."
@@ -2091,6 +2078,10 @@ msgstr ""
 "A tartalomtípus mezőinek megjelenítési beállítása, amikor meg "
 "kell jelenniük a következő környezetben."
 
+#: content.module:1897,1900
+msgid "Print"
+msgstr "Nyomtatás"
+
 #: includes/content.admin.inc:106
 msgid ""
 "This content type has inactive fields. Inactive fields are not "
@@ -2108,7 +2099,7 @@ msgstr ""
 "!field (!field_name) egy inaktív !field_type mező, ami !widget_type "
 "felületi elemet használ."
 
-#: includes/content.admin.inc:571
+#: includes/content.admin.inc:578
 msgid ""
 "There are no fields configured for this content type. You can add new "
 "fields on the <a href=\"@link\">Manage fields</a> page."
@@ -2116,27 +2107,27 @@ msgstr ""
 "Nincsenek mezők beállítva ebben a tartalomtípusban. Új mezőket "
 "hozzáadni a <a href=\"@link\">Mezők kezelése</a> oldalon lehet."
 
-#: includes/content.admin.inc:618,661
+#: includes/content.admin.inc:625,668
 msgid "Include"
 msgstr "Befoglalás"
 
-#: includes/content.admin.inc:618,661; theme/content-admin-display-overview-form.tpl.php:17
+#: includes/content.admin.inc:625,668; theme/content-admin-display-overview-form.tpl.php:17
 msgid "Exclude"
 msgstr "Kizárás"
 
-#: includes/content.panels.inc:57
+#: includes/panels/content_types/content_field.inc:105
 msgid "Configure how the label is going to be displayed."
 msgstr "A cimke megjelenítési módjának beállítása."
 
-#: includes/content.rules.inc:181
+#: includes/content.rules.inc:193
 msgid "Populate @node's field '@field'"
 msgstr "@node @field mezejének felhasználása"
 
-#: includes/content.rules.inc:249
+#: includes/content.rules.inc:259
 msgid "@node's field '@field' has value"
 msgstr "@node @field mezejének van értéke"
 
-#: includes/content.rules.inc:275
+#: includes/content.rules.inc:285
 msgid "@node's field '@field' has been changed"
 msgstr "@node @field mezeje megváltozott"
 
@@ -2146,7 +2137,7 @@ msgstr ""
 "A hivatkozott tartalom szűretlen címe. Figyelem - nyers "
 "felhasználói bevitel."
 
-#: includes/views/handlers/content_handler_field_multiple.inc:61
+#: includes/views/handlers/content_handler_field_multiple.inc:66
 msgid ""
 "If unchecked, each item in the field will create a new row, which may "
 "appear to cause duplicates. This setting is not compatible with "
@@ -2169,159 +2160,15 @@ msgstr ""
 "tovább. Ha a „Mind” van kiválasztva, akkor a mező minden eleme "
 "új sort hoz létre, mely többszörös megjelenést okozhat."
 
-#: modules/content_multigroup/content_multigroup.module:15
-msgid ""
-"The fields in a Standard group are independent of each other and each "
-"can have either single or multiple values. The fields in a Multigroup "
-"are treated as a repeating collection of single value fields."
-msgstr ""
-"Az alapvető csoportban lévő mezők függetlenek egymástól, és "
-"mindegyiknek lehet egy, vagy több értéke. A többescsoportban "
-"lévő mezők kezelése úgy történik, mintha egy ismétlődő "
-"gyűjteménye lenne az egyszeres értékű mezőknek."
-
-#: modules/content_multigroup/content_multigroup.module:53,123
-msgid "Multigroup"
-msgstr "Többescsoport"
-
-#: modules/content_multigroup/content_multigroup.module:122
-msgid "Standard"
-msgstr "Szabványos"
-
-#: modules/content_multigroup/content_multigroup.module:126
+#: includes/content.admin.inc:344
 msgid "Type of group."
 msgstr "A csoport típusa."
 
-#: modules/content_multigroup/content_multigroup.module:204
-msgid ""
-"The field %field has been updated to use %multiple values, to match "
-"the multiple value setting of the Multigroup %group."
-msgstr ""
-"%field mező úgy módosult, hogy használja %multiple értékeket, "
-"hogy egyezzen a többszörös érték beállításokkal a "
-"többescsoportban (%group)."
-
-#: modules/content_multigroup/content_multigroup.module:238
-msgid ""
-"This change is not allowed. The field %field already has %multiple "
-"values in the database but the group %group only allows %group_max. "
-"Making this change would result in the loss of data."
-msgstr ""
-"Ez a változtatás nem megengedett. %field mezőnek már van %multiple "
-"értéke az adatbázisban, de a csoport (%group) csak %group_max "
-"értéket enged. Ez a változtatás adatvesztéshez vezetne."
-
-#: modules/content_multigroup/content_multigroup.module:262
-msgid ""
-"This change is not allowed. The field %field handles multiple values "
-"differently than the Content module. Making this change could result "
-"in the loss of data."
-msgstr ""
-"Ez a változtatás nem megengedett. %field mező másképpen kezeli a "
-"többszörös értékeket, mint a <em>Content</em> modul. Ez a "
-"változtatás adatvesztéshez vezetne."
-
-#: modules/content_multigroup/content_multigroup.module:277
-msgid "You are moving the field %field into a Multigroup."
-msgstr "%field mező át lett helyezve egy többescsoportba."
-
-#: modules/content_multigroup/content_multigroup.module:310
-msgid ""
-"This change is not allowed. The field %field already has data created "
-"and uses a widget that stores data differently in a Standard group "
-"than in a Multigroup. Making this change could result in the loss of "
-"data."
-msgstr ""
-"Ez a változtatás nem megengedett. %field mezőnek már van "
-"létrehozott adata, és a használt felületi elem másképpen "
-"tárolja az adatot az alapvető csopontban, mint a többescsoportban. "
-"Ez a változtatás adatvesztéshez vezetne."
-
-#: modules/content_multigroup/content_multigroup.module:324
-msgid "You are moving the field %field out of a Multigroup."
-msgstr "%field mező ki lett véve a többescsoportból."
-
-#: modules/content_multigroup/content_multigroup.module:357
-msgid "Fieldset"
-msgstr "Mezőcsoport"
-
-#: modules/content_multigroup/content_multigroup.module:358
-msgid "Horizontal line"
-msgstr "Vízszintes vonal"
-
-#: modules/content_multigroup/content_multigroup.module:371
-msgid "[Subgroup format]"
-msgstr "[Alcsoport formátum]"
-
-#: modules/content_multigroup/content_multigroup.module:448
-msgid "Other settings"
-msgstr "Egyéb beállítások"
-
-#: modules/content_multigroup/content_multigroup.module:453
-msgid "Number of times to repeat the collection of Multigroup fields."
-msgstr "A többescsoport mezők ismétléseinek száma."
-
-#: modules/content_multigroup/content_multigroup.module:454
-msgid ""
-"'Unlimited' will provide an 'Add more' button so the users can add "
-"repeat it as many times as they like."
-msgstr ""
-"„Korlátlan” esetén a felhasználóknak megjelenik egy „Újabb "
-"elem hozzáadása” nyomógomb, amellyel annyi értéket adhatnak "
-"hozzá, amennyit csak akarnak."
-
-#: modules/content_multigroup/content_multigroup.module:455
-msgid ""
-"All fields in this group will automatically be set to allow this "
-"number of values."
-msgstr ""
-"Minden mező ebben a csoportban automatikusan be lesz állítva, hogy "
-"ennyi értéket engedjen megadni."
-
-#: modules/content_multigroup/content_multigroup.module:461
-msgid "Number of repeats"
-msgstr "Ismétlések száma"
-
-#: modules/content_multigroup/content_multigroup.module:469
-msgid "Labels"
-msgstr "Címkék"
-
-#: modules/content_multigroup/content_multigroup.module:470
-msgid ""
-"Labels for each subgroup of fields. Labels can be hidden or shown in "
-"various contexts using the 'Display fields' screen."
-msgstr ""
-"Cimke a mezők alcsoportjainak. A cimke lehett rejtett, vagy "
-"megjelenhet különböző helyeken, mely beállítható a „Mezők "
-"megjelenítése” oldalon."
-
-#: modules/content_multigroup/content_multigroup.module:478
-msgid "Subgroup %number label"
-msgstr "Alcsoport %number cimke"
-
-#: modules/content_multigroup/content_multigroup.module:506
-msgid ""
-"The field %field in this group already has %multiple values in the "
-"database. To prevent the loss of data you cannot set the number of "
-"Multigroup values to less than this."
-msgstr ""
-"A csoportban lévő %field mezőnek már van %multiple értéke az "
-"adatbázisban. Az adatvesztés elkerülése érdekében nem lehet a "
-"többescsoport értékét ennél kisebbre állítani."
-
-#: modules/content_multigroup/content_multigroup.module:966
-msgid "Add more values"
-msgstr "További értékek hozzáadása"
-
-#: modules/content_multigroup/content_multigroup.module:0
-msgid "content_multigroup"
-msgstr "content_multigroup"
-
-#: modules/nodereference/nodereference.module:417; modules/userreference/userreference.module:343
+#: modules/nodereference/nodereference.module:429; modules/userreference/userreference.module:355
 msgid "Autocomplete matching"
 msgstr "Automatikus kiegészítés módja"
 
-#: modules/nodereference/nodereference.module:423
+#: modules/nodereference/nodereference.module:435
 msgid ""
 "Select the method used to collect autocomplete suggestions. Note that "
 "<em>Contains</em> can cause performance issues on sites with thousands "
@@ -2332,21 +2179,21 @@ msgstr ""
 "teljesítmény problémákat okozhat olyan webhelyeken, melyek sokezer "
 "tartalommal rendelkeznek."
 
-#: modules/number/number.module:178; modules/text/text.module:132
+#: modules/number/number.module:181; modules/text/text.module:133
 msgid "@label (!name) - Allowed values"
 msgstr "@label (!name) - engedélyezett értékek"
 
-#: modules/number/number.module:512
+#: modules/number/number.module:515
 msgid "Only numbers and decimals are allowed in %field."
 msgstr ""
 "%field mezőben csak számok és tizedeselválasztó van "
 "engedélyezve."
 
-#: modules/number/number.module:535
+#: modules/number/number.module:538
 msgid "Only numbers are allowed in %field."
 msgstr "%field mező csak számokat tartalmazhat."
 
-#: modules/number/number.module:559
+#: modules/number/number.module:562
 msgid ""
 "Only numbers and the decimal character (%decimal) are allowed in "
 "%field."
@@ -2358,7 +2205,7 @@ msgstr ""
 msgid "%name: this field cannot hold more that @count values."
 msgstr "%name: ez a mező legfeljebb @count értéket tartalmazhat."
 
-#: modules/userreference/userreference.module:349
+#: modules/userreference/userreference.module:361
 msgid ""
 "Select the method used to collect autocomplete suggestions. Note that "
 "<em>Contains</em> can cause performance issues on sites with thousands "
@@ -2369,7 +2216,7 @@ msgstr ""
 "teljesítmény problémákat okozhat olyan webhelyeken, melyek sokezer "
 "tartalommal rendelkeznek."
 
-#: modules/userreference/userreference.module:594
+#: modules/userreference/userreference.module:614
 msgid "%name: found no valid user with that name."
 msgstr "%name: nincs érvényes felhasználó evvel a névvel."
 
@@ -2389,55 +2236,55 @@ msgstr ""
 "A „Kizárás” jelölőnégyzet használatával az elem kizárható "
 "a tartalom sablonnak átadott !content értékből."
 
-#: content.module:2361
+#: content.module:2384
 msgid "Book module form."
 msgstr "<em>Book</em> modul űrlapja."
 
-#: content.module:2367
+#: content.module:2390
 msgid "Poll title"
 msgstr "Poll cím"
 
-#: content.module:2368
+#: content.module:2391
 msgid "Poll module title."
 msgstr "Poll modul cím."
 
-#: content.module:2372
+#: content.module:2395
 msgid "Poll choices"
 msgstr "Poll válaszok"
 
-#: content.module:2373
+#: content.module:2396
 msgid "Poll module choices."
 msgstr "Poll modul válaszok"
 
-#: content.module:2378
+#: content.module:2401
 msgid "Poll module settings."
 msgstr "Poll modul beállítások"
 
-#: includes/content.admin.inc:1849
+#: includes/content.admin.inc:1865
 msgid "%name must be an integer."
 msgstr "%name értékének egésznek kell lennie."
 
-#: includes/content.admin.inc:1859
+#: includes/content.admin.inc:1875
 msgid "%name must be a positive integer."
 msgstr "%name értékének pozitív egésznek kell lennie."
 
-#: includes/content.admin.inc:1869
+#: includes/content.admin.inc:1885
 msgid "%name must be a number."
 msgstr "%name értékének számnak kell lennie."
 
-#: includes/views/content.views.inc:245,261
+#: includes/views/content.views.inc:252,268
 msgid "@label (!name)"
 msgstr "@label (!name)"
 
-#: includes/views/content.views.inc:249
+#: includes/views/content.views.inc:256
 msgid "@label (!name) - !column"
 msgstr "@label (!name) - !column"
 
-#: includes/views/content.views.inc:250
+#: includes/views/content.views.inc:257
 msgid "@label-truncated - !column"
 msgstr "@label-truncated - !column"
 
-#: modules/nodereference/nodereference.module:107
+#: modules/nodereference/nodereference.module:117
 msgid ""
 "<p>Choose the \"Views module\" view that selects the nodes that can be "
 "referenced.<br />Note:</p>"
@@ -2445,7 +2292,7 @@ msgstr ""
 "<p>Meg kell adni azt a <em>Views</em> nézetet, amely kiválasztja "
 "azokat a tartalmakat, melyekre hivatkozni lehet.<br />Megjegyzés:</p>"
 
-#: modules/nodereference/nodereference.module:108,121
+#: modules/nodereference/nodereference.module:118,131
 msgid ""
 "<ul><li>Only views that have fields will work for this "
 "purpose.</li><li>This will discard the \"Content types\" settings "
@@ -2465,7 +2312,7 @@ msgstr ""
 "használatával befolyásolható a lehetséges tartalmak "
 "megjelenítési sorrendje.</li></ul>"
 
-#: modules/nodereference/nodereference.module:120
+#: modules/nodereference/nodereference.module:130
 msgid ""
 "<p>The list of nodes that can be referenced can be based on a \"Views "
 "module\" view but no appropriate views were found. <br />Note:</p>"
@@ -2473,11 +2320,11 @@ msgstr ""
 "<p>A hivatkozható tartalmak listája egy <em>Views</em> nézeten "
 "alapul, de a megfelelő nézet nem található. <br />Megjegyzés:</p>"
 
-#: modules/nodereference/nodereference.module:205; modules/userreference/userreference.module:184
+#: modules/nodereference/nodereference.module:216; modules/userreference/userreference.module:195
 msgid "%name: invalid input."
 msgstr "%name: érvénytelen bevitel."
 
-#: modules/userreference/userreference.module:104
+#: modules/userreference/userreference.module:114
 msgid ""
 "<p>Choose the \"Views module\" view that selects the users that can be "
 "referenced.<br />Note:</p>"
@@ -2486,7 +2333,7 @@ msgstr ""
 "azokat a felhasználókat, melyekre hivatkozni lehet.<br "
 "/>Megjegyzés:</p>"
 
-#: modules/userreference/userreference.module:105,118
+#: modules/userreference/userreference.module:115,128
 msgid ""
 "<ul><li>Only views that have fields will work for this "
 "purpose.</li><li>This will discard the \"Referenceable Roles\" and "
@@ -2507,11 +2354,77 @@ msgstr ""
 "használatával befolyásolható a lehetséges felhasználók "
 "megjelenítési sorrendje.</li></ul>"
 
-#: modules/userreference/userreference.module:117
+#: modules/userreference/userreference.module:127
 msgid ""
 "<p>The list of user that can be referenced can be based on a \"Views "
 "module\" view but no appropriate views were found. <br />Note:</p>"
 msgstr ""
 "<p>A hivatkozható felhasználók listája egy <em>Views</em> nézeten "
 "alapul, de a megfelelő nézet nem található. <br />Megjegyzés:</p>"
+
+#: includes/panels/content_types/content_field.inc:37
+msgid "@type: (@field_type) @field"
+msgstr "@type: (@field_type) @field"
+
+#: includes/panels/content_types/content_field.inc:44
+msgid "Field on the referenced node."
+msgstr "Mező a hivatkozott tartalmon."
+
+#: includes/panels/content_types/content_field.inc:128
+msgid "Formatter"
+msgstr "Formázó"
+
+#: includes/panels/content_types/content_field.inc:131
+msgid "Select a formatter."
+msgstr "Formázó kiválasztása."
+
+#: includes/panels/content_types/content_field.inc:147
+msgid "\"@s\" field (@name)"
+msgstr "„@s” mező (@name)"
+
+#: modules/fieldgroup/panels/content_types/content_fieldgroup.inc:39
+msgid "@type: (fieldgroup) @fieldgroup"
+msgstr "@type: (mezőcsoport) @fieldgroup"
+
+#: modules/fieldgroup/panels/content_types/content_fieldgroup.inc:42
+msgid "All fields from this fieldgroup on the referenced node."
+msgstr "Minden mező ebből a mezőcsoportból a hivatkozott tartalmon."
+
+#: modules/fieldgroup/panels/content_types/content_fieldgroup.inc:119
+msgid "\"@s\" fieldgroup (@name)"
+msgstr "„@s” mezőcsoport (@name)"
+
+#: modules/nodereference/panels/relationships/node_from_noderef.inc:14
+msgid "Node from reference"
+msgstr "Tartalom a hivatkozásból"
+
+#: modules/nodereference/panels/relationships/node_from_noderef.inc:16
+msgid ""
+"Adds a node from a node reference in a node context; if multiple nodes "
+"are referenced, this will get the first referenced node only."
+msgstr ""
+"Hozzáad egy tartalmat a tartalom hivatkozásból a tartalom "
+"környezetben. Ha több tartalom van hivatkozva, csak az első "
+"hivatkozott tartalmat fogja venni."
+
+#: modules/nodereference/panels/relationships/node_from_noderef.inc:50
+msgid "Node reference field"
+msgstr "Tartalom hivatkozás mező"
+
+#: modules/userreference/panels/relationships/user_from_userref.inc:14
+msgid "User from reference"
+msgstr "Felhasználó a hivatkozásból"
+
+#: modules/userreference/panels/relationships/user_from_userref.inc:16
+msgid ""
+"Adds a user from a user reference in a node context; if multiple users "
+"are referenced, this will get the first referenced user only."
+msgstr ""
+"Hozzáad egy felhasználót a felhasználó hivatkozásból a tartalom "
+"környezetben. Ha több felhasználó van hivatkozva, csak az első "
+"hivatkozott felhasználót fogja venni."
+
+#: modules/userreference/panels/relationships/user_from_userref.inc:50
+msgid "User reference field"
+msgstr "Felhasználó hivatkozás mező"
 

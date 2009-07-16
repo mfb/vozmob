@@ -1,5 +1,5 @@
 <?php
-// $Id: nodereference.module,v 1.138.2.55 2009/06/02 12:24:04 yched Exp $
+// $Id: nodereference.module,v 1.138.2.57 2009/06/24 16:07:46 yched Exp $
 
 /**
  * @file
@@ -725,7 +725,7 @@ function nodereference_allowed_values($field) {
 /**
  * Fetch an array of all candidate referenced nodes.
  *
- * This info is used in various places (aloowed values, autocomplete results,
+ * This info is used in various places (allowed values, autocomplete results,
  * input validation...). Some of them only need the nids, others nid + titles,
  * others yet nid + titles + rendered row (for display in widgets).
  * The array we return contains all the potentially needed information, and lets
@@ -933,12 +933,20 @@ function nodereference_node_type($op, $info) {
         // content.module's implementaion of hook_node_type() has already
         // refreshed _content_type_info().
         $fields = content_fields();
+        $rebuild = FALSE;
         foreach ($fields as $field_name => $field) {
           if ($field['type'] == 'nodereference' && isset($field['referenceable_types'][$info->old_type])) {
             $field['referenceable_types'][$info->type] = empty($field['referenceable_types'][$info->old_type]) ? 0 : $info->type;
             unset($field['referenceable_types'][$info->old_type]);
-            content_field_instance_update($field);
+            content_field_instance_update($field, FALSE);
+            $rebuild = TRUE;
           }
+        }
+
+        // Clear caches and rebuild menu only if any field has been updated.
+        if ($rebuild) {
+          content_clear_type_cache(TRUE);
+          menu_rebuild();
         }
       }
       break;

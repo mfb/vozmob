@@ -1,9 +1,11 @@
 <?php
-// $Id: print_pdf.module,v 1.1.2.36 2009/05/06 00:23:05 jcnventura Exp $
+// $Id: print_pdf.module,v 1.1.2.41 2009/07/09 12:00:52 jcnventura Exp $
 
 /**
  * @file
  * Displays Printer-friendly versions of Drupal pages.
+ *
+ * @ingroup print
  */
 
 define('PRINTPDF_PATH', 'printpdf');
@@ -23,12 +25,20 @@ define('PRINT_PDF_PDF_TOOL_DEFAULT', 0);
 define('PRINT_PDF_CONTENT_DISPOSITION_DEFAULT', 2);
 define('PRINT_PDF_PAPER_SIZE_DEFAULT', 'A4');
 define('PRINT_PDF_PAGE_ORIENTATION_DEFAULT', 'portrait');
+define('PRINT_PDF_AUTOCONFIG_DEFAULT', 1);
 define('PRINT_PDF_FONT_FAMILY_DEFAULT', 'dejavusans');
 define('PRINT_PDF_FONT_SIZE_DEFAULT', 10);
 define('PRINT_PDF_FILENAME_DEFAULT', '[site-name] - [title] - [mod-yyyy]-[mod-mm]-[mod-dd]');
 define('PRINT_PDF_WKHTMLTOPDF_OPTIONS', "--footer-font-size 7 --footer-right '[page]'");
 define('PRINT_PDF_XVFB_OPTIONS', '');
 //  define('PRINT_PDF_XVFB_OPTIONS', ' -fp /usr/share/fonts/X11/misc/,/usr/share/fonts/X11/Type1/,/usr/share/fonts/X11/75dpi/,/usr/share/fonts/X11/100dpi/');
+
+/**
+ * Implementation of hook_perm().
+ */
+function print_pdf_perm() {
+  return array('access PDF version');
+}
 
 /**
  * Implementation of hook_theme().
@@ -74,9 +84,12 @@ function print_pdf_menu() {
   $items[PRINTPDF_PATH] = array(
     'title' => 'Printer-friendly PDF',
     'page callback' => 'print_pdf_controller',
-    'access arguments' => array('access print'),
+    'access arguments' => array('access PDF version'),
     'type' => MENU_CALLBACK,
     'file' => 'print_pdf.pages.inc',
+  );
+  $items[PRINTPDF_PATH .'/'. PRINTPDF_PATH] = array(
+    'page callback' => 'drupal_access_denied',
   );
   $items['admin/settings/print/pdf'] = array(
     'title' => 'PDF',
@@ -240,8 +253,7 @@ function print_pdf_nodeapi(&$node, $op = 'view', $teaser, $page) {
       // Insert content corner links
       $print_pdf_link_pos = variable_get('print_pdf_link_pos', array(PRINT_PDF_LINK_POS_DEFAULT => PRINT_PDF_LINK_POS_DEFAULT));
       if (($teaser === FALSE) && !empty($print_pdf_link_pos['corner']) &&
-          !isset($node->printing)) {
-//          isset($node->build_mode) && ($node->build_mode == NODE_BUILD_NORMAL)) {
+          isset($node->build_mode) && ($node->build_mode == NODE_BUILD_NORMAL)) {
         $link = print_pdf_insert_link(NULL, $node);
         if ($link) {
           $node->content['print_links']['#value'] = preg_replace('!</span>$!', $link .'</span>', $node->content['print_links']['#value']);
@@ -447,7 +459,7 @@ function print_pdf_insert_link($path = NULL, $node = NULL) {
  */
 function print_pdf_link_allowed($args) {
   $print_pdf_pdf_tool = variable_get('print_pdf_pdf_tool', PRINT_PDF_PDF_TOOL_DEFAULT);
-  if (!empty($args['teaser']) || !user_access('access print') || (empty($print_pdf_pdf_tool))) {
+  if (!empty($args['teaser']) || !user_access('access PDF version') || (empty($print_pdf_pdf_tool))) {
     // If showing only the teaser or the user is not allowed or link is disabled
     return FALSE;
   }

@@ -1,5 +1,5 @@
 <?php
-// $Id: og.module,v 1.628.4.13 2009/06/29 20:10:40 weitzman Exp $
+// $Id: og.module,v 1.628.4.14 2009/07/13 03:57:15 weitzman Exp $
 
 // Selective groups states. chosen by the group admin
 define ('OG_OPEN', 0);
@@ -429,7 +429,8 @@ function og_set_language($node) {
   if ($node->og_language) {
     $map = language_list();
     $og_language = $map[$node->og_language];
-    $user_language = user_preferred_language($account, $og_language);
+    global $user;
+    $user_language = user_preferred_language($user, $og_language);
     if ($og_language == $user_language) {
       $GLOBALS['language'] = $og_language;
     }

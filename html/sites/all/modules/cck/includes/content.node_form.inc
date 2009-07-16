@@ -1,5 +1,5 @@
 <?php
-// $Id: content.node_form.inc,v 1.7.2.19 2009/06/02 20:18:27 yched Exp $
+// $Id: content.node_form.inc,v 1.7.2.20 2009/06/25 22:02:55 yched Exp $
 
 /**
  * @file
@@ -42,17 +42,7 @@ function content_field_form(&$form, &$form_state, $field, $get_delta = NULL) {
   $form_element = array();
   $field_name = $field['field_name'];
 
-  // See if access to this form element is restricted,
-  // if so, skip widget processing and just set the value.
-  $access = content_access('edit', $field);
-  if (!$access) {
-    $addition[$field_name] = array(
-      '#access' => $access,
-      '#type' => 'value',
-      '#value' => $node->$field_name,
-      );
-    return $addition;
-  }
+  $items = array();
 
   // TODO: is the "if (function_exists($function)) {" needed ?
   // defining the $function here makes it unclear where it is actually called
@@ -64,7 +54,6 @@ function content_field_form(&$form, &$form_state, $field, $get_delta = NULL) {
     // - Node values (when editing an existing node), or pre-filled values (when
     //   creating a new node translation)
     // - Default values set for the field (when creating a new node).
-    $items = array();
     if (!empty($form_state['values'][$field['field_name']])) {
       $items = $form_state['values'][$field['field_name']];
       // If there was an AHAH add more button in this field, don't save it.
@@ -84,6 +73,18 @@ function content_field_form(&$form, &$form_state, $field, $get_delta = NULL) {
           $items = $callback($form, $form_state, $field, 0);
         }
       }
+    }
+
+    // See if access to this form element is restricted,
+    // if so, skip widget processing and just set the value.
+    $access = content_access('edit', $field);
+    if (!$access) {
+      $addition[$field_name] = array(
+        '#access' => $access,
+        '#type' => 'value',
+        '#value' => $items,
+      );
+      return $addition;
     }
 
     // If content module handles multiple values for this form element,

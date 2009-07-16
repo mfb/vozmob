@@ -1,5 +1,5 @@
 <?php
-// $Id: jquery_media.jq.inc,v 1.4.2.1 2008/06/30 14:26:55 aaron Exp $
+// $Id: jquery_media.jq.inc,v 1.4.2.2 2009/03/23 13:44:06 aaron Exp $
 
 /**
  * @file
@@ -83,6 +83,12 @@ function _jquery_media_add($options = array(), $return_js = FALSE) {
     if (!($default_js_loaded || isset($defaults['flvplayer'])) || $options['flvplayer']) {
       $defaults['flvplayer'] = $options['flvplayer'] ? url($options['flvplayer']) : url(variable_get('jquery_media_flvplayer', JQUERY_MEDIA_FLVPLAYER_DEFAULT));
       $js .= "    $.fn.media.defaults.flvPlayer = '{$defaults['flvplayer']}';\n";
+    }
+    if (!($default_js_loaded || isset($defaults['mp4 flash'])) || $options['mp4 flash']) {
+      $defaults['mp4 flash'] = $options['mp4 flash'] ? $options['mp4 flash'] : variable_get('jquery_media_mp4_flash', JQUERY_MEDIA_MP4_FLASH_DEFAULT);
+      if ($defaults['mp4 flash']) {
+        $js .= "    $.fn.media.mp4 = $.fn.media.flv;\n";
+      }
     }
     if (!($default_js_loaded || isset($defaults['mp3player'])) || $options['mp3player']) {
       $defaults['mp3player'] = $options['mp3player'] ? url($options['mp3player']) : url(variable_get('jquery_media_mp3player', JQUERY_MEDIA_MP3PLAYER_DEFAULT));

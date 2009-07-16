@@ -1,5 +1,5 @@
 <?php
-// $Id: content.module,v 1.301.2.106 2009/06/02 12:24:04 yched Exp $
+// $Id: content.module,v 1.301.2.109 2009/07/14 22:17:05 yched Exp $
 /**
  * @file
  * Allows administrators to associate custom fields to content types.
@@ -611,7 +611,7 @@ function content_associate_fields($module) {
   foreach ($types as $type_name => $fields) {
     foreach ($fields as $field) {
       if ($field['module'] == $module && !in_array($field['field_name'], $fields_set)) {
-        $columns = module_invoke($field['module'], 'field_settings', 'database columns', $field);
+        $columns = (array) module_invoke($field['module'], 'field_settings', 'database columns', $field);
         db_query("UPDATE {". content_field_tablename() ."} SET db_columns = '%s' WHERE field_name = '%s'", serialize($columns), $field['field_name']);
         $fields_set[] = $field['field_name'];
       }
@@ -2357,11 +2357,30 @@ function content_content_extra_fields($type_name) {
       'view' => 'body'
     );
   }
+  $extra['revision_information'] = array(
+    'label' => t('Revision information'),
+    'description' => t('Node module form.'),
+    'weight' => 20
+  );
+  if (module_exists('comment')) {
+    $extra['comment_settings'] = array(
+      'label' => t('Comment settings'),
+      'description' => t('Comment module form.'),
+      'weight' => 30
+    );
+  }  
   if (module_exists('locale') && variable_get("language_content_type_$type_name", 0)) {
     $extra['language'] = array(
       'label' => t('Language'),
       'description' => t('Locale module form.'),
       'weight' => 0
+    );
+  }
+  if (module_exists('translation') && translation_supported_type($type_name)) {
+    $extra['translation'] = array(
+      'label' => t('Translation settings'),
+      'description' => t('Translation module form.'),
+      'weight' => 30
     );
   }
   if (module_exists('menu')) {
@@ -2383,6 +2402,13 @@ function content_content_extra_fields($type_name) {
       'label' => t('Book'),
       'description' => t('Book module form.'),
       'weight' => 10
+    );
+  }
+  if (module_exists('path')) {
+    $extra['path'] = array(
+      'label' => t('Path settings'),
+      'description' => t('Path module form.'),
+      'weight' => 30
     );
   }
   if ($type_name == 'poll' && module_exists('poll')) {

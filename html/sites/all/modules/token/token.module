@@ -1,5 +1,5 @@
 <?php
-// $Id: token.module,v 1.7.4.9 2008/08/29 15:21:40 eaton Exp $
+// $Id: token.module,v 1.7.4.12 2009/06/01 16:15:32 greggles Exp $
 
 /**
  * @file
@@ -24,17 +24,18 @@ function token_theme() {
  * For a given context, builds a formatted list of tokens and descriptions
  * of their replacement values.
  *
- * @param type
- *    The token types to display documentation for. Defaults to 'all'.
+ * @param types
+ *    The token types to display documentation for. Can be either a single
+ *    string or an array of token types. Defaults to 'all'.
  * @param prefix
  *    The prefix your module will use when parsing tokens. Defaults to '['
  * @param suffix
  *    The suffix your module will use when parsing tokens. Defaults to ']'
  * @return An HTML table containing the formatting docs.
  */
-function theme_token_help($type = 'all', $prefix = '[', $suffix = ']') {
+function theme_token_help($types = 'all', $prefix = '[', $suffix = ']') {
   token_include();
-  $full_list = token_get_list($type);
+  $full_list = token_get_list($types);
 
   $headers = array(t('Token'), t('Replacement value'));
   $rows = array();
@@ -99,6 +100,9 @@ function token_token_values($type, $object = NULL) {
       $values['site-date-ddd']   = format_date($time, 'custom', 'D', $tz);
       $values['site-date-dd']    = format_date($time, 'custom', 'd', $tz);
       $values['site-date-d']     = format_date($time, 'custom', 'j', $tz);
+      // The page number may or may not be present. If it is, it may be comma separated values in which case grab the first.
+      $page = isset($_GET['page']) ? $_GET['page'] : '';
+      $values['page-number']     = 1 + (int)(($p = strpos($page, ',')) ? substr($page, 0, $p) : $page);
       break;
   }
   return $values;
@@ -141,6 +145,7 @@ function token_token_list($type = 'all') {
   $tokens['global']['site-date-ddd']   = t('The current day of week (abbreviation)');
   $tokens['global']['site-date-dd']    = t('The current day (two digit, zero-padded)');
   $tokens['global']['site-date-d']     = t('The current day (one or two digit)');
+  $tokens['global']['page-number']     = t('The current page number for paged lists');
   return $tokens;
 }
 
@@ -316,26 +321,30 @@ function token_get_values($type = 'global', $object = NULL, $flush = FALSE, $opt
  * in a particular domain are requested and a normal array_marge() is
  * sufficient.
  *
- * @param type
+ * @param types
  *   A flag indicating the class of substitution tokens to use. If an
- *   object is passed in the second param, 'type' should contain the
- *   object's type. For example, 'node', 'comment', or 'user'. If no
+ *   object is passed in the second param, 'types' should contain the
+ *   object's type. For example, 'node', 'comment', or 'user'. 'types'
+ *   may also be an array of types of the form array('node','user'). If no
  *   type is specified, only 'global' site-wide substitution tokens are
  *   built.
  * @return
  *   The array of usable tokens and their descriptions, organized by
  *   token type.
  */
-function token_get_list($type = 'all') {
+function token_get_list($types = 'all') {
   token_include();
   $return = array();
+  settype($types, 'array');
   foreach (module_implements('token_list') as $module) {
     $function = $module .'_token_list';
-    $result = $function($type);
-    if (is_array($result)) {
-      foreach ($result as $category => $tokens) {
-        foreach ($tokens as $token => $title) {
-          $return[$category][$token] = $title;
+    foreach ($types as $type) {
+      $result = $function($type);
+      if (is_array($result)) {
+        foreach ($result as $category => $tokens) {
+          foreach ($tokens as $token => $title) {
+            $return[$category][$token] = $title;
+          }
         }
       }
     }

@@ -34,5 +34,3 @@ if (!function_exists('array_intersect_key'))
     }
   }
 }
-
-?>

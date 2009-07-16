@@ -1,96 +1,94 @@
 <?php
-// $Id: transliteration.install,v 1.1 2008/03/20 09:44:43 smk Exp $
+// $Id: transliteration.install,v 1.1.4.3 2009/06/09 18:44:16 smk Exp $
+
+/**
+ * Whether to perform retroactive transliteration of existing files.
+ * Since this might break hard-coded links to files in content, it is disabled
+ * by default. Set to TRUE to enable.
+ */
+define('TRANSLITERATION_RETROACTIVE', FALSE);
 
 /**
  * Implementation of hook_install().
  */
 function transliteration_install() {
-  transliteration_install_compat();
-  $errors = transliteration_install_retroactive();
-  if (!$errors) {
-    drupal_set_message('Existing filenames have been successfully transliterated.');
+  if (TRANSLITERATION_RETROACTIVE) {
+    transliteration_install_retroactive();
   }
   else {
-    $message = 'Not all existing filenames could be transliterated. The following files could not be accessed:';
-    $message .= theme_item_list($errors);
-    drupal_set_message($message, 'error');
+    $t = get_t();
+    drupal_set_message($t('Existing filenames have not been transliterated.'));
   }
 }
 
 /**
- * Helper function; add database-specific compatibility functions.
+ * Implementation of hook_uninstall().
  */
-function transliteration_install_compat() {
-  switch ($GLOBALS['db_type']) {
-    case 'pgsql':
-      // Taken from the MySQL Compatibility project
-      // http://pgfoundry.org/projects/mysqlcompat/
-      if (!db_result(db_query("SELECT COUNT(*) FROM pg_proc WHERE proname = 'substring_index'"))) {
-        db_query("CREATE OR REPLACE FUNCTION substring_index(text, text, integer)
-          RETURNS text AS $$
-            DECLARE
-              tokens text[];
-            BEGIN
-              tokens := pg_catalog.string_to_array($1, $2); 
-
-              IF $3 >= 0 THEN
-                RETURN pg_catalog.array_to_string(tokens[1:$3], $2);
-              ELSE
-                RETURN pg_catalog.array_to_string(tokens[($3 * -1):pg_catalog.array_upper(tokens, 1)], $2);
-              END IF;
-            END;
-          $$ IMMUTABLE STRICT LANGUAGE PLPGSQL;"
-        );
-        break;
-      }
-  }
+function transliteration_uninstall() {
 }
 
 /**
  * Helper function; retroactive transliteration of existing filenames.
  */
 function transliteration_install_retroactive() {
-  require_once(drupal_get_path('module', 'transliteration') .'/transliteration.inc');
+  require_once (drupal_get_path('module', 'transliteration') . '/transliteration.inc');
+
+  $t = get_t();
+  $errors = array();
+
+  // Get all of the files that need to be converted, that is those that
+  // contain characters other than alphanumerics, underscores, dots, or
+  // hyphens.
+  $query = "SELECT fid, filepath FROM {files} WHERE filepath ";
 
   // Regexp operators differ between database manufacturers.
   switch ($GLOBALS['db_type']) {
     case 'mysql':
     case 'mysqli':
-      $op = 'RLIKE';
+      $query .= "REGEXP '[^0-9a-z_./-]'";
       break;
+
     case 'pgsql':
-      $op = '~*';
+      $query .= "~* '[^0-9a-z_./-]'";
       break;
+
+    case 'mssql':
+      // SQL Server LIKE is case sensitive.
+      $query .= "LIKE '%[^0-9A-Za-z_./-]%'";
+      break;
+
+    default:
+      drupal_set_message($t('Filenames could not be transliterated: database type not supported.'), 'error');
+      return;
   }
 
-  // Get all of the files that need to be converted, that is those that
-  // contain characters other than alphanumerics, underscores, dots, or
-  // hyphens.
-  $result = db_query("SELECT fid, filepath FROM {files} WHERE SUBSTRING_INDEX(filepath, '/', -1) $op '[^0-9A-Za-z_.-]'");
-  $errors = array();
+  $result = db_query($query);
 
   while ($file = db_fetch_object($result)) {
-    // Transliterate the file's name.
-    $filepath = $file->filepath;
-    $filepath_new = dirname($filepath) .'/'. transliteration_clean_filename(basename($filepath));
+    // Transliterate the filename, skip if result is identical.
+    $transliterated = dirname($file->filepath) . '/' . transliteration_clean_filename(basename($file->filepath));
+    if ($transliterated == $file->filepath) {
+      continue;
+    }
 
-    // Move the file to a new location but do a shortcut check first to avoid
-    // unneccessary error messages. It's probably better to not mess with
-    // records for missing files.
-    $realpath = realpath($filepath);
-    if ($realpath && file_exists($realpath) && file_move($filepath, $filepath_new, FILE_EXISTS_RENAME)) {
-      // Get the file's new path; it may have changed.
-      $filepath_new = $filepath;
-
-      // Update the files table with the new path.
-      db_query("UPDATE {files} SET filepath = '%s' WHERE fid = %d", $filepath_new, $file->fid);
+    // Rename the file but do a shortcut check first to avoid warnings.
+    if (realpath($file->filepath) && file_move($file->filepath, $transliterated, FILE_EXISTS_RENAME)) {
+      $transliterated = $file->filepath;
+      db_query("UPDATE {files} SET filepath = '%s' WHERE fid = %d", $transliterated, $file->fid);
     }
     else {
       $errors[] = $file->filepath;
     }
   }
 
-  return $errors;
+  if ($errors) {
+    $message = $t('Not all existing filenames could be transliterated. The following files could not be accessed:');
+    $message .= theme_item_list($errors);
+    drupal_set_message($message, 'error');
+  }
+  else {
+    drupal_set_message($t('Existing filenames have been successfully transliterated.'));
+  }
 }
 
 /**
@@ -98,15 +96,12 @@ function transliteration_install_retroactive() {
  */
 function transliteration_update_1() {
   $ret = array();
-  transliteration_install_compat();
-  $errors = transliteration_install_retroactive();
-  if (!$errors) {
-    drupal_set_message('Existing filenames have been successfully transliterated.');
+  if (TRANSLITERATION_RETROACTIVE) {
+    transliteration_install_retroactive();
   }
   else {
-    $message = 'Not all existing filenames could be transliterated. The following files could not be accessed:';
-    $message .= theme_item_list($errors);
-    drupal_set_message($message, 'error');
+    $t = get_t();
+    drupal_set_message($t('Existing filenames have not been transliterated.'));
   }
   return $ret;
 }

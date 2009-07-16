@@ -1,4 +1,34 @@
 CHANGELOG for Views 2 for Drupal 6
+  Bug fixes:
+    o Table style when not overriding sorts put sorts in wrong order.
+    o #488908 by sl27257: "Node: Has new content" only worked when exposed.
+	o #451110 by wonder95: Fixed missing word in transform case help text.
+	o #385904 by JirkaRybka: Prevent duplication of id edit-submit on views exposed form.
+	o #489888 by TheRec: Remove erroneous "alt" attribute from <a> when using link rewriting.
+	o #499078 by Darren Oh: Make sure theme is initialized for pre_render hook.
+	o #490516 by v_20q: Some fields not properly being marked as translatable due to option unpacking bug.
+	o #484222 by dereine: Attachment displays were ignoring access settings.
+	o #503098 by Davide Goode: Feed displays should have link displays since they link to a page display.
+	o #381346 by ayalon: Allow Taxonomy: Tid as a field, which is now needed for rewrites which may need tids.
+	o #485296 by overall and deekayen: Remove unnecessary t() call.
+	o #460838 by Darren Oh: Make DISTINCT more distinct.
+	o #503774 by dereine: Cache time failed to return the proper cutoff time.
+    o #506098: Table sorting with no default was overriding sorts even tho it was not supposed to.
+	o #407538: Ensure views_break_phrase() will stop providing warnings on empty strings.
+	o #420850 by dereine: Commas should not be used to separate items in a profile list field.
+	o #482162 by agentrickard: link path needed further sanitization to properly encode special characters.
+	o Tables would not accept 0 as having data so columns with zeroes would lose data when merging with other columns.
+
+  Other changes:
+    o Implement a post_render hook (for themes too) and cache method.
+	o #501552 by neclimdul: Work around a core bug with DISTINCT on nodes.
+	o #430068 by overall and aclight: Improvements to the global "counter" field.
+	o #492002 by iterato: Allow "target" specification in field linking.
+	o #466454 by neclimdul: PHP strict fixes.
+	o Can now directly add a taxonomy term relationship to nodes, allowing more control by vocabulary.
+	o #472194: !1 can now be used with field rewriting to get the raw argument.
+	o #480162: Fields row style now contains option to hide empty fields.
+	o #433318: Special handling for empty fields, allowing them to avoid rewriting and not be displayed.
 
 Views 2.6
   Bugs fixed:

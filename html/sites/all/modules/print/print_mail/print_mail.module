@@ -1,9 +1,11 @@
 <?php
-// $Id: print_mail.module,v 1.1.2.33 2009/05/13 01:11:46 jcnventura Exp $
+// $Id: print_mail.module,v 1.1.2.37 2009/07/09 12:00:52 jcnventura Exp $
 
 /**
  * @file
  * Displays Printer-friendly versions of Drupal pages.
+ *
+ * @ingroup print
  */
 
 define('PRINTMAIL_PATH', 'printmail');
@@ -23,6 +25,13 @@ define('PRINT_MAIL_HOURLY_THRESHOLD', 3);
 define('PRINT_MAIL_TEASER_DEFAULT_DEFAULT', 1);
 define('PRINT_MAIL_TEASER_CHOICE_DEFAULT', 1);
 define('PRINT_MAIL_JOB_QUEUE_DEFAULT', 0);
+
+/**
+ * Implementation of hook_perm().
+ */
+function print_mail_perm() {
+  return array('access send to friend');
+}
 
 /**
  * Implementation of hook_theme().
@@ -49,9 +58,12 @@ function print_mail_menu() {
     'title' => 'Send page by e-mail',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('print_mail_form'),
-    'access arguments' => array('access print'),
+    'access arguments' => array('access send to friend'),
     'type' => MENU_CALLBACK,
     'file' => 'print_mail.inc',
+  );
+  $items[PRINTMAIL_PATH .'/'. PRINTMAIL_PATH] = array(
+    'page callback' => 'drupal_access_denied',
   );
   $items['admin/settings/print/email'] = array(
     'title' => 'e-mail',
@@ -192,8 +204,7 @@ function print_mail_nodeapi(&$node, $op = 'view', $teaser, $page) {
       // Insert content corner links
       $print_mail_link_pos = variable_get('print_mail_link_pos', array(PRINT_MAIL_LINK_POS_DEFAULT => PRINT_MAIL_LINK_POS_DEFAULT));
       if (($teaser === FALSE) && !empty($print_mail_link_pos['corner']) &&
-          !isset($node->printing)) {
-//          isset($node->build_mode) && ($node->build_mode == NODE_BUILD_NORMAL)) {
+          isset($node->build_mode) && ($node->build_mode == NODE_BUILD_NORMAL)) {
         $link = print_mail_insert_link(NULL, $node);
         if ($link) {
           $node->content['print_links']['#value'] = preg_replace('!</span>$!', $link .'</span>', $node->content['print_links']['#value']);
@@ -407,7 +418,7 @@ function print_mail_insert_link($path = NULL, $node = NULL) {
  *   PRINT_ALLOW_BOOK_LINK if a link is allowed in a book node
  */
 function print_mail_link_allowed($args) {
-  if (!empty($args['teaser']) || !user_access('access print')) {
+  if (!empty($args['teaser']) || !user_access('access send to friend')) {
     // If showing only the teaser or the user is not allowed or link is disabled
     return FALSE;
   }

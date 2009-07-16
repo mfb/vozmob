@@ -1,5 +1,5 @@
 <?php
-// $Id: print.pages.inc,v 1.1.2.49 2009/05/13 16:18:06 jcnventura Exp $
+// $Id: print.pages.inc,v 1.1.2.52 2009/07/09 12:00:52 jcnventura Exp $
 
 /**
  * @file
@@ -8,6 +8,8 @@
  * This file is included by the core PF module, and includes all the
  * functions necessary to generate a PF version of the original page
  * in HTML format.
+ *
+ * @ingroup print
  */
 
 $_print_urls = PRINT_URLS_DEFAULT;
@@ -87,7 +89,7 @@ function print_controller($path, $cid = NULL, $format = PRINT_HTML_FORMAT, $teas
     }
   }
   $parts = explode('/', $path);
-  if (is_numeric($parts[0])) {
+  if (is_numeric($parts[0]) && (count($parts) == 1)) {
     $print = _print_generate_node($path, $cid, $format, $teaser, $message);
   }
   else {
@@ -561,7 +563,7 @@ function _print_generate_node($nid, $cid = NULL, $format = PRINT_HTML_FORMAT, $t
   $node->printing = TRUE;
 
   //use the proper build_mode
-//  $node->build_mode = NODE_BUILD_PRINT;
+  $node->build_mode = NODE_BUILD_PRINT;
 
   // Turn off Pagination by the Paging module
   unset($node->pages);
@@ -659,6 +661,12 @@ function _print_generate_node($nid, $cid = NULL, $format = PRINT_HTML_FORMAT, $t
  */
 function _print_generate_path($path, $format = PRINT_HTML_FORMAT, $teaser = FALSE, $message = NULL) {
   global $_print_urls;
+
+  // Handle node tabs
+  $parts = explode('/', $path);
+  if (is_numeric($parts[0]) && (count($parts) > 1)) {
+    $path = 'node/'. $path;
+  }
 
   $path = drupal_get_normal_path($path);
 

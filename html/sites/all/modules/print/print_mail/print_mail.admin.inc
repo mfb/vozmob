@@ -1,5 +1,5 @@
 <?php
-// $Id: print_mail.admin.inc,v 1.1.2.13 2009/05/04 13:48:22 jcnventura Exp $
+// $Id: print_mail.admin.inc,v 1.1.2.14 2009/07/09 12:00:52 jcnventura Exp $
 
 /**
  * @file
@@ -7,6 +7,8 @@
  *
  * This file is included by the send by e-mail module, and includes the
  * settings form.
+ *
+ * @ingroup print
  */
 
 /**

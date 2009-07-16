@@ -6,7 +6,7 @@ class CoderStyleTest extends CoderTestCase {
     parent::__construct('style', $id);
   }
   
-  function getInfo() {
+  public static function getInfo() {
     return array(
       'name' => t('Coder Style Tests'),
       'description' => t('Tests for the coder style review.'),
@@ -33,6 +33,8 @@ class CoderStyleTest extends CoderTestCase {
     $this->assertCoderPass('  $var = $obj->camelCase();');
     $this->assertCoderFail('  $camelCase = "1";');
     $this->assertCoderFail('  function camelCase() {');
+    $this->assertCoderPass("  class myClass {\nfunction camelCase() {");
+    $this->assertCoderPass("  interface myClass {\nfunction camelCase() {");
     $this->assertCoderPass('  ?>This is embedded php and should Not trigger a camelCase error.<?php');
     $this->assertCoderPass("  ?>This second embedded php and should Not trigger\na camelCase error.<?php");
     $this->assertCoderPass('  $var = 0xFF;');
@@ -72,7 +74,7 @@ class CoderStyleTest extends CoderTestCase {
   }
 
   function testStyleStringConcatentation() {
-    $this->assertCoderFail('  if ($file = file_check_upload($fieldname . "_upload")) {');
+    $this->assertCoderPass('  if ($file = file_check_upload($fieldname . "_upload")) {');
     $this->assertCoderPass('  $v .= \'bugger\';');
     $this->assertCoderPass('  $a = $v .\'bugger\';');
     $this->assertCoderPass('  $a = $v ."bugger";');

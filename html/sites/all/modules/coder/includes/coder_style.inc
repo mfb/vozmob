@@ -1,5 +1,5 @@
 <?php
-// $Id: coder_style.inc,v 1.16.2.18.2.4 2008/10/23 09:22:18 snpower Exp $
+// $Id: coder_style.inc,v 1.16.2.18.2.8 2009/05/27 00:08:45 snpower Exp $
 
 /**
  * @file
@@ -45,11 +45,13 @@ function coder_style_reviews() {
       '#value' => '(\S=>|=>\S)',
       '#warning' => 'Arrays should be formatted with a space separating each element and assignment operator',
     ),
+    /* Commenting out for string concatentation style change.
     array(
       '#type' => 'regex',
       '#value' => '(\.\s\'\'|\'\'\s\.|\.\s""|\.\s"")',
       '#warning' => 'string concatenation should be formatted without a space separating the operators (dot .) and a quote',
     ),
+    */
     array(
       '#type' => 'regex',
       '#value' => '([^\(\'\"\s0-9]\.|\.[^\)\'\"\=\s0-9])',
@@ -92,7 +94,8 @@ function coder_style_reviews() {
       '#type' => 'regex',
       '#value' => '(?-i)(function\s+|\$)(([a-z]+[A-Z]+([a-z]*[A-Z]*)*)|([A-Z]+[a-z]+([A-Z]*[a-z]*)*))',
       '#warning' => 'do not use mixed case (camelCase), use lower case and _',
-      '#filename-not' => array('test'),
+      '#class-not' => '.+',
+      '#filename-not' => array('test'), // Add this line too for patch files, where we don't have have class context.
     ),
     array(
       '#type' => 'regex',
@@ -164,6 +167,9 @@ function coder_style_reviews() {
  * Define the rule callbacks for style.
  */
 function _coder_style_closing_php_callback(&$coder_args, $review, $rule, $lines, &$results) {
+  if (empty($lines)) {
+    return;
+  }
   for ($lineno = -1; $last = array_slice($lines, $lineno); $lineno --) {
     $lastline = $last[0][0];
     if (preg_match('/\S/', $lastline)) {

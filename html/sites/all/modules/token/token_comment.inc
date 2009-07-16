@@ -1,5 +1,5 @@
 <?php
-// $Id: token_comment.inc,v 1.3.4.3 2008/07/14 16:07:04 greggles Exp $
+// $Id: token_comment.inc,v 1.3.4.5 2009/05/31 15:56:09 greggles Exp $
 
 /**
  * @file
@@ -30,11 +30,24 @@ function comment_token_values($type, $object = NULL, $options = array()) {
       $values['comment-body']            = check_markup($comment->comment, $comment->format);
       $values['comment-author-name']     = check_plain($comment->name);
       $values['comment-author-uid']      = $comment->uid;
+      $values['comment-author-homepage'] = check_url($comment->homepage);
 
       // Raw counterparts of user supplied data.
       $values['comment-title-raw']       = $comment->subject;
       $values['comment-body-raw']        = $comment->comment;
       $values['comment-author-name-raw'] = $comment->name;
+
+      if (!empty($comment->mail)) {
+        $account_mail = $comment->mail;
+      }
+      elseif (!empty($comment->uid)) {
+        $account_mail = db_result(db_query("SELECT mail FROM {users} WHERE uid = %d", $comment->uid));
+      }
+      else {
+        $account_mail = '';
+      }
+      $values['comment-author-mail']     = check_plain($account_mail);
+      $values['comment-author-mail-raw'] = $account_mail;
 
       // Included in case a consuming module wants to format the body
       $values['comment-body-format']     = $comment->format;
@@ -72,6 +85,10 @@ function comment_token_list($type = 'all') {
     $tokens['comment']['comment-author-uid']      = t("Comment author's user id");
     $tokens['comment']['comment-author-name']     = t("Comment author's user name");
     $tokens['comment']['comment-author-name-raw'] = t("Comment author's user name. WARNING - raw user input");
+    $tokens['comment']['comment-author-homepage'] = t("Comment author's home page.");
+
+    $tokens['comment']['comment-author-mail']     = t("Comment author's e-mail.");
+    $tokens['comment']['comment-author-mail-raw'] = t("Comment author's e-mail. WARNING - raw user input.");
 
     $tokens['comment']['comment-yyyy']            = t("Comment creation year (four digit)");
     $tokens['comment']['comment-yy']              = t("Comment creation year (two digit)");

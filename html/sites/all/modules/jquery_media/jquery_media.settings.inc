@@ -1,5 +1,5 @@
 <?php
-// $Id: jquery_media.settings.inc,v 1.5.2.6 2008/08/28 01:47:17 aaron Exp $
+// $Id: jquery_media.settings.inc,v 1.5.2.7 2009/03/23 13:44:06 aaron Exp $
 
 /**
  * @file
@@ -121,6 +121,12 @@ function _jquery_media_settings_form() {
     '#title' => t('Flash Player (%flvPlayer)', array('%flvPlayer' => 'flvPlayer')),
     '#default_value' => variable_get('jquery_media_flvplayer', JQUERY_MEDIA_FLVPLAYER_DEFAULT),
     '#description' => t('Enter the path relative to your webroot to your flash video player, such as for the JW Media Player or Wimpy Rave. Do not include the beginning slash.'),
+  );
+  $form['players']['jquery_media_mp4_flash'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Play MP4 Files with Flash Player'),
+    '#default_value' => variable_get('jquery_media_mp4_flash', JQUERY_MEDIA_MP4_FLASH_DEFAULT),
+    '#description' => t('If checked, then MP4 files will be treated like FLV files and played with the Flash Video Player rather than a video plugin such as QuickTime. Flash is more widely deployed than QuickTime, but has stricter encoding requirements. Don\'t enable this unless all your MP4 files are encoded to Adobe\'s Flash specifications (i.e. h.264 + AAC).'),
   );
   $form['players']['jquery_media_mp3player'] = array(
     '#type' => 'textfield',

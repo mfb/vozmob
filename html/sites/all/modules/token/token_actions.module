@@ -1,5 +1,5 @@
 <?php
-// $Id: token_actions.module,v 1.4.2.7 2008/10/14 15:35:29 greggles Exp $
+// $Id: token_actions.module,v 1.4.2.8 2009/03/24 14:20:52 greggles Exp $
 
 /**
  * @file
@@ -128,10 +128,7 @@ function token_actions_send_email_action_submit($form, &$form_state) {
  * Sends an email.
  */
 function token_actions_send_email_action($object, $context) {
-  $context['global'] = NULL;
-  if (!empty($context['node']) && empty($context['user'])) {
-    $context['user'] = user_load(array('uid' => $context['node']->uid));
-  }
+  token_normalize_context($context);
   $params['from'] = variable_get('site_mail', ini_get('sendmail_from'));
   $recipient = token_replace_multiple($context['recipient'], $context);
   $params['subject'] = str_replace(array("\r", "\n"), '', token_replace_multiple($context['subject'], $context));
@@ -184,10 +181,7 @@ function token_actions_message_action_submit($form, &$form_state) {
  * Sends a configurable message to the current user's screen.
  */
 function token_actions_message_action(&$object, $context = array()) {
-  $context['global'] = NULL;
-  if (!empty($context['node']) && empty($context['user'])) {
-    $context['user'] = user_load(array('uid' => $context['node']->uid));
-  }
+  token_normalize_context($context);
   $context['message'] = token_replace_multiple($context['message'], $context);
   drupal_set_message($context['message']);
 }
@@ -226,9 +220,21 @@ function token_actions_goto_action_submit($form, &$form_state) {
 }
 
 function token_actions_goto_action($object, $context) {
-  $context['global'] = NULL;
-  if (!empty($context['node']) && empty($context['user'])) {
-    $context['user'] = user_load(array('uid' => $context['node']->uid));
-  }
+  token_normalize_context($context);
   drupal_goto(token_replace_multiple($context['url'], $context));
 }
+
+/**
+ * Load, into the context, the common objects user and node so we can use their
+ * tokens. Somtimes Trigger, or Actions, load them for us, but sometimes not.
+ */
+function token_normalize_context(&$context) {
+  $context['global'] = NULL;
+  if (empty($context['user']) && !empty($context['node'])) {
+    $context['user'] = user_load(array('uid' => $context['node']->uid));
+  }
+  if (empty($context['node']) && !empty($context['comment']) && !empty($context['comment']->nid)) {
+    $context['node'] = node_load($context['comment']->nid);
+  }
+}
+

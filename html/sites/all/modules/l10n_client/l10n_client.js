@@ -1,4 +1,4 @@
-// $Id: l10n_client.js,v 1.8 2008/10/22 20:25:33 goba Exp $
+// $Id: l10n_client.js,v 1.10.2.1 2009/07/14 18:02:54 goba Exp $
 
 // Store all l10n_client related data + methods in its own object
 jQuery.extend(Drupal, {
@@ -59,11 +59,11 @@ jQuery.extend(Drupal, {
     }
     // Get a string from the DOM tree
     this.getString = function(index, type) {
-      return $('#l10n-client-data div:eq('+index+') .'+type).html();
+      return $('#l10n-client-data div:eq('+index+') .'+type).text();
     }
     // Set a string in the DOM tree
     this.setString = function(index, data) {
-      $('#l10n-client-data div:eq('+index+') .target').html(data);
+      $('#l10n-client-data div:eq('+index+') .target').text(data);
     }
     // Filter the the string list by a search string
     this.filter = function(search) {
@@ -149,15 +149,37 @@ Drupal.behaviors.l10nClient = function (context) {
       type: "POST",
       url: $('#l10n-client-form').attr('action'),
       // Send source and target strings.
-      data: 'source=' + Drupal.encodeURIComponent($('#l10n-client-string-editor .source-text').text()) +
-            '&target=' + Drupal.encodeURIComponent($('#l10n-client-form #edit-target').val()) +
-            '&form_token=' + Drupal.encodeURIComponent($('#l10n-client-form #edit-l10n-client-form-form-token').val()),
+      data: {
+        source: $('#l10n-client-string-editor .source-text').text(),
+        target: $('#l10n-client-form #edit-target').val(),
+        'form_token': $('#l10n-client-form #edit-l10n-client-form-form-token').val()
+      },
       success: function (data) {
         // Store string in local js
         Drupal.l10nClient.setString(Drupal.l10nClient.selected, $('#l10n-client-form #edit-target').val());
 
+        // Figure out the display of the new translation in the selection list.
+        var newTranslation = $('#l10n-client-form #edit-target').val();
+        var newTranslationDisplay = newTranslation;
+        var newTranslationStripped = newTranslation.replace(/<\/?[^<>]+>/gi, '')
+                                                   .replace(/&quot;/g, '"')
+                                                   .replace(/&lt;/g, "<")
+                                                   .replace(/&gt;/g, ">")
+                                                   .replace(/&amp;/g, "&");
+        if (newTranslationStripped.length == 0) {
+          // Only contains HTML tags (edge case). Keep the whole string.
+          // HTML tags will show up in the selector, but that is normal in this case.
+          newTranslationDisplay = newTranslation;
+        }
+        else if (newTranslationStripped.length > 81) {
+          // Long translation, strip length to display only first part.
+          // We strip at 78 chars and add thre dots, if the total length is
+          // above 81.
+          newTranslationDisplay = newTranslationStripped.substr(0, 78) + '...';
+        }
+        
         // Mark string as translated.
-        $('#l10n-client-string-select li').eq(Drupal.l10nClient.selected).removeClass('untranslated').removeClass('active').addClass('translated').text($('#l10n-client-form #edit-target').val());
+        $('#l10n-client-string-select li').eq(Drupal.l10nClient.selected).removeClass('untranslated').removeClass('active').addClass('translated').text(newTranslationDisplay);
 
         // Empty input fields.
         $('#l10n-client-string-editor .source-text').html('');

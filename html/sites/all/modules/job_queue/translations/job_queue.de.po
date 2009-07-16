@@ -1,0 +1,109 @@
+# $Id: job_queue.de.po,v 1.1.2.1 2009/07/12 16:47:07 hass Exp $
+#
+# LANGUAGE translation of Drupal (general)
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from files:
+#  job_queue.module,v 1.7 2008/08/18 07:35:59 drumm
+#  job_queue.info: n/a
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: German translation of job_queue module\n"
+"POT-Creation-Date: 2009-07-12 18:15+0200\n"
+"PO-Revision-Date: 2009-07-12 18:41+0100\n"
+"Last-Translator: Alexander Haß\n"
+"Language-Team: Alexander Haß\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1)\n"
+"X-Poedit-Language: German\n"
+"X-Poedit-Country: GERMANY\n"
+
+#: job_queue.module:41;22
+#: job_queue.info:0
+msgid "Job queue"
+msgstr "Jobwarteschlange"
+
+#: job_queue.module:43
+msgid "There are no queued jobs."
+msgstr "Es gibt keine wartenden Jobs."
+
+#: job_queue.module:133
+msgid "There are <strong>no queued jobs</strong>. Modules may programmatically add queued jobs."
+msgstr "Es gibt <strong>keine wartenden Jobs</strong>. Module können programmatisch wartende Jobs hinzufügen."
+
+#: job_queue.module:139
+msgid "Created"
+msgstr "Erstellt"
+
+#: job_queue.module:140
+msgid "Description"
+msgstr "Beschreibung"
+
+#: job_queue.module:191
+msgid "Do not run"
+msgstr "Nicht ausführen"
+
+#: job_queue.module:197
+msgid "All other functions"
+msgstr "Alle anderen Funktionen"
+
+#: job_queue.module:205
+msgid "Save settings"
+msgstr "Einstellungen speichern"
+
+#: job_queue.module:213
+msgid "Job type"
+msgstr "Job-Typ"
+
+#: job_queue.module:214
+msgid "Priority"
+msgstr "Priorität"
+
+#: job_queue.module:234
+msgid "Saved job queue settings."
+msgstr "Die Einstellungen der Jobwarteschlange wurden gespeichert."
+
+#: job_queue.module:109;112;0
+msgid "job_queue"
+msgstr "job_queue"
+
+#: job_queue.module:109
+msgid "Ran queued job \"!description\""
+msgstr "Der wartende Job „!description“ wurde ausgeführt."
+
+#: job_queue.module:112
+msgid "Failed to run queued job \"!description\" because the function %function is not defined."
+msgstr "Der wartende Job „!description“ ist fehlgeschlagen, da die Funktion %function nicht vorhanden ist."
+
+#: job_queue.module:43;136
+msgid "There is <strong>@count</strong> queued job."
+msgid_plural "There are <strong>@count</strong> queued jobs."
+msgstr[0] "Es gibt <strong>einen</strong> wartenden Job."
+msgstr[1] "Es gibt <strong>@count</strong> wartende Jobs."
+
+#: job_queue.module:32
+msgid "view queued jobs"
+msgstr "Wartende Jobs anzeigen"
+
+#: job_queue.module:32
+msgid "administer job queue"
+msgstr "Jobwarteschlange verwalten"
+
+#: job_queue.module:16
+msgid "Queued jobs"
+msgstr "Wartende Jobs"
+
+#: job_queue.module:17
+msgid "View a list of the queued jobs."
+msgstr "Eine Liste der wartenden Jobs anzeigen."
+
+#: job_queue.module:23
+msgid "Set queue priorities."
+msgstr "Warteschlangenprioritäten festlegen."
+
+#: job_queue.info:0
+msgid "An API for modules to add jobs to a queue for running on cron."
+msgstr "Ein API für Module, um Jobs zu einer Warteschlange hinzuzufügen, die mit Cron ausgeführt werden."
+

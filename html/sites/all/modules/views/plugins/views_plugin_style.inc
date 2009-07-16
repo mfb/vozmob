@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_style.inc,v 1.6 2009/06/01 23:34:55 merlinofchaos Exp $
+// $Id: views_plugin_style.inc,v 1.7 2009/06/18 19:27:32 merlinofchaos Exp $
 
 /**
  * @defgroup views_style_plugins Views' style plugins
@@ -118,6 +118,12 @@ class views_plugin_style extends views_plugin {
    * any non-TRUE value, normal sorting will NOT be added to the query.
    */
   function build_sort() { return TRUE; }
+
+  /**
+   * Called by the view builder to let the style build a second set of
+   * sorts that will come after any other sorts in the view.
+   */
+  function build_sort_post() { }
 
   /**
    * Allow the style to do stuff before each row is rendered.

@@ -1,5 +1,5 @@
 <?php
-// $Id: query.inc,v 1.45 2009/06/02 18:17:06 merlinofchaos Exp $
+// $Id: query.inc,v 1.47 2009/06/30 19:28:44 merlinofchaos Exp $
 /**
  * @file query.inc
  * Defines the query object which is the underlying layer in a View.
@@ -116,7 +116,19 @@ class views_query {
    */
   function set_distinct($value = TRUE) {
     if (!(isset($this->no_distinct) && $value)) {
-      $this->distinct = $value;
+      // Hack in a check to see if node_access is going to add its own DISTINCT
+      // and break this query.
+      // See http://drupal.org/node/284392 for the core bug.
+      //
+      // We want to bypass views distinct code if this bug will be triggered so
+      // if the base table is node and there is a node access module, bypass
+      // views distinct code.
+      if ($this->base_table != 'node' || !node_access_view_all_nodes()) {
+        $this->distinct = FALSE;
+      }
+      else {
+        $this->distinct = $value;
+      }
     }
   }
 
@@ -881,6 +893,7 @@ class views_query {
     if (empty($this->no_distinct) && $this->distinct && !empty($this->fields)) {
       if (!empty($this->fields[$this->base_field])) {
         $this->fields[$this->base_field]['distinct'] = TRUE;
+        $this->add_groupby($this->base_field);
       }
     }
 
@@ -937,6 +950,9 @@ class views_query {
       }
       else if (!empty($field['aggregate'])) {
         $has_aggregate = TRUE;
+      }
+      elseif ($this->distinct && !in_array($fieldname, $this->groupby)) {
+        $string = $GLOBALS['db_type'] == 'pgsql' ? "FIRST($string)" : $string;
       }
       else {
         $non_aggregates[] = $fieldname;

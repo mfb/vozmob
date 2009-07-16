@@ -1,4 +1,4 @@
-// $Id: README.txt,v 1.4 2008/06/23 23:45:01 webchick Exp $
+// $Id: README.txt,v 1.8 2009/06/21 03:42:43 sun Exp $
 
 CONTENTS OF THIS FILE
 ---------------------
@@ -12,11 +12,7 @@ INTRODUCTION
 ------------
 
 Authors:
-* Jeff Robbins (jjeff)
-* Angela Byron (webchick)
-* Addison Berry (add1sun)
-
-This Module Made by Robots: http://www.lullabot.com
+* Rob Loach (Rob Loach)
 
 jQuery UI (http://ui.jquery.com/) is a set of cool widgets and effects that
 developers can use to add some pizazz to their modules.
@@ -29,17 +25,19 @@ on its own.
 INSTALLATION
 ------------
 
-1. Copy the jquery_ui module directory to your sites/SITENAME/modules
-   directory.
+1. Apply the patch from http://drupal.org/node/315100 .
 
-2. Download the "Development bundle" of jQuery UI from
-   http://ui.jquery.com/download.
+2. Copy the jquery_ui module directory to your sites/all/modules directory.
 
-3. Extract it as a sub-directory called 'jquery.ui' in the jquery_ui folder:
+3. Download the latest jQuery 1.7 development package from:
 
-     /sites/all/modules/jquery_ui/jquery.ui/
+     http://code.google.com/p/jquery-ui/downloads/list?can=3&q=1.7
 
-4. Enable the module at Administer >> Site building >> Modules.
+4. Extract it as a sub-directory called 'jquery-ui' in the jquery_ui folder:
+
+     /sites/all/modules/jquery_ui/jquery-ui/
+
+5. Enable the module at Administer >> Site building >> Modules.
 
 
 API
@@ -57,16 +55,14 @@ the following changes:
 
 2. In your module, call the following function:
 
-     jquery_ui_add($files);
-
-   For example:
-
-     jquery_ui_add(array('ui.draggable', 'ui.droppable', 'ui.sortable'));
-     
-     jquery_ui_add('ui.sortable');  // For a single file
+     drupal_add_js_library('ui.accordion');
 
    See the contents of the jquery.ui-X.X sub-directory for a list of available
    files that may be included, and see http://ui.jquery.com/docs for details on
    how to use them. The required ui.core file is automatically included, as is
    effects.core if you include any effects files.
+   
+   If you know the jQuery selector you are adding the widget to, you can have it
+   processed by the behaviors by calling:
 
+     drupal_add_js_library('ui.accordion', '#accordion');

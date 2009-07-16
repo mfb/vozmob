@@ -1,5 +1,5 @@
 <?php
-// $Id: print.admin.inc,v 1.1.2.25 2009/03/27 01:12:35 jcnventura Exp $
+// $Id: print.admin.inc,v 1.1.2.27 2009/07/09 12:00:52 jcnventura Exp $
 
 /**
  * @file
@@ -7,6 +7,8 @@
  *
  * This file is included by the core PF module, and includes the
  * settings form.
+ *
+ * @ingroup print
  */
 
 /**
@@ -25,7 +27,7 @@ function print_main_settings() {
     '#title' => t('Stylesheet URL'),
     '#default_value' => variable_get('print_css', PRINT_CSS_DEFAULT),
     '#size' => 60,
-    '#maxlength' => 64,
+    '#maxlength' => 250,
     '#description' => t('The URL to your custom print cascading stylesheet, if any. When none is specified, the default module CSS file is used.') .'<br />'.
                       t('Macros: %b (base path: "%base"), %t (path to theme: "%theme")', array('%base' => base_path(), '%theme' => path_to_theme())),
   );

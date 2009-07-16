@@ -1,5 +1,5 @@
 <?php
-// $Id: content.views.inc,v 1.1.2.25 2009/04/11 14:50:53 yched Exp $
+// $Id: content.views.inc,v 1.1.2.26 2009/07/14 22:17:05 yched Exp $
 
 /**
  * @file
@@ -140,7 +140,8 @@ function content_views_data() {
   $data = array();
   foreach (content_fields() as $field) {
     $module = $field['module'];
-    $result = module_invoke($module, 'field_settings', 'views data', $field);
+    $result = (array) module_invoke($module, 'field_settings', 'views data', $field);
+    drupal_alter('field_settings', $result, 'views data', $field);
     if (empty($result)) {
       $result = content_views_field_views_data($field);
     }

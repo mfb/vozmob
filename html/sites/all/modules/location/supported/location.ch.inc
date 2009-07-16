@@ -1,10 +1,11 @@
 <?php
-// $Id: location.ch.inc,v 1.6 2008/01/24 09:00:02 bdragon Exp $
+// $Id: location.ch.inc,v 1.6.4.1 2009/06/29 14:44:02 bdragon Exp $
 
 // Switzerland
 
 function location_province_list_ch() {
-  return array('ZH' => "Zurich",
+  return array(
+    'ZH' => "Zurich",
     'BE' => "Bern",
     'LU' => "Lucerne",
     'UR' => "Uri",
@@ -27,7 +28,75 @@ function location_province_list_ch() {
     'TI' => "Ticino",
     'VD' => "Vaud",
     'VS' => "Valais",
-    'NE' => "Neuch�tel",
+    'NE' => "Neuchatel",
     'GE' => "Geneva",
-    'JU' => "Jura");
+    'JU' => "Jura",
+  );
+}
+
+function location_map_link_ch_providers() {
+  return array(
+    'search' => array(
+      'name' => 'map.search.ch',
+      'url' => 'http://map.search.ch',
+      'tos' => 'http://map.search.ch/terms.html',
+    ),
+    'google' => array(
+      'name' => 'Google Maps',
+      'url' => 'http://maps.google.ch',
+      'tos' => 'http://www.google.ch/help/terms_maps.html',
+    ),
+  );
+}
+
+function location_map_link_ch_default_providers() {
+  return array('search', 'google');
+}
+
+function location_map_link_ch_google($location = array()) {
+  $query_params = array();
+
+  foreach (array('street', 'city', 'postal_code', 'country') as $field) {
+    if (isset($location[$field])) {
+      $query_params[] = $location[$field];
+    }
+  }
+
+  if (count($query_params)) {
+    return ('http://maps.google.ch?q='. urlencode(implode(', ', $query_params)));
+  }
+  else {
+    return NULL;
+  }
+}
+
+function location_map_link_ch_search($location = array()) {
+  $query_param = '';
+
+  if ($location['postal_code'] || $location['city'] || $location['street']) {
+    $query_param = $location['postal_code'] . '-' . $location['city'] . '/' . $location['street'];
+    return 'http://map.search.ch/' . $query_param;
+  }
+  else {
+    return NULL;
+  }
+}
+
+function location_driving_directions_link_ch($location_a, $location_b) {
+  return _location_driving_directions_link_ch_search($location_a, $location_b);
+}
+
+function _location_driving_directions_link_ch_search($location_a, $location_b) {
+  $query_params_a = array();
+  $query_params_b = array();
+
+  foreach (array('street', 'postal_code', 'city') as $field) {
+    if (isset($location_a[$field])) {
+      $query_params_a[] = $location_a[$field];
+    }
+    if (isset($location_b[$field])) {
+      $query_params_b[] = $location_b[$field];
+    }
+  }
+  return 'http://route.search.ch/?route=' . urlencode(implode(' ', $query_params_a) . ' to ' .implode(' ', $query_params_b));
 }

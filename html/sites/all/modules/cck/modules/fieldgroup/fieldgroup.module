@@ -1,5 +1,5 @@
 <?php
-// $Id: fieldgroup.module,v 1.79.2.48 2009/04/29 20:51:52 karens Exp $
+// $Id: fieldgroup.module,v 1.79.2.50 2009/07/12 20:50:31 markuspetrux Exp $
 
 /**
  * @file
@@ -74,9 +74,6 @@ function fieldgroup_theme() {
     ),
     'fieldgroup_display_overview_form' => array(
       'arguments' => array('form' => NULL),
-    ),
-    'fieldgroup_content_type' => array(
-      'arguments' => array('vars' => NULL, 'nid' => NULL),
     ),
   );
 }
@@ -524,83 +521,179 @@ function fieldgroup_nodeapi(&$node, $op, $teaser, $page) {
     case 'view':
       // Prevent against invalid 'nodes' built by broken 3rd party code.
       if (isset($node->type)) {
-        // NODE_BUILD_NORMAL is 0, and ('whatever' == 0) is TRUE, so we need a ===.
-        if ($node->build_mode === NODE_BUILD_NORMAL || $node->build_mode == NODE_BUILD_PREVIEW) {
-          $context = $teaser ? 'teaser' : 'full';
-        }
-        else {
-          $context = $node->build_mode;
-        }
-
-        foreach (fieldgroup_groups($node->type) as $group_name => $group) {
-          // Do not include group labels when indexing content.
-          if ($context == NODE_BUILD_SEARCH_INDEX) {
-            $group['settings']['display']['label'] = 'hidden';
-          }
-          $label = $group['settings']['display']['label'] == 'above';
-          $element = array(
-            '#title' => $label ? check_plain(t($group['label'])) : '',
-            '#description' => $label ? content_filter_xss(t($group['settings']['display']['description'])) : '',
-          );
-          $format = isset($group['settings']['display'][$context]['format']) ? $group['settings']['display'][$context]['format'] : 'fieldset';
-
-          switch ($format) {
-            case 'simple':
-              $element['#type'] = 'fieldgroup_simple';
-              $element['#group_name'] = $group_name;
-              $element['#node'] = $node;
-              break;
-            case 'hidden':
-              $element['#access'] = FALSE;
-              break;
-
-            case 'fieldset_collapsed':
-              $element['#collapsed'] = TRUE;
-            case 'fieldset_collapsible':
-              $element['#collapsible'] = TRUE;
-            case 'fieldset':
-              $element['#type'] = 'fieldgroup_fieldset';
-              $element['#attributes'] = array('class' => 'fieldgroup '. strtr($group['group_name'], '_', '-'));
-              break;
-          }
-          foreach ($group['fields'] as $field_name => $field) {
-            if (isset($node->content[$field_name])) {
-              $element[$field_name] = $node->content[$field_name];
-            }
-          }
-
-          // Allow other modules to alter the group view.
-          // Can't use module_invoke_all because we want
-          // to be able to use a reference to $node and $element.
-          foreach (module_implements('fieldgroup_view') as $module) {
-            $function = $module .'_fieldgroup_view';
-            $function($node, $element, $group, $context);
-          }
-
-          foreach ($group['fields'] as $field_name => $field) {
-            if (isset($node->content[$field_name])) {
-              unset($node->content[$field_name]);
-            }
-          }
-
-          // The wrapper lets us get the themed output for the group
-          // to populate the $GROUP_NAME_rendered variable for node templates,
-          // and hide it from the $content variable if needed.
-          // See fieldgroup_preprocess_node(), theme_fieldgroup_wrapper().
-          $wrapper = array(
-            'group' => $element,
-            '#weight' => $group['weight'],
-            '#post_render' => array('fieldgroup_wrapper_post_render'),
-            '#group_name' => $group_name,
-            '#type_name' => $node->type,
-            '#context' => $context,
-          );
-
-          $node->content[$group_name] = $wrapper;
+        // Build the node content element needed to render each fieldgroup.
+        foreach (fieldgroup_groups($node->type) as $group) {
+          fieldgroup_build_content($group, $node, $teaser, $page);
         }
       }
       break;
   }
+}
+
+/**
+ * Build the node content element needed to render a fieldgroup.
+ *
+ * @param $group
+ *   The field group definition.
+ * @param $node
+ *   The node containing the field group to display. Can be a 'pseudo-node',
+ *   containing at least 'type', 'nid', 'vid', and the content for fields
+ *   required for the group.
+ * @param $teaser
+ * @param $page
+ *   Similar to hook_nodeapi('view').
+ *
+ * @see fieldgroup_nodeapi()
+ * @see fieldgroup_view_group()
+ */
+function fieldgroup_build_content($group, &$node, $teaser, $page) {
+  // NODE_BUILD_NORMAL is 0, and ('whatever' == 0) is TRUE, so we need a ===.
+  if ($node->build_mode === NODE_BUILD_NORMAL || $node->build_mode == NODE_BUILD_PREVIEW) {
+    $context = $teaser ? 'teaser' : 'full';
+  }
+  else {
+    $context = $node->build_mode;
+  }
+
+  $group_name = $group['group_name'];
+
+  // Do not include group labels when indexing content.
+  if ($context == NODE_BUILD_SEARCH_INDEX) {
+    $group['settings']['display']['label'] = 'hidden';
+  }
+  $label = $group['settings']['display']['label'] == 'above';
+  $element = array(
+    '#title' => $label ? check_plain(t($group['label'])) : '',
+    '#description' => $label ? content_filter_xss(t($group['settings']['display']['description'])) : '',
+  );
+  $format = isset($group['settings']['display'][$context]['format']) ? $group['settings']['display'][$context]['format'] : 'fieldset';
+
+  switch ($format) {
+    case 'simple':
+      $element['#type'] = 'fieldgroup_simple';
+      $element['#group_name'] = $group_name;
+      $element['#node'] = $node;
+      break;
+    case 'hidden':
+      $element['#access'] = FALSE;
+      break;
+    case 'fieldset_collapsed':
+      $element['#collapsed'] = TRUE;
+    case 'fieldset_collapsible':
+      $element['#collapsible'] = TRUE;
+    case 'fieldset':
+      $element['#type'] = 'fieldgroup_fieldset';
+      $element['#attributes'] = array('class' => 'fieldgroup '. strtr($group['group_name'], '_', '-'));
+      break;
+  }
+  foreach ($group['fields'] as $field_name => $field) {
+    if (isset($node->content[$field_name])) {
+      $element[$field_name] = $node->content[$field_name];
+    }
+  }
+
+  // Allow other modules to alter the group view.
+  // Can't use module_invoke_all because we want
+  // to be able to use a reference to $node and $element.
+  foreach (module_implements('fieldgroup_view') as $module) {
+    $function = $module .'_fieldgroup_view';
+    $function($node, $element, $group, $context);
+  }
+
+  // Unset the original field values now that we've moved them.
+  foreach ($group['fields'] as $field_name => $field) {
+    if (isset($node->content[$field_name])) {
+      unset($node->content[$field_name]);
+    }
+  }
+
+  // The wrapper lets us get the themed output for the group
+  // to populate the $GROUP_NAME_rendered variable for node templates,
+  // and hide it from the $content variable if needed.
+  // See fieldgroup_preprocess_node(), theme_fieldgroup_wrapper().
+  $wrapper = array(
+    'group' => $element,
+    '#weight' => $group['weight'],
+    '#post_render' => array('fieldgroup_wrapper_post_render'),
+    '#group_name' => $group_name,
+    '#type_name' => $node->type,
+    '#context' => $context,
+  );
+
+  $node->content[$group_name] = $wrapper;
+}
+
+/**
+ * Render a single field group, fully themed with label.
+ *
+ * To be used by third-party code (Panels, ...) that needs to output an
+ * isolated field group. Do *not* use inside node templates, use the
+ * $GROUP_NAME_rendered variables instead. You can also use the 'simple'
+ * style format and override the template fieldgroup-simple.tpl.php.
+ *
+ * By default, the field group is displayed using the settings defined for the
+ * 'full node' or 'teaser' contexts (depending on the value of the $teaser param).
+ * Set $node->build_mode to a different value to use a different context.
+ *
+ * Different settings can be specified by adjusting $group['settings']['display'].
+ *
+ * @param $group
+ *   The field group definition.
+ * @param $node
+ *   The node containing the field group to display. Can be a 'pseudo-node',
+ *   containing at least 'type', 'nid', 'vid', and the field data required
+ *   for the group.
+ * @param $teaser
+ * @param $page
+ *   Similar to hook_nodeapi('view').
+ * @return
+ *   The themed output for the field group.
+ *
+ * @see content_view_field()
+ */
+function fieldgroup_view_group($group, &$node, $teaser = FALSE, $page = FALSE) {
+  $group_name = $group['group_name'];
+  $field_types = _content_field_types();
+
+  // Clone the node to prevent from altering the original.
+  $node_copy = drupal_clone($node);
+
+  // Use 'full'/'teaser' if not specified otherwise.
+  $node_copy->build_mode = isset($node_copy->build_mode) ? $node_copy->build_mode : NODE_BUILD_NORMAL;
+
+  // Build the content element for individual fields in the field group.
+  if (!isset($node_copy->content)) {
+    $node_copy->content = array();
+  }
+  foreach (array_keys($group['fields']) as $field_name) {
+    $field = content_fields($field_name, $node_copy->type);
+
+    if (isset($node_copy->{$field_name})) {
+      $items = $node_copy->{$field_name};
+
+      // One-field equivalent to _content_field_invoke('sanitize').
+      $module = $field_types[$field['type']]['module'];
+      $function = $module .'_field';
+      if (function_exists($function)) {
+        $function('sanitize', $node_copy, $field, $items, $teaser, $page);
+        $node_copy->{$field_name} = $items;
+      }
+
+      $field_view = content_field('view', $node_copy, $field, $items, $teaser, $page);
+      // content_field('view') adds a wrapper to handle variables and 'excluded'
+      // fields for node templates. We bypass it and get the actual field.
+      $node_copy->content[$field_name] = $field_view[$field_name];
+    }
+  }
+
+  // Build the content element of the field group itself.
+  fieldgroup_build_content($group, $node_copy, $teaser, $page);
+
+  // fieldgroup_build_content() adds a wrapper to handle variables and 'excluded'
+  // groups for node templates. We bypass it and render the actual field group.
+  $output = drupal_render($node_copy->content[$group_name]['group']);
+
+  return $output;
 }
 
 /**

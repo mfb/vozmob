@@ -1,5 +1,5 @@
 <?php
-// $Id: content-admin-field-overview-form.tpl.php,v 1.1.2.5 2008/10/16 14:40:54 yched Exp $
+// $Id: content-admin-field-overview-form.tpl.php,v 1.1.2.6 2009/06/26 18:02:45 yched Exp $
 ?>
 <div>
   <?php print $help; ?>
@@ -47,7 +47,8 @@
             <span class="<?php print $row->label_class; ?>"><?php print $row->label; ?></span>
           </td>
           <td><?php print $row->weight . $row->parent . $row->hidden_name; ?></td>
-          <td colspan="3"><?php print $row->description; ?></td>
+          <td colspan="2"><?php print $row->description; ?></td>
+          <td><?php print $row->configure; ?>&nbsp;&nbsp;<?php print $row->remove; ?></td>
           <?php break;
         case 'separator': ?>
           <td colspan="5" class="region"><?php print t('Add'); ?></td>

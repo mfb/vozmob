@@ -1,10 +1,13 @@
 <?php
-// $Id: imagefield.module,v 1.99 2009/04/20 23:57:17 quicksketch Exp $
+// $Id: imagefield.module,v 1.102 2009/07/03 23:35:49 quicksketch Exp $
 
 /**
  * @file
  * ImageField core hooks and menu callbacks.
  */
+
+include_once dirname(__FILE__) . '/imagefield_file.inc';
+include_once dirname(__FILE__) . '/imagefield_widget.inc';
 
 /**
  * Implementation of hook_init().
@@ -18,9 +21,6 @@ function imagefield_init() {
     drupal_set_message(t('The ImageField module has been disabled. The <a href="http://drupal.org/project/filefield">FileField module</a> needs to be installed for it to work properly.'));
     return;
   }
-
-  module_load_include('inc', 'imagefield', 'imagefield_file');
-  module_load_include('inc', 'imagefield', 'imagefield_widget');
 }
 
 /**
@@ -282,9 +282,17 @@ function theme_imagefield_image($file, $alt = '', $title = '', $attributes = NUL
     return '<!-- File not found: '. $file['filepath'] .' -->';
   }
 
-  if ($getsize && (list($width, $height, $type, $image_attributes) = @getimagesize($file['filepath']))) {
-    $attributes['width'] = $width;
-    $attributes['height'] = $height;
+  if ($getsize) {
+    // Use cached width and height if available.
+    if (!empty($file['data']['width']) && !empty($file['data']['height'])) {
+      $attributes['width']  = $file['data']['width'];
+      $attributes['height'] = $file['data']['height'];
+    }
+    // Otherwise pull the width and height from the file.
+    elseif (list($width, $height, $type, $image_attributes) = @getimagesize($file['filepath'])) {
+      $attributes['width'] = $width;
+      $attributes['height'] = $height;
+    }
   }
 
   if (!empty($title)) {
@@ -324,7 +332,7 @@ function theme_imagefield_admin_thumbnail($item = NULL) {
     return '<!-- link to default admin thumb -->';
   }
   $thumb_path = imagefield_file_admin_thumb_path($item);
-  return '<img src="'. file_create_url($thumb_path) .'" />';
+  return '<img src="'. file_create_url($thumb_path) .'" title="' . check_plain($item['filename']) . '" />';
 }
 /**
  * @} End defgroup "Theme Callbacks".

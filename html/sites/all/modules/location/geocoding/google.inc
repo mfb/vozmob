@@ -1,5 +1,5 @@
 <?php
-// $Id: google.inc,v 1.11.2.2 2009/01/09 18:36:48 bdragon Exp $
+// $Id: google.inc,v 1.11.2.3 2009/06/29 14:11:16 bdragon Exp $
 
 /**
  * @file
@@ -41,6 +41,7 @@ function google_geocode_country_list() {
     /* Ireland                      */ 'ie',
     /* Italy                        */ 'it',
     /* Japan                        */ 'jp',
+    /* Kenya                        */ 'ke',
     /* Latvia                       */ 'lv',
     /* Lebanon                      */ 'lb',
     /* Liechtenstein                */ 'li',
@@ -56,6 +57,7 @@ function google_geocode_country_list() {
     /* New Zealand                  */ 'nz',
     /* Nicaragua                    */ 'ni',
     /* Norway                       */ 'no',
+    /* Panama                       */ 'pa',
     /* Poland                       */ 'pl',
     /* Portugal                     */ 'pt',
     /* Romania                      */ 'ro',

@@ -1,0 +1,114 @@
+# $Id: filefield_meta-includes.de.po,v 1.1 2009/06/06 22:00:58 hass Exp $
+#
+# German translation of Drupal (general)
+# Copyright 2008 <dvc@drupalcenter.de>
+# Generated from files:
+#  filefield.module,v 1.50.2.2 2007/09/25 16:06:07 jpetso
+#  filefield.info,v 1.5 2007/06/18 22:53:42 dww
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"POT-Creation-Date: 2009-06-06 23:22+0200\n"
+"PO-Revision-Date: 2009-06-06 23:59+0100\n"
+"Last-Translator: Alexander Haß\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+"X-Poedit-Language: German\n"
+"X-Poedit-Country: GERMANY\n"
+
+#: filefield_meta/includes/filefield_meta.views.inc:21
+msgid "File"
+msgstr "Datei"
+
+#: filefield_meta/includes/filefield_meta.views.inc:39
+msgid "Video width"
+msgstr "Videobreite"
+
+#: filefield_meta/includes/filefield_meta.views.inc:40
+msgid "Width of a video or image file in pixels."
+msgstr "Die Breite eines Video oder einer Bilddatei in Pixel."
+
+#: filefield_meta/includes/filefield_meta.views.inc:55
+msgid "Video height"
+msgstr "Videohöhe"
+
+#: filefield_meta/includes/filefield_meta.views.inc:56
+msgid "Height of a video or image file in pixels."
+msgstr "Die Höhe eines Video oder einer Bilddatei in Pixel."
+
+#: filefield_meta/includes/filefield_meta.views.inc:71
+msgid "Duration"
+msgstr "Dauer"
+
+#: filefield_meta/includes/filefield_meta.views.inc:72
+msgid "The duration of audio or video files, in seconds."
+msgstr "Die Dauer einer Audio- oder Video-Datei in Sekunden."
+
+#: filefield_meta/includes/filefield_meta.views.inc:87
+msgid "Audio format"
+msgstr "Audioformat"
+
+#: filefield_meta/includes/filefield_meta.views.inc:88
+msgid "The audio format."
+msgstr "Das Audioformat."
+
+#: filefield_meta/includes/filefield_meta.views.inc:103
+msgid "Audio sample rate"
+msgstr ""
+
+#: filefield_meta/includes/filefield_meta.views.inc:104
+msgid "The sample rate of the audio."
+msgstr ""
+
+#: filefield_meta/includes/filefield_meta.views.inc:119
+msgid "Audio channel mode"
+msgstr ""
+
+#: filefield_meta/includes/filefield_meta.views.inc:120
+msgid "The number of channels in the audio, by name (stereo or mono)."
+msgstr ""
+
+#: filefield_meta/includes/filefield_meta.views.inc:135
+msgid "Audio bitrate"
+msgstr ""
+
+#: filefield_meta/includes/filefield_meta.views.inc:136
+msgid "The audio bitrate."
+msgstr ""
+
+#: filefield_meta/includes/filefield_meta.views.inc:151
+msgid "Audio bitrate mode"
+msgstr ""
+
+#: filefield_meta/includes/filefield_meta.views.inc:152
+msgid "The kind of audio bitrate, such as VBR. Usually empty."
+msgstr ""
+
+#: filefield_meta/includes/filefield_meta_handler_field_duration.inc:38
+msgid "Time format"
+msgstr "Zeitformat"
+
+#: filefield_meta/includes/filefield_meta_handler_field_duration.inc:41
+msgid "Default (usually mm:ss)"
+msgstr "Standard (normalerweise mm:ss)"
+
+#: filefield_meta/includes/filefield_meta_handler_field_duration.inc:42
+msgid "Hours: h"
+msgstr "Stunden: h"
+
+#: filefield_meta/includes/filefield_meta_handler_field_duration.inc:43
+msgid "Minutes: mm"
+msgstr "Minuten: mm"
+
+#: filefield_meta/includes/filefield_meta_handler_field_duration.inc:44
+msgid "Seconds: ss"
+msgstr "Sekunden: ss"
+
+#: filefield_meta/includes/filefield_meta_handler_field_duration.inc:45
+msgid "Total seconds"
+msgstr ""
+

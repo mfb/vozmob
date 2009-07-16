@@ -1,4 +1,4 @@
-/* $Id: printlinks.css,v 1.1.2.5 2009/04/20 16:00:53 jcnventura Exp $ */
+/* $Id: printlinks.css,v 1.1.2.6 2009/06/04 23:08:43 jcnventura Exp $ */
 
 .print-link {
   /* Use these for links above the content */
@@ -11,6 +11,10 @@
   bottom: 0.5em;
   float:right;
   */
+}
+
+div#block-print-0 span {
+  display: block;
 }
 
 .print_html, .print_mail, .print_pdf {

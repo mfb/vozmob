@@ -1,5 +1,5 @@
 <?php
-// $Id: content_copy.module,v 1.27.2.21 2009/02/26 23:15:54 yched Exp $
+// $Id: content_copy.module,v 1.27.2.23 2009/07/01 16:09:08 markuspetrux Exp $
 
 /**
  *  @file
@@ -102,7 +102,6 @@ function content_copy_export_form(&$form_state) {
       $form['type_name'] = array(
         '#title' => t('Types'),
         '#type' => 'radios',
-        '#multiple' => FALSE,
         '#options' => $types,
         '#description' => t('Select the content type to export.'),
       );
@@ -137,7 +136,6 @@ function content_copy_export_form(&$form_state) {
       }
       $form['fields'] = array(
         '#type' => 'checkboxes',
-        '#multiple' => TRUE,
         '#options' => $fields_options,
         '#default_value' => array_keys($fields_options),
       );
@@ -162,7 +160,6 @@ function content_copy_export_form(&$form_state) {
       if ($groups) {
         $form['groups'] = array(
           '#type' => 'checkboxes',
-          '#multiple' => TRUE,
           '#options' => $groups_options,
           '#default_value' => array_keys($groups_options),
         );
@@ -457,6 +454,7 @@ function content_copy_import_form_submit($form, &$form_state) {
   }
 
   // Iterate through the field forms in the import and execute each.
+  $rebuild = FALSE;
   foreach ($imported_fields as $field) {
 
     // Make sure the field doesn't already exist in the type.
@@ -472,7 +470,8 @@ function content_copy_import_form_submit($form, &$form_state) {
       // Might need to overwrite the content type name if a new type was created.
       $field['type_name'] = $type_name;
 
-      $field = content_field_instance_create($field);
+      $field = content_field_instance_create($field, FALSE);
+      $rebuild = TRUE;
       drupal_set_message(t('The field %field_label (%field_name) was added to the content type %type.', array(
         '%field_label' => $field['widget']['label'], '%field_name' => $field_name, '%type' => $type_label)));
 
@@ -480,6 +479,12 @@ function content_copy_import_form_submit($form, &$form_state) {
         fieldgroup_update_fields($field);
       }
     }
+  }
+
+  // Clear caches and rebuild menu only if any field has been created.
+  if ($rebuild) {
+    content_clear_type_cache(TRUE);
+    menu_rebuild();
   }
 
   // Import weights of non-CCK fields.

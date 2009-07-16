@@ -1,5 +1,5 @@
 <?php
-// $Id: devel_generate.drush.inc,v 1.1.2.6 2009/04/09 19:22:56 weitzman Exp $
+// $Id: devel_generate.drush.inc,v 1.1.2.7 2009/05/30 04:34:47 weitzman Exp $
 
 /**
  * @file
@@ -102,7 +102,9 @@ function drush_generate_nodescontent($num_nodes = NULL, $num_comments = NULL) {
   global $user;
   $user_one = user_load(array('uid' => '1'));
   $user = $user_one;
+
   session_save_session(FALSE);
+  drush_generate_include_devel();
   
   if (drush_get_option('kill')) $values['values']['kill_content'] = 1;
   $values['values']['title_length'] = '8';
@@ -117,7 +119,6 @@ function drush_generate_nodescontent($num_nodes = NULL, $num_comments = NULL) {
   }
   $values['values']['node_types'] = drupal_map_assoc($types);
 
-  drush_generate_include_devel();
   drush_op('devel_generate_content', $values);
   drush_log(dt('Generated @num_nodes nodes, @num_comments comments per node', array('@num_nodes' => $num_nodes, '@num_comments' => $num_comments)), 'ok');
 }

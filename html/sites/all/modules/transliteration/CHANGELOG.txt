@@ -1,4 +1,21 @@
-// $Id: CHANGELOG.txt,v 1.4.2.4 2008/06/12 21:43:50 smk Exp $
+// $Id: CHANGELOG.txt,v 1.4.2.10 2009/06/10 15:04:57 smk Exp $
+
+Transliteration 6.x-2.x, xxxx-xx-xx
+-----------------------------------
+#487550 by viadimezzo: Added sz ligature transliteration to German.
+
+
+Transliteration 6.x-2.1, 2009-06-09
+-----------------------------------
+#199660 by smk-ka: Added a constant to disallow converting pre-existing
+  filenames by default.
+#357254 by overall, Cynicus: Fixed transliteration of Russian letters.
+#364931 by PaV: Added Esperanto transliteration.
+by smk-ka: Rewrote retroactive transliteration to get rid of SUBSTRING_INDEX
+  function dependency.
+#312021 by pcorbett: Added SQL Server support.
+#257041 by Freso: More transliterations (x21??).
+
 
 Transliteration 6.x-2.0, 2008-06-12
 -----------------------------------

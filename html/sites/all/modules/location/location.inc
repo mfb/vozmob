@@ -1,5 +1,5 @@
 <?php
-// $Id: location.inc,v 1.95.2.2 2009/03/24 17:59:12 bdragon Exp $
+// $Id: location.inc,v 1.95.2.3 2009/07/08 20:53:22 bdragon Exp $
 
 /**
  * @defgroup Location Location: An API for working with locations.
@@ -94,6 +94,7 @@ function location_get_postalcode_data($location = array()) {
   if (is_null($location['postal_code']) || is_null($location['country']) || empty($location['country']) || empty($location['postal_code']) || $location['postal_code'] == 'xx') {
     return NULL;
   }
+  location_load_country($location['country']);
   $country_specific_function = 'location_get_postalcode_data_'. $location['country'];
   if (function_exists($country_specific_function)) {
     return $country_specific_function($location);

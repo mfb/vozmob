@@ -1,4 +1,8 @@
-// $Id: changelog.txt,v 1.6.2.10 2008/12/17 14:45:40 aaron Exp $
+// $Id: changelog.txt,v 1.6.2.11 2009/03/23 13:44:06 aaron Exp $
+
+March 2009
+----------
+ * #328701/stefanor: Play MP4s with Flash Player (stefanor).
 
 December 2008
 -------------

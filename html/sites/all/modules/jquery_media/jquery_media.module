@@ -1,5 +1,5 @@
 <?php
-// $Id: jquery_media.module,v 1.5.2.6 2008/12/17 14:43:50 aaron Exp $
+// $Id: jquery_media.module,v 1.5.2.7 2009/03/23 13:44:06 aaron Exp $
 
 /**
  * @file
@@ -13,6 +13,7 @@ define('JQUERY_MEDIA_BGCOLOR_DEFAULT', '#ffffff');
 define('JQUERY_MEDIA_AUTOPLAY_DEFAULT', 0);
 define('JQUERY_MEDIA_FLVPLAYER_DEFAULT', 'mediaplayer.swf');
 define('JQUERY_MEDIA_MP3PLAYER_DEFAULT', 'mediaplayer.swf');
+define('JQUERY_MEDIA_MP4_FLASH_DEFAULT', 0);
 define('JQUERY_MEDIA_CLASS_MEDIA_DEFAULT', '.filefield-file a');
 define('JQUERY_MEDIA_CLASS_MEDIA_AUTOINVOKE_DEFAULT', TRUE);
 define('JQUERY_MEDIA_MEDIA_WIDTH_DEFAULT', '');

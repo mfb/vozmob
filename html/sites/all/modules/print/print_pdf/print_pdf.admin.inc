@@ -1,5 +1,5 @@
 <?php
-// $Id: print_pdf.admin.inc,v 1.1.2.16 2009/04/27 22:53:50 jcnventura Exp $
+// $Id: print_pdf.admin.inc,v 1.1.2.18 2009/07/09 12:00:52 jcnventura Exp $
 
 /**
  * @file
@@ -7,6 +7,8 @@
  *
  * This file is included by the PDF version module, and includes the
  * settings form.
+ *
+ * @ingroup print
  */
 
 /**
@@ -163,6 +165,12 @@ function print_pdf_settings() {
       '#options' => array('portrait' => t('Portrait'), 'landscape' => t('Landscape')),
       '#default_value' => variable_get('print_pdf_page_orientation', PRINT_PDF_PAGE_ORIENTATION_DEFAULT),
       '#description' => t('Choose the page orientation of the generated PDF.'),
+    );
+    $form['settings']['print_pdf_autoconfig'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Auto-configure the TCPDF settings'),
+      '#default_value' => variable_get('print_pdf_autoconfig', PRINT_PDF_AUTOCONFIG_DEFAULT),
+      '#description' => t('(TCPDF only) If you disable this option, the TCDPF settings in tcpdf/config/tcpdf_config.php file must be configured manually.'),
     );
     $form['settings']['print_pdf_font_family'] = array(
       '#type' => 'textfield',

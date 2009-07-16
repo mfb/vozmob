@@ -1,9 +1,11 @@
 <?php
-// $Id: print.tpl.php,v 1.8.2.13 2009/05/13 16:18:06 jcnventura Exp $
+// $Id: print.tpl.php,v 1.8.2.15 2009/07/09 12:00:52 jcnventura Exp $
 
 /**
  * @file
  * Default print module template
+ *
+ * @ingroup print
  */
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
@@ -19,11 +21,11 @@
   </head>
   <body<?php print $print['sendtoprinter']; ?>>
     <?php if (!empty($print['message'])) {
-      print '<div class="print-message">'. $print['message'] .'</div><br />';
+      print '<div class="print-message">'. $print['message'] .'</div><p />';
     } ?>
     <div class="print-logo"><?php print $print['logo']; ?></div>
     <div class="print-site_name"><?php print $print['site_name']; ?></div>
-    <br />
+    <p />
     <div class="print-breadcrumb"><?php print $print['breadcrumb']; ?></div>
     <hr class="print-hr" />
     <h1 class="print-title"><?php print $print['title']; ?></h1>

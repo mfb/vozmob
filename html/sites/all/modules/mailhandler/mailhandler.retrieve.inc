@@ -7,14 +7,12 @@ function mailhandler_admin_retrieve($mid) {
   $mailbox = mailhandler_get_mailbox($mid);
 
   // Check to see if there are new messages requiring retrieval
-  $messages = mailhandler_get_unread_messages($mailbox);
-
   // If messages available, set batch and begin processing
-  if ($messages) {
+  if ($messages = mailhandler_get_unread_messages($mailbox)) {
     foreach ($messages as $message_number) {
       $operations[] = array(
         'mailhandler_retrieve_message',
-        array($mailbox, $message_number),
+        array($result, $mailbox, $message_number),
       );
     }
 
@@ -261,7 +259,7 @@ function mailhandler_process_message($header, $body, $mailbox) {
 
   // Apply defaults to the $node object, and allow modules to add default values
   require_once($base_path . 'modules/node/node.pages.inc');
-  node_object_prepare(&$node);
+  node_object_prepare($node);
 
   // Reset $node->taxonomy
   $node->taxonomy = array();
@@ -614,89 +612,91 @@ function mailhandler_get_unread_messages($mailbox) {
   return $unread_messages;
 }
 
-function mailhandler_retrieve_message($mailbox, $i, &$context) {
+function mailhandler_retrieve_message(&$result = FALSE, $mailbox, $i, &$context) {
+  // Required for batch API.
+  if (!$result) {
+    $result = mailhandler_open_mailbox($mailbox);
+  }
+  mailhandler_switch_user();
+
+  $header = imap_header($result, imap_msgno($result, $i));
+  // Initialize the subject in case it's missing.
+  if (!isset($header->subject)) {
+    $header->subject = '';
+  }
+
+  $mime = explode(',', $mailbox['mime']);
+
+  // Get the first text part - this will be the node body
+  $origbody = mailhandler_get_part($result, $i, $mime[0]);
+
+  // If we didn't get a body from our first attempt, try the alternate format (HTML or PLAIN)
+  if (!$origbody) {
+    $origbody = mailhandler_get_part($result, $i, $mime[1]);
+  }
+
+  // Parse MIME parts, so all mailhandler modules have access to
+  // the full array of mime parts without having to process the email.
+  $mimeparts = mailhandler_get_parts($result, $i);
+
+  // Is this an empty message with no body and no mimeparts?
+  if (!$origbody && !$mimeparts) {
+    // @TODO: Log that we got an empty email?
+    imap_close($result);
+    return;
+  }
+
+  // we must process before authenticating because the password may be in Commands
+  $node = mailhandler_process_message($header, $origbody, $mailbox);
+
+  // check if mail originates from an authenticated user
+  $node = mailhandler_authenticate($node, $header, $origbody, $mailbox);
+
+  // Put $mimeparts on the node
+  $node->mimeparts = $mimeparts;
+
+  // we need to change the current user
+  // this has to be done here to allow modules
+  // to create users
+  mailhandler_switch_user($node->uid);
+
+  // modules may override node elements before submitting. they do so by returning the node.
+  foreach (module_list() as $name) {
+    if (module_hook($name, 'mailhandler')) {
+      $function = $name .'_mailhandler';
+      if (!($node = $function($node, $result, $i, $header, $mailbox))) {
+        // Exit if a module has handled the submitted data.
+        break;
+      }
+    }
+  }
+
+  if ($node) {
+    if ($node->type == 'comment') {
+      mailhandler_comment_submit($node, $header, $mailbox, $origbody);
+    }
+    else {
+      mailhandler_node_submit($node, $header, $mailbox, $origbody);
+    }
+  }
+  // don't delete while we're only getting new messages
+  if ($mailbox['delete_after_read']) {
+    imap_delete($result, $i, FT_UID);
+  }
+
+  // switch back to original user
+  mailhandler_switch_user();
+
+  // Put something in the results array for the counter in the batch finished callback
+  $context['results'][] = $mailbox['mail'];
 
   mailhandler_switch_user();
 
-  $result = mailhandler_open_mailbox($mailbox);
-
-  if ($result) {
-      $header = imap_header($result, imap_msgno($result, $i));
-      // Initialize the subject in case it's missing.
-      if (!isset($header->subject)) {
-        $header->subject = '';
-      }
-
-      $mime = explode(',', $mailbox['mime']);
-
-      // Get the first text part - this will be the node body
-      $origbody = mailhandler_get_part($result, $i, $mime[0]);
-
-      // If we didn't get a body from our first attempt, try the alternate format (HTML or PLAIN)
-      if (!$origbody) {
-        $origbody = mailhandler_get_part($result, $i, $mime[1]);
-      }
-
-      // Parse MIME parts, so all mailhandler modules have access to
-      // the full array of mime parts without having to process the email.
-      $mimeparts = mailhandler_get_parts($result, $i);
-
-      // Is this an empty message with no body and no mimeparts?
-      if (!$origbody && !$mimeparts) {
-        // @TODO: Log that we got an empty email?
-        imap_close($result);
-        return;
-      }
-
-      // we must process before authenticating because the password may be in Commands
-      $node = mailhandler_process_message($header, $origbody, $mailbox);
-
-      // check if mail originates from an authenticated user
-      $node = mailhandler_authenticate($node, $header, $origbody, $mailbox);
-
-      // Put $mimeparts on the node
-      $node->mimeparts = $mimeparts;
-
-      // we need to change the current user
-      // this has to be done here to allow modules
-      // to create users
-      mailhandler_switch_user($node->uid);
-
-      // modules may override node elements before submitting. they do so by returning the node.
-      foreach (module_list() as $name) {
-        if (module_hook($name, 'mailhandler')) {
-          $function = $name .'_mailhandler';
-          if (!($node = $function($node, $result, $i, $header, $mailbox))) {
-            // Exit if a module has handled the submitted data.
-            break;
-          }
-        }
-      }
-
-      if ($node) {
-        if ($node->type == 'comment') {
-          mailhandler_comment_submit($node, $header, $mailbox, $origbody);
-        }
-        else {
-          mailhandler_node_submit($node, $header, $mailbox, $origbody);
-        }
-      }
-      // don't delete while we're only getting new messages
-      if ($mailbox['delete_after_read']) {
-        imap_delete($result, $i, FT_UID);
-      }
-
-      // switch back to original user
-      mailhandler_switch_user();
-
-      // Put something in the results array for the counter in the batch finished callback
-      $context['results'][] = $mailbox['mail'];
-    }
-
+  // If using batch API, must close imap stream.  Cron uses single stream.
+  $args = func_get_args();
+  if (!$args[0]) {
     imap_close($result, CL_EXPUNGE);
-
-    mailhandler_switch_user();
-
+  }
 }
 
 
@@ -711,17 +711,19 @@ function mailhandler_retrieve_message($mailbox, $i, &$context) {
  */
 function mailhandler_cron_retrieve($mailbox) {
 
-  // Find out how many messages need retrieval
-  $new_messages = mailhandler_get_unread_messages($mailbox);
+  if ($result = mailhandler_open_mailbox($mailbox)) {
+    // Find out how many messages need retrieval
+    $new_messages = mailhandler_get_unread_messages($mailbox);
 
-  // Initialise counters for maximum message retrieval
-  $max_messages = variable_get('mailhandler_max_retrieval', 0);
-  $retrieved_messages = 0;
+    // Initialise counters for maximum message retrieval
+    $max_messages = variable_get('mailhandler_max_retrieval', 0);
+    $retrieved_messages = 0;
 
-  // Begin retrieval of messages
-  while ($new_messages && (!$max_messages || $retrieved_messages < $max_messages)) {
-    mailhandler_retrieve_message($mailbox, array_shift($new_messages), $context);
-    $retrieved_messages++;
+    // Begin retrieval of messages
+    while ($new_messages && (!$max_messages || $retrieved_messages < $max_messages)) {
+      mailhandler_retrieve_message($result, $mailbox, array_shift($new_messages), $context);
+      $retrieved_messages++;
+    }
+    imap_close($result, CL_EXPUNGE);
   }
-
 }

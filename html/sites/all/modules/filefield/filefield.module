@@ -1,5 +1,5 @@
 <?php
-// $Id: filefield.module,v 1.198 2009/05/29 22:34:52 quicksketch Exp $
+// $Id: filefield.module,v 1.204 2009/07/10 09:50:11 quicksketch Exp $
 
 /**
  * @file
@@ -10,14 +10,14 @@
  */
 
 // FileField API hooks should always be available.
-include_once dirname(__FILE__) .'/field_file.inc';
+include_once dirname(__FILE__) . '/field_file.inc';
+include_once dirname(__FILE__) . '/filefield_widget.inc';
 
 /**
  * Implementation of hook_init().
  */
 function filefield_init() {
   // File hooks and callbacks may be used by any module.
-  module_load_include('inc', 'filefield', 'filefield_widget');
   drupal_add_css(drupal_get_path('module', 'filefield') .'/filefield.css');
 
   // Conditional module support.
@@ -120,8 +120,7 @@ function filefield_theme() {
 }
 
 /**
- * Implementation of hook_file_download(). Yes, *that* hook that causes
- * any attempt for file upload module interoperability to fail spectacularly.
+ * Implementation of hook_file_download().
  */
 function filefield_file_download($file) {
   $file = file_create_path($file);
@@ -132,7 +131,7 @@ function filefield_file_download($file) {
     return;
   }
 
-  // Find out if any filefield contains this file, and if so, which field
+  // Find out if any file field contains this file, and if so, which field
   // and node it belongs to. Required for later access checking.
   $cck_files = array();
   foreach (content_fields() as $field) {
@@ -155,7 +154,7 @@ function filefield_file_download($file) {
       }
     }
   }
-  // If no filefield item is involved with this file, we don't care about it.
+  // If no file field item is involved with this file, we don't care about it.
   if (empty($cck_files)) {
     return;
   }
@@ -169,37 +168,38 @@ function filefield_file_download($file) {
   }
 
   // So the overall field view permissions are not denied, but if access is
-  // denied for a specific node containing the file, deny the download as well.
-  // It's probably a little too restrictive, but I can't think of a
-  // better way at the moment. Input appreciated.
-  // (And yeah, node access checks also include checking for 'access content'.)
+  // denied for ALL nodes containing the file, deny the download as well.
+  // Node access checks also include checking for 'access content'.
   $nodes = array();
+  $denied = FALSE;
   foreach ($cck_files as $field_name => $field_files) {
     foreach ($field_files as $revision_id => $content) {
       // Checking separately for each revision is probably not the best idea -
       // what if 'view revisions' is disabled? So, let's just check for the
       // current revision of that node.
       if (isset($nodes[$content['nid']])) {
-        continue; // don't check the same node twice
+        continue; // Don't check the same node twice.
       }
-      $node = node_load($content['nid']);
-      if (!node_access('view', $node)) {
+      if ($denied == FALSE && $node = node_load($content['nid']) && node_access('view', $node)) {
         // You don't have permission to view the node this file is attached to.
-        return -1;
+        $denied = TRUE;
       }
       $nodes[$content['nid']] = $node;
     }
+    if ($denied) {
+      return -1;
+    }
   }
 
-  // Well I guess you can see this file.
+  // Access is granted.
   $name = mime_header_encode($file->filename);
   $type = mime_header_encode($file->filemime);
-  // Serve images and text inline for the browser to display rather than download.
-  $disposition = ereg('^(text/|image/)', $file->filemime) ? 'inline' : 'attachment';
+  // Serve images and text inline for display rather than download.
+  $disposition = (ereg('^(text/|image/)', $file->filemime) || ereg('flash$', $file->filemime)) ? 'inline' : 'attachment';
   return array(
-    'Content-Type: '. $type .'; name='. $name,
-    'Content-Length: '. $file->filesize,
-    'Content-Disposition: '. $disposition .'; filename='. $name,
+    'Content-Type: ' . $type . '; name="' . $name . '"',
+    'Content-Length: ' . $file->filesize,
+    'Content-Disposition: ' . $disposition . '; filename="' . $name . '"',
     'Cache-Control: private',
   );
 }

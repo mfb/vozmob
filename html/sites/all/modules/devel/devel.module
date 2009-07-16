@@ -1,5 +1,5 @@
 <?php
-// $Id: devel.module,v 1.258.2.53 2009/04/20 02:32:36 weitzman Exp $
+// $Id: devel.module,v 1.258.2.54 2009/06/03 03:56:44 weitzman Exp $
 
 // This module holds functions useful for Drupal development.
 // Please contribute!
@@ -21,12 +21,12 @@ define('DEVEL_MIN_TEXTAREA', 50);
 function devel_help($section) {
   switch ($section) {
     case 'devel/reference':
-      return '<p>'. t('This is a list of defined user functions that generated this current request lifecycle. Click on a function name to view its documention.'). '</p>';
+      return '<p>'. t('This is a list of defined user functions that generated this current request lifecycle. Click on a function name to view its documention.') .'</p>';
     case 'devel/session':
-      return '<p>'. t('Here are the contents of your <code>$_SESSION</code> variable.'). '</p>';
+      return '<p>'. t('Here are the contents of your <code>$_SESSION</code> variable.') .'</p>';
     case 'devel/variable':
       $api = variable_get('devel_api_url', 'api.drupal.org');
-      return '<p>'. t('This is a list of the variables and their values currently stored in variables table and the <code>$conf</code> array of your settings.php file. These variables are usually accessed with <a href="@variable-get-doc">variable_get()</a> and <a href="@variable-set-doc">variable_set()</a>. Variables that are too long can slow down your pages.', array('@variable-get-doc' => "http://$api/api/HEAD/function/variable_get", '@variable-set-doc' => "http://$api/api/HEAD/function/variable_set")).'</p>';
+      return '<p>'. t('This is a list of the variables and their values currently stored in variables table and the <code>$conf</code> array of your settings.php file. These variables are usually accessed with <a href="@variable-get-doc">variable_get()</a> and <a href="@variable-set-doc">variable_set()</a>. Variables that are too long can slow down your pages.', array('@variable-get-doc' => "http://$api/api/HEAD/function/variable_get", '@variable-set-doc' => "http://$api/api/HEAD/function/variable_set")) .'</p>';
   }
 }
 
@@ -252,7 +252,8 @@ function devel_devel_themer_toggle() {
     include_once('./includes/install.inc');
     if (drupal_get_schema_versions('devel_themer') == FALSE) {
       drupal_install_modules(array('devel_themer'));
-    } else {
+    }
+    else {
       module_enable(array('devel_themer'));
     }
   }
@@ -352,7 +353,7 @@ function devel_init() {
       }
       // Add CSS for query log if should be displayed.
       if (variable_get('devel_query_display', 0)) {
-        drupal_add_css(drupal_get_path('module', 'devel'). '/devel.css');
+        drupal_add_css(drupal_get_path('module', 'devel') .'/devel.css');
       }
     }
   }
@@ -370,7 +371,7 @@ function devel_init() {
 // return boolean. no need for cache here.
 function has_krumo() {
   // see README.txt or just download from http://krumo.sourceforge.net/
-  @include_once './'. drupal_get_path('module', 'devel'). '/krumo/class.krumo.php';
+  @include_once './'. drupal_get_path('module', 'devel') .'/krumo/class.krumo.php';
   if (function_exists('krumo') && php_sapi_name() != 'cli') {
     return TRUE;
   }
@@ -408,7 +409,7 @@ function devel_set_handler($handler) {
       // do nothing
       break;
     case DEVEL_ERROR_HANDLER_BACKTRACE:
-      if(has_krumo()) {
+      if (has_krumo()) {
         set_error_handler('backtrace_error_handler');
       }
       break;
@@ -509,7 +510,7 @@ function devel_block($op = 'list', $delta = 0, $edit = array()) {
     $blocks[2]['info'] = t('Execute PHP');
     return $blocks;
   }
-  else if ($op == 'configure' && $delta == 0) {
+  elseif ($op == 'configure' && $delta == 0) {
     $form['devel_switch_user_list_size'] = array(
       '#type' => 'textfield',
       '#title' => t('Number of users to display in the list'),
@@ -519,10 +520,10 @@ function devel_block($op = 'list', $delta = 0, $edit = array()) {
     );
     return $form;
   }
-  else if ($op == 'save' && $delta == 0) {
+  elseif ($op == 'save' && $delta == 0) {
     variable_set('devel_switch_user_list_size', $edit['devel_switch_user_list_size']);
   }
-  else if ($op == 'view') {
+  elseif ($op == 'view') {
     $block = array();
     switch ($delta) {
       case 0:
@@ -576,7 +577,7 @@ function devel_switch_user_list() {
     while ($user = db_fetch_object($users)) {
       $links[$user->uid] = array(
         'title' => theme('placeholder', $user->name),
-        'href' => 'devel/switch/' . $user->name,
+        'href' => 'devel/switch/'. $user->name,
         'query' => $dest,
         'attributes' => array('title' => t('This user can switch back.')),
         'html' => TRUE,
@@ -589,7 +590,7 @@ function devel_switch_user_list() {
       while (($user = db_fetch_object($users)) && count($links) < $list_size) {
         $links[$user->uid] = array(
           'title' => $user->name ? $user->name : 'anon',
-          'href' => 'devel/switch/' . $user->name,
+          'href' => 'devel/switch/'. $user->name,
           'query' => $dest,
           'attributes' => array('title' => t('Caution: this user will be unable switch back.')),
         );
@@ -750,7 +751,7 @@ function devel_shutdown_real() {
       list($counts, $query_summary) = devel_query_summary();
       // Query log off, timer on.
       if (!variable_get('devel_query_display', 0) && variable_get('dev_timer', 0)) {
-        $output .= '<div class="dev-timer">'. devel_timer() .' '. $query_summary. '</div>';
+        $output .= '<div class="dev-timer">'. devel_timer() .' '. $query_summary .'</div>';
       }
 
       // Query log on.
@@ -859,7 +860,7 @@ function devel_function_reference() {
   $ufunctions = $functions['user'];
   sort($ufunctions);
   $api = variable_get('devel_api_url', 'api.drupal.org');
-  foreach($ufunctions as $function) {
+  foreach ($ufunctions as $function) {
     $links[] = l($function, "http://$api/api/$version/function/$function");
   }
   return theme('item_list', $links);
@@ -930,7 +931,7 @@ function devel_admin_settings() {
 
   $description = t("Collect query info. If disabled, no query log functionality will work.");
   if (!devel_is_compatible_optimizer()) {
-    $description = t('You must disable or upgrade the php Zend Optimizer extension in order to enable this feature. The minimum required version is 3.2.8. Earlier versions of Zend Optimizer are <a href="!url">horribly buggy and segfault your Apache</a> ... ', array('!url' => url('http://drupal.org/node/126098'))). $description;
+    $description = t('You must disable or upgrade the php Zend Optimizer extension in order to enable this feature. The minimum required version is 3.2.8. Earlier versions of Zend Optimizer are <a href="!url">horribly buggy and segfault your Apache</a> ... ', array('!url' => url('http://drupal.org/node/126098'))) . $description;
   }
   $form['queries']['dev_query'] = array('#type' => 'checkbox',
     '#title' => t('Collect query info'),
@@ -1156,7 +1157,7 @@ function devel_variable_form() {
       $sql = "SELECT *, LENGTH(value) AS length FROM {variable}";
       break;
   }
-  $result = db_query($sql. tablesort_sql($header));
+  $result = db_query($sql . tablesort_sql($header));
   while ($row = db_fetch_object($result)) {
     $variables[$row->name] = '';
     $form['name'][$row->name] = array('#value' => check_plain($row->name));
@@ -1286,7 +1287,7 @@ function devel_switch_user($name = NULL) {
     $user = user_load(array('name' => $name));
   }
   // Retrieve the initial user. Can be called multiple times.
-  else if (count($orig_user)) {
+  elseif (count($orig_user)) {
     $user = array_shift($orig_user);
     array_unshift($orig_user, $user);
   }
@@ -1314,7 +1315,7 @@ function devel_render_object($type, $object) {
   $title = isset($object->title) ? $object->title : $object->name;
   // not sure why menu system doesn't give us a reasonable title here.
   drupal_set_title(check_plain($title));
-  $function = $type. '_build_content';
+  $function = $type .'_build_content';
   $content = $function($object, FALSE, FALSE);
   return kdevel_print_object($content, '$'. $type .'->');
 }
@@ -1355,10 +1356,10 @@ function krumo_ob($object) {
  *   set to FALSE to suppress the output of the h3
  */
 function devel_print_object($object, $prefix = NULL, $header = TRUE) {
-  drupal_add_css(drupal_get_path('module', 'devel'). '/devel.css');
+  drupal_add_css(drupal_get_path('module', 'devel') .'/devel.css');
   $output = '<div class="devel-obj-output">';
   if ($header) {
-    $output .= '<h3>'. t('Display of !type !obj', array('!type' => str_replace(array('$', '->'), '', $prefix), '!obj' => gettype($object))). '</h3>';
+    $output .= '<h3>'. t('Display of !type !obj', array('!type' => str_replace(array('$', '->'), '', $prefix), '!obj' => gettype($object))) .'</h3>';
   }
   $output .= _devel_print_object($object, $prefix);
   $output .= '</div>';
@@ -1402,7 +1403,7 @@ function _devel_print_object($obj, $prefix = NULL, $parents = NULL, $object = FA
   }
   if (is_array($obj)) {
     $output = "<dl>\n";
-    foreach($obj as $field => $value) {
+    foreach ($obj as $field => $value) {
       if ($field == 'devel_flag_reference') {
         continue;
       }
@@ -1488,7 +1489,7 @@ function _devel_print_object($obj, $prefix = NULL, $parents = NULL, $object = FA
  */
 function devel_query_table($queries, $counts) {
   $version = devel_get_core_version(VERSION);
-  $header = array ('ms', '#', 'where', 'query');
+  $header = array('ms', '#', 'where', 'query');
   $i = 0;
   $api = variable_get('devel_api_url', 'api.drupal.org');
   foreach ($queries as $query) {
@@ -1496,17 +1497,17 @@ function devel_query_table($queries, $counts) {
     $ar = explode("\n", $query[0]);
     $function=array_shift($ar);
     $count = isset($counts[$query[0]]) ? $counts[$query[0]] : 0;
-    $query[0]=join(' ',$ar);
+    $query[0]=join(' ', $ar);
 
     $diff = round($query[1] * 1000, 2);
     if ($diff > variable_get('devel_execution', 5)) {
-      $cell[$i][] = array ('data' => $diff, 'class' => 'marker');
+      $cell[$i][] = array('data' => $diff, 'class' => 'marker');
     }
     else {
       $cell[$i][] = $diff;
     }
     if ($count > 1) {
-      $cell[$i][] = array ('data' => $count, 'class' => 'marker');
+      $cell[$i][] = array('data' => $count, 'class' => 'marker');
     }
     else {
       $cell[$i][] = $count;
@@ -1575,8 +1576,12 @@ function theme_devel_querylog($header = array(), $rows = array()) {
 function _devel_table_sort($a, $b) {
   $a = is_array($a[0]) ? $a[0]['data'] : $a[0];
   $b = is_array($b[0]) ? $b[0]['data'] : $b[0];
-  if ($a < $b) { return 1; }
-  if ($a > $b) { return -1; }
+  if ($a < $b) { 
+    return 1;
+  }
+  if ($a > $b) { 
+    return -1;
+  }
   return 0;
 }
 
@@ -1612,7 +1617,7 @@ function drupal_debug($data, $label = NULL) {
   print_r($data);
   $string = ob_get_clean();
   if ($label) {
-    $out = $label. ': '. $string;
+    $out = $label .': '. $string;
   }
   else {
     $out = $string;
@@ -1620,7 +1625,7 @@ function drupal_debug($data, $label = NULL) {
   $out .= "\n";
 
   // The temp directory does vary across multiple simpletest instances.
-  $file = file_directory_temp(). '/drupal_debug.txt';
+  $file = file_directory_temp() .'/drupal_debug.txt';
   if (file_put_contents($file, $out, FILE_APPEND) === FALSE) {
     drupal_set_message(t('The file could not be written.'), 'error');
     return FALSE;
@@ -1703,10 +1708,10 @@ function dprint_r($input, $return = FALSE, $name = NULL, $function = 'print_r', 
     }
     if (count($input, COUNT_RECURSIVE) > DEVEL_MIN_TEXTAREA) {
         // don't use fapi here because sometimes fapi will not be loaded
-        $printed_value = "<textarea rows=30 style=\"width: 100%;\">\n". $name . $output . '</textarea>';
+        $printed_value = "<textarea rows=30 style=\"width: 100%;\">\n". $name . $output .'</textarea>';
     }
     else {
-      $printed_value = '<pre>' . $name . $output . '</pre>';
+      $printed_value = '<pre>'. $name . $output .'</pre>';
     }
 
     if ($return) {
@@ -1795,8 +1800,8 @@ function devel_queries() {
                   );
 
   global $db_type;
-  if($db_type == 'pgsql') {
-    $result = pager_query('SELECT q.qid, q.query, q.function , t.* FROM {devel_queries} q INNER JOIN (SELECT t.qid, COUNT(t.qid) AS count,SUM(t.time) AS total_time, AVG(t.time) AS average, STDDEV(t.time) AS stddev FROM {devel_times} t GROUP BY t.qid) AS t ON t.qid=q.qid ' . tablesort_sql($header), 30, 0, 'SELECT COUNT(qid) FROM {devel_queries}');
+  if ($db_type == 'pgsql') {
+    $result = pager_query('SELECT q.qid, q.query, q.function , t.* FROM {devel_queries} q INNER JOIN (SELECT t.qid, COUNT(t.qid) AS count,SUM(t.time) AS total_time, AVG(t.time) AS average, STDDEV(t.time) AS stddev FROM {devel_times} t GROUP BY t.qid) AS t ON t.qid=q.qid '. tablesort_sql($header), 30, 0, 'SELECT COUNT(qid) FROM {devel_queries}');
   }
   else {
     $result = pager_query('SELECT q.qid, q.query, q.function, t.*, COUNT(t.qid) AS count, SUM(t.time) AS total_time, AVG(t.time) AS average, STDDEV(t.time) AS stddev FROM {devel_queries} q INNER JOIN {devel_times} t ON q.qid = t.qid GROUP BY t.qid '. tablesort_sql($header), 30, 0, 'SELECT COUNT(qid) FROM {devel_queries}');

@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_display.inc,v 1.24 2009/06/10 22:01:31 merlinofchaos Exp $
+// $Id: views_plugin_display.inc,v 1.25 2009/06/26 00:23:42 merlinofchaos Exp $
 /**
  * @file
  * Contains the base display plugin.
@@ -1387,7 +1387,7 @@ class views_plugin_display extends views_plugin {
   /**
    * Validate the options form.
    */
-  function options_validate($form, &$form_state) {
+  function options_validate(&$form, &$form_state) {
     switch ($form_state['section']) {
       case 'style_options':
         $style = TRUE;

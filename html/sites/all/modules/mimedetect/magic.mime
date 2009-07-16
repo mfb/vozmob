@@ -310,7 +310,7 @@
 # gzip (GNU zip, not to be confused with [Info-ZIP/PKWARE] zip archiver)
 0       string          \037\213        application/x-gzip
 
-0		string			PK\003\004		application/x-zip
+0		string			PK\003\004		application/zip
 
 # RAR archiver (Greg Roelofs, newt@uchicago.edu)
 0	string		Rar!		application/x-rar
@@ -899,10 +899,10 @@
 >24		string	@		application/octet-stream
 
 0		string	MZ
->30		string	Copyright\ 1989-1990\ PKWARE\ Inc.	application/x-zip
+>30		string	Copyright\ 1989-1990\ PKWARE\ Inc.	application/zip
 
 0		string	MZ
->30		string	PKLITE\ Copr.	application/x-zip
+>30		string	PKLITE\ Copr.	application/zip
 
 0		string	MZ
 >36		string	LHa's\ SFX	application/x-lha

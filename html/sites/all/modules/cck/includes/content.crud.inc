@@ -1,5 +1,5 @@
 <?php
-// $Id: content.crud.inc,v 1.76.2.14 2008/11/07 15:02:02 yched Exp $
+// $Id: content.crud.inc,v 1.76.2.17 2009/07/14 22:17:05 yched Exp $
 
 /**
  * @file
@@ -42,9 +42,9 @@ function content_field_default_values($field_type) {
     $field['active'] = 1;
   }
 
-  $field['columns'] = module_invoke($module, 'field_settings', 'database columns', $field);
+  $field['columns'] = (array) module_invoke($module, 'field_settings', 'database columns', $field);
   // Ensure columns always default to NULL values.
-  foreach ((array) $field['columns'] as $column_name => $column) {
+  foreach ($field['columns'] as $column_name => $column) {
     $field['columns'][$column_name]['not null'] = FALSE;
   }
 
@@ -53,11 +53,10 @@ function content_field_default_values($field_type) {
   $field['db_storage'] = CONTENT_DB_STORAGE_PER_CONTENT_TYPE;
 
   // Make sure field settings all have an index in the array.
-  $setting_names = module_invoke($module, 'field_settings', 'save', $field);
-  if (is_array($setting_names)) {
-    foreach ($setting_names as $setting) {
-      $field[$setting] = NULL;
-    }
+  $setting_names = (array) module_invoke($module, 'field_settings', 'save', $field);
+  drupal_alter('field_settings', $setting_names, 'save', $field);
+  foreach ($setting_names as $setting) {
+    $field[$setting] = NULL;
   }
   return $field;
 }
@@ -93,9 +92,10 @@ function content_instance_default_values($field_name, $type_name, $widget_type) 
   }
 
   // Make sure widget settings all have an index in the array.
-  $settings_names = module_invoke($module, 'widget_settings', 'save', $widget);
+  $settings_names = (array) module_invoke($module, 'widget_settings', 'save', $widget);
+  drupal_alter('widget_settings', $settings_names, 'save', $widget);
   $widget['widget_settings'] = array();
-  foreach ((array) $settings_names as $name) {
+  foreach ($settings_names as $name) {
     $widget['widget_settings'][$name] = NULL;
   }
   return $widget;
@@ -190,8 +190,24 @@ function content_field_instance_collapse($field) {
  *   If there is no prior instance to create this from, we also need:
  *   - type, the type of field to create
  *   - widget_type, the type of widget to use
+ * @param $rebuild
+ *   TRUE to clear content type caches and rebuild menu (default).
+ *   FALSE allows the caller to process several fields at a time quickly, but then
+ *   the caller is reponsible to clear content type caches and rebuild menu as soon
+ *   as all fields have been processed. For example:
+ *   @code
+ *     // Create several fields at a time.
+ *     foreach ($fields as $field) {
+ *       content_field_instance_create($field, FALSE);
+ *     }
+ *     // Clear caches and rebuild menu.
+ *     content_clear_type_cache(TRUE);
+ *     menu_rebuild();
+ *   @endcode
+ * @see content_clear_type_cache()
+ * @see menu_rebuild()
  */
-function content_field_instance_create($field) {
+function content_field_instance_create($field, $rebuild = TRUE) {
   include_once('./'. drupal_get_path('module', 'content') .'/includes/content.admin.inc');
 
   $form_values = $field;
@@ -270,9 +286,10 @@ function content_field_instance_create($field) {
 
   content_alter_schema(array(), $field);
 
-  content_clear_type_cache(TRUE);
-
-  menu_rebuild();
+  if ($rebuild) {
+    content_clear_type_cache(TRUE);
+    menu_rebuild();
+  }
 
   return $field;
 }
@@ -284,8 +301,24 @@ function content_field_instance_create($field) {
  *   An array of properties to update the field with, input either in
  *   the field => widget format used by the content module or as an
  *   array of form values.
+ * @param $rebuild
+ *   TRUE to clear content type caches and rebuild menu (default).
+ *   FALSE allows the caller to process several fields at a time quickly, but then
+ *   the caller is reponsible to clear content type caches and rebuild menu as soon
+ *   as all fields have been processed. For example:
+ *   @code
+ *     // Update several fields at a time.
+ *     foreach ($fields as $field) {
+ *       content_field_instance_update($field, FALSE);
+ *     }
+ *     // Clear caches and rebuild menu.
+ *     content_clear_type_cache(TRUE);
+ *     menu_rebuild();
+ *   @endcode
+ * @see content_clear_type_cache()
+ * @see menu_rebuild()
  */
-function content_field_instance_update($field) {
+function content_field_instance_update($field, $rebuild = TRUE) {
   include_once('./'. drupal_get_path('module', 'content') .'/includes/content.admin.inc');
 
   // Ensure the field description is in the 'expanded' form.
@@ -344,12 +377,14 @@ function content_field_instance_update($field) {
 
   content_alter_schema($prev_field, $field);
 
-  content_clear_type_cache(TRUE);
+  if ($rebuild) {
+    content_clear_type_cache(TRUE);
 
-  // The label is in the menu tree, so we need a menu rebuild
-  // if the label changes.
-  if ($prev_field['widget']['label'] != $field['widget']['label']) {
-   menu_rebuild();
+    // The label is in the menu tree, so we need a menu rebuild
+    // if the label changes.
+    if ($prev_field['widget']['label'] != $field['widget']['label']) {
+      menu_rebuild();
+    }
   }
 
   return $field;
@@ -364,14 +399,14 @@ function content_field_instance_update($field) {
 function _content_field_write($field, $op = 'update') {
   // Rearrange the data to create the global_settings array.
   $field['global_settings'] = array();
-  $setting_names = module_invoke($field['module'], 'field_settings', 'save', $field);
-  if (is_array($setting_names)) {
-    foreach ($setting_names as $setting) {
-      // Unlike _content_field_instance_write() and 'widget_settings', 'global_settings'
-      // is never preexisting, so we take no particular precautions here.
-      $field['global_settings'][$setting] = isset($field[$setting]) ? $field[$setting] : '';
-      unset($field[$setting]);
-    }
+  $setting_names = (array) module_invoke($field['module'], 'field_settings', 'save', $field);
+  drupal_alter('field_settings', $setting_names, 'save', $field);
+
+  foreach ($setting_names as $setting) {
+    // Unlike _content_field_instance_write() and 'widget_settings', 'global_settings'
+    // is never preexisting, so we take no particular precautions here.
+    $field['global_settings'][$setting] = isset($field[$setting]) ? $field[$setting] : '';
+    unset($field[$setting]);
   }
   // 'columns' is a reserved word in MySQL4, so our column is named 'db_columns'.
   $field['db_columns'] = $field['columns'];
@@ -400,16 +435,15 @@ function _content_field_instance_write($field, $op = 'update') {
   $field = content_field_instance_collapse($field);
 
   // Rearrange the data to create the widget_settings array.
-  $setting_names = module_invoke($field['widget_module'], 'widget_settings', 'save', $field);
-  if (is_array($setting_names)) {
-    foreach ($setting_names as $setting) {
-      // In some cases (when the updated $field was originally read from
-      // the db, as opposed to gathered from the values of a form), the values
-      // are already in the right place, we take care to not wipe them.
-      if (isset($field[$setting])) {
-        $field['widget_settings'][$setting] = $field[$setting];
-        unset($field[$setting]);
-      }
+  $setting_names = (array) module_invoke($field['widget_module'], 'widget_settings', 'save', $field);
+  drupal_alter('widget_settings', $setting_names, 'save', $field);
+  foreach ($setting_names as $setting) {
+    // In some cases (when the updated $field was originally read from
+    // the db, as opposed to gathered from the values of a form), the values
+    // are already in the right place, we take care to not wipe them.
+    if (isset($field[$setting])) {
+      $field['widget_settings'][$setting] = $field[$setting];
+      unset($field[$setting]);
     }
   }
 
@@ -487,8 +521,29 @@ function content_field_instance_read($param = NULL, $include_inactive = FALSE) {
 
 /**
  * Delete an existing field instance.
+ *
+ * @param $field_name
+ *   The field name to delete.
+ * @param $type_name
+ *   The content type where the field instance is going to be deleted.
+ * @param $rebuild
+ *   TRUE to clear content type caches and rebuild menu (default).
+ *   FALSE allows the caller to process several fields at a time quickly, but then
+ *   the caller is reponsible to clear content type caches and rebuild menu as soon
+ *   as all fields have been processed. For example:
+ *   @code
+ *     // Delete several fields at a time.
+ *     foreach ($fields as $field) {
+ *       content_field_instance_delete($field['field_name'], $type_name, FALSE);
+ *     }
+ *     // Clear caches and rebuild menu.
+ *     content_clear_type_cache(TRUE);
+ *     menu_rebuild();
+ *   @endcode
+ * @see content_clear_type_cache()
+ * @see menu_rebuild()
  */
-function content_field_instance_delete($field_name, $type_name) {
+function content_field_instance_delete($field_name, $type_name, $rebuild = TRUE) {
   include_once('./'. drupal_get_path('module', 'content') .'/includes/content.admin.inc');
 
   // Get the previous field value.
@@ -518,8 +573,6 @@ function content_field_instance_delete($field_name, $type_name) {
     content_alter_schema($instance, $new_instance);
   }
 
-  content_clear_type_cache(TRUE);
-
   // If the deleted instance was the last field for the content type,
   // we drop the per-type table. We also consider possibly inactive fields.
   if (!content_field_instance_read(array('type_name' => $field['type_name']), TRUE)) {
@@ -529,7 +582,10 @@ function content_field_instance_delete($field_name, $type_name) {
     }
   }
 
-  menu_rebuild();
+  if ($rebuild) {
+    content_clear_type_cache(TRUE);
+    menu_rebuild();
+  }
 
   return $field;
 }
@@ -546,10 +602,11 @@ function content_module_delete($module) {
   if (db_table_exists(content_instance_tablename())) {
     $results = db_query("SELECT field_name, type_name FROM {". content_instance_tablename() ."} WHERE widget_module = '%s'", $module);
     while ($field = db_fetch_array($results)) {
-      content_field_instance_delete($field['field_name'], $field['type_name']);
+      content_field_instance_delete($field['field_name'], $field['type_name'], FALSE);
     }
     // Force the caches and static arrays to update to the new info.
     content_clear_type_cache(TRUE);
+    menu_rebuild();
   }
 }
 
@@ -624,7 +681,7 @@ function content_type_delete($info) {
   // Currently, content_field_instance_delete doesn't work on those...
   $fields = content_field_instance_read(array('type_name' => $info->type));
   foreach ($fields as $field) {
-    content_field_instance_delete($field['field_name'], $info->type);
+    content_field_instance_delete($field['field_name'], $info->type, FALSE);
   }
   $table = _content_tablename($info->type, CONTENT_DB_STORAGE_PER_CONTENT_TYPE);
   if (db_table_exists($table)) {

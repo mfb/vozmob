@@ -1,4 +1,9 @@
-// $Id: changelog.txt,v 1.7.2.4 2008/10/01 01:27:33 aaron Exp $
+// $Id: changelog.txt,v 1.7.2.6 2009/05/20 20:52:55 aaron Exp $
+
+May 2009
+--------
+ * #455352/chris.cohen Expand fieldsets by default on settings page (chris.cohen).
+ * #455374/chris.cohen Settings page does not save settings (chris.cohen).
 
 2008-09
 -------

@@ -1,10 +1,8 @@
 <?php
-// $Id: schema_mysql.inc,v 1.18 2009/05/10 14:46:34 mikeryan Exp $
+// $Id: schema_mysql.inc,v 1.23 2009/07/13 22:12:22 mikeryan Exp $
 
 function schema_mysql_engine_type_map() {
   $map = db_type_map();
-  // work around a bug in mysql's type map; see http://drupal.org/node/198234
-  $map['numeric:normal'] = 'DECIMAL';
   return $map;
 }
 
@@ -26,15 +24,13 @@ function schema_mysql_create_table_sql($table) {
     unset($col['unsigned']);
     if (isset($col['length']) && $col['length']) {
       $sql .= '('.$col['length'].')';
-    } else if (isset($col['disp-width']) && $col['disp-width']) {
-      $sql .= '('.$col['disp-width'].')';
-    }
+    } 
     if (isset($col['type']) && $col['type'] == 'serial') {
       $sql .= ' AUTO_INCREMENT';
     }
     unset($col['type']);
     unset($col['length']);
-    unset($col['disp-width']);
+
     if (isset($col['not null']) && $col['not null']) {
       $sql .= ' NOT NULL';
     }
@@ -108,7 +104,7 @@ function schema_mysql_inspect($name = NULL) {
 
   $res = db_query($sql, $database, $name);
   while ($r = db_fetch_array($res)) {
-    $r['TABLE_NAME'] = schema_unprefix_table($r['TABLE_NAME']);
+    $r['NEW_TABLE_NAME'] = schema_unprefix_table($r['TABLE_NAME']);
 
     $numeric = !is_null($r['NUMERIC_SCALE']);
     $col = array();
@@ -116,14 +112,11 @@ function schema_mysql_inspect($name = NULL) {
     if (preg_match('@([a-z]+)(?:\((\d+)(?:,(\d+))?\))?\s*(unsigned)?@', $col['type'], $matches)) {
       list($col['type'], $col['size']) = schema_schema_type($matches[1], $r['TABLE_NAME'], $r['COLUMN_NAME'], 'mysql');
       if (isset($matches[2])) {
-        if ($col['type'] == 'numeric') {
+        if ($col['type'] == 'numeric' || $col['type'] == 'float' || $col['type'] == 'double') {
           $col['precision'] = $matches[2];
           $col['scale'] = $matches[3];
         }
-        else if ($numeric) {
-          $col['disp-width'] = $matches[2];
-        } 
-        else {
+        else if (!$numeric) {
           $col['length'] = $matches[2];
         }
       }
@@ -145,7 +138,9 @@ function schema_mysql_inspect($name = NULL) {
       }
     }
     $tables[$r['TABLE_NAME']]['fields'][$r['COLUMN_NAME']] = $col;
-    $tables[$r['TABLE_NAME']]['name'] = $r['TABLE_NAME'];
+    // At this point, $tables is indexed by the raw db table name - save the unprefixed
+    // name for later use
+    $tables[$r['TABLE_NAME']]['name'] = $r['NEW_TABLE_NAME'];
   }
 
   $res = db_query('SELECT * FROM information_schema.STATISTICS '.
@@ -153,8 +148,6 @@ function schema_mysql_inspect($name = NULL) {
     'ORDER BY TABLE_NAME, INDEX_NAME, SEQ_IN_INDEX',
     $database);
   while ($r = db_fetch_array($res)) {
-    $r['TABLE_NAME'] = schema_unprefix_table($r['TABLE_NAME']);
-
     if (isset($r['SUB_PART']) && !is_null($r['SUB_PART'])) {
       $col = array($r['COLUMN_NAME'], intval($r['SUB_PART']));
     } else {
@@ -171,8 +164,16 @@ function schema_mysql_inspect($name = NULL) {
     }
     $tables[$r['TABLE_NAME']][$type][$r['INDEX_NAME']][] = $col;
   }
+  
+  // Now, for tables which we have unprefixed, index $tables by the unprefixed name
+  foreach ($tables as $tablename => $table) {
+    $newname = $tables[$tablename]['name'];
+    if ($tablename != $newname) {
+      $tables[$newname] = $table;
+      unset($tables[$tablename]);
+    }
+  }
 
   return $tables;
 }
 
-?>

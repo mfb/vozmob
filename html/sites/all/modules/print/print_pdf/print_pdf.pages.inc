@@ -1,5 +1,5 @@
 <?php
-// $Id: print_pdf.pages.inc,v 1.3.2.48 2009/05/13 16:18:06 jcnventura Exp $
+// $Id: print_pdf.pages.inc,v 1.3.2.54 2009/07/15 11:02:40 jcnventura Exp $
 
 /**
  * @file
@@ -7,6 +7,8 @@
  *
  * This file is included by the print_pdf module and includes the
  * functions that interface with the PDF generation packages.
+ *
+ * @ingroup print
  */
 
 require_once(drupal_get_path('module', 'print') .'/print.pages.inc');
@@ -67,9 +69,11 @@ function print_pdf_controller() {
   ob_end_clean();
   $html = drupal_final_markup($html);
 
-  // Convert the a href elements
+  // Convert the a href elements, to make sure no relative links remain
   $pattern = '!<(a\s[^>]*?)>!is';
   $html = preg_replace_callback($pattern, '_print_rewrite_urls', $html);
+  // And make anchor links relative again, to permit in-PDF navigation
+  $html = preg_replace("!${base_url}/". PRINTPDF_PATH ."/.*?%2523!", '#', $html);
 
   $pdf_filename = variable_get('print_pdf_filename', PRINT_PDF_FILENAME_DEFAULT);
   if (function_exists('token_replace') && !empty($pdf_filename)) {
@@ -136,6 +140,9 @@ function _print_pdf_dompdf($print, $html, $filename) {
 // dompdf can't handle footers cleanly, so disable the following
 //  $html = theme('print_pdf_dompdf_footer', $html);
 
+  // Convert the euro sign to an HTML entity
+  $html = str_replace('€', '&#0128;', $html);
+
   // Convert from UTF-8 to ISO 8859-1 and then to HTML entities
   if (function_exists('utf8_decode')) {
     $html = utf8_decode($html);
@@ -182,21 +189,23 @@ function _print_pdf_tcpdf($print, $html, $filename) {
 
   $pdf_tool_path = realpath(dirname($print_pdf_pdf_tool));
 
-  define('K_TCPDF_EXTERNAL_CONFIG', TRUE);
-  define('K_PATH_MAIN', dirname($_SERVER['SCRIPT_FILENAME']));
-  define('K_PATH_URL', $base_url);
-  define('K_PATH_FONTS', $pdf_tool_path .'/fonts/');
-  define('K_PATH_CACHE', $pdf_tool_path .'/cache/');
-  define('K_PATH_IMAGES', '');
-  define('K_BLANK_IMAGE', $pdf_tool_path .'/images/_blank.png');
-  define('K_CELL_HEIGHT_RATIO', 1.25);
-  define('K_SMALL_RATIO', 2/3);
+  if (variable_get('print_pdf_autoconfig', PRINT_PDF_AUTOCONFIG_DEFAULT)) {
+    define('K_TCPDF_EXTERNAL_CONFIG', TRUE);
+    define('K_PATH_MAIN', dirname($_SERVER['SCRIPT_FILENAME']));
+    define('K_PATH_URL', $base_url);
+    define('K_PATH_FONTS', $pdf_tool_path .'/fonts/');
+    define('K_PATH_CACHE', $pdf_tool_path .'/cache/');
+    define('K_PATH_IMAGES', '');
+    define('K_BLANK_IMAGE', $pdf_tool_path .'/images/_blank.png');
+    define('K_CELL_HEIGHT_RATIO', 1.25);
+    define('K_SMALL_RATIO', 2/3);
+  }
 
   // Decode HTML entities in image filenames
-  $pattern = "!<img[^>]*?>!is";
+  $pattern = "!<img\s[^>]*?src\s*?=\s*?['\"]?${base_url}[^>]*?>!is";
   $html = preg_replace_callback($pattern, create_function('$matches', 'return html_entity_decode($matches[0], ENT_QUOTES);'), $html);
   // Remove queries from the image URL
-  $pattern = "!(<img\s[^>]*?src\s*?=.*?)(?:%3F|\?)[\w=&]+([^>]*?>)!is";
+  $pattern = "!(<img\s[^>]*?src\s*?=\s*?['\"]?${base_url}.*?)(?:%3F|\?)[\w=&]+([^>]*?>)!is";
   $html = preg_replace($pattern, '$1$2', $html);
 
   require_once($print_pdf_pdf_tool);
@@ -298,7 +307,7 @@ function _print_pdf_wkhtmltopdf($print, $html, $filename) {
     $pdf = stream_get_contents($pipes[1]);
     fclose($pipes[1]);
 
-    stream_set_blocking($xpipes[2], 0);
+    stream_set_blocking($pipes[2], 0);
     $error = stream_get_contents($pipes[2]);
     if (!empty($error)) {
       watchdog('print_pdf', 'wkhtmltopdf: '. $error);
@@ -431,7 +440,9 @@ function theme_print_pdf_tcpdf_page(&$pdf) {
   // set auto page breaks
   $pdf->SetAutoPageBreak(TRUE, 15);
   // set image scale factor
-  $pdf->setImageScale(4);
+  sscanf(PDF_PRODUCER, "TCPDF %d.%d.%d", $major, $minor, $build);
+  $imagescale = (($major >= 4) && ($minor >= 6) && ($build >= 2)) ? 1 : 4;
+  $pdf->setImageScale($imagescale);
   // set image compression quality
   $pdf->setJPEGQuality(100);
 

@@ -1,5 +1,5 @@
 <?php
-// $Id: mapstraction_style_map.inc,v 1.1.2.12 2009/05/06 15:04:14 dixon Exp $
+// $Id: mapstraction_style_map.inc,v 1.1.2.13 2009/06/11 12:40:00 dixon Exp $
 
 /**
  * @file
@@ -18,7 +18,7 @@ class mapstraction_style_map extends views_plugin_style {
       'zoom' => 10,
     );
     $options['controls'] = array();
-    
+    $options['behaviours'] = array();
     return $options;
   }
   
@@ -93,6 +93,15 @@ class mapstraction_style_map extends views_plugin_style {
         'edit-style-options-initial-point-auto' => array(0)
       ),
       '#default_value' => $this->options['initial_point']['zoom'],
+    );
+
+    $form['behaviours'] = array(
+      '#type' => 'checkboxes',
+      '#title' => t('Behaviours'),
+      '#options' => array(
+        'hover' => t('Show info bubble on mouse hover'),
+      ),
+      '#default_value' => $this->options['behaviours'],
     );
 
     $form['controls'] = array(

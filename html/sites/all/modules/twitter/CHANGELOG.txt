@@ -1,0 +1,29 @@
+$Id: CHANGELOG.txt,v 1.1.2.1 2009/07/02 15:25:15 eaton Exp $
+
+Twitter 2.6, 2009-07-02
+----------------------
+A cleaner fix for the data type issue with twitter ids. We now store status IDs
+and twitter user ids as NUMERIC fields instead of STRINGS. This isn't awesome,
+but it works for now. We'll probably change this again in the future we feel
+cheeky.
+
+Added support for the Twitter in-reply-to fields for incoming statuses. It's now
+possible to build views of 'original' tweets or 'reply' tweets by filtering on
+the reply fields, as well. Note that only FRESHLY imported statuses will have
+the reply data.
+
+Added a new view-based block that shows ALL tweets on the site, not just tweets
+for the current user.
+
+Eliminated the unholy abomination that was custom_twitter_shorten_url(). If you
+want outgoing tweets to use another URL shortening service, install the Shorten
+module, and it will be used automatically.
+
+- #475808 - Added twitter.api.php to the project to document hooks.
+- #480222 - minor fix to the function signature for hook_nodeapi.
+- #477756 - minor cleanup of the comments in the install file.
+- #504112 - add an API function to support sending direct messages.
+- #392834 - make it possible to hide the 'Drupal' attribution line when statuses
+  are posted.
+- #301317 - last_refresh didn't have a default value. Adding accounts died in
+  mysql strict mode.

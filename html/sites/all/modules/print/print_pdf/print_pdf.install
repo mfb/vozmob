@@ -1,9 +1,11 @@
 <?php
-// $Id: print_pdf.install,v 1.1.2.10 2009/04/27 22:53:50 jcnventura Exp $
+// $Id: print_pdf.install,v 1.1.2.12 2009/07/09 12:42:18 jcnventura Exp $
 
 /**
  * @file
  * Install file of the print_pdf module
+ *
+ * @ingroup print
  */
 
 /**
@@ -220,5 +222,21 @@ function print_pdf_update_6003() {
   }
 
   menu_rebuild();
+  return $ret;
+}
+
+/**
+ * Update to version 6.x-1.8
+ */
+function print_pdf_update_6004() {
+  // add new 'access PDF version' permission to any role which has 'access print'
+  $ret = array();
+  $dbret = db_query('SELECT * FROM {permission}');
+  while ($role = db_fetch_object($dbret)) {
+    if ((strpos($role->perm, 'access print') !== FALSE)) {
+      $role->perm = 'access PDF version, ' . $role->perm;
+      $ret[] = update_sql("UPDATE {permission} SET perm = '$role->perm' WHERE rid = $role->rid");
+    }
+  }
   return $ret;
 }

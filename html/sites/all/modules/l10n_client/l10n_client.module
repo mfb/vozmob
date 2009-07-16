@@ -1,5 +1,5 @@
 <?php
-// $Id: l10n_client.module,v 1.20 2008/10/30 23:08:22 goba Exp $
+// $Id: l10n_client.module,v 1.22.2.1 2009/07/14 18:02:54 goba Exp $
 
 /**
  * @file
@@ -161,13 +161,13 @@ function l10n_client_translate_page($display_translated = FALSE, $textgroup = 'd
   $result = pager_query($sql, L10N_CLIENT_STRINGS, 0, NULL, $language->language);
   while ($data = db_fetch_object($result)) {
     if ($display_translated) {
-      $table[] = array($data->source, $data->translation);
+      $table[] = array(check_plain($data->source), check_plain($data->translation));
       if ($allow_translation) {
         l10_client_add_string_to_page($data->source, $data->translation);
       }
     }
     else {
-      $table[] = array($data->source);
+      $table[] = array(check_plain($data->source));
       if ($allow_translation) {
         l10_client_add_string_to_page($data->source, TRUE);
       }
@@ -303,8 +303,8 @@ function _l10n_client_page_strings() {
 function _l10n_client_dom_strings($strings) {
   $output = '';
   foreach ($strings as $values) {
-    $source = $values[0] === TRUE ? '' : $values[0];
-    $target = $values[1] === TRUE ? '' : $values[1];
+    $source = $values[0] === TRUE ? '' : htmlspecialchars($values[0], ENT_NOQUOTES, 'UTF-8');
+    $target = $values[1] === TRUE ? '' : htmlspecialchars($values[1], ENT_NOQUOTES, 'UTF-8');
     $output .= "<div><span class='source'>$source</span><span class='target'>$target</span></div>";
   }
   return "<div id='l10n-client-data'>$output</div>";
@@ -327,11 +327,24 @@ function _l10n_client_string_list($strings) {
     // TRUE means we don't have translation, so we use the original string,
     // so we always have the string displayed on the page in the dropdown.
     $original = $values[1] === TRUE ? $values[0] : $values[1];
-    // Remove html tags, at least for display
-    $original = strip_tags($original);
-    // Truncate and add ellipsis if too long.
-    $string = truncate_utf8($original, 78, TRUE);
-    $select_list[] = "<li class='$str_class'>". $string . ($original == $string ? '' : '...') .'</li>';
+    
+    // Remove HTML tags for display.
+    $string = strip_tags($original);
+    
+    if (empty($string)) {
+      // Edge case where the whole string was HTML tags. For the
+      // user to be able to select anything, we need to show part
+      // of the HTML tags. Truncate first, so we do not truncate in
+      // the middle of an already escaped HTML tag, thus possibly
+      // breaking the page.
+      $string = htmlspecialchars(truncate_utf8($original, 78, TRUE, TRUE), ENT_NOQUOTES, 'UTF-8');
+    }
+    else {
+      // Truncate and add ellipsis if too long.
+      $string = truncate_utf8($string, 78, TRUE, TRUE);
+    }
+    
+    $select_list[] = "<li class='$str_class'>$string</li>";
   }
   $output = implode("\n", $select_list);
   return "<ul class='string-list'>$output</ul>";
@@ -423,7 +436,7 @@ function l10n_client_import_package_form(&$form_state) {
 
   if (!count($names)) {
     // This only works if there is any foreign language set up.
-    drupal_set_message(t('No languages set up to reimport packages into.', 'warning'));
+    drupal_set_message(t('No languages set up to reimport packages into.'), 'warning');
     return array();
   }
   

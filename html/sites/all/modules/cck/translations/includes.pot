@@ -1,20 +1,19 @@
-# $Id: includes.pot,v 1.1.2.12 2009/03/09 21:49:59 hass Exp $
+# $Id: includes.pot,v 1.1.2.13 2009/06/16 17:05:11 hass Exp $
 #
 # LANGUAGE translation of Drupal (includes)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  content.admin.inc,v 1.181.2.64 2009/03/01 13:48:44 yched
-#  content.panels.inc,v 1.1.2.6 2008/11/03 14:12:41 yched
-#  content.rules.inc,v 1.1.2.4 2008/10/24 11:11:48 fago
+#  content.admin.inc,v 1.181.2.68 2009/06/02 14:49:07 yched
+#  content.rules.inc,v 1.1.2.6 2009/04/30 09:56:07 fago
 #  content.crud.inc,v 1.76.2.14 2008/11/07 15:02:02 yched
-#  content.node_form.inc,v 1.7.2.18 2009/02/10 22:53:04 yched
+#  content.node_form.inc,v 1.7.2.19 2009/06/02 20:18:27 yched
 #  content.token.inc,v 1.5.2.8 2008/12/05 14:59:22 yched
 #
 #, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2009-03-09 22:08+0100\n"
+"POT-Creation-Date: 2009-06-16 19:00+0200\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -43,11 +42,11 @@ msgstr ""
 msgid "» Add a new content type"
 msgstr ""
 
-#: includes/content.admin.inc:67;789;984
+#: includes/content.admin.inc:67;796;991
 msgid "Field name"
 msgstr ""
 
-#: includes/content.admin.inc:67;804;990
+#: includes/content.admin.inc:67;811;997
 msgid "Field type"
 msgstr ""
 
@@ -111,291 +110,287 @@ msgstr ""
 msgid "Group name (a-z, 0-9, _)"
 msgstr ""
 
-#: includes/content.admin.inc:365
+#: includes/content.admin.inc:373
 msgid "Add new field: you need to provide a label."
 msgstr ""
 
-#: includes/content.admin.inc:370
+#: includes/content.admin.inc:378
 msgid "Add new field: you need to provide a field name."
 msgstr ""
 
-#: includes/content.admin.inc:384
+#: includes/content.admin.inc:392
 msgid "Add new field: the field name %field_name is invalid. The name must include only lowercase unaccentuated letters, numbers, and underscores."
 msgstr ""
 
-#: includes/content.admin.inc:387
+#: includes/content.admin.inc:395
 msgid "Add new field: the field name %field_name is too long. The name is limited to 32 characters, including the 'field_' prefix."
 msgstr ""
 
-#: includes/content.admin.inc:391
+#: includes/content.admin.inc:399
 msgid "Add new field: the name 'field_instance' is a reserved name."
 msgstr ""
 
-#: includes/content.admin.inc:403
+#: includes/content.admin.inc:411
 msgid "Add new field: the field name %field_name already exists."
 msgstr ""
 
-#: includes/content.admin.inc:409
+#: includes/content.admin.inc:417
 msgid "Add new field: you need to select a field type."
 msgstr ""
 
-#: includes/content.admin.inc:414
+#: includes/content.admin.inc:422
 msgid "Add new field: you need to select a widget."
 msgstr ""
 
-#: includes/content.admin.inc:420
+#: includes/content.admin.inc:428
 msgid "Add new field: invalid widget."
 msgstr ""
 
-#: includes/content.admin.inc:441
+#: includes/content.admin.inc:449
 msgid "Add existing field: you need to provide a label."
 msgstr ""
 
-#: includes/content.admin.inc:446
+#: includes/content.admin.inc:454
 msgid "Add existing field: you need to select a field."
 msgstr ""
 
-#: includes/content.admin.inc:451
+#: includes/content.admin.inc:459
 msgid "Add existing field: you need to select a widget."
 msgstr ""
 
-#: includes/content.admin.inc:457
+#: includes/content.admin.inc:465
 msgid "Add existing field: invalid widget."
 msgstr ""
 
-#: includes/content.admin.inc:506
+#: includes/content.admin.inc:514
 msgid "There was a problem creating field %label."
 msgstr ""
 
-#: includes/content.admin.inc:518
+#: includes/content.admin.inc:526
 msgid "The field %label cannot be added to a content type because it is locked."
 msgstr ""
 
-#: includes/content.admin.inc:528
+#: includes/content.admin.inc:536
 msgid "There was a problem adding field %label."
 msgstr ""
 
-#: includes/content.admin.inc:571
+#: includes/content.admin.inc:578
 msgid "There are no fields configured for this content type. You can add new fields on the <a href=\"@link\">Manage fields</a> page."
 msgstr ""
 
-#: includes/content.admin.inc:579 includes/content.panels.inc:54
-msgid "Inline"
-msgstr ""
-
-#: includes/content.admin.inc:618;661
+#: includes/content.admin.inc:625;668
 msgid "Include"
 msgstr ""
 
-#: includes/content.admin.inc:630
+#: includes/content.admin.inc:637
 msgid "no styling"
 msgstr ""
 
-#: includes/content.admin.inc:631
+#: includes/content.admin.inc:638
 msgid "simple"
 msgstr ""
 
-#: includes/content.admin.inc:632
+#: includes/content.admin.inc:639
 msgid "fieldset"
 msgstr ""
 
-#: includes/content.admin.inc:633
+#: includes/content.admin.inc:640
 msgid "fieldset - collapsible"
 msgstr ""
 
-#: includes/content.admin.inc:634
+#: includes/content.admin.inc:641
 msgid "fieldset - collapsed"
 msgstr ""
 
-#: includes/content.admin.inc:690
+#: includes/content.admin.inc:697
 msgid "Your settings have been saved."
 msgstr ""
 
-#: includes/content.admin.inc:760
+#: includes/content.admin.inc:767
 msgid "@type: @field (@label)"
 msgstr ""
 
-#: includes/content.admin.inc:786
+#: includes/content.admin.inc:793
 msgid "Edit basic information"
 msgstr ""
 
-#: includes/content.admin.inc:792
+#: includes/content.admin.inc:799
 msgid "The machine-readable name of the field. This name cannot be changed."
 msgstr ""
 
-#: includes/content.admin.inc:800
+#: includes/content.admin.inc:807
 msgid "A human-readable name to be used as the label for this field in the %type content type."
 msgstr ""
 
-#: includes/content.admin.inc:807
+#: includes/content.admin.inc:814
 msgid "The type of data you would like to store in the database with this field. This option cannot be changed."
 msgstr ""
 
-#: includes/content.admin.inc:812;996
+#: includes/content.admin.inc:819;1003
 msgid "Widget type"
 msgstr ""
 
-#: includes/content.admin.inc:816
+#: includes/content.admin.inc:823
 msgid "The type of form element you would like to present to the user when creating this field in the %type content type."
 msgstr ""
 
-#: includes/content.admin.inc:826 includes/content.rules.inc:66
+#: includes/content.admin.inc:833 includes/content.rules.inc:66
 msgid "Continue"
 msgstr ""
 
-#: includes/content.admin.inc:854
+#: includes/content.admin.inc:861
 msgid "Updated basic settings for field %label."
 msgstr ""
 
-#: includes/content.admin.inc:858
+#: includes/content.admin.inc:865
 msgid "There was a problem updating the basic settings for field %label."
 msgstr ""
 
-#: includes/content.admin.inc:885
+#: includes/content.admin.inc:892
 msgid "Are you sure you want to remove the field %field?"
 msgstr ""
 
-#: includes/content.admin.inc:887
+#: includes/content.admin.inc:894
 msgid "If you have any content left in this field, it will be lost. This action cannot be undone."
 msgstr ""
 
-#: includes/content.admin.inc:894
+#: includes/content.admin.inc:901
 msgid "This field is <strong>locked</strong> and cannot be removed."
 msgstr ""
 
-#: includes/content.admin.inc:915
+#: includes/content.admin.inc:922
 msgid "Removed field %field from %type."
 msgstr ""
 
-#: includes/content.admin.inc:920
+#: includes/content.admin.inc:927
 msgid "There was a problem deleting %field from %type."
 msgstr ""
 
-#: includes/content.admin.inc:939
+#: includes/content.admin.inc:946
 msgid "The field %field is locked and cannot be edited."
 msgstr ""
 
-#: includes/content.admin.inc:973
+#: includes/content.admin.inc:980
 msgid "%type basic information"
 msgstr ""
 
-#: includes/content.admin.inc:1003;1182
+#: includes/content.admin.inc:1010;1189
 msgid "Change basic information"
 msgstr ""
 
-#: includes/content.admin.inc:1009
+#: includes/content.admin.inc:1016
 msgid "%type settings"
 msgstr ""
 
-#: includes/content.admin.inc:1010
+#: includes/content.admin.inc:1017
 msgid "These settings apply only to the %field field as it appears in the %type content type."
 msgstr ""
 
-#: includes/content.admin.inc:1027
+#: includes/content.admin.inc:1034
 msgid "Instructions to present to the user below this field on the editing form.<br />Allowed HTML tags: @tags"
 msgstr ""
 
-#: includes/content.admin.inc:1053
+#: includes/content.admin.inc:1060
 msgid "Default value"
 msgstr ""
 
-#: includes/content.admin.inc:1083;1238 includes/content.rules.inc:93
+#: includes/content.admin.inc:1090;1245 includes/content.rules.inc:93
 msgid "'@column' => value for @column"
 msgstr ""
 
-#: includes/content.admin.inc:1085;1240 includes/content.rules.inc:95
+#: includes/content.admin.inc:1092;1247 includes/content.rules.inc:95
 msgid "return array(\n  0 => array(@columns),\n  // You'll usually want to stop here. Provide more values\n  // if you want your 'default value' to be multi-valued:\n  1 => array(@columns),\n  2 => ...\n);"
 msgstr ""
 
-#: includes/content.admin.inc:1093
+#: includes/content.admin.inc:1100
 msgid "Advanced usage only: PHP code that returns a default value. Should not include &lt;?php ?&gt; delimiters. If this field is filled out, the value returned by this code will override any value specified above. Expected format: <pre>!sample</pre>To figure out the expected format, you can use the <em>devel load</em> tab provided by <a href=\"@link_devel\">devel module</a> on a %type content page."
 msgstr ""
 
-#: includes/content.admin.inc:1104
+#: includes/content.admin.inc:1111
 msgid "This PHP code was set by an administrator and will override any value specified above."
 msgstr ""
 
-#: includes/content.admin.inc:1111
+#: includes/content.admin.inc:1118
 msgid "Global settings"
 msgstr ""
 
-#: includes/content.admin.inc:1112
+#: includes/content.admin.inc:1119
 msgid "These settings apply to the %field field in every content type in which it appears."
 msgstr ""
 
-#: includes/content.admin.inc:1116
+#: includes/content.admin.inc:1123
 msgid "Required"
 msgstr ""
 
-#: includes/content.admin.inc:1119
+#: includes/content.admin.inc:1126
 msgid "Maximum number of values users can enter for this field."
 msgstr ""
 
-#: includes/content.admin.inc:1121
+#: includes/content.admin.inc:1128
 msgid "'Unlimited' will provide an 'Add more' button so the users can add as many values as they like."
 msgstr ""
 
-#: includes/content.admin.inc:1123
+#: includes/content.admin.inc:1130
 msgid "Warning! Changing this setting after data has been created could result in the loss of data!"
 msgstr ""
 
-#: includes/content.admin.inc:1126
+#: includes/content.admin.inc:1133
 msgid "Number of values"
 msgstr ""
 
-#: includes/content.admin.inc:1242
+#: includes/content.admin.inc:1249
 msgid "The default value PHP code returned an incorrect value.<br/>Expected format: <pre>!sample</pre> Returned value: @value"
 msgstr ""
 
-#: includes/content.admin.inc:1281
+#: includes/content.admin.inc:1288
 msgid "The PHP code for 'default value' returned @value, which is invalid."
 msgstr ""
 
-#: includes/content.admin.inc:1285
+#: includes/content.admin.inc:1292
 msgid "The default value is invalid."
 msgstr ""
 
-#: includes/content.admin.inc:1309
+#: includes/content.admin.inc:1316
 msgid "Added field %label."
 msgstr ""
 
-#: includes/content.admin.inc:1313
+#: includes/content.admin.inc:1320
 msgid "Saved field %label."
 msgstr ""
 
-#: includes/content.admin.inc:1662
+#: includes/content.admin.inc:1678
 msgid "Processing"
 msgstr ""
 
-#: includes/content.admin.inc:1663
+#: includes/content.admin.inc:1679
 msgid "The update has encountered an error."
 msgstr ""
 
-#: includes/content.admin.inc:1677
+#: includes/content.admin.inc:1693
 msgid "The database has been altered and data has been migrated or deleted."
 msgstr ""
 
-#: includes/content.admin.inc:1680
+#: includes/content.admin.inc:1696
 msgid "An error occurred and database alteration did not complete."
 msgstr ""
 
-#: includes/content.admin.inc:1783
+#: includes/content.admin.inc:1799
 msgid "Processing %title"
 msgstr ""
 
-#: includes/content.admin.inc:1849
+#: includes/content.admin.inc:1865
 msgid "%name must be an integer."
 msgstr ""
 
-#: includes/content.admin.inc:1859
+#: includes/content.admin.inc:1875
 msgid "%name must be a positive integer."
 msgstr ""
 
-#: includes/content.admin.inc:1869
+#: includes/content.admin.inc:1885
 msgid "%name must be a number."
 msgstr ""
 
-#: includes/content.admin.inc:1681
+#: includes/content.admin.inc:1697
 msgid "1 item successfully processed:"
 msgid_plural "@count items successfully processed:"
 msgstr[0] ""
@@ -413,43 +408,11 @@ msgstr ""
 msgid "Add another item"
 msgstr ""
 
-#: includes/content.panels.inc:21;35
-msgid "Content field"
-msgstr ""
-
-#: includes/content.panels.inc:38
-msgid "A content field from the referenced node."
-msgstr ""
-
-#: includes/content.panels.inc:52
-msgid "Block title"
-msgstr ""
-
-#: includes/content.panels.inc:55
-msgid "Hidden"
-msgstr ""
-
-#: includes/content.panels.inc:57
-msgid "Configure how the label is going to be displayed."
-msgstr ""
-
-#: includes/content.panels.inc:73
-msgid "Field / Formatter"
-msgstr ""
-
-#: includes/content.panels.inc:76
-msgid "Select a field and formatter."
-msgstr ""
-
-#: includes/content.panels.inc:92
-msgid "\"@s\" field @name"
-msgstr ""
-
 #: includes/content.rules.inc:15
 msgid "Populate a field"
 msgstr ""
 
-#: includes/content.rules.inc:23;212
+#: includes/content.rules.inc:23;224
 msgid "You should make sure that the used field exists in the given content type."
 msgstr ""
 
@@ -469,39 +432,39 @@ msgstr ""
 msgid "You have to return the default value in the expected format."
 msgstr ""
 
-#: includes/content.rules.inc:181
+#: includes/content.rules.inc:193
 msgid "Populate @node's field '@field'"
 msgstr ""
 
-#: includes/content.rules.inc:198
+#: includes/content.rules.inc:210
 msgid "Field has value"
 msgstr ""
 
-#: includes/content.rules.inc:203
+#: includes/content.rules.inc:215
 msgid "You should make sure that the used field exists in the given content type. The condition returns TRUE, if the selected field has the given value."
 msgstr ""
 
-#: includes/content.rules.inc:207
+#: includes/content.rules.inc:219
 msgid "Field has changed"
 msgstr ""
 
-#: includes/content.rules.inc:209
+#: includes/content.rules.inc:221
 msgid "Content containing changes"
 msgstr ""
 
-#: includes/content.rules.inc:210
+#: includes/content.rules.inc:222
 msgid "Content not containing changes"
 msgstr ""
 
-#: includes/content.rules.inc:249
+#: includes/content.rules.inc:259
 msgid "@node's field '@field' has value"
 msgstr ""
 
-#: includes/content.rules.inc:269
+#: includes/content.rules.inc:279
 msgid "Select the machine-name of the field to look at."
 msgstr ""
 
-#: includes/content.rules.inc:275
+#: includes/content.rules.inc:285
 msgid "@node's field '@field' has been changed"
 msgstr ""
 

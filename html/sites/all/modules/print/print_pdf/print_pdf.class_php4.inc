@@ -1,5 +1,5 @@
 <?php
-// $Id: print_pdf.class_php4.inc,v 1.1.2.3 2008/09/02 20:08:28 jcnventura Exp $
+// $Id: print_pdf.class_php4.inc,v 1.1.2.4 2009/07/09 12:00:52 jcnventura Exp $
 
 /**
  * @file
@@ -7,6 +7,8 @@
  *
  * This file is included by the _print_pdf_tcpdf function when the current
  * PHP_VERSION is less than 5.0.0
+ *
+ * @ingroup print
  */
 
 class PrintTCPDF extends TCPDF {

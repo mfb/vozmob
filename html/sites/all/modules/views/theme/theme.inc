@@ -1,5 +1,5 @@
 <?php
-// $Id: theme.inc,v 1.76 2009/06/02 20:28:52 merlinofchaos Exp $
+// $Id: theme.inc,v 1.78 2009/07/01 23:36:14 merlinofchaos Exp $
 
 /**
  * @file theme.inc
@@ -168,7 +168,8 @@ function template_preprocess_views_view_fields(&$vars) {
   foreach ($view->field as $id => $field) {
     // render this even if set to exclude so it can be used elsewhere.
     $field_output = $view->field[$id]->theme($vars['row']);
-    if (empty($field->options['exclude'])) {
+    $empty = $field_output !== 0 && empty($field_output);
+    if (empty($field->options['exclude']) && (!$empty || empty($field->options['hide_empty']))) {
       $object = new stdClass();
 
       $object->content = $field_output;
@@ -353,7 +354,7 @@ function template_preprocess_views_view_table(&$vars) {
         }
 
         // Place the field into the column, along with an optional separator.
-        if (!empty($vars['rows'][$num][$column])) {
+        if (isset($vars['rows'][$num][$column]) && (!empty($vars['rows'][$num][$column]) || $vars['rows'][$num][$column]) == 0) {
           if (!empty($options['info'][$column]['separator'])) {
             $vars['rows'][$num][$column] .= filter_xss_admin($options['info'][$column]['separator']);
           }

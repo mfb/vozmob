@@ -1,5 +1,5 @@
 <?php
-// $Id: jq.admin.inc,v 1.2.2.4 2008/10/01 02:02:09 aaron Exp $
+// $Id: jq.admin.inc,v 1.2.2.6 2009/05/20 20:52:55 aaron Exp $
 
 /**
  *  The administration form. Allows an administrator to turn off specific plugins
@@ -26,13 +26,12 @@ function jq_settings_form() {
     }
     $description .= t('<br />%Invocation: ', array('%Invocation' => t('Invocation')));
     $description .= $plugin['invocation'] ? $plugin['invocation'] : t('Invoke this plugin with %code', array('%code' => "jq_add('$key');"));
-    $form['jq']['jq_allow_'. $key] = array(
+    $form['jq']['jq_allow_'. $key .'_fieldset'] = array(
       '#type' => 'fieldset',
       '#title' => $plugin['name'],
       '#collapsible' => TRUE,
-      '#collapsed' => TRUE,
     );
-    $form['jq']['jq_allow_'. $key]['allow'] = array(
+    $form['jq']['jq_allow_'. $key .'_fieldset']['jq_allow_'. $key] = array(
       '#type' => 'checkbox',
       '#title' => t('Enable @plugin (%code)', array('@plugin' => $plugin['name'], '%code' => $key)),
       '#description' => $description,

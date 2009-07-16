@@ -23,16 +23,16 @@ dompdf support:
   This tool is not supported and there are several known bugs that result
   from its incomplete implementation.
 
-  1. Download dompdf from http://sourceforge.net/projects/dompdf/
+  1. Download dompdf from http://code.google.com/p/dompdf/downloads/list
   2. Extract the contents of the downloaded package into the print module
-  directory (usually sites/all/modules/print/lib)
+  lib directory (usually sites/all/modules/print/lib)
   3. Check if dompdf_config.inc.php fits your installation. In 99% of cases,
   no changes are necessary, so just try to use it and only edit anything if
   the PDF generation fails.
   4. Grant write access to the lib/fonts directory to your webserver user.
   5. If you're using dompdf-0.5.1, delete the dompdf.php file as it contains
   a security vulnerability
-  6. Check http://www.digitaljunkies.ca/dompdf/ for further information.
+  6. Check http://code.google.com/p/dompdf/ for further information.
 
 TCPDF support:
   TCPDF seems to be more actively developed than dompdf, but it's support
@@ -42,7 +42,7 @@ TCPDF support:
 
   1. Download TCPDF from http://sourceforge.net/projects/tcpdf/
   2. Extract the contents of the downloaded package into the print module
-  directory (usually sites/all/modules/print/lib). There is no need to
+  lib directory (usually sites/all/modules/print/lib). There is no need to
   modify the config/tcpdf_config.php file, as the module self-configures
   TCPDF.
   3. Check http://tcpdf.sourceforge.net/ for further information.
@@ -53,12 +53,12 @@ wkhtmltopdf support:
   http://code.google.com/p/wkhtmltopdf/downloads/list. You can choose to
   download the source and compile it or simply download the static binary,
   which doesn't require you to complile anything.
-  2. Place the wkhtmltopdf executable into the print module directory
+  2. Place the wkhtmltopdf executable into the print module lib directory
   (usually sites/all/modules/print/lib). You can also place a symbolic link
   to the executable.
   3. You will need a running X Server or the virtual (headless) X
   framebuffer server: Xvfb. Place the Xvfb binary or a symbolic link to it
-  in the print module directory (usually sites/all/modules/print/lib).
+  in the print module lib directory (usually sites/all/modules/print/lib).
   4. Check http://code.google.com/p/wkhtmltopdf/ for further information.
 
 UPDATE
@@ -87,4 +87,4 @@ Note that pattern matching in robots.txt is a Google extension (see
 http://www.google.com/support/webmasters/bin/answer.py?answer=40367 for more
 information).
 
-// $Id: INSTALL.txt,v 1.10.2.10 2009/04/27 22:53:50 jcnventura Exp $
+// $Id: INSTALL.txt,v 1.10.2.11 2009/06/15 22:04:24 jcnventura Exp $

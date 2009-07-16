@@ -1,5 +1,5 @@
 <?php
-// $Id: x00.php,v 1.1.8.2 2008/06/12 20:37:11 smk Exp $
+// $Id: x00.php,v 1.1.8.3 2009/06/10 15:04:57 smk Exp $
 
 return array(
   'en' => array(0x80 => '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '',
@@ -11,5 +11,5 @@ return array(
     'a', 'a', 'a', 'a', 'a', 'a', 'ae', 'c', 'e', 'e', 'e', 'e', 'i', 'i', 'i', 'i',
     'd', 'n', 'o', 'o', 'o', 'o', 'o', '/', 'o', 'u', 'u', 'u', 'u', 'y', 'th', 'y'),
   'da' => array(0xC5 => 'Aa', 0xD8 => 'Oe', 0xE5 => 'aa', 0xF8 => 'oe'),
-  'de' => array(0xC4 => 'Ae', 0xD6 => 'Oe', 0xDC => 'Ue', 0xE4 => 'ae', 0xF6 => 'oe', 0xFC => 'ue'),
+  'de' => array(0xC4 => 'Ae', 0xD6 => 'Oe', 0xDC => 'Ue', 0xE4 => 'ae', 0xF6 => 'oe', 0xFC => 'ue', 0xDF => 'ss'),
 );

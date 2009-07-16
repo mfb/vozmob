@@ -1,5 +1,5 @@
 <?php
-// $Id: location_taxonomy.module,v 1.1.2.1 2009/04/03 18:37:04 bdragon Exp $
+// $Id: location_taxonomy.module,v 1.1.2.2 2009/06/29 14:34:54 bdragon Exp $
 
 /**
  * @file
@@ -40,7 +40,8 @@ function location_taxonomy_taxonomy($op, $type, $array = NULL) {
         }
         break;
       case 'delete':
-        location_save_locations(array(), array('genid' => 'taxonomy:'. $array['tid']));
+        $locations = array();
+        location_save_locations($locations, array('genid' => 'taxonomy:'. $array['tid']));
         break;
     }
   }

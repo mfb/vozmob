@@ -1,5 +1,5 @@
 <?php
-// $Id: handlers.inc,v 1.114 2009/06/04 20:20:45 merlinofchaos Exp $
+// $Id: handlers.inc,v 1.116 2009/07/01 16:11:35 merlinofchaos Exp $
 /**
  * @file handlers.inc
  * Defines the various handler objects to help build and display views.
@@ -787,6 +787,21 @@ function views_break_phrase($str, $filter = NULL) {
   if (!$filter) {
     $filter = new stdClass();
   }
+
+  // Set up defaults:
+
+  if (!isset($filter->value)) {
+    $filter->value = array();
+  }
+
+  if (!isset($filter->operator)) {
+    $filter->operator = 'or';
+  }
+
+  if (empty($str)) {
+    return $filter;
+  }
+
   if (preg_match('/^([0-9]+[+ ])+[0-9]+$/', $str)) {
     // The '+' character in a query string may be parsed as ' '.
     $filter->operator = 'or';
@@ -1217,14 +1232,23 @@ class views_join {
    * Build the SQL for the join this object represents.
    */
   function join($table, &$query) {
+    if (empty($this->definition['table formula'])) {
+      $right_table = "{" . $this->table . "}";
+    }
+    else {
+      $right_table = $this->definition['table formula'];
+    }
+
     if ($this->left_table) {
       $left = $query->get_table_info($this->left_table);
-      $output = " $this->type JOIN {" . $this->table . "} $table[alias] ON $left[alias].$this->left_field = $table[alias].$this->field";
+      $left_field = "$left[alias].$this->left_field";
     }
     else {
       // This can be used if left_field is a formula or something. It should be used only *very* rarely.
-      $output = " $this->type JOIN {" . $this->table . "} $table[alias] ON $this->left_field = $table[alias].$this->field";
+      $left_field = $this->left_field;
     }
+
+    $output = " $this->type JOIN $right_table $table[alias] ON $left_field = $table[alias].$this->field";
     // Tack on the extra.
     if (isset($this->extra)) {
       if (is_array($this->extra)) {

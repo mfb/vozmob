@@ -1,7 +1,9 @@
 <?php
-// $Id: token.rules.inc,v 1.1.2.2 2008/11/11 00:23:28 greggles Exp $
+// $Id: token.rules.inc,v 1.1.2.3 2009/05/31 15:56:09 greggles Exp $
 /**
- * @file rules integration for the token module
+ * @file
+ * Rules integration for the token module.
+ *
  * This provides a token input evaluator, so that token replacements can be used
  * in every rules action.
  */
@@ -32,7 +34,7 @@ function token_rules_evaluator() {
 function token_rules_input_evaluator_prepare($string, $variables) {
   $used_vars = array();
   foreach ($variables as $name => $info) {
-    if (strpos($string, '['. $name . ':') !== FALSE) {
+    if (strpos($string, '['. $name .':') !== FALSE) {
       $used_vars[] = $name;
     }
   }
@@ -59,7 +61,7 @@ function token_rules_input_evaluator_apply($text, $used_vars, &$state) {
       return FALSE;
     }
 
-    foreach($used_vars as $name) {
+    foreach ($used_vars as $name) {
       $type = $state['variables'][$name]->info['type'];
 
       $token_id = _token_get_id($type, $vars[$name]);
@@ -69,7 +71,7 @@ function token_rules_input_evaluator_apply($text, $used_vars, &$state) {
         token_get_values('global', NULL, TRUE);
       }
 
-      $text = token_replace($text, $type, $vars[$name], '['. $name . ':', ']');
+      $text = token_replace($text, $type, $vars[$name], '['. $name .':', ']');
 
       // remember that this variable has been used and got cached
       $token_cache[$token_id] = $name;
@@ -92,7 +94,7 @@ function token_rules_input_evaluator_help($variables) {
       '#collapsed' => TRUE,
     );
     $form[$name]['content'] = array(
-      '#value' => theme('token_help', $info['type'], '['. $name . ':', ']'),
+      '#value' => theme('token_help', $info['type'], '['. $name .':', ']'),
     );
   }
   return $form;

@@ -1,5 +1,5 @@
 <?php
-// $Id: content_plugin_display_simple.inc,v 1.1.2.3 2008/10/21 22:25:15 yched Exp $
+// $Id: content_plugin_display_simple.inc,v 1.1.2.4 2009/06/23 13:19:12 yched Exp $
 
 /**
  * @file
@@ -12,6 +12,10 @@ class content_plugin_display_simple extends views_plugin_display {
 
   function render() {
     return !empty($this->view->result) || !empty($this->view->style_plugin->definition['even empty']) ? $this->view->style_plugin->render($this->view->result) : '';
+  }
+
+  function uses_exposed() {
+    return FALSE;
   }
 }
 

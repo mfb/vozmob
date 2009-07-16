@@ -1,5 +1,5 @@
 <?php
-// $Id: schema.module,v 1.40 2009/05/10 16:35:56 mikeryan Exp $
+// $Id: schema.module,v 1.43 2009/07/11 17:17:26 mikeryan Exp $
 
 /**
  * @file The Schema module provides functionality built on the Schema API.
@@ -148,6 +148,10 @@ function schema_unprefix_table($name) {
 }
 
 function schema_invoke($op) {
+  // We could be called by other modules (notably Table Wizard or Migrate) in an update
+  // function, which does not call hook_init(). So, make sure we get our include files included...
+  schema_require();
+
   global $db_type;
   $function = 'schema_'.$db_type.'_'.$op;
   $args = func_get_args();
@@ -432,7 +436,9 @@ function schema_init() {
 
 function schema_require() {
   static $done = 0;
-  if ($done++) { return; }
+  if ($done++) {
+    return;
+  }
 
   $path = drupal_get_path('module', 'schema');
 
@@ -464,7 +470,7 @@ function schema_require() {
     }
   } else {
     // Load all Schema database engines.
-    $files =drupal_system_listing('schema_.*\.inc$',$path.'/engines','name',0);
+    $files = drupal_system_listing('schema_.*\.inc$',$path.'/engines','name',0);
     foreach($files as $file) {
       require_once("./$file->filename");
       $schema_engines[] = substr($file->filename, strlen($path)+16, -4);
@@ -819,5 +825,3 @@ EOT;
 
   return $output;
 }
-  
-?>

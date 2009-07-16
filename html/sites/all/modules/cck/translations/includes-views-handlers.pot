@@ -1,10 +1,10 @@
-# $Id: includes-views-handlers.pot,v 1.1.2.4 2009/03/09 21:49:59 hass Exp $
+# $Id: includes-views-handlers.pot,v 1.1.2.5 2009/06/16 17:05:11 hass Exp $
 #
 # LANGUAGE translation of Drupal (includes-views-handlers)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
-#  content_handler_field.inc,v 1.1.2.13 2009/03/06 15:29:34 karens
-#  content_handler_field_multiple.inc,v 1.1.2.15 2008/12/29 23:34:35 yched
+#  content_handler_field.inc,v 1.1.2.15 2009/03/30 22:54:16 yched
+#  content_handler_field_multiple.inc,v 1.1.2.18 2009/05/07 15:06:36 yched
 #  content_handler_relationship.inc,v 1.1.2.3 2008/10/24 12:31:58 yched
 #  content_handler_sort.inc,v 1.1.2.6 2008/10/25 00:36:41 yched
 #
@@ -12,7 +12,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2009-03-09 22:08+0100\n"
+"POT-Creation-Date: 2009-06-16 19:00+0200\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -41,23 +41,23 @@ msgstr ""
 msgid "Format"
 msgstr ""
 
-#: includes/views/handlers/content_handler_field_multiple.inc:58
+#: includes/views/handlers/content_handler_field_multiple.inc:63
 msgid "Group multiple values"
 msgstr ""
 
-#: includes/views/handlers/content_handler_field_multiple.inc:61
+#: includes/views/handlers/content_handler_field_multiple.inc:66
 msgid "If unchecked, each item in the field will create a new row, which may appear to cause duplicates. This setting is not compatible with click-sorting in table displays."
 msgstr ""
 
-#: includes/views/handlers/content_handler_field_multiple.inc:65
+#: includes/views/handlers/content_handler_field_multiple.inc:70
 msgid "Show @count value(s)"
 msgstr ""
 
-#: includes/views/handlers/content_handler_field_multiple.inc:76
+#: includes/views/handlers/content_handler_field_multiple.inc:81
 msgid "starting from @count"
 msgstr ""
 
-#: includes/views/handlers/content_handler_field_multiple.inc:87
+#: includes/views/handlers/content_handler_field_multiple.inc:92
 msgid "Reversed (start from last values)"
 msgstr ""
 

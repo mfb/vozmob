@@ -1,4 +1,4 @@
-# $Id: de.po,v 1.1.2.20 2009/05/13 12:58:18 jcnventura Exp $
+# $Id: de.po,v 1.1.2.21 2009/05/17 15:18:29 jcnventura Exp $
 #
 # German translation of Drupal (general)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
@@ -19,9 +19,9 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: Drupal Printer, e-mail and pdf versions\n"
+"Project-Id-Version: Drupal Printer, e-mail and pdf versions V6.x-1.7\n"
 "POT-Creation-Date: 2009-05-13 03:12+0200\n"
-"PO-Revision-Date: 2009-05-13 12:50+0100\n"
+"PO-Revision-Date: 2009-05-17 17:10+0100\n"
 "Last-Translator: Joao Ventura <jcnventura@drupal.org>\n"
 "Language-Team: Frank Tartler <frank.tartler@googlemail.com>\n"
 "MIME-Version: 1.0\n"
@@ -568,11 +568,11 @@ msgstr "Wenn aktiviert, kann der Benutzer beim Senden auswählen, ob der vollst�
 
 #: print_mail/print_mail.admin.inc:143
 msgid "Send e-mails using Job Queue"
-msgstr ""
+msgstr "E-Mails mittels Job Queue versenden"
 
 #: print_mail/print_mail.admin.inc:145
 msgid "Selecting this option, e-mail delivery will be performed by the Job Queue module during each cron run. Leaving this unselected, the e-mail will be sent immediately, but the site will take slightly longer to reply to the user."
-msgstr ""
+msgstr "Bei Auswahl dieser Option wird der E-Mail-Versand während jedem Cron-Lauf vom Modul ‚Job Queue‘ durchgeführt. Wenn dies nicht ausgewählt wird, wird die E-Mail sofort gesendet, aber die Website braucht etwas länger, um dem Benutzer zu antworten."
 
 #: print_mail/print_mail.admin.inc:168
 #: print_mail/print_mail.module:262;321
@@ -700,7 +700,7 @@ msgstr "Eine Nachricht muss eingegeben werden."
 
 #: print_mail/print_mail.inc:282
 msgid "print_mail: From %from"
-msgstr ""
+msgstr "print_mail: Von %from"
 
 #: print_mail/print_mail.inc:299
 msgid "us"
@@ -828,22 +828,20 @@ msgid "(TCPDF only) Set the font size to be used for normal text. This is the ba
 msgstr "(nur TCPDF) Einstellung der Schriftgröße für normalen Text. Dies ist der Basiswert beim Skalieren auf andere Schriftstile."
 
 #: print_pdf/print_pdf.admin.inc:186
-#, fuzzy
 msgid "wkhtmltopdf options"
 msgstr "wkhtmltopdf-Optionen"
 
 #: print_pdf/print_pdf.admin.inc:188
 msgid "(wkhtmltopdf only) Set any additional options to be passed to the wkhtmltopdf executable."
-msgstr ""
+msgstr "(nur wkhtmltopdf) Zusätzliche Optionen einstellen, die an die ausführbare Datei wkhtmltopdf übergeben werden."
 
 #: print_pdf/print_pdf.admin.inc:192
-#, fuzzy
 msgid "Xvfb options"
 msgstr "Xvfb-Optionen"
 
 #: print_pdf/print_pdf.admin.inc:194
 msgid "(wkhtmltopdf only) Set any additional options to be passed to the Xvfb executable."
-msgstr ""
+msgstr "(nur wkhtmltopdf) Zusätzliche Optionen einstellen, die an die ausführbare Datei Xvfb übergeben werden."
 
 #: print_pdf/print_pdf.admin.inc:200
 msgid "PDF File Name"
@@ -907,9 +905,4 @@ msgstr "PDF"
 #: print_pdf/print_pdf.info:0
 msgid "Adds the capability to export pages as PDF."
 msgstr "Ermöglicht, Seiten als PDF zu exportieren."
-
-#~ msgid "print"
-#~ msgstr "print"
-#~ msgid "print_pdf"
-#~ msgstr "print_pdf"
 

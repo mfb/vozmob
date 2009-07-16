@@ -1,8 +1,8 @@
 <?php
-// $Id: twitter.install,v 1.2.2.1 2009/01/17 20:43:53 eaton Exp $
+// $Id: twitter.install,v 1.2.2.10 2009/07/02 14:50:24 eaton Exp $
 
 /**
- * Implementation of hook_schema).
+ * Implementation of hook_schema().
  */
 function twitter_schema() {
   $schema['twitter'] = array(
@@ -10,13 +10,19 @@ function twitter_schema() {
     'fields' => array(
       'twitter_id' => array(
         'description' => t("Unique identifier for each {twitter} post."),
-        'type' => 'int',
-        'not null' => TRUE
+        'type' => 'numeric',
+        'unsigned' => TRUE,
+        'precision' => 20,
+        'scale' => 0,
+        'not null' => TRUE,
+        'default' => 0
       ),
       'screen_name' => array(
         'description' => t("Screen name of the {twitter} user."),
         'type' => 'varchar',
-        'length' => 255
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => ''
       ),
       'created_at' => array(
         'description' => t("Date and time the {twitter} post was created."),
@@ -42,6 +48,35 @@ function twitter_schema() {
         'length' => 255,
         'not null' => FALSE
       ),
+      'in_reply_to_status_id' => array(
+        'description' => t("Unique identifier of a status this {twitter} post was replying to."),
+        'type' => 'numeric',
+        'unsigned' => TRUE,
+        'precision' => 20,
+        'scale' => 0,
+        'not null' => FALSE,
+      ),
+      'in_reply_to_user_id' => array(
+        'description' => t("Unique identifier for the {twitter_account} this post was replying to."),
+        'type' => 'numeric',
+        'unsigned' => TRUE,
+        'precision' => 20,
+        'scale' => 0,
+        'not null' => FALSE,
+      ),
+      'in_reply_to_screen_name' => array(
+        'description' => t("Screen name of the {twitter} user this post was replying to."),
+        'type' => 'varchar',
+        'length' => 255,
+        'not null' => FALSE,
+      ),
+      'truncated' => array(
+        'description' => t("Boolean flag indicating whether the {twitter} status was cut off to fit in the 140 character limit."),
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0
+       ),
     ),
     'indexes' => array('screen_name' => array('screen_name')),
     'primary key' => array('twitter_id'),
@@ -52,8 +87,11 @@ function twitter_schema() {
     'fields' => array(
       'twitter_uid' => array(
         'description' => t("The unique identifier of the {twitter_account}."),
-        'type' => 'int',
-        'not null' => TRUE
+        'type' => 'numeric',
+        'unsigned' => TRUE,
+        'precision' => 20,
+        'scale' => 0,        'not null' => TRUE,
+        'default' => 0
       ),
       'screen_name' => array(
         'description' => t("The unique login name of the {twitter_account} user."),
@@ -103,7 +141,8 @@ function twitter_schema() {
       'last_refresh' => array(
         'description' => t("A UNIX timestamp marking the date Twitter statuses were last fetched on."),
         'type' => 'int',
-        'not null' => TRUE
+        'not null' => TRUE,
+        'default' => 0,
       ),
     ),
     'indexes' => array('screen_name' => array('screen_name')),
@@ -120,7 +159,9 @@ function twitter_schema() {
       'screen_name' => array(
         'description' => t("The unique login name for the Twitter account."),
         'type' => 'varchar',
-        'length' => 255
+        'length' => 255,
+        'not null' => TRUE,
+        'default' => '',
       ),
       'password' => array(
         'description' => t("The password for the Twitter account."),
@@ -149,7 +190,7 @@ function twitter_install() {
   // Create tables.
   drupal_install_schema('twitter');
 
-  // Set the weight to 3, making it heaving than Pathauto.
+  // Set the weight to 3, making it heavier than Pathauto.
   db_query("UPDATE {system} SET weight = 3 WHERE name = 'twitter'");
 }
 
@@ -199,6 +240,175 @@ function twitter_update_6001() {
 function twitter_update_6002() {
   $ret = array();
   $ret[] = update_sql("UPDATE {system} SET weight = 3 WHERE name = 'twitter'");
+  return $ret;
+}
+
+/**
+ * Twitter status IDs are hitting the rollover point for signed ints. Let's
+ * be sure we're ready. See http://bit.ly/kokvi for details.
+ */
+function twitter_update_6003() {
+  $ret = array();
+  db_drop_primary_key($ret, 'twitter');
+  
+  db_change_field($ret, 'twitter', 'twitter_id', 'twitter_id',
+    array('description' => t("Unique identifier for each {twitter} post."),
+          'type' => 'int', 'size' => 'big', 'unsigned' => 'true', 'not null' => TRUE),
+    array('primary key' => array('twitter_id')));
+
+  return $ret;
+}
+
+/**
+ * Add NOT NULL constraint and DEFAULT value to the screen_name field of the 
+ * twitter and twitter_user tables per updated schema definition.
+ *
+ * See http://drupal.org/node/336048 and http://drupal.org/node/430442
+ */
+function twitter_update_6004() {
+  $ret = array();
+  // Have to drop PRIMARY KEY and indexes that use the field being changed.
+  // twitter
+  db_drop_index($ret, 'twitter', 'screen_name');
+  db_change_field($ret, 'twitter', 'screen_name', 'screen_name', array('type' => 'varchar', 'length' => 255, 'not null' => TRUE, 'default' => ''), array('indexes' => array('screen_name' => array('screen_name'))));
+
+  // twitter_user
+  db_drop_index($ret, 'twitter_user', 'screen_name');
+  db_drop_primary_key($ret, 'twitter_user');
+  db_change_field($ret, 'twitter_user', 'screen_name', 'screen_name', array('type' => 'varchar', 'length' => 255, 'not null' => TRUE, 'default' => ''), array('primary key' => array('uid', 'screen_name'), 'indexes' => array('screen_name' => array('screen_name'))));
+  return $ret;
+}
+
+/**
+ * Dear PHP, I hate you so bad. Love, Jeff.
+ *
+ * Workaround for drupal_write_record(), which treats a DB bigint as a signed 32
+ * bit int on 32 bit PHP builds. We can STORE bigints, and PHP automatically
+ * converts them to floats in memory while we work with them, but db_placeholders()
+ * always treats them as %d and casts them back to dumb signed ints.
+ *
+ * See http://drupal.org/node/333788 for more info.
+ *
+ * Instead we'll set the column type to 'string' which is a little like jumping
+ * off the Sears Tower because the elevator's broken. But that's life.
+ */
+function twitter_update_6005() {
+  $ret = array();
+
+  // First clear out any borked statuses.
+  $ret[] = update_sql("DELETE FROM {twitter} WHERE twitter_id = 2147483647");
+
+  db_drop_primary_key($ret, 'twitter');
+  
+  db_change_field($ret, 'twitter', 'twitter_id', 'twitter_id',
+    array('description' => t("Unique identifier for each {twitter} post."),
+          'type' => 'varchar', 'length' => 255, 'not null' => TRUE, 'default' => ''),
+    array('primary key' => array('twitter_id')));
+  
+  return $ret;
+}
+
+/**
+ * Dear PHP, I'm sorry baby. I know I said a lotta things last night, but I was
+ * angry. I didn't mean it, you know that. I'll use numbers from now on -- no!
+ * No, I'll use *decimals*. You'll like that, won't you, PHP? We're cool, right?
+ *
+ * Yeah. Yeah, we're cool.
+ *
+ * Also, while we're at it we'll add support for some of the additional Twitter
+ * API data for replies, and convert the twitter_uid field to a numeric type, too.
+ */
+function twitter_update_6006() {
+  $ret = array();
+
+  db_drop_primary_key($ret, 'twitter');
+  
+  db_change_field($ret, 'twitter', 'twitter_id', 'twitter_id',
+    array(
+      'description' => t("Unique identifier for each {twitter} post."),
+      'type' => 'numeric',
+      'unsigned' => TRUE,
+      'precision' => 20,
+      'scale' => 0,
+      'not null' => TRUE,
+      'default' => 0
+    ),
+    array('primary key' => array('twitter_id'))
+  );
+  
+  db_add_field($ret, 'twitter', 'in_reply_to_status_id',
+    array(
+      'description' => t("Unique identifier of a status this {twitter} post was replying to."),
+      'type' => 'numeric',
+      'precision' => 20,
+      'scale' => 0,
+      'unsigned' => TRUE,
+      'not null' => FALSE,
+    )
+  );
+
+  db_add_field($ret, 'twitter', 'in_reply_to_user_id',
+    array(
+      'description' => t("Unique identifier for the {twitter_account} this post was replying to."),
+      'type' => 'numeric',
+      'precision' => 20,
+      'scale' => 0,
+      'unsigned' => TRUE,
+      'not null' => FALSE,
+    )
+  );
+
+  db_add_field($ret, 'twitter', 'in_reply_to_screen_name',
+    array(
+      'description' => t("Screen name of the {twitter} user this post was replying to."),
+      'type' => 'varchar',
+      'length' => 255,
+      'not null' => FALSE,
+    )
+  );
+
+  db_add_field($ret, 'twitter', 'truncated',
+    array(
+      'description' => t("Boolean flag indicating whether the {twitter} status was cut off to fit in the 140 character limit."),
+      'type' => 'int',
+      'unsigned' => TRUE,
+      'not null' => TRUE,
+      'default' => 0,
+    )
+  );
+  
+  db_drop_primary_key($ret, 'twitter_account');
+
+  db_change_field($ret, 'twitter_account', 'twitter_uid', 'twitter_uid',
+    array(
+      'description' => t("The unique identifier of the {twitter_account}."),
+      'type' => 'numeric',
+      'unsigned' => TRUE,
+      'precision' => 20,
+      'scale' => 0,
+      'not null' => TRUE,
+      'default' => 0
+    ),
+    array('primary key' => array('twitter_uid'))
+  );
+
+       
+  return $ret;
+}
+
+/*
+ * Update the last_refresh column to supply a default value. http://drupal.org/node/301317
+ */
+function twitter_update_6007() {
+  $ret = array();
+  db_change_field($ret, 'twitter_account', 'last_refresh', 'last_refresh',
+    array(
+      'description' => t("A UNIX timestamp marking the date Twitter statuses were last fetched on."),
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    )
+  );
   return $ret;
 }
 

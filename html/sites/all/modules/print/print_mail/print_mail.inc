@@ -1,5 +1,5 @@
 <?php
-// $Id: print_mail.inc,v 1.2.2.22 2009/05/13 16:18:06 jcnventura Exp $
+// $Id: print_mail.inc,v 1.2.2.23 2009/07/09 12:00:52 jcnventura Exp $
 
 /**
  * @file
@@ -7,6 +7,8 @@
  *
  * This file is included by the print_mail module and includes the
  * mail form display, validation and submit hooks.
+ *
+ * @ingroup print
  */
 
 require_once(drupal_get_path('module', 'print') .'/print.pages.inc');
