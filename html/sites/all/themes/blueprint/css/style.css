@@ -60,3 +60,7 @@ div.overlay-links li {
 .media-mover-audio-image .flowplayer {
   height: 24px;
 }
+
+audio {
+  width: 320px; height: 28px;
+}
