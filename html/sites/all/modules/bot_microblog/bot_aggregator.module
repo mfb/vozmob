@@ -19,6 +19,10 @@ function bot_aggregator_help($path, $arg) {
  * Relay feed items to IRC.
  */
 function bot_aggregator_irc_bot_cron($cron = 300) {
+  global $irc;
+  // Increase the receive timeout from 300 to 600 seconds to reduce unnecessary disconnections.
+  // @todo move this elsewhere :)
+  $irc->setReceiveTimeout(600);
   $feeds = bot_aggregator_get_feeds();
   while ($feed = db_fetch_object($feeds)) {
     if ($cron == variable_get('bot_aggregator_cron_' . $feed->fid, 300) && ($channel = variable_get('bot_aggregator_channel_' . $feed->fid, ''))) {
@@ -54,7 +58,7 @@ function bot_aggregator_irc_bot_cron_fastest() {
  * Implementation of hook_irc_msg_channel().
  */
 function bot_aggregator_irc_msg_channel($data, $from_query = FALSE) {
-  if (preg_match('/^\.follow (.*) (.*) (.*)/', $data->message, $matches)) {
+  if (preg_match('/^\.follow (.+) (.+) (.+)/', $data->message, $matches)) {
     $to = $from_query ? $data->nick : $data->channel;
     if (!valid_url($matches[1], TRUE)) {
       bot_message($to, $data->nick . ': ' . t("Hrm that doesn't appear to be a valid feed URL :("));
@@ -83,7 +87,7 @@ function bot_aggregator_irc_msg_channel($data, $from_query = FALSE) {
       }
     }
   }
-  if (preg_match('/^\.unfollow (.*) (.*)/', $data->message, $matches)) {
+  if (preg_match('/^\.unfollow (.+) (.+)/', $data->message, $matches)) {
     $to = $from_query ? $data->nick : $data->channel;
     if ($feed = db_fetch_array(db_query("SELECT * from {aggregator_feed} WHERE url = '%s'", $matches[1]))) {
       if (variable_get('bot_aggregator_channel_' . $feed['fid'], '') == $matches[2]) {

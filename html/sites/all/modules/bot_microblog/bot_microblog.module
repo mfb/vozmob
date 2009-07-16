@@ -18,10 +18,15 @@ function bot_microblog_help($path, $arg) {
  * Implementation of hook_irc_msg_channel().
  */
 function bot_microblog_irc_msg_channel($data, $from_query = FALSE) {
-  if (preg_match('/^\.twitter (.*)/s', $data->message, $matches)) {
+  if (preg_match('/^\.twitter (.+)/s', $data->message, $matches)) {
     $to = $from_query ? $data->nick : $data->channel;
-    if ($status = bot_microblog_status('<' . $data->nick . '> ' . $matches[1])) {
-      bot_message($to, $data->nick . ': ' . 'http://twitter.com/' . $status->user->screen_name . '/statuses/' . $status->id);
+    $status = '<' . $data->nick . '> ' . $matches[1];
+    $length = drupal_strlen($status);
+    if ($length > 140) {
+      bot_message($to, $data->nick . ': ' . t('Doh! Your status update would be !length characters, max is 140 characters.', array('!length' => $length)));
+    }
+    elseif ($update = bot_microblog_status($status)) {
+      bot_message($to, $data->nick . ': ' . 'http://twitter.com/' . $update->user->screen_name . '/statuses/' . $update->id);
     }
   }
 }
