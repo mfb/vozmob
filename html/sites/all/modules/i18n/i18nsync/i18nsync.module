@@ -1,5 +1,5 @@
 <?php
-// $Id: i18nsync.module,v 1.1.2.24 2009/05/18 09:29:23 jareyero Exp $
+// $Id: i18nsync.module,v 1.1.2.27 2009/07/05 14:43:41 jareyero Exp $
 
 /**
  * @file
@@ -59,14 +59,15 @@ function i18nsync_form_alter(&$form, $form_state, $form_id) {
     case 'node_type_form':
       $type = $form['#node_type']->type;
       $current = i18nsync_node_fields($type);
-
-      $form['workflow']['i18n']['i18nsync_nodeapi'] = array(
+      $disabled = $form['i18n']['#disabled'];
+      $form['i18n']['i18nsync_nodeapi'] = array(
         '#type' => 'fieldset',
         '#tree' => TRUE,
         '#title' => t('Synchronize translations'),
         '#collapsible' => TRUE,
         '#collapsed' => !count($current),
-        '#description' => t('Select which fields to synchronize for all translations of this content type.')
+        '#description' => t('Select which fields to synchronize for all translations of this content type.'),
+        '#disabled' => $disabled,
       );
       // Each set provides title and options. We build a big checkboxes control for it to be
       // saved as an array. Special themeing for group titles.
@@ -74,12 +75,13 @@ function i18nsync_form_alter(&$form, $form_state, $form_id) {
         $title = $data['#title'];
         if (!empty($data['#options'])) {
           foreach ($data['#options'] as $field => $name) {
-            $form['workflow']['i18n']['i18nsync_nodeapi'][$field] = array(
+            $form['i18n']['i18nsync_nodeapi'][$field] = array(
               '#group_title' => $title,
               '#title' => $name,
               '#type' => 'checkbox',
               '#default_value' => in_array($field, $current),
               '#theme' => 'i18nsync_workflow_checkbox',
+              '#disabled' => $disabled,
             );
             $title = '';
           }
@@ -258,18 +260,20 @@ function i18nsync_node_translation($node, $translation, $fields, $op) {
 
   foreach ($fields as $field) {
     // Check for CCK fields first.
-    if (isset($content_fields[$field])) {
+    if (isset($content_fields[$field]) && isset($node->$field)) {
       switch ($content_fields[$field]['type']) {
         // TODO take type specific actions.
         case 'filefield':
         case 'imagefield':
           break;
 
+        case 'nodereference':
+          i18nsync_node_translation_nodereference_field($node, $translation, $field);
+          break;
+
         default:
           // For fields that don't need special handling.
-          if (isset($node->$field)) {
-            $translation->$field = $node->$field;
-          }
+          $translation->$field = $node->$field;
       }
       // Skip over the regular handling.
       continue;
@@ -339,22 +343,47 @@ function i18nsync_taxonomyfield(&$node, $source) {
  * Node attachments (CCK) that may have translation.
  */
 function i18nsync_node_translation_attached_node(&$node, &$translation, $field) {
-  if (isset($node->$field) && ($attached = node_load($node->$field))) {
-    if (translation_supported_type($attached->type)) {
-      // This content type has translations, find the one.
-      $nid = $attached->tnid ? $attached->tnid : $attached->nid;
-      if (($attachedtrans = translation_node_get_translations($nid)) && isset($attachedtrans[$translation->language])) {
-        $translation->$field = $attachedtrans[$translation->language]->nid;
-      }
-      else {
-        // No requested language found, just copy the field.
-        $translation->$field = $node->$field;
-      }
+  if ($attached = node_load($node->$field)) {
+    $translation->$field = i18nsync_node_translation_reference_field($attached, $node->$field, $translation->language);
+  }
+}
+
+/**
+ * Translating a nodereference field (cck).
+ */
+function i18nsync_node_translation_nodereference_field(&$node, &$translation, $field) {
+  $translated_references = array();
+  foreach ($node->$field as $reference) {
+    if ($reference_node = node_load($reference['nid'])) {
+      $translated_references[] = array(
+        'nid' => i18nsync_node_translation_reference_field($reference_node, $reference['nid'], $translation->language)
+      );
+    }
+  }
+  $translation->$field = $translated_references;
+}
+
+/**
+ * Helper function to which translates reference field. We try to use translations for reference, otherwise fallback.
+ * Example:
+ *   English A references English B and English C.
+ *   English A and B are translated to German A and B, but English C is not.
+ *   The syncronization from English A to German A would it German B and English C.
+ */
+function i18nsync_node_translation_reference_field(&$reference_node, $default_value, $langcode) {
+  if (isset($reference_node->tnid) && translation_supported_type($reference_node->type)) {
+    // This content type has translations, find the one.
+    if (($reference_trans = translation_node_get_translations($reference_node->tnid)) && isset($reference_trans[$langcode])) {
+      return $reference_trans[$langcode]->nid;
     }
     else {
-      // Content type without language, just copy the field.
-      $translation->$field = $node->$field;
+      // No requested language found, just copy the field.
+      return $default_value;
     }
+  }
+  else {
+    // Content type without language, just copy the field.
+    return $default_value;
   }
 }
 
@@ -370,81 +399,93 @@ function i18nsync_node_fields($type) {
 
 /**
  * Returns list of available fields for given content type.
- *
+ * 
+ * There are two hidden variables (without UI) that can be used to add fields
+ * with the form array('field' => 'Field name')
+ *  - i18nsync_fields_node
+ *  - i18nsync_fields_node_$type;
+ * 
+ * Fields can also be changed using hook_i18nsync_fields_alter($fields, $type)
+ * 
  * @param $type
  *   Node type.
- * @param $tree
- *   Whether to return in tree form or FALSE for flat list.
  */
 function i18nsync_node_available_fields($type) {
-  // Default node fields.
-  $fields['node']['#title'] = t('Standard node fields.');
-  $options = variable_get('i18nsync_fields_node', array());
-  $options += array(
-    'name' => t('Author'),
-    'status' => t('Status'),
-    'promote' => t('Promote'),
-    'moderate' => t('Moderate'),
-    'sticky' => t('Sticky'),
-    'revision' => t('Revision (Create also new revision for translations)'),
-    'parent' => t('Book outline (with the translated parent)'),
-    'taxonomy' => t('Taxonomy terms'),
-  );
-  if (module_exists('comment')) {
-    $options['comment'] = t('Comment settings');
-  }
-  if (module_exists('upload')) {
-    $options['files'] = t('File attachments');
-  }
+  static $cache;
 
-  // If no type defined yet, that's it.
-  $fields['node']['#options'] = $options;
-  
-  if (!$type) {
-    return $fields;
-  }
-
-
-  // Get variable for this node type.
-  $fields += variable_get("i18nsync_fields_node_$type", array());
-
-  // Image and image attach.
-  /** No way to synchronize images with the current image module. See 
-  if (module_exists('image') && $type == 'image') {
-    $image['images'] = t('Image files');
-  }
-  */
-  if (module_exists('image_attach') && variable_get('image_attach_'. $type, 0)) {
-    $image['iid'] = t('Attached image nodes');
-  }
-  if (!empty($image)) {
-    $fields['image']['#title'] = t('Image module');
-    $fields['image']['#options'] = $image;    
-  }
-  // Event fields.
-  if (variable_get('event_nodeapi_'. $type, 'never') != 'never') {
-    $fields['event']['#title'] = t('Event fields');
-    $fields['event']['#options'] = array(
-      'event_start' => t('Event start'),
-      'event_end' => t('Event end'),
-      'timezone' => t('Timezone')
+  if (!isset($cache[$type])) {
+    // Default node fields.
+    $fields['node']['#title'] = t('Standard node fields.');
+    $options = variable_get('i18nsync_fields_node', array());
+    $options += array(
+      'name' => t('Author'),
+      'status' => t('Status'),
+      'promote' => t('Promote'),
+      'moderate' => t('Moderate'),
+      'sticky' => t('Sticky'),
+      'revision' => t('Revision (Create also new revision for translations)'),
+      'parent' => t('Book outline (with the translated parent)'),
+      'taxonomy' => t('Taxonomy terms'),
     );
-  }
-  // Location module
-  if (module_exists('location')) {
-    $options['locations'] = t('Location settings');
-  }
-  // Get CCK fields.
-  if (($contentfields = _i18nsync_cck_fields($type))) {
-    // Get context information.
-    $info = module_invoke('content', 'fields', NULL, $type);
-    $fields['cck']['#title'] = t('CCK fields');
-    foreach ($contentfields as $name => $data) {
-      $fields['cck']['#options'][$data['field_name']] = $data['widget']['label'];
+    if (module_exists('comment')) {
+      $options['comment'] = t('Comment settings');
     }
-  }
+    if (module_exists('upload')) {
+      $options['files'] = t('File attachments');
+    }
+  
+    // If no type defined yet, that's it.
+    $fields['node']['#options'] = $options;
+    
+    if (!$type) {
+      return $fields;
+    }
+  
+    // Get variable for this node type.
+    $fields += variable_get("i18nsync_fields_node_$type", array());
+  
+    // Image and image attach.
+    /** No way to synchronize images with the current image module. See 
+    if (module_exists('image') && $type == 'image') {
+      $image['images'] = t('Image files');
+    }
+    */
+    if (module_exists('image_attach') && variable_get('image_attach_'. $type, 0)) {
+      $image['iid'] = t('Attached image nodes');
+    }
+    if (!empty($image)) {
+      $fields['image']['#title'] = t('Image module');
+      $fields['image']['#options'] = $image;    
+    }
+    // Event fields.
+    if (variable_get('event_nodeapi_'. $type, 'never') != 'never') {
+      $fields['event']['#title'] = t('Event fields');
+      $fields['event']['#options'] = array(
+        'event_start' => t('Event start'),
+        'event_end' => t('Event end'),
+        'timezone' => t('Timezone')
+      );
+    }
+    // Location module
+    if (module_exists('location')) {
+      $options['locations'] = t('Location settings');
+    }
+    // Get CCK fields.
+    if (($contentfields = _i18nsync_cck_fields($type))) {
+      // Get context information.
+      $info = module_invoke('content', 'fields', NULL, $type);
+      $fields['cck']['#title'] = t('CCK fields');
+      foreach ($contentfields as $name => $data) {
+        $fields['cck']['#options'][$data['field_name']] = $data['widget']['label'];
+      }
+    }
+    
+    // Give a chance to modules to change/remove/add their own fields
+    drupal_alter('i18nsync_fields', $fields, $type);
 
-  return $fields;
+    $cache[$type] = $fields;
+  }
+  return $cache[$type];
 }
 
 /**

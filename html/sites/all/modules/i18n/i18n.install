@@ -1,5 +1,5 @@
 <?php
-// $Id: i18n.install,v 1.15.2.7 2009/01/14 18:18:38 snpower Exp $
+// $Id: i18n.install,v 1.15.2.8 2009/06/25 23:08:20 hass Exp $
 
 /**
  * @file
@@ -11,22 +11,22 @@
  */
 function i18n_schema() {
   $schema['i18n_variable'] = array(
-    'description' => t('Multilingual variables.'),
+    'description' => 'Multilingual variables.',
     'fields' => array(
       'name' => array(
-        'description' => t('The name of the variable.'),
+        'description' => 'The name of the variable.',
         'type' => 'varchar',
         'length' => 128,
         'not null' => TRUE,
         'default' => ''),
       'language' => array(
-        'description' => t('The language of the variable.'),
+        'description' => 'The language of the variable.',
         'type' => 'varchar',
         'length' => 12,
         'not null' => TRUE,
         'default' => ''),
       'value' => array(
-        'description' => t('The value of the variable.'),
+        'description' => 'The value of the variable.',
         'type' => 'text',
         'not null' => TRUE,
         'size' => 'big'),

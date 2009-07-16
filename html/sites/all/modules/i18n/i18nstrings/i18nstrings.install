@@ -1,5 +1,5 @@
 <?php
-// $Id: i18nstrings.install,v 1.2.2.10 2009/01/14 18:20:08 snpower Exp $
+// $Id: i18nstrings.install,v 1.2.2.12 2009/06/25 23:02:01 hass Exp $
 
 /**
  * @file
@@ -41,33 +41,33 @@ function i18nstrings_uninstall() {
  */
 function i18nstrings_schema() {
   $schema['i18n_strings'] = array(
-    'description' => t('Metadata for source strings.'),
+    'description' => 'Metadata for source strings.',
     'fields' => array(
       'lid' => array(
         'type' => 'int',
         'not null' => TRUE,
         'default' => 0,
-        'description' => t('Source string ID. References {locales_source}.lid.'),
+        'description' => 'Source string ID. References {locales_source}.lid.',
       ),
       'objectid' => array(
         'type' => 'int',
         'not null' => TRUE,
         'default' => 0,
-        'description' => t('Object ID.'),
+        'description' => 'Object ID.',
       ),
       'type' => array(
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
         'default' => '',
-        'description' => t('Object type for this string.'),
+        'description' => 'Object type for this string.',
       ),
       'property' => array(
         'type' => 'varchar',
         'length' => 255,
         'not null' => TRUE,
         'default' => 'default',
-        'description' => t('Object property for this string.'),
+        'description' => 'Object property for this string.',
       ),
     ),
     'primary key' => array('lid'),
@@ -82,8 +82,8 @@ function i18nstrings_schema_alter(&$schema) {
   // Add index for textgroup and location to {locales_source}.
   $schema['locales_source']['indexes']['textgroup_location'] = array(array('textgroup', 30), 'location');
   // Add field for tracking whether translations need updating.
-  $schema['locales_target']['status'] = array(
-    'description' => t('A boolean indicating whether this translation needs to be updated.'),
+  $schema['locales_target']['fields']['status'] = array(
+    'description' => 'A boolean indicating whether this translation needs to be updated.',
     'type' => 'int',
     'not null' => TRUE,
     'default' => 0,

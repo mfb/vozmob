@@ -1,5 +1,5 @@
 <?php
-// $Id: i18nblocks.module,v 1.7.2.14 2009/01/21 16:26:18 jareyero Exp $
+// $Id: i18nblocks.module,v 1.7.2.15 2009/06/12 13:35:12 jareyero Exp $
 
 /**
  * @file
@@ -51,7 +51,7 @@ function i18nblocks_help($path, $arg) {
 function i18nblocks_db_rewrite_sql($query, $primary_table, $primary_key) {
   global $language;
   if ($primary_table == 'b' && $primary_key == 'bid') {
-    $return['join'] = 'LEFT JOIN {i18n_blocks} i18n ON b.module = i18n.module AND b.delta = i18n.delta';
+    $return['join'] = 'LEFT JOIN {i18n_blocks} i18n ON (b.module = i18n.module AND b.delta = i18n.delta)';
     $return['where'] = i18n_db_rewrite_where('i18n', 'block', 'simple');
     return $return;
   }

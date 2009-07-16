@@ -1,4 +1,4 @@
-# $Id: uk-ua.po,v 1.1.2.2 2009/05/21 01:06:22 podarok Exp $
+# $Id: i18nblocks.uk-ua.po,v 1.1.2.1 2009/06/25 22:53:31 hass Exp $
 #
 # Ukrainian translation of Drupal (general)
 # Copyright YEAR NAME <EMAIL@ADDRESS>

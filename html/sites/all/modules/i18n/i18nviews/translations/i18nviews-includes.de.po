@@ -1,4 +1,4 @@
-# $Id: i18nviews.de.po,v 1.1.2.6 2009/06/25 23:08:05 hass Exp $
+# $Id: i18nviews-includes.de.po,v 1.1.2.1 2009/06/25 23:08:05 hass Exp $
 #
 # LANGUAGE translation of Drupal (i18nviews)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
@@ -20,24 +20,11 @@ msgstr ""
 "X-Poedit-Language: German\n"
 "X-Poedit-Country: GERMANY\n"
 
-#: i18nviews/i18nviews.module:19
-msgid "Supports translation for views strings: title, header, footer..."
-msgstr "Unterstützt die Übersetzung von Zeichenketten in Ansichten: Titel, Kopfbereich, Fußbereich..."
+#: i18nviews/includes/i18nviews.views.inc:6
+msgid "Content negotiation"
+msgstr ""
 
-#: i18nviews/i18nviews.module:31
-msgid "Views"
-msgstr "Ansichten"
-
-#: i18nviews/i18nviews.module:0
-msgid "i18nviews"
-msgstr "i18nviews"
-
-#: i18nviews/i18nviews.info:0
-#, fuzzy
-msgid "Views translation"
-msgstr "Ansichtenübersetzung"
-
-#: i18nviews/i18nviews.info:0
-msgid "Translation of views strings and content selection for views"
+#: i18nviews/includes/i18nviews.views.inc:7
+msgid "Removes the nodes that are not valid according to the content selection mode"
 msgstr ""
 

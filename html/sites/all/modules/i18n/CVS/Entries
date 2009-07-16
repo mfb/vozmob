@@ -8,12 +8,12 @@ D/i18nsync////
 D/i18ntaxonomy////
 D/translations////
 D/i18nviews////
-/CHANGELOG.txt/1.15.4.61/Fri May 22 01:35:11 2009//TDRUPAL-6--1
 /INSTALL.txt/1.21.2.5/Wed Apr  1 07:47:45 2009//TDRUPAL-6--1
 /README.txt/1.18.2.4/Wed Apr  1 07:47:45 2009//TDRUPAL-6--1
 /i18n.admin.inc/1.2.2.7/Wed Apr  1 07:47:45 2009//TDRUPAL-6--1
 /i18n.info/1.5.2.5/Wed Apr  1 07:47:45 2009//TDRUPAL-6--1
-/i18n.install/1.15.2.7/Wed Apr  1 07:47:45 2009//TDRUPAL-6--1
 /i18n.js/1.1.2.3/Wed Apr  1 07:47:45 2009//TDRUPAL-6--1
-/i18n.module/1.41.2.33/Fri May 22 01:35:11 2009//TDRUPAL-6--1
 /i18n.pages.inc/1.1.2.2/Fri May 22 01:35:11 2009//TDRUPAL-6--1
+/CHANGELOG.txt/1.15.4.65/Thu Jul 16 03:52:06 2009//TDRUPAL-6--1
+/i18n.install/1.15.2.8/Thu Jul 16 03:52:06 2009//TDRUPAL-6--1
+/i18n.module/1.41.2.35/Thu Jul 16 03:52:06 2009//TDRUPAL-6--1

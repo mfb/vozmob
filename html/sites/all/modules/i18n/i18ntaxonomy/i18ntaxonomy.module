@@ -1,5 +1,5 @@
 <?php
-// $Id: i18ntaxonomy.module,v 1.5.2.31 2009/04/27 16:50:49 jareyero Exp $
+// $Id: i18ntaxonomy.module,v 1.5.2.32 2009/06/12 13:10:25 jareyero Exp $
 
 /**
  * @file
@@ -321,7 +321,7 @@ function i18ntaxonomy_form_alter(&$form, $form_state, $form_id) {
       $languages = locale_language_list('name');
       foreach ($vocabularies as $vocabulary) {
         if ($vocabulary->language) {
-          $form[$vocabulary->vid]['types']['#value'] .= '&nbsp('. $languages[$vocabulary->language] .')';
+          $form[$vocabulary->vid]['types']['#value'] .= '&nbsp;('. $languages[$vocabulary->language] .')';
         }
       }
       break;
@@ -332,7 +332,7 @@ function i18ntaxonomy_form_alter(&$form, $form_state, $form_id) {
         $languages = locale_language_list('name');
         foreach (element_children($form) as $key) {
           if (isset($form[$key]['#term']) && ($lang = $form[$key]['#term']['language'])) {
-            $form[$key]['view']['#value'] .= '&nbsp('. $languages[$lang] .')';
+            $form[$key]['view']['#value'] .= '&nbsp;('. $languages[$lang] .')';
           }
         }
       }

@@ -1,5 +1,5 @@
 <?php
-// $Id: i18ntaxonomy.install,v 1.3.2.9 2009/01/18 17:52:22 jareyero Exp $
+// $Id: i18ntaxonomy.install,v 1.3.2.10 2009/06/12 13:35:12 jareyero Exp $
 
 /**
  * @file
@@ -17,8 +17,8 @@ function i18ntaxonomy_install() {
   db_add_field($ret, 'term_data', 'language', array('type' => 'varchar', 'length' => 12, 'not null' => TRUE, 'default' => ''));
   db_add_field($ret, 'term_data', 'trid', array('type' => 'int', 'not null' => TRUE, 'default' => 0));
 
-  // Set module weight for it to run after core modules.
-  db_query("UPDATE {system} SET weight = 10 WHERE name = 'i18ntaxonomy' AND type = 'module'");
+  // Set module weight for it to run after core modules, but before views.
+  db_query("UPDATE {system} SET weight = 5 WHERE name = 'i18ntaxonomy' AND type = 'module'");
 }
 
 /**
@@ -82,5 +82,14 @@ function i18ntaxonomy_update_1() {
   variable_set('i18ntaxonomy_vocabulary', $options);
   drupal_set_message(t('The multilingual vocabulary settings have been updated. Please review them in the <a href="@taxonomy_admin page">taxonomy administration</a>.', array('@taxonomy_admin' => url('admin/content/taxonomy'))));
   // @ TODO Update strings in localization tables.
+  return $items;
+}
+
+/**
+ * Set module weight for it to run after core modules, but before views.
+ */
+function i18ntaxonomy_update_6002() {
+  $items = array();
+  $items[] = update_sql("UPDATE {system} SET weight = 5 WHERE name = 'i18ntaxonomy' AND type = 'module'");
   return $items;
 }

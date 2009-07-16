@@ -1,7 +1,15 @@
-// $Id: CHANGELOG.txt,v 1.15.4.61 2009/05/18 09:29:24 jareyero Exp $
+// $Id: CHANGELOG.txt,v 1.15.4.65 2009/06/22 09:32:03 jareyero Exp $
 
-6.x-1.0 to ........
+6.x-1.0 to 6.x-1.1
 --------------------
+- Fixed pgsql issue in i18nblocks query rewriting, by plj, #383772
+- Changed i18ntaxonomy module weight for it to run before views, by Owen Barton, #386136
+- Inprovements to i18nsync_node_available_fields(): cached, alter hook, ...
+- Fixed node author field in i18nsync (author -> name), by mfb, #399216
+- Fixed synchronization for nodereference fields, by dasjo, #242601
+- Fixed: Unterminated entities in taxonomy module break page validation, by ao2, #478856
+- Fixed multilingual variables issues, by rfay, #451120
+- Fixed i18nstrings, wrong hook_schema_alter() implementation, by rsvelko, #466876
 - Added location to i18nsync fields, by zedzed, #426294
 - Added new dependence (i18ntaxonomy) and some taxonomy handling to i18nviews
 - Fixed missing brackets around table name in query, #371429
