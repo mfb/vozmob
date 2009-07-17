@@ -693,11 +693,11 @@ function ffmpeg_wrapper_file_data($path = null) {
 
     // get audio settings
     // format is: codec, sample rate, stereo/mono, bitrate
-    $pattern = "/Audio: (.*), ([0-9]*) Hz, (stereo|mono)/";
+    $pattern = "/Audio: (.*), ([0-9]*) Hz, (stereo|mono|([0-9]+) channels)/";
     preg_match($pattern, $output, $matches);
     $file['audio']['codec'] = !empty($matches[1]) ? $matches[1] : 'na';
     $file['audio']['ar'] = !empty($matches[2]) ? $matches[2] : 'na';
-    $file['audio']['ac'] = (!empty($matches[3]) && $matches[3] == 'stereo') ? 2 : 1;
+    $file['audio']['ac'] = !empty($matches[4]) ? $matches[4] : (!empty($matches[3]) && $matches[3] == 'stereo' ? 2 : 1);
 
     // take the last match and extract the bit rate if present
     $pattern = "/Audio: .* (.*) kb\/s/";
