@@ -43,7 +43,7 @@
     <div class="media-mover">
       <?php foreach ($node->media_mover as $cid): ?>
         <?php foreach ($cid as $mmfid): ?>
-          <?php if (substr($mmfid['complete_file'], -4, 4) == '.mp3'): ?>
+          <?php if (strtolower(substr($mmfid['complete_file'], -4, 4)) == '.mp3'): ?>
             <?php if (empty($playlist) && empty($node->field_image[0])): ?>
               <?php $playlist[] = base_path() . drupal_get_path('theme', 'blueprint') . '/images/audio_icon_large.gif'; ?>
             <?php endif; ?>
