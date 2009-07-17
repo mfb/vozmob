@@ -1,0 +1,25 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * This module provides support for synchronizing Media Mover items across translations.
+ */
+
+/**
+ * Implementation of hook_nodeapi(), handles syncing process for Media Mover items.
+ */
+function mm_translation_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  if ($op == 'insert') {
+    // Sync media mover items only if they do not already exist.
+    if (!empty($node->translation_source->media_mover) && empty($node->media_mover)) {
+      $node->media_mover = $node->translation_source->media_mover;
+      foreach ($node->media_mover as $cid => $configuration) {
+        foreach ($configuration as $key => $item) {
+          $node->media_mover[$cid][$key]['nid'] = $node->nid;
+          drupal_write_record('media_mover_files', $node->media_mover[$cid][$key]);
+        }
+      }
+    }
+  }
+}

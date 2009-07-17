@@ -1,0 +1,7 @@
+; $Id$
+name = Media Mover Translation
+description = Synchronizes Media Mover items across translations.
+package = Media Mover
+dependencies[] = media_mover_api
+dependencies[] = translation
+core = 6.x
