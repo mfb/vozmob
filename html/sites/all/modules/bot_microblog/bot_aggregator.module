@@ -184,7 +184,7 @@ function bot_aggregator_get_channels() {
  * Implementation of hook_form_FORM_ID_alter().
  */
 function bot_aggregator_form_aggregator_form_feed_alter(&$form, &$form_state) {
-  $form['refresh']['#options'][0] = t('0 sec');
+  $form['refresh']['#options'][30] = format_interval(30);
 }
 
 /**
