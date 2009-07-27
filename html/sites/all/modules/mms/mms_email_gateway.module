@@ -6,6 +6,7 @@
  */
 function mms_email_gateway_get_map() {
   return array(
+    'comcel.com.co' => 'mms.comcel.net',
     'messaging.sprintpcs.com' => 'pm.sprint.com',
     'page.nextel.com' => 'messaging.nextel.com',
     'sms.tigo.com.co' => 'mms.tigo.com.co',
