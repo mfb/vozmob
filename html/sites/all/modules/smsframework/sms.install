@@ -42,8 +42,14 @@ function sms_update_1() {
  */
 function sms_update_2() {
   $ret = array();
-  $table = drupal_get_schema_unprocessed('sms', 'sms_carriers');
-  db_create_table($ret, 'sms_carriers', $table);
+  $schema = array(
+    'fields' => array(
+      'name'    => array('type' => 'varchar', 'not null' => TRUE, 'length' => 64),
+      'domain'  => array('type' => 'varchar', 'not null' => TRUE, 'length' => 128),
+    ),
+    'primary key' => array('domain'),
+  );
+  db_create_table($ret, 'sms_carriers', $schema);
   return $ret;
 }
 
