@@ -1,0 +1,5 @@
+; $Id$
+name = VozMob utilities
+description = Various utilities only for developers, not for production sites.
+package = Development
+core = 6.x

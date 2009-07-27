@@ -1,0 +1,24 @@
+<?php
+// $Id$
+
+/**
+ * Assign a path under admin/build.
+ */
+function vozmob_util_menu($may_cache) {
+  $items['admin/build/truncate'] = array(
+    'access arguments' => array('delete all site data'),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('vozmob_util_truncate_form'),
+    'title' => 'Truncate site',
+    'description' => t('Bulk delete site data.'),
+    'file' => 'vozmob_util.inc',
+  );
+  return $items;
+}
+
+/**
+ * Give other users access to the truncate page.
+ */
+function vozmob_util_perm() {
+  return array('delete all site data');
+}
