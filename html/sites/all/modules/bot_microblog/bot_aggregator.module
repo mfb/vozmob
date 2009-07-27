@@ -76,6 +76,7 @@ function bot_aggregator_irc_msg_channel($data, $from_query = FALSE) {
         else {
           if (!$feed = db_fetch_array(db_query("SELECT * from {aggregator_feed} WHERE url = '%s'", $matches[1]))) {
             $feed['url'] = $matches[1];
+            $feed['refresh'] = $speed[$matches[3]];
             drupal_write_record('aggregator_feed', $feed);
           }
           variable_set('bot_aggregator_channel_' . $feed['fid'], $matches[2]);
@@ -184,7 +185,7 @@ function bot_aggregator_get_channels() {
  * Implementation of hook_form_FORM_ID_alter().
  */
 function bot_aggregator_form_aggregator_form_feed_alter(&$form, &$form_state) {
-  $form['refresh']['#options'][30] = format_interval(30);
+  $form['refresh']['#options'] = drupal_map_assoc(array(15, 60, 300), 'format_interval') + $form['refresh']['#options'];
 }
 
 /**
