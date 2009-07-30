@@ -118,7 +118,7 @@ watchdog('debug',print_r($mailbox, TRUE));
         $password = user_password(8);
         $user = user_save($account, array('name' => $username, 'pass' => $password));
         if ($user) {
-          $message = variable_get('sms_registration_message_welcome_blog','Welcome, !name. Your blog was created. Your password is !pass');//  array('!name' => $username, '!pass' => $password);
+          $message = t(variable_get('sms_registration_message_welcome_blog','Welcome, !name. Your blog was created. Your password is !pass'),  array('!name' => $username, '!pass' => $password));
         }
         else {
           $message = variable_get('sms_registration_message_blog_not_created','The blog was not created. Please choose another name.');
