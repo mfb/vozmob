@@ -1,5 +1,5 @@
 <?php
-// $Id: i18ncontent.module,v 1.1.2.14 2009/04/27 16:50:49 jareyero Exp $
+// $Id: i18ncontent.module,v 1.1.2.15 2009/08/29 21:08:24 hass Exp $
 
 /**
  * @file
@@ -84,8 +84,8 @@ function i18ncontent_form_alter(&$form, $form_state, $form_id) {
       if ($type) {
         $form['submission']['help']['#default_value'] = i18nstrings_ts("nodetype:type:$type:help", $form['submission']['help']['#default_value'], $language);
       }
-      break; 
-    
+      break;
+
     case 'search_form':
       // Advanced search form. Add language and localize content type names
       if ($form['module']['#value'] == 'node' && !empty($form['advanced'])){
@@ -172,7 +172,7 @@ function i18ncontent_menu_alter(&$menu) {
 function i18ncontent_node_add_page() {
   $item = menu_get_item();
   $content = system_admin_menu_block($item);
- 
+
   // The node type isn't available in the menu path, but 'title' is equivalent
   // to the human readable name, so check this against node_get_types() to get
   // the correct values. First we build an array of node types indexed by names
@@ -189,7 +189,7 @@ function i18ncontent_node_add_page() {
 
 /**
  * Replacement for node_add
- * 
+ *
  * This just calls node_add() and switches title. This has to be done here to work always
  */
 function i18ncontent_node_add($type) {
@@ -206,5 +206,5 @@ function i18ncontent_node_add($type) {
     $output = drupal_get_form($type .'_node_form', $node);
   }
 
-  return $output;  
+  return $output;
 }

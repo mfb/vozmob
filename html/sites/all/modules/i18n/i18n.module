@@ -1,5 +1,5 @@
 <?php
-// $Id: i18n.module,v 1.41.2.35 2009/07/05 14:43:41 jareyero Exp $
+// $Id: i18n.module,v 1.41.2.38 2009/08/29 21:08:24 hass Exp $
 
 /**
  * @file
@@ -85,7 +85,7 @@ function i18n_menu() {
     'file' => 'i18n.admin.inc',
     'type' => MENU_LOCAL_TASK,
     'weight' => 10,
-  );  
+  );
   $items['admin/settings/language/i18n/configure'] = array(
     'title' => 'Multilingual system',
     'description' => 'Configure extended options for multilingual content and translations.',
@@ -301,7 +301,7 @@ function i18n_textfield_process($element) {
     if ($node_edit || $node_translate) {
       $node_language = $node_edit ? $node->language : $_GET['language'];
       // Only needed if the node language is different from the interface one.
-      if ($node->language != $language->language) {
+      if ($node_language != $language->language) {
         $languages = language_list();
         if (isset($languages[$node_language])) {
           drupal_add_js(drupal_get_path('module', 'i18n') . '/i18n.js');
@@ -359,7 +359,7 @@ function i18n_node_get_lang($nid, $default = '') {
 function i18n_node_language_list($node, $translate = FALSE) {
   // Check if the node module manages its own language list.
   $languages = node_invoke($node, 'language_list', $translate);
-  
+
   if (!$languages) {
     if (variable_get('i18n_node_'. $node->type, 0) >= LANGUAGE_SUPPORT_EXTENDED) {
       $languages = locale_language_list('name', TRUE); // All defined languages
@@ -380,7 +380,7 @@ function i18n_node_language_list($node, $translate = FALSE) {
     // Check language required for this type (no language neutral)
     elseif (!variable_get('i18n_required_node_' . $node->type, 0)) {
       $languages = array('' => t('Language neutral')) + $languages;
-    }    
+    }
   }
 
   return $languages;
@@ -571,7 +571,7 @@ function i18n_form_alter(&$form, $form_state, $form_id) {
       );
       // Add disabled message
       if ($disabled) {
-        $form['i18n']['#description'] .= ' <em>' . t('These will be available only when you enable Multilingual support in Workflow settings above.') . '</em>'; 
+        $form['i18n']['#description'] .= ' <em>' . t('These will be available only when you enable Multilingual support in Workflow settings above.') . '</em>';
       }
       // Some settings about node languages
       $form['i18n']['options'] = array(
@@ -729,7 +729,7 @@ function i18n_variable_init($langcode = NULL, $prefix = '') {
     }
     $variables = _i18n_variable_init($langcode, $prefix);
     foreach ($i18n_variables as $name) {
-      $i18n_conf[$name] = isset($variables[$name]) ? $variables[$name] : (isset($conf[$name]) ? $conf[$name] : '');
+      $i18n_conf[$name] = isset($variables[$name]) ? $variables[$name] : (isset($conf[$name]) ? $conf[$name] : NULL);
     }
 
     $conf = array_merge($conf, $i18n_conf);

@@ -1,5 +1,5 @@
 <?php
-// $Id: i18nblocks.install,v 1.5.2.9 2009/06/25 23:08:20 hass Exp $
+// $Id: i18nblocks.install,v 1.5.2.10 2009/08/13 20:11:41 hass Exp $
 
 /**
  * @file
@@ -87,7 +87,7 @@ function i18nblocks_update_1() {
   if ($number = variable_get('i18nblocks_number', 0)) {
     for ($delta = 1; $delta <= $number; $delta++) {
       if ($block = variable_get('i18nblocks_'. $delta, NULL)) {
-        $update = update_sql("INSERT INTO {i18n_blocks}(delta) VALUES('". db_escape_string($delta) ."')");
+        $update = update_sql("INSERT INTO {i18n_blocks} (delta) VALUES('". db_escape_string($delta) ."')");
         $ret[] = $update;
         $metablock = array();
         if ($update['success']) {
