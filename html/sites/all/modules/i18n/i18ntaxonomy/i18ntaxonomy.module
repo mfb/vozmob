@@ -484,6 +484,7 @@ function i18ntaxonomy_node_form(&$form) {
         if (i18ntaxonomy_vocabulary($vid) == I18N_TAXONOMY_LOCALIZE) {
           $form['taxonomy']['tags'][$vid]['#description'] .= ' '. t('This is a localizable vocabulary, so only terms in %language are allowed here.', array('%language' => language_default('name')));
         }
+        $form['taxonomy']['tags'][$vid]['#title'] = tt("taxonomy:vocabulary:$vid:name", $form['taxonomy']['tags'][$vid]['#title']);
       }
     }
     elseif (is_numeric($vid) && i18ntaxonomy_vocabulary($vid) == I18N_TAXONOMY_LOCALIZE) {
