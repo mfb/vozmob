@@ -1,5 +1,5 @@
 <?php
-// $Id: user.module,v 1.892.2.14 2009/07/01 20:51:56 goba Exp $
+// $Id: user.module,v 1.892.2.17 2009/09/14 11:56:15 goba Exp $
 
 /**
  * @file
@@ -487,7 +487,7 @@ function user_access($string, $account = NULL, $reset = FALSE) {
     $perm = array();
   }
 
-  if (is_null($account)) {
+  if (!isset($account)) {
     $account = $user;
   }
 
@@ -618,7 +618,7 @@ function user_user($type, &$edit, &$account, $category = NULL) {
       '#weight' => 5,
       '#title' => t('History'),
     );
-    $account->content['summary']['member_for'] =  array(
+    $account->content['summary']['member_for'] = array(
       '#type' => 'user_profile_item',
       '#title' => t('Member for'),
       '#value' => format_interval(time() - $account->created),
@@ -2401,7 +2401,11 @@ function user_register() {
 
   // Display the registration form.
   if (!$admin) {
-    $form['user_registration_help'] = array('#value' => filter_xss_admin(variable_get('user_registration_help', '')));
+    $form['user_registration_help'] = array(
+      '#value' => filter_xss_admin(variable_get('user_registration_help', '')),
+      // Ensure that user registration help appears above profile fields.
+      '#weight' => -20,
+    );
   }
 
   // Merge in the default user edit fields.
