@@ -1,5 +1,5 @@
 <?php
-// $Id: system.module,v 1.585.2.41 2009/09/15 10:50:31 goba Exp $
+// $Id: system.module,v 1.585.2.45 2009/09/16 19:47:20 goba Exp $
 
 /**
  * @file
@@ -9,7 +9,7 @@
 /**
  * The current system version.
  */
-define('VERSION', '6.14-dev');
+define('VERSION', '6.15-dev');
 
 /**
  * Core API compatibility.
@@ -81,6 +81,7 @@ function system_help($path, $arg) {
       $output .= '<p>'. t('It is important that <a href="@update-php">update.php</a> is run every time a module is updated to a newer version.', array('@update-php' => $base_url .'/update.php')) .'</p>';
       $output .= '<p>'. t('You can find all administration tasks belonging to a particular module on the <a href="@by-module">administration by module page</a>.', array('@by-module' => url('admin/by-module'))) .'</p>';
       $output .= '<p>'. t('To extend the functionality of your site, a number of <a href="@modules">contributed modules</a> are available.', array('@modules' => 'http://drupal.org/project/modules')) .'</p>';
+      $output .= '<p>'. t('To clear all caches, click the button on the <a href="@performance">Performance page</a>.', array('@performance' => url('admin/settings/performance', array('fragment' => 'edit-clear')))) .'</p>';
       return $output;
     case 'admin/build/modules/uninstall':
       return '<p>'. t('The uninstall process removes all data related to a module. To uninstall a module, you must first disable it. Not all modules support this feature.') .'</p>';
@@ -1892,7 +1893,7 @@ function system_goto_action($object, $context) {
  */
 function _system_zonelist() {
   $timestamp = time();
-  $zonelist = array(-11, -10, -9.5, -9, -8, -7, -6, -5, -4.5, -4, -3.5, -3, -2, -1, 0, 1, 2, 3, 3.5, 4, 5, 5.5, 5.75, 6, 6.5, 7, 8, 9, 9.5, 10, 10.5, 11, 11.5, 12, 12.75, 13, 14);
+  $zonelist = array(-11, -10, -9.5, -9, -8, -7, -6, -5, -4.5, -4, -3.5, -3, -2.5, -2, -1, 0, 1, 2, 3, 3.5, 4, 5, 5.5, 5.75, 6, 6.5, 7, 8, 9, 9.5, 10, 10.5, 11, 11.5, 12, 12.75, 13, 14);
   $zones = array();
   foreach ($zonelist as $offset) {
     $zone = $offset * 3600;
