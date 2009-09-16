@@ -168,41 +168,44 @@ function notifications_views_views_data() {
 
   $data['notifications']['send_method'] = array(
     'title' => t('Send method'),
-    'help' => t('Filter to subscriptions with this send method.'),
+    'help' => t('Subscription send method.'),
     'field' => array(
       'handler' => 'views_handler_field',
     ),
     'filter' => array(
       'title' => t('Method'),
-      'handler' => 'views_handler_filter_subscription_send_method',
+      'handler' => 'notifications_views_handler_filter_subscription_send_method',
     ),
   );
   $data['notifications']['type'] = array(
     'title' => t('Type'),
-    'help' => t('Filter to subscriptions of this type.'),
+    'help' => t('Subscription type.'),
     'field' => array(
       'handler' => 'views_handler_field',
     ),
     'filter' => array(
       'title' => t('Type'),
-      'handler' => 'views_handler_filter_subscription_type',
+      'handler' => 'notifications_views_handler_filter_subscription_type',
     ),
     'argument' => array(
-      'handler' => 'views_handler_argument_user_uid',
-      'parent' => 'views_handler_argument_numeric', // make sure parent is included
-      // 'name field' => 'title', // the field to display in the summary.
-      'numeric' => TRUE,
+      'handler' => 'views_handler_argument_string',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
     ),
   );
   $data['notifications']['send_interval'] = array(
     'title' => t('Send Interval'),
-    'help' => t('Filter to subscriptions on this interval.'),
+    'help' => t('Subscription send interval.'),
     'field' => array(
-      'handler' => 'views_handler_field_subscription_interval',
+      'handler' => 'notifications_views_handler_field_subscription_interval',
     ),
     'filter' => array(
       'title' => t('Send Interval'),
-      'handler' => 'views_handler_filter_subscription_interval',
+      'handler' => 'notifications_views_handler_filter_subscription_interval',
+    ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
     ),
   );
 
@@ -254,7 +257,7 @@ function notifications_views_views_data() {
     'relationship' => array(
       'base' => 'node',
       'real field' => 'value',
-      'handler' => 'views_handler_relationship_notifications',
+      'handler' => 'notifications_views_handler_relationship',
       'label' => t('Thread'),
       'extra' => array(
         array('field' => 'field', 'value' => 'nid', 'table' => 'notifications_fields'),
@@ -281,7 +284,7 @@ function notifications_views_views_data() {
     'relationship' => array(
       'base' => 'users',
       'real field' => 'value',
-      'handler' => 'views_handler_relationship_notifications',
+      'handler' => 'notifications_views_handler_relationship',
       'label' => t('Author'),
       'extra' => array(
         array('field' => 'field', 'value' => 'author', 'table' => 'notifications_fields'),
@@ -301,18 +304,18 @@ function notifications_views_views_handlers() {
     ),
     'handlers' => array(
       // filter handlers
-      'views_handler_filter_subscription_send_method' => array(
+      'notifications_views_handler_filter_subscription_send_method' => array(
         'parent' => 'views_handler_filter_in_operator',
       ),
-      'views_handler_filter_subscription_type' => array(
+      'notifications_views_handler_filter_subscription_type' => array(
         'parent' => 'views_handler_filter_in_operator',
       ),
-      'views_handler_filter_subscription_interval' => array(
+      'notifications_views_handler_filter_subscription_interval' => array(
         'parent' => 'views_handler_filter_in_operator',
       ),
 
       // arguments
-      'views_handler_argument_subscription_type' => array(
+      'notifications_views_handler_argument_subscription_type' => array(
         'parent' => 'views_handler_argument',
       ),
 
@@ -323,15 +326,15 @@ function notifications_views_views_handlers() {
       'notifications_views_handler_field_delete_link' => array(
         'parent' => 'views_handler_field',
       ),
-      'views_handler_field_subscription_type' => array(
+      'notifications_views_handler_field_subscription_type' => array(
         'parent' => 'views_handler_field',
       ),
-      'views_handler_field_subscription_interval' => array(
+      'notifications_views_handler_field_subscription_interval' => array(
         'parent' => 'views_handler_field',
       ),
       
       // relationships
-      'views_handler_relationship_notifications' => array(
+      'notifications_views_handler_relationship' => array(
         'parent' => 'views_handler_relationship',
       ),
     ),

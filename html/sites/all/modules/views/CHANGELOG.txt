@@ -1,23 +1,45 @@
 CHANGELOG for Views 2 for Drupal 6
+
+Views 2.x-dev
   Bug fixes:
     o Table style when not overriding sorts put sorts in wrong order.
     o #488908 by sl27257: "Node: Has new content" only worked when exposed.
-	o #451110 by wonder95: Fixed missing word in transform case help text.
-	o #385904 by JirkaRybka: Prevent duplication of id edit-submit on views exposed form.
-	o #489888 by TheRec: Remove erroneous "alt" attribute from <a> when using link rewriting.
-	o #499078 by Darren Oh: Make sure theme is initialized for pre_render hook.
-	o #490516 by v_20q: Some fields not properly being marked as translatable due to option unpacking bug.
-	o #484222 by dereine: Attachment displays were ignoring access settings.
-	o #503098 by Davide Goode: Feed displays should have link displays since they link to a page display.
-	o #381346 by ayalon: Allow Taxonomy: Tid as a field, which is now needed for rewrites which may need tids.
-	o #485296 by overall and deekayen: Remove unnecessary t() call.
-	o #460838 by Darren Oh: Make DISTINCT more distinct.
-	o #503774 by dereine: Cache time failed to return the proper cutoff time.
+    o #451110 by wonder95: Fixed missing word in transform case help text.
+    o #385904 by JirkaRybka: Prevent duplication of id edit-submit on views exposed form.
+    o #489888 by TheRec: Remove erroneous "alt" attribute from <a> when using link rewriting.
+    o #499078 by Darren Oh: Make sure theme is initialized for pre_render hook.
+    o #490516 by v_20q: Some fields not properly being marked as translatable due to option unpacking bug.
+    o #484222 by dereine: Attachment displays were ignoring access settings.
+    o #503098 by Davide Goode: Feed displays should have link displays since they link to a page display.
+    o #381346 by ayalon: Allow Taxonomy: Tid as a field, which is now needed for rewrites which may need tids.
+    o #485296 by overall and deekayen: Remove unnecessary t() call.
+    o #460838 by Darren Oh: Make DISTINCT more distinct.
+    o #503774 by dereine: Cache time failed to return the proper cutoff time.
     o #506098: Table sorting with no default was overriding sorts even tho it was not supposed to.
-	o #407538: Ensure views_break_phrase() will stop providing warnings on empty strings.
-	o #420850 by dereine: Commas should not be used to separate items in a profile list field.
-	o #482162 by agentrickard: link path needed further sanitization to properly encode special characters.
-	o Tables would not accept 0 as having data so columns with zeroes would lose data when merging with other columns.
+    o #407538: Ensure views_break_phrase() will stop providing warnings on empty strings.
+    o #420850 by dereine: Commas should not be used to separate items in a profile list field.
+    o #482162 by agentrickard: link path needed further sanitization to properly encode special characters.
+    o Tables would not accept 0 as having data so columns with zeroes would lose data when merging with other columns.
+    o #529164: Fatal typo in profile list field.
+    o #537870 by dww: Fixed a bug in the [uplodate_fid-size] token where format_size() was called on it twice.
+    o #510910 by mfb: Fixed bug where multiple fields sharing a column in a table was broken so only the final field would display.
+    o #546586 by dww: Fixed bugs that prevented '0' being a valid rewrite text or empty text for a view field. Also fixes a logic bug regarding the handling of the 'Count the number 0 as empty' setting.
+    o #507884 by TheRec: Removed matching title (alt) attribute on node links.\
+    o #333439 by killes: Fix query for multiply inherited taxonomy terms with taxonomy filter.
+    o #468370 by emackn: Proper timezone support on postgres.
+    o #508124 by voxpelli: Optionally allow boolean to treat NULL as FALSE.
+    o #487528 by dereine: Fix typo in 'Maximum length' field instructions.
+    o #303800 by Justin W Freeman: Improve dashes to spaces transformation.
+    o #538530 by elcuco: Views export textareas should be LTR.
+    o #538204 by dereine: User picture should be sortable.
+    o #540122 by stella: Attachment displays should attach even if arguments caused the primary display to abort.
+    o #544098 by joachim: Fix validation quirks with defaulted handlers.
+    o #485872 by dereine: Make sure views.css is always loaded for all users.
+    o #442982 by killes: Make destroy() method more robust so that views are more readily reused.
+    o #520558 by bdurbin: node access filter not properly checking 'view'.
+    o #535424 by Hugo Wetterberg: Download file link could provide empty a tag if no file is available.
+    o #554000 by killes: Preview checking wrong flag for preview state causes feeds to display incorrectly when embedded.
+    o #554016 by webchick: views_embed_view() should check view access.
 
   Other changes:
     o Implement a post_render hook (for themes too) and cache method.
@@ -29,6 +51,15 @@ CHANGELOG for Views 2 for Drupal 6
 	o #472194: !1 can now be used with field rewriting to get the raw argument.
 	o #480162: Fields row style now contains option to hide empty fields.
 	o #433318: Special handling for empty fields, allowing them to avoid rewriting and not be displayed.
+    o #354457 by ausvalue: Example integrating node_example.module with Views API.
+    o #479728 by enboig: Allow "Does not start with" and "Does not end with" as string operators.
+    o #511468 by dereine: State which view was saved after saving a view.
+    o #520632 by DamZ: Add comment hostname and mail to available comment fields.
+    o #523580 by JirkaRybka: More documentation on Reduce Duplicates option.
+    o #510920 by apanag: Add set_current_page() method to view class.
+    o #337741 by joachim: Allow profile fields to have "link to user" option.
+    o #534680 by dagmar: Visual indicator if checkbox will expand options.
+    o #512650 by sdboyer: Multiple many to one arguments on the same relationship were not relationship safe.
 
 Views 2.6
   Bugs fixed:

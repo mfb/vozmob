@@ -1,5 +1,5 @@
 <?php
-// $Id: query.inc,v 1.47 2009/06/30 19:28:44 merlinofchaos Exp $
+// $Id: query.inc,v 1.48 2009/09/15 19:29:12 merlinofchaos Exp $
 /**
  * @file query.inc
  * Defines the query object which is the underlying layer in a View.
@@ -199,6 +199,11 @@ class views_query {
     $count = 1;
     while (!empty($this->relationships[$alias])) {
       $alias = $alias_base . '_' . $count++;
+    }
+
+    // Make sure this join is adjusted for our relationship.
+    if ($link_point && isset($this->relationships[$link_point])) {
+      $join = $this->adjust_join($join, $link_point);
     }
 
     // Add the table directly to the queue to avoid accidentally marking

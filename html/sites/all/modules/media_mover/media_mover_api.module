@@ -1,6 +1,6 @@
 <?php
 
-/* $Id: media_mover_api.module,v 1.1.2.110.2.58 2009/06/29 02:46:14 arthuregg Exp $ */
+/* $Id: media_mover_api.module,v 1.1.2.110.2.60 2009/09/15 05:07:53 arthuregg Exp $ */
 
 
 /*
@@ -1153,12 +1153,10 @@ function media_mover_api_fetch_files($cid){
  * @param $cid is a configuration id
  */
 function media_mover_api_config_delete_files($cid){
-  // get config
-  $config = media_mover_api_get_configuration($cid);
   // get all the files
-  $items = media_mover_api_fetch_files($cid);
-  foreach ($items as $item) {
-    media_mover_api_file_delete_call($item);
+  $files = media_mover_api_fetch_files($cid);
+  foreach ($files as $file) {
+    media_mover_api_file_delete_call($file);
   }
 }
 
@@ -3024,7 +3022,8 @@ function media_mover_api_node_update($node) {
 function media_mover_api_file_delete_call($file) {
   // load up the configuration for this file
   $configuration = media_mover_api_get_configuration($file['cid']);
-  // call the modules that made it
+
+  // call the modules that added files to this
   foreach (media_mover_api_verbs() as $verb) {
     module_invoke($configuration->{$verb}->module, 'media_mover', 'delete', $configuration->{$verb}->action, $configuration->{$verb}->configuration, $file, $configuration);
   }
@@ -3036,29 +3035,16 @@ function media_mover_api_file_delete_call($file) {
 
   // now check if there are any files in the item left to delete
   // note: NEVER delete harvest file because that may not belong to us.
-  $delete_items = array('process_file', 'harvest_file', 'complete_file');
-  $display_files = array();
+  $delete_items = array('process_file', 'storage_file', 'complete_file');
   foreach($delete_items as $delete_item) {
-    if (! $delete_item == $file['harvest_file']) {
-      // keep a record of what has been deleted
-      $display_files[] = str_replace('_', ' ', $delete_item) .': '.$file[$delete_item];
-      print $file[$delete_item] ."\n";
-      file_delete($file[$delete_item]);
-    }
+    file_delete($file[$delete_item]);
   }
 
   // remove the file from the database
   db_query('DELETE FROM {media_mover_files} WHERE mmfid = %d', $file['mmfid']);
 
-  if (user_access('see media mover alerts')) {
-    $display_files = array();
-    drupal_set_message(t('Deleted file id: %file_id', array('%file_id' => $file['mmfid'])));
-    if (count($display_files)) {
-      drupal_set_message(t('Removed files: %files', array('%files' => implode(', ', $display_files))));
-    }
-  }
   $replacements = array('%file' => basename($file['complete_file']));
-  watchdog('Media Mover', 'Deleted converted file: %file', $replacements);
+  watchdog('Media Mover', 'Deleted converted file: %file', $replacements, WATCHDOG_INFO);
 }
 
 

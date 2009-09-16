@@ -1,5 +1,5 @@
 <?php
-// $Id: og_notifications.module,v 1.24.4.16 2009/06/10 16:13:12 weitzman Exp $
+// $Id: og_notifications.module,v 1.24.4.23 2009/08/19 07:48:22 karthik Exp $
 
 /**
  * @file
@@ -18,6 +18,25 @@ function og_notifications_help($path, $arg) {
     case 'user/%/notifications/group':
       return t('Customize notifications for each of your groups and each of their content types along with their frequency and delivery method.');
   }
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+function og_notifications_menu() {
+  $items = array();
+  $items['user/%user/notifications/group'] = array(
+    'title' => 'Group',
+    'page callback' => 'og_notifications_user_page',
+    'page arguments' => array(1),
+    'access callback' => 'notifications_content_access',
+    'access arguments' => array(1, 'subscribe to content in groups'),
+    'type' => MENU_LOCAL_TASK,
+    'weight' => 10,
+    'file' => 'og_notifications.pages.inc'
+  );
+
+  return $items;
 }
 
 /**
@@ -89,13 +108,14 @@ function og_notifications_form_alter(&$form, $form_state, $form_id) {
       // form.
       // user_profile_form is, oddly enough, also the form_id for forms in other
       // sub-tabs such as those added by the profile module.
-      if (!arg(3)) {
+      if ($form['_category']['#value'] == 'account') {
         $account = $form['_account']['#value'];
         $form['messaging']['og_notifications_autosubscribe'] = array(
           '#type' => 'checkbox',
           '#title' => t('Automatically enable notifications for any groups that I join.'),
           '#description' => t('Group notifications can also be <a href="!manage-url">customized</a> in greater detail if required.', array('!manage-url' => url('user/'. $account->uid .'/notifications/group'))),
-          '#default_value' => og_notifications_user_autosubscribe_get($account->uid)
+          '#default_value' => og_notifications_user_autosubscribe_get($account->uid),
+          '#access' => notifications_content_access($account, 'subscribe to content in groups'),
         );
       }
       break;
@@ -302,6 +322,7 @@ function og_notifications_notifications($op, &$arg0, $arg1 = NULL, $arg2 = NULL)
         'title' => t('Content type in group'),
         'access' => 'subscribe to content in groups',
         'page callback' => 'og_notifications_user_page',
+        'user page' => 'user/%user/notifications/group',
         'fields' => array('group', 'type'),
         'description' => t('Subscribe to specific content within a group.')
       );
@@ -497,7 +518,7 @@ function _og_notifications_node_options($account, $node) {
   if (isset($node->og_groups)) {
     foreach ($node->og_groups as $index => $gid) {
       // Only members get to see subscription options.
-      if (isset($account->og_groups[$gid])) {
+      if (isset($account->og_groups[$gid]) && in_array($node->type, array_filter(variable_get('og_notifications_content_types', array())))) {
         // Content type
         $options[] = array(
           'name' => t('%type posts in %group', array('%group' => $node->og_groups_both[$gid], '%type' => node_get_types('name', $node->type))),
@@ -539,7 +560,7 @@ function _og_notification_check_message($message) {
 // TODO: Use constants instead of integers.
 function og_notifications_autosubscribe_map() {
   return array(
-    -1 => t('Site default'), 
+    -1 => t('Site default'),
     0 => t('Disabled'),
     1 => t('Enabled'),
   );

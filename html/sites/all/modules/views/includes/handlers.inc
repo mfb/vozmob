@@ -1,5 +1,5 @@
 <?php
-// $Id: handlers.inc,v 1.116 2009/07/01 16:11:35 merlinofchaos Exp $
+// $Id: handlers.inc,v 1.119 2009/09/15 19:29:12 merlinofchaos Exp $
 /**
  * @file handlers.inc
  * Defines the various handler objects to help build and display views.
@@ -519,7 +519,7 @@ class views_many_to_one_helper {
     $form['reduce_duplicates'] = array(
       '#type' => 'checkbox',
       '#title' => t('Reduce duplicates'),
-      '#description' => t('This filter can cause items that have more than one of the selected options to appear as duplicate results. If this filter causes duplicate results to occur, this checkbox can reduce those duplicates; however, the more terms it has to search for, the less performant the query will be, so use this with caution.'),
+      '#description' => t('This filter can cause items that have more than one of the selected options to appear as duplicate results. If this filter causes duplicate results to occur, this checkbox can reduce those duplicates; however, the more terms it has to search for, the less performant the query will be, so use this with caution. Shouldn\'t be set on single-value fields, as it may cause values to disappear from display, if used on an incompatible field.'),
       '#default_value' => !empty($this->handler->options['reduce_duplicates']),
     );
   }
@@ -572,10 +572,9 @@ class views_many_to_one_helper {
     while ($r_join->left_table != $base_table) {
       $r_join = views_get_table_join($r_join->left_table, $base_table);
     }
-
     // If we found that there are tables in between, add the relationship.
     if ($r_join->table != $join->table) {
-      $relationship = $this->handler->query->add_relationship($this->handler->table, $r_join, $r_join->table, $this->handler->relationship);
+      $relationship = $this->handler->query->add_relationship($this->handler->table . '_' . $r_join->table, $r_join, $r_join->table, $this->handler->relationship);
     }
 
     // And now add our table, using the new relationship if one was used.
@@ -842,12 +841,17 @@ function views_get_timezone() {
   }
 
   // set up the database timezone
-  if (in_array($GLOBALS['db_type'], array('mysql', 'mysqli'))) {
+  if (in_array($GLOBALS['db_type'], array('mysql', 'mysqli', 'pgsql'))) {
+    $offset = '+00:00';
     static $already_set = false;
     if (!$already_set) {
-      if ($GLOBALS['db_type'] == 'mysqli' || version_compare(mysql_get_server_info(), '4.1.3', '>=')) {
-        db_query("SET @@session.time_zone = '+00:00'");
+      if ($GLOBALS['db_type'] == 'pgsql') {
+        db_query("SET TIME ZONE INTERVAL '$offset' HOUR TO MINUTE");
       }
+      elseif ($GLOBALS['db_type'] == 'mysqli' || version_compare(mysql_get_server_info(), '4.1.3', '>=')) {
+        db_query("SET @@session.time_zone = '$offset'");
+      }
+
       $already_set = true;
     }
   }
@@ -861,7 +865,7 @@ function views_get_timezone() {
  * @param $field
  *   The real table and field name, like 'tablename.fieldname'.
  * @param $field_type
- *   The type of date field, 'int' or 'datetime'.
+ *  The type of date field, 'int' or 'datetime'.
  * @param $set_offset
  *   The name of a field that holds the timezone offset or a fixed timezone
  *   offset value. If not provided, the normal Drupal timezone handling

@@ -1,5 +1,5 @@
 <?php
-// $Id: notifications_content.module,v 1.4.2.9.2.36.2.10 2009/06/11 16:28:03 jareyero Exp $
+// $Id: notifications_content.module,v 1.4.2.9.2.36.2.12 2009/08/11 14:32:24 davidg Exp $
 /**
  * @file
  * Subscriptions to content events
@@ -260,7 +260,7 @@ function notifications_content_notifications($op, &$arg0, $arg1 = NULL, $arg2 = 
         'field' => 'author',
         'type' => 'int',
         'autocomplete path' => 'user/autocomplete',
-        'autocomplete callback' => 'notifications_content_author_name',
+        'autocomplete callback' => 'notifications_content_author_name_callback',
         'format callback' => 'notifications_content_author_name',
         'value callback' => 'notifications_content_author_uid',
       );
@@ -268,7 +268,7 @@ function notifications_content_notifications($op, &$arg0, $arg1 = NULL, $arg2 = 
         'name' => t('Node type'),
         'field' => 'type',
         'type' => 'string',
-        'options callback' => 'notifications_content_types',
+        'options callback' => 'notifications_content_types_callback',
       );
       return $fields;
 
@@ -373,20 +373,32 @@ function notifications_content_notifications($op, &$arg0, $arg1 = NULL, $arg2 = 
         $access = TRUE;
         if (!empty($object->fields['nid'])) {
           if ($node = node_load($object->fields['nid'])) {
-            $access =  notifications_content_node_allow($account, $node);
+            $access =  notifications_content_node_allow($account, $node) && notifications_content_type_enabled($node->type, $object->type);
           }
           else {
             $access = FALSE;
           }
         }
         if (!empty($object->fields['type'])) {
-          $access = $access && array_key_exists($object->fields['type'], notifications_content_types());
+          $access = $access && notifications_content_type_enabled($object->fields['type'], $object->type);
         } 
       }
       // We return an array that will be merged with the ones from other modules
       return array($access);      
       break;
   }
+}
+
+/**
+ * Wrapper for author autocomplete callback.
+ *
+ * @param $uid
+ *   uid of the author for which to return the name.
+ * @param $subs_type
+ *   Optional type of subscription for which to find allowed content types. Defaults to nodetype, can be any subscription type with event-type=node for which notifications_content handles content type settings.
+ */
+function notifications_content_author_name_callback($uid, $subs_type = '') {
+  return notifications_content_author_name($uid);
 }
 
 /**
@@ -750,10 +762,22 @@ function notifications_content_comment_load($cid) {
 }
 
 /**
+ * Wrapper for options callback based on subscription type.
+ *
+ * @param $subs_type
+ *   Optional type of subscription for which to find allowed content types. Defaults to nodetype, can be any subscription type with event-type=node for which notifications_content handles content type settings.
+ */
+function notifications_content_types_callback($subs_type = 'nodetype') {
+  return notifications_content_types('name', $subs_type);
+}
+
+/**
  * Get content types available for subscriptions to content type
  * 
  * @param $field
  *   Optional field to return as array value. If none it will return the full objects.
+ * @param $subs_type
+ *   Optional type of subscription for which to find allowed content types. Defaults to nodetype, can be any subscription type with event-type=node for which notifications_content handles content type settings.
  */
 function notifications_content_types($field = 'name', $subs_type = 'nodetype') {
   // Get list of available node types, all of them will be allowed by default
@@ -774,8 +798,11 @@ function notifications_content_types($field = 'name', $subs_type = 'nodetype') {
 
 /**
  * Get subscription options for this content type
- * - All enabled options if ($option = NULL)
- * - TRUE / FALSE for a given $option
+ *
+ * @param $type
+ *   Optional content type to return info for, defaults to global notifications defaults.
+ * @param $option
+ *   Optional option to return for the given content type or the defaults, defaults to returning all settings for the type.
  */
 function notifications_content_type_enabled($type = NULL, $option = NULL) {
   $defaults = variable_get('notifications_content_type', array());

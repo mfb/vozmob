@@ -1,5 +1,5 @@
 <?php
-// $Id: print.module,v 1.25.2.73 2009/07/09 12:00:52 jcnventura Exp $
+// $Id: print.module,v 1.25.2.75 2009/08/20 02:19:19 jcnventura Exp $
 
 /**
  * @defgroup print Printer, e-mail and PDF versions
@@ -185,7 +185,7 @@ function print_block($op = 'list', $delta = 0, $edit = array()) {
       case 0:
       $nid = preg_replace('!^node/!', '', $_GET['q']);
       if (is_numeric($nid)) {
-        $node = node_load(array('nid' => $nid));
+        $node = node_load($nid);
       }
       else {
         $node = NULL;
@@ -585,7 +585,7 @@ function theme_print_format_link() {
   $print_html_link_class = variable_get('print_html_link_class', PRINT_HTML_LINK_CLASS_DEFAULT);
   $print_html_new_window = variable_get('print_html_new_window', PRINT_HTML_NEW_WINDOW_DEFAULT);
   $print_html_show_link = variable_get('print_html_show_link', PRINT_HTML_SHOW_LINK_DEFAULT);
-  $print_html_link_text = variable_get('print_html_link_text', t('Printer-friendly version'));
+  $print_html_link_text = filter_xss(variable_get('print_html_link_text', t('Printer-friendly version')));
 
   $img = drupal_get_path('module', 'print') .'/icons/print_icon.gif';
   $title = t('Display a printer-friendly version of this page.');
@@ -711,7 +711,7 @@ function print_link_allowed($args) {
   if (!empty($args['path'])) {
     $nid = preg_replace('!^node/!', '', drupal_get_normal_path($args['path']));
     if (is_numeric($nid)) {
-      $args['node'] = node_load(array('nid' => $nid));
+      $args['node'] = node_load($nid);
     }
   }
   if (!empty($args['node'])) {

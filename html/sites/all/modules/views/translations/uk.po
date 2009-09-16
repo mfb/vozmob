@@ -1,4 +1,4 @@
-# $Id: uk.po,v 1.4 2009/05/25 11:10:06 podarok Exp $
+# $Id: uk.po,v 1.5 2009/09/15 11:36:46 podarok Exp $
 #
 # Ukrainian translation of Drupal (general)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
@@ -157,11 +157,11 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: views uk Ukrainian Translation\n"
-"POT-Creation-Date: 2009-05-25 13:53+0300\n"
-"PO-Revision-Date: 2009-05-25 13:55+0200\n"
+"Project-Id-Version: views \n"
+"POT-Creation-Date: 2009-09-15 14:28+0300\n"
+"PO-Revision-Date: 2009-09-15 14:35+0200\n"
 "Last-Translator: podarok <podarok@ua.fm>\n"
-"Language-Team: uk <podarok@ua.fm>\n"
+"Language-Team: Ukrainian <podarok@ua.fm>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -1452,7 +1452,7 @@ msgstr ""
 
 #: includes/admin.inc:401
 msgid "[@time ms]"
-msgstr ""
+msgstr "[@time мсек]"
 
 #: includes/admin.inc:404
 msgid "Other queries"
@@ -1468,7 +1468,7 @@ msgstr ""
 
 #: includes/admin.inc:417;418;419
 msgid "@time ms"
-msgstr ""
+msgstr "@time мсек"
 
 #: includes/admin.inc:418
 msgid "Query execute time"
@@ -1673,7 +1673,7 @@ msgstr "Створити копію даного вигляду"
 
 #: includes/admin.inc:1023
 msgid "View \"!display\""
-msgstr ""
+msgstr "Вигляд \"!display\""
 
 #: includes/admin.inc:1024
 msgid "Go to the real page for this display"
@@ -1924,7 +1924,7 @@ msgstr ""
 
 #: includes/admin.inc:2756
 msgid "The cache has been cleared."
-msgstr ""
+msgstr "Кеш - очищено!"
 
 #: includes/admin.inc:2922
 msgid "Error: missing @component"
@@ -1937,15 +1937,15 @@ msgstr "Поле"
 
 #: includes/admin.inc:3009
 msgid "Column"
-msgstr ""
+msgstr "Стовпець"
 
 #: includes/admin.inc:3012
 msgid "Sortable"
-msgstr ""
+msgstr "Сортується"
 
 #: includes/admin.inc:3016
 msgid "Default sort"
-msgstr ""
+msgstr "Базове сортування"
 
 #: includes/ajax.inc:82
 msgid "Server reports invalid input error."
@@ -1973,7 +1973,7 @@ msgstr "Дії"
 
 #: includes/convert.inc:33
 msgid "Converted"
-msgstr ""
+msgstr "Конвертовано"
 
 #: includes/convert.inc:68
 msgid "The table below lists Views version 1 views that are stored in the database. You can either convert them to work in Views version 2, or delete them. The views are convertible only if there is no Views 2 view with the same name."
@@ -1981,11 +1981,11 @@ msgstr ""
 
 #: includes/convert.inc:79
 msgid "Unable to find view."
-msgstr ""
+msgstr "Неможливо знайти view"
 
 #: includes/convert.inc:89
 msgid "Unable to convert view."
-msgstr ""
+msgstr "Неможливо перетворити view"
 
 #: includes/convert.inc:107
 msgid "This action cannot be undone."
@@ -2009,7 +2009,7 @@ msgstr ""
 
 #: includes/handlers.inc:521
 msgid "Reduce duplicates"
-msgstr ""
+msgstr "Зменшення дублів"
 
 #: includes/handlers.inc:522
 msgid "This filter can cause items that have more than one of the selected options to appear as duplicate results. If this filter causes duplicate results to occur, this checkbox can reduce those duplicates; however, the more terms it has to search for, the less performant the query will be, so use this with caution."
@@ -2085,7 +2085,7 @@ msgstr ""
 
 #: includes/plugins.inc:154
 msgid "RSS Feed"
-msgstr ""
+msgstr "RSS потік"
 
 #: includes/plugins.inc:155
 msgid "Generates an RSS feed from a view."
@@ -2261,7 +2261,7 @@ msgstr ""
 
 #: modules/aggregator.views.inc:135
 msgid "Aggregator feed"
-msgstr ""
+msgstr "Стрічка збиральника"
 
 #: modules/aggregator.views.inc:147
 msgid "Feed ID"
@@ -2360,7 +2360,7 @@ msgstr ""
 
 #: modules/comment.views.inc:45
 msgid "The title of the comment."
-msgstr ""
+msgstr "Тема коментаря"
 
 #: modules/comment.views.inc:64
 msgid "The text of the comment."
@@ -2484,7 +2484,7 @@ msgstr "Користувач"
 
 #: modules/comment.views.inc:235
 msgid "The User ID of the comment's author."
-msgstr ""
+msgstr "ID користувача-автора коментаря"
 
 #: modules/comment.views.inc:245
 msgid "Parent CID"
@@ -2669,11 +2669,11 @@ msgstr ""
 
 #: modules/node.views.inc:58
 msgid "The node ID of the node."
-msgstr ""
+msgstr "Ідентифікатор матеріалу"
 
 #: modules/node.views.inc:86;418
 msgid "The title of the node."
-msgstr ""
+msgstr "Тема матеріалу"
 
 #: modules/node.views.inc:109
 msgid "The date the node was posted."
@@ -2888,7 +2888,7 @@ msgstr "Профіль"
 
 #: modules/profile.views.inc:100
 msgid "@field-name"
-msgstr ""
+msgstr "@назва поля"
 
 #: modules/profile.views.inc:107
 msgid "Profile textfield"
@@ -3072,7 +3072,7 @@ msgstr ""
 
 #: modules/system.views.inc:107
 msgid "Mime type"
-msgstr ""
+msgstr "MIME Тип"
 
 #: modules/system.views.inc:108
 msgid "The mime type of the file."
@@ -3084,7 +3084,7 @@ msgstr "Розмір"
 
 #: modules/system.views.inc:127
 msgid "The size of the file."
-msgstr ""
+msgstr "Розмір файлу"
 
 #: modules/system.views.inc:142
 msgid "Status"
@@ -3104,11 +3104,11 @@ msgstr ""
 
 #: modules/system.views.inc:204
 msgid "Temporary"
-msgstr "Тимчасово"
+msgstr ""
 
 #: modules/system.views.inc:205
 msgid "Permanent"
-msgstr "Постійно"
+msgstr ""
 
 #: modules/taxonomy.views.inc:24;67;156;174;230;270;307;318
 msgid "Taxonomy"
@@ -3161,7 +3161,7 @@ msgstr ""
 
 #: modules/taxonomy.views.inc:152
 msgid "Term description"
-msgstr ""
+msgstr "Опис терміна"
 
 #: modules/taxonomy.views.inc:153
 msgid "The description associated with a taxonomy term."
@@ -3339,7 +3339,7 @@ msgstr ""
 
 #: modules/user.views.inc:49
 msgid "The user ID"
-msgstr ""
+msgstr "ID користувача"
 
 #: modules/user.views.inc:70
 msgid "Current"
@@ -3391,7 +3391,7 @@ msgstr "Останній вхід"
 
 #: modules/user.views.inc:162
 msgid "The user's last login date."
-msgstr ""
+msgstr "Остання дата входу користувача"
 
 #: modules/user.views.inc:178
 msgid "Whether a user is active or blocked."
@@ -3739,7 +3739,7 @@ msgstr ""
 
 #: modules/taxonomy/views_handler_argument_term_node_tid_depth.inc:31
 msgid "Allow multiple terms per argument"
-msgstr ""
+msgstr "Дозволити багато термінів на аргумент"
 
 #: modules/taxonomy/views_handler_argument_term_node_tid_depth.inc:32
 msgid "If selected, users can enter multiple arguments in the form of 1+2+3. Due to the number of JOINs it would require, AND will be treated as OR with this argument."
@@ -4323,7 +4323,7 @@ msgstr "Повернутись до !info"
 
 #: plugins/views_plugin_display.inc:1097;1124;1153;1182
 msgid "theming information"
-msgstr ""
+msgstr "Інформація для розробки тем"
 
 #: plugins/views_plugin_display.inc:1100
 msgid "This display has no theming information"

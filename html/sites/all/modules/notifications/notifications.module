@@ -1,5 +1,5 @@
 <?php
-// $Id: notifications.module,v 1.6.2.9.2.50.2.10 2009/06/16 15:23:09 jareyero Exp $
+// $Id: notifications.module,v 1.6.2.9.2.50.2.11 2009/08/11 14:32:24 davidg Exp $
 
 /**
  * @file
@@ -1678,25 +1678,33 @@ function notifications_user_form_submit($form, &$form_state) {
 /**
  * Display a form field for a notifications_field
  */
-function notifications_subscription_form_field($type, $value = NULL) {
+function notifications_subscription_form_field($type, $value = NULL, $subtype = NULL) {
   $info = notifications_subscription_fields($type);
   
   if (!empty($info['options callback'])) {
     $element['#type'] = 'select';
-    $element['#options'] =  call_user_func($info['options callback']);
+    if (!empty($info['options callback args'])) {
+      $element['#options'] = call_user_func($info['options callback'], $subtype, $info['options callback args']);
+    } else {
+      $element['#options'] = call_user_func($info['options callback'], $subtype);
+    }
   }
   elseif (!empty($info['autocomplete path'])) {
     $element['#type'] = 'textfield';
     $element['#autocomplete_path'] = $info['autocomplete path'];
     if ($value) {
       if (!empty($info['autocomplete callback'])) {
-        $value = call_user_func($info['autocomplete callback'], $value);
+        if (!empty($info['autocomplete callback args'])) {
+          $value = call_user_func($info['autocomplete callback'], $value, $subtype, $info['autocomplete callback args']);
+        } else {
+          $value = call_user_func($info['autocomplete callback'], $value, $subtype);
+        }
       }
       elseif (!empty($info['format callback']))  {
         if (!empty($info['format callback args'])) {
-          $value = call_user_func($info['format callback'], $value, FALSE, $info['format callback args']);
+          $value = call_user_func($info['format callback'], $value, FALSE, $subtype, $info['format callback args']);
         } else {
-          $value = call_user_func($info['format callback'], $value, FALSE);
+          $value = call_user_func($info['format callback'], $value, FALSE, $subtype);
         }
       }      
     }
@@ -1728,7 +1736,7 @@ function notifications_format_subscription($subscription, $format = 'short', $ht
   // Get field names and values formatting each field
   if (!empty($subscription->fields)) {
     foreach (_notifications_fields($subscription->fields) as $field) {
-      $item = notifications_format_subscription_field($field->type, $field->value, $html);
+      $item = notifications_format_subscription_field($field->type, $field->value, $html, $subscription->type);
       $names[] = $item['name'];
       $values[] = $item['value'];
     }
@@ -1757,20 +1765,24 @@ function notifications_format_subscription($subscription, $format = 'short', $ht
  * @return array()
  *   Array with 'name' and 'value' elements
  */
-function notifications_format_subscription_field($type, $value, $html = TRUE) {
+function notifications_format_subscription_field($type, $value, $html = TRUE, $subtype = NULL) {
   $format_name = $format_value = t('Unknown');
  
   if ($info = notifications_subscription_fields($type)) {
     $format_name = $info['name'];
     if (!empty($info['format callback'])) {
       if (!empty($info['format callback args'])) {
-        $format_value = call_user_func($info['format callback'], $value, $html, $info['format callback args']);
+        $format_value = call_user_func($info['format callback'], $value, $html, $subtype, $info['format callback args']);
       } else {
-        $format_value = call_user_func($info['format callback'], $value, $html);
+        $format_value = call_user_func($info['format callback'], $value, $html, $subtype);
       }
     }
     elseif (!empty($info['options callback'])) {
-      $options = call_user_func($info['options callback']);
+      if (!empty($info['options callback args'])) {
+        $options = call_user_func($info['options callback'], $subtype, $info['options callback args']);
+      } else {
+        $options = call_user_func($info['options callback'], $subtype);
+      }
       $format_value = isset($options[$value]) ? $options[$value] : t('Not available');
     }
     else {

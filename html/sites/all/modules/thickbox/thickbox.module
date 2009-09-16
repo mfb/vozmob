@@ -1,5 +1,5 @@
 <?php
-// $Id: thickbox.module,v 1.18.2.17 2009/03/24 14:25:36 frjo Exp $
+// $Id: thickbox.module,v 1.18.2.21 2009/09/07 15:07:01 frjo Exp $
 
 /**
  * @file
@@ -14,7 +14,7 @@
 function thickbox_theme() {
   $theme = array(
     'imagefield_image_imagecache_thickbox' => array(
-      'arguments' => array('namespace' => NULL, 'field' => NULL, 'path' => NULL, 'alt' => NULL, 'title' => NULL, 'gid' => NULL, 'attributes' => NULL),
+      'arguments' => array('namespace' => NULL, 'path' => NULL, 'alt' => NULL, 'title' => NULL, 'gid' => NULL, 'attributes' => NULL),
     ),
   );
 
@@ -34,18 +34,7 @@ function thickbox_theme() {
  * Implementation of hook_init().
  */
 function thickbox_init() {
-  // Code from the block_list funtion in block.module.
-  // If the path doesn't match any of the exeptions, load header files.
-  $path = drupal_get_path_alias($_GET['q']);
-  $regexp = '/^('. preg_replace(array('/(\r\n?|\n)/', '/\\\\\*/', '/(^|\|)\\\\<front\\\\>($|\|)/'), array('|', '.*', '\1'. preg_quote(variable_get('site_frontpage', 'node'), '/') .'\2'), preg_quote(variable_get('thickbox_pages', ''), '/')) .')$/';
-  // Compare with the internal and path alias (if any).
-  $page_match = preg_match($regexp, $path);
-  if ($path != $_GET['q']) {
-    $page_match = $page_match || preg_match($regexp, $_GET['q']);
-  }
-  if (!$page_match) {
-    _thickbox_doheader();
-  }
+  _thickbox_doheader();
 }
 
 /**
@@ -78,8 +67,27 @@ function thickbox_menu() {
  * Menu callback for thickbox_login.
  */
 function thickbox_login() {
-  print drupal_get_form('user_login');
+  $form = variable_get('thickbox_login_form', '') == 'custom' ? variable_get('thickbox_login_custom', 'user_login') : variable_get('thickbox_login_form', 'user_login');
+  print drupal_get_form($form);
   exit;
+}
+
+/**
+ * Check if Thickbox should be active for the current URL.
+ *
+ * @return
+ *   TRUE if Thickbox should be active for the current page.
+ */
+function _thickbox_active() {
+  // Code from the block_list funtion in block.module.
+  $path = drupal_get_path_alias($_GET['q']);
+  // Compare with the internal and path alias (if any).
+  $page_match = drupal_match_path($path, variable_get('thickbox_pages', ''));
+  if ($path != $_GET['q']) {
+    $page_match = $page_match || drupal_match_path($_GET['q'], variable_get('thickbox_pages', ''));
+  }
+
+  return !$page_match;
 }
 
 /**
@@ -87,34 +95,40 @@ function thickbox_login() {
  */
 function _thickbox_doheader() {
   global $user;
-
-  $path = drupal_get_path('module', 'thickbox');
-  drupal_add_css($path .'/thickbox.css');
-  if (variable_get('thickbox_ie_css', 0) != 1) {
-    drupal_add_css($path .'/thickbox_ie.css');
+  static $already_added = FALSE;
+  if ($already_added) {
+    return; // Don't add the JavaScript and CSS multiple times.
   }
 
-  // Insert translated strings as javascript settings.
-  $tb_msg = array(
-    'close' => t('Close'),
-    'next' => t('Next >'),
-    'prev' => t('< Prev'),
-    'esc_key' => t('or Esc Key'),
-    'next_close' => t('Next / Close on last'),
-    'image_count' => t('Image !current of !total')
-  );
-  drupal_add_js(array('thickbox' => $tb_msg), 'setting');
+  if(_thickbox_active()) {
+    $path = drupal_get_path('module', 'thickbox');
+    drupal_add_css($path .'/thickbox.css');
+    if (variable_get('thickbox_ie_css', 0) != 1) {
+      drupal_add_css($path .'/thickbox_ie.css');
+    }
 
-  if ($user->uid == 0 && variable_get('thickbox_login', 0)) {
-    drupal_add_js($path .'/thickbox_login.js');
+    // Insert options and translated strings as javascript settings.
+    $js_settings = array(
+      'close' => t('Close'),
+      'next' => t('Next >'),
+      'prev' => t('< Prev'),
+      'esc_key' => t('or Esc Key'),
+      'next_close' => t('Next / Close on last'),
+      'image_count' => t('Image !current of !total')
+    );
+    drupal_add_js(array('thickbox' => $js_settings), 'setting');
+
+    if ($user->uid == 0 && variable_get('thickbox_login', 0)) {
+      drupal_add_js($path .'/thickbox_login.js');
+    }
+
+    if (variable_get('thickbox_auto', 0) && module_exists('image')) {
+      drupal_add_js(array('thickbox' => array('derivative' => variable_get('thickbox_derivative', 'preview'))), 'setting');
+      drupal_add_js($path .'/thickbox_auto.js');
+    }
+
+    drupal_add_js($path .'/thickbox.js');
   }
-
-  if (variable_get('thickbox_auto', 0) && module_exists('image')) {
-    drupal_add_js(array('thickbox' => array('derivative' => variable_get('thickbox_derivative', 'preview'))), 'setting');
-    drupal_add_js($path .'/thickbox_auto.js');
-  }
-
-  drupal_add_js($path .'/thickbox.js');
 }
 
 /**
@@ -195,20 +209,31 @@ function thickbox_field_formatter($field, $item, $formatter, $node) {
     }
     list($namespace, $presetname) = explode('][', $formatter, 2);
     if ($preset = imagecache_preset_by_name($namespace)) {
-      return theme('imagefield_image_imagecache_thickbox', $namespace, $field, $item['filepath'], $item['data']['alt'], $item['data']['title'], $gallery_id);
+      return theme('imagefield_image_imagecache_thickbox', $namespace, $item['filepath'], $item['data']['alt'], $item['data']['title'], $gallery_id);
     }
   }
 }
 
 /**
  * Implementation of theme_imagefield_image_imagecache_thickbox().
+ *
+ * @param $namespace
+ *   presetname of the derivative you wish to generate a tag for.
+ * @param $path
+ *   path to the original image you wish to create a derivative image tag for.
+ * @param $alt
+ *   img tag alternate text
+ * @param $title
+ *   img tag title text
+ * @param $gid
+ *   gallery id
+ * @param attributes
+ *   optional drupal attributes array. If attributes is set, the default imagecache classes
+ *   will not be set automatically, you must do this manually.
  */
-function theme_imagefield_image_imagecache_thickbox($namespace, $field, $path, $alt = '', $title = '', $gid = '', $attributes = NULL) {
+function theme_imagefield_image_imagecache_thickbox($namespace, $path, $alt = '', $title = '', $gid = '', $attributes = NULL) {
   if (!empty($path)) {
-    $attributes = drupal_attributes($attributes);
-    $imagecache_path = imagecache_create_url($namespace, $path);
-    $image = '<img src="'. $imagecache_path .'" alt="'. check_plain($alt) .'" '. $attributes .' />';
-
+    $image = theme('imagecache', $namespace, $path, $alt, $title, $attributes);
     if ($presetname = variable_get('thickbox_imagecache_preset', 0)) {
       $link_path = imagecache_create_url($presetname, $path);
     }

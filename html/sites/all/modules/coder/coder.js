@@ -1,4 +1,4 @@
-// $Id: coder.js,v 1.3 2007/04/07 17:28:03 douggreen Exp $
+// $Id: coder.js,v 1.3.4.1 2009/08/08 14:40:12 snpower Exp $
 
 if (Drupal.jsEnabled) {
   jQuery.fn.extend({
@@ -13,8 +13,8 @@ if (Drupal.jsEnabled) {
           core = this.form.elements.namedItem("edit-coder-core");
           active = this.form.elements.namedItem("edit-coder-active-modules");
           if (this == core || this == active) {
-            modules = "input[@id^=edit-coder-modules-]";
-            themes = "input[@id^=edit-coder-themes-]";
+            modules = "input[id^=edit-coder-modules-]";
+            themes = "input[id^=edit-coder-themes-]";
             if (core.checked || active.checked) {
               $(modules).uncheck();
               $(themes).uncheck();

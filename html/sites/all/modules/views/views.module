@@ -1,5 +1,5 @@
 <?php
-// $Id: views.module,v 1.339 2009/06/25 22:01:18 merlinofchaos Exp $
+// $Id: views.module,v 1.340 2009/09/15 22:43:42 merlinofchaos Exp $
 /**
  * @file
  * Primarily Drupal hooks and global API functions to manipulate views.
@@ -1118,7 +1118,7 @@ function views_embed_view($name, $display_id = 'default') {
   }
 
   $view = views_get_view($name);
-  if (!$view) {
+  if (!$view || !$view->access($display_id)) {
     return;
   }
 

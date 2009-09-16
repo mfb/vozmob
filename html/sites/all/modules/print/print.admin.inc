@@ -1,5 +1,5 @@
 <?php
-// $Id: print.admin.inc,v 1.1.2.27 2009/07/09 12:00:52 jcnventura Exp $
+// $Id: print.admin.inc,v 1.1.2.28 2009/08/20 02:19:19 jcnventura Exp $
 
 /**
  * @file
@@ -29,7 +29,9 @@ function print_main_settings() {
     '#size' => 60,
     '#maxlength' => 250,
     '#description' => t('The URL to your custom print cascading stylesheet, if any. When none is specified, the default module CSS file is used.') .'<br />'.
-                      t('Macros: %b (base path: "%base"), %t (path to theme: "%theme")', array('%base' => base_path(), '%theme' => path_to_theme())),
+                      t('Macros: %b (base path: "%base"), %t (path to theme: "%theme")', array('%base' => base_path(), '%theme' => path_to_theme())) .'<br />'.
+                      t('Requires the <em>administer site configuration</em> permission.'),
+    '#disabled' => !user_access('administer site configuration'),
   );
 
   $form['settings']['print_urls'] = array(
@@ -147,6 +149,8 @@ function print_main_settings() {
  * Validate print_main_settings form.
  */
 function _print_main_settings_validate($form, &$form_state) {
+  global $base_url;
+
   // Check for a new uploaded logo, and use that instead.
   if ($file = file_save_upload('print_logo_upload', array('file_validate_is_image' => array()))) {
     $parts = pathinfo($file->filename);
@@ -158,6 +162,13 @@ function _print_main_settings_validate($form, &$form_state) {
     if (file_copy($file, $filename, FILE_EXISTS_REPLACE)) {
       $form_state['values']['print_logo_options'] = 2;
       $form_state['values']['print_logo_url'] = base_path() . $file->filepath;
+    }
+  }
+
+  // Check that the stylesheet URL is a local URL, if it is an absolute URL, then it must start with the site's base URL
+  if (preg_match('!^http://.*!', $form_state['values']['print_css'], $matches)) {
+    if (!preg_match("!^$base_url/!", $matches[0])) {
+      form_set_error('print_css', t("Stylesheet URL must be a relative path or start with the site's base URL"));
     }
   }
 }

@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_upload_fid.inc,v 1.7 2009/07/01 23:07:14 merlinofchaos Exp $
+// $Id: views_handler_field_upload_fid.inc,v 1.10 2009/08/11 22:06:19 dww Exp $
 /**
  * Field handler to provide a list of roles.
  */
@@ -79,6 +79,6 @@ class views_handler_field_upload_fid extends views_handler_field_prerender_list 
     $tokens['[' . $this->options['id'] . '-type' . ']'] = $item['filemime'];
     $tokens['[' . $this->options['id'] . '-description' . ']'] = $item['description'];
     $tokens['[' . $this->options['id'] . '-path' . ']'] = $item['filepath'];
-    $tokens['[' . $this->options['id'] . '-size' . ']'] = format_size($item['filesize']);
+    $tokens['[' . $this->options['id'] . '-size' . ']'] = $item['filesize'];
   }
 }

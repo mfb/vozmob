@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field.inc,v 1.28 2009/07/02 00:13:12 merlinofchaos Exp $
+// $Id: views_handler_field.inc,v 1.31 2009/09/15 16:40:23 merlinofchaos Exp $
 /**
  * @defgroup views_field_handlers Views' field handlers
  * @{
@@ -332,7 +332,7 @@ class views_handler_field extends views_handler {
         '#title' => t('Maximum length'),
         '#type' => 'textfield',
         '#default_value' => $this->options['alter']['max_length'],
-        '#description' => t('The maximum number of characters his field can be.'),
+        '#description' => t('The maximum number of characters this field can be.'),
         '#process' => array('views_process_dependency'),
         '#dependency' => array(
           'edit-options-alter-trim' => array(1)
@@ -472,8 +472,8 @@ class views_handler_field extends views_handler {
       $this->last_render = $value;
     }
 
-    if (empty($this->last_render) && !empty($this->options['empty'])) {
-      if ($this->last_render !== 0 || empty($this->options['empty_zero'])) {
+    if (empty($this->last_render)) {
+      if ($this->last_render !== 0 || !empty($this->options['empty_zero'])) {
         $this->last_render = $this->options['empty'];
       }
     }
@@ -493,7 +493,7 @@ class views_handler_field extends views_handler {
       return '';
     }
 
-    if (!empty($alter['alter_text']) && !empty($alter['text'])) {
+    if ($alter['alter_text'] !== '' && $alter['text'] !== '') {
       $tokens = $this->get_render_tokens($alter);
       $value = $this->render_altered($alter, $tokens);
     }
@@ -596,7 +596,8 @@ class views_handler_field extends views_handler {
     }
 
     $alt = strtr($alter['alt'], $tokens);
-    if ($alt) {
+    // Set the title attribute of the link only if it improves accessibility
+    if ($alt && $alt != $text) {
       $options['attributes']['title'] = $alt;
     }
 

@@ -1,9 +1,13 @@
 <?php
-// $Id: performance.module,v 1.2.2.24 2009/06/25 02:51:54 kbahey Exp $
+// $Id: performance.module,v 1.2.2.27 2009/09/13 12:11:34 salvis Exp $
 
-// Copyright Khalid Baheyeldin 2008 of http://2bits.com
+/**
+ * @file performance.module
+  * Logs detailed and/or summary page generation time and memory consumption for page requests.
+ * Copyright Khalid Baheyeldin 2008 of http://2bits.com
+ */
 
-define('PERFORMANCE_KEY', 'dru-perf:' . $_SERVER['HTTP_HOST'] . ':');
+define('PERFORMANCE_KEY', 'dru-perf:'. $_SERVER['HTTP_HOST'] .':');
 
 function performance_menu() {
   $items = array();
@@ -160,7 +164,7 @@ function performance_shutdown() {
   $params['query_count'] = $query_count;
   $params['query_timer'] = $query_timer;
 
-  $anon = ($data['anon']) ? t('Yes') : t('No');
+  $anon = (!empty($data['anon'])) ? t('Yes') : t('No');
 
   $header = array(
     'path' => $path,
@@ -212,7 +216,7 @@ function performance_log_summary_apc($params = array()) {
   else {
     $data = array(
       'path'            => $params['path'],
-      'bytes_max'       => $params['mem'], 
+      'bytes_max'       => $params['mem'],
       'bytes_avg'       => $params['mem'],
       'millisecs_max'   => $params['timer'],
       'millisecs_avg'   => $params['timer'],
@@ -230,7 +234,7 @@ function performance_log_summary_apc($params = array()) {
 function performance_log_summary_db($params = array()) {
   $row = db_fetch_object(db_query("SELECT * FROM {performance_summary} WHERE path = '%s'", $params['path']));
   if (!empty($row)) {
-    db_query("UPDATE {performance_summary} 
+    db_query("UPDATE {performance_summary}
       SET last_access = %d,
       num_accesses = num_accesses + 1,
       bytes_max = %d,
@@ -259,12 +263,12 @@ function performance_log_summary_db($params = array()) {
       (path, last_access, num_accesses,
       bytes_max, bytes_avg, millisecs_max, millisecs_avg,
       query_count_max, query_count_avg, query_timer_max, query_timer_avg)
-      VALUES 
+      VALUES
       ('%s', %d, %d, %d, %d, %d, %d, %d, %d, %d, %d)",
       $params['path'],
       time(),
       1,
-      $params['mem'], 
+      $params['mem'],
       $params['mem'],
       $params['timer'],
       $params['timer'],
@@ -294,8 +298,8 @@ function performance_log_details($params = array()) {
 function performance_apc_list_all() {
   $key_list = array();
   $list = apc_cache_info('user');
-  foreach($list['cache_list'] as $cache_id => $cache_data) {
-    $regex = '/^' . PERFORMANCE_KEY . '/';
+  foreach ($list['cache_list'] as $cache_id => $cache_data) {
+    $regex = '/^'. PERFORMANCE_KEY .'/';
     if (preg_match($regex, $cache_data['info'])) {
       $key_list[] = $cache_data['info'];
     }
@@ -310,7 +314,7 @@ function performance_view_summary() {
   $go = array_sum($sum);
 
   if (!$go) {
-    return t('Summary performance log is not enabled. Go to the !link to enable it.', array('!link' => l(t('settings page'), 'admin/settings/performance_logging')));
+    return t('Summary performance log is not enabled. Go to the <a href="@link">settings page</a> to enable it.', array('@link' => url('admin/settings/performance_logging')));
   }
 
   $header = array();
@@ -337,7 +341,7 @@ function performance_view_summary() {
 
   if (variable_get('performance_summary_apc', 0) && function_exists('apc_cache_info')) {
     // Get the data from the APC cache
-    foreach(performance_apc_list_all() as $key) {
+    foreach (performance_apc_list_all() as $key) {
       $data_list[] = apc_fetch($key);
     }
   }
@@ -346,12 +350,12 @@ function performance_view_summary() {
     $sql = "SELECT * FROM {performance_summary}";
     $tablesort = tablesort_sql($header);
     $result = pager_query($sql . $tablesort, 50);
-    while($row = db_fetch_array($result)) {
+    while ($row = db_fetch_array($result)) {
       $data_list[] = $row;
     }
   }
 
-  foreach($data_list as $data) {
+  foreach ($data_list as $data) {
     $total_rows++;
     $last_max = max($last_max, $data['last_access']);
     $last_min = min($last_min, $data['last_access']);
@@ -389,10 +393,10 @@ function performance_view_summary() {
   $output = '';
   if ($threshold) {
     $output .= t('Showing !shown paths with more than !threshold accesses, out of !total total paths.',
-      array('!threshold' => $threshold, '!shown' => $shown, '!total' => $total_rows)) . '<br/>';
+      array('!threshold' => $threshold, '!shown' => $shown, '!total' => $total_rows)) .'<br/>';
   }
   else {
-    $output .= t('Showing all !total paths.', array('!total' => $total_rows)) . '<br/>';
+    $output .= t('Showing all !total paths.', array('!total' => $total_rows)) .'<br/>';
   }
 
   // Protect against divide by zero
@@ -405,11 +409,11 @@ function performance_view_summary() {
     $ms_avg = 'n/a';
   }
 
-  $output .= t('Average memory per page: !mb_avg MB', array('!mb_avg' => $mb_avg)) . '<br/>';
-  $output .= t('Average milliseconds per page: !ms_avg', array('!ms_avg' => $ms_avg)) . '<br/>';
-  $output .= t('Total number of page accesses: !accesses', array('!accesses' => $total_accesses)) . '<br/>';
-  $output .= t('First access: !access.', array('!access' => format_date($last_min, 'small'))) . '<br/>';
-  $output .= t('Last access: !access.',  array('!access' => format_date($last_max, 'small'))) . '<br/>';
+  $output .= t('Average memory per page: !mb_avg MB', array('!mb_avg' => $mb_avg)) .'<br/>';
+  $output .= t('Average milliseconds per page: !ms_avg', array('!ms_avg' => $ms_avg)) .'<br/>';
+  $output .= t('Total number of page accesses: !accesses', array('!accesses' => $total_accesses)) .'<br/>';
+  $output .= t('First access: !access.', array('!access' => format_date($last_min, 'small'))) .'<br/>';
+  $output .= t('Last access: !access.',  array('!access' => format_date($last_max, 'small'))) .'<br/>';
 
   $output .= theme('table', $header, $rows);
   $output .= theme('pager', NULL, 50, 0);
@@ -419,7 +423,7 @@ function performance_view_summary() {
 
 function performance_view_details() {
   if (!variable_get('performance_detail', 0)) {
-    return t('Detail performance log is not enabled. Go to the !link to enable it.', array('!link' => l(t('settings page'), 'admin/settings/performance_logging')));
+    return t('Detail performance log is not enabled. Go to the <a href="@link">settings page</a> to enable it.', array('@link' => url('admin/settings/performance_logging')));
   }
 
   $header = array(
@@ -497,7 +501,7 @@ function performance_cron_apc_prune($timestamp = 0) {
     return;
   }
 
-  foreach($list as $key) {
+  foreach ($list as $key) {
     if ($data = apc_fetch($key)) {
       if ($data['last_access'] <= $timestamp) {
         apc_delete($key);
@@ -508,7 +512,7 @@ function performance_cron_apc_prune($timestamp = 0) {
 
 function performance_clear_apc_confirm() {
   $form['confirm'] = array(
-    '#value' => t('Confirm APC clear'), 
+    '#value' => t('Confirm APC clear'),
   );
   return confirm_form(
     $form,
@@ -519,7 +523,7 @@ function performance_clear_apc_confirm() {
     t('Cancel'));
 }
 
-function performance_clear_apc_confirm_submit($form_id, &$form) {
+function performance_clear_apc_confirm_submit($form, &$form_state) {
   if (!function_exists('apc_cache_info')) {
     drupal_set_message(t('APC is not enabled. Nothing to do ...'), 'status', FALSE);
     drupal_goto('admin/settings/performance');
@@ -532,7 +536,7 @@ function performance_clear_apc_confirm_submit($form_id, &$form) {
     return;
   }
 
-  foreach($list as $key) {
+  foreach ($list as $key) {
     if ($data = apc_fetch($key)) {
       apc_delete($key);
     }
@@ -543,7 +547,7 @@ function performance_clear_apc_confirm_submit($form_id, &$form) {
 }
 
 /**
- * Implementation of hook_nagios_info()
+ * Implementation of hook_nagios_info().
  */
 function performance_nagios_info() {
   return array(
@@ -553,11 +557,11 @@ function performance_nagios_info() {
 }
 
 /**
- * Implementation of hook_nagios()
+ * Implementation of hook_nagios().
  */
 function performance_nagios() {
   $info = performance_nagios_info();
-  $id = $info['id']; 
+  $id = $info['id'];
 
   // Find out if we have what we need enabled
   $sum = array();
@@ -582,19 +586,19 @@ function performance_nagios() {
   // Check which data store to use
   if (variable_get('performance_summary_apc', 0) && function_exists('apc_cache_info')) {
     // Get the data from the APC cache
-    foreach(performance_apc_list_all() as $key) {
+    foreach (performance_apc_list_all() as $key) {
       $data_list[] = apc_fetch($key);
     }
   }
   else {
     // Get the data form the database table for URLs that have been accessed in the last 15 minutes
     $result = db_query("SELECT * FROM {performance_summary} WHERE last_access >= %d", time() - 15*60);
-    while($row = db_fetch_array($result)) {
+    while ($row = db_fetch_array($result)) {
       $data_list[] = $row;
     }
   }
 
-  foreach($data_list as $data) {
+  foreach ($data_list as $data) {
     $total_rows++;
 
     // Calculate running averages

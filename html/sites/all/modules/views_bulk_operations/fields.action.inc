@@ -1,5 +1,5 @@
 <?php
-// $Id: fields.action.inc,v 1.1.2.9 2009/04/22 04:16:00 kratib Exp $
+// $Id: fields.action.inc,v 1.1.2.10 2009/07/25 03:51:03 kratib Exp $
 /**
  * @file Drupal action to set individual field values. 
  * 
@@ -40,14 +40,17 @@ function views_bulk_operations_fields_action_form($context) {
     $node[$field['field_name']] = NULL;
 
     // The field info and widget.
-    $form['#field_info'][$field['field_name']] = $field;
-    $form['fields']['#value'][] = $field['field_name'];
     if (isset($field['field_def'])) { // is it our hacked definition?
       $form += (array)$field['field_def'];
     }
     else { // no, it's CCK
       $form += (array)content_field_form($form, $form_state, $field);
     }
+    if (!isset($form[$field['field_name']])) { // some field was not rendered
+      continue;
+    }
+    $form['#field_info'][$field['field_name']] = $field;
+    $form['fields']['#value'][] = $field['field_name'];
     $form[$field['field_name']] += array('#weight' => $weight++, '#prefix' => '<div class="fields-action-togglable">', '#suffix' => '</div>');
 
     // Checkbox to enable/disable this field.

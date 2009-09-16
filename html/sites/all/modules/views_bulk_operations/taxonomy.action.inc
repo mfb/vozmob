@@ -21,6 +21,8 @@ function views_bulk_operations_taxonomy_action(&$node, $context) {
     $node->taxonomy = array();
     return;
   }
+
+  // Operate on a terms array.
   if (isset($context['terms']['tags'])) {
     $tags = $context['terms']['tags'];
     unset($context['terms']['tags']);
@@ -29,7 +31,6 @@ function views_bulk_operations_taxonomy_action(&$node, $context) {
   foreach ($context['terms'] as $tid) {
     $terms[$tid] = taxonomy_get_term($tid);
   }
-  // check for add or delete
   switch ($context['do']) {
   case TAXONOMY_ACTION_DELETE:
     $existing_terms = taxonomy_node_get_terms($node);
@@ -51,7 +52,6 @@ function views_bulk_operations_taxonomy_action(&$node, $context) {
       }
     }
     $terms = array_merge($terms, $existing_terms);
-    if (isset($tags)) $terms['tags'] = $tags;
     break;
   case TAXONOMY_ACTION_REPLACE_VOCABULARY:
     $existing_terms = taxonomy_node_get_terms($node);
@@ -63,14 +63,32 @@ function views_bulk_operations_taxonomy_action(&$node, $context) {
       }
     }
     $terms = array_merge($terms, $existing_terms);
-    if (isset($tags)) $terms['tags'] = $tags;
     break;
   case TAXONOMY_ACTION_REPLACE:
-    if (isset($tags)) $terms['tags'] = $tags;
     break;
   }
 
-  $node->taxonomy = $terms;
+  // Reassemble a taxonomy array that can be saved.
+  $taxonomy = array();
+  if (!empty($terms)) foreach ($terms as $term) {
+    if (!isset($taxonomy[$term->vid])) {
+      $taxonomy[$term->vid] = $term->tid;
+    }
+    else if (is_array($taxonomy[$term->vid])) {
+      $taxonomy[$term->vid][$term->tid] = $term->tid;
+    }
+    else {
+      $previous_tid = $taxonomy[$term->vid];
+      $taxonomy[$term->vid] = array(
+        $previous_tid => $previous_tid,
+        $term->tid => $term->tid
+      );
+    }
+  }
+  if (isset($tags) && $context['do'] != TAXONOMY_ACTION_DELETE) {
+    $taxonomy['tags'] = $tags;
+  }
+  $node->taxonomy = $taxonomy;
 }
 
 function views_bulk_operations_taxonomy_action_form($context) {

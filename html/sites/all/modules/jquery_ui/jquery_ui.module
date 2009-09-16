@@ -1,5 +1,5 @@
 <?php
-// $Id: jquery_ui.module,v 1.10 2009/06/29 00:09:27 sun Exp $
+// $Id: jquery_ui.module,v 1.12 2009/08/02 14:31:50 sun Exp $
 
 /**
  * @file
@@ -73,12 +73,14 @@ EOT;
 }
 
 /**
- * Implementation of hook_library().
+ * Implementation of hook_library_alter().
  */
-function jquery_ui_library_alter(&$libraries) {
-  foreach ($libraries['system'] as $library => $info) {
-    if (strpos($library, 'ui') === 0) {
-      $libraries['system'][$library]['add callbacks'][] = 'jquery_ui_library_add_ui';
+function jquery_ui_library_alter(&$libraries, $module) {
+  if ($module == 'system') {
+    foreach ($libraries as $name => $info) {
+      if (strpos($name, 'ui') === 0) {
+        $libraries[$name]['add callbacks'][] = 'jquery_ui_library_add_ui';
+      }
     }
   }
 }

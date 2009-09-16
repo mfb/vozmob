@@ -1,5 +1,5 @@
 <?php
-// $Id: content_field.inc,v 1.1.2.7 2009/07/12 20:15:58 markuspetrux Exp $
+// $Id: content_field.inc,v 1.1.2.9 2009/07/18 01:18:07 markuspetrux Exp $
 
 /**
  * @file
@@ -13,6 +13,7 @@ function content_content_field_ctools_content_types() {
   return array(
     'title' => t('Content field'),
     'defaults' => array('label' => '', 'formatter' => ''),
+    'content type' => 'content_content_field_content_type_content_type',
   );
 }
 
@@ -30,8 +31,9 @@ function content_content_field_content_type_content_types() {
     foreach ($type['fields'] as $field_name => $field) {
       if (!isset($types[$field_name])) {
         $types[$field_name] = array(
-          'category' => t('Content'),
-          'title' => t('field: @widget_label (@field_name) - @field_type', array(
+          'category' => t('Node'),
+          'icon' => 'icon_cck_field.png',
+          'title' => t('Field: @widget_label (@field_name) - @field_type', array(
             '@widget_label' => t($field['widget']['label']),
             '@field_name' => $field_name,
             '@field_type' => t($field_types[$field['type']]['label']),
@@ -59,9 +61,35 @@ function content_content_field_content_type_content_types() {
 }
 
 /**
+ * Just one subtype.
+ *
+ * Ordinarily this function is meant to get just one subtype. However, we are
+ * using it to deal with the fact that we have changed the subtype names. This
+ * lets us translate the name properly.
+ */
+function content_content_field_content_type_content_type($subtype) {
+  // Previous versions of CCK included the content type as part of the subtype.
+  // This allows those to continue to sort of work, at least during render.
+  if (strpos($subtype, ':') !== FALSE) {
+    list($content_type, $subtype) = explode(':', $subtype, 2);
+  }
+
+  $types = content_content_field_content_type_content_types();
+  if (isset($types[$subtype])) {
+    return $types[$subtype];
+  }
+}
+
+/**
  * Output function for the 'field' content type.
  */
 function content_content_field_content_type_render($subtype, $conf, $panel_args, $context) {
+  // Previous versions of CCK included the content type as part of the subtype.
+  // This allows those to continue to sort of work, at least during render.
+  if (strpos($subtype, ':') !== FALSE) {
+    list($content_type, $subtype) = explode(':', $subtype, 2);
+  }
+
   if (is_array($context)) {
     $context = array_pop($context);
   }
@@ -80,7 +108,7 @@ function content_content_field_content_type_render($subtype, $conf, $panel_args,
   $formatter = $conf['formatter'];
 
   // Check view access to the field.
-  if (!content_access('view', $field)) {
+  if (!content_access('view', $field, NULL, $node)) {
     return;
   }
 
@@ -160,6 +188,12 @@ function content_content_field_content_type_edit_form_submit(&$form, &$form_stat
  * Admin title for field content type.
  */
 function content_content_field_content_type_admin_title($subtype, $conf, $context) {
+  // Previous versions of CCK included the content type as part of the subtype.
+  // This allows those to continue to sort of work, at least during render.
+  if (strpos($subtype, ':') !== FALSE) {
+    list($content_type, $subtype) = explode(':', $subtype, 2);
+  }
+
   // Get all fields on the site.
   $field_types = _content_field_types();
 

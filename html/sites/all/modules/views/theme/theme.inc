@@ -1,5 +1,5 @@
 <?php
-// $Id: theme.inc,v 1.78 2009/07/01 23:36:14 merlinofchaos Exp $
+// $Id: theme.inc,v 1.80 2009/09/15 20:59:58 merlinofchaos Exp $
 
 /**
  * @file theme.inc
@@ -109,12 +109,12 @@ function template_preprocess_views_view(&$vars) {
 
     drupal_alter('views_admin_links', $vars['admin_links_raw'], $view);
     $vars['admin_links'] = theme('links', $vars['admin_links_raw']);
-    views_add_css('views');
   }
   else {
     $vars['admin_links'] = '';
     $vars['admin_links_raw'] = array();
   }
+  views_add_css('views');
 
   // Our JavaScript needs to have some means to find the HTML belonging to this
   // view.
@@ -348,19 +348,20 @@ function template_preprocess_views_view_table(&$vars) {
       if (!empty($fields[$field]) && empty($fields[$field]->options['exclude'])) {
         $field_output = $renders[$num][$field];
 
+        if (!isset($vars['rows'][$num][$column])) {
+          $vars['rows'][$num][$column] = '';
+        }
+
         // Don't bother with separators and stuff if the field does not show up.
-        if (empty($field_output) && !empty($vars['rows'][$num][$column])) {
+        if ($field_output === '') {
           continue;
         }
 
         // Place the field into the column, along with an optional separator.
-        if (isset($vars['rows'][$num][$column]) && (!empty($vars['rows'][$num][$column]) || $vars['rows'][$num][$column]) == 0) {
+        if ($vars['rows'][$num][$column] !== '') {
           if (!empty($options['info'][$column]['separator'])) {
             $vars['rows'][$num][$column] .= filter_xss_admin($options['info'][$column]['separator']);
           }
-        }
-        else {
-          $vars['rows'][$num][$column] = '';
         }
 
         $vars['rows'][$num][$column] .= $field_output;

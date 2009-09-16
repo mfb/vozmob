@@ -1,4 +1,4 @@
-// $Id: CHANGELOG.txt,v 1.11 2009/06/29 00:09:27 sun Exp $
+// $Id: CHANGELOG.txt,v 1.12 2009/08/01 12:56:34 sun Exp $
 
 jQuery UI x.x-x.x, xxxx-xx-xx
 -----------------------------
@@ -6,6 +6,7 @@ jQuery UI x.x-x.x, xxxx-xx-xx
 
 jQuery UI 7.x-2.x, xxxx-xx-xx
 -----------------------------
+#537052 by sun: Updated for hook_library_alter().
 by sun: Updated for #315100.
 #434960 by sun: Added package information.
 #362509 by Rob Loach, Deciphered, sun, and adrinux: New release system with

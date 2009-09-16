@@ -1,5 +1,5 @@
 <?php
-// $Id: flowplayer.admin.inc,v 1.1.2.2 2009/04/17 16:56:03 robloach Exp $
+// $Id: flowplayer.admin.inc,v 1.1.2.3 2009/07/28 17:09:01 robloach Exp $
 
 /**
  * @file
@@ -16,6 +16,26 @@ function flowplayer_admin_settings() {
     '#title' => t('License Key'),
     '#description' => t('The optional <a href="!commercial">commercial license key</a> associated with your Flowplayer account.', array('!commercial' => 'http://flowplayer.org/documentation/commercial.html')),
     '#default_value' => variable_get('flowplayer_key', ''),
+  );
+
+  $form['behavior'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Behavior'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+  // Add scaling property.
+  $form['behavior']['flowplayer_scaling'] = array(
+    '#type' => 'select',
+    '#title' => t('Scaling'),
+    '#options' => array(
+      'fit' => t('Fit to window: Preserves aspect ratio'),
+      'half' => t('Half size: Preserves aspect ratio'),
+      'orig' => t('Original size: Scaled to fit if too large'),
+      'scale' => t('Scale: Fill all available space, ignoring metadata'),
+    ),
+    '#description' => t('The <a href="@options">scaling-property</a> for the video. Scale is the default option.', array('@options' => 'http://flowplayer.org/documentation/configuration/clips.html#scaling')),
+    '#default_value' => variable_get('flowplayer_background_gradient', 'scale'), 
   );
 
   // Construct the color picker
@@ -98,7 +118,7 @@ function flowplayer_admin_settings() {
   // Create the preview
   $config = array(
     'clip' => array(
-      'url' => 'http://player-e7.simplecdn.net/flowplayer.flv',
+      'url' => 'http://e1h13.simplecdn.net/flowplayer/flowplayer.flv',
       'autoPlay' => TRUE,
     ),
     'onLoad' => 'flowplayer_admin_init',

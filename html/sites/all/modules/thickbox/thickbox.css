@@ -1,6 +1,5 @@
-/* ----------------------------------------------------------------------------------------------------------------*/
-/* ---------->>> thickbox specific link and font settings <<<------------------------------------------------------*/
-/* ----------------------------------------------------------------------------------------------------------------*/
+/* $Id: thickbox.css,v 1.4.2.7 2009/07/30 19:44:28 frjo Exp $  */
+
 #TB_window {
   font: 12px "Lucida Grande", Verdana, Arial, sans-serif;
   color: #333333;
@@ -11,19 +10,22 @@
   color: #666666;
 }
 
-#TB_window a:link {color: #666666;}
-#TB_window a:visited {color: #666666;}
-#TB_window a:hover {color: #000;}
-#TB_window a:active {color: #666666;}
-#TB_window a:focus{color: #666666;}
-
-.thickbox-hide-image {
-  display: none;
+#TB_window a:link {
+  color: #666666;
+}
+#TB_window a:visited {
+  color: #666666;
+}
+#TB_window a:hover {
+  color: #000;
+}
+#TB_window a:active {
+  color: #666666;
+}
+#TB_window a:focus {
+  color: #666666;
 }
 
-/* ----------------------------------------------------------------------------------------------------------------*/
-/* ---------->>> thickbox settings <<<-----------------------------------------------------------------------------*/
-/* ----------------------------------------------------------------------------------------------------------------*/
 #TB_overlay {
   position: fixed;
   z-index: 100;
@@ -48,7 +50,9 @@
   z-index: 102;
   color: #000000;
   display: none;
+/*
   border: 4px solid #525252;
+*/
   text-align: left;
   top: 50%;
   left: 50%;
@@ -57,10 +61,13 @@
 #TB_window img#TB_Image {
   display: block;
   margin: 15px 0 0 15px;
+  border: 1px solid #ccc;
+/*
   border-right: 1px solid #ccc;
   border-bottom: 1px solid #ccc;
   border-top: 1px solid #666;
   border-left: 1px solid #666;
+*/
 }
 
 #TB_caption {
@@ -139,4 +146,8 @@
   border: none;
   margin-bottom: -1px;
   margin-top: 1px;
+}
+
+.thickbox-hide-image {
+  display: none;
 }

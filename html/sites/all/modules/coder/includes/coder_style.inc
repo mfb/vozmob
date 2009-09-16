@@ -1,5 +1,5 @@
 <?php
-// $Id: coder_style.inc,v 1.16.2.18.2.8 2009/05/27 00:08:45 snpower Exp $
+// $Id: coder_style.inc,v 1.16.2.18.2.10 2009/08/14 00:18:30 snpower Exp $
 
 /**
  * @file

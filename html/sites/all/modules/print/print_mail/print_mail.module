@@ -1,5 +1,5 @@
 <?php
-// $Id: print_mail.module,v 1.1.2.37 2009/07/09 12:00:52 jcnventura Exp $
+// $Id: print_mail.module,v 1.1.2.39 2009/08/20 02:19:19 jcnventura Exp $
 
 /**
  * @file
@@ -329,7 +329,7 @@ function _print_mail_node_conf_modify($nid, $link, $comments, $url_list) {
 function theme_print_mail_format_link() {
   $print_mail_link_class  = variable_get('print_mail_link_class', PRINT_MAIL_LINK_CLASS_DEFAULT);
   $print_mail_show_link = variable_get('print_mail_show_link', PRINT_MAIL_SHOW_LINK_DEFAULT);
-  $print_mail_link_text = variable_get('print_mail_link_text', t('Send to friend'));
+  $print_mail_link_text = filter_xss(variable_get('print_mail_link_text', t('Send to friend')));
 
   $img = drupal_get_path('module', 'print') .'/icons/mail_icon.gif';
   $title = t('Send this page by e-mail.');
@@ -425,7 +425,7 @@ function print_mail_link_allowed($args) {
   if (!empty($args['path'])) {
     $nid = preg_replace('!^node/!', '', drupal_get_normal_path($args['path']));
     if (is_numeric($nid)) {
-      $args['node'] = node_load(array('nid' => $nid));
+      $args['node'] = node_load($nid);
     }
   }
   if (!empty($args['node'])) {

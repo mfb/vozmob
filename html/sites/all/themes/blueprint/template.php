@@ -1,5 +1,5 @@
 <?php
-// $Id: template.php,v 1.15.2.1.2.16 2009/03/06 23:51:42 designerbrent Exp $
+// $Id: template.php,v 1.15.2.1.2.17 2009/03/19 13:05:12 designerbrent Exp $
 
 /**
  * Uncomment the following line during development to automatically
@@ -107,9 +107,7 @@ function phptemplate_preprocess_page(&$vars) {
   unset($css['all']['module']['sites/all/modules/contrib/plus1/plus1.css']);
   $vars['styles'] = drupal_get_css($css);   
   */
-  
-  // Add a class for each section of the URL
-  $vars['body_classes'] .= ' ' . str_replace('/', ' ', drupal_get_path_alias($_GET['q'])) . ' ';
+
 }
 
 /**

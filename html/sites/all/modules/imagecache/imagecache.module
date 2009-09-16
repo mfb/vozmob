@@ -1,5 +1,5 @@
 <?php
-// $Id: imagecache.module,v 1.112 2009/05/07 15:15:04 drewish Exp $
+// $Id: imagecache.module,v 1.112.2.5 2009/08/19 20:59:07 drewish Exp $
 
 /**
  * @file
@@ -315,7 +315,7 @@ function imagecache_create_url($presetname, $filepath, $bypass_browser_cache = F
     $path = transliteration_get($path);
   }
 
-  $args = array('absolute' => TRUE, 'query' => $bypass_browser_cache ? time() : $bypass_browser_cache);
+  $args = array('absolute' => TRUE, 'query' => empty($bypass_browser_cache) ? NULL : time());
   switch (variable_get('file_downloads', FILE_DOWNLOADS_PUBLIC)) {
     case FILE_DOWNLOADS_PUBLIC:
       return url($GLOBALS['base_url'] . '/' . file_directory_path() .'/imagecache/'. $presetname .'/'. $path, $args);
@@ -365,7 +365,7 @@ function imagecache_cache_private() {
   $preset = check_plain(array_shift($args));
   $source = implode('/', $args);
 
-  if (user_access('view imagecache '. $preset)) {
+  if (user_access('view imagecache '. $preset) && !in_array(-1, module_invoke_all('file_download', $source))) {
     _imagecache_cache($preset, $source);
   }
   else {
@@ -480,6 +480,8 @@ function imagecache_transfer($path) {
 
   if ($fileinfo = stat($path)) {
     $headers[] = 'Content-Length: '. $fileinfo[7];
+    $headers[] = 'Expires: ' . gmdate('D, d M Y H:i:s', time() + 1209600) .' GMT';
+    $headers[] = 'Cache-Control: max-age=1209600, private, must-revalidate';
     _imagecache_cache_set_cache_headers($fileinfo, $headers);
   }
   file_transfer($path, $headers);
@@ -1004,7 +1006,7 @@ function imagecache_preset_save($preset) {
 }
 
 function imagecache_preset_delete($preset) {
-  imagecache_preset_flush($preset['presetid']);
+  imagecache_preset_flush($preset);
   db_query('DELETE FROM {imagecache_action} where presetid = %d', $preset['presetid']);
   db_query('DELETE FROM {imagecache_preset} where presetid = %d', $preset['presetid']);
   imagecache_presets(TRUE);
@@ -1027,8 +1029,9 @@ function imagecache_preset_actions($preset, $reset = FALSE) {
 
 /**
  * Flush cached media for a preset.
- * @param id
- *   A preset id.
+ *
+ * @param preset
+ *   an imagecache preset array.
  */
 function imagecache_preset_flush($preset) {
   if (user_access('flush imagecache')) {
@@ -1076,6 +1079,11 @@ function imagecache_action_load($actionid) {
 function imagecache_action_save($action) {
   $definition = imagecache_action_definition($action['action']);
   $action = array_merge($definition, $action);
+
+  // Some actions don't have data. Make an empty one to prevent SQL errors.
+  if (!isset($action['data'])) {
+    $action['data'] = array();
+  }
 
   if (!empty($action['actionid'])) {
     drupal_write_record('imagecache_action', $action, 'actionid');

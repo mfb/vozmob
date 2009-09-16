@@ -1,4 +1,4 @@
-; $Id: contemplate.info,v 1.2.4.1 2008/02/28 18:16:27 jrglasgow Exp $
+; $Id: contemplate.info,v 1.2.4.3 2009/09/12 01:38:20 jrglasgow Exp $
 name = Content Templates
 description = Create templates to customize output of teaser and body content.
 package = CCK

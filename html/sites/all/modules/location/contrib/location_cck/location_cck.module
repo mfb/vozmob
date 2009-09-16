@@ -1,5 +1,5 @@
 <?php
-// $Id: location_cck.module,v 1.5.2.11 2009/04/03 18:59:21 bdragon Exp $
+// $Id: location_cck.module,v 1.5.2.18 2009/07/30 20:58:43 bdragon Exp $
 
 /**
  * @file
@@ -12,7 +12,19 @@
 function location_cck_theme() {
   return array(
     'location_cck_formatter_default' => array(
-      'arguments' => array('element'),
+      'arguments' => array('element' => NULL),
+    ),
+    'location_cck_formatter_all' => array(
+      'arguments' => array('element' => NULL),
+    ),
+    'location_cck_formatter_map' => array(
+      'arguments' => array('element' => NULL),
+    ),
+    'location_cck_field_map' => array(
+      'arguments' => array('locations' => NULL, 'field' => NULL),
+    ),
+    'location_cck_field_popup' => array(
+      'arguments' => array('location' => NULL, 'field' => NULL),
     ),
   );
 }
@@ -46,10 +58,45 @@ function location_cck_field_settings($op, $field) {
       unset ($form['location_settings']['form']['collapsible']);
       unset ($form['location_settings']['form']['collapsed']);
       unset ($form['location_settings']['display']['weight']);
+
+      // We want to see the settings, so uncollapse them.
+      $form['location_settings']['#collapsible'] = FALSE;
+      $form['location_settings']['form']['#collapsed'] = FALSE;
+      $form['location_settings']['display']['#collapsed'] = FALSE;
+
+      // Add some GMap settings, if GMap is enabled.
+      if (module_exists('gmap')) {
+        $form['gmap_macro'] = array(
+          '#type' => 'textarea',
+          '#title' => t('GMap Macro'),
+          '#rows' => 2,
+          '#maxlength' => 500,
+          '#description' => t('A macro to be used as a base map for this field.  This map will be recentered on the location, so the center is not that important.'),
+          '#default_value' => !empty($field['gmap_macro']) ? $field['gmap_macro'] : '[gmap ]',
+        );
+        $options = gmap_get_marker_titles();
+        $form['gmap_marker'] = array(
+          '#type' => 'select',
+          '#title' => t('GMap marker'),
+          '#options' => $options,
+          '#default_value' => !empty($field['gmap_marker']) ? $field['gmap_marker'] : 'drupal',
+        );
+      }
+      else {
+        // Preserve existing data, apply defaults even if gmap is disabled.
+        $form['gmap_macro'] = array(
+          '#type' => 'value',
+          '#value' => !empty($field['gmap_macro']) ? $field['gmap_macro'] : '[gmap ]',
+        );
+        $form['gmap_marker'] = array(
+          '#type' => 'value',
+          '#value' => !empty($field['gmap_marker']) ? $field['gmap_marker'] : 'drupal',
+        );
+      }
       return $form;
 
     case 'save':
-      return array('location_settings');
+      return array('location_settings', 'gmap_macro', 'gmap_marker');
 
     case 'database columns':
       return array(
@@ -59,40 +106,6 @@ function location_cck_field_settings($op, $field) {
           'not null' => FALSE,
         ),
       );
-
-    case 'arguments':
-/*      $arguments = content_views_field_arguments($field);
-      $alias = "content: $field[field_name]";
-      $argument = array(
-        'handler' => 'text_views_argument_handler',
-        'option' => 'string',
-        'help' => t('Set the option to the number of initial characters to filter by. Leave empty for full term; use 1 for an A/B/C style glossary.'),
-      );
-      $arguments[$alias] = array_merge($arguments[$alias], $argument);
-      return $arguments;*/return;
-
-    case 'filters':
-      /*
-      $allowed_values = text_allowed_values($field);
-       if (count($allowed_values)) {
-         return array(
-           'default' => array(
-            'list' => $allowed_values,
-             'list-type' => 'list',
-             'operator' => 'views_handler_operator_andor',
-             'value-type' => 'array',
-            ),
-          );
-        }
-      else {
-        return array(
-          'like' => array(
-            'operator' => 'views_handler_operator_like',
-            'handler' => 'views_handler_filter_like',
-          ),
-        );
-      }*/
-      break;
 
     case 'views data':
       // We want to for the most part use the CCK stuff, but we also want to
@@ -112,66 +125,11 @@ function location_cck_field_settings($op, $field) {
   }
 }
 
-/*
-
-function location_cck_views_argument_handler($op, &$query, $argtype, $arg = '') {
-  $name = explode(':', is_array($argtype) ? $argtype['type'] : $argtype);
-  $field_name = trim($name[1]);
-  $field      = content_fields($field_name);
-  $db_info    = content_database_info($field);
-  $value      = $db_info['columns']['value']['column'];
-  $table      = 'node_data_'. $field['field_name'];
-
-  switch($op) {
-    case 'summary':
-      $query->ensure_table($table);
-      $query->add_field($value, $table);
-
-      $length = intval($arg);
-      $fieldinfo['field'] = $length <= 0 ? "$table.$value" : "LEFT($table.$value, $length)";
-      $fieldinfo['fieldname'] = 'letter';
-      return $fieldinfo;
-
-    case 'sort':
-      break;
-
-    case 'filter':
-      $query->ensure_table($table);
-      $query->add_field($value, $table);
-
-      $length = intval($argtype['options']);
-      $where = $length <= 0 ? "$table.$value = '%s'" : "LEFT($table.$value, $length) = '%s'";
-      $query->add_where($where, $arg);
-      break;
-
-    case 'link':
-      return l(strtoupper($query->letter), "$arg/$query->letter");
-
-    case 'title':
-      return check_plain(strtoupper($query));
-  }
-}
-*/
-
 /**
  * Implementation of hook_field().
  */
 function location_cck_field($op, &$node, $field, &$items, $teaser, $page) {
   switch ($op) {
-    case 'validate':
-      /*
-      if (is_array($items)) {
-        foreach ($items as $delta => $item) {
-          $error_field = $field['field_name'] .']['. $delta .'][value';
-          if ($item['value'] != '') {
-            if (count($allowed_values) && !array_key_exists($item['value'], $allowed_values)) {
-              form_set_error($error_field, t('Illegal value for %name.', array('%name' => t($field['widget']['label']))));
-            }
-          }
-        }
-      }
-      */
-      break;
 
     case 'insert':
     case 'update':
@@ -190,8 +148,10 @@ function location_cck_field($op, &$node, $field, &$items, $teaser, $page) {
       return array($field['field_name'] => $locations);
 
     case 'delete':
-      // Run through the revisions and clean up all applicable references.
-      $result = db_query('SELECT vid FROM {node_revisions} WHERE nid = %d', $node->nid);
+      // Use the CCK storage to figure out the vids that need to be deleted,
+      // and clean up all the applicable references.
+      $db_info = content_database_info($field);
+      $result = db_query('SELECT vid FROM {'. $db_info['table'] .'} WHERE nid = %d', $node->nid);
       while ($row = db_fetch_object($result)) {
         $genid = 'cck:'. $field['field_name'] .':'. $row->vid;
         $locs = array();
@@ -211,28 +171,29 @@ function location_cck_field($op, &$node, $field, &$items, $teaser, $page) {
  * Implementation of hook_field_formatter_info().
  */
 function location_cck_field_formatter_info() {
-  return array(
+  $info = array(
     'default' => array(
-      'label' => t('Default'),
+      'label' => t('Default (address)'),
       'field types' => array('location'),
     ),
   );
-}
-
-/**
- * Implementation of hook_field_formatter().
- *
- * The $node argument is necessary so that filter access can be checked on
- * node preview.
- */
-function location_cck_field_formatter($field, $item, $formatter, $node) {
-  if (empty($item)) {
-    return '';
+  if (module_exists('gmap')) {
+    $info['all'] = array(
+      'label' => t('Address with map'),
+      'field types' => array('location'),
+    );
+    $info['map'] = array(
+      'label' => t('Map only'),
+      'field types' => array('location'),
+    );
+    $info['multiple'] = array(
+      'label' => t('Multiple field values on a single map'),
+      'field types' => array('location'),
+      'multiple values' => CONTENT_HANDLE_MODULE,
+    );
   }
-  $item = location_load_location($item['lid']);
-  return theme('location', $item);
+  return $info;
 }
-
 
 /**
  * Implementation of hook_widget_info().
@@ -242,18 +203,12 @@ function location_cck_widget_info() {
     'location' => array(
       'label' => t('Location Field'),
       'field types' => array('location'),
+      // Location will set its own custom values.
       'callbacks' => array(
-//        'default value' => CONTENT_CALLBACK_CUSTOM,
+        //'default value' => CONTENT_CALLBACK_MODULE,
       ),
     ),
   );
-}
-
-/**
- * Implementation of hook_widget_settings().
- */
-function location_cck_widget_settings($op, $widget) {
-
 }
 
 /**
@@ -262,9 +217,6 @@ function location_cck_widget_settings($op, $widget) {
 function location_cck_widget(&$form, &$form_state, $field, $items, $delta = 0) {
   if ($field['widget']['type'] == 'location') {
     $settings = $field['location_settings'];
-
-    // Initialize empty location.
-    $location = location_empty_location($settings);
 
     // Load location data for existing locations.
     if (isset($items[$delta]['lid']) && $items[$delta]['lid']) {
@@ -284,10 +236,11 @@ function location_cck_widget(&$form, &$form_state, $field, $items, $delta = 0) {
     // Load location data passed by cck.
     else if (isset($items[$delta]) && is_array($items[$delta]) && !empty($items[$delta])) {
 
+      // Initialize empty location.
+      $location = location_empty_location($settings);
       foreach ($items[$delta] as $k => $v) {
         $location[$k] = $v;
       }
-
       // We can't trust that CCK is giving us the right information.
       // It can't tell us whether $items is defaults or multistep values.
       // Location *needs* the defaults to match the initial field values,
@@ -329,13 +282,6 @@ function location_cck_widget(&$form, &$form_state, $field, $items, $delta = 0) {
  * CCK Emptiness check.
  */
 function location_cck_content_is_empty($item, $field) {
-  // @@@ Bug:
-  // There is a suspect check here from content_set_empty().
-  // It's calling this function with raw cck defaults.
-  // I think it's causing a minimum of two fieldsets to be shown when using
-  // cck default values.
-
-  // Empty check
   $fields = array();
   if (location_is_empty($item, $fields)) {
     return TRUE;
@@ -343,16 +289,19 @@ function location_cck_content_is_empty($item, $field) {
   return FALSE;
 }
 
+/**
+ * Return an address for an individual item.
+ */
 function theme_location_cck_formatter_default($element) {
   $field = content_fields($element['#field_name'], $element['#type_name']);
-  $hide = array_keys(array_filter($field['location_settings']['display']['hide']));
+  $hide = (isset($field['location_settings']['display']['hide'])) ? array_keys(array_filter($field['location_settings']['display']['hide'])) : array();
   $location = $element['#item'];
   if (!empty($location['cck_preview_in_progress'])) {
     // Our canary field is in place, we are in a node preview.
     $fields = array();
-    // If the delete location checkbox isn't checked, and the location isn't
-    // "empty", then theme it based on the current state of the item.
-    if (!location_is_empty($location, $fields) && empty($location['delete_location'])) {
+    // If the location isn't "empty", then theme it based on the current state
+    // of the item.
+    if (!location_is_empty($location, $fields)) {
       return theme('location', $location, $hide);
     }
   }
@@ -363,6 +312,105 @@ function theme_location_cck_formatter_default($element) {
   }
 }
 
+/**
+ * Return both an address and a map for an individual item.
+ */
+function theme_location_cck_formatter_all($element) {
+  $content = '';
+  $field = content_fields($element['#field_name'], $element['#type_name']);
+  $hide = (isset($field['location_settings']['display']['hide'])) ? array_keys(array_filter($field['location_settings']['display']['hide'])) : array();
+  $location = $element['#item'];
+  if (!empty($location['cck_preview_in_progress'])) {
+    // Our canary field is in place, we are in a node preview.
+    $fields = array();
+    // If the location isn't "empty", then theme it based on the current state
+    // of the item.
+    if (!location_is_empty($location, $fields)) {
+      $content = theme('location', $location, $hide);
+    }
+  }
+  else if (isset($location['lid']) && $location['lid']) {
+    // "normal" viewing.
+    // Location is already cached by CCK, so no need to load it.
+    $content = theme('location', $location, $hide);
+  }
+  $content .= theme_location_cck_field_map(array($location), $field);
+  return $content;
+}
+
+/**
+ * Returns a map for an individual field value.
+ */
+function theme_location_cck_formatter_map($element) {
+  $field = content_fields($element['#field_name'], $element['#type_name']);
+  $location = $element['#item'];
+  return theme_location_cck_field_map(array($location), $field);
+}
+
+/**
+ * Alternate function to return a map with all
+ * multiple values in the same map.
+ */
+function theme_location_cck_formatter_combined($element) {
+  $field = content_fields($element['#field_name'], $element['#type_name']);
+  $locations = $element['#items'];
+  return theme_location_cck_field_map($locations, $field);
+}
+
+/**
+ * Generate a GMap map for one or more location field values.
+ *
+ * Mostly just cut and paste from gmap_location
+ * block view.
+ */
+function theme_location_cck_field_map($locations, $field) {
+  $count = 0;
+  $content = '';
+  foreach ($locations as $location) {
+    if (location_has_coordinates($location)) {
+      $count++;
+      $markername = isset($field['gmap_marker']) ? $field['gmap_marker'] : 'drupal';
+      $markers[] = array(
+        'latitude' => $location['latitude'],
+        'longitude' => $location['longitude'],
+        'markername' => $markername,
+        'offset' => $count-1,
+        'text' => theme('location_cck_field_popup', $location, $field),
+      );
+    }
+  }
+  if (!empty($markers)) {
+    $macro = !empty($field['gmap_macro']) ? $field['gmap_macro'] : '[gmap ]';
+    $map = gmap_parse_macro($macro);
+    $map['latitude'] = $markers[0]['latitude'];
+    $map['longitude'] = $markers[0]['longitude'];
+    $map['markers'] = $markers;
+    $map['id'] = gmap_get_auto_mapid();
+    $content = theme('gmap', array('#settings' => $map));
+  }
+  return $content;
+}
+
+/**
+ * Theme the GMap popup text for the field.
+ */
+function theme_location_cck_field_popup($location, $field) {
+  $hide = (isset($field['location_settings']['display']['hide'])) ? array_keys(array_filter($field['location_settings']['display']['hide'])) : array();
+  // Don't use a map link in a popup!
+  // We're making the name into a title.
+  $hide[] = 'map_link';
+  $hide[] = 'name';
+
+  $markertitle = $field['widget']['label'];
+  if (!empty($location['name'])) {
+    $markertitle = $location['name'];
+  }
+  return '<h4>'. $markertitle .'</h4>'. theme('location', $location, $hide);
+}
+
+/**
+ * Implementation of hook_token_list().
+ */
 function location_cck_token_list($type = 'all') {
   if ($type == 'field') {
     $tokens = array();
@@ -378,6 +426,9 @@ function location_cck_token_list($type = 'all') {
   }
 }
 
+/**
+ * Implementation of hook_token_values().
+ */
 function location_cck_token_values($type, $object = NULL) {
   if ($type == 'field') {
     $tokens = array();
@@ -386,7 +437,10 @@ function location_cck_token_values($type, $object = NULL) {
       // If the location exists, we need to set up the tokens.
 
       $location = array(
-        'hide' => array_keys(array_filter($item['location_settings']['display']['hide'])),
+        // There is no way to find out which elements to hide because $item does not contain
+        // the 'location_settings' element, so for now, just set it to be an empty array.
+        // See http://drupal.org/node/463618 for more infomation.
+        'hide' => array(),
         'location' => location_load_location($item['lid']),
       );
 

@@ -1,5 +1,5 @@
 <?php
-// $Id: content_permissions.module,v 1.5.2.5 2008/12/27 22:22:55 yched Exp $
+// $Id: content_permissions.module,v 1.5.2.6 2009/07/18 00:40:21 markuspetrux Exp $
 
 /**
  *  Implementation of hook_perm().
@@ -18,7 +18,7 @@ function content_permissions_perm() {
  *
  * @see content_access().
  */
-function content_permissions_field_access($op, $field, $account) {
+function content_permissions_field_access($op, $field, $account, $node = NULL) {
   switch ($op) {
     case 'view':
     case 'edit':

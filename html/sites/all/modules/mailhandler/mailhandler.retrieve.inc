@@ -400,7 +400,8 @@ function mailhandler_comment_submit($node, $header, $mailbox, $origbody) {
   $edit = (array)$node;
 
   // post the comment. if unable, send a failure email when so configured
-  if (!comment_save($edit) && $mailbox['replies']) {
+  $cid = comment_save($edit);
+  if (!$cid && $mailbox['replies']) {
     // $fromaddress really refers to the mail header which is authoritative for authentication
     list($fromaddress, $fromname) = mailhandler_get_fromaddress($header, $mailbox);
     $error_text = t('Sorry, your comment experienced an error and was not posted. Possible reasons are that you have insufficient permission to post comments or the node is no longer open for comments.');
@@ -408,6 +409,8 @@ function mailhandler_comment_submit($node, $header, $mailbox, $origbody) {
     drupal_mail('mailhandler', 'mailhandler_error_comment', $fromaddress, user_preferred_language($user), $params);
     watchdog('mailhandler', 'Comment submission failure: %subject.', array('%subject' => $edit['subject']), WATCHDOG_ERROR);
   }
+  
+  return $cid;
 }
 
 
@@ -478,6 +481,10 @@ function mailhandler_node_submit($node, $header, $mailbox, $origbody) {
         watchdog('mailhandler', 'Node submission failure: %from may not create %type items.', array('%from' => $fromaddress, '%type' => $node->type), WATCHDOG_WARNING);
       }
     }
+    // Return the node is successfully saved
+    if (!isset($error_text)) {
+      return $node;
+    } 
   }
   else {
     $error_text = t('Your submission is invalid:');
@@ -490,6 +497,9 @@ function mailhandler_node_submit($node, $header, $mailbox, $origbody) {
       drupal_mail('mailhandler', 'mailhandler_error_node', $fromaddress, user_preferred_language($user), $params);
     }
   }
+  
+  // return FALSE if the node was not successfully saved
+  return FALSE;
 }
 
 
@@ -673,12 +683,24 @@ function mailhandler_retrieve_message(&$result = FALSE, $mailbox, $i, &$context)
 
   if ($node) {
     if ($node->type == 'comment') {
-      mailhandler_comment_submit($node, $header, $mailbox, $origbody);
+      $nid = mailhandler_comment_submit($node, $header, $mailbox, $origbody);
+      $type = 'comment';
     }
     else {
-      mailhandler_node_submit($node, $header, $mailbox, $origbody);
+      $nid = mailhandler_node_submit($node, $header, $mailbox, $origbody);
+      $type = 'node';
     }
   }
+  
+  // Invoke a second hook for modules to operate on the newly created/edited node/comment.
+  foreach (module_list() as $name) {
+    if (module_hook($name, 'mailhandler_post_save')) {
+      $function = $name .'_mailhandler_post_save';
+      // Pass in the $nid (which could be a $cid, depending on $node->type)
+      $function($nid, $type);
+    }
+  }
+  
   // don't delete while we're only getting new messages
   if ($mailbox['delete_after_read']) {
     imap_delete($result, $i, FT_UID);

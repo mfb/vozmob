@@ -1,5 +1,5 @@
 <?php
-// $Id: mimedetect.module,v 1.12 2009/05/09 17:42:01 drewish Exp $
+// $Id: mimedetect.module,v 1.13 2009/09/12 17:11:07 drewish Exp $
 
 /**
  * @file
@@ -53,7 +53,7 @@ function mimedetect_mime($file) {
   );
 
   $mime = FALSE;
-  $magic_file = drupal_get_path('module', 'mimedetect') . '/magic';
+  $magic_file = variable_get('mimedetect_magic', drupal_get_path('module', 'mimedetect') .'/magic');
 
   // Try to use the fileinfo extension first.
   if (extension_loaded('fileinfo')) {

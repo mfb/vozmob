@@ -1,7 +1,34 @@
-//$Id: CHANGELOG.txt,v 1.1.6.349 2009/07/14 22:17:05 yched Exp $
+//$Id: CHANGELOG.txt,v 1.1.6.378 2009/09/11 09:30:23 markuspetrux Exp $
 
 CCK 6.x-2.x
 ===========
+
+Features:
+- #244896 by stella, canaryMason - Add incremental classes for multiple value fields in views.
+- #227129 by igor.ro - Expose "delta" column in multiple value fields to Views.
+- #531662 by neochief - i18n support. Allow external modules to translate field labels, descriptions and allowed values list as typed in the field settings form.
+- #531662 i18n support for fieldgroups.
+- #558420 Accept trimmed titles in nodereference autocomplete validation to prevent title mismatch errors when title ends with space.
+
+Bugfixes:
+- #416134 Userreference, impossible to filter allowed values by blocked users. Requires update.php.
+- #545942 warning: array_filter() [function.array-filter]: The first argument should be an array in userreference_update_6002().
+- #521002 Fix validation errors when using optgroups in allowed values for select elements.
+- #550252 by GuyPaddock - content_db_index_exists produces SQL errors when creating node reference fields for MySQL 4 (related to #231453).
+- #551280 by xurizaemon - Typo fix for "this field cannot hold more that 3 values" error message.
+- #558744 by chellomere - Fix one of the swedish translation strings to be correct, and much clearer.
+- #562260 by przadka - content_db_index_exists() has wrong syntax for PostgreSQL.
+- #567168 by jcmarco - Checkbox required not defined for on/off widgets.
+- #568430 by Jody Lynn - Bad @see in content-field.tpl.php.
+- #572672 by Jan van Diepen - Remove redundant (and bad) inclusion of node/content_types.inc in content_copy_import_form_submit().
+
+CCK 6.x-2.5
+===========
+
+A few files have been added and/or removed in this package. It is recommended to replace the whole CCK directory with the new one.
+Please visit update.php apply pending updates after installing the new files.
+It also worths to mention that Panels 3 integration has been reviewed and enhanced with display options for fiels and field groups.
+IMPORTANT: All sites using Diff module with CCK for Drupal 6 are strongly encouraged to upgrade to CCK 2.5 (see #538872 below).
 
 Features:
 - #428650 Conditional cache/menu rebuild for content CRUD methods.
@@ -11,6 +38,11 @@ Features:
 - #495582 Reviewed Panels 3 integration (prep work for combo / multigroups).
   Implementation of fieldgroup_view_group() that can be used to render field groups.
 - #417122 by quicksketch: allow drupal_alter on field and widget settings.
+- #514452 Add new argument $node to content_access() to enhance the context for hook_field_access().
+- #523072 by merlinofchaos - Have nodereference relationships limit CCK field availability as well.
+- #519870 by joachim - Add a note to say offset starts from 0 in grouping options for views handler for multiple values fields.
+- #231453 Allow fields index their columns. Implemented for reference value column in node and user reference fields. Needs update.php.
+- #521002 by mh86 - Support for optgroups in allowed values for select elements.
 
 Bugfixes:
 - #499696 by DeFr - Noderefernce / Userreference: fix Views mode when the view has exposed filters.
@@ -19,6 +51,13 @@ Bugfixes:
 - #361473 CCK fieldgroup panels doesn't respect CCK field privacy settings.
 - #515984 Multiple field delta ORDER BY incorrect.
 - #414298 by Michelle, merlinofchaos - Follow up to remove fieldgroup.panels.inc (it was moved to panels/content_types).
+- #522112 by hefox, prevent malformed condition for vid IN () in views handler for multiple values fields.
+- #505278 by Michelle, merlinofchaos - Provide backward compatibility with previous method to build Panels 3 subtype names for fields.
+- #523864 Minor coding style issues in Panels 3 relationships implementations.
+- #481568 by merlinofchaos - Empty property error when attempting to save a user reference in Panels.
+- #510396 by yched - Use field/type definition to render fields in views.
+- #393020 by auth - Fieldgroup data is lost when importing to module provided content type with group info for existing fields.
+- #538872 Diff does not respect field permissions.
 
 CCK 6.x-2.4
 ===========

@@ -1,5 +1,5 @@
 <?php
-// $Id: content.admin.inc,v 1.181.2.73 2009/07/14 22:17:04 yched Exp $
+// $Id: content.admin.inc,v 1.181.2.74 2009/07/19 13:03:56 markuspetrux Exp $
 
 /**
  * @file
@@ -1465,10 +1465,17 @@ function content_alter_db($previous_field, $new_field) {
     db_create_table($ret, $new_table, $new_schema);
   }
   else {
-    // Or add fields to an existing table.
+    // Or add fields and/or indexes to an existing table.
     foreach ($new_schema['fields'] as $column => $attributes) {
-      if (!in_array($column, array('nid', 'vid', 'delta')) && !db_column_exists($new_table, $column)) {
-        db_add_field($ret, $new_table, $column, $attributes);
+      if (!in_array($column, array('nid', 'vid', 'delta'))) {
+        // Create the column if it does not exist.
+        if (!db_column_exists($new_table, $column)) {
+          db_add_field($ret, $new_table, $column, $attributes);
+        }
+        // Create the index if requested to, and it does not exist.
+        if (isset($new_schema['indexes'][$column]) && !content_db_index_exists($new_table, $column)) {
+          db_add_index($ret, $new_table, $column, $new_schema['indexes'][$column]);
+        }
       }
     }
   }

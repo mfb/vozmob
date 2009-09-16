@@ -1,5 +1,5 @@
 <?php
-// $Id: contemplate.module,v 1.8.4.59 2009/01/03 03:27:43 jrglasgow Exp $
+// $Id: contemplate.module,v 1.8.4.62 2009/08/03 20:59:19 jrglasgow Exp $
 // by Jeff Robbins - Lullabot - www.lullabot.com
 
 define('CONTEMPLATE_TEASER_ENABLED', 0x0001);
@@ -72,15 +72,15 @@ function contemplate_menu() {
     'access arguments' => array('administer templates'),
   );
   $node_types = node_get_types();
-  foreach ($node_types as $type) {
-    $items['admin/content/node-type/'. $type->type .'/template'] = array(
+  foreach (node_get_types('types', NULL, TRUE) as $type) {
+    $type_url_str = str_replace('_', '-', $type->type);
+    $items['admin/content/node-type/'. $type_url_str .'/template'] = array(
       'title' => 'Template',
       'page callback' => 'contemplate_edit_type',
-      'page arguments' => array(3),
-      'access callback' => 'user_access',
+      'page arguments' => array($type),
       'access arguments' => array('administer templates'),
       'type' => MENU_LOCAL_TASK,
-      'weight' => 7,
+      'weight' => 10,
     );
   }
   $items['admin/settings/contemplate'] = array(
@@ -201,16 +201,18 @@ function contemplate_admin() {
   contemplate_refresh_files();
   $types = node_get_types();
   $templates = contemplate_get_templates();
-  $enabled = t('Enabled');
+  $enabled = t('Enabled: Textfield');
   $disabled = t('Disabled');
+  $file = t('Enabled: Disk');
   foreach ($types as $type) {
+    $type_url_str = str_replace('_', '-', $type->type);
     $rows[] = array(
       $type->name,
-      isset($templates[$type->type]['teaser']) ? ($templates[$type->type]['teaser-enabled'] ? $enabled : $disabled) : '',
-      isset($templates[$type->type]['body']) ? ($templates[$type->type]['body-enabled'] ? $enabled : $disabled) : '',
-      isset($templates[$type->type]['rss']) ? ($templates[$type->type]['rss-enabled'] ? $enabled : $disabled) : '',
-      l(isset($templates[$type->type]) ? t('edit template') : t('create template'), 'admin/content/node-type/'. $type->type .'/template'),
-      (isset($templates[$type->type]) ? l(t('delete template'), 'admin/content/node-type/'. $type->type .'/template/delete', array('query' => $destination)) : ''),
+      isset($templates[$type->type]['teaser-enabled']) ? ($templates[$type->type]['teaser-enabled'] ? ($templates[$type->type]['teaser-file'] ? $file : $enabled) : $disabled) : '',
+      isset($templates[$type->type]['body-enabled']) ? ($templates[$type->type]['body-enabled'] ? ($templates[$type->type]['body-file'] ? $file : $enabled) : $disabled) : '',
+      isset($templates[$type->type]['rss-enabled']) ? ($templates[$type->type]['rss-enabled'] ? ($templates[$type->type]['rss-file'] ? $file : $enabled) : $disabled) : '',
+      l(isset($templates[$type->type]) ? t('edit template') : t('create template'), 'admin/content/node-type/'. $type_url_str .'/template'),
+      (isset($templates[$type->type]) ? l(t('delete template'), 'admin/content/node-type/'. $type_url_str .'/template/delete', array('query' => $destination)) : ''),
     );
   }
   $header = array(
@@ -426,26 +428,24 @@ function contemplate_edit_type_form(&$form_state, $type = NULL) {
     '#value' => $type,
   );
 
-  $form['reset'] = array(
-    '#type' => 'submit',
-    '#value' => t('Delete'),
-    '#attributes' => array('onclick' => 'return(confirm("'. t("Are you sure you want to reset this form?\\nAny customizations will be lost.") .'"));'),
-  );
 
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Save'),
   );
+  $form['reset'] = array(
+    '#type' => 'submit',
+    '#value' => t('Delete'),
+    '#attributes' => array('onclick' => 'return(confirm("'. t("Are you sure you want to reset this form?\\nAny customizations will be lost.") .'"));'),
+  );
   return $form;
 }
 
-function contemplate_edit_type($type = NULL) {
-  $types = node_get_types();
-
-  if (empty($types[$type])) { // if the argument isn't a valid node type, output admin page
+function contemplate_edit_type($type = array()) {
+  if (empty($type)) { // if the argument isn't a valid node type, output admin page
     return contemplate_admin();
   }
-  drupal_set_title(t('Template for %type', array('%type' => $types[$type]->name)));
+  drupal_set_title(t('Template for %type', array('%type' => $type->name)));
   if (arg(0) == 'admin' && arg(1) == 'content' && arg(4) == 'template') {
     $breadcrumbs = drupal_get_breadcrumb();
     $type_crumb = array_pop($breadcrumbs);
@@ -453,11 +453,11 @@ function contemplate_edit_type($type = NULL) {
     drupal_set_breadcrumb($breadcrumbs);
   }
   if (arg(5) == 'delete') {
-    return drupal_get_form('contemplate_delete_type_form', $type);
+    return drupal_get_form('contemplate_delete_type_form', $type->type);
   }
   else {
     contemplate_refresh_files();
-    return drupal_get_form('contemplate_edit_type_form', $type);
+    return drupal_get_form('contemplate_edit_type_form', $type->type);
   }
 }
 
@@ -502,8 +502,7 @@ function contemplate_get_template($type) {
  * @return unknown
  */
 function contemplate_get_templates() {
-  $result = db_query('SELECT * FROM {contemplate}');
-  while ($r = db_fetch_object($result)) {
+  foreach (node_get_types() AS $r) {
     /*
     $templates[$r->type]['teaser'] = $r->teaser;
     $templates[$r->type]['body'] = $r->body;

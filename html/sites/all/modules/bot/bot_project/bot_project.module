@@ -1,5 +1,5 @@
 <?php
-// $Id: bot_project.module,v 1.1.2.6.2.7 2009/03/05 14:09:36 morbus Exp $
+// $Id: bot_project.module,v 1.1.2.6.2.8 2009/09/01 15:04:26 morbus Exp $
 
 /**
  * @file
@@ -130,9 +130,11 @@ function bot_project_irc_msg_channel($data, $from_query = FALSE) {
       preg_match('/<title>(.*?) \|.*?<\/title>/', $result->data, $title_match);
       $title = $title_match[1] ? $title_match[1] : '<' . t('unable to determine title') . '>';
 
-      // save and set count into message.
-      $count = bot_project_url_save($url, $title);
-      $message = "$url => " . decode_entities($title_match[1]) . " => $count";
+      // save and set counts into message.
+      $seen_count = bot_project_url_save($url, $title);
+      preg_match_all('/id="comment-(\d+)/', $result->data, $comments_match);
+      $comment_count = format_plural(count($comments_match[1]), '0 comments', '@count comments');
+      $message = "$url => " . decode_entities($title_match[1]) . ' => ' . decode_entities(implode(', ', array($comment_count, $seen_count)));
 
       // get some metadata about project issue URLs. tested as of 2006-12-28.
       preg_match('/<td>Project:<\/td><td>(.*)<\/td>/', $result->data, $project_match);
@@ -140,8 +142,8 @@ function bot_project_irc_msg_channel($data, $from_query = FALSE) {
         preg_match('/<td>Component:<\/td><td>(.*)<\/td>/', $result->data, $component_match);
         preg_match('/<td>Priority:<\/td><td>(.*)<\/td>/', $result->data, $priority_match);
         preg_match('/<td>Status:<\/td><td>(.*)<\/td>/', $result->data, $status_match);
-        $message = "$url => " . decode_entities($title) . ' => ' . decode_entities(implode(', ', array($project_match[1], $component_match[1], $priority_match[1], $status_match[1], $count)));
-      }
+        $message = "$url => " . decode_entities($title) . ' => ' . decode_entities(implode(', ', array($project_match[1], $component_match[1], $priority_match[1], $status_match[1], $comment_count, $seen_count)));
+        }
 
       bot_message($to, $message);
     }
@@ -186,10 +188,10 @@ function bot_project_irc_msg_channel($data, $from_query = FALSE) {
       // if the URL is a tab export, it's a ticket.
       if (strpos($url, '?format=tab') !== FALSE) {
         $lines = explode("\n", $result->data); $ticket = explode("\t", $lines[1]);
-        $count = bot_project_url_save(str_replace('?format=tab', '', $url), $ticket[1]);
+        $seen_count = bot_project_url_save(str_replace('?format=tab', '', $url), $ticket[1]);
 
         // 0:id, 1:summary, 2:reporter, 3:owner, 4:description, 5:type, 6:status, 7:priority, 8:component, 9:resolution, 10:keywords, 11:cc
-        $message = str_replace('?format=tab', '', $url) . ' => ' . decode_entities($ticket[1]) . ' => ' . implode(', ', array($ticket[2], $ticket[3], $ticket[8], $ticket[7], $count));
+        $message = str_replace('?format=tab', '', $url) . ' => ' . decode_entities($ticket[1]) . ' => ' . implode(', ', array($ticket[2], $ticket[3], $ticket[8], $ticket[7], $seen_count));
       }
       else { // not a ticket? changeset!
         $result->data = preg_replace("/\n/", '', $result->data); // for easier grepping.
@@ -200,10 +202,10 @@ function bot_project_irc_msg_channel($data, $from_query = FALSE) {
         // grab the title from the HTML and add our shortened commit message to it.
         preg_match('/<title>(.*?) - .*? - Trac<\/title>/', $result->data, $title_match);
         $title = $title_match[1] ? $title_match[1] : '<' . t('unable to determine title') . '>';
-        $count = bot_project_url_save($url, "$title - $commit_msg");
+        $seen_count = bot_project_url_save($url, "$title - $commit_msg");
 
         // and finally generate the final version of our IRC message.
-        $message = "$url => " . decode_entities($commit_msg) . " => $count";
+        $message = "$url => " . decode_entities($commit_msg) . " => $seen_count";
       }
 
       bot_message($to, $message);

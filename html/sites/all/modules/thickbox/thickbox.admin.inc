@@ -1,5 +1,5 @@
 <?php
-// $Id: thickbox.admin.inc,v 1.1.2.6 2009/03/24 14:25:36 frjo Exp $
+// $Id: thickbox.admin.inc,v 1.1.2.11 2009/08/20 05:14:55 frjo Exp $
 
 /**
  * @file
@@ -45,7 +45,7 @@ function thickbox_admin_settings() {
       '#title' => t('Image field gallery'),
       '#default_value' => variable_get('thickbox_imagefield_gallery', 1),
       '#options' => array(0 => t('Per page gallery'), 1 => t('Per post gallery'), 2 => t('Per field gallery'), 3 => t('No gallery')),
-      '#description' => t('Should the gallery be images within a single field, a single post (default) or all images on the page. The last option disabels gallerys.'),
+      '#description' => t('Should the gallery be images within a single field, a single post (default) or all images on the page. The last option disables galleries.'),
     );
     if (module_exists('imagecache')) {
       $presets_options = array(0 => t('Original image (no preset)'));
@@ -54,10 +54,10 @@ function thickbox_admin_settings() {
       }
       $form['thickbox_imagefield']['thickbox_imagecache_preset'] = array(
         '#type' => 'select',
-        '#title' => t('Image cache preset'),
+        '#title' => t('Imagecache preset'),
         '#options' => $presets_options,
         '#default_value' => variable_get('thickbox_imagecache_preset', 0),
-        '#description' => t('Select which image cache preset to use for viewing images in the thickbox.'),
+        '#description' => t('Select which Imagecache preset to use for viewing images in the thickbox.'),
       );
     }
   }
@@ -72,6 +72,19 @@ function thickbox_admin_settings() {
     '#default_value' => variable_get('thickbox_login', 0),
     '#description' => t('Automatically activate Thickbox for links to user/login.'),
   );
+  $form['thickbox_login_settings']['thickbox_login_form'] = array(
+    '#type' => 'select',
+    '#title' => t('Login form to use'),
+    '#options' => array('user_login' => t('User login'), 'user_login_block' => t('User login block'), 'custom' => t('Custom')),
+    '#default_value' => variable_get('thickbox_login_form', 'user_login'),
+    '#description' => t('Select which form to use for login. If "custom", specify below.'),
+  );
+  $form['thickbox_login_settings']['thickbox_login_custom'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Custom login form'),
+    '#default_value' => variable_get('thickbox_login_custom', ''),
+    '#description' => t('Specify the form here if you have set the login form to "custom" above.'),
+  );
 
   $form['thickbox_advanced_settings'] = array(
     '#type' => 'fieldset',
@@ -81,7 +94,7 @@ function thickbox_admin_settings() {
   );
   $form['thickbox_advanced_settings']['thickbox_ie_css'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Do not include special CSS for Internet Explorer.'),
+    '#title' => t('Do not include special CSS for Internet Explorer'),
     '#default_value' => variable_get('thickbox_ie_css', 0),
     '#description' => t('If you have added the Thickbox IE CSS to you themes IE CSS file or simply do not need it you can check this box.'),
   );

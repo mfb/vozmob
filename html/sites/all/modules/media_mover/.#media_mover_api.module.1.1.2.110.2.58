@@ -1,0 +1,3365 @@
+<?php
+
+/* $Id: media_mover_api.module,v 1.1.2.110.2.58 2009/06/29 02:46:14 arthuregg Exp $ */
+
+
+/*
+ * This file contains all the generic functions for media_moving.
+ * Specific functions for the media_mover hook are located in the
+ * media_mover.inc file.
+ */
+
+ /**
+  * @ TODO Document Document Document
+  * @ TODO Improve harvest ops to declare if they can run on a single node
+  * @ TODO Add simple tests for API intgrity
+  *
+  */
+
+/* ************************************************ */
+/* Definitions */
+/* ************************************************ */
+
+// files directory
+define('MMA_FILES_DIR','media_mover');
+
+// defines the configuration status
+define('MMA_CONFIG_STATUS_RUNNING', 'running');
+define('MMA_CONFIG_STATUS_STOPPED', 'stopped');
+define('MMA_CONFIG_STATUS_ENABLED', 'enabled');
+define('MMA_CONFIG_STATUS_DISABLED', 'disabled');
+
+// defines specific file states
+define('MMA_FILE_ERROR', 0);
+define('MMA_FILE_STATUS_HARVESTED', 2);
+define('MMA_FILE_STATUS_IN_PROCESS', 3);
+define('MMA_FILE_STATUS_PROCESS_COMPLETE', 4);
+define('MMA_FILE_STATUS_IN_STORAGE', 5);
+define('MMA_FILE_STATUS_STORAGE_COMPLETE', 6);
+define('MMA_FILE_STATUS_IN_COMPLETE', 7);
+define('MMA_FILE_STATUS_COMPLETE_COMPLETE', 8);
+
+
+/* ************************************************ */
+/* Drupal Hooks */
+/* ************************************************ */
+
+/**
+ * Implementation of hook_help().
+ */
+function media_mover_api_help($path, $arg) {
+  switch ($path) {
+    case 'admin/modules#description' :
+      return t('Media Mover module is a helper module to manipulate media files on your site.');
+  }
+  return;
+}
+
+
+/**
+ * Implementation of hook_menu().
+ */
+function media_mover_api_menu() {
+  // moved menu functions to seperate file to make it
+  // easier to keep branches in sync
+  require_once('media_mover_api_menus.inc');
+  return media_mover_api_menus();
+}
+
+
+/**
+ * Implementation of hook_perm().
+ */
+function media_mover_api_perm() {
+  return array('administer media_mover', 'Media Mover delete own file', 'administer own media_mover files', 'see media mover alerts');
+}
+
+
+/**
+ * Implementation of hook_cron
+ * Runs all active configurations
+ */
+function media_mover_api_cron() {
+  // check for any stuck jobs
+  media_mover_api_stuck_job_check();
+  // get all the configurations to run
+  $configurations = media_mover_api_get_configurations();
+  foreach ($configurations as $configuration) {
+    // check to see if we should run on cron for this configuration
+    if (media_mover_api_run_control_extend($configuration, 'cron_run')) {
+      media_mover_api_run_config($configuration, null, null, true);
+    }
+  }
+}
+
+
+/**
+ * Implementation of nodeapi
+ */
+function media_mover_api_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+
+  switch ($op) {
+    case "load":
+      if ($media_mover = media_mover_api_node_files_fetch($node->nid)) {
+        return array('media_mover' => $media_mover);
+      }
+    break;
+
+    case "view":
+      // Add the attachments list to node body
+      if (!empty($node->media_mover)) {
+       $node->body .= theme('media_mover_files', $node->media_mover);
+      }
+      return $node;
+    break;
+
+    case "delete":
+      // invoke MM modules here and delete files associated with this node
+      media_mover_api_node_files_delete($node);
+    break;
+
+    // rss feed support
+    case 'rss item':
+      return media_mover_api_rss($node);
+    break;
+
+    // clear cache and delete files
+    case 'update':
+      media_mover_api_node_update($node);
+    break;
+  }
+}
+
+
+/**
+ * implementation of hook_form_alter
+ * @param $form
+ *   array
+ * @param $form_state
+ *   array
+ * @param $form_id
+ *   string
+ *
+ */
+function media_mover_api_form_alter(&$form, $form_state, $form_id) {
+  // check and see if this is a node delete form
+  if ($form_id == 'node_delete_confirm') {
+    // check if there is any media mover content
+    if ($node_mm_files = $form['#parameters'][2]->media_mover ) {
+      $files = array();
+      foreach ($node_mm_files as $cid => $mmfiles) {
+        $files[] = basename($mmfiles[0]['complete_file']);
+      }
+      $form['media_mover'] = array(
+        '#type' => 'markup',
+        '#title' => t('Media Mover files'),
+        '#value' => t('If you delete this node, you will also delete these Media Mover files: %files', array('%files' => implode(', ',$files))),
+      );
+    }
+  }
+
+  // display MM files on node edit page if there are MM files
+  if ( isset($form['type']) && $form['#node']->media_mover) {
+    // get the list of files
+    if ($html = media_mover_api_files_node_edit_display($form['#node'])) {
+      $form['media_mover'] = array(
+        '#type' => 'fieldset',
+        '#title' => t('Media Mover files'),
+      );
+      $form['media_mover']['media_mover_files'] = array(
+        '#type' => 'markup',
+        '#value' => $html,
+      );
+    }
+  }
+}
+
+
+/**
+ * Implementation of hook_flush_caches
+ * @return array
+ */
+function media_mover_api_flush_caches() {
+  return array('cache_media_mover');
+}
+
+
+/**
+ * support for simple tests
+ * @return array of test files
+ */
+function media_mover_api_simpletest() {
+  return array_keys(file_scan_directory(drupal_get_path('module', 'media_mover_api') .'/tests', '\.test'));
+}
+
+
+/* ************************************************ */
+/* Media Mover Hook                                 */
+/* ************************************************ */
+
+/**
+ * Implementation of media_mover hook
+ * @param $op is the operator to return
+ * @param $action_id is which action is being called
+ * @param $configuration is the specific configuration saved for the action for this configuration
+ * @param $file is the file in use
+ * @param $running_config is the full configuration data currently running
+ */
+function media_mover_api_media_mover($op, $action = null, $configuration = null, &$file = array(), $running_config = null ) {
+
+  switch ($op) {
+
+    case 'name':
+      return "Media Mover defaults";
+    break;
+
+    // defines the actions that this module does
+    case 'actions':
+      return array(
+        'harvest' => array(1 => t('Bypass this operation')),
+        'process' => array(1 => t('Bypass this operation')),
+        'storage' => array(1 => t('Bypass this operation')),
+        'complete' => array(1 => t('Bypass this operation')),
+        );
+    break;
+
+    // functions called on process op
+    case 'process':
+      return $file['harvest_file'];
+    break;
+    case 'storage':
+      return $file['process_file'];
+    break;
+    case 'complete':
+      return $file['storage_file'];
+    break;
+
+    // admin options for the API setup
+    case 'admin':
+      return media_mover_api_admin_form();
+    break;
+  }
+}
+
+
+/* ************************************************ */
+/* Media Mover Menu functions */
+/* ************************************************ */
+
+
+/**
+ * menu helper to get the name of the configuration into the menu tab
+ * @param int $cid
+ *   configuration id
+ * @return string
+ */
+function media_mover_api_menu_configuration_title_callback($cid) {
+  $configuration = media_mover_api_get_configuration($cid);
+  return $configuration->name;
+}
+
+
+/* ************************************************ */
+/* Media Mover internal functions */
+/* ************************************************ */
+
+/**
+ * defines the verb types for all media mover actions
+ * @return array of media mover action types
+ */
+function media_mover_api_verbs() {
+  static $verbs;
+  if (! $verbs) {
+    $verbs = array('harvest', 'process', 'storage', 'complete');
+  }
+  return $verbs;
+}
+
+/**
+ * returns human readable version of the status code
+ *
+ * @param string $status_code
+ */
+function media_mover_api_get_status($status_code) {
+  switch ($status_code) {
+    case MMA_CONFIG_STATUS_ENABLED:
+    case MMA_CONFIG_STATUS_STOPPED:
+      return t('ready');
+    case MMA_CONFIG_STATUS_RUNNING:
+      return t('running');
+    case MMA_CONFIG_STATUS_DISABLED:
+      return t('disabled');
+    default:
+      return $status_code;
+  }
+}
+
+
+/**
+ * returns an array of item status or text for status
+ * @param int $status value of status to return (optional)
+ * @return array or string
+ */
+function media_mover_api_item_status($status = null) {
+	static $states;
+	if (! $states) {
+      $states = array(
+        MMA_FILE_ERROR => t('Error'),
+        MMA_FILE_STATUS_HARVESTED => t('Harvested'),
+  	    MMA_FILE_STATUS_IN_PROCESS => t('Processing'),
+  	    MMA_FILE_STATUS_PROCESS_COMPLETE => t('Processed'),
+  	    MMA_FILE_STATUS_IN_STORAGE => t('Storing'),
+  	    MMA_FILE_STATUS_STORAGE_COMPLETE => t('Stored'),
+  	    MMA_FILE_STATUS_IN_COMPLETE => t('Finishing'),
+  	    MMA_FILE_STATUS_COMPLETE_COMPLETE => t('Finished'),
+	  );
+	}
+	if ($status != null) {return $states[$status];}
+  return $states;
+}
+
+
+/**
+ * this returns either the status id for a verb or the name of the status
+ *
+ * @param string $verb
+ * @param boolean $id
+ * @return string
+ */
+function media_mover_api_verb_base_status($id = null) {
+  $status = array(
+    // note that the harvest is a special case as the file
+    // would not exist previous to the harvest
+    'harvest' => 0,
+    'process' => MMA_FILE_STATUS_HARVESTED,
+    'storage' => MMA_FILE_STATUS_PROCESS_COMPLETE,
+    'complete' => MMA_FILE_STATUS_STORAGE_COMPLETE
+  );
+
+  // do we need to hand back english?
+  if (is_numeric($id)) {
+    // return the $verb for the ID
+    $status = array_flip($status);
+    // add the completition state.
+    $status[MMA_FILE_STATUS_COMPLETE_COMPLETE] = 'complete';
+  }
+  return $status[$id];
+}
+
+
+/**
+ * get all media_mover modules
+ * creates media_mover hook
+ *
+ * @returns array of modules names that implement media_mover hook
+ */
+function media_mover_api_modules() {
+  static $modules = array();
+  if (!$modules) {
+    foreach (module_implements('media_mover') as $m) $modules[] = $m;
+  }
+  return $modules;
+}
+
+
+/**
+ * Controls for throttle mechanisms. Returns true if the
+ * configuration should be running. If one module returns
+ * true, return true which stops the running of the configuration
+ *
+ * @param object $configuration
+ * @oaram string $action
+ * @return boolean
+ */
+function media_mover_api_run_control_extend($configuration, $action, $file = null) {
+  // disabling for now
+  return true;
+	foreach (module_implements('run_control') as $module) {
+	  // function name includes the module name
+		$function  = $module .'_run_control';
+		if (function_exists($function)) {
+		  // if any function returns true (stop) stop.
+			if ($function($configuration, $action, $file)) {
+				return true;
+			}
+		}
+	}
+}
+
+
+/* ************************************************ */
+/* Media Mover Run Configuration Functions          */
+/* ************************************************ */
+
+
+/**
+ * lets admin run all configurations, displays debug info
+ * @ TODO would be nice to provide a set of comprehensive tools here
+ * @param $cid is a configuration id which selected to run
+ * @return string
+ */
+function media_mover_api_run_configuration($cid = null) {
+  if (! $cid) {
+    $configurations = media_mover_api_get_configurations();
+    $output = t('Running all configurations') .'<br /><hr><br />';
+    foreach ($configurations as $config) {
+      $output .= media_mover_api_run_config($config, true);
+    }
+    $output .= '<hr><br />'. t('All configurations run. Check your !logs for additional data.', array('!logs' => l(t('logs'), 'admin/reports/dblog')));
+  }
+  else {
+    // load up the configuration object
+    $config = media_mover_api_get_configuration($cid);
+    if ($config->status == MMA_CONFIG_STATUS_RUNNING) {
+      $output = t('This configuration is already running. Please wait for it to finish.');
+    }
+    else {
+     $output = t('Running !config configuration', array('!config' => $config->name)) .'<br /><hr><br />';
+     $output .= media_mover_api_run_config($config, true);
+     $output .= '<hr><br />'. t('Configuration run. Check your !logs for additional data.', array('!logs' => l(t('logs'), 'admin/reports/dblog')));
+    }
+  }
+  return $output;
+}
+
+
+/**
+ * runs one configuration
+ * this is the main controller of the media mover functions
+ * @param object $config
+ *   media mover api configuration object
+ * @param boolean $debug
+ *   determines if we should output debug text
+ * @param int $nid
+ *   node id that can force the operation to harvest only from a specific drupal nid
+ * @param boolean $cron
+ *   flag if cron is requesting this run
+ * @return
+ */
+function media_mover_api_run_config($config, $debug = true, $nid = null, $cron = false) {
+  $output = t('Running') .' '. l($config->name, 'admin/build/media_mover/config/'. $config->cid .'/view') ."<br />";
+  /**
+   * first, lock config, harvest files, store files, unlock config
+   * get all files ready for processing, process one file at a time
+   * lock each file to prevent overrunning
+   */
+
+  // check to make sure that we have all directories
+  media_mover_api_check_config_dirs($config);
+
+  // start the loop where we run all the verbs
+  foreach (media_mover_api_verbs() as $verb) {
+    // we make a special case for harvesting
+    // @ TODO refactor harvest to work the same way that all the other steps do.
+    if ($verb == 'harvest') {
+      $output = media_mover_api_run_config_harvest($config, $verb, $nid);
+    }
+    else {
+      // -----------------------------------------------------
+      // run all the other configuration actions
+      // pass back the status of the previous step to get the previous files
+      $output .= media_mover_api_run_config_verb($config, $verb, media_mover_api_verb_base_status($verb), $cron);
+    }
+
+  } // end verb loop
+
+  // if in debug mode.....
+  if ($debug) {
+    return $output;
+  }
+}
+
+
+/**
+ * this runs the specific funcions of harvesting which are different
+ * than the other steps
+ *
+ * @param object $config
+ * @param int $nid
+ */
+function media_mover_api_run_config_harvest($config, $verb, $nid) {
+  // check to see if there are any files to harvest for this configuration
+  // and make sure that no other harvest is running.
+  if (! media_mover_api_harvest_lock($config)) {
+    // set some output display
+    $output .= t('Harvesting.... ') .'<br />';
+    $files = module_invoke($config->{$verb}->module, 'media_mover', $verb, $config->{$verb}->action, $config->{$verb}->configuration, null, $config, $nid);
+    $output .= t('Configuration process: <em>harvest</em> found !count files', array('!count' => count($files))) .'<br />';
+    // store the harvested files
+    if (count($files)) {
+      foreach ($files as $file) {
+        // save harvested file
+        media_mover_api_file_db_add($file, $config, $verb, MMA_FILE_STATUS_HARVESTED);
+        //media_mover_api_event_trigger('config', 'run', $verb, $file);
+      }
+    }
+    // set the stop time on this harvest so that we
+    // we can start a new harvest where we left off
+    media_mover_api_set_harvest_stop_time($config->cid);
+  }
+  return $output;
+}
+
+
+/**
+ * This is a helper function for media_mover_api_run_config() that does the
+ * actual running of the configuration
+ * @param array $config
+ *   config that is running
+ * @param string $verb
+ *   current verb running
+ * @param int $status
+ *   status of the file to fetch flag
+ * @param boolean $cron
+ *   is cron requesting this?
+ * @return string
+ */
+function media_mover_api_run_config_verb($config, $verb, $status) {
+  // how many files should we deal with? Check the configuration
+  // setting then the global setting, then default to all
+  $num = $config->settings->{'mma_'. $verb .'_num'} ? $config->settings->{'mma_'. $verb .'_num'} : variable_get('mma_'. $verb .'_num', 0);
+  // get the files, make sure to not get cached files
+  $files = media_mover_api_get_files($status, $config->cid, $num, true);
+  $output = t('Configuration process: %verb is acting on !count files', array('%verb' => $verb, '!count' => count($files))) .'<br />';
+  // loop through all of the found files for this status
+  foreach ($files as $file) {
+  	// only run this if cron isn't requeseting this OR run_control does not try to stop it
+  	// @TODO think through if we need to be passing cron here- might make more sense to have a $configuration->operator
+  	media_mover_api_run_config_verb_file($file, $config, $verb);
+  	if ( ! media_mover_api_run_control_extend($config, $verb .'_run', $file) ) {
+      //media_mover_api_run_config_verb_file($file, $config, $verb);
+  	}
+  }
+  return $output;
+}
+
+
+/**
+ * lowest level of the configuration run process, actually operates on the file
+ * and calls all the media mover modules based on the current verb
+ * @param array $file
+ *   media mover file array
+ * @param object $config
+ *   media mover configuration
+ * @param string $verb
+ * @param int $status
+ * @return array $file
+ *   the file that has been acted upon
+ */
+function media_mover_api_run_config_verb_file($file, $config, $verb ) {
+  // set the status for the file
+  $status = media_mover_api_verb_base_status($verb);
+  // make sure no one else is trying to operate on this file
+  if (media_mover_api_file_lock($file['mmfid'], $status, $status + 1) )  {
+    // now we run the actual verb on this file
+    // @NOTE not using module_invoke here b/c it doesn't seem to pass by reference correctly ($file)
+    $filepath = call_user_func_array($config->{$verb}->module .'_media_mover', array($verb, $config->{$verb}->action, $config->{$verb}->configuration, &$file, $config));
+    if ($filepath) {
+      // sucessful. Increase the file status
+      $new_status = $status + 2;
+      // add the new file path to the file array. Some modules may return
+      // true instead of a file path. If this is the case, get the current file
+      // from this file
+      if ($filepath === true) {
+        $filepath == media_mover_api_config_current_file($file);
+      }
+      // we do this here to keep the api simple for module developers
+      $file[$verb .'_file'] = $filepath;
+    }
+    else {
+      // failed
+      $new_status = MMA_FILE_ERROR;
+      // @TODO trigger email and log alert here
+    }
+    // update file record with the new data and new status
+    media_mover_api_update_file($file, $new_status);
+    // call the event triger
+    media_mover_api_event_trigger('config', 'run', $verb, $file);
+  }
+  return $file;
+}
+
+
+/**
+ * this is a helper function to run a specific configuration set on an existing file
+ * used by the mm_asset module, but will be usefule in the future
+ * @param array $file
+ * @param object $config
+ * @param array $files
+ *
+ */
+function media_mover_api_run_config_file($file, $config, $verbs) {
+  foreach ($verbs as $verb) {
+    $file = media_mover_api_run_config_verb_file($file, $config, $verb );
+  }
+}
+
+
+/* ************************************************ */
+/* Media Mover directory and file functions  */
+/* ************************************************ */
+
+
+/**
+ * check each of the configuration modules directories
+ * @param $config is a mm configuration
+ */
+function media_mover_api_check_config_dirs($config) {
+  foreach (media_mover_api_verbs() as $verb) {
+    $dirs = module_invoke($config->$verb->module, 'media_mover', 'directories', null, null);
+    if ($dirs) {
+      media_mover_api_check_dirs($dirs);
+    }
+  }
+}
+
+
+/**
+ * checks to make sure a directories exits, creates them
+ * @param array $dirs
+ *   an array of directory names, names can be single directories or nested
+ */
+function media_mover_api_check_dirs($dirs) {
+  $parent = file_directory_path() .'/'. MMA_FILES_DIR .'/';
+  if ($dirs) {
+    foreach ($dirs as $dir) {
+      $path = $parent . $dir;
+      // check and see if we can create the directory
+      if (! file_check_directory($path, FILE_CREATE_DIRECTORY) ) {
+        // call the whole path recurisvely
+        media_mover_api_build_dirs($path);
+      }
+    }
+  }
+}
+
+/**
+ * this is a recursive function that builds out the complete
+ * path being called in
+ * returns true when it finally creates a directory
+ * @param $path is a path to create directories on
+ * @return true when it completes
+ */
+function media_mover_api_build_dirs($path){
+  if (! file_check_directory($path, FILE_CREATE_DIRECTORY) && $path != '.'  ) {
+    // couldn't create the directory, try it higher up the path
+    if (media_mover_api_build_dirs(dirname($path))){
+      file_check_directory($path, FILE_CREATE_DIRECTORY);
+    }
+  }
+  return true;
+}
+
+
+/**
+ * this is a place holder function so that directory paths
+ * can be more flexible in the future without needing to
+ * rewrite indidivudual modules. Relies on drupal's files
+ * path for now. Note, this should produce a path that is
+ * executable to the file, relative to drupal. We do not
+ * need to store this path.
+ *
+ * @param $filepath is a file path to check against to return
+ *                  a good path
+ *
+ */
+function media_mover_api_dir_path($filepath = false) {
+  $path = file_directory_path() .'/'. MMA_FILES_DIR .'/';
+  if ($filepath) {
+    $path = $path . $filepath;
+    // make sure the directories exist
+    media_mover_api_check_dirs(array($filepath));
+  }
+  return $path;
+}
+
+
+/**
+ * this is a handler to check file permissions. It lets an admin set
+ * global file perms and then the modules don't have to worry about it
+ */
+function media_mover_api_set_file_perm($filepath){
+  if (variable_get('mma_file_perm', true)) {
+    if ($oct = variable_get('mma_file_mask', null)) {
+      $perms = octdec( $oct);
+    }
+    else {
+      $perms = 0644;
+    }
+    @ chmod($filepath, $perms);
+  }
+}
+
+
+/**
+ * This is a slight change of the D6 function to make it useful for MM
+ * @param string $file_name
+ * @param string $extensions
+ * @return boolean
+ */
+function media_mover_api_file_validate_extensions($file_name, $extensions) {
+  // all files are allowed
+  if ($extensions == '*') {
+    return true;
+  }
+  $regex = '/\.('. ereg_replace(' +', '|', preg_quote($extensions)) .')$/i';
+  if (preg_match($regex, $file_name)) {
+    return true;
+  }
+  return false;
+}
+
+
+/**
+ * gets an action name for a specific module
+ * @param string $module is a module name
+ * @param string $verb is the verb to call
+ * @param int $id is the action name to return
+ * @return is a the text string from the module
+ * */
+function media_mover_api_action_name($module, $verb, $id) {
+  static $names;
+  if (! $names[$module][$verb][$id]) {
+    $names[$module] = module_invoke($module, 'media_mover', 'actions', null, null);
+  }
+  return $names[$module][$verb][$id];
+}
+
+
+/* ************************************************ */
+/* Media Mover internal db functions                */
+/* ************************************************ */
+
+/**
+ * Locks tables for harvesting files
+ *
+ * @param $configuration
+ *   media mover configuration object
+ * @return boolean
+ *   false if config is not running, true if configuration is running
+ */
+function media_mover_api_harvest_lock($configuration) {
+  // lock the tables to prevent over run on this configuration
+  db_lock_table('media_mover_config_list');
+  // check the status of this configuration
+  if ($configuration->status != MMA_CONFIG_STATUS_RUNNING) {
+    // set this configuration's status to running, and set the start run time.
+    db_query('UPDATE {media_mover_config_list} SET status = "%s", last_start_time = %d, start_time = %d WHERE cid = %d', MMA_CONFIG_STATUS_RUNNING, $configuration->start_time, time(), $configuration->cid );
+    // unlock the tables
+    db_unlock_tables('media_mover_config_list');
+    return false;
+  }
+  // unlock the tables
+  db_unlock_tables('media_mover_config_list');
+  // figure out how long ago this job started in minutes
+  $time = intval( (time() - $configuration->start_time) / 60);
+  $message = 'Media Mover detected a MM job (!name) that has been running for !time minutes. You may want to consider decreasing your cron.php frequency or increase your PHP timeout.';
+  $params = array('!name' => $configuration->name, '!time' => $time);
+  // set watchdog
+  watchdog('Media Mover', $message, $params, WATCHDOG_WARNING );
+  // should we alert an admin?
+  if ($configuration->settings->mma_cron_notify && $time >= $configuration->settings->mma_cron_notify_time && $configuration->settings->mma_cron_notify_email) {
+    $subject = t('[!sitename] Media Mover Job Stuck', array('!sitename' => variable_get('site_name', false)));
+    drupal_mail_send(array(
+      'id' => 'media_mover_api_job_running',
+      'to' => $configuration->settings->mma_cron_notify_email,
+      'subject' => $subject,
+      'body' => drupal_wrap_mail(t($message, $params))
+    ));
+  }
+  return true;
+}
+
+
+/**
+ * Locks files for processing
+ *
+ * @mmfid is a file id
+ * @return false if cofnig is not running, true if so
+ */
+function media_mover_api_file_lock($mmfid, $status, $new_status) {
+  // lock the tables to prevent over run
+  db_lock_table('media_mover_files');
+
+  // check the status of the file
+  $result = db_result(db_query('SELECT status FROM {media_mover_files} WHERE mmfid = %d AND status = %d', $mmfid, $status));
+
+  if ($result['status']) {
+    // set status to in process
+    db_query('UPDATE {media_mover_files} SET status = %d WHERE mmfid = %d', $new_status, $mmfid);
+    db_unlock_tables('media_mover_files');
+    return true;
+  }
+
+  // unlock
+  db_unlock_tables('media_mover_files');
+
+  return false;
+}
+
+
+/**
+ * ends a configuration run, sets the status flag to off
+ * @cid configuration id
+ * @return
+ */
+function media_mover_api_set_harvest_stop_time($cid) {
+  // get the config
+  $config = db_fetch_array(db_query('SELECT * FROM {media_mover_config_list} WHERE cid = %d', $cid));
+
+  // we know that if the last_start_time == 0 then this was the first time
+  // through. This is a special case. Updated the last_start_time with start_time
+  if ($config['last_start_time'] == 0 ) {
+    db_query('UPDATE {media_mover_config_list} SET status = "%s", last_start_time = start_time WHERE cid = %d', MMA_CONFIG_STATUS_STOPPED, $cid);
+  }
+  else {
+    db_query('UPDATE {media_mover_config_list} SET status = "%s"  WHERE cid = %d', MMA_CONFIG_STATUS_STOPPED, $cid);
+  }
+}
+
+
+/**
+ * checks for files which have been in process mode for longer than
+ * the defined state, sends email to admin
+ */
+function media_mover_api_stuck_job_check() {
+  // set the time where we need to notfiy current time - notify time
+  $time = time() - (variable_get('mma_cron_notify_time', 10) * 60);
+
+  // build the db query
+  $results = db_query('SELECT cid, mmfid, status, date FROM {media_mover_files} WHERE status IN (%d, %d, %d) AND date < %d',
+    MMA_FILE_STATUS_IN_PROCESS, MMA_FILE_STATUS_IN_STORAGE, MMA_FILE_STATUS_IN_COMPLETE, $time);
+
+  $rows = array();
+  while ($result = db_fetch_array($results)) {
+    $row = array(
+      l( t('File id: !id', array('!id' => $result['mmfid'])),
+        $GLOBALS['base_url'] .'/admin/build/media_mover/file/edit/'. $result['mmfid']
+      ),
+      t('Stuck in: !status', array('!status' => media_mover_api_item_status($result['status']))),
+      t('Since: !date', array('!date' => format_date($result['date'])))
+    );
+    $rows[] =  $row;
+  }
+
+  // are there stuck any to report?
+  if (count($rows)) {
+    $message = theme('media_mover_api_stuck_job', $rows);
+    watchdog('media_mover', $message, null, WATCHDOG_NOTICE);
+
+    // load the configuration to see if we have settings we have to abide by
+    $configuration = media_mover_api_get_configuration($result['cid']);
+
+    // should we alert an admin?
+    $send = isset($configuration->settings->mma_cron_notify) ? $configuration->settings->mma_cron_notify : variable_get('mma_cron_notify', false);
+    if ($send) {
+      $subject = t('[!sitename] Media Mover Job Stuck', array('!sitename' => variable_get('site_name', false)));
+      drupal_mail('media_mover_api_job_running',
+        $configuration->settings->mma_cron_notify_email ?
+          $configuration->settings->mma_cron_notify_email :
+          variable_get('mma_cron_notify_email', null),
+        $subject, $message);
+    }
+  }
+}
+
+
+/**
+ * this is a trigger function that is called for specific events
+ * so that other modules can be notified that some specific media mover
+ * function is taking place. Right now it's largerly a wrapper for
+ * workflow_ng
+ *
+ * @param string $type is what kind of trigger
+ * @param string $event is the kind of thing happening
+ * @param string $verb is the action happening
+ * @param unknown $data is the data to pass
+ */
+function media_mover_api_event_trigger($type, $event, $verb, $data) {
+  switch ($type) {
+    case 'config':
+      switch($event) {
+        case 'run':
+          if (module_exists('mm_workflow_ng')) {
+            // fire the harvest method;
+            workflow_ng_invoke_event('media_mover_'. $verb .'_file', $data);
+          }
+        break;
+      }
+    break;
+  }
+}
+
+
+/**
+ * adds a new config to the db
+ * @param string $name name of the configuration
+ * @param string $description of the configuration
+ * @param object $settings configuration specific settings
+ * @param int $status usually "enabled"
+ * @return cid value
+ */
+function media_mover_api_config_add($name, $description, $settings, $status) {
+  db_query("INSERT INTO {media_mover_config_list} (name, description, settings, status) VALUES ('%s', '%s', '%s', '%s')",
+    $name, $description, serialize($settings), $status
+  );
+  $cid = db_last_insert_id('media_mover_config_list', 'cid');
+  return $cid;
+}
+
+/**
+ * this adds a new media mover process to a configuration
+ * @param int $cid
+ * @param string $verb
+ * @param string $module
+ * @param string $action
+ * @param array $configuration
+ */
+function media_mover_api_configuration_process_add($cid, $verb, $module, $action, $configuration ) {
+  db_query("INSERT INTO {media_mover_configurations} (cid, verb, module, action, configuration) VALUES (%d, '%s', '%s', '%s', '%s')", $cid, $verb, $module, $action, serialize($configuration));
+}
+
+
+/**
+ * adds a newly created media_mover file to the media_mover db table
+ *
+ * @param $file is a file array with all the data harvested
+ * @param $config is a MM config
+ * @param $verb is what MM processs is calling this
+ * @return $mmfid for this files ID
+ */
+function media_mover_api_file_db_add($file, $config, $verb, $status) {
+  // add to db
+  db_query('INSERT INTO {media_mover_files} (nid, fid, cid, harvest_file, status, date, data)  VALUES (%d, %d, %d, "%s", %d, %d, "%s")',
+    $file['nid'], $file['fid'], $config->cid, $file['harvest_file'], $status, time(), serialize($file['data'])
+  );
+
+  // return the mmfid
+  return db_last_insert_id("media_mover_files", 'mmfid');
+}
+
+
+/**
+ * selects all files with this status. We don't cache this as it's used internally for MMAPI
+ * @param int $status
+ *   file status to select with
+ * @param int $cid
+ *   option to select specific configuration
+ * @param int $num
+ *   the number of files to get
+ * @param boolean $reset
+ *   fetch without cache?
+ * @return is an array of files
+ */
+function media_mover_api_get_files($status, $cid = null, $num = null, $reset = false) {
+  $options = array();
+  if ($cid) {
+    $options[] = "AND cid = $cid";
+  }
+  // set the limit queue
+  if ($num) {
+    $options[] = 'LIMIT 0, '. $num;
+  }
+  // find all matching files
+  $results = db_query('SELECT mmfid FROM {media_mover_files} WHERE status = %d '. implode(' ', $options), $status);
+  // put files into an array
+  $items = array();
+  while ($result = db_fetch_array($results)) {
+    $item = media_mover_api_file_fetch($result['mmfid'], $reset);
+    $items[] = $item;
+  }
+  return $items;
+}
+
+
+/**
+ * fetches files from files db for a specific node
+ * invokes media_mover fetch hook to get additional data that media mover
+ * modules may have saved in seperate tables regarding a node. Caches results
+ * so that invoke is not so painful
+ *
+ * @param int nid
+ *   node id
+ * @param int $status
+ *   MM file status for specific files, false for all files
+ * @return array files
+ *   media mover file array
+ */
+function media_mover_api_node_files_fetch($nid, $status = MMA_FILE_STATUS_COMPLETE_COMPLETE) {
+  // if a status is being passed set an id
+  if ($status) {
+    $status_id = "_$status";
+    $file_status = "AND status = $status ";
+  }
+
+  // create cache name
+  $cache_name = 'media_mover_files_node_'. $nid . $status_id;
+  // get data from the cache
+  $data = cache_get($cache_name, 'cache_media_mover');
+  // we can haz cache?
+  if (! $data->data) {
+    $data = array();
+    $results = db_query('SELECT mmfid, cid FROM {media_mover_files} WHERE nid = %d '. $file_status .' ORDER BY cid', $nid);
+    while ($result = db_fetch_array($results)) {
+      $data[$result['cid']][] = media_mover_api_file_fetch($result['mmfid']);
+    }
+    cache_set($cache_name, $data, 'cache_media_mover', CACHE_TEMPORARY);
+    return $data;
+  }
+  return $data->data;
+}
+
+
+/**
+ * Takes a file array and returns the the file path from the previous status.
+ * This gives the "current" file beause the status is the current operation and the
+ * current file is the out put of the last status.
+ *
+ * @param array $file
+ * @param string $type
+ *    is the file to return
+ * @return string
+ */
+function media_mover_api_config_current_file($file, $type = 'previous') {
+  switch ($type) {
+    case 'previous':
+      $status  = $file['status'] -2;
+      return $file[media_mover_api_verb_base_status($file['status'] -2) .'_file'];
+    break;
+    case 'final':
+      return $file[media_mover_api_verb_base_status(MMA_FILE_STATUS_COMPLETE_COMPLETE, true) .'_file'];
+    break;
+  }
+}
+
+
+/**
+ * Takes an incoming file and looks for node data on
+ * the file array. Returns false if it can not find any
+ * otherwise returns a node
+ * @param $file
+ *   media mover file array
+ * @return object
+ *   drupal node object
+ */
+function media_mover_api_get_node_from_file($file) {
+  // Node data is stored on $file['data']['node']. It can be the case
+  // that this is not complete data. Try to load any data we find
+  if (! $nid = $file['nid']) {
+    if (! $nid = $file['node']->nid ) {
+      if (! $nid = $file['data']['nid']) {
+        return false;
+      }
+    }
+  }
+  return node_load($nid);
+}
+
+
+/**
+ * Takes an incoming file and looks for user data on
+ * the file array. Returns false if it can not find any
+ * otherwise returns a user
+ * @param $file
+ *   media mover file array
+ * @return object
+ *   drupal user object
+ */
+function media_mover_api_get_user_from_file($file) {
+  // Node data is stored on $file['node']. It can be the case
+  // that this is not complete data. Try to load any data we find
+  if ($file['user']) {
+    if ($user = user_load($file['user'])) {
+      return $user;
+    }
+  }
+  return false;
+}
+
+
+/**
+ * update the config name, description and status
+ *
+ * @param $cid is the cid
+ * @param $name is the name of the config
+ * @param $description is the description of the config
+ * @param object $settings are the configuration's settings
+ * @param $status is the status- enabled, disabled, running, stopped
+ */
+function media_mover_api_configlist_config_update($cid, $name, $description, $settings, $status) {
+  db_query("UPDATE {media_mover_config_list} SET name = '%s', description = '%s', settings = '%s', status = '%s' WHERE cid = %d", $name, $description, serialize($settings), $status, $cid);
+}
+
+
+/**
+ * update a specific verb in a configuration
+ * @param cid is a config id
+ * @param verb is verb to match on
+ * @param configuration is a serialized array
+ */
+function media_mover_api_configuration_verb_update($cid, $verb, $configuration ) {
+  db_query("UPDATE {media_mover_configurations} SET configuration = '%s' WHERE cid = %d AND verb = '%s'", $configuration, $cid,  $verb);
+}
+
+
+/**
+ * updates the database with new data from a file that has been acted upon
+ * @param $file is a complete file array
+ */
+function media_mover_api_update_file($file, $status) {
+  $file['data'] = serialize($file['data']);
+  // first lock the table so that nobody can get in the mix
+  db_lock_table('media_mover_files');
+  db_query('UPDATE {media_mover_files} SET '.
+    'nid = %d, fid = %d, harvest_file = "%s", process_file = "%s", storage_file = "%s", complete_file = "%s", status = %d, data = "%s" WHERE mmfid = %d ',
+    $file['nid'], $file['fid'], $file['harvest_file'], $file['process_file'], $file['storage_file'],
+    $file['complete_file'], $status, $file['data'], $file['mmfid']
+  );
+  foreach (media_mover_api_verbs() as $verb) {
+    if (isset($file["{$verb}_module"])) {
+      module_invoke($file["{$verb}_module"], 'media_mover', 'update', $file["{$verb}_action"], null, $file  );
+    }
+  }
+  db_unlock_tables('media_mover_files');
+  // clear the cache for this file if we have a NID
+  if ($file['nid']) {
+    cache_clear_all('media_mover_files_node_'. $file['nid'], 'cache_media_mover', true);
+  }
+}
+
+
+/**
+ * fetches all files associated with a specific $cid
+ *
+ * @param $cid is a configuration id
+ * @return is an array of file arrays
+ */
+function media_mover_api_fetch_files($cid){
+  $files = array();
+  $results = db_query('SELECT * FROM {media_mover_files} WHERE cid = %d', $cid);
+  while ($file = db_fetch_array($results)) {
+    // unserailize the stored data
+    $file['data'] = unserialize($file['data']);
+    $files[] = $file;
+  }
+  return $files;
+}
+
+
+/**
+ * run a delete function for harvest and storage modules to delete
+ * files they've handled
+ *
+ * @param $cid is a configuration id
+ */
+function media_mover_api_config_delete_files($cid){
+  // get config
+  $config = media_mover_api_get_configuration($cid);
+  // get all the files
+  $items = media_mover_api_fetch_files($cid);
+  foreach ($items as $item) {
+    media_mover_api_file_delete_call($item);
+  }
+}
+
+/* ******************************************************** */
+/* CONFIGURATION functions                                  */
+/* ******************************************************** */
+
+
+/**
+ * Get the active configurations from the db
+ *
+ * @return array of configuration objects
+ */
+function media_mover_api_get_configurations() {
+  $configurations = array();
+  // get all active configuration names
+  $results = db_query("SELECT * FROM {media_mover_config_list} mmcl WHERE mmcl.status != 'disabled'");
+  while ($config_name = db_fetch_array($results)) {
+    $configurations[] = media_mover_api_build_configuration($config_name);
+  }
+  return $configurations;
+}
+
+
+/**
+ * wrapper function for menu arguments
+ * @param int $cid
+ * @return object
+ */
+function media_mover_api_menu_get_configuration_load($cid) {
+  return media_mover_api_get_configuration($cid);
+}
+
+/**
+ * takes a CID and returns the full configuration object
+ * uses a local cache to store config data to prevent multiple hits the DB
+ * @param int $cid is a configuration id
+ * @return object config
+ */
+function media_mover_api_get_configuration($cid) {
+  // we locally cache the configurations here
+  static $configurations;
+  if (! $configurations[$cid]) {
+    $result = db_fetch_array(db_query('SELECT * FROM {media_mover_config_list} WHERE cid = %d', $cid));
+    if ($result['cid']) {
+      // add this configuration to the static cache
+      $configurations[$cid] = media_mover_api_build_configuration($result);
+    }
+  }
+  // return false if necessary
+  if (! $configurations[$cid]) { return false;}
+  // return the config
+  return $configurations[$cid];
+}
+
+
+/**
+ * creates a single runable configuration from the configuration
+ * array from the db
+ * @param array $config_array is the data from the db config list
+ * @return object $config
+ */
+function media_mover_api_build_configuration($config_array) {
+  $config = new stdClass();
+  $config->name = $config_array['name'];
+  $config->cid = $config_array['cid'];
+  $config->description = $config_array['description'];
+  $config->start_time = $config_array['start_time'];
+  $config->last_start_time = $config_array['last_start_time'];
+  $config->status = $config_array['status'];
+  $config->settings = unserialize($config_array['settings']);
+
+  // get the specific configs for this configuration
+  $config_from_db = db_query("SELECT * FROM {media_mover_configurations} mmc WHERE mmc.cid = %d", $config_array['cid']);
+
+  while ($single_config = db_fetch_array($config_from_db)) {
+    $config->{$single_config['verb']}->module = $single_config['module'];
+    $config->{$single_config['verb']}->action = $single_config['action'];
+    $config->{$single_config['verb']}->configuration = unserialize($single_config['configuration']);
+    $config->{$single_config['verb']}->configuration['cid'] = $config_array['cid'];
+    $config->{$single_config['verb']}->configuration['module'] = $single_config['module'];
+    $config->{$single_config['verb']}->configuration['action'] = $single_config['action'];
+    $config->{$single_config['verb']}->configuration['verb'] = $single_config['verb'];
+    $config->{$single_config['verb']}->cid = $single_config['cid'];
+  }
+
+  // load up the heirarchy of this node
+  $config->hierarchy = media_mover_api_configuration_hierarchy($config->cid);
+
+  return $config;
+}
+
+
+/* ******************************************************** */
+/* HIERARCHY functions                                  */
+/* ******************************************************** */
+
+
+/**
+ * takes a configuration id and returns parent and children info
+ * this is an internal function which the configuration_load process uses
+ * @NOTE this only handles one level of hierarchy. Maybe down the line we can do more
+ * @param int $cid
+ * @return object
+ */
+function media_mover_api_configuration_hierarchy($cid) {
+  $result = db_fetch_array(db_query("SELECT children, parent FROM {media_mover_hierarchy} WHERE cid = %d", $cid));
+  if ($result['parent'] == 0 || $result['parent']) {
+    $hierarchy->parent = $result['parent'];
+  }
+  // extract children
+  if ($children = unserialize($result['children'])) {
+    foreach ($children as $child) {
+      $configurations[] = $child;
+    }
+    $hierarchy->children = $configurations;
+  }
+  return $hierarchy;
+}
+
+
+/**
+ * gets a list of all the configurations that are
+ * not children. Good for listing out parents
+ * @return array
+ *   array of cid values
+ */
+function media_mover_api_get_configuration_parents() {
+  $results = db_query("SELECT cid FROM {media_mover_hierarchy} WHERE parent = 0");
+  while($result = db_fetch_array($results)) {
+    $parents[] =  $result['cid'];
+  }
+  return $parents;
+}
+
+
+/**
+ * this sets the hierarchy of a configuration. It will either update
+ * or create an entry. The append value can change the behavior of the
+ * function to merge the current children values with the new values.
+ * @param int $cid
+ * @param int $parent
+ * @param array $children
+ *   array of cid values
+ * @param boolean $append
+ *   if this is true, merge children with current children, false, overwrite
+ * @param boolean $remove
+ *   remove specified children
+ */
+function media_mover_api_hierarchy_update($cid, $parent = 0, $children = array(), $append = false, $remove = false) {
+  // load the configuration that is incoming so we have hierarchy data
+  $configuration = media_mover_api_get_configuration($cid);
+
+  // if there is no hiearachy data, we are creating the entry.
+  if (! $parent && ! count($children))  {
+    db_query('INSERT INTO {media_mover_hierarchy} (cid, parent) VALUES (%d, %d)', $cid, 0);
+    return;
+  }
+
+  // are we appending children to existing children?
+  if ($append && count($configuration->hierarchy->children) && count($children)) {
+    $children = array_merge($configuration->hierarchy->children, $children);
+  }
+
+  // do we need to remove children?
+  if ($remove && count($children)) {
+    foreach ($configuration->hierarchy->children as $child) {
+      if (! in_array($child, $children)) {
+        $clean_children[] = $child;
+      }
+      // set children to be the clean ones
+      $children = $clean_children;
+    }
+  }
+
+  // now we update with our data
+  db_query('UPDATE {media_mover_hierarchy} SET parent = %d, children = "%s" WHERE cid = %d', $parent, serialize($children), $cid);
+}
+
+
+/**
+ * this function builds a list of configurations with
+ * their hierarchy arrangement
+ * @TODO figure out how todo this with mysql instead of this hacky way
+ * @return array
+ */
+function media_mover_api_hierachy_configuration_list() {
+  // get all the parents first
+  $results = db_query("SELECT cid, children FROM {media_mover_hierarchy} WHERE parent = 0 OR parent = null ");
+  while ($result = db_fetch_array($results)) {
+    // get the parent config
+    $configurations[] = media_mover_api_get_configuration($result['cid']);
+    if ( $children = unserialize($result['children'])) {
+      foreach ($children as $child) {
+        if ($configuration = media_mover_api_get_configuration($child)) {
+          $configurations[] = $configuration;
+        }
+      }
+    }
+  }
+  return $configurations;
+}
+
+
+/**
+ * Gets a list of configurations that implement the specified module
+ * @param $name
+ *   string, module name
+ * @return array
+ */
+function media_mover_api_get_configurations_by_module($name) {
+  // find all the media mover configurations that us FTP
+  $results = db_query('SELECT cid FROM {media_mover_configurations} WHERE module = "%s"', $name);
+  while($result = db_fetch_array($results)) {
+    $configuration = media_mover_api_get_configuration($result['cid']);
+    $options[$configuration->cid] = $configuration->name;
+  }
+  if (count($options)) {
+    return $options;
+  }
+  return false;
+}
+
+
+/* ****************************************** */
+/* media mover ADMIN PAGES                    */
+/* ****************************************** */
+
+/**
+ * calls all of the media mover modules which
+ * implement the 'admin' param
+ */
+function media_mover_api_admin_settings() {
+  $form = array();
+
+  $form['display'] = array(
+    '#type' => 'markup',
+    '#value' => '<p>'. t('These are default settings for Media Mover and its modules.'),
+  );
+
+  $form = array();
+
+  // get all the admin forms
+  foreach (media_mover_api_modules() as $m) {
+    if ($elements = module_invoke($m, 'media_mover', 'admin', null, null)) {
+      // move through all the elements to put them in the correct places in the array-
+      // a module can add elements to another's fieldsets.
+      foreach ($elements as $key => $values) {
+        if (isset($form[$key])) {
+          // move all the values onto this item
+          foreach($values as $id => $value) {
+            $form[$key][$id] =  $value ;
+          }
+        }
+        else {
+          $form[$key] = $values;
+        }
+      }
+    }
+  }
+
+  return system_settings_form($form);
+}
+
+
+/**
+ * this is a form builder for the admin settings- wraps the advanced
+ * form that is used on the config/X/edit form. this is called from the
+ * media_mover_hook
+ * @return array drupal form array
+ */
+function media_mover_api_admin_form() {
+  $form['admin'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Media Mover default options'),
+    '#collapsible' => true,
+    '#description' => t('These settings set the default value for all configurations. Settings can be overridden on a per configuration basis by editing the configuration and changing the option values under the <em>advanced</em> option.')
+  );
+
+  $form = array_merge($form, media_mover_api_config_advanced_settings_form());
+  return $form;
+}
+
+
+/**
+ * display information about media_mover modules
+ * and existing configurations
+ * @return string html
+ */
+function media_mover_api_page() {
+  // add the css file
+  drupal_add_css(drupal_get_path('module', 'media_mover_api') . '/media_mover_api.css');
+
+  // ------------------------------------
+  // builds the enabled module information
+
+  $row = array();
+  $header = array(t('Loaded modules'), t('Action type(s)'), t('Module actions'));
+
+  // loop through all of the modules to get the actions
+  foreach (media_mover_api_modules() as $m) {
+    // initialize these arrrays
+    $module_verbs = array();
+    $module_actions = array();
+
+    // get all mm module actions
+    $actions = module_invoke($m, 'media_mover', 'actions', null, null);
+    foreach (media_mover_api_verbs() as $verb) {
+      if (is_array($actions[$verb])) {
+        foreach($actions[$verb] as $action_verb => $action) {
+          $module_verbs[] = $verb;
+          $module_actions[] =  $action;
+        }
+      }
+    }
+
+    $item = array();
+    $item[] = "<strong>". module_invoke($m, 'media_mover', 'name', null, null) ."</strong>";
+    $item[] = implode(", ", $module_verbs);
+    $item[] = implode(", " , array_unique($module_actions));
+    $row[] = $item;
+  }
+
+  $modules = theme('table', $header, $row);
+
+  // ------------------------------------------
+  // builds the enabled configuration information
+
+  // build header
+  $header = array('', t('Name & Description'), t('Files / Files in process'), t('Last run'), t('Status'), t('Run'), t('Edit'), );
+
+  // get the configurations in hierarchical format
+  if ($list = media_mover_api_hierachy_configuration_list()) {
+    foreach ($list as $configuration) {
+      // Build all the display data for each row
+
+      // initalize the row
+      $row = array();
+
+      // handle the status of the current configuration
+      switch ($configuration->status) {
+        case 'enabled':
+        case 'stopped':
+          $status = t('ready') .' ('. l(t('disable'), 'admin/build/media_mover/config/'.  $configuration->cid .'/status/'. MMA_CONFIG_STATUS_DISABLED) .')';
+        break;
+        case 'running':
+          $status = t('running') .' ('. l(t('stop'), 'admin/build/media_mover/config/'. $configuration->cid .'/status/'. MMA_CONFIG_STATUS_STOPPED) .')';
+        break;
+        case 'disabled':
+          $status = t('disabled') .' ('. l(t('enable'), 'admin/build/media_mover/config/'. $configuration->cid .'/status/'. MMA_CONFIG_STATUS_ENABLED) .')';
+        break;
+      }
+
+      // get the total number of files for this config
+      $count = l(media_mover_api_configuration_files_count($configuration->cid), 'admin/build/media_mover/config/'. $configuration->cid .'/files');
+      $process_count = media_mover_api_configuration_files_count($configuration->cid, true);
+
+      // build the name and description
+      $name = l($configuration->name, 'admin/build/media_mover/config/'. $configuration->cid .'/view') .'<br />'. substr($configuration->description, 0, 100) .'...';
+
+      // is this a child configuration?
+      if ($configuration->hierarchy->parent) {
+        $title = array('|--> &nbsp; ',  $name);
+      }
+      else {
+        $title = array(array('data' => $name, 'colspan'  => 2));
+      }
+
+      // merge the title into the row
+      $row = array_merge($title, array(
+        $count ."\n". $process_count,
+        $configuration->last_start_time ?
+          date('M j, Y g:ia', $configuration->last_start_time ) :
+          ($configuration->start_time ?
+            date('M j, Y g:ia', $configuration->start_time ) : 'never'),
+        $status,
+        l(t('run'), 'admin/build/media_mover/config/'. $configuration->cid .'/run'),
+        l(t('edit'), 'admin/build/media_mover/config/'. $configuration->cid.'/edit'),
+        )
+      );
+      $rows[] = $row;
+    }
+
+    $configs = theme('table', $header, $rows);
+  }
+
+  $form['configs'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Media Mover Configurations'),
+    '#collapsed' => false,
+    '#collapsible' => true,
+  );
+  $form['configs']['content'] = array(
+    '#type' => 'markup',
+    '#value' => $configs,
+  );
+  $form['modules'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Installed Media Mover Modules'),
+    '#collapsed' => true,
+    '#collapsible' => true,
+  );
+  $form['modules']['content'] = array(
+    '#type' => 'markup',
+    '#value' => $modules,
+  );
+
+  return drupal_render($form);
+}
+
+
+/**
+ * creates the landing page for an individual configuration
+ *
+ * @param int $cid
+ *   media mover configuration id
+ * @return string html
+ */
+function media_mover_api_configuration_view($cid) {
+  // load the configuration
+  $config = media_mover_api_get_configuration($cid);
+
+  drupal_set_title(t('Viewing: !name', array('!name' => $config->name)));
+
+  // create the list of actions you can take with this configuration
+  $actions = array(
+    l(t('Edit configuration'), "admin/build/media_mover/config/$cid/edit"),
+    l(t('View files'), "admin/build/media_mover/config/$cid/files"),
+    l(t('Run configuration'), "admin/build/media_mover/config/$cid/run"),
+    l(t('Export configuration'), "admin/build/media_mover/export/". $cid),
+    l(t('Stop configuration'), "admin/build/media_mover/config/$cid/status/". MMA_CONFIG_STATUS_STOPPED),
+    l(t('Disable configuration'), "admin/build/media_mover/config/$cid/status/". MMA_CONFIG_STATUS_DISABLED),
+    l(t('Empty configuration files'), "admin/build/media_mover/config/$cid/empty"),
+    l(t('Delete configuration'), "admin/build/media_mover/config/$cid/delete"),
+  );
+  $actions = theme('item_list', $actions);
+
+  // create the description area for this configuration
+  $description[] = $config->description;
+
+  // set the status for this configuration
+  $description[] = '<p>'. t('Current status %status', array('%status' => media_mover_api_get_status($config->status))) .'</p>';
+
+  // get the file count
+  $description[] = '<p>'. t('!count files harvested by this configuration', array('!count' => media_mover_api_configuration_files_count($cid))) .'</p>';
+
+  // get the in process file count
+  $process_count = media_mover_api_configuration_files_count($cid, true);
+  $description[] = '<p>'. t('!count files are currently being processed by this configuration', array('!count' => $process_count)) .'</p>';
+
+  // get a list of all the modules for this configuration
+  foreach (media_mover_api_verbs() as $verb) {
+    $modules[] = $verb .': '. $config->{$verb}->module;
+  }
+  $description[] = '<p>'. t('This configuration implements: '). theme('item_list', $modules) .'</p>';
+
+  $description = implode("\n", $description);
+
+  return theme('table', array(), array(array($description, $actions)));
+}
+
+
+/* ****************************************** */
+/* ADD / EDIT configuration functions         */
+/* ****************************************** */
+
+/**
+ * Add configuration form
+ * @param string $id is a cache id for the import functions
+ * @return array drupal form array
+ */
+function media_mover_api_add_config_form($form, $id = null) {
+  // do we have an incoming cache id that we should load
+  // an imported configuration from?
+  if ($id) {
+    $configuration = cache_get('media_mover_config_'. $id, 'cache');
+    if ($configuration->data) {
+      $configuration = $configuration->data;
+      drupal_set_message(t('You are now configuring the configuration you just imported. Please make any changes and save the configuration.'));
+      // delete the cached configuration
+      cache_clear_all('media_mover_config_'. $id, 'cache');
+    }
+  }
+
+  // get the base configuration items
+  $form = media_mover_api_configuration_base_form($configuration);
+  // add all mm module config forms
+  $form[] = media_mover_api_build_add_config($configuration);
+  // add on the advanced form features
+  $form['advanced'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Advanced configuration'),
+    '#collapsible' => true,
+    '#collapsed' => true,
+  );
+  $form['advanced'][] = media_mover_api_config_advanced_settings_form($configuration);
+  // submit button
+  $form['submit'] = array('#type' => 'submit', '#value' => t('Save configuration'));
+  return $form;
+}
+
+
+/**
+ * takes config data and creates the form prefix that is needed
+ * for manipulating the add/edit forms
+ *
+ * @param array $configuration
+ * @return string prefix name
+ */
+function media_mover_api_form_prefix($configuration) {
+  return $configuration['verb'] .'--'. $configuration['module'] .'--'. $configuration['action'] .'--';
+}
+
+
+/**
+ * this function builds the base options for the configuration
+ * options
+ *
+ * @param object $configuration
+ * @return array drupal form array
+ */
+function media_mover_api_configuration_base_form($configuration = null) {
+  $form['config'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Configuration Info'),
+  );
+  $form['config']['mm_config_name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Name your configuration'),
+    '#description' => t('Give a descriptive name to your configuration'),
+    '#default_value' => $configuration->name ? $configuration->name : variable_get('mm_config_name', t('My configuration name')),
+    '#required' => true,
+  );
+  $form['config']['mm_config_descript'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Describe configuration'),
+    '#description' => t('Enter a description for your configuration.'),
+    '#default_value' => $configuration->description ? $configuration->description : variable_get('mm_config_descript', t('My configuration description')),
+    '#required' => true,
+  );
+  return $form;
+}
+
+
+/**
+ * admin settings for the API module
+ * @param object $configuration is a media mover configuration object
+ * @return array drupal form array
+ */
+function media_mover_api_config_advanced_settings_form($configuration = null) {
+
+  // umask
+  $form['mma_file_perm'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Set created file permissions'),
+    '#default_value' => isset($configuration->settings->mma_file_perm) ? $configuration->settings->mm_file_perm : variable_get('mma_file_perm', false),
+  );
+
+  // umask
+  $form['mma_file_mask'] = array(
+    '#type' => 'textfield',
+    '#title' => t('umask to use'),
+    '#default_value' => isset($configuration->settings->mma_file_mask) ? $configuration->settings->mma_file_mask : variable_get('mma_file_mask', '0644'),
+    '#description' => t('Use this if you need to change the permssions on your file system for files created by Media Mover. Default is 0644, however you may choose to have more or less restrictive options.'),
+    '#size' => 4,
+  );
+
+  // Node options
+  $form['node'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Node options'),
+    '#description' => t('You can set the behavior of the items produced by Media Mover on a particular node.'),
+  );
+
+  // list items
+  $form['node']['mma_node_edit_item_show'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Show items on node edit screen'),
+    '#default_value' => isset($configuration->settings->mma_node_edit_item_show) ? $configuration->settings->mma_node_edit_item_show : variable_get('mma_node_edit_item_show', false),
+    '#description' => t('When a user edits a node, they will see a list of any Media Mover items attached to the node, similar to the file attachments list.'),
+   );
+
+   // item deletion
+  $form['mma_node_item_delete'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Delete Media Mover items with nodes'),
+    '#default_value' => isset($configuration->settings->mma_node_item_delete) ? $configuration->settings->mma_node_item_delete : variable_get('mma_node_item_delete', true),
+    '#description' => t('When you delete a node that has Media Mover items associated with it, do you want those items deleted as well? This is good for reducing file system cruft.'),
+  );
+
+  // RSS display
+  $form['advanced']['mma_node_config_rss'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Expose to rss'),
+    '#description' => t('You can expose the items generated to Drupal\'s RSS feed.'),
+    '#default_value' =>  isset($configuration->settings->mma_node_config_rss) ? $configuration->settings->mma_node_config_rss : variable_get('mma_node_config_rss', false),
+  );
+
+  $form['time'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Job timeout alert'),
+    '#collapsible' => true,
+    '#collapsed' => isset($configuration->settings->mma_cron_notify) ? $configuration->settings->mma_cron_notify : variable_get('mma_cron_notify', false) ? false : true,
+    '#description' => t('Sometimes a MM job can get stuck and prevent MM from running in the future. Use this to notify an admin that the queue needs review.'),
+  );
+
+  $form['time']['mma_cron_notify'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Notify admin when a MM job has run to long'),
+    '#default_value' => isset($configuration->settings->mma_cron_notify) ? $configuration->settings->mma_cron_notify : variable_get('mma_cron_notify', false),
+  );
+
+  $form['time']['mma_cron_notify_email'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Email address to notify'),
+    '#default_value' => isset($configuration->settings->mma_cron_notify_email) ? $configuration->settings->mma_cron_notify_email : variable_get('mma_cron_notify_email', $user->mail),
+    '#description' => t('Email address to notify that a MM job has taken more than the set time.'),
+  );
+
+  $form['time']['mma_cron_notify_time'] = array(
+    '#type' => 'textfield',
+    '#title' => t('MM alert time'),
+    '#default_value' => isset($configuration->settings->mma_cron_notify_time) ? $configuration->settings->mma_cron_notify_time : variable_get('mma_cron_notify_time', 10),
+    '#description' => t('Set the maximum time (in minutes) that a MM job can run before alerting an admin.'),
+    '#size' => 4,
+  );
+
+  $form['run_numbers'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Media Mover runtime configuration'),
+    '#collapsible' => true,
+    '#collapsed' =>  true,
+    '#description' => t('Set the number of items a specific part of the Media Mover process should operate on.'),
+  );
+
+  $form['run_numbers']['mma_process_num'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Number of items to process'),
+    '#default_value' => isset($configuration->settings->mma_process_num) ? $configuration->settings->mma_process_num : variable_get('mma_process_num', 0),
+    '#description' => t('Set the number of items to process at one time. Smaller numbers may help timeouts and improve clustering performance. <em>0 is no limit</em>.'),
+    '#size' => 4,
+  );
+
+  $form['run_numbers']['mma_storage_num'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Number of items to store'),
+    '#default_value' => isset($configuration->settings->mma_storage_num) ? $configuration->settings->mma_storage_num : variable_get('mma_storage_num', 0),
+    '#description' => t('Set the number of items to store at one time. Smaller numbers may help time outs and improve clustering performance. <em>0 is no limit</em>.'),
+    '#size' => 4,
+  );
+
+  $form['run_numbers']['mma_complete_num'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Number of items to complete'),
+    '#default_value' => isset($configuration->settings->mma_complete_num) ? $configuration->settings->mma_complete_num : variable_get('mma_complete_num', 0),
+    '#description' => t('Set the number of items to complete at one time. Smaller numbers may help time outs and improve clustering performance. <em>0 is no limit</em>.'),
+    '#size' => 4,
+  );
+
+  return $form;
+}
+
+
+/**
+ * build configuration options for a node add/edit
+ * helper function to fetch all configuration options from media mover modules
+ * this is a complicated function because it does remapping of form elements so that they
+ * can be tracked by module names and action ids.
+ * @param object $configuration is a configuration
+ * @return array drupal form array
+ */
+function media_mover_api_build_add_config($configuration) {
+  // add the javascript to show and hide configuration for modules
+  drupal_add_js(drupal_get_path('module', 'media_mover_api') .'/media_mover_api.js');
+
+  // build some descriptive text
+  $description['harvest'] = t('Harvesting is where files are selected from');
+  $description['process'] = t('Processing is how files are changed');
+  $description['storage'] = t('Storage is where files are stored in addition to Media Mover\'s internal storage');
+  $description['complete'] = t('Complete is something that happens to files at the end of a configuration');
+
+  // get the list of verbs that will be used
+  $verbs = media_mover_api_verbs();
+  foreach ($verbs as $verb) {
+    $form[$verb] = array(
+      '#type' => 'fieldset',
+      '#title' => t('%verb configuration', array('%verb' => $verb)),
+      '#attributes' => array('class' => 'mm_config_fieldset'),
+      '#description' => $description[$verb],
+    );
+
+    // now itterate on each module
+    foreach (media_mover_api_modules() as $module) {
+      $actions = module_invoke($module, 'media_mover', 'actions', null, null );
+
+      if ($actions[$verb]) {
+        foreach ($actions[$verb] as $action_id => $action) {
+
+          // if we don't have a config, build one
+          if (! $configuration->{$verb}->configuration) {
+            $config = array(
+              'verb' => $verb,
+              'module' => $module,
+              'action' => $action_id,
+            );
+          }
+          // we have a config, use it
+          else {
+            $config = $configuration->{$verb}->configuration;
+          }
+
+          // get the config form from the modules
+          if (! $action_form = module_invoke($module, 'media_mover', 'config', $action_id, $config)) {
+            // this action has no config, make a default
+            $no_options_form = array();
+            $no_options_form[$module .'_nooptions_'. $action_id] = array(
+              '#type' => 'fieldset',
+              '#title' => 'No options'
+            );
+            $no_options_form[$module .'_nooptions_'. $action_id]['data'] = array(
+             '#value' => t('There are no configuration options for this.'),
+             '#type' => 'markup',
+            );
+            $action_form = theme('media_mover_configuration_no_options', $module, $action_id);
+          }
+
+          // prefix the incoming form values with module name and action id
+          $action_form = media_mover_api_rename_form_keys($action_form, "{$verb}--{$module}--{$action_id}--" );
+
+          // get the current element from the array
+          $current_key = key($action_form);
+
+          // check for a top level fieldset and assign id and class
+          if ($action_form[$current_key]['#type'] == 'fieldset') {
+            $action_form[$current_key]['#attributes'] = array(
+              'id' => $module .'--'. $action_id,
+              'class' => 'mm_config_option');
+          }
+
+          // structure the form organized by module and action
+          $form[$verb][$module][$action_id] = $action_form;
+
+          // get the name of the module being called and build the options for a select
+          $name = module_invoke($module, 'media_mover', 'name', null, null);
+          $options["{$module}--{$action_id}"] = "$name: $action" ;
+        }
+      }
+    }
+
+    $id = $verb ."_choice";
+    $attributes = array('class' => $verb .'_choice media_mover_action_select');
+    $form[$verb][$id] = array(
+      '#title' => t('Select which %verb module and action to use', array('%verb' => $verb)),
+      '#type' => 'select',
+      '#options' => $options,
+      '#attributes' => $attributes,
+      '#weight' => -9,
+      '#default_value' => $configuration->{$verb}->module ?
+        $configuration->{$verb}->module .'--'. $configuration->{$verb}->action :
+        'media_mover_api--1' // this is the bypass value, hard coded. Probably should be re-thought
+    );
+    unset($options);
+  }
+
+  return $form;
+}
+
+
+/**
+ * remap the incoming forms from media mover modules
+ * value names so that values can saved to the correct
+ * configuration.
+ * this converts $form['item'] to $form["{$verb}--{$module}--{$action}--item"]
+ * @param $form is a drupal form
+ * @param $prefix is a string value to prefix the form values ith
+ * @return form with prefixed values
+ */
+function media_mover_api_rename_form_keys($form, $prefix){
+  if (empty($form)) {
+    return array();
+  }
+
+  $newform = array();
+  if (is_array($form)) {
+    $ignore = drupal_map_assoc(array('#options', '#default_value', '#attributes'));
+    foreach ($form as $key => $value) {
+      // we never remap on $form['item']['#options']
+      // or $form['item']['#default_value'] because their children
+      // are arrays that we don't want to change
+      if (isset($ignore[$key])) {
+        $newform[$key] = $value;
+      }
+      // check to see if the current item has a child array, isn't a drupal
+      // form item, but is a drupal form array
+      elseif (isset($value['#type']) && (! strstr($key, '#'))) {
+        $newform[$prefix.$key] = media_mover_api_rename_form_keys($value, $prefix);
+      }
+      elseif (is_array($form[$key])) {
+        $newform[$key] = media_mover_api_rename_form_keys($value, $prefix);
+      }
+      else {
+        $newform[$key] = $value;
+      }
+    }
+  }
+  return count($newform) ? $newform : $form;
+}
+
+
+/**
+ * implementation of hook_form_validate()
+ * @TODO this needs to be depreciated once the existing modules have
+ *       removed this hook
+ *
+ * @param string $form_id
+ *   is the form id
+ * @param array $form_values
+ *   is the array of form data
+ */
+function media_mover_api_add_config_form_validate($form, &$form_state) {
+  media_mover_api_config_form_validate($form, $form_state,  true);
+}
+
+
+/**
+ * implementation of hook_form_submit()
+ * adds a new configuration set to the db and returns the user to the
+ * configuration landing page
+ *
+ * @param string $form_id
+ *   is the form id
+ * @param array $form_values
+ *   is the array of form data
+ *
+ */
+function media_mover_api_add_config_form_submit($form, &$form_state) {
+  // Get all of the general configuration data out of this form
+  $settings = media_mover_api_configuration_get_settings($form_state['values']);
+
+  // create the config and get a cid for building the configuration
+  $cid = media_mover_api_config_add($form_state['values']['mm_config_name'], $form_state['values']['mm_config_descript'], $settings , 'enabled');
+
+  // fish out the data for each item
+  foreach (media_mover_api_verbs() as $verb) {
+    $configuration[$verb] = media_mover_api_collect_form_data($verb, $form_state['values']);
+  }
+
+  // add each configuration's config to the db
+  foreach ($configuration as $verb => $config) {
+    media_mover_api_configuration_process_add($cid, $verb, $config['module'], $config['action'], $config['configuration'], 1 );
+  }
+
+  // set the hierarchy
+  media_mover_api_hierarchy_update($cid);
+
+  // now the configuration has been created we want to get the real configuraiton
+  $configuration = media_mover_api_get_configuration($cid);
+
+  // we need to allow modules to manipulate the configuration now that it is created
+  foreach (media_mover_api_verbs() as $verb) {
+    module_invoke($configuration->{$verb}->module, 'media_mover', 'config_add', $configuration->{$verb}->action, $configuration);
+  }
+
+  drupal_set_message(t('Media mover configuration %name created.', array('%name' => $form_state['values']['name'])));
+
+  // redirect the user to the configuration landing page
+  $form_state['redirect'] =  'admin/build/media_mover/config/'. $cid .'/view';
+}
+
+
+/**
+ * this is a helper function to parse the form data from the configuration form
+ * @param string $verb
+ *   is a media mover verb identifier
+ * @param array $form_values
+ *   the data in the form array
+ * @param array $output
+ *   pass an array of module and action data in
+ * @return array
+ */
+function media_mover_api_collect_form_data($verb, $form_values) {
+
+  $output = array();
+  $output['module'] = substr($form_values["{$verb}_choice" ], 0, strpos($form_values["{$verb}_choice"], '--') );
+  $output['action'] = substr($form_values["{$verb}_choice"], strpos($form_values["{$verb}_choice"], '--') + 2 );
+
+
+  // sort through all of the values coming in
+  foreach ($form_values as $key => $value) {
+
+    // convert the key from $verb--$module--$action--$value_name
+    $items = explode('--', $key);
+
+    // match the current item against the current verb, module and action
+    if ($items[0] == $verb && $items[1] == $output['module'] && $items[2] == $output['action']) {
+      $output['configuration'][$items[3]] = $value;
+    }
+  }
+  return $output;
+}
+
+
+/**
+ * This function takes apart the form keys that are used to
+ * keep module data seperate and hand back an array of parsed
+ * values back to a requestor
+ * @TODO this will become legacy once configurations are built dynamically
+ *       instead of the static method used now
+ * @param $element
+ * @param $form_state
+ * @return array
+ */
+function media_mover_api_extract_form_data($element, $form_state) {
+  $values = array();
+
+  // figure out what module and action we are using
+  $parts = explode('--', key($element['#element_validate']));
+  $verb = $parts[0];
+  $module = $parts[1];
+  $action = $parts[2];
+
+  // is this the module in use?
+  if ($form_state['values'][$verb .'_choice'] == $module .'--'. $action) {
+    // get each of the form element data for this element
+    foreach(element_children($element) as $name) {
+      // get the name of the value that is being extracted
+      // harvest--mm_mailhandler--0--mm_mailhandler_formats
+      $data = explode('--', $name);
+      $values[$data[3]] = $element[$name]['#value'];
+    }
+    return $values;
+  }
+}
+
+
+/**
+ * helper function to get all the setting data out of the form values
+ * @param array $form_values
+ * @return object
+ */
+function media_mover_api_configuration_get_settings($form_values) {
+  foreach ($form_values as $name => $value) {
+    if (strstr($name, 'mma_')) {
+      $settings->{$name} = $value;
+    }
+  }
+  return $settings;
+}
+
+
+/**
+ * pulls the forms up to edit a specific configuration
+ * this does not allow changing the MM modules that are in use,
+ * only the specific configurations for the origional configuration
+ * can be change which prevents some potentially bad things from happening
+ *
+ * @param array $form
+ * @param int $cid is a configuration id
+ * @return array drupal form
+ */
+function media_mover_api_config_edit_form($form, $cid) {
+  $configuration = media_mover_api_get_configuration($cid);
+
+  // check if this configuration is currently running, if it is, return user to config screen
+  if ($configuration->status == 'running') {
+    drupal_set_message(t('This configuration is currently running. You need to wait to modify it until it is complete.'), 'error');
+    drupal_goto('admin/build/media_mover/config/'. $cid .'/view');
+  }
+
+  // get the standard elements for the configuration
+  $form = media_mover_api_configuration_base_form($configuration);
+
+  $options = array(1 => "enabled");
+  if ($configuration->status == 'disabled') { $status = 0;}
+  else {$status = 1; }
+  $form['config']['mm_config_status'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Configuration Enabled'),
+    '#options' => $options,
+    '#default_value' => $status,
+  );
+
+  $form['config']['mm_config_status_value'] = array(
+    '#type' => 'hidden',
+    '#value' => $configuration->status,
+  );
+
+  $form['config']['cid']= array(
+    '#type' => 'hidden',
+    '#value' => $cid,
+  );
+
+  // we need to build out the existing data
+  foreach (media_mover_api_verbs() as $verb) {
+    $form["{$verb}_choice"] = array(
+      '#type' => 'hidden',
+      '#value' => $configuration->{$verb}->module .'--'. $configuration->{$verb}->action,
+    );
+  }
+
+  // build each form element for this configuration
+  foreach(media_mover_api_verbs() as $weight => $verb) {
+    // get the form for this configuration role
+    $config_role_form = module_invoke($configuration->{$verb}->module, 'media_mover', 'config', $configuration->{$verb}->action, $configuration->{$verb}->configuration);
+
+    // prefix the incoming form values with verb and action data
+    $prefix = media_mover_api_form_prefix($configuration->{$verb}->configuration);
+    $config_role_form = media_mover_api_rename_form_keys($config_role_form, $prefix);
+
+    // get the name of the module
+    $name = module_invoke($configuration->{$verb}->module, 'media_mover', 'name', null, null);
+
+    // get the name of this action
+    $config_role_name = media_mover_api_action_name($configuration->{$verb}->module, $verb, $configuration->{$verb}->action);
+
+    $form[$verb] = $config_role_form;
+    $form[$verb]['#description'] = $name .': '. $config_role_name;
+
+    // weight the form fieldsets to display in order
+    $form[$verb]['#weight'] = $weight;
+    $form[$verb]['#type'] = 'fieldset';
+    $form[$verb]['#title'] = $verb;
+  }
+
+  // add on the advanced form features
+  // add weight to the fieldset to make it appear last
+  $form['advanced'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Advanced configuration'),
+    '#collapsible' => true,
+    '#collapsed' => true,
+    '#weight' => 9,
+  );
+  $form['advanced'][] = media_mover_api_config_advanced_settings_form($configuration);
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save configuration'),
+    '#weight' => 10,
+  );
+
+  return $form;
+}
+
+
+/**
+ * helper function to serialize form data
+ * takes a drupal form and finds all matches to $verb--$action
+ * and returns a serialized $id => $value from all the form
+ * matches
+ *
+ * we do this because we know that a given config may have multiple
+ * options for the same module action.
+ * @param array $form drupal form array
+ * @param string $match is the string to match on
+ * @param int $cid is the configuration id
+ * @return serialized array
+ */
+function media_mover_api_config_edit_form_serialize($form, $match, $cid) {
+  foreach ($form as $key => $value) {
+    if (strstr($key, $match)) {
+      $form_value = explode("--", $key);
+      $output[$form_value[3]] = $value;
+    }
+  }
+  $output['cid'] = $cid;
+  return serialize($output);
+}
+
+/**
+ * Validate incoming config form data
+ *
+ * @param string $form_edit
+ * @param array $form_values
+ */
+function media_mover_api_config_edit_form_validate($form, &$form_state) {
+  media_mover_api_config_form_validate($form, $form_state, false);
+}
+
+
+/**
+ * saves the edited configuration for data
+ * this pulls apart the prefixed form elements and sorts them into the right configuration
+ * buckets
+ * @ TODO evaluate different ways of doing this that maybe possible under D6 that make this
+ *        code simpler.
+ *
+ * @param string $form_id
+ * @param array $form_values
+ * @return drupal goto (as all form submits are)
+ */
+function media_mover_api_config_edit_form_submit($form, &$form_state) {
+  // check to see if the status was disabled
+  // this is somewhat of a hackish approach here
+  if (! $form_state['values']['mm_config_status']) { $status = MMA_CONFIG_STATUS_DISABLED; }
+  elseif ($form_state['values']['mm_config_status_value'] == MMA_CONFIG_STATUS_DISABLED ) { $status = MMA_CONFIG_STATUS_ENABLED; }
+  else {$status = $form_state['values']['mm_config_status_value']; }
+
+  // get the settings values
+  $settings = media_mover_api_configuration_get_settings($form_state['values']);
+  // update the name and description
+  media_mover_api_configlist_config_update($form_state['values']['cid'], $form_state['values']['mm_config_name'], $form_state['values']['mm_config_descript'], $settings, $status);
+
+  // iterate through the form data by $verb
+  foreach (media_mover_api_verbs() as $verb) {
+    foreach ($form_state['values'] as $key => $value) {
+      // $key is in format $verb--$module--$action_id--$element
+      $items = explode('--', $key);
+      if ($items[0] == $verb) {
+        $update[$verb] = array(
+          'module' => $items[1],
+          'action' => $items[2],
+          'configuration' => media_mover_api_config_edit_form_serialize($form_state['values'], $items[1] .'--'. $items[2] .'--', $form_state['values']['cid']),
+        );
+      }
+    }
+  }
+
+  // we match on verb and cid to allow for null values to
+  // remove existing configurations
+  foreach (media_mover_api_verbs() as $verb) {
+    media_mover_api_configuration_verb_update($form_state['values']['cid'], $verb, $update[$verb]['configuration'] ? $update[$verb]['configuration'] : serialize(array("cid" => $form_state['values']['cid'])) );
+  }
+
+  drupal_set_message(t('Media mover configuration %config_name updated.', array('%config_name' => $form_state['values']['mm_config_name'])));
+  return 'admin/build/media_mover/config/'. $form_state['values']['cid'] .'/view';
+}
+
+
+/**
+ * helper function to validate the configuration data. used on
+ * adding and editing a form. calls the validate hook on each of
+ * the modules that are in this configuration
+ *
+ * @param array $form
+ * @param array $form_state
+ * @param boolean $add
+ *   controls if we are editing or adding a new form
+ */
+function media_mover_api_config_form_validate($form, &$form_state, $add = false) {
+  // first get all the config data out of the form array
+  foreach (media_mover_api_verbs() as $verb) {
+    // get all the config data back for this item
+    $config = media_mover_api_collect_form_data($verb, $form_state['values']);
+
+    // now pass this back to the module functions for validation
+    if ( $all_errors[$verb] = module_invoke($config['module'], 'media_mover', 'config_validate', $config['action'], $config['configuration'])) {
+      // now add the action on. Do this here so that module
+      // authors don't have to worry about passing back data
+      foreach($all_errors[$verb] as $id => $error) {
+        $all_errors[$verb][$id]['action'] = $config['action'];
+        $all_errors[$verb][$id]['module'] = $config['module'];
+      }
+    }
+  }
+
+  // check if we have any errors to process
+  if ($all_errors) {
+    // now loop through and build out the form elements
+    foreach ($all_errors as $verb => $errors) {
+      if ($errors) {
+        foreach ($errors as $error) {
+          // build the id in form {$verb}--{$module}--{$action}--{$element}
+          $id = $verb .'--'. $error['module'] .'--'. $error['action'] .'--'. $error['element'];
+          form_set_error($id, $error['message']);
+        }
+      }
+    }
+  }
+}
+
+
+/**
+ * One function to govern the status control of an individual configuration
+ * @param int $cid
+ *   a configuration id
+ * @param int $status
+ *   the status to set the configuration to
+ * @return array drupal form
+ */
+function media_mover_api_config_status_change(&$form_state, $cid, $status) {
+  $config = media_mover_api_get_configuration($cid);
+  switch ($status) {
+    case MMA_CONFIG_STATUS_DISABLED:
+      $text = t('You are about to disable:<br /> %config_name <br /> %config_description <br /><br />'.
+        'This will prevent the configuration from being run.',
+        array('%config_name' => $config->name, '%config_description' => $config->description));
+    break;
+
+    case MMA_CONFIG_STATUS_STOPPED:
+      $text = t('You are about to stop:<br /> %config_name <br /> %config_description <br /><br />'.
+        'This stops a running configuration. This is useful if the configurationg got hung on a file. '.
+        'If you do this while an item is being processed, you could orphan it. <br /><br />',
+        array('%config_name' => $config->name, '%config_description' => $config->description));
+    break;
+
+    case MMA_CONFIG_STATUS_ENABLED:
+      $text = t('You are about to enable:<br /> %config_name <br /> %config_description <br /><br />'.
+        'This will allow the configuration from by cront and other Media Mover modules.',
+        array('%config_name' => $config->name, '%config_description' => $config->description));
+    break;
+  }
+
+  $form['markup'] = array(
+    '#type' => 'markup',
+    '#value' => $text,
+  );
+
+  $form['cid'] = array(
+    '#type' => 'value',
+    '#value' => $cid
+  );
+
+  $form['status'] = array(
+    '#type' => 'value',
+    '#value' => $status
+  );
+  return confirm_form(
+    $form,
+    t('Are you sure you want to change the status of this configuration?'),
+    'admin/build/media_mover/config/'. $cid .'/view',
+    t('This action cannot be undone.'),
+    t('Stop'),
+    t('Cancel')
+  );
+}
+
+
+/**
+ * Sets a configuration to stopped
+ * @param string $form_id
+ * @param array $form_values
+ *
+ */
+function media_mover_api_config_status_change_submit($form, &$form_state) {
+  db_query('UPDATE {media_mover_config_list} SET status = "%s"  WHERE cid = %d', $form_state['values']['status'], $form_state['values']['cid']);
+  drupal_set_message('Updated the configuration status.');
+  $form_state['redirect'] = 'admin/build/media_mover/config/'. $form_state['values']['cid'] .'/view';
+}
+
+
+/**
+ * reset a configuration form
+ * @param $cid is a configuration id
+ * @return array drupal form
+ */
+function media_mover_api_config_empty_confirm($form_state, $cid) {
+  // get the current configuration
+  $config = media_mover_api_get_configuration($cid);
+  $form['markup'] = array(
+    '#type' => 'markup',
+    '#value' => t('You are about to empty:<br /> %config_name <br /> %config_description <br /><br />'.
+      'This removes Media Mover\'s references to items created by this configuration and will delete any files created (unless you choose to not delete them). '.
+      'Doing this will take all of this configuration\'s media off line. <br /><br />'.
+      'Please only do this if you are debuging an installation or have very good reasons for wanting to do so.<br /><br /.',
+      array('%config_name' => $config->name, '%config_description' => $config->description)
+    ),
+  );
+
+  $form['cid'] = array(
+    '#type' => 'value',
+    '#value' => $cid
+  );
+  $form['confirm_delete'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Delete this configuration\'s files'),
+    '#description' => t('If this is checked, all files created by this configuration will also be removed'),
+    '#default_value' => TRUE,
+  );
+  return confirm_form(
+    $form,
+    t('Are you sure you want to empty this configuration and remove references to its files?'),
+    'admin/build/media_mover',
+    t('This action cannot be undone.'),
+    t('Empty'),
+    t('Cancel'),
+    'confirm'
+  );
+}
+
+
+/**
+ * deletes a configuration submission
+ * this only deletes the records of files
+ * @param string $form_id
+ * @param array $form_values
+ */
+function media_mover_api_config_empty_confirm_submit($form, &$form_state) {
+  if ($form_state['values']['confirm_delete']) {
+    // run the hook to delete files created by any MM module
+    media_mover_api_config_delete_files($form_state['values']['cid']);
+    drupal_set_message(t('Deleted files associated with this configuration'));
+  }
+  db_query('UPDATE {media_mover_config_list} SET status = "stopped", last_start_time = 0, start_time = 0 WHERE cid = %d', $form_state['values']['cid']);
+  db_query('DELETE FROM {media_mover_files} WHERE cid = %d', $form_state['values']['cid'] );
+  drupal_set_message(t('Reset the configuration. Removed all of Media Mover\'s file refrences for this configuration.'));
+  $form_state['redirect'] = 'admin/build/media_mover/config/'. $form_state['values']['cid'] .'/view';
+}
+
+
+/**
+ * deletes a configuration confirm form
+ * @param array $drupal_form
+ *   drupal form - this is a place holder because of
+ * @param int $cid
+ *   is a configuration id
+ * @return array
+ *   drupal form array
+ */
+function media_mover_api_config_delete_confirm($drupal_form, $cid) {
+  $config = media_mover_api_get_configuration($cid);
+
+  // we need to see if this is a parent configuration
+  if (count($configuration->hierarchy->children)) {
+    drupal_set_message(t('This configuration has child configurations. You can not delete this until you delete the child configurations'));
+    drupal_goto('admin/build/media_mover/config/'. $cid .'/view');
+  }
+
+  $output .= t('You are about to delete:<br /> %config_name <br /> %config_description <br />', array('%config_name' => $config->name, '%config_description' => $config->description) );
+  $output .= t('This will also delete references to files, and the files that Media Mover has created with this configuration.');
+  $form['markup'] = array(
+    '#type' => 'markup',
+    '#value' => $output,
+  );
+  $form['cid'] = array(
+    '#type' => 'value',
+    '#value' => $cid,
+  );
+
+  return confirm_form(
+    $form,
+    t('Are you sure you want to delete this configuration?'),
+    'admin/build/media_mover/config/'. $cid .'/view',
+    t('This action cannot be undone and will remove ALL files created by this configuration'),
+    t('Delete'),
+    t('Cancel'),
+    'media_mover_api_config_delete_confirm'
+  );
+}
+
+
+/**
+ * deletes a configuration
+ */
+function media_mover_api_config_delete_confirm_submit($form_id, &$form_state) {
+  // load up the configuration so we can easily acess some of its data
+  $configuration = media_mover_api_get_configuration($form_state['values']['cid']);
+  // run the hook to delete files created by any MM module
+  media_mover_api_config_delete_files($configuration->cid);
+  // remove the configurations
+  db_query('DELETE FROM {media_mover_config_list} WHERE cid = %d', $configuration->cid);
+  // remove the definition of the config
+  db_query('DELETE FROM {media_mover_configurations} WHERE cid = %d', $configuration->cid);
+  // delete from the hierarchy table
+  db_query('DELETE FROM {media_mover_hierarchy} WHERE cid = %d', $configuration->cid);
+  // now update the parent configuration if there is one
+  if ($configuration->hierarchy->parent) {
+    // remove this configuration from the parent
+    media_mover_api_hierarchy_update($configuration->hierarchy->parent, null, array($configuration->cid), false, true);
+  }
+  // notify
+  drupal_set_message('Deleted the configuration.');
+  $form_state['redirect'] = 'admin/build/media_mover';
+}
+
+
+/**
+ * remove all non finished files for this configuration
+ * @TODO
+ */
+function media_mover_api_config_files_clear($cid) {
+  $results = db_query('SELECT mmfid FROM {media_mover_files} WHERE cid = %d AND status != %d', $cid, MMA_FILE_STATUS_COMPLETE_COMPLETE);
+  while($result = db_fetch_array($results)) {
+
+  }
+
+  drupal_set_message(t('Removed all files'));
+  drupal_goto('admin/build/media_mover/config/'. $cid .'/files');
+}
+
+/* ****************************************** */
+/* ADMIN IMPORT / EXPORT FUNCTIONS            */
+/* ****************************************** */
+
+// @TODO move all of this to the menu file hook
+
+/**
+ * calls the import/export include and starts the
+ * import process
+ * @return string html page
+ */
+function media_mover_api_import_config() {
+  require_once('media_mover_api_io.inc');
+  return _media_mover_api_import_config();
+}
+
+
+/**
+ * calls the import/export include and starts the
+ * export process
+ * @param int $cid is a config cid
+ * @return string html page
+ */
+function media_mover_api_export($cid = null) {
+  require_once('media_mover_api_io.inc');
+  return _media_mover_api_export($cid);
+}
+
+
+/**
+ * Displays information about what test functions are
+ * accessible here
+ * @return unknown_type
+ */
+function media_mover_api_tests () {
+	$output = t('You can choose test to run to make sure your Drupal installation is setup correctly to run Media Mover');
+	return $output;
+}
+
+
+/* ****************************************** */
+/* media mover ADMIN PAGES individual files   */
+/* ****************************************** */
+
+/**
+ * returns the total number of files for a configuration
+ *
+ * @param int $cid
+ * @return int
+ */
+function media_mover_api_configuration_files_count($cid, $in_process = false) {
+  if ($in_process) {
+    $status = ' AND status != -1 AND status != '. MMA_FILE_STATUS_COMPLETE_COMPLETE;
+  }
+  $count = db_result(db_query('SELECT COUNT(mmfid) FROM {media_mover_files} WHERE cid = %d '. $status, $cid));
+  return $count;
+}
+
+/**
+ * returns a media mover file array from the requested id
+ *
+ * @param int $mmfid
+ * @return array
+ */
+function media_mover_api_file_get($mmfid) {
+  $file =  db_fetch_array(db_query('SELECT * FROM {media_mover_files} WHERE mmfid = %d', $mmfid));
+  $file['data'] = unserialize($file['data']);
+  return $file;
+}
+
+/**
+ * List all the files in the files table
+ * @param int $cid
+ *   media mover configuration id
+ * @pram int $status
+ *   file status
+ * @return string
+ */
+function media_mover_api_files_list($cid = null, $status = null) {
+  drupal_set_title(t('Media Mover: all files'));
+
+  // alert admin if there are files that can be expunged for a specific configuration
+  if ($cid) {
+    $result = db_result(db_query('SELECT count(mmfid) FROM {media_mover_files} WHERE status != %d AND cid = %d', $status, $cid));
+    if ($result) {
+      drupal_set_message(t('There are %count files that Media Mover has not finished processing. These files may not ever finish. You can !link.',
+        array('%count' => $result, '!link' => l(t('remove them all at once'), 'admin/build/media_mover/config/'. $cid . '/files/clear')) )
+      );
+    }
+  }
+
+  // see http://drupal.org/node/97293
+  $header = array(
+    array('data' => 'mmfid', 'field' => 'mmfid',  'sort' => 'asc'),
+    array('data' => 'cid', 'field' => 'cid', 'sort' => 'asc'),
+    array('data' => 'status', 'field' => 'status', 'sort' => 'asc'),
+    t('File'),
+    t('Edit'),
+    t('Delete')
+  );
+
+  // set up the db order
+  if (! $_GET['sort']) { $order = ' ORDER BY date DESC';}
+  else { $order = tablesort_sql($header); }
+
+  if ($status) {
+    $status = " AND status = ". msql_escape_string($status) .' ';
+  }
+
+  if ($cid) {
+    $results = pager_query('SELECT * FROM {media_mover_files} WHERE cid = '. mysql_escape_string($cid) . $status . $order);
+    // get the config so that we can give the page a title
+    $config = media_mover_api_get_configuration($cid);
+    drupal_set_title(t('Files for: !config', array('!config' => $config->name)));
+  }
+  else {
+    $results = pager_query("SELECT * FROM {media_mover_files} $order");
+  }
+
+  while ($file = db_fetch_array($results)) {
+    // @ TODO make this match up with the media_mover_files db
+
+    if ($file['nid']) {
+      $node = l('node/'. $file['nid'], 'node/'. $file['nid']);
+    }
+
+    $configuration = media_mover_api_get_configuration($file['cid']);
+    $row[] = array(
+      $file['mmfid'],
+      l($configuration->name, 'admin/build/media_mover/config/edit/'. $file['cid']) .'<br />'. $node,
+      media_mover_api_item_status($file['status']),
+      t('Harvest: ') . $file['harvest_file'] .'<br />'. t('Complete: ') . $file['complete_file'],
+      l(t('Edit ') . $file['mmfid'], 'admin/build/media_mover/file/edit/'. $file['mmfid']),
+      l(t('Delete ') . $file['mmfid'], 'admin/build/media_mover/file/delete/'. $file['mmfid']),
+    );
+  }
+  $output = theme('table', $header, $row);
+  $output .= theme('pager');
+  return $output;
+}
+
+/**
+ * lists any files that are not in a complete status
+ * @return string
+ *   html themed page
+ */
+function media_mover_api_files_status () {
+  drupal_set_title(t('Media Mover: status'));
+
+  // see http://drupal.org/node/97293
+  $header = array(
+    array('data' => t('MMfid'), 'field' => 'mmfid', null),
+    array('data' => t('Configuration'), 'field' => 'cid', null),
+    array('data' => t('Status'), 'field' => 'status', null),
+    t('File'),
+    t('Edit'),
+    t('Delete')
+  );
+
+  // set up the db order
+  if (! $_GET['sort']) { $order = 'ORDER BY date DESC';}
+  else { $order = tablesort_sql($header); }
+
+  // get a list of files
+  $results = pager_query("SELECT * FROM {media_mover_files} WHERE status IN (MMA_FILE_STATUS_IN_PROCESS, MMA_FILE_STATUS_IN_STORAGE, MMA_FILE_STATUS_IN_COMPLETE) $order");
+
+  while ($file = db_fetch_array($results)) {
+    $node = l('node/'. $file['nid'], 'node/'. $file['nid']);
+    $configuration = media_mover_api_get_configuration($file['cid']);
+    $row[] = array(
+      $file['mmfid'],
+      l($configuration->name, 'admin/build/media_mover/config/edit/'. $file['cid']) .'<br />'. $node,
+      media_mover_api_item_status($file['status']),
+      t('Harvest: ') . $file['harvest_file'] .'<br />'. t('Complete: ') . $file['complete_file'],
+      l(t('Edit ') . $file['mmfid'], 'admin/build/media_mover/file/edit/'. $file['mmfid']),
+      l(t('Delete ') . $file['mmfid'], 'admin/build/media_mover/file/delete/'. $file['mmfid']),
+    );
+  }
+
+  // do we have any output?
+  if (! $row) {
+    drupal_set_message(t('No items are currently being processed'));
+  }
+
+  $output = theme('table', $header, $row);
+  $output .= theme('pager');
+  return $output;
+}
+
+
+/**
+ * fetch function for a single media mover file
+ * @param $id
+ *   array or int, sets what kind of input is coming in, default is int, as an
+ *   mmfid
+ * @param boolean $reset
+ *   turns the caching off, needed to reload files for updating
+ * @return array file array
+ */
+function media_mover_api_file_fetch($id, $reset = false) {
+  static $cached;
+
+  // is the $id numeric? if so, use it as an mmfid
+  if (is_numeric($id)) {
+    $id = array('mmfid' => $id);
+  }
+
+  // can we use cached data?
+  if (! $reset) {
+    if ($file = $cached['mmfid'][$id['mmfid']]) {
+      return $file;
+    }
+    if ($file = $cached['fid'][$id['fid']]) {
+      return $file;
+    }
+  }
+
+  // we did not find a cached file. Let's look for one
+  // if we get an array of conditions, build some SQL
+  foreach ($id as $key => $value) {
+    $cond[] = 'mmf.'. db_escape_table($key) ." = '%s'";
+    $arguments[] = $value;
+  }
+  $cond = implode(' AND ', $cond);
+
+  // fetch the file
+  $file = db_fetch_array(db_query('SELECT * FROM {media_mover_files} mmf WHERE '. $cond, $arguments));
+  // no file, exit
+  if (! $file['mmfid']) {return false; }
+  // get the data in the right form
+  $file['data'] = unserialize($file['data']);
+  // add any additional items via the hook
+  if ($additional_items = media_mover_api_file_fetch_get_additional($file)) {
+    $file['additional_items'] = $additional_items;
+  }
+  // add the data to the cache
+  $cached['mmfid'][$file['mmfid']] = $file;
+  $cached['fid'][$file['fid']] = $file;
+
+  return $file;
+}
+
+
+/**
+ * adds additional data to item that is being called from the database
+ * @param array $item is a media mover item
+ * @return array data for appeneding to item
+ */
+function media_mover_api_file_fetch_get_additional($item) {
+  // get the configuration this file was created with
+  $configuration = media_mover_api_get_configuration($item['cid']);
+  // get ready to fetch additional items
+  $fetch_items = array();
+  foreach (media_mover_api_verbs() as $verb) {
+    if ($new_items = module_invoke($configuration->{$verb}->module, 'media_mover', 'fetch', $item_config->{$verb}->action, $configuration, $item)) {
+      $fetch_items[$item_config->{$verb}->module][$configuration->{$verb}->action] = $new_items;
+    }
+  }
+  if ($fetch_items) {
+    return $fetch_items;
+  }
+}
+
+
+/**
+ * edit a single file page
+ *
+ * @param int $mmfid is a media mover file id
+ * @return array drupal form array
+ */
+function media_mover_api_edit_file_form($form_state, $mmfid) {
+  // set the title
+  drupal_set_title(t('Media Mover File %id', array('%id'=> $mmfid)));
+  // load the item
+  $item = media_mover_api_file_get($mmfid);
+  // if the file isn't finished set an alert
+  if ($item['status'] != MMA_FILE_STATUS_COMPLETE_COMPLETE) {
+    drupal_set_message(t('This item has not been finished by Media Mover. It is currently in status: !status',
+      array('!status' => media_mover_api_item_status($item['status']))),
+      'error'
+    );
+  }
+
+  // get the configuration
+  $configuration = media_mover_api_get_configuration($item['cid']);
+  // get each of the actions for this configuration
+  foreach (media_mover_api_verbs() as $verb) {
+  	$rows[] = array(
+      t('Verb: %name', array('%name' => $verb)),
+      t('Action: %name', array('%name' => media_mover_api_action_name($configuration->{$verb}->module, $verb, $configuration->{$verb}->action)) ),
+    );
+  }
+
+  // build the header
+  $header = array(array('data' =>t('Configuration: %name', array('%name' => $configuration->name)), 'colspan' => 2));
+  $config_table = theme('table', $header, $rows);
+
+  // set the mmfid
+  $form['mmfid'] = array(
+    '#type' => 'hidden',
+    '#value' => $item['mmfid'],
+  );
+
+  // build the file data
+  $header = array(t('File'));
+  $data[] = array(t('Harvest:  %file', array('%file' => $item['harvest_file'])));
+  $data[] = array(t('Process: %file', array('%file' => $item['process_file'])));
+  $data[] = array(t('Storage: %file', array('%file' => $item['storage_file'])));
+  $data[] = array(t('Complete: %file', array('%file' => $item['complete_file'])));
+
+  $file_data = theme('table', $header, $data);
+
+  $form['title'] = array(
+    '#type' => 'markup',
+    '#value' => $config_table . $file_data,
+  );
+
+  $form['additonal'] = array(
+    '#type' => 'markup',
+    '#value' => 'Additional data: <p><pre>'. print_r($item['data'], true) .'</pre>',
+  );
+
+  $form['file']['nid'] = array(
+    '#title' => "Node ID",
+    '#type' => 'textfield',
+    '#default_value' => $item['nid'],
+    '#description' => t('File is associated with this Node ID. You can assocate a Media Mover file with one NID'),
+  );
+
+  $options = media_mover_api_item_status();
+  $form['file']['status'] = array(
+    '#title' => t('Current File Status'),
+    '#type' => 'select',
+    '#options' => $options,
+    '#default_value' => $item['status'],
+    '#description' => t('Sets the status that the file is in. Should be <em>Finished<em> unless the file is stuck or actively being processed.'),
+  );
+
+  $form['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Save'),
+  );
+
+  $form['delete'] = array(
+    '#type' => 'submit',
+    '#value' => t('Delete'),
+  );
+  return $form;
+}
+
+
+/**
+ * implementation of hook form_submit
+ * nid, url, status, fid are incoming vars
+ * @param array $form
+ * @param array $form_state
+ *
+ */
+function media_mover_api_edit_file_form_submit($form, &$form_state) {
+  switch ($form_state['values']['op']) {
+    case t('Save'):
+      db_query("UPDATE {media_mover_files} SET nid = %d, status = %d  WHERE mmfid = %d", $form_state['values']['nid'], $form_state['values']['status'], $form_state['values']['mmfid']);
+      drupal_set_message(t('Media mover file ID: !id was updated.', array('!id' => $form_state['values']['mmfid'])));
+      $form_state['redirect'] = "admin/build/media_mover/files";
+      break;
+    case t('Delete'):
+      // redirect to the delete confirm
+      $form_state['redirect'] = 'admin/build/media_mover/file/delete/'. $form_state['values']['mmfid'];
+      break;
+  }
+}
+
+
+/**
+ * returns delete_file_form
+ * @param int $mmfid is a media mover field id
+ * @return array drupal confirm
+ */
+function media_mover_api_file_delete_confirm_form($form_state, $mmfid) {
+  $form['display_data'] = array(
+    '#type' => 'markup',
+    '#value' => t('You are about to delete file id#: %fid', array('%fid' => $mmfid)),
+  );
+  $form['mmfid'] = array(
+    '#type' => 'hidden',
+    '#value' => $mmfid,
+    );
+  return confirm_form($form,
+      t('Are you sure you want to delete this file?'),
+      'admin/build/media_mover/files',
+      t('This action cannot be undone.'),
+      t('Delete'),
+      t('Cancel')
+  );
+}
+
+
+/**
+ * Deletes single file
+ * @param string $form_id
+ * @param array $form_values is drupal form array
+ * @
+ */
+function media_mover_api_file_delete_confirm_form_submit($form, &$form_state) {
+  // get the file
+  $file = media_mover_api_file_get($form['mmfid']['#value']);
+
+  // get the configuration that this file was created from
+  $configuration = media_mover_api_get_configuration($file['cid']);
+  // invoke the hook media mover $op delete
+  foreach (media_mover_api_verbs() as $verb) {
+    module_invoke($configuration->{$verb}->module, 'media_mover', 'delete', $configuration->{$verb}->action, $configuration->{$verb}->configuration, $file, $configuration);
+  }
+  // delete the file cache for this node
+  if ($file['nid']) {
+    cache_clear_all('media_mover_files_node_'. $file['nid'], 'cache_media_mover');
+  }
+  // now delete the file from the db
+  db_query('DELETE FROM {media_mover_files} WHERE mmfid = %d', $form['mmfid']['#value']);
+  drupal_set_message(t('Deleted the file.'));
+  $form_state['redirect'] = 'admin/build/media_mover/files';
+}
+
+
+/**
+ * deletes all the files associated with a specified node
+ * @param object node
+ *   drupal node object
+ */
+function media_mover_api_node_files_delete($node) {
+  if ($files = $node->media_mover) {
+    foreach ($files as $cid => $mm_files) {
+      // now we need to get each configuration to check
+      // if we should delete the file
+      $configuration = media_mover_api_get_configuration($cid);
+      if ($configuration->settings->mma_node_item_delete) {
+        foreach ($mm_files as $mm_file) {
+          media_mover_api_file_delete_call($mm_file);
+        }
+      }
+    }
+  }
+}
+
+
+/**
+ * If a drupal file is removed from a node we can detelete the media mover files associated
+ * with that node. This is a per configuration option.
+ * @TODO move this to mm_node
+ * @param object $node
+ *   drupal node object
+ */
+function media_mover_api_node_update($node) {
+  // we only do this if there are media mover files that we need to delete
+  // because they are linked to files on a node
+  // we do not handle creation as other modules are responsible for that
+  if ($node->media_mover) {
+    // build a list of all the media mover files associated with this node
+    foreach ($node->media_mover as $cid => $mm_files) {
+      if ($mm_files) {
+        foreach ($mm_files as $mm_file) {
+          // load the configuration for this file
+          $config = media_mover_api_get_configuration($mm_file['cid']);
+          // check and see if this media mover file comes from a drupal file AND the
+          // drupal file will be removed  AND the configuration removes files
+          if ($node->files[$mm_file['fid']]->remove && $config->settings->mma_node_item_delete ) {
+            media_mover_api_file_delete_call($mm_file);
+          }
+        }
+      }
+    }
+    // now reset the nodes media mover cache
+    cache_clear_all('media_mover_files_node_'. $node->nid, 'cache_media_mover');
+  }
+}
+
+
+/**
+ * deletes a single media mover file runs the media_mover delete hook
+ * renamed because of file_field hook_file_delete()
+ * @param array $file
+ */
+function media_mover_api_file_delete_call($file) {
+  // load up the configuration for this file
+  $configuration = media_mover_api_get_configuration($file['cid']);
+  // call the modules that made it
+  foreach (media_mover_api_verbs() as $verb) {
+    module_invoke($configuration->{$verb}->module, 'media_mover', 'delete', $configuration->{$verb}->action, $configuration->{$verb}->configuration, $file, $configuration);
+  }
+
+  // now clear the cache if we have a node
+  if ($file['nid']) {
+    cache_clear_all('media_mover_files_node_'. $file['nid'], 'cache_media_mover', TRUE);
+  }
+
+  // now check if there are any files in the item left to delete
+  // note: NEVER delete harvest file because that may not belong to us.
+  $delete_items = array('process_file', 'harvest_file', 'complete_file');
+  $display_files = array();
+  foreach($delete_items as $delete_item) {
+    if (! $delete_item == $file['harvest_file']) {
+      // keep a record of what has been deleted
+      $display_files[] = str_replace('_', ' ', $delete_item) .': '.$file[$delete_item];
+      print $file[$delete_item] ."\n";
+      file_delete($file[$delete_item]);
+    }
+  }
+
+  // remove the file from the database
+  db_query('DELETE FROM {media_mover_files} WHERE mmfid = %d', $file['mmfid']);
+
+  if (user_access('see media mover alerts')) {
+    $display_files = array();
+    drupal_set_message(t('Deleted file id: %file_id', array('%file_id' => $file['mmfid'])));
+    if (count($display_files)) {
+      drupal_set_message(t('Removed files: %files', array('%files' => implode(', ', $display_files))));
+    }
+  }
+  $replacements = array('%file' => basename($file['complete_file']));
+  watchdog('Media Mover', 'Deleted converted file: %file', $replacements);
+}
+
+
+/**
+ * Confirm form to rerun the processing on a specific node
+ *
+ * @param int $cid
+ *   configuration id
+ * @param int $nid
+ *   node id
+ * @return array
+ *   drupal form array
+ */
+function media_mover_api_rerun_node_form($cid, $nid) {
+  // load the configuration
+  $configuration = media_mover_api_get_configuration($cid);
+
+  // load the node
+  $node = node_load($nid);
+
+  $form['display_data'] = array(
+    '#type' => 'markup',
+    '#value' => t('You are about to re-process %title with the %config Media Mover configuration.', array('%config' => $configuration->name, '%title' => $node->title)),
+  );
+
+  // only alert about deletion if we actuall will delete files
+  if ($node->media_mover[$cid]) {
+    // build the list of files
+    foreach ($node->media_mover[$cid] as $file) {
+      $name = $file['complete_file'] ? $file['complete_file'] : t('No file present');
+      $files[] = $file['mmfid'] .': '. $name;
+    }
+
+    $form['file_list'] = array (
+      '#type' => 'markup',
+      '#value' => t('<p> Please note: this will <em>DELETE</em> existing files from this configuration on this node. <p>The following files will be removed !files', array('!files' => theme('item_list', $files))),
+    );
+  }
+
+  $form['node'] = array(
+    '#type' => 'value',
+    '#value' => $node,
+  );
+
+  $form['configuration'] = array(
+    '#type' => 'value',
+    '#value' => $configuration,
+  );
+
+  return confirm_form($form,
+    t('Are you sure you want to re-process this node?'),
+    'node/'. $nid,
+    t('This action cannot be undone.'),
+    t('Re-process'),
+    t('Cancel')
+  );
+}
+
+
+/**
+ * Submit form data from the rerun form
+ *
+ * @param string $form_id
+ * @param array $form_values
+ */
+function media_mover_api_rerun_node_form_submit($form_id, $form_values) {
+  // first delete existing files for this node if we have them
+  $files = $form_state['values']['node']->media_mover[$form_state['values']['configuration']->cid];
+  if ($files) {
+    foreach($files as $file) {
+      media_mover_api_file_delete_call($file);
+    }
+    // set a message that we did this
+    if (user_access('see media mover messages')) {
+      drupal_set_message(t('Deleted previously harvested files from: %title', array('%title' => $form_state['values']['node']->title)));
+    }
+    watchdog('Media Mover', 'Deleted media mover transcoded files from '. l($form_state['values']['node']->title, drupal_get_path_alias('node/'. $form_state['values']['node']->nid)));
+  }
+  // now rerun the config on this nid and set the output
+  drupal_set_message(media_mover_api_run_config($form_state['values']['configuration'], true, $form_state['values']['node']->nid));
+  // clear the cache so the node is rebuilt
+  cache_clear_all('media_mover_files_node_'. $form_state['values']['node']->nid, 'cache_media_mover', true);
+  return 'node/'. $form_state['values']['node']->nid;
+}
+
+
+/* ************************************************* */
+/* RSS Functions                                     */
+/* ************************************************* */
+
+
+/**
+ * This governs the rss feeds for a given node
+ * @param object $node drupal node object
+ * @return array for enclosure
+ */
+function media_mover_api_rss($node) {
+  // @TODO make settings per configuration to expose RSS
+  if ($node->media_mover) {
+    foreach ($node->media_mover as $cid => $files) {
+      // load the configuration
+      $configuration = media_mover_api_get_configuration($cid);
+      if ($configuration->settings->mma_node_config_rss) {
+        // take the first file that we find on the array
+        $file = array_shift($files);
+        // structure the RSS
+        $rss = array(
+          array(
+            'key' => 'enclosure',
+            'attributes' => array(
+              'url' => $GLOBALS['base_url'] .'/'. $file['complete_file'],
+              'length' => format_size(filesize($file['complete_file'])),
+              'type' => file_get_mimetype($file['complete_file']),
+            )
+          )
+        );
+        return $rss;
+      }
+    }
+  }
+}
+
+
+/* *************************************************************** */
+/* XSPF Playlist functions */
+/* *************************************************************** */
+
+
+/**
+ * implementation of hook_xspf_playlist_thumbnail
+ *
+ */
+function media_mover_api_xspf_playlist_thumbnail($op, $node = null, $config = null) {
+  switch($op) {
+    // defines what options xspf can use
+    case 'define':
+      $configurations = media_mover_api_get_configurations();
+      foreach ($configurations as $configuration ) {
+        $define['media_mover_api--'. $configuration->cid] = t('Media Mover: ') . $configuration->name;
+      }
+      return $define;
+    break;
+
+    case 'return':
+      if ($file = $node->media_mover[$config][0]['complete_file']) {
+        if (! strstr($file, 'http://')) {
+          $file = file_create_url($file);
+        }
+        return $file;
+      }
+    break;
+  }
+}
+
+
+/**
+ * implemenation of hook_xspf_playlist_use
+ */
+function media_mover_api_xspf_playlist_use($op, $node, $config) {
+  switch($op) {
+    case 'define' :
+      $configurations = media_mover_api_get_configurations();
+      foreach ($configurations as $configuration ) {
+        $define['media_mover_api--'. $configuration->cid] = t('Media Mover: ') . $configuration->name;
+      }
+      return $define;
+    break;
+
+    case 'views':
+      $conditions = '%s.nid = node.nid';
+      return array('tablename' => 'media_mover_files', 'conditions' => $conditions);
+    break;
+
+    case 'return':
+      // get files for the running configuration
+      if ($mmfiles = $node->media_mover[$config]) {
+        $items = array();
+        foreach($mmfiles as $mmfile) {
+          $filepath = $mmfile['complete_file'];
+          // make sure that the file path is complete
+          if (! strstr($filepath, 'http://')) {
+            $filepath = file_create_url($filepath);
+          }
+          // only add the file if we have an incoming item
+          if ($xspf_item = xspf_playlist_node_build_file_item($node, $filepath)) {
+            $items[] = $xspf_item;
+          }
+        }
+        return $items;
+      }
+   break;
+  }
+}
+
+
+/* *************************************************************** */
+/* THEME functions */
+/* *************************************************************** */
+
+/**
+ * basic theming function
+ * @ TODO make some kind of reasonable theming here
+ *   this is totally not used <sigh>
+ */
+function theme_media_mover_files($files) {
+  foreach ($files as $file) {
+    if ($custom = module_invoke($file['storage_module'], 'media_mover', 'theme', null, $file) ) {
+      $output .= $custom;
+    }
+    else {
+      if ($file['storage_file']) {
+        $output .= print_r($file, true);
+      } // if
+    }
+  } // foreach
+
+  return $output;
+}
+
+
+/**
+ * Basic html for the node/edit screen
+ * @param $node is drupal node object
+ * @return
+ *   themed table
+ */
+function media_mover_api_files_node_edit_display($node) {
+  global $user;
+  // does this node have media mover files?
+  if ($node->media_mover) {
+    // build the header
+    $header = array(t('Name and id'), t('File'));
+    if (user_access('administer media_mover') || (user_access('administer own media_mover files') && $user->uid == $node->uid )) {
+      $header[] = t('Delete');
+      $header[] = t('Re-process');
+      $reprocess = true;
+    }
+    // build the table data for each item
+    foreach ($node->media_mover as $cid => $files) {
+      $configuration = media_mover_api_get_configuration($cid);
+      // should we show this on the node edit screen?
+      if ($configuration->settings->mma_node_edit_item_show) {
+        if ($cid != $type) {
+          $rows[] = array(
+            array(
+              'data' => t('Configuration: !name',
+                array('!name' => l($configuration->name, 'admin/media_mover/config/'. $cid))),
+              'colspan' => 4
+            ),
+          );
+          $type = $cid;
+        }
+        foreach ($files as $file) {
+  	      $rows[] = array(
+  	        l($file['mmfid'], 'admin/media_mover/file/edit/'. $file['mmfid'], array('title' => t('Edit file')), "destination=node/$node->nid/edit"),
+  	        $file['complete_file'] ? $file['complete_file'] : t('No file path available'),
+  	        $reprocess ? l(t('Delete'), 'admin/media_mover/file/delete/'. $file['mmfid'], array('title' => t('Delete file')), "destination=node/$node->nid/edit") : null,
+  	        $reprocess ? l(t('Re-process'), 'media_mover/rerun/'. $file['cid'] .'/node/'. $node->nid, array('title' => t('Reprocess file')), "destination=node/$node->nid/edit") : null,
+  	      );
+        }
+      }
+    }
+    return theme('table', $header, $rows);
+  }
+}
+
+
+/**
+ * retuns a formated email to the admin with a list of all the
+ * stuck files
+ * @param $header array is the header for the table
+ * @param $rows array is a multi dimentional array of files that are stuck
+ */
+function theme_media_mover_api_stuck_job ($rows) {
+  $output = t('The following files appear to be stuck:') ."\n";
+  foreach ($rows as $row){
+    $output .= "\n---------------------------\n";
+    $output .= implode("\n", $row);
+  }
+  return $output;
+}
+
+
+/**
+ * this handles the default form for a configuration that does
+ * not have options on the config/edit or config/add screen
+ *
+ * @param string $m
+ * @param string $action_id
+ * @return array
+ */
+function theme_media_mover_api_configuration_no_options($module_name, $action_id) {
+  // this action has no config, make a default
+  $form = array();
+  $form[$module_name .'_nooptions_'. $action_id] = array(
+    '#type' => 'fieldset',
+    '#title' => 'No options'
+  );
+  $form[$module_name .'_nooptions_'. $action_id]['data'] = array(
+    '#value' => t('There are no configuration options for this.'),
+    '#type' => 'markup',
+  );
+  return $form;
+}

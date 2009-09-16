@@ -1,5 +1,5 @@
 <?php
-// $Id: og.module,v 1.628.4.14 2009/07/13 03:57:15 weitzman Exp $
+// $Id: og.module,v 1.628.4.23 2009/09/02 11:27:57 weitzman Exp $
 
 // Selective groups states. chosen by the group admin
 define ('OG_OPEN', 0);
@@ -486,7 +486,7 @@ function og_determine_context() {
     $gid = intval(current($_REQUEST['gids']));
     $node = node_load($gid);
   }
-  elseif (($item['map'][0] == 'og' && !empty($item['map'][2])) || $path == 'comment/reply/%') {
+  elseif ((!empty($item['map'][2]) && $item['map'][0] == 'og') || $path == 'comment/reply/%') {
     $node = menu_get_object('node', 2);
   }
   elseif ($path == 'comment/edit' || $path == 'comment/delete') {
@@ -619,25 +619,27 @@ function og_set_theme($group_node) {
      is_active, is_admin, created. Other values are passed to hook implementations.
  */
 function og_save_subscription($gid, $uid, $args = array()) {
-  $sql = "SELECT COUNT(*) FROM {og_uid} WHERE nid = %d AND uid = %d";
-  $cnt = db_result(db_query($sql, $gid, $uid));
-  $time = time();
-  $subscription = array(
-    'nid' => $gid,
-    'uid' => $uid,
-    'created' => isset($args['created']) ? $args['created'] : $time,
-    'changed' => $time
-  );
-  unset($args['created']);
-  $subscription += $args;
-  
-  if ($cnt == 0) {
-    drupal_write_record('og_uid', $subscription);
-    module_invoke_all('og', 'user insert', $gid, $uid, $args);
-  }
-  else {
-    drupal_write_record('og_uid', $subscription, array('nid', 'uid'));
-    module_invoke_all('og', 'user update', $gid, $uid, $args);
+  if ($uid > 0) {
+    $sql = "SELECT COUNT(*) FROM {og_uid} WHERE nid = %d AND uid = %d";
+    $cnt = db_result(db_query($sql, $gid, $uid));
+    $time = time();
+    $subscription = array(
+      'nid' => $gid,
+      'uid' => $uid,
+      'created' => isset($args['created']) ? $args['created'] : $time,
+      'changed' => $time
+    );
+    unset($args['created']);
+    $subscription += $args;
+
+    if ($cnt == 0) {
+      drupal_write_record('og_uid', $subscription);
+      module_invoke_all('og', 'user insert', $gid, $uid, $args);
+    }
+    else {
+      drupal_write_record('og_uid', $subscription, array('nid', 'uid'));
+      module_invoke_all('og', 'user update', $gid, $uid, $args);
+    }
   }
 }
 
@@ -715,56 +717,66 @@ function og_mail($key, &$message, $params) {
  * @return string 'approval', 'subscribed' or 'rejected' depending on the group's configuration.
  **/
 function og_subscribe_user($gid, $account, $request = NULL) {
-  // moderated groups must approve all members (selective=1)
-  $node = node_load($gid);
-  switch ($node->og_selective) {
-    case OG_MODERATED:
-      $admins = array();
-      og_save_subscription($gid, $account->uid, array('is_active' => 0));
-      $sql = og_list_users_sql(1, 1, NULL);
-      $res = db_query($sql, $node->nid);
-      $admins = array();
-      while ($row = db_fetch_object($res)) {
-        $admins[] = $row->uid;
-      }
-      if (!empty($admins)) {
-        $variables = array(
-          '@group' => $node->title,
-          '@username' => $account->name,
-          '!approve_url' => url("og/approve/$node->nid/$account->uid", array('absolute' => TRUE)),
-          '!group_url' => url("og/users/$node->nid", array('absolute' => TRUE)),
-          '@request' => $request,
-        );
-        
-        $message = array(
-          'subject' => _og_mail_text('og_request_user_subject', $variables),
-          'body' => _og_mail_text('og_request_user_body', $variables),
-        );
-
-        // Send notifications to each admin; Sending an array of recipients
-        // implies that this is a bulk message.
-        module_invoke_all('og', 'user request', $gid, $admins, $message);
-      }
-      $return_value = array('type' => 'approval',
-                            'message' => t('Membership request to the %group group awaits approval by an administrator.', array('%group' => $node->title)));
-
-      break;
-    case OG_OPEN:
-      og_save_subscription($gid, $account->uid, array('is_active' => 1));
-      $return_value = array('type' => 'subscribed',
-                            'message' => t('You are now a member of the %group.', array('%group' => $node->title)));
-      break;
-    case OG_CLOSED:
-    case OG_INVITE_ONLY:
-      // admins can add members to these groups, but others can't.
-      if (og_is_group_admin($node)) {
-        og_save_subscription($gid, $account->uid, array('is_active' => 1));
-      }
-      else {
-        $return_value = array('type' => 'rejected',
-                            'message' => t('Membership request to the %group group was rejected, only group administrators can add users to this group.', array('%group' => $node->title)));
-      }
+  if ($account->uid == 0) {
+    // Silly admins can do this. Maybe code can too when an account gets deleted. See http://drupal.org/node/434632.
+    $return_value = array(
+      'type' => 'rejected',
+      'message' => t('Membership request to the %group group was rejected; the anonymous user may not join a group.', array('%group' => $node->title))
+    );
   }
+  else {
+    // Moderated groups must approve all members (selective=1).
+    $node = node_load($gid);
+    switch ($node->og_selective) {
+      case OG_MODERATED:
+        $admins = array();
+        og_save_subscription($gid, $account->uid, array('is_active' => 0));
+        $sql = og_list_users_sql(1, 1, NULL);
+        $res = db_query($sql, $node->nid);
+        $admins = array();
+        while ($row = db_fetch_object($res)) {
+          $admins[] = $row->uid;
+        }
+        if (!empty($admins)) {
+          $variables = array(
+            '@group' => $node->title,
+            '@username' => $account->name,
+            '!approve_url' => url("og/approve/$node->nid/$account->uid", array('absolute' => TRUE)),
+            '!group_url' => url("og/users/$node->nid", array('absolute' => TRUE)),
+            '@request' => $request,
+          );
+
+          $message = array(
+            'subject' => _og_mail_text('og_request_user_subject', $variables),
+            'body' => _og_mail_text('og_request_user_body', $variables),
+          );
+
+          // Send notifications to each admin; Sending an array of recipients
+          // implies that this is a bulk message.
+          module_invoke_all('og', 'user request', $gid, $admins, $message);
+        }
+        $return_value = array('type' => 'approval',
+                              'message' => t('Membership request to the %group group awaits approval by an administrator.', array('%group' => $node->title)));
+
+        break;
+      case OG_OPEN:
+        og_save_subscription($gid, $account->uid, array('is_active' => 1));
+        $return_value = array('type' => 'subscribed',
+                              'message' => t('You are now a member of %group.', array('%group' => $node->title)));
+        break;
+      case OG_CLOSED:
+      case OG_INVITE_ONLY:
+        // admins can add members to these groups, but others can't.
+        if (og_is_group_admin($node)) {
+          og_save_subscription($gid, $account->uid, array('is_active' => 1));
+        }
+        else {
+          $return_value = array('type' => 'rejected',
+                              'message' => t('Membership request to the %group group was rejected, only group administrators can add users to this group.', array('%group' => $node->title)));
+        }
+    }
+  }
+                      
   return $return_value;
 }
 
@@ -1241,11 +1253,13 @@ function og_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
     case 'update':
       if (og_is_group_type($node->type)) {
         og_update_group($node);
-        // make sure the node owner is a full powered member
-        og_save_subscription($node->nid, $node->uid, array('is_active' => 1, 'is_admin' => 1));
-        // load new group into $user->og_groups so that author can get redirected to the new group
-        if ($node->uid == $user->uid) {
-          $user->og_groups = og_get_subscriptions($user->uid, 1, TRUE);
+        if ($node->uid > 0) {
+          // Make sure the node owner is a full powered member.
+          og_save_subscription($node->nid, $node->uid, array('is_active' => 1, 'is_admin' => 1));
+          // Load new group into $user->og_groups so that author can get redirected to the new group.
+          if ($node->uid == $user->uid) {
+            $user->og_groups = og_get_subscriptions($user->uid, 1, TRUE);
+          }
         }
       }
       else {
@@ -1556,7 +1570,7 @@ function og_node_delete_move_memberships($form, &$form_state) {
 function og_all_groups_options() {
   list($types, $in) = og_get_sql_args();
   $sql = "SELECT n.title, n.nid FROM {node} n WHERE n.type $in AND n.status = 1 ORDER BY n.title ASC";
-  $result = db_query($sql, $types);
+  $result = db_query(db_rewrite_sql($sql), $types);
   while ($row = db_fetch_object($result)) {
     $options[$row->nid] = $row->title;
   }
@@ -1726,7 +1740,7 @@ function og_form_add_og_audience(&$form, &$form_state) {
       '#type' => $type, 
       '#title' => t('Audience'), 
       '#attributes' => array('class' => 'og-audience'),
-      '#options' => $options, 
+      '#options' => $type == 'checkboxes' ? array_map('filter_xss', $options) : $options, 
       '#required' => $required, 
       '#description' =>  format_plural(count($options), 'Show this post in this group.', 'Show this post in these groups.'),
       '#default_value' => $groups ? $groups : array(),
@@ -2189,7 +2203,7 @@ function og_og_create_links($group) {
     $type_url_str = str_replace('_', '-', $post_type);
     if (module_invoke($types[$post_type]->module, 'access', 'create', $post_type, $user)) {
       $links["create_$post_type"] = l(t('Create !type', array('!type' => $type_name)), "node/add/$type_url_str", array(
-        'title' => t('Add a new !type in this group.', array('!type' => $type_name)),
+        'attributes' => array('title' => t('Add a new !type in this group.', array('!type' => $type_name))),
         'query' => "gids[]=$group->nid",
         ));
     }

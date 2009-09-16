@@ -1,5 +1,5 @@
 <?php
-// $Id: job_queue.module,v 1.7 2008/08/18 07:35:59 drumm Exp $
+// $Id: job_queue.module,v 1.7.2.1 2009/09/13 01:51:51 drumm Exp $
 
 /**
  * @file job_queue.module
@@ -106,7 +106,8 @@ function job_queue_dequeue() {
   if (function_exists($job->function)) {
     $arguments = unserialize($job->arguments);
     call_user_func_array($job->function, $arguments);
-    watchdog('job_queue', 'Ran queued job "!description"', array('!description' => t($job->description, $arguments)));
+    // Filter objects out of arguments
+    watchdog('job_queue', 'Ran queued job "!description"', array('!description' => t($job->description, array_filter($arguments, 'is_scalar'))));
   }
   else {
     watchdog('job_queue', 'Failed to run queued job "!description" because the function %function is not defined.', array('!description' => $job->description, '%function' => $job->function), WATCHDOG_ERROR);
@@ -142,9 +143,10 @@ function job_queue_list() {
     $result = pager_query('SELECT created, description, arguments FROM {job_queue} ORDER BY priority, jqid', 20);
     $rows = array();
     while ($job = db_fetch_object($result)) {
+      // Filter objects out of arguments
       $rows[] = array(
         format_date($job->created),
-        t($job->description, unserialize($job->arguments)),
+        t($job->description, array_filter(unserialize($job->arguments), 'is_scalar')),
       );
     }
     $output .= theme('table', $header, $rows);

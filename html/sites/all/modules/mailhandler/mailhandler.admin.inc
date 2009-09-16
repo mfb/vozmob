@@ -127,7 +127,7 @@ function mailhandler_add_edit_mailbox($form_state, $mid, $clone = FALSE) {
 
   $form['sigseparator'] = array('#type' => 'textfield', '#title' => t('Signature separator'), '#default_value' => $edit['sigseparator'], '#description' => t('All text after this string will be discarded. A typical value is <strong>"-- "</strong> that is two dashes followed by a blank in an otherwise empty line. Leave blank to include signature text in nodes.'));
 
-  $form['delete_after_read'] = array('#type' => 'checkbox', '#title' => t('Delete messages after they are processed?'), '#default_value' => $edit['delete_after_read'], '#description' => t('Uncheck this box to leave read messages in the mailbox. They will not be processed again unless they become marked as unread.'));
+  $form['delete_after_read'] = array('#type' => 'checkbox', '#title' => t('Delete messages after they are processed?'), '#default_value' => $edit['delete_after_read'], '#description' => t('Uncheck this box to leave read messages in the mailbox. They will not be processed again unless they become marked as unread.  If you selected "POP3" as your mailbox type, you must check this box.'));
 
   $form['enabled'] = array('#type' => 'radios', '#title' => t('Cron processing'), '#options' => array(t('Disabled'), t('Enabled')), '#default_value' => $edit['enabled'], '#description' => t('Select disable to temporarily stop cron processing for this mailbox.'));
 
@@ -205,6 +205,11 @@ function mailhandler_add_edit_mailbox_validate($form, &$form_state) {
 
     // We don't want to save, so we set an 'invisible error' that means the form is not submitted
     form_set_error('mailhandler');
+  }
+  
+  // If POP3 mailbox is chosen, messages must be deleted after processing.
+  if ($form_state['values']['imap'] == 0 && $form_state['values']['delete_after_read'] == 0) {
+    form_set_error('delete_after_read', t('You must check off "Delete messages after they are processed" when using a POP3 mailbox.'));
   }
 
 }

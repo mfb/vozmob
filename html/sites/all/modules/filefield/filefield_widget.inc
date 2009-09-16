@@ -1,5 +1,5 @@
 <?php
-// $Id: filefield_widget.inc,v 1.88 2009/05/19 01:58:28 quicksketch Exp $
+// $Id: filefield_widget.inc,v 1.89 2009/07/25 04:35:03 quicksketch Exp $
 
 /**
  * @file
@@ -254,7 +254,6 @@ function filefield_widget_process($element, $edit, &$form_state, $form) {
   $element['filefield_upload'] = array(
     '#type' => 'submit',
     '#value' => t('Upload'),
-    '#process' => array('form_expand_ahah'),
     '#submit' => array('node_form_submit_build_node'),
     '#ahah' => array( // with JavaScript
        'path' => 'filefield/ahah/'.   $element['#type_name'] .'/'. $element['#field_name'] .'/'. $element['#delta'],
@@ -276,7 +275,6 @@ function filefield_widget_process($element, $edit, &$form_state, $form) {
     '#name' => implode('_', $element['#parents']) .'_filefield_remove',
     '#type' => 'submit',
     '#value' => t('Remove'),
-    '#process' => array('form_expand_ahah'),
     '#submit' => array('node_form_submit_build_node'),
     '#ahah' => array( // with JavaScript
       'path' => 'filefield/ahah/'.   $element['#type_name'] .'/'. $element['#field_name'] .'/'. $element['#delta'],

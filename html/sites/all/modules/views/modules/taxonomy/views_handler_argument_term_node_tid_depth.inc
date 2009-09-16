@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_argument_term_node_tid_depth.inc,v 1.1 2008/09/03 19:21:30 merlinofchaos Exp $
+// $Id: views_handler_argument_term_node_tid_depth.inc,v 1.2 2009/09/15 15:52:39 merlinofchaos Exp $
 /**
  * Argument handler for taxonomy terms with depth.
  *
@@ -89,31 +89,35 @@ class views_handler_argument_term_node_tid_depth extends views_handler_argument 
       $placeholder = "= %d";
       $tids = array($this->argument);
     }
-    $subquery = "\n  SELECT tn.vid FROM {term_node} tn\n";
-    $where = "  WHERE tn.tid $placeholder\n";
-    $args = $tids;
-    $last = "tn";
+
+    $node_table = $this->ensure_my_table();
+    $group = 'term_node_nid_depth';
+    $this->query->set_where_group('OR', $group);
+
+    // Create a new join to relate the 'term_node' table to our current 'node' table.
+    $join = new views_join;
+    $join->construct('term_node', $node_table, 'vid', 'vid');
+    $term_node = $this->query->add_relationship('term_node', $join, $node);
+    $this->query->add_where($group, "$term_node.tid $placeholder", $tids);
 
     if ($this->options['depth'] > 0) {
-      $subquery .= "    LEFT JOIN {term_hierarchy} th ON th.tid = tn.tid\n";
-      $last = "th";
+      $th_join = new views_join;
+      $th_join->construct('term_hierarchy', $term_node, 'tid', 'tid');
+      $term_hierarchy = $this->query->add_relationship('term_hierarchy', $th_join, $term_node);
       foreach (range(1, abs($this->options['depth'])) as $count) {
-        $subquery .= "    LEFT JOIN {term_hierarchy} th$count ON $last.parent = th$count.tid\n";
-        $where .= "    OR th$count.tid $placeholder\n";
-        $args = array_merge($args, $tids);
-        $last = "th$count";
+        $th_join = new views_join;
+        $th_join->construct($term_hierarchy, $term_hierarchy, 'parent', 'tid');
+        $term_hierarchy = $this->query->add_relationship($term_hierarchy, $th_join, $term_hierarchy);
+        $this->query->add_where($group, "$term_hierarchy.tid $placeholder", $tids);
       }
     }
     else if ($this->options['depth'] < 0) {
       foreach (range(1, abs($this->options['depth'])) as $count) {
-        $subquery .= "    LEFT JOIN {term_hierarchy} th$count ON $last.tid = th$count.parent\n";
-        $where .= "    OR th$count.tid $placeholder\n";
-        $args = array_merge($args, $tids);
-        $last = "th$count";
+        $th_join->construct($term_hierarchy, $term_hierarchy, 'tid', 'parent');
+        $term_hierarchy = $this->query->add_relationship($term_hierarchy, $th_join, $term_hierarchy);
+        $this->query->add_where($group, "$term_hierarchy.tid $placeholder", $tids);
       }
     }
-
-    $this->query->add_where(0, "$this->table_alias.$this->real_field IN ($subquery$where  )", $args);
   }
 
   function title() {

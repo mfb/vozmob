@@ -1,5 +1,5 @@
 <?php
-// $Id: notifications.pages.inc,v 1.1.2.8.2.6 2009/06/16 15:23:09 jareyero Exp $
+// $Id: notifications.pages.inc,v 1.1.2.8.2.7 2009/08/11 14:32:24 davidg Exp $
 /**
  * @file
  * User pages for Notifications
@@ -82,7 +82,7 @@ function notifications_add_subscription_form($form_state, $account, $type, $dest
   foreach ($info['fields'] as $fid => $field_type) {
     $field = notifications_subscription_fields($field_type);
     $form['info']['fields'][$fid]['type'] = array('#type' => 'value', '#value' => $field_type);
-    $form['info']['fields'][$fid]['value'] = notifications_subscription_form_field($field_type);
+    $form['info']['fields'][$fid]['value'] = notifications_subscription_form_field($field_type, NULL, $type);
     $form['info']['fields'][$fid]['value'] += array(
       '#title' => $field['name'],
       '#required' => TRUE,   
@@ -125,9 +125,9 @@ function notifications_add_subscription_form_validate($form, &$form_state) {
     $value = $field['value'];
     if ($callback = notifications_subscription_fields($field['type'], 'value callback')) {
       if ($args = notifications_subscription_fields($field['type'], 'value callback args')) {
-        $value = call_user_func($callback, $value, "fields][$fid][value", $args);
+        $value = call_user_func($callback, $value, "fields][$fid][value", $form_state['values']['type'], $args);
       } else {
-        $value = call_user_func($callback, $value, "fields][$fid][value");
+        $value = call_user_func($callback, $value, "fields][$fid][value", $form_state['values']['type']);
       }
     }
     // If we still have a value (mapping may have failed, go and save)

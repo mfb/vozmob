@@ -1,4 +1,4 @@
-# $Id: pt-br.po,v 1.1.2.1 2009/03/11 21:20:49 frjo Exp $
+# $Id: pt-br.po,v 1.1.2.2 2009/07/30 09:13:53 frjo Exp $
 #
 # LANGUAGE translation of Drupal (general)
 # Copyright 2009 <ric@mpcnet.com.br>
@@ -73,12 +73,12 @@ msgid "Original image (no preset)"
 msgstr "Imagem original (sem preset)"
 
 #: thickbox.admin.inc:57
-msgid "Image cache preset"
-msgstr "Preset image cache"
+msgid "Imagecache preset"
+msgstr "Preset Imagecache"
 
 #: thickbox.admin.inc:60
-msgid "Select which image cache preset to use for viewing images in the thickbox."
-msgstr "Selecione qual image cache preset será usado para ver imagens no thickbox."
+msgid "Select which Imagecache preset to use for viewing images in the thickbox."
+msgstr "Selecione qual Imagecache preset será usado para ver imagens no thickbox."
 
 #: thickbox.admin.inc:67
 msgid "Login settings"

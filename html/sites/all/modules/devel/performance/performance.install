@@ -1,7 +1,11 @@
 <?php
-// $Id: performance.install,v 1.1.4.7 2009/06/25 02:51:54 kbahey Exp $
+// $Id: performance.install,v 1.1.4.9 2009/09/13 12:11:34 salvis Exp $
 
-// Copyright Khalid Baheyeldin 2008 of http://2bits.com
+/**
+ * @file performance.install
+ * Install and update for Performance Logging
+ * Copyright Khalid Baheyeldin 2008 of http://2bits.com
+ */
 
 function performance_schema() {
   $schema = array();
@@ -64,45 +68,45 @@ function performance_requirements($phase) {
     return $requirements;
   }
 
-   if (variable_get('performance_detail', 0)) {
-     $requirements['performance_detail'] = array(
-       'title'       => t('Performance logging details'),
-       'value'       => 'Enabled',
-       'severity'    => REQUIREMENT_WARNING,
-       'description' => t('Performance detailed logging is !link. This can cause severe issues on live sites.', array('!link' => l(t('enabled'), 'admin/settings/performance_logging'))),
-     );
-   }
+  if (variable_get('performance_detail', 0)) {
+    $requirements['performance_detail'] = array(
+      'title'       => t('Performance logging details'),
+      'value'       => 'Enabled',
+      'severity'    => REQUIREMENT_WARNING,
+      'description' => t('Performance detailed logging is <a href="@link">enabled</a>. This can cause severe issues on live sites.', array('@link' => url('admin/settings/performance_logging'))),
+    );
+  }
 
-   if (variable_get('dev_query', 0)) {
-     if (variable_get('performance_detail', 0) ||
-         variable_get('performance_summary_db', 0) ||
-         variable_get('performance_summary_apc', 0)) {
-       $requirements['performance_query'] = array(
-         'title'       => t('Performance logging query'),
-         'value'       => 'Enabled',
-         'severity'    => REQUIREMENT_WARNING,
-         'description' => t('Query timing and count logging is !link. This can cause memory size per page to be larger than normal.', array('!link' => l(t('enabled'), 'admin/settings/performance_logging'))),
-       );
-     }
-   }
+  if (variable_get('dev_query', 0)) {
+    if (variable_get('performance_detail', 0) ||
+        variable_get('performance_summary_db', 0) ||
+        variable_get('performance_summary_apc', 0)) {
+      $requirements['performance_query'] = array(
+        'title'       => t('Performance logging query'),
+        'value'       => 'Enabled',
+        'severity'    => REQUIREMENT_WARNING,
+        'description' => t('Query timing and count logging is <a href="@link">enabled</a>. This can cause memory size per page to be larger than normal.', array('@link' => url('admin/settings/performance_logging'))),
+      );
+    }
+  }
 
-   if (!function_exists('apc_fetch')) {
-     $requirements['performance_apc'] = array(
-       'title'       => t('Performance logging APC'),
-       'value'       => 'Disabled',
-       'severity'    => REQUIREMENT_WARNING,
-       'description' => t('Performance logging on live web sites works best if APC is enabled.'),
-     );
-   }
+  if (!function_exists('apc_fetch')) {
+    $requirements['performance_apc'] = array(
+      'title'       => t('Performance logging APC'),
+      'value'       => 'Disabled',
+      'severity'    => REQUIREMENT_WARNING,
+      'description' => t('Performance logging on live web sites works best if APC is enabled.'),
+    );
+  }
 
-   $shm_size = ini_get('apc.shm_size');
-   if ($shm_size < 48) {
-     $requirements['performance_apc_mem'] = array(
-       'title'       => t('Performance logging APC memory size'),
-       'value'       => $shm_size,
-       'severity'    => REQUIREMENT_WARNING,
-       'description' => t('APC has been configured for !size, which is less than the recommended 48 MB of memory. If you encounter errors when viewing the summary report, then try to increase that limit for APC.', array('!size' => $shm_size)),
-     );
+  $shm_size = ini_get('apc.shm_size');
+  if ($shm_size < 48) {
+    $requirements['performance_apc_mem'] = array(
+      'title'       => t('Performance logging APC memory size'),
+      'value'       => $shm_size,
+      'severity'    => REQUIREMENT_WARNING,
+      'description' => t('APC has been configured for !size, which is less than the recommended 48 MB of memory. If you encounter errors when viewing the summary report, then try to increase that limit for APC.', array('!size' => $shm_size)),
+    );
   }
 
   return $requirements;

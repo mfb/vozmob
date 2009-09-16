@@ -1,7 +1,9 @@
-// $Id: CHANGELOG.txt,v 1.14.2.16.2.33 2009/05/08 17:13:16 morbus Exp $
+// $Id: CHANGELOG.txt,v 1.14.2.16.2.36 2009/09/01 15:26:39 morbus Exp $
 
 Bot 6.x-1.x, xxxx-xx-xx
 -----------------------
+  * #564524: bot_project now reports comment counts on d.o URLs (thanks killes).
+  * bot_tell now accepts :;, after a told nick (thanks webchick).
   * Channels are now joined every 15 seconds instead of at initial connection.
   * Logging checks for channels are now case-insensitive (thanks mozillamonks).
   * #362661: Attempt to GHOST and IDENTIFY on nick clashes (thanks seutje).

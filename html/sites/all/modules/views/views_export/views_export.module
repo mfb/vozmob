@@ -1,5 +1,5 @@
 <?php
-// $Id: views_export.module,v 1.7 2009/06/30 19:34:49 merlinofchaos Exp $
+// $Id: views_export.module,v 1.9 2009/09/15 17:27:03 merlinofchaos Exp $
 
 /**
  * @file views_export.module
@@ -189,7 +189,7 @@ function views_export_export_form_submit(&$form, &$form_state) {
 
   $types = system_elements();
 
-  $info  = '; $Id: views_export.module,v 1.7 2009/06/30 19:34:49 merlinofchaos Exp $'."\n";
+  $info  = "; \$Id" . ": $\n"; // The break in the string prevents CVS.
   $info .= "\n";
   $info .= strtr("name = @module Export Module\n", array('@module' => $form_state['values']['name']));
   $info .= strtr("description = Exports some views of @module\n", array('@module' => $form_state['values']['name']));
@@ -228,7 +228,7 @@ function views_export_export_form_submit(&$form, &$form_state) {
     '#type' => 'textarea',
     '#id' => 'export-api-textarea',
     '#name' => 'export-api-textarea',
-    '#attributes' => array(),
+    '#attributes' => array( 'dir' => 'ltr' ),
     '#rows' => 9,
     '#cols' => 60,
     '#value' => $api,
@@ -241,7 +241,7 @@ function views_export_export_form_submit(&$form, &$form_state) {
     '#type' => 'textarea',
     '#id' => 'export-textarea',
     '#name' => 'export-textarea',
-    '#attributes' => array(),
+    '#attributes' => array( 'dir' => 'ltr' ),
     '#rows' => min($lines, 150),
     '#value' => $code,
     '#parents' => array('dummy'),

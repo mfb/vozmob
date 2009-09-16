@@ -1,5 +1,5 @@
 <?php
-// $Id: cow.test,v 1.2.2.2 2009/02/25 18:49:31 bdragon Exp $
+// $Id: cow.test,v 1.2.2.4 2009/07/30 20:58:43 bdragon Exp $
 
 /**
  * @file
@@ -9,6 +9,22 @@
 require_once drupal_get_path('module', 'location') . '/tests/location_testcase.php';
 
 class CowInstanceTest extends LocationTestCase {
+  /**
+   * A global administrative user.
+   */
+  var $admin_user;
+
+  /**
+   * A global normal user.
+   */
+  var $normal_user;
+
+  /**
+   * Simple content type using defaults.
+   */
+  var $content_type;
+
+
   function getInfo() {
     return array(
       'name' => t('Location Copy on Write checks'),
@@ -43,6 +59,31 @@ class CowInstanceTest extends LocationTestCase {
     $node2 = node_load($node->nid, NULL, TRUE);
 
     $this->assertEqual($location1_name, $node2->locations[0]['name'], t('Testing basic save/load'));
+  }
+
+  function testLocpickOnly() {
+    $settings = array();
+    $location_type = $this->addLocationContentType($settings);
+
+    $location1_name = $this->randomName();
+
+    $node = $this->drupalCreateNode(array(
+      'type' => $location_type,
+      'locations' => array(
+        0 => array(
+          'locpick' => array(
+            'user_latitude' => '44.25',
+            'user_longitude' => '-10.25',
+          ),
+          'location_settings' => $settings,
+        ),
+      ),
+    ));
+
+    // Reload the node.
+    $node2 = node_load($node->nid, NULL, TRUE);
+    $this->pass(var_export($node2->locations, TRUE));
+    $this->assertEqual($node2->locations[0]['latitude'], 44.25, t('Testing coordinate-only save/load'));
   }
 
   function testMultipleLocationOnSingleNode() {
@@ -213,14 +254,14 @@ class CowInstanceTest extends LocationTestCase {
 
   function testCOWConservation() {
     $settings = array();
-    $location_type = $this->addLocationContentType($settings, array('multiple' => array('max' => 3, 'add' => 3)));
+    $location_type = $this->addLocationContentType($settings);
 
     $location1_name = $this->randomName();
 
     $node = $this->drupalCreateNode(array(
       'type' => $location_type,
       'locations' => array(
-        0 => array( // First
+        0 => array(
           'name' => $location1_name,
           'location_settings' => $settings,
         ),
@@ -232,7 +273,8 @@ class CowInstanceTest extends LocationTestCase {
 
     $changes = array(
       'locations' => array(
-        0 => array( // Delete First
+        0 => array(
+          // Update name.
           'name' => $location1_name .'_CHANGE',
         ),
       ),

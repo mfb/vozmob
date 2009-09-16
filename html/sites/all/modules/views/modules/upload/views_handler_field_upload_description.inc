@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_upload_description.inc,v 1.4 2009/07/01 23:07:14 merlinofchaos Exp $
+// $Id: views_handler_field_upload_description.inc,v 1.5 2009/09/15 22:15:31 merlinofchaos Exp $
 
 /**
  * Field handler to provide a list of roles.
@@ -64,6 +64,9 @@ class views_handler_field_upload_description extends views_handler_field {
       $values = $this->items[$value->{$this->aliases['fid']}];
       $this->options['alter']['make_link'] = TRUE;
       $this->options['alter']['path'] = file_create_url($values->filepath);
+    }
+    else {
+      $this->options['alter']['make_link'] = FALSE;
     }
     return $data;
   }

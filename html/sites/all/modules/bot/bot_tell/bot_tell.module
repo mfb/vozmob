@@ -1,5 +1,5 @@
 <?php
-// $Id: bot_tell.module,v 1.1.2.6 2009/02/06 17:04:09 morbus Exp $
+// $Id: bot_tell.module,v 1.1.2.7 2009/08/10 18:50:49 morbus Exp $
 
 /**
  * @file
@@ -47,7 +47,7 @@ function bot_tell_irc_msg_channel($data, $from_query = FALSE) {
   }
 
   // check for tells to queue up.
-  if (preg_match("/^($addressed)tell\s+([a-zA-Z0-9\[\]\{\}\\\|\^\`\-\_\*]*)\s+(.*)$/i", $data->message, $matches)) {
+  if (preg_match("/^($addressed)tell\s+([a-zA-Z0-9\[\]\{\}\\\|\^\`\-\_\*]*)[:;,]?\s+(.*)$/i", $data->message, $matches)) {
 
     // if bot_factoid.module is enabled, we'll check to see if this could be about a factoid.
     // if it is, we'll let bot_factoid handle it and skip over this message's processing here.

@@ -1,5 +1,5 @@
 <?php
-// $Id: print_pdf.pages.inc,v 1.3.2.54 2009/07/15 11:02:40 jcnventura Exp $
+// $Id: print_pdf.pages.inc,v 1.3.2.55 2009/08/20 02:19:20 jcnventura Exp $
 
 /**
  * @file
@@ -217,9 +217,9 @@ function _print_pdf_tcpdf($print, $html, $filename) {
   }
 
   $font = Array(
-    variable_get('print_pdf_font_family', PRINT_PDF_FONT_FAMILY_DEFAULT),
+    check_plain(variable_get('print_pdf_font_family', PRINT_PDF_FONT_FAMILY_DEFAULT)),
     '',
-    variable_get('print_pdf_font_size', PRINT_PDF_FONT_SIZE_DEFAULT),
+    check_plain(variable_get('print_pdf_font_size', PRINT_PDF_FONT_SIZE_DEFAULT)),
   );
   $orientation = drupal_strtoupper($print_pdf_page_orientation[0]);
 

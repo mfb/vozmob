@@ -1,4 +1,4 @@
-// $Id: thickbox.js,v 1.8.2.14 2009/04/18 21:32:36 frjo Exp $
+// $Id: thickbox.js,v 1.8.2.18 2009/07/31 15:21:59 frjo Exp $
 
 /*
  * Thickbox 3.1 - One Box To Rule Them All.
@@ -11,7 +11,6 @@
 // Initialize Thickbox.
 Drupal.behaviors.initThickbox = function (context) {
   $('a,area,input', context).filter('.thickbox:not(.initThickbox-processed)').addClass('initThickbox-processed').click(function() {
-    tb_setBrowserExtra();
     var t = this.title || this.name || null;
     var a = this.href || this.alt;
     var g = this.rel || false;
@@ -24,6 +23,7 @@ Drupal.behaviors.initThickbox = function (context) {
 function tb_show(caption, url, imageGroup) { //function called when the user clicks on a thickbox link
 
   var settings = Drupal.settings.thickbox;
+  tb_setBrowserExtra();
 
   try {
     if (typeof document.body.style.maxHeight === 'undefined') { //if IE 6
@@ -48,7 +48,9 @@ function tb_show(caption, url, imageGroup) { //function called when the user cli
       $('#TB_overlay').addClass('TB_overlayBG'); //use background and opacity
     }
 
-    if (caption===null) {caption='';}
+    if (caption === null) {
+      caption = '';
+    }
     $('body').append('<div id="TB_load"></div>'); //add loader to the page
     $('#TB_load').show(); //show loader
 
@@ -90,7 +92,9 @@ function tb_show(caption, url, imageGroup) { //function called when the user cli
           }
           else {
             TB_FoundURL = true;
-            TB_imageCount = settings.image_count.replace(/\!current/, (TB_Counter + 1)).replace(/\!total/, TB_TempArray.length);
+            if (TB_TempArray.length > 1) { // Don't show "Image 1 of 1".
+              TB_imageCount = settings.image_count.replace(/\!current/, (TB_Counter + 1)).replace(/\!total/, TB_TempArray.length);
+            }
           }
         }
       }
@@ -169,7 +173,7 @@ function tb_show(caption, url, imageGroup) { //function called when the user cli
             keycode = event.keyCode;
             escapeKey = 27;
           }
-          else if ($.browser.safari) { // safari
+          else if ($.browser.safari || $.browser.opera) { // safari or opera
             keycode = e.which;
             escapeKey = 27;
           }
@@ -264,7 +268,7 @@ function tb_show(caption, url, imageGroup) { //function called when the user cli
         $('#TB_ajaxContent').load(url += '&random=' + (new Date().getTime()),function() { //to do a post change this load method
           tb_position();
           $('#TB_load').remove();
-          Drupal.attachBehaviors('#TB_ajaxContent a.thickbox');
+          Drupal.attachBehaviors('#TB_ajaxContent');
           $('#TB_window').css({display:'block', opacity: 0}).animate({opacity: 1}, 400);
         });
       }
@@ -276,7 +280,7 @@ function tb_show(caption, url, imageGroup) { //function called when the user cli
           keycode = event.keyCode;
           escapeKey = 27;
         }
-        else if ($.browser.safari) { // safari
+        else if ($.browser.safari || $.browser.opera) { // safari or opera
           keycode = e.which;
           escapeKey = 27;
         }
@@ -325,7 +329,7 @@ function tb_position() {
   }
 }
 
-function tb_parseQuery ( query ) {
+function tb_parseQuery( query ) {
   var Params = {};
   if ( ! query ) {return Params;}// return empty object
   var Pairs = query.split(/[;&]/);
@@ -349,13 +353,18 @@ function tb_getPageSize() {
 }
 
 function tb_setBrowserExtra() {
+  // Return if already set.
+  if ($.browserextra) {
+    return;
+  }
+
   // Add iPhone, IE 6 and Mac Firefox browser detection.
   // msie6 fixes the fact that IE 7 now reports itself as MSIE 6.0 compatible
   var userAgent = navigator.userAgent.toLowerCase();
   $.browserextra = {
     iphone: /iphone/.test( userAgent ),
     msie6: /msie/.test( userAgent ) && !/opera/.test( userAgent ) && /msie 6\.0/.test( userAgent ) && !/msie 7\.0/.test( userAgent ),
-    macfirefox: /mac/.test( userAgent ) && /firefox/.test( userAgent ),
+    macfirefox: /mac/.test( userAgent ) && /firefox/.test( userAgent )
   };
 }
 

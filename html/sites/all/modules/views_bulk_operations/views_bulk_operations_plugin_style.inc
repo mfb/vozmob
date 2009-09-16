@@ -1,5 +1,5 @@
 <?php
-// $Id: views_bulk_operations_plugin_style.inc,v 1.1.2.39 2009/07/05 04:13:57 kratib Exp $
+// $Id: views_bulk_operations_plugin_style.inc,v 1.1.2.41 2009/07/25 05:43:00 kratib Exp $
 
 class views_bulk_operations_plugin_style extends views_plugin_style_table {
   function options(&$options) {
@@ -96,6 +96,9 @@ class views_bulk_operations_plugin_style extends views_plugin_style_table {
         $perm = actions_permissions_get_perm($this->options['all_operations'][$key]['label'], $this->options['all_operations'][$key]['callback']);
         if (!user_access($perm)) continue;
       }
+      if (!empty($this->options['all_operations'][$key]['permissions'])) foreach ($this->options['all_operations'][$key]['permissions'] as $perm) {
+        if (!user_access($perm)) continue 2;
+      }
       if (isset($this->options['all_operations'][$key])) {
         $selected[$key] = $this->options['all_operations'][$key]['label'];
       }
@@ -136,7 +139,7 @@ class views_bulk_operations_plugin_style extends views_plugin_style_table {
     $operations = array();
 
     module_load_include('inc', 'node', 'node.admin');
-    foreach (views_bulk_operations_get_object_info() as $object_type => $info) {
+    foreach (_views_bulk_operations_get_object_info() as $object_type => $info) {
       $hook_name = $object_type .'_operations';
       foreach (module_invoke_all($hook_name) as $operation) {
         if (empty($operation['callback'])) continue;

@@ -1,5 +1,5 @@
 <?php
-// $Id: imagecache_actions.inc,v 1.24 2009/05/03 17:27:46 drewish Exp $
+// $Id: imagecache_actions.inc,v 1.24.2.3 2009/08/19 21:05:31 drewish Exp $
 
 function imagecache_resize_form($action) {
   $form['width'] = array(
@@ -27,7 +27,10 @@ function imagecache_resize_image(&$image, $data) {
 
 function theme_imagecache_resize($element) {
   $data = $element['#value'];
-  return 'width: '. $data['width'] .', height: '. $data['height'];
+  if ($data['width'] && $data['height']) {
+    return check_plain($data['width']) . 'x' . check_plain($data['height']);
+  }
+  return ($data['width']) ? t('width @width', array('@width' => $data['width'])) : t('height @height', array('@height' => $data['height']));
 }
 
 /**
@@ -45,9 +48,7 @@ function imagecache_scale_form($data = array()) {
 }
 
 function theme_imagecache_scale($element) {
-  $output = theme_imagecache_resize($element) .  ', upscale: ';
-  $output .= ($element['#value']['upscale']) ? t('Yes') : t('No');
-  return $output;
+  return theme_imagecache_resize($element) . ' ' . ($element['#value']['upscale'] ? '(' . t('upscaling allowed') . ')' : '');
 }
 
 function imagecache_scale_image(&$image, $data) {
@@ -119,8 +120,8 @@ function imagecache_deprecated_scale_form($data = array()) {
 
 function theme_imagecache_deprecated_scale($element) {
   $data = $element['#value'];
-  $options = array('inside' => t('Inside dimensions'), 'outside' => t('Outside dimensions'));
-  return 'width: '. $data['width'] .', height: '. $data['height'] .', fit: '. $options[$data['fit']];
+  $fits = array('inside' => t('Inside dimensions'), 'outside' => t('Outside dimensions'));
+  return t('width: @width, height: @height, fit: @fit', array('@width' => $data['width'], '@height' => $data['height'], '@fit' => $fits[$data['fit']]));
 }
 
 function imagecache_deprecated_scale_image(&$image, $data) {
@@ -181,7 +182,12 @@ function imagecache_crop_form($data = array()) {
 
 function theme_imagecache_crop($element) {
   $data = $element['#value'];
-  return 'width: '. $data['width'] .', height: '. $data['height'] .', xoffset: '. $data['xoffset'] .', yoffset: '. $data['yoffset'];
+  return t('width: @width, height: @height, xoffset: @xoffset, yoffset: @yoffset', array(
+    '@width' => $data['width'],
+    '@height' => $data['height'],
+    '@xoffset' => $data['xoffset'],
+    '@yoffset' => $data['yoffset'],
+  ));
 }
 
 function imagecache_crop_image(&$image, $data) {
@@ -241,10 +247,11 @@ function imagecache_rotate_form($data = array()) {
 }
 
 function theme_imagecache_rotate($element) {
-  $output = t('degrees:') .' '. $element['#value']['degrees'] .', ';
-  $output .= t('randomize:') .' '. (($element['#value']['random']) ? t('Yes') : t('No')) .', ';
-  $output .= t('background:') .' '. strlen(trim($element['#value']['bgcolor'])) ? $element['#value']['bgcolor'] : t('Transparent/white');
-  return $output;
+  $data = $element['#value'];
+  if ($data['random']) {
+    return t('random between -@degrees&deg and @degrees&deg', array('@degrees' => $data['degrees']));
+  }
+  return t('@degrees&deg', array('@degrees' => $data['degrees']));
 }
 
 function imagecache_rotate_image(&$image, $data) {
@@ -254,7 +261,7 @@ function imagecache_rotate_image(&$image, $data) {
     'random' => FALSE,
     'bgcolor' => '',
   );
- 
+
   // Set sane default values.
   if (strlen(trim($data['bgcolor']))) {
     $data['bgcolor'] = hexdec(str_replace('#', '', $data['bgcolor']));
@@ -310,11 +317,13 @@ function imagecache_sharpen_form($data) {
 }
 
 function theme_imagecache_sharpen($element) {
-  $output = t('radius:') .' '. $element['#value']['radius'] .', ';
-  $output .= t('sigma:') .' '. $element['#value']['sigma'] .', ';
-  $output .= t('amount:') .' '. $element['#value']['amount'] .', ';
-  $output .= t('threshold:') .' '. $element['#value']['threshold'] ;
-  return $output;
+  $data = $element['#value'];
+  return t('radius: @radius, sigma: @sigma, amount: @amount, threshold: @threshold', array(
+    '@radius' => $data['radius'],
+    '@sigma' => $data['sigma'],
+    '@amount' => $data['amount'],
+    '@threshold' => $data['threshold'],
+  ));
 }
 
 function imagecache_sharpen_image(&$image, $data) {

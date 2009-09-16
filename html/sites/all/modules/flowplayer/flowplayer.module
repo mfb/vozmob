@@ -1,5 +1,5 @@
 <?php
-// $Id: flowplayer.module,v 1.2.2.4 2009/06/25 19:54:07 robloach Exp $
+// $Id: flowplayer.module,v 1.2.2.8 2009/09/08 15:09:10 robloach Exp $
 
 /**
  * @file
@@ -17,7 +17,7 @@ function flowplayer_help($path, $arg) {
       return t('The following provides the default Flowplayer settings when the player is displayed. This does not mean it is how it will be displayed everywhere, it will just be the defaults if these settings are not explicitly sent through to the player.');
 
     case 'admin/help#flowplayer':
-      $output = '<p>'. t('The following is a demonstration of <a href="@flowplayer">FlowPlayer</a>. Note that you can change the defaults of how it looks in the <a href="@settings">Flowplayer settings</a>.', array('@flowplayer' => 'http://flowplayer.org', '@settings' => url('admin/settings/flowplayer'))) .'</p>';
+      $output = '<p>'. t('The following is a demonstration of <a href="@flowplayer">Flowplayer</a>. Note that you can change the defaults of how it looks in the <a href="@settings">Flowplayer settings</a>.', array('@flowplayer' => 'http://flowplayer.org', '@settings' => url('admin/settings/flowplayer'))) .'</p>';
       $output .= '<p>'. t("To create Flowplayer elements, you can either use the theme('flowplayer') function, or the flowplayer_add() function. The theme function will add the JavaScript to the page, as well as create the markup for you, while the <code>flowplayer_add()</code> function will just add the JavaScript.") .'</p>';
 
       /**
@@ -26,7 +26,7 @@ function flowplayer_help($path, $arg) {
       $output .= '<h3>'. t('Theme Funciton') .'</h3>';
       $output .= '<p>'. t("Calling <code>theme('flowplayer')</code> will not only add the correct JavaScript to the page, but also construct the markup for you. The second argument passed through here is the video URL, but you can pass the <a href='http://flowplayer.org/documentation/configuration.html'>configuration options</a> instead as seen below.") .'</p>';
       // Construct the video and output it using theme('flowplayer').
-      $output .= theme('flowplayer', 'http://player-e7.simplecdn.net/flowplayer.flv');
+      $output .= theme('flowplayer', 'http://e1h13.simplecdn.net/flowplayer/flowplayer.flv');
       // The second parameter can either be the video URL or configuration options from:
       //   http://flowplayer.org/documentation/configuration.html
 
@@ -36,7 +36,7 @@ function flowplayer_help($path, $arg) {
       $output .= '<h3>'. t('Flowplayer Add') .'</h3>';
       $output .= '<p>'. t("The <code>flowplayer_add()</code> function will add the Flowplayer JavaScript to the page, as well as register the Drupal JavaScript behaviors to load the Flowplayer appropriately. The first argument is the jQuery selector to apply the Flowplayer element to. The second argument is the <a href='http://flowplayer.org/documentation/configuration.html'>configuration options</a>. Using <code>flowplayer_add</code> requires you to already have the markup created.") .'</p>';
       // Construct the video markup first.
-      $output .= '<a href="http://player-e7.simplecdn.net/flowplayer.flv" id="player" class="flowplayer"></a>';
+      $output .= '<a href="http://e1h13.simplecdn.net/flowplayer/flowplayer.flv" id="player" class="flowplayer"></a>';
       // Now add the required JavaScript using some configuration options (http://flowplayer.org/documentation/configuration.html).
       flowplayer_add('#player', array(
         'clip' => array(
@@ -85,12 +85,12 @@ function flowplayer_add($selector = NULL, $config = NULL) {
   // Add Flowplayer to the page if it hasn't been added yet.
   if ($flowplayer_added === FALSE) {
     // Add the FlowPlayer JavaScript and CSS to the page.
-    drupal_add_js(drupal_get_path('module', 'flowplayer') .'/flowplayer/example/flowplayer-3.1.1.min.js');
+    drupal_add_js(drupal_get_path('module', 'flowplayer') .'/flowplayer/example/flowplayer.min.js');
     drupal_add_css(drupal_get_path('module', 'flowplayer') .'/flowplayer.css');
 
     // Tell the JavaScript where flowplayer.swf is.
     $settings = array(
-      'flowplayerSwf' => drupal_get_path('module', 'flowplayer') .'/flowplayer/flowplayer-3.1.1.swf',
+      'flowplayerSwf' => drupal_get_path('module', 'flowplayer') .'/flowplayer/flowplayer.swf',
     );
     drupal_add_js($settings, 'setting');
     $flowplayer_added = TRUE;
@@ -121,6 +121,12 @@ function flowplayer_add($selector = NULL, $config = NULL) {
       if (!empty($key)) {
         $config['key'] = $key;
       }
+    }
+
+    // Merge scaling option in the defaults.
+    $scaling = variable_get('flowplayer_scaling', NULL);
+    if (!empty($scaling)) {
+      $config['clip']['scaling'] = $scaling;
     }
 
     // The player colors.

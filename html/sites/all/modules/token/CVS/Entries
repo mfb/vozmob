@@ -1,16 +1,16 @@
 D/translations////
 /API.txt/1.2.2.1/Wed Apr  1 07:47:46 2009//TDRUPAL-6--1
-/README.txt/1.1.6.1/Thu Jul 16 04:10:28 2009//TDRUPAL-6--1
 /token.info/1.2.2.1/Wed Apr  1 07:47:46 2009//TDRUPAL-6--1
 /token.install/1.2.2.1/Wed Apr  1 07:47:46 2009//TDRUPAL-6--1
-/token.module/1.7.4.12/Thu Jul 16 04:10:28 2009//TDRUPAL-6--1
-/token.rules.inc/1.1.2.3/Thu Jul 16 04:10:28 2009//TDRUPAL-6--1
-/token.test/1.1.2.1/Sun May 31 15:52:35 2009//TDRUPAL-6--1
-/tokenSTARTER.info/1.1.2.1/Sun Apr 19 21:31:24 2009//TDRUPAL-6--1
-/tokenSTARTER.module/1.1.2.2/Thu May 14 16:06:47 2009//TDRUPAL-6--1
 /token_actions.info/1.1.2.1/Wed Apr  1 07:47:46 2009//TDRUPAL-6--1
-/token_actions.module/1.4.2.8/Thu Jul 16 04:10:28 2009//TDRUPAL-6--1
-/token_comment.inc/1.3.4.5/Thu Jul 16 04:10:28 2009//TDRUPAL-6--1
-/token_node.inc/1.5.4.16/Thu Jul 16 04:10:28 2009//TDRUPAL-6--1
 /token_taxonomy.inc/1.3.4.3/Wed Apr  1 07:47:46 2009//TDRUPAL-6--1
 /token_user.inc/1.3.4.2/Wed Apr  1 07:47:46 2009//TDRUPAL-6--1
+/README.txt/1.1.6.1/Mon Jul 27 16:30:57 2009//TDRUPAL-6--1
+/token.module/1.7.4.12/Mon Jul 27 16:30:57 2009//TDRUPAL-6--1
+/token.rules.inc/1.1.2.4/Wed Sep 16 05:32:34 2009//TDRUPAL-6--1
+/token.test/1.1.2.1/Mon Jul 27 16:30:57 2009//TDRUPAL-6--1
+/tokenSTARTER.info/1.1.2.1/Mon Jul 27 16:30:57 2009//TDRUPAL-6--1
+/tokenSTARTER.module/1.1.2.2/Mon Jul 27 16:30:57 2009//TDRUPAL-6--1
+/token_actions.module/1.4.2.8/Mon Jul 27 16:30:57 2009//TDRUPAL-6--1
+/token_comment.inc/1.3.4.5/Mon Jul 27 16:30:57 2009//TDRUPAL-6--1
+/token_node.inc/1.5.4.17/Wed Sep 16 05:32:35 2009//TDRUPAL-6--1

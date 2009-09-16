@@ -1,6 +1,6 @@
  <?php
 
-// $Id: mm_s3_test.inc,v 1.1.2.1.2.7 2009/03/22 20:44:33 arthuregg Exp $
+// $Id: mm_s3_test.inc,v 1.1.2.1.2.8 2009/09/15 04:42:06 arthuregg Exp $
 
 /**
  * This file provides some testing configuration for the s3 module
@@ -87,10 +87,10 @@ function mm_s3_test_form_submit($form, &$form_state) {
       $output[] = t('We did not find your bucket on your account on the Amazon server. Attempting to create it.');
       // Create a bucket with public read access
       if (! $s3->putBucket($test_bucket, $conf['mm_s3_perm'], false, false)) {
-         drupal_set_mesage(t("Could not create your bucket: ". $conf['mm_s3_bucket'] .",  probably already exists"), 'error');
+         drupal_set_message(t("Could not create your bucket: ". $conf['mm_s3_bucket'] .",  probably already exists"), 'error');
       }
       else {
-        drupal_set_mesage(t("Created bucket ". $conf['mm_s3_bucket']));
+        drupal_set_message(t("Created bucket ". $conf['mm_s3_bucket']));
       }
     }
 

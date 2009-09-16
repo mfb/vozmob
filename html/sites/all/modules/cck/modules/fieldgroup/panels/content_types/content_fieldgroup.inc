@@ -1,5 +1,5 @@
 <?php
-// $Id: content_fieldgroup.inc,v 1.1.2.3 2009/07/12 20:15:58 markuspetrux Exp $
+// $Id: content_fieldgroup.inc,v 1.1.2.4 2009/07/18 01:18:07 markuspetrux Exp $
 
 /**
  * @file
@@ -37,8 +37,9 @@ function fieldgroup_content_fieldgroup_content_type_content_types() {
 
       // Assemble the information about the content type.
       $info = array(
-        'category' => t('Content'),
-        'title' => t('field group: @group in @type', array(
+        'category' => t('Node'),
+        'icon' => 'icon_cck_field_group.png',
+        'title' => t('Field group: @group in @type', array(
           '@group' => t($group['label']),
           '@type' => node_get_types('name', $group['type_name']),
         )),
@@ -61,6 +62,14 @@ function fieldgroup_content_fieldgroup_content_type_render($subtype, $conf, $pan
     return;
   }
   $node = drupal_clone($context->data);
+
+  // Make sure old data doesn't cause problems:
+  if (empty($conf['label'])) {
+    $conf['label'] = 'hidden';
+  }
+  if (empty($conf['format'])) {
+    $conf['format'] = 'simple';
+  }
 
   // Extract the node type and fieldgroup name from the subtype.
   list($node_type, $group_name) = explode(':', $subtype, 2);

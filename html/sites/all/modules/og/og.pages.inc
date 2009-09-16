@@ -1,5 +1,5 @@
 <?php
-// $Id: og.pages.inc,v 1.1.2.2 2009/06/10 01:07:27 weitzman Exp $
+// $Id: og.pages.inc,v 1.1.2.3 2009/08/08 17:37:37 weitzman Exp $
 
 /**
  * @file
@@ -430,7 +430,7 @@ function og_page_activity() {
     array('data' => t('Manager'), 'field' => 'u.name'),
     array('data' => t('Posts'), 'field' => 'ncount'),
     array('data' => t('Comments'), 'field' => 'ccount'),
-    array('data' => t('Age'), 'field' => 'node_group_nid.created'),
+    array('data' => t('Age'), 'field' => 'ncreated'),
     array('data' => t('Last comment'), 'field' => 'lct', 'sort' => 'asc'),
   );
   $result = db_query($sql. tablesort_sql($header));

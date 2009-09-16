@@ -1,5 +1,5 @@
 <?php
-// $Id: content.diff.inc,v 1.2.2.5 2008/12/08 01:16:29 yched Exp $
+// $Id: content.diff.inc,v 1.2.2.6 2009/08/03 20:49:29 markuspetrux Exp $
 
 /**
  * @file hook_diff() implementations for CCK (especially fields).
@@ -18,6 +18,10 @@ function content_diff(&$old_node, &$new_node) {
     $type = content_types($new_node->type);
     $field_types = _content_field_types();
     foreach ($type['fields'] as $field) {
+      // Ignore fields the current user is not allowed to view.
+      if (!content_access('view', $field, NULL, $new_node)) {
+        continue;
+      }
       $function = $field_types[$field['type']]['module'] . '_content_diff_values';
       $function = function_exists($function) ? $function : 'content_content_diff_values';
       $old_values = array();

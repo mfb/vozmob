@@ -1,4 +1,4 @@
-$Id: README.txt,v 1.60.4.3 2009/06/09 14:29:52 weitzman Exp $
+$Id: README.txt,v 1.60.4.5 2009/08/11 01:43:07 weitzman Exp $
 
 DESCRIPTION
 --------------------------
@@ -36,7 +36,7 @@ THEMES
 ------------------
 You may wish to stylize nodes which have properties assigned by this module.
 --- public vs. private posts are denoted by $node->og_public (og_access provides private posts)
---- provided in this package are two template files for the phptemplate engine. One stylizes group nodes and the other stylizes all other stylizes group posts. These can be starting points for your customization of look and feel of your group. Just copy them to your theme directory and edit as desired. Or you might use the included og_panels module to achieve custom group homepages (and other group pages) that group admins can design themselves.
+--- provided in this package are two template files which are in use by default for both groups and group posts. These can be starting points for your customization of look and feel of your group. Tp customize, copy one or both to your theme directory and edit as desired. Your theme directory must also impement node.tpl.php for your overrides to be recognized. Or you might use the og_panels module to achieve custom group homepages (and other group pages) that group admins can design themselves.
 
 INTEGRATION
 ---------------------

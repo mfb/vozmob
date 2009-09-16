@@ -1,5 +1,5 @@
 <?php
-// $Id: text.module,v 1.95.2.29 2009/04/29 20:51:53 karens Exp $
+// $Id: text.module,v 1.95.2.30 2009/07/18 01:18:07 markuspetrux Exp $
 
 /**
  * @file
@@ -40,7 +40,7 @@ function text_field_info() {
     'text' => array(
       'label' => t('Text'),
       'description' => t('Store text in the database.'),
-      'content_icon' => 'icon_content_text.png',
+//      'content_icon' => 'icon_content_text.png',
     ),
   );
 }

@@ -1,5 +1,5 @@
 <?php
-// $Id: devel.module,v 1.258.2.54 2009/06/03 03:56:44 weitzman Exp $
+// $Id: devel.module,v 1.258.2.56 2009/09/13 12:11:34 salvis Exp $
 
 // This module holds functions useful for Drupal development.
 // Please contribute!
@@ -158,7 +158,7 @@ function devel_menu() {
   );
   $items['admin/settings/devel'] = array(
     'title' => 'Devel settings',
-    'description' =>  'Helper functions, pages, and blocks to assist Drupal developers. The devel blocks can be managed via the !block page.', array('!block' => l(t('block administration'), 'admin/build/block')),
+    'description' =>  'Helper functions, pages, and blocks to assist Drupal developers. The devel blocks can be managed via the <a href="!block">block administration</a> page.', array('!block' => url('admin/build/block')),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('devel_admin_settings'),
     'access arguments' => array('administer site configuration'),
@@ -213,7 +213,7 @@ function devel_menu_need_destination() {
  * This is more robust that setting alter in hook_menu(). See devel_translated_menu_link_alter().
  *
  **/
-function devel_menu_link_alter(&$item, &$menu) {
+function devel_menu_link_alter(&$item, $menu) {
   if (in_array($item['link_path'], devel_menu_need_destination())) {
     $item['options']['alter'] = TRUE;
   }
@@ -995,7 +995,7 @@ function devel_admin_settings() {
     '#title' => t('Error handler'),
     '#default_value' => variable_get('devel_error_handler', DEVEL_ERROR_HANDLER_STANDARD),
     '#options' => array(DEVEL_ERROR_HANDLER_NONE => t('None'), DEVEL_ERROR_HANDLER_STANDARD => t('Standard drupal')),
-    '#description' => t('Choose an error handler for your site. <em>Backtrace</em> prints nice debug information when an error is noticed, and you !choose. <strong>Backtrace requires the <a href="!krumo">krumo library</a></strong>. <em>None</em> is a good option when stepping through the site in your debugger.', array('!krumo' => url("http://krumo.sourceforge.net"), '!choose' => l(t('choose to show errors on screen'), 'admin/settings/error-reporting'))),
+    '#description' => t('Choose an error handler for your site. <em>Backtrace</em> prints nice debug information when an error is noticed, and you <a href="@choose">choose to show errors on screen</a>. <strong>Backtrace requires the <a href="@krumo">krumo library</a></strong>. <em>None</em> is a good option when stepping through the site in your debugger.', array('@krumo' => url('http://krumo.sourceforge.net'), '@choose' => url('admin/settings/error-reporting'))),
   );
   if (has_krumo()) {
     $form['devel_error_handler']['#options'][DEVEL_ERROR_HANDLER_BACKTRACE] = t('Backtrace');

@@ -1,5 +1,5 @@
 <?php
-// $Id: transliteration.inc,v 1.2.2.2 2009/06/07 19:05:50 smk Exp $
+// $Id: transliteration.inc,v 1.2.2.3 2009/09/05 22:25:01 smk Exp $
 
 /**
  * Sanitize a file name.
@@ -24,6 +24,8 @@ function transliteration_clean_filename($filename, $langcode = NULL) {
   $filename = str_replace(' ', '_', $filename);
   // Remove any remaining non-safe characters.
   $filename = preg_replace('/[^0-9A-Za-z_.-]/', '', $filename);
+  // Force lowercase to prevent issues on case insensitive file systems.
+  $filename = strtolower($filename);
 
   return $filename;
 }

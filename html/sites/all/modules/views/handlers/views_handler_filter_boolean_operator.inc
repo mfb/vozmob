@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_filter_boolean_operator.inc,v 1.5 2009/07/01 22:30:40 merlinofchaos Exp $
+// $Id: views_handler_filter_boolean_operator.inc,v 1.6 2009/09/15 16:18:38 merlinofchaos Exp $
 /**
  * Simple filter to handle matching of boolean values
  *
@@ -15,11 +15,16 @@ class views_handler_filter_boolean_operator extends views_handler_filter {
   var $no_single = TRUE;
   // Don't display empty space where the operator would be.
   var $no_operator = TRUE;
+  // Whether to accept NULL as a false value or not
+  var $accept_null = FALSE;
 
   function construct() {
     $this->value_value = t('True');
     if (isset($this->definition['label'])) {
       $this->value_value = $this->definition['label'];
+    }
+    if (isset($this->definition['accept_null'])) {
+      $this->accept_null = (bool) $this->definition['accept null'];
     }
     $this->value_options = NULL;
     parent::construct();
@@ -127,6 +132,18 @@ class views_handler_filter_boolean_operator extends views_handler_filter {
 
   function query() {
     $this->ensure_my_table();
-    $this->query->add_where($this->options['group'], "$this->table_alias.$this->real_field " . (empty($this->value) ? '=' : '<>') . " 0");
+
+    $where = "$this->table_alias.$this->real_field ";
+
+    if (empty($this->value)) {
+      $where .= '= 0';
+      if ($this->accept_null) {
+        $where = '(' . $where . " OR $this->table_alias.$this->real_field IS NULL)";
+      }
+    }
+    else {
+      $where .= '<> 0';
+    }
+    $this->query->add_where($this->options['group'], $where);
   }
 }

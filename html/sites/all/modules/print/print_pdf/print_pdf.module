@@ -1,5 +1,5 @@
 <?php
-// $Id: print_pdf.module,v 1.1.2.41 2009/07/09 12:00:52 jcnventura Exp $
+// $Id: print_pdf.module,v 1.1.2.43 2009/08/20 02:19:20 jcnventura Exp $
 
 /**
  * @file
@@ -369,7 +369,7 @@ function theme_print_pdf_format_link() {
   $print_pdf_link_class  = variable_get('print_pdf_link_class', PRINT_PDF_LINK_CLASS_DEFAULT);
   $print_pdf_content_disposition = variable_get('print_pdf_content_disposition', PRINT_PDF_CONTENT_DISPOSITION_DEFAULT);
   $print_pdf_show_link = variable_get('print_pdf_show_link', PRINT_PDF_SHOW_LINK_DEFAULT);
-  $print_pdf_link_text = variable_get('print_pdf_link_text', t('PDF version'));
+  $print_pdf_link_text = filter_xss(variable_get('print_pdf_link_text', t('PDF version')));
 
   $img = drupal_get_path('module', 'print') .'/icons/pdf_icon.gif';
   $title = t('Display a PDF version of this page.');
@@ -466,7 +466,7 @@ function print_pdf_link_allowed($args) {
   if (!empty($args['path'])) {
     $nid = preg_replace('!^node/!', '', drupal_get_normal_path($args['path']));
     if (is_numeric($nid)) {
-      $args['node'] = node_load(array('nid' => $nid));
+      $args['node'] = node_load($nid);
     }
   }
   if (!empty($args['node'])) {

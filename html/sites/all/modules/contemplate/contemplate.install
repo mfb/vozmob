@@ -1,5 +1,5 @@
 <?php
-// $Id: contemplate.install,v 1.5.2.4 2009/01/06 16:03:22 jrglasgow Exp $
+// $Id: contemplate.install,v 1.5.2.5 2009/08/03 20:59:19 jrglasgow Exp $
 
 /**
  * @file
@@ -58,7 +58,6 @@ function contemplate_update_1() {
 
 function contemplate_update_2() {
   $ret = array();
-
   switch ($GLOBALS['db_type']) {
     case 'mysql':
     case 'mysqli':
@@ -69,9 +68,14 @@ function contemplate_update_2() {
       ) /*!40100 DEFAULT CHARACTER SET utf8 */;');
       break;
     }
-
   return $ret;
+}
 
+/**
+ * clear the cache to get the updates to hook_menu().
+ */
+function contemplate_update_6102() {
+  cache_clear_all();
 }
 
 function contemplate_uninstall() {

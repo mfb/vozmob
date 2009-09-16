@@ -1,5 +1,5 @@
 <?php
-// $Id: location.module,v 1.222.2.23 2009/04/17 19:12:54 bdragon Exp $
+// $Id: location.module,v 1.222.2.25 2009/07/30 20:58:43 bdragon Exp $
 
 /**
  * @file
@@ -1000,6 +1000,26 @@ function location_invoke_locationapi(&$location, $op, $a3 = NULL, $a4 = NULL, $a
 }
 
 /**
+ * Apply locpick twiddling to a location.
+ * This is needed before saving and comparison.
+ */
+function _location_patch_locpick(&$location) {
+  $inhibit_geocode = FALSE;
+  if (!empty($location['locpick'])) {
+    $location['locpick']['user_latitude'] = trim($location['locpick']['user_latitude']);
+    $location['locpick']['user_longitude'] = trim($location['locpick']['user_longitude']);
+  }
+  // If the user location was set, convert it into lat / lon.
+  if (!empty($location['locpick']['user_latitude']) && !empty($location['locpick']['user_longitude'])) {
+    $location['source'] = LOCATION_LATLON_USER_SUBMITTED;
+    $location['latitude'] = $location['locpick']['user_latitude'];
+    $location['longitude'] = $location['locpick']['user_longitude'];
+    $inhibit_geocode = TRUE;
+  }
+  return $inhibit_geocode;
+}
+
+/**
  * Save a location.
  *
  * This is the central function for saving a location.
@@ -1038,18 +1058,7 @@ function location_save(&$location, $cow = TRUE, $criteria = array()) {
   if (isset($location['lid']) && !empty($location['lid'])) {
     $oldloc = (array)location_load_location($location['lid']);
   }
-
-  // @@@ This isn't the best place to do this...
-  // But if the user only changes user lat/lon, we need to be able to detect it!
-  if (!empty($location['locpick'])) {
-    $location['locpick']['user_latitude'] = trim($location['locpick']['user_latitude']);
-    $location['locpick']['user_longitude'] = trim($location['locpick']['user_longitude']);
-  }
-  // If the user location was set, convert it into lat / lon.
-  if (!empty($location['locpick']['user_latitude']) && !empty($location['locpick']['user_longitude'])) {
-    $location['source'] = LOCATION_LATLON_USER_SUBMITTED;
-    $location['latitude'] = $location['locpick']['user_latitude'];
-    $location['longitude'] = $location['locpick']['user_longitude'];
+  if (_location_patch_locpick($location)) {
     $inhibit_geocode = TRUE;
   }
 
@@ -1187,6 +1196,16 @@ function location_is_empty($location, &$filled) {
   if (empty($location)) {
     return TRUE;
   }
+
+  // Special case: Consider a location with the "delete" checkbox checked to
+  // be empty.
+  if (isset($location['delete_location']) && $location['delete_location']) {
+    return TRUE;
+  }
+
+  // Patch locpick at this point.
+  // Otherwise, changing locpick only will not show a difference.
+  _location_patch_locpick($location);
 
   $settings = isset($location['location_settings']) ? $location['location_settings'] : array();
   $emptyloc = location_empty_location($settings);

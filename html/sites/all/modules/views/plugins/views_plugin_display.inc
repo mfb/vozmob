@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_display.inc,v 1.25 2009/06/26 00:23:42 merlinofchaos Exp $
+// $Id: views_plugin_display.inc,v 1.26 2009/09/15 21:54:23 merlinofchaos Exp $
 /**
  * @file
  * Contains the base display plugin.
@@ -1828,15 +1828,10 @@ class views_plugin_display extends views_plugin {
 
     // Validate handlers
     foreach (views_object_types() as $type => $info) {
-      $plural = $info['plural'];
-      // Skip handlers which are defaulted as there is no point in
-      // validating them again.
-      if (!$this->is_defaulted($plural)) {
-        foreach ($this->get_handlers($type) as $handler) {
-          $result = $handler->validate();
-          if (!empty($result) && is_array($result)) {
-            $errors = array_merge($errors, $result);
-          }
+      foreach ($this->get_handlers($type) as $handler) {
+        $result = $handler->validate();
+        if (!empty($result) && is_array($result)) {
+          $errors = array_merge($errors, $result);
         }
       }
     }

@@ -1,5 +1,5 @@
 <?php
-// $Id: content.node_form.inc,v 1.7.2.20 2009/06/25 22:02:55 yched Exp $
+// $Id: content.node_form.inc,v 1.7.2.21 2009/07/18 00:40:20 markuspetrux Exp $
 
 /**
  * @file
@@ -77,7 +77,7 @@ function content_field_form(&$form, &$form_state, $field, $get_delta = NULL) {
 
     // See if access to this form element is restricted,
     // if so, skip widget processing and just set the value.
-    $access = content_access('edit', $field);
+    $access = content_access('edit', $field, NULL, $node);
     if (!$access) {
       $addition[$field_name] = array(
         '#access' => $access,
