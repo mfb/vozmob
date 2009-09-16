@@ -33,7 +33,6 @@ function sms_registration_mail_alter(&$message) {
  * create a user account.
  */
 function sms_registration_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
-   // watchdog('debug','going into sms_registratino mailsave clean');
     
   // Ignore empty messages.
   if (empty($node)) {
@@ -66,21 +65,9 @@ function sms_registration_mailsave_clean(&$node, $result, $i, $header, $mailbox)
 
       //list($to_address, $to_name) = sms_registration_get_toaddress($header, $mailbox);
 	$to_address = sms_registration_get_toaddress($header, $mailbox);
-/*
-watchdog('debug','Donde falla el $to: ');
-      watchdog('debug',print_r($to_address, TRUE));
-watchdog('debug',print_r($header, TRUE));
-watchdog('debug',print_r($mailbox, TRUE));
-*/
       //$to  = explode('@', $to_address);
       $email_registration_accounts = variable_get('sms_registration_address', '');
-      watchdog('debug','this the email registration 1 and to');
-      watchdog('debug',print_r($email_registration_accounts, TRUE));
-      watchdog('debug',print_r($to_address, TRUE));
-      watchdog('debug',print_r($email_registration_accounts == $to_address, TRUE));
       
-      watchdog('debug',print_r($node->uid,TRUE));
-
       // If message is from an SMS/MMS gateway, create a user account.
       if (!$node->uid) {
         $user = FALSE;
@@ -99,13 +86,11 @@ watchdog('debug',print_r($mailbox, TRUE));
         $node->name = $user->name;
         mailhandler_switch_user($node->uid);
       
-     	watchdog('debug','the user was created');
 
         if (strcasecmp($email_registration_accounts, $to_address) != 0) {
-          $message = t('Thanks! Do you want to have a blog in vozmob? If yes please send one word identifying the blog.');
+          $message = variable_get('sms_registration_question_name_blog', 'Thanks! Do you want to have a blog in vozmob? If yes please send one word identifying the blog.');
           $options = array('carrier' => $from[1], 'from' => variable_get('sms_registration_address', ''), 'subject' => t('Media posted'), 'action' => 'registration');
           sms_send($number, $message, $options);
-     	watchdog('debug','the message was sent');
         }
       }
 
@@ -118,10 +103,10 @@ watchdog('debug',print_r($mailbox, TRUE));
         $password = user_password(8);
         $user = user_save($account, array('name' => $username, 'pass' => $password));
         if ($user) {
-          $message = t('Welcome, !name. Your blog was created. Your password is !pass', array('!name' => $username, '!pass' => $password));
+          $message = t(variable_get('sms_registration_message_welcome_blog','Welcome, !name. Your blog was created. Your password is !pass'),  array('!name' => $username, '!pass' => $password));
         }
         else {
-          $message = t('The blog was not created. Please choose another name.');
+          $message = variable_get('sms_registration_message_blog_not_created','The blog was not created. Please choose another name.');
         }
         $options = array('carrier'=> $from[1], 'from' => variable_get('sms_registration_address', ''));
         sms_send($number, $message, $options);
@@ -146,7 +131,6 @@ function sms_registration_get_toaddress($header, $mailbox) {
 
   $to = $mailbox[mail];
 
-//watchdog('debug',print_r($to, TRUE));
   return $to;
 //  return array($to[0]->mailbox .'@'. $to[0]->host, $to[0]->personal);
 }
