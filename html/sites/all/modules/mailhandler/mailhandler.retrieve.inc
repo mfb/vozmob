@@ -56,6 +56,8 @@ function mailhandler_get_part($stream, $msg_number, $mime_type, $structure = fal
     $structure = imap_fetchstructure($stream, $msg_number, FT_UID);
   }
   if ($structure) {
+    // Set a sane default encoding in case encoding has not been defined.
+    $encoding = 'Windows-1252';
     foreach ($structure->parameters as $parameter) {
       if (strtoupper($parameter->attribute) == 'CHARSET') {
         $encoding = $parameter->value;
