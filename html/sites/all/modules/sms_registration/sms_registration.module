@@ -79,7 +79,7 @@ function sms_registration_mailsave_clean(&$node, $result, $i, $header, $mailbox)
             'roles' => ($role = variable_get('sms_registration_role', NULL)) ? array($role => 1) : NULL,
             'status' => 1,
             'language' => $node->language,
-            'sms_user' => array('number' => sms_formatter($from[0]), 'status' => SMS_USER_CONFIRMED, 'gateway' => array('carrier' => $from[1])),
+            'sms_user' => array('number' => sms_formatter($from[0]), 'status' => SMS_USER_PENDING, 'gateway' => array('carrier' => $from[1])),
           ));
         }
         $node->uid = $user->uid;
@@ -101,7 +101,7 @@ function sms_registration_mailsave_clean(&$node, $result, $i, $header, $mailbox)
         $username =  trim($node->body);
         //if it comes from a valid sms email gateway and it was sent to one of the email registration accounts
         $password = user_password(8);
-        $user = user_save($account, array('name' => $username, 'pass' => $password));
+        $user = user_save($account, array('name' => $username, 'pass' => $password, 'sms_user' => array('number' => sms_formatter($from[0]), 'status' => SMS_USER_CONFIRMED, 'gateway' => array('carrier' => $from[1]))));
         if ($user) {
           $message = t('Welcome, !name. Your blog was created. Your password is !pass', array('!name' => $username, '!pass' => $password));
         }
