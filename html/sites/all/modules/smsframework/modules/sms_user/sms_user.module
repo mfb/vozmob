@@ -316,7 +316,7 @@ function sms_user_user($op, &$edit, &$account, $category = NULL) {
       break;
     case 'login':
       // Check if first it's the user's first time logging in.
-      if (!$account->access && $account->sms_user['number']) {
+      if (!$account->access && !empty($account->sms_user['number']) && empty($account->sms_user['status'])) {
         sms_user_send_confirmation($account, $account->sms_user['number'], $account->sms_user['gateway']);
         drupal_set_message(t('A confirmation message has been sent to your mobile phone. Please !link.', array('!link' => l(t('confirm your number'), 'user/'. $account->uid .'/mobile'))), 'status');
       }
