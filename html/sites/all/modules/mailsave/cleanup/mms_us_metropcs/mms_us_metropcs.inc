@@ -30,7 +30,7 @@ function mms_us_metropcs_mailsave_clean(&$node, $result, $i, $header, $mailbox) 
 
       // Set node title and reset the body if the author just puts short text in the body
       if (empty($node->title) && !empty($node->body) && strlen($node->body) <= 60) {
-        $node->title = truncate_utf8($body, 60, TRUE, TRUE);
+        $node->title = truncate_utf8(decode_entities(strip_tags($body)), 60, TRUE, TRUE);
         $node->body = '';
       }
 
