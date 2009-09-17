@@ -11,6 +11,7 @@ function mms_us_verizon_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
   if (preg_match($pattern, $header->fromaddress)) {
 
     // Build a regex to extract message Verizon spam from message.
+    $node->body = preg_replace('/This message has been sent using .* or higher is required\./s', '', $node->body);
     $node->body = preg_replace('/This message was sent using .* or higher is required\./s', '', $node->body);
     $node->body = preg_replace('/This message was sent using .* email, QuickTime/s', '', $node->body);
 
