@@ -1,6 +1,6 @@
 <?php
 
-/* $Id: media_mover_api.module,v 1.1.2.110.2.60 2009/09/15 05:07:53 arthuregg Exp $ */
+/* $Id: media_mover_api.module,v 1.1.2.110.2.62 2009/09/17 03:10:52 arthuregg Exp $ */
 
 
 /*
@@ -86,7 +86,7 @@ function media_mover_api_cron() {
   $configurations = media_mover_api_get_configurations();
   foreach ($configurations as $configuration) {
     // check to see if we should run on cron for this configuration
-    if (media_mover_api_run_control_extend($configuration, 'cron_run')) {
+    if (! media_mover_api_run_control_extend($configuration, 'cron_run')) {
       media_mover_api_run_config($configuration, null, null, true);
     }
   }
@@ -372,8 +372,6 @@ function media_mover_api_modules() {
  * @return boolean
  */
 function media_mover_api_run_control_extend($configuration, $action, $file = null) {
-  // disabling for now
-  return true;
 	foreach (module_implements('run_control') as $module) {
 	  // function name includes the module name
 		$function  = $module .'_run_control';
@@ -384,6 +382,7 @@ function media_mover_api_run_control_extend($configuration, $action, $file = nul
 			}
 		}
 	}
+	return false;
 }
 
 
@@ -2620,7 +2619,7 @@ function media_mover_api_files_list($cid = null, $status = null) {
 
   // alert admin if there are files that can be expunged for a specific configuration
   if ($cid) {
-    $result = db_result(db_query('SELECT count(mmfid) FROM {media_mover_files} WHERE status != %d AND cid = %d', $status, $cid));
+    $result = db_result(db_query('SELECT count(mmfid) FROM {media_mover_files} WHERE status != %d AND cid = %d', MMA_FILE_STATUS_COMPLETE_COMPLETE, $cid));
     if ($result) {
       drupal_set_message(t('There are %count files that Media Mover has not finished processing. These files may not ever finish. You can !link.',
         array('%count' => $result, '!link' => l(t('remove them all at once'), 'admin/build/media_mover/config/'. $cid . '/files/clear')) )
@@ -2642,6 +2641,7 @@ function media_mover_api_files_list($cid = null, $status = null) {
   if (! $_GET['sort']) { $order = ' ORDER BY date DESC';}
   else { $order = tablesort_sql($header); }
 
+  // Seet the status if called for
   if ($status) {
     $status = " AND status = ". msql_escape_string($status) .' ';
   }
@@ -2957,7 +2957,7 @@ function media_mover_api_file_delete_confirm_form_submit($form, &$form_state) {
   // now delete the file from the db
   db_query('DELETE FROM {media_mover_files} WHERE mmfid = %d', $form['mmfid']['#value']);
   drupal_set_message(t('Deleted the file.'));
-  $form_state['redirect'] = 'admin/build/media_mover/files';
+  $form_state['redirect'] = 'admin/build/media_mover/config/' . $configuration->cid .'/files';
 }
 
 

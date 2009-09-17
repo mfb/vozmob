@@ -612,7 +612,12 @@ function mm_cck_node_file_delete($configuration, $file) {
 
   // Build the name of the field that we are looking for
   $field = $configuration['mm_cck_field_save_' . $configuration['verb']];
-
+  
+  // Make sure that this field exists on the node 
+  if (! $node->{$field}) {
+  	return;
+  }
+  
   // If we have a fid, we can just delete that file and save the node
   if ($fid = $file['fid']) {
     // We need to look at the files stored in this field to find the fid
@@ -625,6 +630,7 @@ function mm_cck_node_file_delete($configuration, $file) {
         unset($node->{$field}[$key]);
         // Save the node without the file
         node_save($node);
+        watchdog('mm_cck', 'Deleted file attached to a CCK field for !node', array('!node' => l($node->title, 'node/'. $node->nid)), WATCHDOG_INFO);
       }
     }
   }

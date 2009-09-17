@@ -15,3 +15,15 @@ function mm_s3_requirements($phase) {
   return $requirements;
 }
 
+/**
+ * Update all the existing mm_s3 configurations to have the default server url
+ */
+function mm_s3_update_6001() {
+  $results = db_query('SELECT cid, configuration FROM {media_mover_configurations} WHERE module = "mm_s3"');
+  while ($result = db_fetch_array($results)) {
+    $configuration = unserialize($result['configuration']);
+    $configuration['mm_s3_server_url'] = 'https://s3.amazonaws.com/';
+    db_query('UPDATE {media_mover_configurations} SET configuration = "%s" WHERE cid = %d AND module = "mm_s3"', $result['cid'], serialize($configuration));
+  }
+  return array();
+}

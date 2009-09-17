@@ -1,6 +1,6 @@
 <?php
 
-// $Id: mm_s3.module,v 1.1.2.2.2.15 2009/06/11 15:46:02 arthuregg Exp $
+// $Id: mm_s3.module,v 1.1.2.2.2.16 2009/09/17 01:37:32 arthuregg Exp $
 
 define('ACL_PRIVATE', 'private');
 define('ACL_PUBLIC_READ', 'public-read');
@@ -161,10 +161,10 @@ function _mm_s3_admin() {
     '#description' => t('Default permissions on files and buckets created on S3'),
   );
 
-  $form['mm_s3']['mm_s3_url'] = array(
+  $form['mm_s3']['mm_s3_server_url'] = array(
     '#type' => 'textfield',
     '#title' => t('S3 URL'),
-    '#default_value' => variable_get('mm_s3_url', "https://s3.amazonaws.com/"),
+    '#default_value' => variable_get('mm_s3_server_url', "https://s3.amazonaws.com/"),
     '#description' => t("URL to send to amazon. You probably do not need to change this."),
   );
 
@@ -243,6 +243,19 @@ function mm_s3_config($action_id, $configuration, $verb) {
     '#default_value' => $configuration['mm_s3_delete_source'],
   );
 
+  $form['mm_s3']['advanced'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Advanced'),
+    '#collapsible' => true,
+    '#collapsed' => true,
+  );  
+  $form['mm_s3']['advanced']['mm_s3_server_url'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Server URL'),
+    '#default_value' => $configuration['mm_s3_server_url'] ? $configuration['mm_s3_server_url'] : variable_get('mm_s3_server_url', "https://s3.amazonaws.com/"),
+    '#description' => t('Server URL. Use this to set the URL where your files will be served from. Normally this is s3.amazonaws.com'),
+  );
+  
   return $form;
 }
 
@@ -300,12 +313,12 @@ function mm_s3_send($file, $configuration, $verb, $action_id) {
   }
 
   // get the current file to work on
-  $file_path = media_mover_api_config_current_file($file);
+  $filepath = media_mover_api_config_current_file($file);
 
   // can we read the file?
-  if (! is_readable($file_path)) {
+  if (! is_readable($filepath)) {
     watchdog('MM S3', 'Harvested file is not readable, check permissions: !file',
-      array('!file' => $file_path), WATCHDOG_ERROR, l($file['mmfid'], 'admin/build/media_mover/file/edit/'. $file['mmfid']));
+      array('!file' => $filepath), WATCHDOG_ERROR, l($file['mmfid'], 'admin/build/media_mover/file/edit/'. $file['mmfid']));
     return;
   }
 
@@ -323,10 +336,10 @@ function mm_s3_send($file, $configuration, $verb, $action_id) {
   $s3->putBucket($bucket, $perms);
 
   // Put file on amazon
-  $s3->putObjectFile($file_path, $bucket, basename($file_path), $perms);
+  $s3->putObjectFile($filepath, $bucket, basename($filepath), $perms);
 
   // Make sure the file made it to amazon
-  $info = $s3->getObjectInfo($bucket, basename($file_path));
+  $info = $s3->getObjectInfo($bucket, basename($filepath));
   // Error check
   if (! $info['hash']) {
     // Error condition when trying to put file up
@@ -345,7 +358,7 @@ function mm_s3_send($file, $configuration, $verb, $action_id) {
         foreach ($items as $id => $item) {
           // now we move these files to amazon
           $s3->putObjectFile($item, $bucket, basename($item), $perms);
-          $display['display'][$module_name][$id] =  "http://s3.amazonaws.com/". $bucket ."/". basename($item);
+          $display['display'][$module_name][$id] = $configuration['mm_s3_server_url'] . $bucket ."/". basename($item);
         }
       }
     }
@@ -370,7 +383,7 @@ function mm_s3_send($file, $configuration, $verb, $action_id) {
   }
 
   // create the return file
-  return "http://s3.amazonaws.com/". $bucket ."/". basename($file_path);
+  return $configuration['mm_s3_server_url'] . $bucket ."/". basename($filepath);
 }
 
 
@@ -381,17 +394,17 @@ function mm_s3_delete_file($item, $configuration) {
   $files = array();
 
   // build a list of files we're going to delete
-  if (strstr($item['storage_file'], 'http://s3.amazonaws.com')) {
+  if (strstr($item['storage_file'], $configuration['mm_s3_server_url'])) {
     $files[] = $item['storage_file'];
   }
-  if (strstr($item['complete_file'], 'http://s3.amazonaws.com')) {
+  if (strstr($item['complete_file'], $configuration['mm_s3_server_url'])) {
     $files[] = $item['complete_file'];
   }
   // sometimes we have data on the $item['data']['display']
   if ($item['data']['display']) {
     foreach ($item['data']['display'] as $module) {
       foreach($module as $path) {
-        if (strstr($path, 'http://s3.amazonaws.com/')) {
+        if (strstr($path, $configuration['mm_s3_server_url'])) {
           $files[] = $item['storage_file'];
         }
       }
@@ -400,7 +413,7 @@ function mm_s3_delete_file($item, $configuration) {
 
   // files is our list of stuff we want to delete. Put it the form bucket/file
   foreach ($files as $file) {
-    $file = str_replace('http://s3.amazonaws.com/', '', $file);
+    $file = str_replace($configuration['mm_s3_server_url'], '', $file);
     $delete_files[] = array('bucket' => dirname($file), 'file' => basename($file) );
   }
 

@@ -1,6 +1,6 @@
- <?php
+<?php
 
-// $Id: mm_s3_test.inc,v 1.1.2.1.2.8 2009/09/15 04:42:06 arthuregg Exp $
+// $Id: mm_s3_test.inc,v 1.1.2.1.2.9 2009/09/16 16:10:55 arthuregg Exp $
 
 /**
  * This file provides some testing configuration for the s3 module
