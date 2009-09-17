@@ -5,41 +5,20 @@
  * Implementation of hook_mailsave_clean().
  */
 function mms_us_virgin_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
-
   // Build regex to see if this was from virgin mobile
   $pattern = '@vmpix.com@';
   
-  watchdog('debug', 'debug inside us virgin mobile');
-
   if (preg_match($pattern, $header->fromaddress)) {
 
-    watchdog('debug', 'inside the virgin mobile message');
-     // Build a regex to extract message body
-    // This regex identifies the actual message text in the email
-    $end_pattern = preg_quote('^M ^M This message is from^M a Virgin Mobile user. Enjoy.^M _____________________________________________________________');
-    $pattern = '@^(.*)' . $end_pattern . '@Us';
+    $node->body = str_replace('<p ALIGN=LEFT><font size=2 color="#cc0000" face=Verdana>This message is from', '', $node->body);
+    $node->body = str_replace('a Virgin Mobile user. Enjoy.<br>', '', $node->body);
+    $node->body = str_replace('_____________________________________________________________</font></p>', '', $node->body);
 
-  watchdog('debug', print_r($node->body,TRUE));
-    // Check for regex success in case the provider changes their format
-    // Worst case is that match fails and nothing is changed
-    if (preg_match($pattern, $node->body)) {
+    $node->teaser = node_teaser($node->body);
 
-    // Find the HTML element containing user-supplied text.
-      preg_match_all('!\^M \^M \^M(.*?)\^M \^M \^M!s', $node->body, $matches);
-      // Get the new body as a string
-      $body = $matches[1][1];
-
-      // Store the amended body
-      $node->body = $body;
-      $node->teaser = node_teaser($node->body);
-
-    watchdog('debug', print_r($body, TRUE));
-    }
-
-    // Set node title and reset the body if the author just puts short text in the body
-    if (empty($node->title) && !empty($node->body) && strlen($node->body) <= 60) {
-      $node->title = truncate_utf8(strip_tags($body), 60, TRUE, TRUE);
-      $node->body = '';
+    // Set node title from body if title is empty.
+    if (empty($node->title)) {
+      $node->title = truncate_utf8(decode_entities(strip_tags($body)), 60, TRUE, TRUE);
     }
 
     // Get rid of extra text attachments
@@ -50,7 +29,6 @@ function mms_us_virgin_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
     }
   }
 }
-
 
 /**
  * Report back module information when requested
