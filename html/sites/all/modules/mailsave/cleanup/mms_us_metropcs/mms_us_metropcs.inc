@@ -19,12 +19,19 @@ function mms_us_metropcs_mailsave_clean(&$node, $result, $i, $header, $mailbox) 
     // Worst case is that match fails and nothing is changed
     if (preg_match($pattern, $node->body)) {
 
-      // Find the HTML element containing user-supplied text.
+      // Find the HTML elements containing user-supplied text.
       preg_match_all('!<td colspan=1 align="Center">(.*?)</td>!s', $node->body, $matches);
-      // Get the new body as a string
-      $body = $matches[1][1];
 
-      // Store the amended body
+      // Get the new body as a string
+      $body = '';
+      foreach ($matches[1] as $cell) {
+        // Do not include links to attachments in the node body.
+        if (substr($cell, 0, 8) != '<a href=') {
+          $body .= $cell;
+        }
+      }
+
+      // Store the amended body.
       $node->body = $body;
       $node->teaser = node_teaser($node->body);
 
