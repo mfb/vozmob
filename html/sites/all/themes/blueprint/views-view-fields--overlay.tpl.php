@@ -45,16 +45,24 @@
         <?php foreach ($cid as $mmfid): ?>
           <?php if (strtolower(substr($mmfid['complete_file'], -4, 4)) == '.mp3'): ?>
             <?php if (empty($playlist) && empty($node->field_image[0])): ?>
-              <?php $playlist[] = base_path() . drupal_get_path('theme', 'blueprint') . '/images/audio_icon_large.gif'; ?>
+              <?php $playlist[$mmfid['fid']] = base_path() . drupal_get_path('theme', 'blueprint') . '/images/audio_icon_large.gif'; ?>
             <?php endif; ?>
-            <?php $playlist[] = array('url' => file_create_url($mmfid['complete_file'])); ?>
+            <?php $playlist[$mmfid['fid']] = array('url' => file_create_url($mmfid['complete_file'])); ?>
           <?php endif; ?>
           <?php if (substr($mmfid['complete_file'], -4, 4) == '.flv'): ?>
-            <?php $playlist[] = array('url' => file_create_url($mmfid['complete_file'])); ?>
+            <?php $playlist[$mmfid['fid']] = array('url' => file_create_url($mmfid['complete_file'])); ?>
           <?php endif; ?>
         <?php endforeach; ?>
       <?php endforeach; ?>
       <?php if (!empty($playlist)): ?>
+        <?php foreach($playlist as $fid => $clip): ?>
+          <?php if (!empty($node->files[$fid]->weight) && !isset($playlist[$node->files[$fid]->weight])): ?>
+            <?php $playlist[$node->files[$fid]->weight] = $clip; ?> 
+            <?php unset($playlist[$fid]); ?>
+          <?php endif; ?>
+        <?php endforeach; ?>
+        <?php ksort($playlist); ?>
+        <?php $playlist = array_merge($playlist); ?>
         <div class="media-mover-audio<?php if (!empty($node->field_image[0])): ?> media-mover-audio-image<?php endif; ?>">
           <?php print theme('flowplayer', array('clip' => array('autoPlay' => TRUE, 'autoBuffering' => TRUE), 'playlist' => $playlist, 'plugins' => array('controls' => array('fullscreen' => FALSE, 'playlist' => TRUE))), 'flowplayer-audio-' . $node->nid); ?>
         </div>
