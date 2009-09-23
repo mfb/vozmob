@@ -1,5 +1,5 @@
 <?php
-// $Id: jquery_plugin.jq.inc,v 1.1.2.17 2009/06/15 22:53:39 mfb Exp $
+// $Id: jquery_plugin.jq.inc,v 1.1.2.19 2009/09/23 22:47:44 mfb Exp $
 
 /**
  * Implementation of hook_jq().
@@ -38,7 +38,7 @@ function jquery_plugin_jq($op, $plugin = NULL) {
       'cycle' => array(
         'name' => t('Cycle'),
         'description' => t('Easy to use light-weight slideshow implementation. It supports pause-on-hover, auto-stop, auto-fit, before/after callbacks, click triggers and many transition effects including fade, shuffle, scroll, turn and zoom. It also allows you to define and run your own custom transitions. In addition, it supports, but does not require, the Metadata Plugin and the Easing Plugin.'),
-        'version' => '2.65',
+        'version' => '2.72',
         'url' => 'http://plugins.jquery.com/project/cycle',
         'files' => array(
           'js' => array(
@@ -77,7 +77,7 @@ function jquery_plugin_jq($op, $plugin = NULL) {
       'flashembed' => array(
         'name' => t('Flash embed'),
         'description' => t('A javascript tool that you can use to embed Flash objects to your website.'),
-        'version' => '1.0.3',
+        'version' => '1.0.4',
         'url' => 'http://plugins.jquery.com/project/flashembed',
         'files' => array(
           'js' => array(
@@ -168,7 +168,7 @@ function jquery_plugin_jq($op, $plugin = NULL) {
       'validate' => array(
         'name' => t('Validate'),
         'description' => t('Setup powerful client-side form validation. From a protoype in a few minutes to heavily customized validation rules, methods and messages.'),
-        'version' => '1.5.3',
+        'version' => '1.5.5',
         'url' => 'http://plugins.jquery.com/project/validate',
         'files' => array(
           'js' => array(

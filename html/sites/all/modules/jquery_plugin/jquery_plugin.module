@@ -1,13 +1,16 @@
 <?php
-// $Id: jquery_plugin.module,v 1.1.4.7 2008/05/15 02:06:44 mfb Exp $
+// $Id: jquery_plugin.module,v 1.1.4.8 2009/09/23 22:11:58 mfb Exp $
 
 /**
  * Add a jQuery plugin to a page.
  */
 function jquery_plugin_add($plugin) {
-  static $plugins = array();
+  static $plugins = array(), $path;
+  if (!isset($path)) {
+    $path = drupal_get_path('module', 'jquery_plugin');
+  }
   if (!isset($plugins[$plugin])) {
-    drupal_add_js(drupal_get_path('module', 'jquery_plugin') .'/jquery.'. $plugin .'.min.js');
+    drupal_add_js($path .'/jquery.'. $plugin .'.min.js');
     $plugins[$plugin] = TRUE;
   }
 }
