@@ -1,5 +1,5 @@
 <?php
-// $Id: imagefield_widget.inc,v 1.39 2009/05/17 02:17:31 quicksketch Exp $
+// $Id: imagefield_widget.inc,v 1.40 2009/09/18 15:30:18 quicksketch Exp $
 
 /**
  * @file
@@ -272,7 +272,7 @@ function imagefield_widget_process($element, $edit, &$form_state, $form) {
 /**
  * FormAPI theme function. Theme the output of an image field.
  */
-function theme_imagefield_widget(&$element) {
+function theme_imagefield_widget($element) {
   drupal_add_css(drupal_get_path('module', 'imagefield') .'/imagefield.css');
   return theme('form_element', $element, $element['#children']);
 }
