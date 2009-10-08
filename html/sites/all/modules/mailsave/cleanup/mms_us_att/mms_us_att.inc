@@ -19,7 +19,6 @@ function mms_us_att_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
     // Add extra text parts into node body.
     foreach ($node->mimeparts as $key => $mimepart) {
       if ($key > 1 && strpos($mimepart->filemime, 'TEXT/') === 0 && strpos($node->body, $mimepart->data) === FALSE) {
-        // Add any text parts, aside from the initial part, to the body.
         $node->body .= "\n" . $mimepart->data;
       }
     }

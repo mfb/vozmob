@@ -26,6 +26,13 @@ function mms_us_verizon_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
       $node->body = '';
     }
 
+    // Add extra text parts into node body.
+    foreach ($node->mimeparts as $key => $mimepart) {
+      if ($key > 1 && strpos($mimepart->filemime, 'TEXT/') === 0 && strpos($node->body, $mimepart->data) === FALSE) {
+        $node->body .= "\n" . $mimepart->data;
+      }
+    }
+
     // Get rid of extra text attachments
     foreach ($node->mailsave_attachments as $key => $file) {
       if ($file['filemime'] == 'text/plain') {
