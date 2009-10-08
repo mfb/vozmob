@@ -23,17 +23,6 @@ function mailsave_to_textpart_mailsave($node, $result, $i, $header, $mailbox) {
     if ($text && $image) {
       $mimepairs[] = array('image' => $key - 1, 'text' => $key);
     }
-    elseif ($text && $key > 1) {
-      // Add any text parts, aside from the initial parts, to the body.
-      // @todo: This is not really right. What if this text part was already
-      // added to the body? What if we threw away an initial text part that we
-      // actually wanted?
-      if (strpos($node->body, $mimepart->data) === FALSE) {
-        // @fixme: This breaks orange.fr.
-        // We need carrier-specific code to add desired textparts into the body.
-        // $node->body .= "\n" . $mimepart->data;
-      }
-    }
     $image = (strpos($mimepart->filemime, 'IMAGE/') === 0) ? TRUE : FALSE;
   }
 
