@@ -36,6 +36,15 @@ function imagefield_widget_settings_form($widget) {
     '#weight' => 2.2,
   );
 
+  $form['rotate'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Allow image rotation on edit (Requires ImageAPI module)'),
+    '#default_value' => isset($widget['rotate']) ? $widget['rotate'] : 0,
+    '#description' => t('Select this to allow users to rotate images on the node edit form.'),
+    '#weight' => 5,
+    '#disabled' => !module_exists('imageapi'),
+  );
+
   $form['alt_settings'] = array(
     '#type' => 'fieldset',
     '#title' => t('ALT text settings'),
@@ -189,7 +198,7 @@ function imagefield_widget_settings_validate($widget) {
  */
 function imagefield_widget_settings_save($widget) {
   $filefield_settings = module_invoke('filefield', 'widget_settings', 'save', $widget);
-  return array_merge($filefield_settings, array('max_resolution', 'min_resolution', 'alt',  'custom_alt', 'title', 'custom_title', 'title_type', 'default_image', 'use_default_image'));
+  return array_merge($filefield_settings, array('max_resolution', 'min_resolution', 'alt',  'custom_alt', 'title', 'custom_title', 'title_type', 'default_image', 'use_default_image', 'rotate'));
 }
 
 /**
@@ -205,6 +214,12 @@ function imagefield_widget_value($element, $edit = FALSE) {
     $item['alt'] = '';
     $item['title'] = '';
   }
+  
+  // Process rotation.
+  if ($item['rotate']) {
+    imagefield_rotate($item);
+  }
+  
   return $item;
 }
 
@@ -264,6 +279,26 @@ function imagefield_widget_process($element, $edit, &$form_state, $form) {
   // #value must be hard-coded if #type = 'value'.
   if ($default_title) {
     $element['data']['title']['#value'] = $field['widget']['title'];
+  }
+  
+  // Add rotation widget.
+  if ($field['widget']['rotate'] && module_exists('imageapi')) {  
+    $element['rotate'] = array(
+      '#type' => 'select',
+      '#title' => t('Rotate'),
+      '#options' => array(
+        0 => t('None'),
+        90 => t('90 degrees clockwise'),
+        180 => t('180 degrees'),
+        270 => t('90 degrees anti-clockwise'),
+      ),
+      '#default_value' => 0,
+      '#attributes' => array(
+        'class' => 'imagefield-rotate',
+      ),
+    );
+    drupal_add_js(drupal_get_path('module', 'imagefield') .'/jquery.rotate.1-1.js');
+    drupal_add_js(drupal_get_path('module', 'imagefield') .'/imagefield-rotate.js');
   }
 
   return $element;

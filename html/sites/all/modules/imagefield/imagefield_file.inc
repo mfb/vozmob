@@ -94,3 +94,35 @@ function imagefield_create_admin_thumb($source, $destination) {
     drupal_set_message(t('An image thumbnail was not able to be created.'), 'error');
   }
 }
+
+/**
+ * Process rotation of submitted images.
+ */
+function imagefield_rotate(&$element) {
+  if ($element['rotate'] && module_exists('imageapi')) {
+    // Open and rotate the image.
+    $image = imageapi_image_open($element['filepath']);
+    imageapi_image_rotate($image, $element['rotate']);
+    
+    // Temp increase the jpeg quality, better way to do this?
+    $imageapi_jpeg_quality = variable_get('imageapi_jpeg_quality', 75);
+    variable_set('imageapi_jpeg_quality', 100);
+    
+    // Save the rotated image to a temp file.
+    $tmp = file_directory_temp() .'/'. basename($image->source);
+    imageapi_image_close($image, $tmp);
+    
+    // Reset imageapi_jpeg_quality.
+    variable_set('imageapi_jpeg_quality', $imageapi_jpeg_quality);
+    
+    // Save the rotated tmp file into the drupal file system and file table.
+    $rotated_file = field_file_save_file($tmp, array(), dirname($element['filepath']));
+    
+    // Delete the old, unrotated file.
+    $unrotated_file = field_file_load($element['fid']);
+    field_file_delete($unrotated_file);
+    
+    // Update the element with the new rotated file.
+    $element = array_merge($element, $rotated_file);
+  }
+}
