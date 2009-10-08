@@ -338,6 +338,7 @@ function sms_sms_carriers() {
     'text.mtsmobility.com' => t('MTS (Canada)'),
     'page.nextel.com' => t('Nextel'),
     'nextel.net.ar' => t('Nextel (Argentina)'),
+    'orange.fr' => t('Orange (France)'),
     'orange.pl' => t('Orange (Poland)'),
     'orange.net' => t('Orange (UK)'),
     'personal-net.com.ar' => t('Personal (Argentina)'),
