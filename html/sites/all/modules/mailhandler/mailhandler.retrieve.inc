@@ -572,22 +572,26 @@ function mailhandler_get_fromaddress($header, $mailbox) {
  *
  */
 function mailhandler_switch_user($uid = NULL) {
-  global $user;
-  static $orig_user = array();
+  global $user, $language;
+  static $orig_user = array(), $orig_language = array();
 
   if (isset($uid)) {
     session_save_session(FALSE);
     $user = user_load(array('uid' => $uid));
+    drupal_init_language();
   }
   // retrieve the initial user, can be called multiple times
   else if (count($orig_user)) {
     $user = array_shift($orig_user);
+    $language = array_shift($orig_language);
     session_save_session(TRUE);
     array_unshift($orig_user, $user);
+    array_unshift($orig_language, $language);
   }
   // store the initial user
   else {
     $orig_user[] = $user;
+    $orig_language[] = $language;
   }
 }
 
