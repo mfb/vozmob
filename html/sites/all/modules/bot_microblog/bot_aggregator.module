@@ -25,7 +25,7 @@ function bot_aggregator_irc_bot_cron($cron = 300) {
   $irc->setReceiveTimeout(600);
   $feeds = bot_aggregator_get_feeds();
   while ($feed = db_fetch_object($feeds)) {
-    if ($cron == variable_get('bot_aggregator_cron_' . $feed->fid, 300) && ($channel = variable_get('bot_aggregator_channel_' . $feed->fid, ''))) {
+    if ($cron == variable_get('bot_aggregator_cron_' . $feed->fid, 300) && ($channels = variable_get('bot_aggregator_channel_' . $feed->fid, array()))) {
       $items = db_query('SELECT a.iid, a.fid, a.title, a.link, a.author FROM {aggregator_item} a LEFT JOIN {bot_aggregator} b ON a.iid = b.iid WHERE a.fid = %d AND b.iid IS NULL ORDER BY a.timestamp asc LIMIT %d', $feed->fid, variable_get('bot_aggregator_limit', 1));
       while ($item = db_fetch_object($items)) {
         $message = ($item->author ? '<' . $item->author . '> ' : '') . $item->title . ' ' . $item->link;
@@ -33,7 +33,11 @@ function bot_aggregator_irc_bot_cron($cron = 300) {
         $message = str_replace(array("\n", "\r"), ' ', $message);
         // Allow other modules to alter (and act on) the message.
         drupal_alter('bot_aggregator_message', $message, $feed, $item);
-        bot_message($channel, $message);
+        foreach ($channels as $channel) {
+          if ($channel) {
+            bot_message($channel, $message);
+          }
+        }
         drupal_write_record('bot_aggregator', $item);
       }
     }
@@ -138,10 +142,11 @@ function bot_aggregator_settings() {
     );
     $form['feed_' . $feed->fid]['bot_aggregator_channel_' . $feed->fid] = array(
       '#title'         => t('IRC channel', array('%title' => $feed->title)),
-      '#description'   => t('Select an IRC channel to which messages from feed %url will be relayed.', array('%url' => $feed->url)),
+      '#description'   => t('Select one or more IRC channels to which messages from feed %url will be relayed.', array('%url' => $feed->url)),
       '#type'          => 'select',
       '#options'       => $options,
       '#default_value' => variable_get('bot_aggregator_channel_' . $feed->fid, ''),
+      '#multiple'      => TRUE,
     );
     $form['feed_' . $feed->fid]['bot_aggregator_cron_' . $feed->fid] = array(
       '#title'         => t('Update frequency'),
