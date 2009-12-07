@@ -1,6 +1,22 @@
 Version history:
 
-3.x
+3.1.5
+-----
+Fixes:
+- The player went to a locked state when resuming playback after a period that was long enought to send the
+netConnection to an invalid state. Now when resuming playback on an invalid connection the clip starts again from
+the beginning. This is only when using RTMP connections and does not affect progressive download playback.
+- Custom netConnect and netStream events did not pass the info object to JS listeners
+
+3.1.4
+-----
+Fixes:
+- player did not initialize if the controlbar plugin was disabled and if the play button overlay was disabled with play: null
+- works properly without cachebusting on IE
+- RSS playlist parsing now respects the isDefault attribute used in mRSS media group items
+- Fixed passing of connection arguments
+
+3.1.3
 -----
 - enhancements to RSS playlist parsing: Now skips all media:content that have unsupported types. Now the type attribute
 of the media:content element is mandatory and has to be present in the RSS file

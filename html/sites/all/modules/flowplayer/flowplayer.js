@@ -1,4 +1,4 @@
-// $Id: flowplayer.js,v 1.1.2.5 2009/05/26 03:20:38 robloach Exp $
+// $Id: flowplayer.js,v 1.1.2.6 2009/11/19 21:33:48 robloach Exp $
 
 /**
  * @file
@@ -24,9 +24,9 @@ Drupal.behaviors.flowplayer = function() {
       'onBeforeKeypress',
       'onVolume',
       'onBeforeVolume',
-      'onMute ',
+      'onMute',
       'onBeforeMute',
-      'onUnmute ',
+      'onUnmute',
       'onBeforeUnmute',
       'onFullscreen',
       'onBeforeFullscreen',
@@ -46,7 +46,7 @@ Drupal.behaviors.flowplayer = function() {
       'onBeforeBegin',
       'onMetaData',
       'onStart',
-      'onPause ',
+      'onPause',
       'onBeforePause',
       'onResume',
       'onBeforeResume',

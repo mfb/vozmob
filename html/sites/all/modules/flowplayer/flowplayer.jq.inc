@@ -1,5 +1,5 @@
 <?php
-// $Id: flowplayer.jq.inc,v 1.1.2.4 2009/09/08 15:03:10 robloach Exp $
+// $Id: flowplayer.jq.inc,v 1.1.2.6 2009/11/24 20:12:37 robloach Exp $
 
 /**
  * @file
@@ -14,7 +14,7 @@ function flowplayer_jq($op, $plugin = NULL) {
         'flowplayer' => array(
           'name' => t('Flowplayer'),
           'description' => t('Flash video player.'),
-          'version' => '3.1.3',
+          'version' => '3.1.5',
           'url' => 'http://flowplayer.org',
         ),
       );
