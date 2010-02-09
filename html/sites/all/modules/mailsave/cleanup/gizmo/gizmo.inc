@@ -26,10 +26,11 @@ function gizmo_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
       $pattern = '/^[0-9]+/';
       if ($file['filemime'] == 'audio/x-wav' && preg_match($pattern, $file['filename'], $matches)) {
         if (module_exists('sms_user')) {
-          sms_mailsave_receive($node, $matches[0]);
-        }
-        if ($node->uid) {
-          mailhandler_switch_user($node->uid);
+          if (($uid = sms_user_get_uid($number)) && ($account = user_load(array('uid' => $uid, 'status' => 1)))) {
+            $node->uid = $account->uid;
+            $node->name = $account->name;
+            mailhandler_switch_user($node->uid);
+          }
         }
         $node->mailsave_attachments[$index]['filename'] = preg_replace($pattern, 'unknown', $file['filename']);
       }
