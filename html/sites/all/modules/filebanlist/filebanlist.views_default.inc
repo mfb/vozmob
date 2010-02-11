@@ -158,14 +158,8 @@ $handler->override_option('style_options', array(
   'display_result' => 1,
   'merge_single_action' => 1,
   'selected_operations' => array(
-    'd43ffcb316c846d7446f776ecf48b44a' => 'd43ffcb316c846d7446f776ecf48b44a',
-    'ebb056ea879a18f8b7fe696f1a442622' => 'ebb056ea879a18f8b7fe696f1a442622',
-    'e52c7d4b8ccc8fd7b8f7a59ca8e0e013' => 0,
-    'e620912b6bfc590784848cf00c05b42f' => 0,
-    'ffd4dd7c59102655f73303c040b08914' => 0,
-    '2094a5f797e4c4f0f5ecc0cfcdae09de' => 0,
-    '97cdd5da60cce28fec0e8a22e535938c' => 0,
-    '0b086d2bd7e37bf66a3b8b0b9226249a' => 0,
+    '0' => 'filebanlist_file_add_action',
+    '1' => 'filebanlist_file_remove_action',
   ),
 ));
 $handler = $view->new_display('page', 'Page', 'page_1');
