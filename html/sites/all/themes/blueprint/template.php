@@ -468,7 +468,9 @@ function blueprint_upload_attachments($files) {
  * Renders a video or audio element.
  */
 function blueprint_media_element($file, $href) {
-  $elements = drupal_map_assoc(array('audio', 'video'));
+  // @fixme: due to firefox bugginess, sometimes WAV files are not decoded and page render stalls?
+  // $elements = drupal_map_assoc(array('audio', 'video'));
+  $elements = drupal_map_assoc(array('video'));
   list($element) = explode('/', $file->filemime);
   if (isset($elements[$element])) {
     return '<' . $element . ' controls="controls" src="' . check_url($href) . '" />';
