@@ -69,12 +69,17 @@ function mms_us_sprint_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
       $node->body = preg_replace('!(.+)<pre id="guestTxtMemoDisplayId" class="guestTxtMemoDisplay">(.+)</pre>(.+)!i', '\\2', $scraped_form);
       $node->teaser = node_teaser($node->body);
       // build an array of input elements to form get string to pull zip file
-      $input_element_array = preg_split("!<(input )|<(select )!i", $scraped_form);
-      $zip_get = array();
+      //$input_element_array = preg_split("!<(input )|<(select )!i", $scraped_form);
+      //$zip_get = array();
       // the call back function will extract the first name/value pairs and build the mms_us_sprint_get array
-      array_walk($input_element_array, 'mms_us_sprint_build_zip_get', &$zip_get);
+      //array_walk($input_element_array, 'mms_us_sprint_build_zip_get', &$zip_get);
       // implode the mms_us_sprint_get into a formatted GET string
-      $url = 'http://pictures.sprintpcs.com/downloadmsgmedia/?' . implode('&',$zip_get);
+      //$url = 'http://pictures.sprintpcs.com/downloadmsgmedia/?' . implode('&',$zip_get);
+      strtok($url, '=');
+      $invite = strtok('&');
+      // @fixme: This code only supports downloading up to 10 items. Have to add more elementID parameters to download more.
+      $url = 'http://pictures.sprintpcs.com/downloadmsgmedia/?' . 'externalMessageId=' . $invite . '&messageId=' . $invite . '&shareType=MultiPictures&fileName=Sprintpictures&invite='
+        . $invite . '&elementID2=2&elementID3=3&elementID4=4&elementID5=5&elementID6=6&elementID7=7&elementID8=8&elementID9=9&elementID10=10&elementID11=11';
       // Retrieve the ZIP file, currently by reading the entire file into a variable!
       // Use a working user agent header.
       $attachments = drupal_http_request($url, array('User-Agent' => 'Wget/1.11.2'));
@@ -84,7 +89,7 @@ function mms_us_sprint_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
       if (is_resource($zip)) {
 //        $node->mailsave_attachments = array();
         while ($zip_entry = zip_read($zip)) {
-          echo "\nzip_entry"; print_r(zip_entry_name($zip_entry));
+          watchdog('mms_us_sprint', 'zip_entry: ' . check_plain(print_r(zip_entry_name($zip_entry), TRUE)), NULL);
           if (zip_entry_open($zip, $zip_entry)) {
             // File name is just a digit, so generate a more unique file name.
             $path_parts = pathinfo(zip_entry_name($zip_entry));
@@ -104,13 +109,13 @@ function mms_us_sprint_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
           }
         }
         zip_close($zip);
-      }else{
+      }
+      else {
         watchdog('mms_us_sprint', 'zip is not a resource');
       }
     }
-    else
-    {
-      echo 'WTF, THERE IS NO LINKS??!?';
+    else {
+      watchdog('mms_us_sprint', 'WTF, THERE IS NO LINKS??!?');
     }
   }
 }
