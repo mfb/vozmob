@@ -1,5 +1,5 @@
 <?php
-/* $Id: mimemail.inc,v 1.31.2.3 2009/04/14 23:08:59 jerdavis Exp $ */
+/* $Id: mimemail.inc,v 1.40 2009/02/23 16:11:19 jerdavis Exp $ */
 
 /**
  * @file
@@ -84,9 +84,8 @@ function mimemail_headers($headers, $from = '') {
  *                  )
  */
 function mimemail_extract_files($html) {
-  $pattern = '/(<link[^>]+href=[\'"]?|<object[^>]+codebase=[\'"]?|@import |src=[\'"]?)([^\'>"]+)([\'"]?)/emis';
-  $replace = 'stripslashes("\\1")._mimemail_file("\\2").stripslashes("\\3")';
-  $html = preg_replace($pattern, $replace, $html);
+  $pattern = '/(<link[^>]+href=[\'"]?|<object[^>]+codebase=[\'"]?|@import |src=[\'"]?)([^\'>"]+)([\'"]?)/mis';
+  $html = preg_replace_callback($pattern, '_mimemail_replace_files', $html);
 
   $document = array(array(
     'Content-Type' => "text/html; charset=utf-8",
@@ -97,6 +96,13 @@ function mimemail_extract_files($html) {
   $files = _mimemail_file();
 
   return array_merge($document, $files);
+}
+
+/**
+ * Callback for preg_replace_callback()
+ */
+function _mimemail_replace_files($matches) {
+  return stripslashes($matches[1]) . _mimemail_file($matches[2]) . stripslashes($matches[3]);
 }
 
 /**
@@ -254,6 +260,13 @@ function mimemail_multipart_body($parts, $content_type = 'multipart/mixed; chars
 }
 
 /**
+ * Callback for preg_replace_callback()
+ */
+function _mimemail_expand_links($matches) {
+  return $matches[1] . _mimemail_url($matches[2]);
+}
+
+/**
  * Generate a multipart message body with a text alternative for some html text
  * @param $body An HTML message body
  * @param $subject The message subject
@@ -297,8 +310,8 @@ function mimemail_html_body($body, $subject, $plaintext = FALSE, $text = NULL, $
   $text_part = array('Content-Type' => 'text/plain; charset=utf-8', 'content' => $text);
 
   //expand all local links
-  $pattern = '/(<a[^>]+href=")([^"]*)/emi';
-  $body = preg_replace($pattern, '"\\1"._mimemail_url("\2")', $body);
+  $pattern = '/(<a[^>]+href=")([^"]*)/mi';
+  $body = preg_replace_callback($pattern, '_mimemail_expand_links', $body);
 
   $mime_parts = mimemail_extract_files($body);
 
