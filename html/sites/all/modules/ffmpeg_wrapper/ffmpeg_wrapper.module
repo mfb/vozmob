@@ -1,6 +1,6 @@
 <?php
 
-/* $Id: ffmpeg_wrapper.module,v 1.1.2.20.2.27 2009/04/20 21:18:45 zoo33 Exp $ */
+/* $Id: ffmpeg_wrapper.module,v 1.1.2.20.2.41 2010/03/22 00:11:23 arthuregg Exp $ */
 
 // This implements a wrapper for FFmpeg so that we don't have to reinvent the
 // the wheel every time we want to do something with video, audio, or images
@@ -172,7 +172,7 @@ function ffmpeg_wrapper_admin() {
     $form['ffmpeg_wrapper']['ffmpeg_wrapper_about']['ffmpeg_wrapper_version'] = array(
       '#type' => 'item',
       '#title' => t('FFmpeg version'),
-      '#value' =>  '<blockquote>'. ffmpeg_wrapper_run_command('-v') .'</blockquote>',
+      '#value' =>  '<blockquote>'. ffmpeg_wrapper_get_version('string') .'</blockquote>',
       '#description' => t('Version of FFmpeg running on your system'),
     );
 
@@ -256,7 +256,13 @@ function ffmpeg_wrapper_run_command($command = '', $error_check = true, $path = 
     $ffmpeg_object = new stdClass();
   }
 
-  $ffmpeg_object->command = escapeshellcmd($path .' '. $command);
+  // Create some exceptions for dealing with pipes and semicolons
+  $pattern = array('\;', '\|');
+  $replace = array(';', '|');
+
+  // Escape our command, but make sure that we allow | and ;
+  $ffmpeg_object->command = str_replace($pattern, $replace, escapeshellcmd($path .' '. $command));
+
   $ffmpeg_object->cwd = getcwd();
 
   // does binary exist?
@@ -264,11 +270,23 @@ function ffmpeg_wrapper_run_command($command = '', $error_check = true, $path = 
     return false;
   }
 
-  // run the command
-  ob_start();
-    passthru($ffmpeg_object->command." 2>&1", $command_return);
-    $ffmpeg_object->output = ob_get_contents();
-  ob_end_clean();
+  $descriptor_spec = array(
+     0 => array('pipe', 'r'),
+     1 => array('pipe', 'w'),
+     2 => array('pipe', 'w')
+  );
+
+  $pipes = array();
+  $process = proc_open($ffmpeg_object->command, $descriptor_spec, $pipes, $ffmpeg_object->cwd , null, array('binary_pipes' => true));
+  if (is_resource($process)) {
+    fclose($pipes[0]);
+    $ffmpeg_object->output = stream_get_contents($pipes[1]);
+    fclose($pipes[1]);
+    $ffmpeg_object->output .= stream_get_contents($pipes[2]);
+    fclose($pipes[2]);
+    $command_return = proc_close($process);
+  }
+
 
   // Find the output file in the command if there was one.
   // This is sort of hacky but is helpful for passing the file out.
@@ -328,27 +346,56 @@ function ffmpeg_wrapper_vhook_list($path = '') {
 
 
 /**
- * Check an incoming file path extension to see if it can be decoded.
+ * Check an incoming file to see if it can be decoded by comparing the file's codec
+ * and format against the list of decode formats in FFMPEG.
  *
  * @param $file
- *   A full system filepath.
+ *   string, A full system filepath.
+ * @param $types
+ *   array, what kind of decode do we need to check for
  * @return
- *   TRUE if file is in the list of decodeable files.
+ *   boolean, TRUE if file is in the list of decodeable files.
  */
-function ffmpeg_wrapper_can_decode($path) {
+function ffmpeg_wrapper_can_decode($path, $types = array('video', 'audio')) {
   // get the kind of files
-  $file_types = ffmpeg_wrapper_get_codecs('decode');
+  $file_types = ffmpeg_wrapper_get_file_formats('decode');
 
-  // get the data on this file
+  // get the format and codec information on this file
   $file_data = ffmpeg_wrapper_file_data($path);
 
-  foreach (array('video', 'audio') as $media) {
-    // some files have multiple formats attached to them
-    foreach(explode(',', $file_data[$media]['codec']) as $type) {
-      // is this type in the array of items that we can decode?
-      if (in_array($type, $file_types)) {
-        return true;
-      }
+   // if the file has multiple formats, all formats
+   // must be in $file_types Otherwise, it is
+   // not supported by ffmpeg.
+  foreach(explode(',', $file_data['format']) as $type) {
+    if (! in_array($type, $file_types)) {
+      return false;
+    }
+  }
+
+  // if we have na values for the audio and video codecs, the file can not be decoded
+  // @ TODO is this really true? The logic below does not seem to indicate this,
+  //        however, I might not understand what the 'na' value really means
+  if ($file_data['audio']['codec'] == 'na' && $file_data['video']['codec'] == 'na') {
+    return false;
+  }
+
+  // Now get installed codecs to compare file codecs
+  foreach (ffmpeg_wrapper_get_codecs('decode') as $codec) {
+    if ($codec == $file_data['audio']['codec'] || $file_data['audio']['codec'] == 'na' ) {
+       // are we only handing back audio?
+      if ($types['audio'] && ! $types['video']) { return true; }
+      $can_audio_decode = true;
+    }
+
+    if ($codec == $file_data['video']['codec'] || $file_data['video']['codec'] == 'na') {
+      // are we only handing back video?
+      if ($types['video'] && ! $types['audio']) { return true; }
+      $can_video_decode = true;
+    }
+
+    // If we can decode both audio and video, the file is ok
+    if ($can_audio_decode && $can_video_decode) {
+      return true;
     }
   }
   return false;
@@ -373,13 +420,19 @@ function ffmpeg_wrapper_get_codecs($return = 'rows') {
   $cache = cache_get($cache_id, 'cache');
   if (!isset($cache->data)) {
     $data = array();
-    // get formats from ffmpeg
-    $output = ffmpeg_wrapper_run_command('-formats');
-
-    // parse the list
-    // we know where the codecs are by looking at the output of ffmpeg -formats
-    $codecs_formats_pos = strpos($output, "Codecs:");
-    $codecs_formats_pos_end = strpos($output, "Supported file protocols:");
+    // we know where the codecs are by looking at the output of ffmpeg -formats or ffmpeg -codecs
+    // depending of version SVN-r > 20561 or version > 0.5
+    $ffmpeg_version = ffmpeg_wrapper_get_version('svn');
+    if ( ((int)$ffmpeg_version >= 20561) || ((float)$ffmpeg_version > 0.5)  ) {
+      $output = ffmpeg_wrapper_run_command('-codecs');
+      $codecs_formats_pos = strpos($output, 'Codecs:');
+      $codecs_formats_pos_end = strpos($output, 'Note,');
+    }
+    else {
+      $output = ffmpeg_wrapper_run_command('-formats');
+      $codecs_formats_pos = strpos($output, 'Codecs:');
+      $codecs_formats_pos_end = strpos($output, 'Supported file protocols:');
+    }
     $codecs = substr($output, $codecs_formats_pos, ($codecs_formats_pos_end - $codecs_formats_pos));
     // remove the extra text
     $codecs = str_replace('Codecs:', '', $codecs);
@@ -481,7 +534,10 @@ function ffmpeg_wrapper_output_formats() {
   $cache = cache_get($cache_id, 'cache');
   if (!isset($cache->data)) {
     // get all the encoding options
-    $outputs = ffmpeg_wrapper_get_file_formats('encode');
+    if (! $outputs = ffmpeg_wrapper_get_file_formats('encode')) {
+    	watchdog('ffmpeg_wrapper', 'No output formats found. Path to ffmpeg is probably wrong', array(), WATCHDOG_ERROR);
+    	return array();
+    }
     // rebuild as a select array
     $formats = array(t('Select output type'));
     foreach ($outputs as $output) {
@@ -553,14 +609,21 @@ function ffmpeg_wrapper_get_file_formats($ret = 'row') {
   $cache_id = 'ffmpeg_wrapper_file_formats';
   $cache = cache_get($cache_id, 'cache');
   // do we have cached data?
-  if (! isset($cache->data)) {
+  if (!isset($cache->data)) {
     // if we can't get formats, do not bother
     if (! $formats = ffmpeg_wrapper_run_command('-formats') ) {
       return;
     }
     // slice up the format output
     $startpos = strpos($formats, 'File formats:');
-    $endpos = strpos($formats, 'Codecs:');
+    // depending of version SVN-r > 20561 or version > 0.5 string changes
+    $ffmpeg_version = ffmpeg_wrapper_get_version('svn');
+    if ( ((int)$ffmpeg_version >= 20561) || ((float)$ffmpeg_version > 0.5)  ) {
+      $endpos = strpos($formats, 'FFmpeg version');
+    }
+    else {
+      $endpos = strpos($formats, 'Codecs:');
+    }
     $formats = substr($formats, $startpos, $endpos - $startpos);
     //remove the header
     $formats = str_replace('File formats:', '', $formats);
@@ -569,9 +632,10 @@ function ffmpeg_wrapper_get_file_formats($ret = 'row') {
     $encode_formats = array();
 
     $rows = array();
+
     foreach (explode("\n", $formats) as $format) {
       // match the decode, encode, format, description
-      $pattern ='/[ ]*([D ])([E ])[ ]*([a-zA-Z0-9_,]*)[ ]*([a-zA-Z0-9,_ ]*)/';
+      $pattern ='/[ ]*([D ])([E ])[ ]*([a-zA-Z0-9_,]*)[ ]*([^\$]*)/';
       preg_match($pattern, $format, $matches);
 
       $a_format['type'] = $matches[3];
@@ -581,9 +645,9 @@ function ffmpeg_wrapper_get_file_formats($ret = 'row') {
       if ($matches[1] == 'D') {
         $a_format['decode'] = t('yes');
         // we can have multiple types per format
-        $types = explode(',', $a_format['name']);
+        $types = explode(',', $a_format['type']);
         foreach ($types as $type) {
-          $decode_formats[] = $a_format['type'];
+          $decode_formats[] = $type;
         }
       }
       else {
@@ -594,9 +658,9 @@ function ffmpeg_wrapper_get_file_formats($ret = 'row') {
       if ($matches[2] == 'E') {
         $a_format['encode'] = t('yes');
         // we can have multiple types per format
-        $types = explode(',', $a_format['name']);
+        $types = explode(',', $a_format['type']);
         foreach ($types as $type) {
-          $encode_formats[] = $a_format['type'];
+          $encode_formats[] = $type;
         }
       }
       else {
@@ -613,6 +677,7 @@ function ffmpeg_wrapper_get_file_formats($ret = 'row') {
     $output['encode'] = $encode_formats;
     $output['decode'] = $decode_formats;
     $output['row'] = $rows;
+
     cache_set($cache_id, $output, 'cache', CACHE_TEMPORARY);
   }
   else {
@@ -622,6 +687,36 @@ function ffmpeg_wrapper_get_file_formats($ret = 'row') {
   return $output[$ret];
 }
 
+/**
+ * Get FFMpeg version
+ *
+ * @param $format
+ *   (string/version/svn)
+ * @return
+ *   Version string.
+ */
+function ffmpeg_wrapper_get_version($format) {
+  // get string from ffmpeg and return it if it is enough
+  $version = ffmpeg_wrapper_run_command('-version');
+  if ($format == 'string') {
+    return $version;
+  }
+  //anything else return the version string or SVN-r
+  // slice up the version output
+  $startpos = strpos($version, 'FFmpeg version ') +15;
+  $endpos = strpos($version, ', Copyright');
+  $version_number = substr($version, $startpos, $endpos - $startpos);
+  if ($format == 'version') {
+    return $version_number;
+  }
+  // is FALSE if the string is not found
+  if (strpos($version_number, 'SVN-r') == 0) {
+    $version_release = substr($version_number, 5);
+    return $version_release;
+  }
+  // then is a full release version as 0.5
+  return $version_number;
+}
 
 /**
  * Get the duration of a video.
@@ -639,7 +734,8 @@ function ffmpeg_wrapper_file_duration($path, $timecode = null, $output = null) {
   // do we have any output from ffmpeg already?
   if (! $output) {
     // get duration from ffmpeg
-    $output = ffmpeg_wrapper_run_command("-i $path");
+    // need quotes around the path parameter in case filename has spaces.
+    $output = ffmpeg_wrapper_run_command("-i \"$path\"");
   }
 
   // parse the output looking for "Duration: 00:02:12"
@@ -676,7 +772,8 @@ function ffmpeg_wrapper_file_duration($path, $timecode = null, $output = null) {
 function ffmpeg_wrapper_file_data($path = null) {
   if (file_exists($path)) {
     // get duration from ffmpeg
-    $output = ffmpeg_wrapper_run_command("-i $path");
+    // need quotes around the path parameter in case filename has spaces.
+    $output = ffmpeg_wrapper_run_command("-i \"$path\"");
 
     // get file format
     $pattern = '/Input #0, (.*),/';
@@ -778,7 +875,7 @@ function ffmpeg_wrapper_padded_size($file, $size, $return = 'padding') {
 
     // Determine source file's dimensions and proportions.
     $info = ffmpeg_wrapper_file_data($file);
-    if ($info) {
+    if ($info && isset($info['video'])) {
       list($orig_x, $orig_y) = explode('x', $info['video']['s']);
       $orig_q = $orig_x / $orig_y;
 
@@ -805,7 +902,7 @@ function ffmpeg_wrapper_padded_size($file, $size, $return = 'padding') {
         $padding = $dest_x - $dest_x_calc;
         $padoptions = '-padleft %d -padright %d';
       }
-      
+
       // Calculate padding on each side. Each value has to be a multiple of 2.
       $padding &= ~1;
       $padding1 = floor($padding / 2);
@@ -896,6 +993,9 @@ function ffmpeg_wrapper_error_check(&$ffmpeg_object, $watchdog = true) {
     '/Error while opening codec for output stream.*/i',
     // match: I/O error occured
     '/I\/O error occured/i',
+    '/Failed to add video hook function*/i',
+    '/ffmpeg: unrecognized option*/i',
+    '/Could not open */i',
   );
 
   // check for error conditions
@@ -938,7 +1038,8 @@ function ffmpeg_wrapper_error_check(&$ffmpeg_object, $watchdog = true) {
  *   A full path.
  */
 function ffmpeg_wrapper_path_to_vhook($name) {
-  if ($path = file_exists(variable_get('ffmpeg_wrapper_vhook', '/usr/local/lib/vhook/') . $name)) {
+  $path = variable_get('ffmpeg_wrapper_vhook', '/usr/local/lib/vhook/') . $name;
+  if (file_exists($path)) {
     return $path;
   }
 }
