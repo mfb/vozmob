@@ -1,14 +1,15 @@
 <?php
-// $Id: query.inc,v 1.48 2009/09/15 19:29:12 merlinofchaos Exp $
+// $Id: views_plugin_query_default.inc,v 1.1.2.21 2010/03/12 01:02:45 merlinofchaos Exp $
 /**
- * @file query.inc
- * Defines the query object which is the underlying layer in a View.
+ * @file views_plugin_query_default.inc
+ * Defines the default query object which builds SQL to execute using the
+ * Drupal database API.
  */
 
 /**
  * Object used to create a SELECT query.
  */
-class views_query {
+class views_plugin_query_default extends views_plugin_query{
 
   /**
    * A list of tables in the order they should be added, keyed by alias.
@@ -65,10 +66,12 @@ class views_query {
    */
   var $distinct = FALSE;
 
+  var $has_aggregate = FALSE;
+
   /**
    * Constructor; Create the basic query object and fill with default values.
    */
-  function views_query($base_table = 'node', $base_field = 'nid') {
+  function init($base_table = 'node', $base_field = 'nid') {
     $this->base_table = $base_table;  // Predefine these above, for clarity.
     $this->base_field = $base_field;
     $this->relationships[$base_table] = array(
@@ -92,6 +95,8 @@ class views_query {
       'alias' => $base_table,
     );
 
+/**
+ * -- we no longer want the base field to appear automatigically.
     if ($base_field) {
       $this->fields[$base_field] = array(
         'table' => $base_table,
@@ -99,6 +104,7 @@ class views_query {
         'alias' => $base_field,
       );
     }
+ */
 
     $this->count_field = array(
       'table' => $base_table,
@@ -116,19 +122,7 @@ class views_query {
    */
   function set_distinct($value = TRUE) {
     if (!(isset($this->no_distinct) && $value)) {
-      // Hack in a check to see if node_access is going to add its own DISTINCT
-      // and break this query.
-      // See http://drupal.org/node/284392 for the core bug.
-      //
-      // We want to bypass views distinct code if this bug will be triggered so
-      // if the base table is node and there is a node access module, bypass
-      // views distinct code.
-      if ($this->base_table != 'node' || !node_access_view_all_nodes()) {
-        $this->distinct = FALSE;
-      }
-      else {
-        $this->distinct = $value;
-      }
+      $this->distinct = $value;
     }
   }
 
@@ -221,6 +215,12 @@ class views_query {
       'table' => $join->table,
       'base' => $base,
     );
+
+    $this->tables[$this->base_table][$alias] = array(
+      'count' => 1,
+      'alias' => $alias,
+    );
+
     return $alias;
   }
 
@@ -623,11 +623,14 @@ class views_query {
    *   The alias to create. If not specified, the alias will be $table_$field
    *   unless $table is NULL. When adding formulae, it is recommended that an
    *   alias be used.
+   * @param $params
+   *   An array of parameters additional to the field that will control items
+   *   such as aggregation functions and DISTINCT.
    *
    * @return $name
    *   The name that this field can be referred to as. Usually this is the alias.
    */
-  function add_field($table, $field, $alias = '', $params = NULL) {
+  function add_field($table, $field, $alias = '', $params = array()) {
     // We check for this specifically because it gets a special alias.
     if ($table == $this->base_table && $field == $this->base_field && empty($alias)) {
       $alias = $this->base_field;
@@ -641,22 +644,36 @@ class views_query {
       $alias = $table . '_' . $field;
     }
 
-    $name = $alias ? $alias : $field;
+    // Make sure an alias is assigned
+    $alias = $alias ? $alias : $field;
 
-    // @todo FIXME -- $alias, then $name is inconsistent
+    // PostgreSQL truncates aliases to 63 characters: http://drupal.org/node/571548
+
+    // We limit the length of the original alias up to 60 characters
+    // to get a unique alias later if its have duplicates
+    $alias = substr($alias, 0, 60);
+
+    // Create a field info array.
+    $field_info = array(
+      'field' => $field,
+      'table' => $table,
+      'alias' => $alias,
+    ) + $params;
+
+    // Test to see if the field is actually the same or not. Due to
+    // differing parameters changing the aggregation function, we need
+    // to do some automatic alias collision detection:
+    $base = $alias;
+    $counter = 0;
+    while (!empty($this->fields[$alias]) && $this->fields[$alias] != $field_info) {
+      $field_info['alias'] = $alias = $base . '_' . ++$counter;
+    }
+
     if (empty($this->fields[$alias])) {
-      $this->fields[$name] = array(
-        'field' => $field,
-        'table' => $table,
-        'alias' => $alias,
-      );
+      $this->fields[$alias] = $field_info;
     }
 
-    foreach ((array)$params as $key => $value) {
-      $this->fields[$name][$key] = $value;
-    }
-
-    return $name;
+    return $alias;
   }
 
   /**
@@ -665,47 +682,6 @@ class views_query {
    */
   function clear_fields() {
     $this->fields = array();
-  }
-
-  /**
-   * Create a new grouping for the WHERE or HAVING clause.
-   *
-   * @param $type
-   *   Either 'AND' or 'OR'. All items within this group will be added
-   *   to the WHERE clause with this logical operator.
-   * @param $group
-   *   An ID to use for this group. If unspecified, an ID will be generated.
-   * @param $where
-   *   'where' or 'having'.
-   *
-   * @return $group
-   *   The group ID generated.
-   */
-  function set_where_group($type = 'AND', $group = NULL, $where = 'where') {
-    // Set an alias.
-    $groups = &$this->$where;
-
-    if (!isset($group)) {
-      $group = empty($groups) ? 1 : max(array_keys($groups)) + 1;
-    }
-
-    // Create an empty group
-    if (empty($groups[$group])) {
-      $groups[$group] = array('clauses' => array(), 'args' => array());
-    }
-
-    $groups[$group]['type'] = strtoupper($type);
-    return $group;
-  }
-
-  /**
-   * Control how all WHERE and HAVING groups are put together.
-   *
-   * @param $type
-   *   Either 'AND' or 'OR'
-   */
-  function set_group_operator($type = 'AND') {
-    $this->group_operator = strtoupper($type);
   }
 
   /**
@@ -817,8 +793,10 @@ class views_query {
    *   must also be in the SELECT portion. If an $alias isn't specified
    *   one will be generated for from the $field; however, if the
    *   $field is a formula, this alias will likely fail.
+   * @param $params
+   *   Any params that should be passed through to the add_field.
    */
-  function add_orderby($table, $field, $order, $alias = '') {
+  function add_orderby($table, $field, $order, $alias = '', $params = array()) {
     if ($table) {
       $this->ensure_table($table);
     }
@@ -833,17 +811,21 @@ class views_query {
     }
 
     if ($field) {
-      $this->add_field($table, $field, $as);
+      $as = $this->add_field($table, $field, $as, $params);
     }
 
     $this->orderby[] = "$as " . strtoupper($order);
 
+/**
+ * -- removing, this should be taken care of by field adding now.
+ * -- leaving commented because I am unsure.
     // If grouping, all items in the order by must also be in the
     // group by clause. Check $table to ensure that this is not a
     // formula.
     if ($this->groupby && $table) {
       $this->add_groupby($as);
     }
+ */
   }
 
   /**
@@ -867,6 +849,10 @@ class views_query {
   function condition_sql($where = 'where') {
     $clauses = array();
     foreach ($this->$where as $group => $info) {
+      if (empty($info['clauses'])) {
+        continue;
+      }
+
       $clause = implode(") " . $info['type'] . " (", $info['clauses']);
       if (count($info['clauses']) > 1) {
         $clause = '(' . $clause . ')';
@@ -877,13 +863,73 @@ class views_query {
     if ($clauses) {
       $keyword = drupal_strtoupper($where);
       if (count($clauses) > 1) {
-        return "$keyword (" . implode(")\n    " . $this->group_operator . ' (', $clauses) . ")\n";
+        return "$keyword (" . implode(")\n    " . $this->group_operator . ' (', array_filter($clauses)) . ")\n";
       }
       else {
         return "$keyword " . array_shift($clauses) . "\n";
       }
     }
     return "";
+  }
+
+  function compile_fields($fields_array) {
+    $fields = $distinct = array();
+    $non_aggregates = array();
+
+    foreach ($fields_array as $field) {
+      $string = '';
+      if (!empty($field['table'])) {
+        $string .= $field['table'] . '.';
+      }
+      $string .= $field['field'];
+      // store for use with non-aggregates below
+      $fieldname = (!empty($field['alias']) ? $field['alias'] : $string);
+
+      if (!empty($field['distinct'])) {
+        $string = "DISTINCT($string)";
+      }
+
+      if (!empty($field['count'])) {
+        // Retained for compatibility
+        $field['function'] = 'count';
+      }
+
+      if (!empty($field['function'])) {
+        $info = $this->get_aggregation_info();
+        if (!empty($info[$field['function']]['method']) && function_exists($info[$field['function']]['method'])) {
+          $string = $info[$field['function']]['method']($field['function'], $string);
+        }
+
+        $this->has_aggregate = TRUE;
+      }
+      elseif ($this->distinct && !in_array($fieldname, $this->groupby)) {
+        $string = $GLOBALS['db_type'] == 'pgsql' ? "FIRST($string)" : $string;
+      }
+      elseif (empty($field['aggregate'])) {
+        $non_aggregates[] = $fieldname;
+      }
+
+      if ($field['alias']) {
+        $string .= " AS $field[alias]";
+      }
+
+      if (!empty($field['distinct']) && empty($field['function'])) {
+        $distinct[] = $string;
+      }
+      else {
+        $fields[] = $string;
+      }
+
+      if (!empty($get_count_optimized)) {
+        // We only want the first field in this case.
+        break;
+      }
+    }
+    return array(
+      $distinct,
+      $fields,
+      $non_aggregates,
+    );
   }
 
   /**
@@ -896,10 +942,8 @@ class views_query {
   function query($get_count = FALSE) {
     // Check query distinct value.
     if (empty($this->no_distinct) && $this->distinct && !empty($this->fields)) {
-      if (!empty($this->fields[$this->base_field])) {
-        $this->fields[$this->base_field]['distinct'] = TRUE;
-        $this->add_groupby($this->base_field);
-      }
+      $base_field_alias = $this->add_field($this->base_table, $this->base_field, NULL, array('distinct' => TRUE));
+      $this->add_groupby($base_field_alias);
     }
 
     /**
@@ -909,7 +953,7 @@ class views_query {
     $fields_array = $this->fields;
     if ($get_count && !$this->groupby) {
       foreach ($fields_array as $field) {
-        if (!empty($field['distinct'])) {
+        if (!empty($field['distinct']) || !empty($field['function'])) {
           $get_count_optimized = FALSE;
           break;
         }
@@ -922,7 +966,7 @@ class views_query {
       $get_count_optimized = TRUE;
     }
 
-    $joins = $fields = $where = $having = $orderby = $groupby = '';
+    $joins = $where = $having = $orderby = $groupby = '';
     // Add all the tables to the query via joins. We assume all LEFT joins.
     foreach ($this->table_queue as $table) {
       if (is_object($table['join'])) {
@@ -930,50 +974,12 @@ class views_query {
       }
     }
 
-    $has_aggregate = FALSE;
-    $non_aggregates = array();
+    list($distinct, $fields, $non_aggregates) = $this->compile_fields($fields_array);
 
-    foreach ($fields_array as $field) {
-      if ($fields) {
-        $fields .= ",\n   ";
-      }
-      $string = '';
-      if (!empty($field['table'])) {
-        $string .= $field['table'] . '.';
-      }
-      $string .= $field['field'];
-
-      // store for use with non-aggregates below
-      $fieldname = (!empty($field['alias']) ? $field['alias'] : $string);
-
-      if (!empty($field['distinct'])) {
-        $string = "DISTINCT($string)";
-      }
-      if (!empty($field['count'])) {
-        $string = "COUNT($string)";
-        $has_aggregate = TRUE;
-      }
-      else if (!empty($field['aggregate'])) {
-        $has_aggregate = TRUE;
-      }
-      elseif ($this->distinct && !in_array($fieldname, $this->groupby)) {
-        $string = $GLOBALS['db_type'] == 'pgsql' ? "FIRST($string)" : $string;
-      }
-      else {
-        $non_aggregates[] = $fieldname;
-      }
-      if ($field['alias']) {
-        $string .= " AS $field[alias]";
-      }
-      $fields .= $string;
-
-      if ($get_count_optimized) {
-        // We only want the first field in this case.
-        break;
-      }
+    if (count($this->having)) {
+      $this->has_aggregate = TRUE;
     }
-
-    if ($has_aggregate || $this->groupby) {
+    if ($this->has_aggregate || $this->groupby) {
       $groupby = "GROUP BY " . implode(', ', array_unique(array_merge($this->groupby, $non_aggregates))) . "\n";
       if ($this->having) {
         $having = $this->condition_sql('having');
@@ -981,7 +987,7 @@ class views_query {
     }
 
     if (!$get_count_optimized) {
-      // we only add the groupby if we're not counting.
+      // We only add the orderby if we're not counting, because of performance reasons.
       if ($this->orderby) {
         $orderby = "ORDER BY " . implode(', ', $this->orderby) . "\n";
       }
@@ -989,7 +995,7 @@ class views_query {
 
     $where = $this->condition_sql();
 
-    $query = "SELECT $fields\n FROM {" . $this->base_table . "} $this->base_table \n$joins $where $groupby $having $orderby";
+    $query = "SELECT " . implode(",\n", array_merge($distinct, $fields)) . "\n FROM {" . $this->base_table . "} $this->base_table \n$joins $where $groupby $having $orderby";
 
     $replace = array('&gt;' => '>', '&lt;' => '<');
     $query = strtr($query, $replace);
@@ -1010,5 +1016,170 @@ class views_query {
     }
     return $args;
   }
+
+  /**
+   * Let modules modify the query just prior to finalizing it.
+   */
+  function alter(&$view) {
+    foreach (module_implements('views_query_alter') as $module) {
+      $function = $module . '_views_query_alter';
+      $function($view, $this);
+    }
+  }
+
+  /**
+   * Builds the necessary info to execute the query.
+   */
+  function build(&$view) {
+    $this->init_pager($view);
+    if ($this->pager->use_pager()) {
+      $this->pager->set_current_page($view->current_page);
+    }
+
+    // Let the pager modify the query to add limits.
+    $this->pager->query();
+
+    $view->build_info['query'] = $this->query();
+    $view->build_info['count_query'] = $this->query(TRUE);
+    $view->build_info['query_args'] = $this->get_where_args();
+  }
+
+  /**
+   * Executes the query and fills the associated view object with according
+   * values.
+   *
+   * Values to set: $view->result, $view->total_rows, $view->execute_time,
+   * $view->current_page.
+   */
+  function execute(&$view) {
+    $external = FALSE; // Whether this query will run against an external database.
+    $query = db_rewrite_sql($view->build_info['query'], $view->base_table, $view->base_field, array('view' => &$view));
+    $count_query = db_rewrite_sql($view->build_info['count_query'], $view->base_table, $view->base_field, array('view' => &$view));
+    $args = $view->build_info['query_args'];
+
+    vpr($query);
+
+    $items = array();
+    if ($query) {
+      $replacements = module_invoke_all('views_query_substitutions', $view);
+      $query = str_replace(array_keys($replacements), $replacements, $query);
+      $count_query = 'SELECT COUNT(*) FROM (' . str_replace(array_keys($replacements), $replacements, $count_query) . ') count_alias';
+
+      if (is_array($args)) {
+        foreach ($args as $id => $arg) {
+          $args[$id] = str_replace(array_keys($replacements), $replacements, $arg);
+        }
+      }
+
+      // Detect an external database.
+      if (isset($view->base_database)) {
+        db_set_active($view->base_database);
+        $external = TRUE;
+      }
+
+      $start = views_microtime();
+
+      if ($this->pager->use_count_query() || !empty($view->get_total_rows)) {
+        $this->pager->execute_count_query($count_query, $args);
+      }
+
+      // Let the pager modify the query to add limits.
+      $this->pager->pre_execute($query, $args);
+
+      if (!empty($this->limit) || !empty($this->offset)) {
+        // We can't have an offset without a limit, so provide a very large limit instead.
+        $limit  = intval(!empty($this->limit) ? $this->limit : 999999);
+        $offset = intval(!empty($this->offset) ? $this->offset : 0);
+        $result = db_query_range($query, $args, $offset, $limit);
+      }
+      else {
+        $result = db_query($query, $args);
+      }
+
+      $view->result = array();
+      while ($item = db_fetch_object($result)) {
+        $view->result[] = $item;
+      }
+
+      $this->pager->post_execute($view->result);
+
+      if ($this->pager->use_pager()) {
+        $view->total_rows = $this->pager->get_total_items();
+      }
+
+      if ($external) {
+        db_set_active();
+      }
+    }
+    $view->execute_time = views_microtime() - $start;
+  }
+
+  function add_signature(&$view) {
+    $view->query->add_field(NULL, "'" . $view->name . ':' . $view->current_display . "'", 'view_name');
+  }
+
+  function get_aggregation_info() {
+    // @todo -- need a way to get database specific and customized aggregation
+    // functions into here.
+    return array(
+      'group' => array(
+        'title' => t('Group results together'),
+        'is aggregate' => FALSE,
+      ),
+      'count' => array(
+        'title' => t('Count'),
+        'method' => 'views_query_default_aggregation_method_simple',
+        'handler' => array(
+          'argument' => 'views_handler_argument_group_by_numeric',
+          'field' => 'views_handler_field_group_by_numeric',
+          'filter' => 'views_handler_filter_group_by_numeric',
+          'sort' => 'views_handler_sort_group_by_numeric',
+        ),
+      ),
+      'sum' => array(
+        'title' => t('Sum'),
+        'method' => 'views_query_default_aggregation_method_simple',
+        'handler' => array(
+          'argument' => 'views_handler_argument_group_by_numeric',
+          'field' => 'views_handler_field_group_by_numeric',
+          'filter' => 'views_handler_filter_group_by_numeric',
+          'sort' => 'views_handler_sort_group_by_numeric',
+        ),
+      ),
+      'avg' => array(
+        'title' => t('Average'),
+        'method' => 'views_query_default_aggregation_method_simple',
+        'handler' => array(
+          'argument' => 'views_handler_argument_group_by_numeric',
+          'field' => 'views_handler_field_group_by_numeric',
+          'filter' => 'views_handler_filter_group_by_numeric',
+          'sort' => 'views_handler_sort_group_by_numeric',
+        ),
+      ),
+      'min' => array(
+        'title' => t('Minimum'),
+        'method' => 'views_query_default_aggregation_method_simple',
+        'handler' => array(
+          'argument' => 'views_handler_argument_group_by_numeric',
+          'field' => 'views_handler_field_group_by_numeric',
+          'filter' => 'views_handler_filter_group_by_numeric',
+          'sort' => 'views_handler_sort_group_by_numeric',
+        ),
+      ),
+      'max' => array(
+        'title' => t('Maximum'),
+        'method' => 'views_query_default_aggregation_method_simple',
+        'handler' => array(
+          'argument' => 'views_handler_argument_group_by_numeric',
+          'field' => 'views_handler_field_group_by_numeric',
+          'filter' => 'views_handler_filter_group_by_numeric',
+          'sort' => 'views_handler_sort_group_by_numeric',
+        ),
+      ),
+    );
+  }
 }
 
+function views_query_default_aggregation_method_simple($group_type, $field) {
+  return strtoupper($group_type) . '(' . $field . ')';
+}

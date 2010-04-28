@@ -1,5 +1,5 @@
 <?php
-// $Id: filefield_field.inc,v 1.32 2009/07/03 22:47:08 quicksketch Exp $
+// $Id: filefield_field.inc,v 1.36 2010/04/24 21:07:17 quicksketch Exp $
 
 /**
  * @file
@@ -19,7 +19,7 @@ function filefield_field_settings_form($field) {
     '#title' => t('List field'),
     '#options' => array(0 => t('Disabled'), 1 => t('Enabled')),
     '#default_value' => $field['list_field'] === '' ? 0 : (int) $field['list_field'],
-    '#description' => t('The "list" option lets a user choose if a file should shown in a list when viewing the content after creation.'),
+    '#description' => t('The "list" option lets a user choose if a file should be shown in a list when viewing the content after creation.'),
     '#attributes' => array('class' => 'filefield-list-field'),
   );
   $form['list_default'] = array(
@@ -76,6 +76,7 @@ function filefield_field_settings_views_data($field) {
     'handler' => 'content_handler_relationship',
     'label' => t($field['widget']['label']),
     'content_field_name' => $field['field_name'],
+    'skip base' => array('files'),
   );
 
   // Use the Views boolean handler for filtering the list value.
@@ -97,6 +98,25 @@ function filefield_field_settings_views_data($field) {
   unset($data[$table_alias][$field['field_name'] .'_data']['filter']);
   unset($data[$table_alias][$field['field_name'] .'_data']['argument']);
   unset($data[$table_alias][$field['field_name'] .'_list']['argument']);
+
+  // Set up relationship with file views.
+  $data[$table_alias]['table']['join']['files'] = array(
+    'table' => $db_info['table'],
+    'left_field' => 'fid',
+    'field' => $db_info['columns']['fid']['column'],
+  );
+  $data[$table_alias]['vid'] = array(
+    'title' => t($field['widget']['label']),
+    'help' => t('The node the uploaded file is attached to'),
+    'relationship' => array(
+      'label' => t($field['widget']['label']),
+      'base' => 'node',
+      'base field' => 'vid',
+      // This allows us to not show this relationship if the base is already
+      // node so users won't create circular relationships.
+      'skip base' => array('node', 'node_revisions'),
+    ),
+  );
 
   return $data;
 }
@@ -122,9 +142,14 @@ function filefield_field_load($node, $field, &$items, $teaser, $page) {
       while (!empty($item['data']) && is_string($item['data'])) {
         $item['data'] = unserialize($item['data']);
       }
+      // Merge any data added by modules in hook_file_load().
+      if (isset($file['data']) && isset($item['data'])) {
+        $file['data'] = array_merge((array) $item['data'], (array) $file['data']);
+      }
       $items[$delta] = array_merge($item, $file);
     }
   }
+
   return array($field['field_name'] => $items);
 }
 
@@ -266,7 +291,7 @@ function filefield_field_sanitize($node, $field, &$items, $teaser, $page) {
 
     // Verify the file exists on the server.
     if (!empty($item['filepath']) && !file_exists($item['filepath'])) {
-      watchdog('filefield', 'FileField was trying to display the file %file, but it does not exist.', array('%file' => $item['filepath']));
+      watchdog('filefield', 'FileField was trying to display the file %file, but it does not exist.', array('%file' => $item['filepath']), WATCHDOG_WARNING);
     }
   }
 }

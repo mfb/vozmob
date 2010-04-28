@@ -1,5 +1,5 @@
 <?php
-// $Id: imagefield_widget.inc,v 1.40 2009/09/18 15:30:18 quicksketch Exp $
+// $Id: imagefield_widget.inc,v 1.41 2010/04/24 05:28:39 quicksketch Exp $
 
 /**
  * @file
@@ -309,5 +309,6 @@ function imagefield_widget_process($element, $edit, &$form_state, $form) {
  */
 function theme_imagefield_widget($element) {
   drupal_add_css(drupal_get_path('module', 'imagefield') .'/imagefield.css');
+  $element['#id'] .= '-upload'; // Link the label to the upload field.
   return theme('form_element', $element, $element['#children']);
 }

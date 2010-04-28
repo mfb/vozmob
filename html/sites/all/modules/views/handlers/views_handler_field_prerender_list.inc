@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_prerender_list.inc,v 1.3 2009/07/02 00:13:12 merlinofchaos Exp $
+// $Id: views_handler_field_prerender_list.inc,v 1.1.2.2 2009/07/02 00:13:06 merlinofchaos Exp $
 
 /**
  * Field handler to provide a list of items.

@@ -1,4 +1,4 @@
-# $Id: filefield.de.po,v 1.4 2009/06/06 22:00:58 hass Exp $
+# $Id: filefield.de.po,v 1.5 2010/04/24 02:47:49 quicksketch Exp $
 #
 # German translation of Drupal (general)
 # Copyright 2008 <dvc@drupalcenter.de>
@@ -448,6 +448,6 @@ msgid "CCK"
 msgstr "CCK"
 
 #: filefield.js:0
-msgid "The selected file %filename cannot not be uploaded. Only files with the following extensions are allowed: %extensions."
+msgid "The selected file %filename cannot be uploaded. Only files with the following extensions are allowed: %extensions."
 msgstr "Die ausgewählte Datei %filename konnte nicht hochgeladen werden. Nur Dateien mit den folgenden Erweiterungen sind zulässig: %extensions."
 

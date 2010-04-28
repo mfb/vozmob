@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_file.inc,v 1.3 2009/01/30 00:01:42 merlinofchaos Exp $
+// $Id: views_handler_field_file.inc,v 1.3.2.1 2010/01/19 21:59:04 merlinofchaos Exp $
 /**
  * Field handler to provide simple renderer that allows linking to a file.
  */
@@ -7,7 +7,7 @@ class views_handler_field_file extends views_handler_field {
   /**
    * Constructor to provide additional field to add.
    */
-  function init(&$view, &$options) {
+  function init(&$view, $options) {
     parent::init($view, $options);
     if (!empty($options['link_to_file'])) {
       $this->additional_fields['filepath'] = 'filepath';

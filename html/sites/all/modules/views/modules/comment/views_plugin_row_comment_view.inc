@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_row_comment_view.inc,v 1.1 2008/09/03 19:21:29 merlinofchaos Exp $
+// $Id: views_plugin_row_comment_view.inc,v 1.1.2.1 2009/12/28 21:11:50 merlinofchaos Exp $
 /**
  * @file
  * Contains the node RSS row style plugin.
@@ -9,6 +9,9 @@
  * Plugin which performs a comment_view on the resulting object.
  */
 class views_plugin_row_comment_view extends views_plugin_row {
+  var $base_table = 'comments';
+  var $base_field = 'cid';
+
   function option_definition() {
     $options = parent::option_definition();
     $options['links'] = array('default' => TRUE);

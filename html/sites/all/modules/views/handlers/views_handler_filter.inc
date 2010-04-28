@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_filter.inc,v 1.10 2009/06/26 00:23:42 merlinofchaos Exp $
+// $Id: views_handler_filter.inc,v 1.6.2.15 2010/03/22 20:44:52 merlinofchaos Exp $
 /**
  * @defgroup views_filter_handlers Views' filter handlers
  * @{
@@ -52,6 +52,12 @@ class views_handler_filter extends views_handler {
       'contains' => array(
         'operator' => array('default' => FALSE),
         'label' => array('default' => '', 'translatable' => TRUE),
+        'use_operator' => array('deafult' => 0),
+        'operator' => array('default' => ''),
+        'identifier' => array('default' => ''),
+        'optional' => array('default' => 1),
+        'remember' => array('default' => 0),
+        'single' => array('default' => 1),
       ),
     );
 
@@ -104,7 +110,7 @@ class views_handler_filter extends views_handler {
   /**
    * Simple submit handler
    */
-  function options_submit(&$form, &$form_state) {
+  function options_submit($form, &$form_state) {
     unset($form_state['values']['expose_button']); // don't store this.
     $this->operator_submit($form, $form_state);
     $this->value_submit($form, $form_state);
@@ -186,98 +192,6 @@ class views_handler_filter extends views_handler {
    * There is no need for this function to actually store the data.
    */
   function value_submit($form, &$form_state) { }
-
-  /**
-   * Shortcut to display the expose/hide button.
-   */
-  function show_expose_button(&$form, &$form_state) {
-    $form['expose_button'] = array(
-      '#prefix' => '<div class="views-expose clear-block">',
-      '#suffix' => '</div>',
-    );
-    if (empty($this->options['exposed'])) {
-      $form['expose_button']['button'] = array(
-        '#type' => 'submit',
-        '#value' => t('Expose'),
-        '#submit' => array('views_ui_config_item_form_expose'),
-      );
-      $form['expose_button']['markup'] = array(
-        '#prefix' => '<div class="description">',
-        '#value' => t('This item is currently not exposed. If you <strong>expose</strong> it, users will be able to change the filter as they view it.'),
-        '#suffix' => '</div>',
-      );
-    }
-    else {
-      $form['expose_button']['button'] = array(
-        '#type' => 'submit',
-        '#value' => t('Hide'),
-        '#submit' => array('views_ui_config_item_form_expose'),
-      );
-      $form['expose_button']['markup'] = array(
-        '#prefix' => '<div class="description">',
-        '#value' => t('This item is currently exposed. If you <strong>hide</strong> it, users will not be able to change the filter as they view it.'),
-        '#suffix' => '</div>',
-      );
-    }
-  }
-
-  /**
-   * Shortcut to display the exposed options form.
-   */
-  function show_expose_form(&$form, &$form_state) {
-    if (empty($this->options['exposed'])) {
-      return;
-    }
-
-    $form['expose'] = array(
-      '#prefix' => '<div class="views-expose-options clear-block">',
-      '#suffix' => '</div>',
-    );
-    $this->expose_form($form, $form_state);
-
-    // When we click the expose button, we add new gadgets to the form but they
-    // have no data in $_POST so their defaults get wiped out. This prevents
-    // these defaults from getting wiped out. This setting will only be TRUE
-    // during a 2nd pass rerender.
-    if (!empty($form_state['force_expose_options'])) {
-      foreach (element_children($form['expose']) as $id) {
-        if (isset($form['expose'][$id]['#default_value']) && !isset($form['expose'][$id]['#value'])) {
-          $form['expose'][$id]['#value'] = $form['expose'][$id]['#default_value'];
-        }
-      }
-    }
-  }
-
-  /**
-   * Overridable form for exposed filter options.
-   *
-   * If overridden, it is best to call the parent or re-implement
-   * the stuff here.
-   *
-   * Many filters will need to override this in order to provide options
-   * that are nicely tailored to the given filter.
-   */
-  function expose_form(&$form, &$form_state) {
-    $form['expose']['start_left'] = array(
-      '#value' => '<div class="views-left-50">',
-    );
-
-    $this->expose_form_left($form, $form_state);
-
-    $form['expose']['end_left'] = array(
-      '#value' => '</div>',
-    );
-
-    $form['expose']['start_checkboxes'] = array(
-      '#value' => '<div class="form-checkboxes views-left-40 clear-block">',
-    );
-
-    $this->expose_form_right($form, $form_state);
-
-    $form['expose']['end_checkboxes'] = array(
-      '#value' => '</div>',
-    );
-  }
 
   /**
    * Handle the 'left' side fo the exposed options form.
@@ -363,13 +277,11 @@ class views_handler_filter extends views_handler {
     if (!empty($form_state['values']['options']['expose']['identifier']) && $form_state['values']['options']['expose']['identifier'] == 'value') {
       form_error($form['expose']['identifier'], t('This identifier is not allowed.'));
     }
-  }
 
-  /**
-   * Perform any necessary changes to the form exposes prior to storage.
-   * There is no need for this function to actually store the data.
-   */
-  function expose_submit($form, &$form_state) { }
+    if (!$this->view->display_handler->is_identifier_unique($form_state['id'], $form_state['values']['options']['expose']['identifier'])) {
+      form_error($form['expose']['identifier'], t('This identifier is used by another handler.'));
+    }
+  }
 
   /**
    * Provide default options for exposed filters.
@@ -396,6 +308,7 @@ class views_handler_filter extends views_handler {
       return;
     }
 
+    // Build the exposed form, when its based on an operator.
     if (!empty($this->options['expose']['use_operator']) && !empty($this->options['expose']['operator'])) {
       $operator = $this->options['expose']['operator'];
       $this->operator_form($form, $form_state);
@@ -410,6 +323,7 @@ class views_handler_filter extends views_handler {
       unset($form['operator']);
     }
 
+    // Build the form and set the value based on the identifier.
     if (!empty($this->options['expose']['identifier'])) {
       $value = $this->options['expose']['identifier'];
       $this->value_form($form, $form_state);
@@ -462,7 +376,7 @@ class views_handler_filter extends views_handler {
     }
 
     if ($type == 'value' && !empty($this->options['expose']['optional']) && $form['#type'] == 'select' && empty($form['#multiple'])) {
-      $any_label = variable_get('views_exposed_filter_any_label', 'old_any') == 'old_any' ? t('<Any>') : t('- Any -');
+      $any_label = variable_get('views_exposed_filter_any_label', 'old_any') == 'old_any' ? '<Any>' : t('- Any -');
       $form['#options'] = array('All' => $any_label) + $form['#options'];
       $form['#default_value'] = 'All';
     }
@@ -471,6 +385,12 @@ class views_handler_filter extends views_handler {
   /**
    * Tell the renderer about our exposed form. This only needs to be
    * overridden for particularly complex forms. And maybe not even then.
+   *
+   * @return
+   *   An array with the following keys:
+   *   - operator: The $form key of the operator. Set to NULL if no operator.
+   *   - value: The $form key of the value. Set to NULL if no value.
+   *   - label: The label to use for this piece.
    */
   function exposed_info() {
     if (empty($this->options['exposed'])) {
@@ -515,7 +435,7 @@ class views_handler_filter extends views_handler {
 
       if (isset($value)) {
         $this->value = $value;
-        if (!empty($this->options['expose']['single'])) {
+        if (empty($this->no_single) && !empty($this->options['expose']['single'])) {
           $this->value = array($value);
         }
       }
@@ -582,6 +502,18 @@ class views_handler_filter extends views_handler {
     $this->ensure_my_table();
     $this->query->add_where($this->options['group'], "$this->table_alias.$this->real_field " . $this->operator . " '%s'", $this->value);
   }
+
+  /**
+   * Can this filter be used in OR groups?
+   *
+   * Some filters have complicated where clauses that cannot be easily used
+   * with OR groups. Some filters must also use HAVING which also makes
+   * them not groupable. These filters will end up in a special group
+   * if OR grouping is in use.
+   */
+   function can_group() {
+     return TRUE;
+   }
 }
 
 

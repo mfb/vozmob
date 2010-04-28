@@ -1,5 +1,5 @@
 <?php
-// $Id: search.views.inc,v 1.17 2009/02/23 23:30:38 merlinofchaos Exp $
+// $Id: search.views.inc,v 1.17.2.2 2009/12/24 00:55:16 merlinofchaos Exp $
 /**
  * @file
  * Provide views data and handlers for search.module
@@ -26,10 +26,6 @@ function search_views_data() {
   $data['search_index']['table']['join'] = array(
     'node' => array(
       'left_field' => 'nid',
-      'field' => 'sid',
-    ),
-    'users' => array(
-      'left_field' => 'uid',
       'field' => 'sid',
     ),
   );
@@ -126,6 +122,9 @@ function search_views_data() {
     'filter' => array(
       'handler' => 'views_handler_filter_search',
     ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_search',
+    ),
   );
 
   return $data;
@@ -149,6 +148,9 @@ function search_views_handlers() {
       ),
       'views_handler_filter_search' => array(
         'parent' => 'views_handler_filter',
+      ),
+      'views_handler_argument_search' => array(
+        'parent' => 'views_handler_argument',
       ),
     ),
   );

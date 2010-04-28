@@ -1,7 +1,22 @@
-//$Id: CHANGELOG.txt,v 1.1.6.378 2009/09/11 09:30:23 markuspetrux Exp $
+//$Id: CHANGELOG.txt,v 1.1.6.390 2010/01/25 23:13:40 markuspetrux Exp $
 
 CCK 6.x-2.x
 ===========
+
+Features:
+- #670344 by dagmar: Make CCK compatible with both, views 2 and views 3.
+
+Bugfixes:
+- #625768 CCK 6.x-2.6, got fatal error on update.php while running userreference_update_6002().
+- #649106 by thekevinday: Fix content_copy_form_alter(), where $form_state argument is not passed by reference.
+
+CCK 6.x-2.6
+===========
+
+Please visit update.php apply pending updates after uploading the new files.
+
+This release:
+- The main reason to pack this release is to keep CCK in sync with recent changes in Views 2.7 that broke the advanced views feature in Node reference fields.
 
 Features:
 - #244896 by stella, canaryMason - Add incremental classes for multiple value fields in views.
@@ -9,6 +24,7 @@ Features:
 - #531662 by neochief - i18n support. Allow external modules to translate field labels, descriptions and allowed values list as typed in the field settings form.
 - #531662 i18n support for fieldgroups.
 - #558420 Accept trimmed titles in nodereference autocomplete validation to prevent title mismatch errors when title ends with space.
+- #596428 by NancyDru - Allow external modules alter the content type list.
 
 Bugfixes:
 - #416134 Userreference, impossible to filter allowed values by blocked users. Requires update.php.
@@ -21,6 +37,12 @@ Bugfixes:
 - #567168 by jcmarco - Checkbox required not defined for on/off widgets.
 - #568430 by Jody Lynn - Bad @see in content-field.tpl.php.
 - #572672 by Jan van Diepen - Remove redundant (and bad) inclusion of node/content_types.inc in content_copy_import_form_submit().
+- #585048 Setting "All users" in "User status that can be referenced" option reverts to "Blocked users".
+- #589306 warning: Invalid argument supplied for foreach() in includes/panels/content_types/content_field.inc on line 166.
+- #605152 by pokurek - Missing number formatter fr_2.
+- #604830 by mattyoung - 32 characters limit on field and group identifiers in "Manage fields" screen.
+- #464030 by eojthebrave - Typo in content_copy.module help.
+- #614292 by DeFr - Fix CCK Reference fields based on views broken by recent change in views_plugin_style Views 2.7 (#502348).
 
 CCK 6.x-2.5
 ===========

@@ -1,5 +1,5 @@
 <?php
-// $Id: ajax.inc,v 1.20 2009/06/01 23:12:22 merlinofchaos Exp $
+// $Id: ajax.inc,v 1.19.2.3 2010/04/07 23:40:32 merlinofchaos Exp $
 
 /**
  * @file ajax.inc
@@ -19,8 +19,17 @@ function views_ajax() {
     $display_id = $_REQUEST['view_display_id'];
     $args = isset($_REQUEST['view_args']) && $_REQUEST['view_args'] !== '' ? explode('/', $_REQUEST['view_args']) : array();
     $path = isset($_REQUEST['view_path']) ? $_REQUEST['view_path'] : NULL;
-    $dom_id = isset($_REQUEST['view_dom_id']) ? $_REQUEST['view_dom_id'] : NULL;
-    $pager_element = isset($_REQUEST['pager_element']) ? $_REQUEST['pager_element'] : NULL;
+    $dom_id = isset($_REQUEST['view_dom_id']) ? intval($_REQUEST['view_dom_id']) : NULL;
+    $pager_element = isset($_REQUEST['pager_element']) ? intval($_REQUEST['pager_element']) : NULL;
+
+    $ajax_arguments = array(
+      'view_name' => $name,
+      'view_display_id' => $display_id,
+      'view_args' => $_REQUEST['view_args'],
+      'view_path' => $path,
+      'view_dom_id' => $dom_id,
+      'pager_element' => $pager_element,
+    );
     views_include('ajax');
     $object = new stdClass();
 
@@ -28,7 +37,7 @@ function views_ajax() {
     $object->display = '';
 
     $arg = explode('/', $_REQUEST['view_path']);
-    
+
     if ($arg[0] == 'admin' || (variable_get('node_admin_theme', '0') && $arg[0] == 'node' && ($arg[1] == 'add' || $arg[2] == 'edit'))) {
         global $custom_theme;
         $custom_theme = variable_get('admin_theme', '0');
@@ -36,6 +45,7 @@ function views_ajax() {
     }
     // Load the view.
     if ($view = views_get_view($name)) {
+      $view->ajax_path = array($_GET['q'], $ajax_arguments);
       if ($view->access($display_id)) {
 
         // Fix 'q' for paging.

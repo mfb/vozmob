@@ -1,4 +1,4 @@
-// $Id: base.js,v 1.11 2009/06/02 18:45:38 merlinofchaos Exp $
+// $Id: base.js,v 1.10.2.3 2010/03/10 20:06:03 merlinofchaos Exp $
 /**
  * @file base.js
  *
@@ -11,11 +11,9 @@ Drupal.Views = {};
  * jQuery UI tabs, Views integration component
  */
 Drupal.behaviors.viewsTabs = function (context) {
-  if ($.ui && $.ui.tabs) {
-    $('#views-tabset:not(.views-processed)').addClass('views-processed').tabs({
-      selectedClass: 'active'
-    });
-  }
+  $('#views-tabset:not(.views-processed)').addClass('views-processed').each(function() {
+    new Drupal.Views.Tabs($(this), {selectedClass: 'active'});
+  });
 
   $('a.views-remove-link')
     .addClass('views-processed')
@@ -23,6 +21,18 @@ Drupal.behaviors.viewsTabs = function (context) {
       var id = $(this).attr('id').replace('views-remove-link-', '');
       $('#views-row-' + id).hide();
       $('#views-removed-' + id).attr('checked', true);
+      return false;
+    });
+  /**
+   * Here is to handle display deletion 
+   * (checking in the hidden checkbox and hiding out the row) 
+   */
+  $('a.display-remove-link')
+    .addClass('display-processed')
+    .click(function() {
+      var id = $(this).attr('id').replace('display-remove-link-', '');
+      $('#display-row-' + id).hide();
+      $('#display-removed-' + id).attr('checked', true);
       return false;
     });
 }
@@ -121,3 +131,5 @@ Drupal.Views.getPath = function (href) {
   }
   return href;
 };
+
+

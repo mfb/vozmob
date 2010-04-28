@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_argument_string.inc,v 1.5 2009/06/25 21:58:17 merlinofchaos Exp $
+// $Id: views_handler_argument_string.inc,v 1.4.2.2 2010/01/19 21:59:04 merlinofchaos Exp $
 
 /**
  * Basic argument handler to implement string arguments that may have length
@@ -8,7 +8,7 @@
  * @ingroup views_argument_handlers
  */
 class views_handler_argument_string extends views_handler_argument {
-  function init(&$view, &$options) {
+  function init(&$view, $options) {
     parent::init($view, $options);
     if (!empty($this->definition['many to one'])) {
       $this->helper = new views_many_to_one_helper($this);

@@ -1,5 +1,5 @@
 <?php
-// $Id: views_ui.module,v 1.109 2009/01/30 00:56:01 merlinofchaos Exp $
+// $Id: views_ui.module,v 1.109.2.4 2010/04/07 23:40:32 merlinofchaos Exp $
 /**
  * @file views_ui.module
  * Provide structure for the administrative interface to Views.
@@ -39,12 +39,13 @@ function views_ui_menu() {
     'page callback' => 'views_ui_add_page',
     'type' => MENU_LOCAL_TASK
   );
-  $items['admin/build/views/import'] = $base + array(
+  $items['admin/build/views/import'] = array(
     'title' => 'Import',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('views_ui_import_page'),
+    'access callback' => 'views_import_access',
     'type' => MENU_LOCAL_TASK
-  );
+  ) + $base;
   $items['admin/build/views/tools'] = $base + array(
     'title' => 'Tools',
     'page callback' => 'drupal_get_form',
@@ -120,6 +121,10 @@ function views_ui_menu() {
     'page callback' => 'views_ui_analyze_view',
     'page arguments' => array(3, 5),
   );
+  $items['admin/build/views/%views_ui_js/reorder-displays/%views_ui_cache'] = $callback + array(
+    'page callback' => 'views_ui_reorder_view',
+    'page arguments' => array(3, 5),
+  );
   $items['admin/build/views/%views_ui_js/details/%views_ui_cache'] = $callback + array(
     'page callback' => 'views_ui_edit_details',
     'page arguments' => array(3, 5),
@@ -188,6 +193,10 @@ function views_ui_theme() {
       'arguments' => array('form' => NULL),
       'file' => 'includes/admin.inc',
     ),
+    'views_ui_rearrange_filter_form' => array(
+      'arguments' => array('form' => NULL),
+      'file' => 'includes/admin.inc',
+    ),
 
     // list views
     'views_ui_list_views' => array(
@@ -208,6 +217,11 @@ function views_ui_theme() {
       'arguments' => array('body' => NULL),
       'file' => 'includes/tabs.inc',
     ),
+    'views_ui_reorder_displays_form' => array(
+      'arguments' => array('form' => NULL),
+      'file' => 'includes/admin.inc',
+    ),
+
 
     // On behalf of a plugin
     'views_ui_style_plugin_table' => array(
@@ -265,6 +279,7 @@ function views_ui_cache_set(&$view) {
   unset($view->display_handler);
   unset($view->current_display);
   unset($view->default_display);
+  $view->query = NULL;
   foreach (array_keys($view->display) as $id) {
     unset($view->display[$id]->handler);
     unset($view->display[$id]->default_display);

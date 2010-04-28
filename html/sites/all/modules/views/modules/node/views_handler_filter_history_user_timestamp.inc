@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_filter_history_user_timestamp.inc,v 1.3 2009/06/24 01:17:28 merlinofchaos Exp $
+// $Id: views_handler_filter_history_user_timestamp.inc,v 1.1.2.2 2009/06/25 18:48:24 merlinofchaos Exp $
 /**
  * Filter for new content
  */

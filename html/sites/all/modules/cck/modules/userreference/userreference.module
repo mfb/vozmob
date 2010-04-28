@@ -1,5 +1,5 @@
 <?php
-// $Id: userreference.module,v 1.106.2.46 2009/08/10 04:19:46 markuspetrux Exp $
+// $Id: userreference.module,v 1.106.2.47 2009/09/23 00:07:32 markuspetrux Exp $
 
 /**
  * @file
@@ -81,7 +81,7 @@ function userreference_field_settings($op, $field) {
       $form['referenceable_status'] = array(
         '#type' => 'radios',
         '#title' => t('User status that can be referenced'),
-        '#default_value' => isset($field['referenceable_status']) ? (int)$field['referenceable_status'] : '',
+        '#default_value' => isset($field['referenceable_status']) ? $field['referenceable_status'] : '',
         '#options' => array('' => t('All users'), 1 => t('Active users'), 0 => t('Blocked users')),
       );
       if (module_exists('views')) {

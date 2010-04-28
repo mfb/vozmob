@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_term_node_tid.inc,v 1.4 2009/07/01 23:07:14 merlinofchaos Exp $
+// $Id: views_handler_field_term_node_tid.inc,v 1.3.2.1 2009/07/01 23:06:44 merlinofchaos Exp $
 
 /**
  * Field handler for terms.

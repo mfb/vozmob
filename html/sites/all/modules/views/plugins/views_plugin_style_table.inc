@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_style_table.inc,v 1.7 2009/06/30 22:07:42 merlinofchaos Exp $
+// $Id: views_plugin_style_table.inc,v 1.5.2.6 2010/03/11 00:06:14 merlinofchaos Exp $
 /**
  * @file
  * Contains the table style plugin.
@@ -28,7 +28,7 @@ class views_plugin_style_table extends views_plugin_style {
    * Determine if we should provide sorting based upon $_GET inputs.
    */
   function build_sort() {
-    if (!isset($_GET['order']) && $this->options['default'] == -1) {
+    if (!isset($_GET['order']) && ($this->options['default'] == -1 || empty($this->view->field[$this->options['default']]))) {
       return TRUE;
     }
 
@@ -172,14 +172,7 @@ class views_plugin_style_table extends views_plugin_style {
     $columns = $this->sanitize_columns($this->options['columns']);
 
     // Create an array of allowed columns from the data we know:
-    foreach ($handlers as $field => $handler) {
-      if ($label = $handler->label()) {
-        $field_names[$field] = $label;
-      }
-      else {
-        $field_names[$field] = $handler->ui_name();
-      }
-    }
+    $field_names = $this->display->handler->get_field_labels();
 
     if (isset($this->options['default'])) {
       $default = $this->options['default'];
@@ -222,6 +215,18 @@ class views_plugin_style_table extends views_plugin_style {
           '#dependency' => array($id => array($field)),
         );
       }
+      $form['info'][$field]['align'] = array(
+        '#type' => 'select',
+        '#default_value' => !empty($this->options['info'][$field]['align']) ? $this->options['info'][$field]['align'] : '',
+        '#options' => array(
+          '' => t('None'),
+          'views-align-left' => t('Left'),
+          'views-align-center' => t('Center'),
+          'views-align-right' => t('Right'),
+          ),
+        '#process' => array('views_process_dependency'),
+        '#dependency' => array($id => array($field)),
+      );
       $form['info'][$field]['separator'] = array(
         '#type' => 'textfield',
         '#size' => 10,

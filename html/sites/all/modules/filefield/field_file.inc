@@ -1,5 +1,5 @@
 <?php
-// $Id: field_file.inc,v 1.33 2009/04/28 04:03:24 quicksketch Exp $
+// $Id: field_file.inc,v 1.34 2010/04/24 06:27:52 quicksketch Exp $
 
 /**
  * @file
@@ -42,7 +42,7 @@ function field_file_load($fid, $reset = NULL) {
     }
 
     foreach (module_implements('file_load') as $module) {
-      $function =  $module .'_file_load';
+      $function = $module .'_file_load';
       $function($file);
     }
 

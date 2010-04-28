@@ -158,7 +158,7 @@ class ImageFieldValidateTestCase extends FileFieldValidateTestCase {
     $field = $this->field;
 
     // Get our test file (PNG, 360x240).
-    $test_file = $this->getTestFile('image');
+    $test_file = $this->getTestFile('image', 64027);
     $test_image_info = image_get_info($test_file->filepath);
     $width = $test_image_info['width'];
     $height = $test_image_info['height'];

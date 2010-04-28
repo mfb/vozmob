@@ -1,4 +1,4 @@
-/* $Id: views-admin.css,v 1.14 2009/09/15 17:32:19 merlinofchaos Exp $ */
+/* $Id: views-admin.css,v 1.13.2.4 2010/01/22 01:41:24 merlinofchaos Exp $ */
 
 /*
  * Summary pad
@@ -211,6 +211,7 @@ div.views-display-deleted div.tab-section {
 
 #views-ajax-title {
   background: #f6f6f6;
+  color: #000;
   border-left: #D6DBDE 1px solid;
   border-right: #D6DBDE 1px solid;
   margin: 0 0 0 118px;
@@ -220,6 +221,7 @@ div.views-display-deleted div.tab-section {
 
 #views-ajax-pad .message {
   background: #f6f6f6;
+  color: #000;
   margin-left: 118px;
   border: #D6DBDE 1px solid;
   border-top: 0;
@@ -230,6 +232,7 @@ div.views-display-deleted div.tab-section {
 
 #views-ajax-pad form {
   background: #fff;
+  color: #000;
   margin-left: 118px;
   border: #D6DBDE 1px solid;
   padding-top: 3px;
@@ -462,6 +465,20 @@ html.js #arrange thead {
   display: none;
 }
 
+html.js #ungroupable_arrange .views-hide-label {
+  color: #D4E7F3;
+}
+
+#ungroupable_arrange thead tr {
+  /* this CSS mirrors what is found in core for blocks admin. */
+  background-color: #D4E7F3;
+  border-bottom: 1px solid #B4D7F0;
+  border-top: 1.5em solid #FFFFFF;
+  color: #455067;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
 html.js .views-remove-checkbox {
   display: none;
 }
@@ -474,14 +491,14 @@ html.js a.views-button-remove {
   display: inline;
 }
 
-#arrange tr.even,
-#arrange tr.odd,
-#arrange td {
+.arrange tr.even,
+.arrange tr.odd,
+.arrange td {
   padding-top: 0;
   padding-bottom: 0;
 }
 
-#arrange .form-item {
+.arrange .form-item {
   padding: 0;
 }
 
@@ -544,6 +561,14 @@ div.changed div.view-changed {
   border: 1px solid #333;
   background-color: #f0f0f0;
   padding: .5em;
+}
+
+form#views-ui-reorder-displays-button {
+  margin-bottom: 0em;
+  border-bottom: 1px solid #ccc;
+}
+form#views-ui-reorder-displays-button input.form-submit{
+  margin-bottom: 2em;
 }
 
 form#views-add-display-form {
@@ -653,4 +678,35 @@ html.js .views-hidden {
   padding: 0 1em;
   margin: 0 1em;
   border: 1px solid;
+}
+
+.group-populated {
+  display: none;
+}
+
+td.group {
+  /* this CSS mirrors what is found in core for blocks admin. */
+  background-color: #D4E7F3;
+  border-bottom: 1px solid #B4D7F0;
+  border-top: 1.5em solid #FFFFFF;
+  color: #455067;
+}
+
+td.group-title {
+  font-weight: bold;
+}
+
+tr.group-message {
+  font-style: italic;
+  color:#999999;
+}
+
+.group-message .form-submit,
+#views-add-group {
+  float: right;
+  clear: both;
+}
+
+html.js .views-group-select {
+  display: none;
 }

@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_node.inc,v 1.5 2009/08/21 23:58:35 dww Exp $
+// $Id: views_handler_field_node.inc,v 1.3.2.7 2010/03/16 23:09:03 merlinofchaos Exp $
 /**
  * @file
  * Contains the basic 'node' field handler.
@@ -9,12 +9,15 @@
  * Field handler to provide simple renderer that allows linking to a node.
  */
 class views_handler_field_node extends views_handler_field {
-  /**
-   * Constructor to provide additional field to add.
-   */
-  function construct() {
-    parent::construct();
-    $this->additional_fields['nid'] = 'nid';
+
+  function init(&$view, $options) {
+    parent::init($view, $options);
+    if (!empty($this->options['link_to_node'])) {
+      $this->additional_fields['nid'] = array('table' => 'node', 'field' => 'nid');
+      if (module_exists('translation')) {
+        $this->additional_fields['language'] = array('table' => 'node', 'field' => 'language');
+      }
+    }
   }
 
   function option_definition() {
@@ -45,6 +48,15 @@ class views_handler_field_node extends views_handler_field {
     if (!empty($this->options['link_to_node']) && $data !== NULL && $data !== '') {
       $this->options['alter']['make_link'] = TRUE;
       $this->options['alter']['path'] = "node/" . $values->{$this->aliases['nid']};
+      if (isset($this->aliases['language'])) {
+        $languages = language_list();
+        if (isset($languages[$values->{$this->aliases['language']}])) {
+          $this->options['alter']['language'] = $languages[$values->{$this->aliases['language']}];
+        }
+        else {
+          unset($this->options['alter']['language']);
+        }
+      }
     }
     return $data;
   }

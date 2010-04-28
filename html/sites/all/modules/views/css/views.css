@@ -1,7 +1,7 @@
-/* $Id: views.css,v 1.11 2008/06/06 23:08:00 merlinofchaos Exp $ */
+/* $Id: views.css,v 1.11.2.3 2010/03/12 00:25:33 merlinofchaos Exp $ */
 .views-exposed-form .views-exposed-widget {
-  float: left;
-  padding: .5em 1em 0 0;
+  float: left; /* LTR */
+  padding: .5em 1em 0 0; /* LTR */
 }
 
 .views-exposed-form .views-exposed-widget .form-submit {
@@ -22,6 +22,17 @@
   margin-bottom: .5em;
 }
 
+/* table style column align */
+.views-align-left {
+  text-align: left;
+}
+.views-align-right {
+  text-align: right;
+}
+.views-align-center {
+  text-align: center;
+}
+
 html.js a.views-throbbing,
 html.js span.views-throbbing {
   background:url(../images/status-active.gif) no-repeat right center;
@@ -34,7 +45,7 @@ div.view div.views-admin-links {
   font-size: xx-small;
   margin-right: 1em;
   margin-top: 1em;
-  width: 95%;
+/*  width: 95%; */
 }
 
 .block div.view div.views-admin-links {

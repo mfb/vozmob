@@ -1,10 +1,12 @@
 <?php
-// $Id: views_handler_filter_term_node_tid.inc,v 1.8 2009/04/07 23:21:01 merlinofchaos Exp $
+// $Id: views_handler_filter_term_node_tid.inc,v 1.8.2.3 2010/01/25 21:19:18 merlinofchaos Exp $
 
 /**
  * Filter by term id
  */
 class views_handler_filter_term_node_tid extends views_handler_filter_many_to_one {
+  function can_group() { return FALSE; }
+
   function has_extra_options() { return TRUE; }
 
   function get_value_options() { /* don't overwrite the value options */ }
@@ -15,6 +17,7 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
     $options['type'] = array('default' => 'textfield');
     $options['limit'] = array('default' => TRUE);
     $options['vid'] = array('default' => 0);
+    $options['hierarchy'] = array('default' => 0);
 
     return $options;
   }
@@ -174,7 +177,7 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
     }
   }
 
-  function value_validate(&$form, &$form_state) {
+  function value_validate($form, &$form_state) {
     // We only validate if they've chosen the text field style.
     if ($this->options['type'] != 'textfield') {
       return;

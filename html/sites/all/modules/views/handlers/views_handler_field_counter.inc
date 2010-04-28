@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_counter.inc,v 1.2 2009/06/25 22:09:42 merlinofchaos Exp $
+// $Id: views_handler_field_counter.inc,v 1.1.2.7 2009/12/03 01:47:31 merlinofchaos Exp $
 
 class views_handler_field_counter extends views_handler_field {
   function option_definition() {
@@ -29,13 +29,13 @@ class views_handler_field_counter extends views_handler_field {
     // Note:  1 is subtracted from the counter start value below because the
     // counter value is incremented by 1 at the end of this function.
     $count = is_numeric($this->options['counter_start']) ? $this->options['counter_start'] - 1 : 0;
-    $pager = $this->view->pager;
+    $pager = $this->view->query->pager;
     // Get the base count of the pager.
-    if ($pager['use_pager']) {
-      $count += ($pager['items_per_page'] * $pager['current_page']) + $pager['offset'];
+    if ($pager->use_pager()) {
+      $count += ($pager->get_items_per_page() * $pager->get_current_page() + $pager->get_offset());
     }
     // Add the counter for the current site.
-    $count += array_search($values, $this->view->result) + 1;
+    $count += $this->view->row_index + 1;
 
     return $count;
   }

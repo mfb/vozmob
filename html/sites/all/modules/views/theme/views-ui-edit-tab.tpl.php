@@ -1,5 +1,5 @@
 <?php
-// $Id: views-ui-edit-tab.tpl.php,v 1.11 2008/08/08 16:57:44 merlinofchaos Exp $
+// $Id: views-ui-edit-tab.tpl.php,v 1.11.2.1 2010/01/19 22:11:28 merlinofchaos Exp $
 /**
  * @file views-ui-edit-tab.tpl.php
  * Template for the primary view editing window.
@@ -67,12 +67,11 @@
   <?php // middle section ?>
   <div class="middle tab-section">
     <div class="inside">
+      <?php foreach ($areas as $area): ?>
       <div class="views-category">
-        <?php print $relationships; ?>
+        <?php print $area; ?>
       </div>
-      <div class="views-category">
-        <?php print $arguments; ?>
-      </div>
+      <?php endforeach;?>
       <?php if (!empty($fields)): ?>
         <div class="views-category">
           <?php print $fields; ?>
@@ -84,6 +83,12 @@
   <?php // right section ?>
   <div class="right tab-section">
     <div class="inside">
+      <div class="views-category">
+        <?php print $relationships; ?>
+      </div>
+      <div class="views-category">
+        <?php print $arguments; ?>
+      </div>
       <div class="views-category">
         <?php print $sorts; ?>
       </div>

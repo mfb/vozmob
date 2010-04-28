@@ -1,5 +1,5 @@
 <?php
-// $Id: handlers.inc,v 1.119 2009/09/15 19:29:12 merlinofchaos Exp $
+// $Id: handlers.inc,v 1.109.2.16 2010/01/19 22:11:28 merlinofchaos Exp $
 /**
  * @file handlers.inc
  * Defines the various handler objects to help build and display views.
@@ -14,11 +14,24 @@ function _views_create_handler($definition, $type = 'handler') {
     return;
   }
 
-  if (!class_exists($definition['handler']) && !views_include_handler($definition, $type)) {
+  if (!empty($definition['override handler']) &&
+      !class_exists($definition['override handler']) &&
+      !views_include_handler($definition['override handler'], $definition, $type)) {
     return;
   }
 
-  $handler = new $definition['handler'];
+  if (!class_exists($definition['handler']) &&
+      !views_include_handler($definition['handler'], $definition, $type)) {
+    return;
+  }
+
+  if (!empty($definition['override handler'])) {
+    $handler = new $definition['override handler'];
+  }
+  else {
+    $handler = new $definition['handler'];
+  }
+
   $handler->set_definition($definition);
   // let the handler have something like a constructor.
   $handler->construct();
@@ -32,24 +45,24 @@ function _views_create_handler($definition, $type = 'handler') {
  * This will also attempt to include all parents, though we're maxing the
  * parent chain to 10 to prevent infinite loops.
  */
-function views_include_handler($definition, $type, $count = 0) {
+function views_include_handler($handler, $definition, $type, $count = 0) {
   // Do not proceed if the class already exists.
-  if (isset($definition['handler']) && class_exists($definition['handler'])) {
+  if (isset($handler) && class_exists($handler)) {
     return TRUE;
   }
 
   // simple infinite loop prevention.
   if ($count > 10) {
-    vpr(t('Handler @handler include tried to loop infinitely!', array('@handler' => $definition['handler'])));
+    vpr(t('Handler @handler include tried to loop infinitely!', array('@handler' => $handler)));
     return FALSE;
   }
 
   if (!isset($definition['path'])) {
     if ($type == 'handler') {
-      $definition += views_fetch_handler_data($definition['handler']);
+      $definition += views_fetch_handler_data($handler);
     }
     else {
-      $definition += views_fetch_plugin_data($type, $definition['handler']);
+      $definition += views_fetch_plugin_data($type, $handler);
     }
   }
 
@@ -62,7 +75,7 @@ function views_include_handler($definition, $type, $count = 0) {
     }
 
     if ($parent) {
-      $rc = views_include_handler($parent, $type, $count + 1);
+      $rc = views_include_handler($parent['handler'], $parent, $type, $count + 1);
       // If the parent chain cannot be included, don't try; this will
       // help alleviate problems with modules with cross dependencies.
       if (!$rc) {
@@ -78,7 +91,7 @@ function views_include_handler($definition, $type, $count = 0) {
     }
   }
 
-  return class_exists($definition['handler']);
+  return class_exists($handler);
 }
 
 /**
@@ -262,6 +275,18 @@ class views_handler extends views_object {
     $this->query = &$view->query;
   }
 
+  function option_definition() {
+    $options = parent::option_definition();
+
+    $options['id'] = array('default' => '');
+    $options['table'] = array('default' => '');
+    $options['field'] = array('default' => '');
+    $options['relationship'] = array('default' => 'none');
+    $options['group_type'] = array('default' => 'group');
+
+    return $options;
+  }
+
   /**
    * Return a string representing this handler's name in the UI.
    */
@@ -271,15 +296,39 @@ class views_handler extends views_object {
   }
 
   /**
-   * Provide a form for setting options.
+   * Shortcut to get a handler's raw field value.
+   *
+   * This should be overridden for handlers with formulae or other
+   * non-standard fields. Because this takes an argument, fields
+   * overriding this can just call return parent::get_field($formula)
    */
-  function options_form(&$form, &$form_state) { }
+  function get_field($field = NULL) {
+    if (!isset($field)) {
+      if (!empty($this->formula)) {
+        $field = $this->get_formula();
+      }
+      else {
+        $field = $this->table_alias . '.' . $this->real_field;
+      }
+    }
+
+    // If grouping, check to see if the aggregation method needs to modify the field.
+    if ($this->view->display_handler->use_group_by()) {
+      $info = $this->query->get_aggregation_info();
+      if (!empty($info[$this->options['group_type']]['method']) && function_exists($info[$this->options['group_type']]['method'])) {
+        return $info[$this->options['group_type']]['method']($this->options['group_type'], $field);
+      }
+    }
+
+    return $field;
+  }
 
   /**
    * Validate the options form.
    */
   function options_validate($form, &$form_state) { }
 
+  function options_form(&$form, &$form_state) { }
   /**
    * Perform any necessary changes to the form values prior to storage.
    * There is no need for this function to actually store the data.
@@ -314,35 +363,142 @@ class views_handler extends views_object {
   function extra_options_submit($form, &$form_state) { }
 
   /**
+   * Determine if a handler can be exposed.
+   */
+  function can_expose() { return FALSE; }
+
+  /**
    * Set new exposed option defaults when exposed setting is flipped
    * on.
    */
   function expose_options() { }
+
   /**
-   * Render our chunk of the exposed filter form when selecting
+   * Get information about the exposed form for the form renderer.
+   */
+  function exposed_info() { }
+
+  /**
+   * Render our chunk of the exposed handler form when selecting
    */
   function exposed_form(&$form, &$form_state) { }
 
   /**
-   * Validate the exposed filter form
+   * Validate the exposed handler form
    */
   function exposed_validate(&$form, &$form_state) { }
 
   /**
-   * Submit the exposed filter form
+   * Submit the exposed handler form
    */
   function exposed_submit(&$form, &$form_state) { }
 
   /**
-   * Get information about the exposed form for the form renderer.
+   * Overridable form for exposed handler options.
    *
-   * @return
-   *   An array with the following keys:
-   *   - operator: The $form key of the operator. Set to NULL if no operator.
-   *   - value: The $form key of the value. Set to NULL if no value.
-   *   - label: The label to use for this piece.
+   * If overridden, it is best to call the parent or re-implement
+   * the stuff here.
+   *
+   * Many handlers will need to override this in order to provide options
+   * that are nicely tailored to the given filter.
    */
-  function exposed_info() { }
+  function expose_form(&$form, &$form_state) {
+    $form['expose']['start_left'] = array(
+      '#value' => '<div class="views-left-50">',
+    );
+
+    $this->expose_form_left($form, $form_state);
+
+    $form['expose']['end_left'] = array(
+      '#value' => '</div>',
+    );
+
+    $form['expose']['start_checkboxes'] = array(
+      '#value' => '<div class="form-checkboxes views-left-40 clear-block">',
+    );
+
+    $this->expose_form_right($form, $form_state);
+
+    $form['expose']['end_checkboxes'] = array(
+      '#value' => '</div>',
+    );
+  }
+
+  function expose_form_left(&$form, &$form_state) { }
+
+  function expose_form_right(&$form, &$form_state){ }
+
+  /**
+   * Validate the options form.
+   */
+  function expose_validate($form, &$form_state) { }
+
+  /**
+   * Perform any necessary changes to the form exposes prior to storage.
+   * There is no need for this function to actually store the data.
+   */
+  function expose_submit($form, &$form_state) { }
+
+    /**
+   * Shortcut to display the expose/hide button.
+   */
+  function show_expose_button(&$form, &$form_state) {
+    $form['expose_button'] = array(
+      '#prefix' => '<div class="views-expose clear-block">',
+      '#suffix' => '</div>',
+    );
+    if (empty($this->options['exposed'])) {
+      $form['expose_button']['button'] = array(
+        '#type' => 'submit',
+        '#value' => t('Expose'),
+        '#submit' => array('views_ui_config_item_form_expose'),
+      );
+      $form['expose_button']['markup'] = array(
+        '#prefix' => '<div class="description">',
+        '#value' => t('This item is currently not exposed. If you <strong>expose</strong> it, users will be able to change the filter as they view it.'),
+        '#suffix' => '</div>',
+      );
+    }
+    else {
+      $form['expose_button']['button'] = array(
+        '#type' => 'submit',
+        '#value' => t('Hide'),
+        '#submit' => array('views_ui_config_item_form_expose'),
+      );
+      $form['expose_button']['markup'] = array(
+        '#prefix' => '<div class="description">',
+        '#value' => t('This item is currently exposed. If you <strong>hide</strong> it, users will not be able to change the filter as they view it.'),
+        '#suffix' => '</div>',
+      );
+    }
+  }
+
+  /**
+   * Shortcut to display the exposed options form.
+   */
+  function show_expose_form(&$form, &$form_state) {
+    if (empty($this->options['exposed'])) {
+      return;
+    }
+
+    $form['expose'] = array(
+      '#prefix' => '<div class="views-expose-options clear-block">',
+      '#suffix' => '</div>',
+    );
+    $this->expose_form($form, $form_state);
+
+    // When we click the expose button, we add new gadgets to the form but they
+    // have no data in $_POST so their defaults get wiped out. This prevents
+    // these defaults from getting wiped out. This setting will only be TRUE
+    // during a 2nd pass rerender.
+    if (!empty($form_state['force_expose_options'])) {
+      foreach (element_children($form['expose']) as $id) {
+        if (isset($form['expose'][$id]['#default_value']) && !isset($form['expose'][$id]['#value'])) {
+          $form['expose'][$id]['#value'] = $form['expose'][$id]['#default_value'];
+        }
+      }
+    }
+  }
 
  /**
   * Check whether current user has access to this handler.
@@ -403,7 +559,7 @@ class views_handler extends views_object {
    *
    * If we were using PHP5, this would be abstract.
    */
-  function query() { }
+  function query($group_by = FALSE) { }
 
   /**
    * Ensure the main table for this handler is in the query. This is used
@@ -440,7 +596,7 @@ class views_handler extends views_object {
   }
 
   /**
-   * Take input from exposed filters and assign to this handler, if necessary.
+   * Take input from exposed handlers and assign to this handler, if necessary.
    */
   function accept_exposed_input($input) { return TRUE; }
 
@@ -776,19 +932,17 @@ class views_many_to_one_helper {
  * @param $str
  *   The string to parse.
  * @param $filter
- *   The filter object to use as a base. If not specified one will
- *   be created.
+ *   The filter object to use as a base.
  *
  * @return $filter
  *   The new filter object.
  */
-function views_break_phrase($str, $filter = NULL) {
+function views_break_phrase($str, &$filter) {
   if (!$filter) {
     $filter = new stdClass();
   }
 
   // Set up defaults:
-
   if (!isset($filter->value)) {
     $filter->value = array();
   }
@@ -797,7 +951,7 @@ function views_break_phrase($str, $filter = NULL) {
     $filter->operator = 'or';
   }
 
-  if (empty($str)) {
+  if ($str == '') {
     return $filter;
   }
 
@@ -1142,6 +1296,28 @@ function views_views_handlers() {
       'views_handler_sort_random' => array(
         'parent' => 'views_handler_sort',
       ),
+
+      // group by handlers
+      'views_handler_argument_group_by_numeric' => array(
+        'parent' => 'views_handler_argument',
+      ),
+      'views_handler_field_group_by_numeric' => array(
+        'parent' => 'views_handler_field',
+      ),
+      'views_handler_filter_group_by_numeric' => array(
+        'parent' => 'views_handler_filter_numeric',
+      ),
+      'views_handler_sort_group_by_numeric' => array(
+        'parent' => 'views_handler_sort',
+      ),
+
+      // area handlers
+      'views_handler_area' => array(
+        'parent' => 'views_handler',
+      ),
+      'views_handler_area_text' => array(
+        'parent' => 'views_handler_area',
+      ),
     ),
   );
 }
@@ -1253,6 +1429,7 @@ class views_join {
     }
 
     $output = " $this->type JOIN $right_table $table[alias] ON $left_field = $table[alias].$this->field";
+
     // Tack on the extra.
     if (isset($this->extra)) {
       if (is_array($this->extra)) {
@@ -1350,7 +1527,8 @@ class views_join {
  */
 function views_views_api() {
   return array(
-    'api' => 2,
+    // in your modules do *not* use views_api_version()!!!
+    'api' => views_api_version(),
     'path' => drupal_get_path('module', 'views') . '/modules',
   );
 }

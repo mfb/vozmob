@@ -15,8 +15,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: German translation for views module\n"
 "POT-Creation-Date: 2008-11-06 21:18+0100\n"
-"PO-Revision-Date: 2008-12-01 01:16+0100\n"
-"Last-Translator: Alexander Haß\n"
+"PO-Revision-Date: 2009-11-22 00:02+0100\n"
+"Last-Translator: Thomas Zahreddin <tz@it-arts.org>\n"
 "Language-Team: Alexander Hass\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -428,7 +428,7 @@ msgstr "Sobald ausgewählt, werden die im Argument angegebenen Zahlen ausgeschlo
 
 #: handlers/views_handler_argument_string.inc:44
 msgid "Glossary mode"
-msgstr ""
+msgstr "Glossar-Modus"
 
 #: handlers/views_handler_argument_string.inc:45
 msgid "Glossary mode applies a limit to the number of characters used in the argument, which allows the summary view to act as a glossary."
@@ -775,8 +775,8 @@ msgid "A date in any machine readable format. CCYY-MM-DD HH:MM:SS is preferred."
 msgstr "Ein Datum in einem maschinenlesbaren Format. JJJJ-MM-TT HH:MM:SS ist bevorzugt."
 
 #: handlers/views_handler_filter_date.inc:27
-msgid "An offset from the current time such as \"+1 day\" or \"-2 hours and 30 minutes\""
-msgstr "Ein Zeitversatz bezogen auf die aktuellen Uhrzeit, wie etwa „+1 Tag“ oder „-2 Stunden und 30 Minuten“"
+msgid "An offset from the current time such as \"+1 day\" or \"-2 hours -30 minutes\""
+msgstr "Ein Zeitversatz bezogen auf die aktuellen Uhrzeit, wie etwa „+1 Tag“ oder „-2 Stunden -30 Minuten“"
 
 #: handlers/views_handler_filter_date.inc:77;83;87
 msgid "Invalid date format."
@@ -2794,8 +2794,9 @@ msgid "The depth filter is more complex, so provides fewer options."
 msgstr "Der Verschachtelungstiefenfilter ist wesentlich komplexer und stellt deshalb weniger Optionen zu Verfügung."
 
 #: modules/taxonomy.views.inc:315
+#, fuzzy
 msgid "Term ID depth modifier"
-msgstr ""
+msgstr "Begriffs-ID (mit Verschachtelungstiefe)"
 
 #: modules/taxonomy.views.inc:316
 msgid "Allows the \"depth\" for Taxonomy: Term ID (with depth) to be modified via an additional argument."
@@ -3227,8 +3228,9 @@ msgstr "Kein Titel"
 #: modules/system/views_handler_field_file.inc:29
 #: modules/upload/views_handler_field_upload_description.inc:24
 #: modules/upload/views_handler_field_upload_fid.inc:21
+#, fuzzy
 msgid "Link this field to download the file"
-msgstr ""
+msgstr "Dieses Feld auf seine Datei verlinken"
 
 #: modules/taxonomy/views_handler_argument_taxonomy.inc:18
 #: modules/taxonomy/views_handler_argument_term_node_tid_depth.inc:125
@@ -3447,8 +3449,9 @@ msgid "Note: you do not have permission to modify this. If you change the valida
 msgstr ""
 
 #: plugins/views_plugin_argument_validate_php.inc:19
+#, fuzzy
 msgid "PHP validate code"
-msgstr ""
+msgstr "PHP Validierungscode"
 
 #: plugins/views_plugin_argument_validate_php.inc:21
 msgid "Enter PHP code that returns TRUE or FALSE. No return is the same as FALSE, so be SURE to return something if you do not want to declare the argument invalid. Do not use &lt;?php ?&gt;. The argument to validate will be \"$argument\" and the view will be \"$view\". You may change the argument by setting \"$handler->argument\"."
@@ -3994,8 +3997,9 @@ msgid "Per user per page"
 msgstr "Nach Benutzer und Seite"
 
 #: plugins/views_plugin_display_block.inc:137
+#, fuzzy
 msgid "Block admin description"
-msgstr ""
+msgstr "Block mit der Administrationsbeschreibung"
 
 #: plugins/views_plugin_display_block.inc:140
 msgid "This will appear as the name of this block in administer >> site building >> blocks."

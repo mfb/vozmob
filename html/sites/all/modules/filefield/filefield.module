@@ -1,5 +1,5 @@
 <?php
-// $Id: filefield.module,v 1.208 2009/07/25 04:10:49 quicksketch Exp $
+// $Id: filefield.module,v 1.212 2010/04/24 04:48:19 quicksketch Exp $
 
 /**
  * @file
@@ -159,14 +159,6 @@ function filefield_file_download($file) {
     return;
   }
 
-  // If any node includes this file but the user may not view this field,
-  // then deny the download.
-  foreach ($cck_files as $field_name => $field_files) {
-    if (!filefield_view_access($field_name)) {
-      return -1;
-    }
-  }
-
   // So the overall field view permissions are not denied, but if access is
   // denied for ALL nodes containing the file, deny the download as well.
   // Node access checks also include checking for 'access content'.
@@ -180,8 +172,7 @@ function filefield_file_download($file) {
       if (isset($nodes[$content['nid']])) {
         continue; // Don't check the same node twice.
       }
-      $node = node_load($content['nid']);
-      if ($denied == FALSE && node_access('view', $node) == FALSE) {
+      if ($denied == FALSE && ($node = node_load($content['nid'])) && (node_access('view', $node) == FALSE || filefield_view_access($field_name, $node) == FALSE)) {
         // You don't have permission to view the node this file is attached to.
         $denied = TRUE;
       }
@@ -366,6 +357,19 @@ function filefield_content_is_empty($item, $field) {
 }
 
 /**
+ * Implementation of CCK's hook_content_diff_values().
+ */
+function filefield_content_diff_values($node, $field, $items) {
+  $return = array();
+  foreach ($items as $item) {
+    if (is_array($item) && !empty($item['filepath'])) {
+      $return[] = $item['filepath'];
+    }
+  }
+  return $return;
+}
+
+/**
  * Implementation of CCK's hook_default_value().
  *
  * Note this is a widget-level hook, so it does not affect ImageField or other
@@ -460,8 +464,8 @@ function filefield_icon_url($file) {
  * us to check, so we can make sure that the user may actually edit the file.
  */
 function filefield_edit_access($field_name) {
-  if (module_exists('content_permissions')) {
-    return user_access('edit '. $field_name);
+  if (!content_access('edit', content_fields($field_name))) {
+    return FALSE;
   }
   // No content permissions to check, so let's fall back to a more general permission.
   return user_access('access content');
@@ -470,9 +474,9 @@ function filefield_edit_access($field_name) {
 /**
  * Access callback that checks if the current user may view the filefield.
  */
-function filefield_view_access($field_name) {
-  if (module_exists('content_permissions')) {
-    return user_access('view '. $field_name);
+function filefield_view_access($field_name, $node = NULL) {
+  if (!content_access('view', content_fields($field_name), NULL, $node)) {
+    return FALSE;
   }
   // No content permissions to check, so let's fall back to a more general permission.
   return user_access('access content');
@@ -972,9 +976,13 @@ function filefield_get_node_files($node, $field = NULL) {
   // Get the file rows.
   foreach ($fields as $field) {
     $db_info = content_database_info($field);
-    $sql =  'SELECT f.* FROM {files} f INNER JOIN {' . $db_info['table'] . '} c ON f.fid = c.' . $db_info['columns']['fid']['column'] . ' AND c.vid = %d';
+    $fields = 'f.*';
+    $fields .= ', c.'. $db_info['columns']['list']['column'] .' AS list';
+    $fields .= ', c.'. $db_info['columns']['data']['column'] .' AS data';
+    $sql =  'SELECT '. $fields .' FROM {files} f INNER JOIN {' . $db_info['table'] . '} c ON f.fid = c.' . $db_info['columns']['fid']['column'] . ' AND c.vid = %d';
     $result = db_query($sql, $node->vid);
     while ($file = db_fetch_array($result)) {
+      $file['data'] = unserialize($file['data']);
       $files[$file['fid']] = $file;
     }
   }

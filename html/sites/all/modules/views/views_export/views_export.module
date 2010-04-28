@@ -1,5 +1,5 @@
 <?php
-// $Id: views_export.module,v 1.9 2009/09/15 17:27:03 merlinofchaos Exp $
+// $Id: views_export.module,v 1.4.2.4 2009/09/15 17:26:53 merlinofchaos Exp $
 
 /**
  * @file views_export.module
@@ -189,7 +189,7 @@ function views_export_export_form_submit(&$form, &$form_state) {
 
   $types = system_elements();
 
-  $info  = "; \$Id" . ": $\n"; // The break in the string prevents CVS.
+  $info  = '; $Id: views_export.module,v 1.4.2.4 2009/09/15 17:26:53 merlinofchaos Exp $'."\n";
   $info .= "\n";
   $info .= strtr("name = @module Export Module\n", array('@module' => $form_state['values']['name']));
   $info .= strtr("description = Exports some views of @module\n", array('@module' => $form_state['values']['name']));

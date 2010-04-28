@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_filter_format_name.inc,v 1.2 2009/06/03 02:16:48 merlinofchaos Exp $
+// $Id: views_handler_field_filter_format_name.inc,v 1.1.2.1 2009/06/03 02:16:43 merlinofchaos Exp $
 /**
  * Field handler to output the name of an input format.
  */
