@@ -1,0 +1,147 @@
+<?php
+
+
+/**
+ * @file
+ * Handles interactions between media mover and imagecache
+ */
+
+
+/**
+ * Implementation of hook_media_mover()
+ * @param $op is the operator to return
+ * @param $action is which action is being called
+ * @param $verb is the verb being run
+ * @param $configuration is the specific configuration saved for the action for this configuration
+ * @param $file is the file in use
+ * @param $job is the full configuration data currently running
+ */
+function mm_imagecache_media_mover($op = null, $action = null, $configuration = null, &$file = array(), $job = null, $nid = null ) {
+  switch ($op) {
+    // Name of module
+    case 'name':
+      return "ImageCache processing";
+    break;
+
+    // Defines what this module does
+    case 'actions':
+      return array(
+        'process' => array(1 => t('Process files with ImageCache'),),
+      );
+    break;
+
+    // Configuration
+    case 'config':
+      return mm_imagecache_configure($configuration);
+    break;
+
+    // Process
+    case 'process':
+      return mm_imagecache_process($configuration, $file, $op);
+    break;
+
+    // implements a delete call from media mover
+    case 'delete':
+      // @TOOD
+      // return mm_imagecache_delete($file);
+    break;
+
+  }
+  return;
+}
+
+
+/**
+ * Configuration settings for the imagecache actions
+ * @param unknown_type $configuration
+ * @return unknown_type
+ */
+function mm_imagecache_configure($configuration) {
+  $form = array();
+  $form['#cache'] = TRUE;
+
+  $form['mm_imagecache'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Imagecache Configuration'),
+  );
+
+  // Get all the imagecache presets
+  $presets = imagecache_presets();
+
+  if (!empty($presets)) {
+    foreach ($presets as $preset) {
+      $options[$preset['presetname']] = $preset['presetname'];
+    }
+    $form['mm_imagecache']['imagecaches'] = array(
+      '#type' => 'select',
+      '#multiple' => true,
+      '#title' => t('Imagecaches to use'),
+      '#options' => $options,
+      '#default_value' => $configuration['imagecaches'],
+      '#description' => t('Select which Imagecache presets\' actions you would like performed on your files'),
+    );
+  }
+  else {
+    $form['mm_imagecache']['#description'] = 'No imagecache presets defined!';
+  }
+
+  return $form;
+}
+
+
+/**
+ * this saves a harvested file to a directory location specified
+ * in the configuration
+ *
+ * @param array $file
+ * @param array $configuration
+ * @param int $action
+ * @return string
+ */
+function mm_imagecache_process($configuration, $file, $verb) {
+  // get the file we should be operating on
+  $current_file = media_mover_api_config_current_file($file);
+
+  // Check the mimetype
+  if (strpos(file_get_mimetype($current_file), 'image') === false) {
+    watchdog('mm_imagecache', 'Unsupported mimetype for imagecache converstion: %file', array('%file', '<pre>' . print_r($file, true) . '</pre>'), WATCHDOG_ERROR);
+    return false;
+  }
+
+  // Run our imagecache functions of each cache
+  foreach ($configuration['imagecaches'] as $imagecache_name) {
+    // Get the imagecache preset from the preset name
+    $preset = imagecache_preset_by_name($imagecache_name);
+    // @TODO should we the destination URL to be configurable? By default, it would be here:
+    $destination = imagecache_create_path($preset['presetname'], $current_file);
+
+    // Check if the imagecache derivative has been built
+    if (!file_exists($destination)) {
+      // Process the actual file
+      if (imagecache_build_derivative($preset['actions'], $current_file, $destination) === false) {
+        watchdog('mm_imagecache', 'Failed to create imagecache preset: %name for %file', array('%name' => $preset['presetid'], '%file' => '<pre>' . print_r($file, true) . '</pre>'), WATCHDOG_ERROR);
+        return false;
+      }
+    }
+    // If there are mutliple imagecache actions being run, the first one belongs
+    // to the Media Mover file that started the process, otherweise we create new files
+    if (! isset($return_filepath)) {
+      $return_filepath = $destination;
+    }
+    else {
+      // Create a copy of the current file that is set to the
+      // current file status
+      $new_mmfile = media_mover_api_file_fetch(media_mover_api_file_db_add($file, $configuration['cid'], $file->status));
+      // Store who the parent was
+      $new_mmfile['data']['mm_imagecache'] = array('mmfid' => $file['mmfid']);
+      // Change our file's file to the imageache one so it can be saved
+      $new_mmfile[$verb . '_file'] = $destination;
+      $new_mmfile['status'] = $file['status'] + 2;
+      // Save the new file with status set for the next step in the process
+      media_mover_api_update_file($new_mmfile);
+      watchdog('mm_imagecache', 'Created new file %file', array('%file' => '<pre>' . print_r($new_mmfile, true) . '</pre>'), WATCHDOG_INFO);
+    }
+  }
+
+  return $return_filepath;
+}

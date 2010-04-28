@@ -1,0 +1,7 @@
+; $Id: mm_ffmpeg.info,v 1.1.4.2 2009/12/02 23:42:52 arthuregg Exp $
+name = FFmpeg Media Mover module
+description = Runs FFmpeg for the Media Mover modules
+package = "Media Mover"
+dependencies[] = media_mover_api 
+dependencies[] = ffmpeg_wrapper
+core=6.x

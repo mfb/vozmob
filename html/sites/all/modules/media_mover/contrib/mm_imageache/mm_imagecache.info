@@ -1,0 +1,8 @@
+; $Id: mm_imagecache.info,v 1.1.2.1 2009/12/21 20:13:09 arthuregg Exp $
+name = Media Mover ImageCache
+description = Use ImageChace to process Media Mover files
+package = "Media Mover"
+dependencies[] = media_mover_api
+dependencies[] = imagecache
+dependencies[] = imagecache_ui
+core = 6.x

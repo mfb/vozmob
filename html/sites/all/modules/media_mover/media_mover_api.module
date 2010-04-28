@@ -1,6 +1,6 @@
 <?php
 
-/* $Id: media_mover_api.module,v 1.1.2.110.2.62 2009/09/17 03:10:52 arthuregg Exp $ */
+/* $Id: media_mover_api.module,v 1.1.2.110.2.82 2010/03/25 15:47:11 msonnabaum Exp $ */
 
 
 /*
@@ -85,9 +85,9 @@ function media_mover_api_cron() {
   // get all the configurations to run
   $configurations = media_mover_api_get_configurations();
   foreach ($configurations as $configuration) {
-    // check to see if we should run on cron for this configuration
+    // The run control hook can prevent a configuration from running
     if (! media_mover_api_run_control_extend($configuration, 'cron_run')) {
-      media_mover_api_run_config($configuration, null, null, true);
+      media_mover_api_run_config($configuration, NULL, NULL, TRUE);
     }
   }
 }
@@ -97,8 +97,16 @@ function media_mover_api_cron() {
  * Implementation of nodeapi
  */
 function media_mover_api_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
-
   switch ($op) {
+
+    case 'insert':
+      // should we bother trying to translate this?
+      if (module_exists('mm_node') && $node->translation_source) {
+        // If a node is being translated, allow for copying files
+        mm_node_translation_insert($node);
+      }
+    break;
+
     case "load":
       if ($media_mover = media_mover_api_node_files_fetch($node->nid)) {
         return array('media_mover' => $media_mover);
@@ -185,6 +193,24 @@ function media_mover_api_flush_caches() {
 
 
 /**
+ * Implements hook_mail().
+ * @param unknown_type $key
+ * @param unknown_type $message
+ * @param unknown_type $params
+ * @return unknown_type
+ */
+function media_mover_api_mail($key, &$message, $params) {
+  $language = $message['language'];
+  switch($key) {
+    default:
+      $message['subject'] = t($params['subject'], $params['params'], $language->language);
+      $message['body'][] = t($params['body'], $params['params'], $language->language);
+    break;
+  }
+}
+
+
+/**
  * support for simple tests
  * @return array of test files
  */
@@ -205,7 +231,7 @@ function media_mover_api_simpletest() {
  * @param $file is the file in use
  * @param $running_config is the full configuration data currently running
  */
-function media_mover_api_media_mover($op, $action = null, $configuration = null, &$file = array(), $running_config = null ) {
+function media_mover_api_media_mover($op, $action = NULL, $configuration = NULL, &$file = array(), $running_config = NULL ) {
 
   switch ($op) {
 
@@ -248,15 +274,27 @@ function media_mover_api_media_mover($op, $action = null, $configuration = null,
 
 
 /**
- * menu helper to get the name of the configuration into the menu tab
+ * Menu helper to get the name of the configuration into the menu tab
  * @param int $cid
  *   configuration id
  * @return string
  */
 function media_mover_api_menu_configuration_title_callback($cid) {
   $configuration = media_mover_api_get_configuration($cid);
-  return $configuration->name;
+  return t($configuration->name);
 }
+
+
+/**
+ * Handles the callbacks for the local tasks that should
+ * not be rendered on the main media mover landing page
+ * @return boolean
+ */
+function media_mover_api_menu_configuration_access_callback() {
+  if ($_GET['q'] != 'admin/build/media_mover' && user_access('administer media_mover')) {
+    return TRUE;
+  }
+ }
 
 
 /* ************************************************ */
@@ -300,7 +338,7 @@ function media_mover_api_get_status($status_code) {
  * @param int $status value of status to return (optional)
  * @return array or string
  */
-function media_mover_api_item_status($status = null) {
+function media_mover_api_item_status($status = NULL) {
 	static $states;
 	if (! $states) {
       $states = array(
@@ -314,7 +352,7 @@ function media_mover_api_item_status($status = null) {
   	    MMA_FILE_STATUS_COMPLETE_COMPLETE => t('Finished'),
 	  );
 	}
-	if ($status != null) {return $states[$status];}
+	if ($status != NULL) {return $states[$status];}
   return $states;
 }
 
@@ -326,7 +364,7 @@ function media_mover_api_item_status($status = null) {
  * @param boolean $id
  * @return string
  */
-function media_mover_api_verb_base_status($id = null) {
+function media_mover_api_verb_base_status($id = NULL) {
   $status = array(
     // note that the harvest is a special case as the file
     // would not exist previous to the harvest
@@ -363,26 +401,26 @@ function media_mover_api_modules() {
 
 
 /**
- * Controls for throttle mechanisms. Returns true if the
+ * Controls for throttle mechanisms. Returns TRUE if the
  * configuration should be running. If one module returns
- * true, return true which stops the running of the configuration
+ * TRUE, return TRUE which stops the running of the configuration
  *
  * @param object $configuration
  * @oaram string $action
  * @return boolean
  */
-function media_mover_api_run_control_extend($configuration, $action, $file = null) {
+function media_mover_api_run_control_extend($configuration, $action, $file = NULL) {
 	foreach (module_implements('run_control') as $module) {
 	  // function name includes the module name
 		$function  = $module .'_run_control';
 		if (function_exists($function)) {
-		  // if any function returns true (stop) stop.
+		  // if any function returns TRUE (stop) stop.
 			if ($function($configuration, $action, $file)) {
-				return true;
+				return TRUE;
 			}
 		}
 	}
-	return false;
+	return FALSE;
 }
 
 
@@ -397,12 +435,12 @@ function media_mover_api_run_control_extend($configuration, $action, $file = nul
  * @param $cid is a configuration id which selected to run
  * @return string
  */
-function media_mover_api_run_configuration($cid = null) {
+function media_mover_api_run_configuration($cid = NULL) {
   if (! $cid) {
     $configurations = media_mover_api_get_configurations();
     $output = t('Running all configurations') .'<br /><hr><br />';
     foreach ($configurations as $config) {
-      $output .= media_mover_api_run_config($config, true);
+      $output .= media_mover_api_run_config($config, TRUE);
     }
     $output .= '<hr><br />'. t('All configurations run. Check your !logs for additional data.', array('!logs' => l(t('logs'), 'admin/reports/dblog')));
   }
@@ -414,7 +452,7 @@ function media_mover_api_run_configuration($cid = null) {
     }
     else {
      $output = t('Running !config configuration', array('!config' => $config->name)) .'<br /><hr><br />';
-     $output .= media_mover_api_run_config($config, true);
+     $output .= media_mover_api_run_config($config, TRUE);
      $output .= '<hr><br />'. t('Configuration run. Check your !logs for additional data.', array('!logs' => l(t('logs'), 'admin/reports/dblog')));
     }
   }
@@ -435,7 +473,7 @@ function media_mover_api_run_configuration($cid = null) {
  *   flag if cron is requesting this run
  * @return
  */
-function media_mover_api_run_config($config, $debug = true, $nid = null, $cron = false) {
+function media_mover_api_run_config($config, $debug = TRUE, $nid = NULL, $cron = FALSE) {
   $output = t('Running') .' '. l($config->name, 'admin/build/media_mover/config/'. $config->cid .'/view') ."<br />";
   /**
    * first, lock config, harvest files, store files, unlock config
@@ -482,13 +520,13 @@ function media_mover_api_run_config_harvest($config, $verb, $nid) {
   if (! media_mover_api_harvest_lock($config)) {
     // set some output display
     $output .= t('Harvesting.... ') .'<br />';
-    $files = module_invoke($config->{$verb}->module, 'media_mover', $verb, $config->{$verb}->action, $config->{$verb}->configuration, null, $config, $nid);
+    $files = module_invoke($config->{$verb}->module, 'media_mover', $verb, $config->{$verb}->action, $config->{$verb}->configuration, NULL, $config, $nid);
     $output .= t('Configuration process: <em>harvest</em> found !count files', array('!count' => count($files))) .'<br />';
     // store the harvested files
     if (count($files)) {
       foreach ($files as $file) {
         // save harvested file
-        media_mover_api_file_db_add($file, $config, $verb, MMA_FILE_STATUS_HARVESTED);
+        media_mover_api_file_db_add($file, $config->cid, MMA_FILE_STATUS_HARVESTED);
         //media_mover_api_event_trigger('config', 'run', $verb, $file);
       }
     }
@@ -518,16 +556,12 @@ function media_mover_api_run_config_verb($config, $verb, $status) {
   // setting then the global setting, then default to all
   $num = $config->settings->{'mma_'. $verb .'_num'} ? $config->settings->{'mma_'. $verb .'_num'} : variable_get('mma_'. $verb .'_num', 0);
   // get the files, make sure to not get cached files
-  $files = media_mover_api_get_files($status, $config->cid, $num, true);
+  $files = media_mover_api_get_files($status, $config->cid, $num, TRUE);
   $output = t('Configuration process: %verb is acting on !count files', array('%verb' => $verb, '!count' => count($files))) .'<br />';
   // loop through all of the found files for this status
   foreach ($files as $file) {
-  	// only run this if cron isn't requeseting this OR run_control does not try to stop it
-  	// @TODO think through if we need to be passing cron here- might make more sense to have a $configuration->operator
+  	// Now run this configuration on this file
   	media_mover_api_run_config_verb_file($file, $config, $verb);
-  	if ( ! media_mover_api_run_control_extend($config, $verb .'_run', $file) ) {
-      //media_mover_api_run_config_verb_file($file, $config, $verb);
-  	}
   }
   return $output;
 }
@@ -545,7 +579,7 @@ function media_mover_api_run_config_verb($config, $verb, $status) {
  * @return array $file
  *   the file that has been acted upon
  */
-function media_mover_api_run_config_verb_file($file, $config, $verb ) {
+function media_mover_api_run_config_verb_file($file, $config, $verb) {
   // set the status for the file
   $status = media_mover_api_verb_base_status($verb);
   // make sure no one else is trying to operate on this file
@@ -557,9 +591,9 @@ function media_mover_api_run_config_verb_file($file, $config, $verb ) {
       // sucessful. Increase the file status
       $new_status = $status + 2;
       // add the new file path to the file array. Some modules may return
-      // true instead of a file path. If this is the case, get the current file
+      // TRUE instead of a file path. If this is the case, get the current file
       // from this file
-      if ($filepath === true) {
+      if ($filepath === TRUE) {
         $filepath == media_mover_api_config_current_file($file);
       }
       // we do this here to keep the api simple for module developers
@@ -605,7 +639,7 @@ function media_mover_api_run_config_file($file, $config, $verbs) {
  */
 function media_mover_api_check_config_dirs($config) {
   foreach (media_mover_api_verbs() as $verb) {
-    $dirs = module_invoke($config->$verb->module, 'media_mover', 'directories', null, null);
+    $dirs = module_invoke($config->$verb->module, 'media_mover', 'directories', NULL, NULL);
     if ($dirs) {
       media_mover_api_check_dirs($dirs);
     }
@@ -635,9 +669,9 @@ function media_mover_api_check_dirs($dirs) {
 /**
  * this is a recursive function that builds out the complete
  * path being called in
- * returns true when it finally creates a directory
+ * returns TRUE when it finally creates a directory
  * @param $path is a path to create directories on
- * @return true when it completes
+ * @return TRUE when it completes
  */
 function media_mover_api_build_dirs($path){
   if (! file_check_directory($path, FILE_CREATE_DIRECTORY) && $path != '.'  ) {
@@ -646,7 +680,7 @@ function media_mover_api_build_dirs($path){
       file_check_directory($path, FILE_CREATE_DIRECTORY);
     }
   }
-  return true;
+  return TRUE;
 }
 
 
@@ -662,8 +696,8 @@ function media_mover_api_build_dirs($path){
  *                  a good path
  *
  */
-function media_mover_api_dir_path($filepath = false) {
-  $path = file_directory_path() .'/'. MMA_FILES_DIR .'/';
+function media_mover_api_dir_path($filepath = FALSE) {
+  $path = variable_get('mma_files_dir', file_directory_path() .'/'. MMA_FILES_DIR .'/');
   if ($filepath) {
     $path = $path . $filepath;
     // make sure the directories exist
@@ -678,8 +712,8 @@ function media_mover_api_dir_path($filepath = false) {
  * global file perms and then the modules don't have to worry about it
  */
 function media_mover_api_set_file_perm($filepath){
-  if (variable_get('mma_file_perm', true)) {
-    if ($oct = variable_get('mma_file_mask', null)) {
+  if (variable_get('mma_file_perm', TRUE)) {
+    if ($oct = variable_get('mma_file_mask', NULL)) {
       $perms = octdec( $oct);
     }
     else {
@@ -699,13 +733,13 @@ function media_mover_api_set_file_perm($filepath){
 function media_mover_api_file_validate_extensions($file_name, $extensions) {
   // all files are allowed
   if ($extensions == '*') {
-    return true;
+    return TRUE;
   }
   $regex = '/\.('. ereg_replace(' +', '|', preg_quote($extensions)) .')$/i';
   if (preg_match($regex, $file_name)) {
-    return true;
+    return TRUE;
   }
-  return false;
+  return FALSE;
 }
 
 
@@ -719,7 +753,7 @@ function media_mover_api_file_validate_extensions($file_name, $extensions) {
 function media_mover_api_action_name($module, $verb, $id) {
   static $names;
   if (! $names[$module][$verb][$id]) {
-    $names[$module] = module_invoke($module, 'media_mover', 'actions', null, null);
+    $names[$module] = module_invoke($module, 'media_mover', 'actions', NULL, NULL);
   }
   return $names[$module][$verb][$id];
 }
@@ -735,7 +769,7 @@ function media_mover_api_action_name($module, $verb, $id) {
  * @param $configuration
  *   media mover configuration object
  * @return boolean
- *   false if config is not running, true if configuration is running
+ *   FALSE if config is not running, TRUE if configuration is running
  */
 function media_mover_api_harvest_lock($configuration) {
   // lock the tables to prevent over run on this configuration
@@ -743,30 +777,20 @@ function media_mover_api_harvest_lock($configuration) {
   // check the status of this configuration
   if ($configuration->status != MMA_CONFIG_STATUS_RUNNING) {
     // set this configuration's status to running, and set the start run time.
-    db_query('UPDATE {media_mover_config_list} SET status = "%s", last_start_time = %d, start_time = %d WHERE cid = %d', MMA_CONFIG_STATUS_RUNNING, $configuration->start_time, time(), $configuration->cid );
+    db_query("UPDATE {media_mover_config_list} SET status = '%s', last_start_time = %d, start_time = %d WHERE cid = %d", MMA_CONFIG_STATUS_RUNNING, $configuration->start_time, time(), $configuration->cid );
     // unlock the tables
     db_unlock_tables('media_mover_config_list');
-    return false;
+    return FALSE;
   }
   // unlock the tables
   db_unlock_tables('media_mover_config_list');
-  // figure out how long ago this job started in minutes
-  $time = intval( (time() - $configuration->start_time) / 60);
-  $message = 'Media Mover detected a MM job (!name) that has been running for !time minutes. You may want to consider decreasing your cron.php frequency or increase your PHP timeout.';
-  $params = array('!name' => $configuration->name, '!time' => $time);
-  // set watchdog
-  watchdog('Media Mover', $message, $params, WATCHDOG_WARNING );
-  // should we alert an admin?
-  if ($configuration->settings->mma_cron_notify && $time >= $configuration->settings->mma_cron_notify_time && $configuration->settings->mma_cron_notify_email) {
-    $subject = t('[!sitename] Media Mover Job Stuck', array('!sitename' => variable_get('site_name', false)));
-    drupal_mail_send(array(
-      'id' => 'media_mover_api_job_running',
-      'to' => $configuration->settings->mma_cron_notify_email,
-      'subject' => $subject,
-      'body' => drupal_wrap_mail(t($message, $params))
-    ));
-  }
-  return true;
+  watchdog(
+    'Media Mover API',
+    'Harvest operation for configuration %configuration was already running. Harvest was not able to start again',
+    array('%configuration' => $configuration->name),
+    WATCHDOG_NOTICE
+  );
+  return TRUE;
 }
 
 
@@ -774,26 +798,26 @@ function media_mover_api_harvest_lock($configuration) {
  * Locks files for processing
  *
  * @mmfid is a file id
- * @return false if cofnig is not running, true if so
+ * @return FALSE if cofnig is not running, TRUE if so
  */
 function media_mover_api_file_lock($mmfid, $status, $new_status) {
   // lock the tables to prevent over run
   db_lock_table('media_mover_files');
 
   // check the status of the file
-  $result = db_result(db_query('SELECT status FROM {media_mover_files} WHERE mmfid = %d AND status = %d', $mmfid, $status));
+  $result = db_result(db_query("SELECT status FROM {media_mover_files} WHERE mmfid = %d AND status = %d", $mmfid, $status));
 
   if ($result['status']) {
     // set status to in process
-    db_query('UPDATE {media_mover_files} SET status = %d WHERE mmfid = %d', $new_status, $mmfid);
+    db_query("UPDATE {media_mover_files} SET status = %d WHERE mmfid = %d", $new_status, $mmfid);
     db_unlock_tables('media_mover_files');
-    return true;
+    return TRUE;
   }
 
   // unlock
   db_unlock_tables('media_mover_files');
 
-  return false;
+  return FALSE;
 }
 
 
@@ -804,15 +828,15 @@ function media_mover_api_file_lock($mmfid, $status, $new_status) {
  */
 function media_mover_api_set_harvest_stop_time($cid) {
   // get the config
-  $config = db_fetch_array(db_query('SELECT * FROM {media_mover_config_list} WHERE cid = %d', $cid));
+  $config = db_fetch_array(db_query("SELECT * FROM {media_mover_config_list} WHERE cid = %d", $cid));
 
   // we know that if the last_start_time == 0 then this was the first time
   // through. This is a special case. Updated the last_start_time with start_time
   if ($config['last_start_time'] == 0 ) {
-    db_query('UPDATE {media_mover_config_list} SET status = "%s", last_start_time = start_time WHERE cid = %d', MMA_CONFIG_STATUS_STOPPED, $cid);
+    db_query("UPDATE {media_mover_config_list} SET status = '%s', last_start_time = start_time WHERE cid = %d", MMA_CONFIG_STATUS_STOPPED, $cid);
   }
   else {
-    db_query('UPDATE {media_mover_config_list} SET status = "%s"  WHERE cid = %d', MMA_CONFIG_STATUS_STOPPED, $cid);
+    db_query("UPDATE {media_mover_config_list} SET status = '%s'  WHERE cid = %d", MMA_CONFIG_STATUS_STOPPED, $cid);
   }
 }
 
@@ -844,20 +868,31 @@ function media_mover_api_stuck_job_check() {
   // are there stuck any to report?
   if (count($rows)) {
     $message = theme('media_mover_api_stuck_job', $rows);
-    watchdog('media_mover', $message, null, WATCHDOG_NOTICE);
+    watchdog('media_mover', $message, NULL, WATCHDOG_NOTICE);
 
     // load the configuration to see if we have settings we have to abide by
     $configuration = media_mover_api_get_configuration($result['cid']);
 
     // should we alert an admin?
-    $send = isset($configuration->settings->mma_cron_notify) ? $configuration->settings->mma_cron_notify : variable_get('mma_cron_notify', false);
+    $send = isset($configuration->settings->mma_cron_notify) ? $configuration->settings->mma_cron_notify : variable_get('mma_cron_notify', FALSE);
     if ($send) {
-      $subject = t('[!sitename] Media Mover Job Stuck', array('!sitename' => variable_get('site_name', false)));
-      drupal_mail('media_mover_api_job_running',
-        $configuration->settings->mma_cron_notify_email ?
-          $configuration->settings->mma_cron_notify_email :
-          variable_get('mma_cron_notify_email', null),
-        $subject, $message);
+
+      // figure out how long ago this job started in minutes
+      $message = 'Media Mover detected jobs that has been running longer than normal.
+        You may want to consider decreasing your cron.php frequency or increase your PHP timeout,
+        or examine the following configurations to see if there is a particular issue with them.' . $message;
+      $params = array(
+        '%name' => $configuration->name,
+        '%time' => intval( (time() - $configuration->start_time) / 60),
+        '%site_name' => variable_get('site_name', '')
+      );
+
+      $email_params = array(
+        'subject' => '[%sitename] Media Mover Job Stuck',
+        'body' => $message,
+        'params' => $params
+      );
+      drupal_mail('media_mover_api', 'cron_stuck', $configuration->settings->mma_cron_notify_email, language_default(), $email_params);
     }
   }
 }
@@ -923,14 +958,14 @@ function media_mover_api_configuration_process_add($cid, $verb, $module, $action
  * adds a newly created media_mover file to the media_mover db table
  *
  * @param $file is a file array with all the data harvested
- * @param $config is a MM config
- * @param $verb is what MM processs is calling this
+ * @param $cid
+ *   int, MM configuration int
  * @return $mmfid for this files ID
  */
-function media_mover_api_file_db_add($file, $config, $verb, $status) {
+function media_mover_api_file_db_add($file, $cid, $status = MMA_FILE_STATUS_HARVESTED) {
   // add to db
-  db_query('INSERT INTO {media_mover_files} (nid, fid, cid, harvest_file, status, date, data)  VALUES (%d, %d, %d, "%s", %d, %d, "%s")',
-    $file['nid'], $file['fid'], $config->cid, $file['harvest_file'], $status, time(), serialize($file['data'])
+  db_query("INSERT INTO {media_mover_files} (nid, fid, cid, harvest_file, status, date, data)  VALUES (%d, %d, %d, '%s', %d, %d, '%s')",
+    $file['nid'], $file['fid'], $cid, $file['harvest_file'], $status, time(), serialize($file['data'])
   );
 
   // return the mmfid
@@ -950,7 +985,7 @@ function media_mover_api_file_db_add($file, $config, $verb, $status) {
  *   fetch without cache?
  * @return is an array of files
  */
-function media_mover_api_get_files($status, $cid = null, $num = null, $reset = false) {
+function media_mover_api_get_files($status, $cid = NULL, $num = NULL, $reset = FALSE) {
   $options = array();
   if ($cid) {
     $options[] = "AND cid = $cid";
@@ -960,7 +995,7 @@ function media_mover_api_get_files($status, $cid = null, $num = null, $reset = f
     $options[] = 'LIMIT 0, '. $num;
   }
   // find all matching files
-  $results = db_query('SELECT mmfid FROM {media_mover_files} WHERE status = %d '. implode(' ', $options), $status);
+  $results = db_query("SELECT mmfid FROM {media_mover_files} WHERE status = %d ". implode(' ', $options), $status);
   // put files into an array
   $items = array();
   while ($result = db_fetch_array($results)) {
@@ -980,7 +1015,7 @@ function media_mover_api_get_files($status, $cid = null, $num = null, $reset = f
  * @param int nid
  *   node id
  * @param int $status
- *   MM file status for specific files, false for all files
+ *   MM file status for specific files, FALSE for all files
  * @return array files
  *   media mover file array
  */
@@ -996,9 +1031,9 @@ function media_mover_api_node_files_fetch($nid, $status = MMA_FILE_STATUS_COMPLE
   // get data from the cache
   $data = cache_get($cache_name, 'cache_media_mover');
   // we can haz cache?
-  if (! $data->data) {
+  if (! $data) {
     $data = array();
-    $results = db_query('SELECT mmfid, cid FROM {media_mover_files} WHERE nid = %d '. $file_status .' ORDER BY cid', $nid);
+    $results = db_query("SELECT mmfid, cid FROM {media_mover_files} WHERE nid = %d ". $file_status .' ORDER BY cid', $nid);
     while ($result = db_fetch_array($results)) {
       $data[$result['cid']][] = media_mover_api_file_fetch($result['mmfid']);
     }
@@ -1026,7 +1061,7 @@ function media_mover_api_config_current_file($file, $type = 'previous') {
       return $file[media_mover_api_verb_base_status($file['status'] -2) .'_file'];
     break;
     case 'final':
-      return $file[media_mover_api_verb_base_status(MMA_FILE_STATUS_COMPLETE_COMPLETE, true) .'_file'];
+      return $file[media_mover_api_verb_base_status(MMA_FILE_STATUS_COMPLETE_COMPLETE, TRUE) .'_file'];
     break;
   }
 }
@@ -1034,7 +1069,7 @@ function media_mover_api_config_current_file($file, $type = 'previous') {
 
 /**
  * Takes an incoming file and looks for node data on
- * the file array. Returns false if it can not find any
+ * the file array. Returns FALSE if it can not find any
  * otherwise returns a node
  * @param $file
  *   media mover file array
@@ -1047,7 +1082,7 @@ function media_mover_api_get_node_from_file($file) {
   if (! $nid = $file['nid']) {
     if (! $nid = $file['node']->nid ) {
       if (! $nid = $file['data']['nid']) {
-        return false;
+        return FALSE;
       }
     }
   }
@@ -1057,7 +1092,7 @@ function media_mover_api_get_node_from_file($file) {
 
 /**
  * Takes an incoming file and looks for user data on
- * the file array. Returns false if it can not find any
+ * the file array. Returns FALSE if it can not find any
  * otherwise returns a user
  * @param $file
  *   media mover file array
@@ -1072,7 +1107,7 @@ function media_mover_api_get_user_from_file($file) {
       return $user;
     }
   }
-  return false;
+  return FALSE;
 }
 
 
@@ -1104,25 +1139,25 @@ function media_mover_api_configuration_verb_update($cid, $verb, $configuration )
 /**
  * updates the database with new data from a file that has been acted upon
  * @param $file is a complete file array
+ * @param status
+ *   int, optional
  */
-function media_mover_api_update_file($file, $status) {
+function media_mover_api_update_file($file, $status = FALSE) {
   $file['data'] = serialize($file['data']);
   // first lock the table so that nobody can get in the mix
   db_lock_table('media_mover_files');
-  db_query('UPDATE {media_mover_files} SET '.
-    'nid = %d, fid = %d, harvest_file = "%s", process_file = "%s", storage_file = "%s", complete_file = "%s", status = %d, data = "%s" WHERE mmfid = %d ',
+  db_query("UPDATE {media_mover_files} SET ".
+    "nid = %d, fid = %d, harvest_file = '%s', process_file = '%s', storage_file = '%s', complete_file = '%s', status = %d, data = '%s' WHERE mmfid = %d ",
     $file['nid'], $file['fid'], $file['harvest_file'], $file['process_file'], $file['storage_file'],
-    $file['complete_file'], $status, $file['data'], $file['mmfid']
+    $file['complete_file'], ($status ? $status : $file['status']) , $file['data'], $file['mmfid']
   );
   foreach (media_mover_api_verbs() as $verb) {
-    if (isset($file["{$verb}_module"])) {
-      module_invoke($file["{$verb}_module"], 'media_mover', 'update', $file["{$verb}_action"], null, $file  );
-    }
+    module_invoke($file["{$verb}_module"], 'media_mover', 'update', $file["{$verb}_action"], NULL, $file);
   }
   db_unlock_tables('media_mover_files');
   // clear the cache for this file if we have a NID
   if ($file['nid']) {
-    cache_clear_all('media_mover_files_node_'. $file['nid'], 'cache_media_mover', true);
+    cache_clear_all('media_mover_files_node_'. $file['nid'], 'cache_media_mover', TRUE);
   }
 }
 
@@ -1135,7 +1170,7 @@ function media_mover_api_update_file($file, $status) {
  */
 function media_mover_api_fetch_files($cid){
   $files = array();
-  $results = db_query('SELECT * FROM {media_mover_files} WHERE cid = %d', $cid);
+  $results = db_query("SELECT * FROM {media_mover_files} WHERE cid = %d", $cid);
   while ($file = db_fetch_array($results)) {
     // unserailize the stored data
     $file['data'] = unserialize($file['data']);
@@ -1199,14 +1234,14 @@ function media_mover_api_get_configuration($cid) {
   // we locally cache the configurations here
   static $configurations;
   if (! $configurations[$cid]) {
-    $result = db_fetch_array(db_query('SELECT * FROM {media_mover_config_list} WHERE cid = %d', $cid));
+    $result = db_fetch_array(db_query("SELECT * FROM {media_mover_config_list} WHERE cid = %d", $cid));
     if ($result['cid']) {
       // add this configuration to the static cache
       $configurations[$cid] = media_mover_api_build_configuration($result);
     }
   }
-  // return false if necessary
-  if (! $configurations[$cid]) { return false;}
+  // return FALSE if necessary
+  if (! $configurations[$cid]) { return FALSE;}
   // return the config
   return $configurations[$cid];
 }
@@ -1301,17 +1336,17 @@ function media_mover_api_get_configuration_parents() {
  * @param array $children
  *   array of cid values
  * @param boolean $append
- *   if this is true, merge children with current children, false, overwrite
+ *   if this is TRUE, merge children with current children, FALSE, overwrite
  * @param boolean $remove
  *   remove specified children
  */
-function media_mover_api_hierarchy_update($cid, $parent = 0, $children = array(), $append = false, $remove = false) {
+function media_mover_api_hierarchy_update($cid, $parent = 0, $children = array(), $append = FALSE, $remove = FALSE) {
   // load the configuration that is incoming so we have hierarchy data
   $configuration = media_mover_api_get_configuration($cid);
 
   // if there is no hiearachy data, we are creating the entry.
   if (! $parent && ! count($children))  {
-    db_query('INSERT INTO {media_mover_hierarchy} (cid, parent) VALUES (%d, %d)', $cid, 0);
+    db_query("INSERT INTO {media_mover_hierarchy} (cid, parent) VALUES (%d, %d)", $cid, 0);
     return;
   }
 
@@ -1332,7 +1367,7 @@ function media_mover_api_hierarchy_update($cid, $parent = 0, $children = array()
   }
 
   // now we update with our data
-  db_query('UPDATE {media_mover_hierarchy} SET parent = %d, children = "%s" WHERE cid = %d', $parent, serialize($children), $cid);
+  db_query("UPDATE {media_mover_hierarchy} SET parent = %d, children = '%s' WHERE cid = %d", $parent, serialize($children), $cid);
 }
 
 
@@ -1344,7 +1379,7 @@ function media_mover_api_hierarchy_update($cid, $parent = 0, $children = array()
  */
 function media_mover_api_hierachy_configuration_list() {
   // get all the parents first
-  $results = db_query("SELECT cid, children FROM {media_mover_hierarchy} WHERE parent = 0 OR parent = null ");
+  $results = db_query("SELECT cid, children FROM {media_mover_hierarchy} WHERE parent = 0 OR parent = NULL ");
   while ($result = db_fetch_array($results)) {
     // get the parent config
     $configurations[] = media_mover_api_get_configuration($result['cid']);
@@ -1368,7 +1403,7 @@ function media_mover_api_hierachy_configuration_list() {
  */
 function media_mover_api_get_configurations_by_module($name) {
   // find all the media mover configurations that us FTP
-  $results = db_query('SELECT cid FROM {media_mover_configurations} WHERE module = "%s"', $name);
+  $results = db_query("SELECT cid FROM {media_mover_configurations} WHERE module = '%s'", $name);
   while($result = db_fetch_array($results)) {
     $configuration = media_mover_api_get_configuration($result['cid']);
     $options[$configuration->cid] = $configuration->name;
@@ -1376,7 +1411,7 @@ function media_mover_api_get_configurations_by_module($name) {
   if (count($options)) {
     return $options;
   }
-  return false;
+  return FALSE;
 }
 
 
@@ -1400,7 +1435,7 @@ function media_mover_api_admin_settings() {
 
   // get all the admin forms
   foreach (media_mover_api_modules() as $m) {
-    if ($elements = module_invoke($m, 'media_mover', 'admin', null, null)) {
+    if ($elements = module_invoke($m, 'media_mover', 'admin', NULL, NULL)) {
       // move through all the elements to put them in the correct places in the array-
       // a module can add elements to another's fieldsets.
       foreach ($elements as $key => $values) {
@@ -1431,7 +1466,7 @@ function media_mover_api_admin_form() {
   $form['admin'] = array(
     '#type' => 'fieldset',
     '#title' => t('Media Mover default options'),
-    '#collapsible' => true,
+    '#collapsible' => TRUE,
     '#description' => t('These settings set the default value for all configurations. Settings can be overridden on a per configuration basis by editing the configuration and changing the option values under the <em>advanced</em> option.')
   );
 
@@ -1462,7 +1497,7 @@ function media_mover_api_page() {
     $module_actions = array();
 
     // get all mm module actions
-    $actions = module_invoke($m, 'media_mover', 'actions', null, null);
+    $actions = module_invoke($m, 'media_mover', 'actions', NULL, NULL);
     foreach (media_mover_api_verbs() as $verb) {
       if (is_array($actions[$verb])) {
         foreach($actions[$verb] as $action_verb => $action) {
@@ -1473,7 +1508,7 @@ function media_mover_api_page() {
     }
 
     $item = array();
-    $item[] = "<strong>". module_invoke($m, 'media_mover', 'name', null, null) ."</strong>";
+    $item[] = "<strong>". module_invoke($m, 'media_mover', 'name', NULL, NULL) ."</strong>";
     $item[] = implode(", ", $module_verbs);
     $item[] = implode(", " , array_unique($module_actions));
     $row[] = $item;
@@ -1511,7 +1546,7 @@ function media_mover_api_page() {
 
       // get the total number of files for this config
       $count = l(media_mover_api_configuration_files_count($configuration->cid), 'admin/build/media_mover/config/'. $configuration->cid .'/files');
-      $process_count = media_mover_api_configuration_files_count($configuration->cid, true);
+      $process_count = media_mover_api_configuration_files_count($configuration->cid, TRUE);
 
       // build the name and description
       $name = l($configuration->name, 'admin/build/media_mover/config/'. $configuration->cid .'/view') .'<br />'. substr($configuration->description, 0, 100) .'...';
@@ -1545,8 +1580,8 @@ function media_mover_api_page() {
   $form['configs'] = array(
     '#type' => 'fieldset',
     '#title' => t('Media Mover Configurations'),
-    '#collapsed' => false,
-    '#collapsible' => true,
+    '#collapsed' => FALSE,
+    '#collapsible' => TRUE,
   );
   $form['configs']['content'] = array(
     '#type' => 'markup',
@@ -1555,8 +1590,8 @@ function media_mover_api_page() {
   $form['modules'] = array(
     '#type' => 'fieldset',
     '#title' => t('Installed Media Mover Modules'),
-    '#collapsed' => true,
-    '#collapsible' => true,
+    '#collapsed' => TRUE,
+    '#collapsible' => TRUE,
   );
   $form['modules']['content'] = array(
     '#type' => 'markup',
@@ -1603,7 +1638,7 @@ function media_mover_api_configuration_view($cid) {
   $description[] = '<p>'. t('!count files harvested by this configuration', array('!count' => media_mover_api_configuration_files_count($cid))) .'</p>';
 
   // get the in process file count
-  $process_count = media_mover_api_configuration_files_count($cid, true);
+  $process_count = media_mover_api_configuration_files_count($cid, TRUE);
   $description[] = '<p>'. t('!count files are currently being processed by this configuration', array('!count' => $process_count)) .'</p>';
 
   // get a list of all the modules for this configuration
@@ -1627,7 +1662,7 @@ function media_mover_api_configuration_view($cid) {
  * @param string $id is a cache id for the import functions
  * @return array drupal form array
  */
-function media_mover_api_add_config_form($form, $id = null) {
+function media_mover_api_add_config_form($form, $id = NULL) {
   // do we have an incoming cache id that we should load
   // an imported configuration from?
   if ($id) {
@@ -1648,8 +1683,8 @@ function media_mover_api_add_config_form($form, $id = null) {
   $form['advanced'] = array(
     '#type' => 'fieldset',
     '#title' => t('Advanced configuration'),
-    '#collapsible' => true,
-    '#collapsed' => true,
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
   );
   $form['advanced'][] = media_mover_api_config_advanced_settings_form($configuration);
   // submit button
@@ -1677,7 +1712,7 @@ function media_mover_api_form_prefix($configuration) {
  * @param object $configuration
  * @return array drupal form array
  */
-function media_mover_api_configuration_base_form($configuration = null) {
+function media_mover_api_configuration_base_form($configuration = NULL) {
   $form['config'] = array(
     '#type' => 'fieldset',
     '#title' => t('Configuration Info'),
@@ -1687,14 +1722,14 @@ function media_mover_api_configuration_base_form($configuration = null) {
     '#title' => t('Name your configuration'),
     '#description' => t('Give a descriptive name to your configuration'),
     '#default_value' => $configuration->name ? $configuration->name : variable_get('mm_config_name', t('My configuration name')),
-    '#required' => true,
+    '#required' => TRUE,
   );
   $form['config']['mm_config_descript'] = array(
     '#type' => 'textarea',
     '#title' => t('Describe configuration'),
     '#description' => t('Enter a description for your configuration.'),
     '#default_value' => $configuration->description ? $configuration->description : variable_get('mm_config_descript', t('My configuration description')),
-    '#required' => true,
+    '#required' => TRUE,
   );
   return $form;
 }
@@ -1705,13 +1740,13 @@ function media_mover_api_configuration_base_form($configuration = null) {
  * @param object $configuration is a media mover configuration object
  * @return array drupal form array
  */
-function media_mover_api_config_advanced_settings_form($configuration = null) {
+function media_mover_api_config_advanced_settings_form($configuration = NULL) {
 
   // umask
   $form['mma_file_perm'] = array(
     '#type' => 'checkbox',
     '#title' => t('Set created file permissions'),
-    '#default_value' => isset($configuration->settings->mma_file_perm) ? $configuration->settings->mm_file_perm : variable_get('mma_file_perm', false),
+    '#default_value' => isset($configuration->settings->mma_file_perm) ? $configuration->settings->mm_file_perm : variable_get('mma_file_perm', FALSE),
   );
 
   // umask
@@ -1734,7 +1769,7 @@ function media_mover_api_config_advanced_settings_form($configuration = null) {
   $form['node']['mma_node_edit_item_show'] = array(
     '#type' => 'checkbox',
     '#title' => t('Show items on node edit screen'),
-    '#default_value' => isset($configuration->settings->mma_node_edit_item_show) ? $configuration->settings->mma_node_edit_item_show : variable_get('mma_node_edit_item_show', false),
+    '#default_value' => isset($configuration->settings->mma_node_edit_item_show) ? $configuration->settings->mma_node_edit_item_show : variable_get('mma_node_edit_item_show', FALSE),
     '#description' => t('When a user edits a node, they will see a list of any Media Mover items attached to the node, similar to the file attachments list.'),
    );
 
@@ -1742,7 +1777,7 @@ function media_mover_api_config_advanced_settings_form($configuration = null) {
   $form['mma_node_item_delete'] = array(
     '#type' => 'checkbox',
     '#title' => t('Delete Media Mover items with nodes'),
-    '#default_value' => isset($configuration->settings->mma_node_item_delete) ? $configuration->settings->mma_node_item_delete : variable_get('mma_node_item_delete', true),
+    '#default_value' => isset($configuration->settings->mma_node_item_delete) ? $configuration->settings->mma_node_item_delete : variable_get('mma_node_item_delete', TRUE),
     '#description' => t('When you delete a node that has Media Mover items associated with it, do you want those items deleted as well? This is good for reducing file system cruft.'),
   );
 
@@ -1751,21 +1786,21 @@ function media_mover_api_config_advanced_settings_form($configuration = null) {
     '#type' => 'checkbox',
     '#title' => t('Expose to rss'),
     '#description' => t('You can expose the items generated to Drupal\'s RSS feed.'),
-    '#default_value' =>  isset($configuration->settings->mma_node_config_rss) ? $configuration->settings->mma_node_config_rss : variable_get('mma_node_config_rss', false),
+    '#default_value' =>  isset($configuration->settings->mma_node_config_rss) ? $configuration->settings->mma_node_config_rss : variable_get('mma_node_config_rss', FALSE),
   );
 
   $form['time'] = array(
     '#type' => 'fieldset',
     '#title' => t('Job timeout alert'),
-    '#collapsible' => true,
-    '#collapsed' => isset($configuration->settings->mma_cron_notify) ? $configuration->settings->mma_cron_notify : variable_get('mma_cron_notify', false) ? false : true,
+    '#collapsible' => TRUE,
+    '#collapsed' => isset($configuration->settings->mma_cron_notify) ? $configuration->settings->mma_cron_notify : variable_get('mma_cron_notify', FALSE) ? FALSE : TRUE,
     '#description' => t('Sometimes a MM job can get stuck and prevent MM from running in the future. Use this to notify an admin that the queue needs review.'),
   );
 
   $form['time']['mma_cron_notify'] = array(
     '#type' => 'checkbox',
     '#title' => t('Notify admin when a MM job has run to long'),
-    '#default_value' => isset($configuration->settings->mma_cron_notify) ? $configuration->settings->mma_cron_notify : variable_get('mma_cron_notify', false),
+    '#default_value' => isset($configuration->settings->mma_cron_notify) ? $configuration->settings->mma_cron_notify : variable_get('mma_cron_notify', FALSE),
   );
 
   $form['time']['mma_cron_notify_email'] = array(
@@ -1786,8 +1821,8 @@ function media_mover_api_config_advanced_settings_form($configuration = null) {
   $form['run_numbers'] = array(
     '#type' => 'fieldset',
     '#title' => t('Media Mover runtime configuration'),
-    '#collapsible' => true,
-    '#collapsed' =>  true,
+    '#collapsible' => TRUE,
+    '#collapsed' =>  TRUE,
     '#description' => t('Set the number of items a specific part of the Media Mover process should operate on.'),
   );
 
@@ -1849,7 +1884,7 @@ function media_mover_api_build_add_config($configuration) {
 
     // now itterate on each module
     foreach (media_mover_api_modules() as $module) {
-      $actions = module_invoke($module, 'media_mover', 'actions', null, null );
+      $actions = module_invoke($module, 'media_mover', 'actions', NULL, NULL );
 
       if ($actions[$verb]) {
         foreach ($actions[$verb] as $action_id => $action) {
@@ -1887,6 +1922,11 @@ function media_mover_api_build_add_config($configuration) {
 
           // get the current element from the array
           $current_key = key($action_form);
+          // make sure we're getting a form qrray and not something like #cache.
+          if (!is_array($action_form[$current_key])) {
+            next($action_form);
+            $current_key = key($action_form);
+          }
 
           // check for a top level fieldset and assign id and class
           if ($action_form[$current_key]['#type'] == 'fieldset') {
@@ -1899,7 +1939,7 @@ function media_mover_api_build_add_config($configuration) {
           $form[$verb][$module][$action_id] = $action_form;
 
           // get the name of the module being called and build the options for a select
-          $name = module_invoke($module, 'media_mover', 'name', null, null);
+          $name = module_invoke($module, 'media_mover', 'name', NULL, NULL);
           $options["{$module}--{$action_id}"] = "$name: $action" ;
         }
       }
@@ -1940,7 +1980,7 @@ function media_mover_api_rename_form_keys($form, $prefix){
 
   $newform = array();
   if (is_array($form)) {
-    $ignore = drupal_map_assoc(array('#options', '#default_value', '#attributes'));
+    $ignore = drupal_map_assoc(array('#options', '#default_value', '#attributes', '#ahah'));
     foreach ($form as $key => $value) {
       // we never remap on $form['item']['#options']
       // or $form['item']['#default_value'] because their children
@@ -1976,7 +2016,7 @@ function media_mover_api_rename_form_keys($form, $prefix){
  *   is the array of form data
  */
 function media_mover_api_add_config_form_validate($form, &$form_state) {
-  media_mover_api_config_form_validate($form, $form_state,  true);
+  media_mover_api_config_form_validate($form, $form_state,  TRUE);
 }
 
 
@@ -2061,9 +2101,8 @@ function media_mover_api_collect_form_data($verb, $form_values) {
 /**
  * This function takes apart the form keys that are used to
  * keep module data seperate and hand back an array of parsed
- * values back to a requestor
- * @TODO this will become legacy once configurations are built dynamically
- *       instead of the static method used now
+ * values back to a requestore
+ *
  * @param $element
  * @param $form_state
  * @return array
@@ -2088,6 +2127,27 @@ function media_mover_api_extract_form_data($element, $form_state) {
     }
     return $values;
   }
+}
+
+
+/**
+ * Replace form value when the key is not known This is used in form
+ * functions where the full key name is not known by the function
+ *
+ * @param $element
+ *   array, drupal form element
+ * @param $form_state
+ *   array, drupal form array
+ * @param $name
+ *   string, form element name whose value
+ * @return string
+ */
+function media_mover_api_form_get_key($element, $form_state, $name) {
+  // We get the verb--module--action from this pattern
+  $pattern = '/^(.*--).*$/';
+  // Build the key name here
+  $replace = '${1}' . $name;
+  return preg_replace($pattern,  $replace, key($element['#element_validate']));
 }
 
 
@@ -2166,7 +2226,7 @@ function media_mover_api_config_edit_form($form, $cid) {
     $config_role_form = media_mover_api_rename_form_keys($config_role_form, $prefix);
 
     // get the name of the module
-    $name = module_invoke($configuration->{$verb}->module, 'media_mover', 'name', null, null);
+    $name = module_invoke($configuration->{$verb}->module, 'media_mover', 'name', NULL, NULL);
 
     // get the name of this action
     $config_role_name = media_mover_api_action_name($configuration->{$verb}->module, $verb, $configuration->{$verb}->action);
@@ -2185,8 +2245,8 @@ function media_mover_api_config_edit_form($form, $cid) {
   $form['advanced'] = array(
     '#type' => 'fieldset',
     '#title' => t('Advanced configuration'),
-    '#collapsible' => true,
-    '#collapsed' => true,
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
     '#weight' => 9,
   );
   $form['advanced'][] = media_mover_api_config_advanced_settings_form($configuration);
@@ -2232,7 +2292,7 @@ function media_mover_api_config_edit_form_serialize($form, $match, $cid) {
  * @param array $form_values
  */
 function media_mover_api_config_edit_form_validate($form, &$form_state) {
-  media_mover_api_config_form_validate($form, $form_state, false);
+  media_mover_api_config_form_validate($form, $form_state, FALSE);
 }
 
 
@@ -2274,7 +2334,7 @@ function media_mover_api_config_edit_form_submit($form, &$form_state) {
     }
   }
 
-  // we match on verb and cid to allow for null values to
+  // we match on verb and cid to allow for NULL values to
   // remove existing configurations
   foreach (media_mover_api_verbs() as $verb) {
     media_mover_api_configuration_verb_update($form_state['values']['cid'], $verb, $update[$verb]['configuration'] ? $update[$verb]['configuration'] : serialize(array("cid" => $form_state['values']['cid'])) );
@@ -2295,7 +2355,7 @@ function media_mover_api_config_edit_form_submit($form, &$form_state) {
  * @param boolean $add
  *   controls if we are editing or adding a new form
  */
-function media_mover_api_config_form_validate($form, &$form_state, $add = false) {
+function media_mover_api_config_form_validate($form, &$form_state, $add = FALSE) {
   // first get all the config data out of the form array
   foreach (media_mover_api_verbs() as $verb) {
     // get all the config data back for this item
@@ -2391,7 +2451,7 @@ function media_mover_api_config_status_change(&$form_state, $cid, $status) {
  *
  */
 function media_mover_api_config_status_change_submit($form, &$form_state) {
-  db_query('UPDATE {media_mover_config_list} SET status = "%s"  WHERE cid = %d', $form_state['values']['status'], $form_state['values']['cid']);
+  db_query("UPDATE {media_mover_config_list} SET status = '%s'  WHERE cid = %d", $form_state['values']['status'], $form_state['values']['cid']);
   drupal_set_message('Updated the configuration status.');
   $form_state['redirect'] = 'admin/build/media_mover/config/'. $form_state['values']['cid'] .'/view';
 }
@@ -2449,8 +2509,8 @@ function media_mover_api_config_empty_confirm_submit($form, &$form_state) {
     media_mover_api_config_delete_files($form_state['values']['cid']);
     drupal_set_message(t('Deleted files associated with this configuration'));
   }
-  db_query('UPDATE {media_mover_config_list} SET status = "stopped", last_start_time = 0, start_time = 0 WHERE cid = %d', $form_state['values']['cid']);
-  db_query('DELETE FROM {media_mover_files} WHERE cid = %d', $form_state['values']['cid'] );
+  db_query("UPDATE {media_mover_config_list} SET status = '%s', last_start_time = 0, start_time = 0 WHERE cid = %d", 'stopped', $form_state['values']['cid']);
+  db_query("DELETE FROM {media_mover_files} WHERE cid = %d", $form_state['values']['cid'] );
   drupal_set_message(t('Reset the configuration. Removed all of Media Mover\'s file refrences for this configuration.'));
   $form_state['redirect'] = 'admin/build/media_mover/config/'. $form_state['values']['cid'] .'/view';
 }
@@ -2485,6 +2545,8 @@ function media_mover_api_config_delete_confirm($drupal_form, $cid) {
     '#value' => $cid,
   );
 
+
+
   return confirm_form(
     $form,
     t('Are you sure you want to delete this configuration?'),
@@ -2506,15 +2568,15 @@ function media_mover_api_config_delete_confirm_submit($form_id, &$form_state) {
   // run the hook to delete files created by any MM module
   media_mover_api_config_delete_files($configuration->cid);
   // remove the configurations
-  db_query('DELETE FROM {media_mover_config_list} WHERE cid = %d', $configuration->cid);
+  db_query("DELETE FROM {media_mover_config_list} WHERE cid = %d", $configuration->cid);
   // remove the definition of the config
-  db_query('DELETE FROM {media_mover_configurations} WHERE cid = %d', $configuration->cid);
+  db_query("DELETE FROM {media_mover_configurations} WHERE cid = %d", $configuration->cid);
   // delete from the hierarchy table
-  db_query('DELETE FROM {media_mover_hierarchy} WHERE cid = %d', $configuration->cid);
+  db_query("DELETE FROM {media_mover_hierarchy} WHERE cid = %d", $configuration->cid);
   // now update the parent configuration if there is one
   if ($configuration->hierarchy->parent) {
     // remove this configuration from the parent
-    media_mover_api_hierarchy_update($configuration->hierarchy->parent, null, array($configuration->cid), false, true);
+    media_mover_api_hierarchy_update($configuration->hierarchy->parent, NULL, array($configuration->cid), FALSE, TRUE);
   }
   // notify
   drupal_set_message('Deleted the configuration.');
@@ -2527,7 +2589,7 @@ function media_mover_api_config_delete_confirm_submit($form_id, &$form_state) {
  * @TODO
  */
 function media_mover_api_config_files_clear($cid) {
-  $results = db_query('SELECT mmfid FROM {media_mover_files} WHERE cid = %d AND status != %d', $cid, MMA_FILE_STATUS_COMPLETE_COMPLETE);
+  $results = db_query("SELECT mmfid FROM {media_mover_files} WHERE cid = %d AND status != %d", $cid, MMA_FILE_STATUS_COMPLETE_COMPLETE);
   while($result = db_fetch_array($results)) {
 
   }
@@ -2559,7 +2621,7 @@ function media_mover_api_import_config() {
  * @param int $cid is a config cid
  * @return string html page
  */
-function media_mover_api_export($cid = null) {
+function media_mover_api_export($cid = NULL) {
   require_once('media_mover_api_io.inc');
   return _media_mover_api_export($cid);
 }
@@ -2586,11 +2648,11 @@ function media_mover_api_tests () {
  * @param int $cid
  * @return int
  */
-function media_mover_api_configuration_files_count($cid, $in_process = false) {
+function media_mover_api_configuration_files_count($cid, $in_process = FALSE) {
   if ($in_process) {
     $status = ' AND status != -1 AND status != '. MMA_FILE_STATUS_COMPLETE_COMPLETE;
   }
-  $count = db_result(db_query('SELECT COUNT(mmfid) FROM {media_mover_files} WHERE cid = %d '. $status, $cid));
+  $count = db_result(db_query("SELECT COUNT(mmfid) FROM {media_mover_files} WHERE cid = %d ". $status, $cid));
   return $count;
 }
 
@@ -2601,7 +2663,7 @@ function media_mover_api_configuration_files_count($cid, $in_process = false) {
  * @return array
  */
 function media_mover_api_file_get($mmfid) {
-  $file =  db_fetch_array(db_query('SELECT * FROM {media_mover_files} WHERE mmfid = %d', $mmfid));
+  $file =  db_fetch_array(db_query("SELECT * FROM {media_mover_files} WHERE mmfid = %d", $mmfid));
   $file['data'] = unserialize($file['data']);
   return $file;
 }
@@ -2614,12 +2676,12 @@ function media_mover_api_file_get($mmfid) {
  *   file status
  * @return string
  */
-function media_mover_api_files_list($cid = null, $status = null) {
+function media_mover_api_files_list($cid = NULL, $status = NULL) {
   drupal_set_title(t('Media Mover: all files'));
 
   // alert admin if there are files that can be expunged for a specific configuration
   if ($cid) {
-    $result = db_result(db_query('SELECT count(mmfid) FROM {media_mover_files} WHERE status != %d AND cid = %d', MMA_FILE_STATUS_COMPLETE_COMPLETE, $cid));
+    $result = db_result(db_query("SELECT count(mmfid) FROM {media_mover_files} WHERE status != %d AND cid = %d", MMA_FILE_STATUS_COMPLETE_COMPLETE, $cid));
     if ($result) {
       drupal_set_message(t('There are %count files that Media Mover has not finished processing. These files may not ever finish. You can !link.',
         array('%count' => $result, '!link' => l(t('remove them all at once'), 'admin/build/media_mover/config/'. $cid . '/files/clear')) )
@@ -2647,7 +2709,7 @@ function media_mover_api_files_list($cid = null, $status = null) {
   }
 
   if ($cid) {
-    $results = pager_query('SELECT * FROM {media_mover_files} WHERE cid = '. mysql_escape_string($cid) . $status . $order);
+    $results = pager_query('SELECT * FROM {media_mover_files} WHERE cid = '. check_plain($cid) . $status . $order);
     // get the config so that we can give the page a title
     $config = media_mover_api_get_configuration($cid);
     drupal_set_title(t('Files for: !config', array('!config' => $config->name)));
@@ -2688,9 +2750,9 @@ function media_mover_api_files_status () {
 
   // see http://drupal.org/node/97293
   $header = array(
-    array('data' => t('MMfid'), 'field' => 'mmfid', null),
-    array('data' => t('Configuration'), 'field' => 'cid', null),
-    array('data' => t('Status'), 'field' => 'status', null),
+    array('data' => t('MMfid'), 'field' => 'mmfid', NULL),
+    array('data' => t('Configuration'), 'field' => 'cid', NULL),
+    array('data' => t('Status'), 'field' => 'status', NULL),
     t('File'),
     t('Edit'),
     t('Delete')
@@ -2736,7 +2798,7 @@ function media_mover_api_files_status () {
  *   turns the caching off, needed to reload files for updating
  * @return array file array
  */
-function media_mover_api_file_fetch($id, $reset = false) {
+function media_mover_api_file_fetch($id, $reset = FALSE) {
   static $cached;
 
   // is the $id numeric? if so, use it as an mmfid
@@ -2763,9 +2825,9 @@ function media_mover_api_file_fetch($id, $reset = false) {
   $cond = implode(' AND ', $cond);
 
   // fetch the file
-  $file = db_fetch_array(db_query('SELECT * FROM {media_mover_files} mmf WHERE '. $cond, $arguments));
+  $file = db_fetch_array(db_query("SELECT * FROM {media_mover_files} mmf WHERE ". $cond, $arguments));
   // no file, exit
-  if (! $file['mmfid']) {return false; }
+  if (! $file['mmfid']) {return FALSE; }
   // get the data in the right form
   $file['data'] = unserialize($file['data']);
   // add any additional items via the hook
@@ -2856,7 +2918,7 @@ function media_mover_api_edit_file_form($form_state, $mmfid) {
 
   $form['additonal'] = array(
     '#type' => 'markup',
-    '#value' => 'Additional data: <p><pre>'. print_r($item['data'], true) .'</pre>',
+    '#value' => 'Additional data: <p><pre>'. print_r($item['data'], TRUE) .'</pre>',
   );
 
   $form['file']['nid'] = array(
@@ -2946,16 +3008,18 @@ function media_mover_api_file_delete_confirm_form_submit($form, &$form_state) {
 
   // get the configuration that this file was created from
   $configuration = media_mover_api_get_configuration($file['cid']);
+
   // invoke the hook media mover $op delete
   foreach (media_mover_api_verbs() as $verb) {
     module_invoke($configuration->{$verb}->module, 'media_mover', 'delete', $configuration->{$verb}->action, $configuration->{$verb}->configuration, $file, $configuration);
   }
+
   // delete the file cache for this node
   if ($file['nid']) {
-    cache_clear_all('media_mover_files_node_'. $file['nid'], 'cache_media_mover');
+    cache_clear_all('media_mover_files_node_'. $file['nid'], 'cache_media_mover', TRUE);
   }
   // now delete the file from the db
-  db_query('DELETE FROM {media_mover_files} WHERE mmfid = %d', $form['mmfid']['#value']);
+  db_query("DELETE FROM {media_mover_files} WHERE mmfid = %d", $form['mmfid']['#value']);
   drupal_set_message(t('Deleted the file.'));
   $form_state['redirect'] = 'admin/build/media_mover/config/' . $configuration->cid .'/files';
 }
@@ -3033,18 +3097,59 @@ function media_mover_api_file_delete_call($file) {
     cache_clear_all('media_mover_files_node_'. $file['nid'], 'cache_media_mover', TRUE);
   }
 
-  // now check if there are any files in the item left to delete
-  // note: NEVER delete harvest file because that may not belong to us.
-  $delete_items = array('process_file', 'storage_file', 'complete_file');
-  foreach($delete_items as $delete_item) {
-    file_delete($file[$delete_item]);
+  // We need to be sure that this file's data is not in use elsewhere
+  foreach (array('process_file', 'storage_file', 'complete_file') as $file_type) {
+    if (media_mover_api_file_unique($file[$file_type], $file)) {
+      file_delete($file[$file_type]);
+    }
   }
 
   // remove the file from the database
-  db_query('DELETE FROM {media_mover_files} WHERE mmfid = %d', $file['mmfid']);
+  db_query("DELETE FROM {media_mover_files} WHERE mmfid = %d", $file['mmfid']);
 
   $replacements = array('%file' => basename($file['complete_file']));
   watchdog('Media Mover', 'Deleted converted file: %file', $replacements, WATCHDOG_INFO);
+}
+
+
+/**
+ * Helper function to make sure that the files associated
+ * with this file are not in use elsewhere
+ *
+ * @param array $file
+ */
+function media_mover_api_file_unique($filepath, $file) {
+  // Build and array of the file types that we need to check for.
+  // We never check for the harvested file because we do not
+  // delete source material because that may not belong to us.
+  $file_types = array('process_file', 'storage_file', 'complete_file');
+  foreach ($file_types as $file_type) {
+    $files[] = '"'. $file[$file_type] .'"';
+  }
+  $files = implode(',', $files);
+
+  // Check the Drupal files table to make sure that we do not delete something
+  // in use by other drupal modules
+  if ($result = db_result(db_query("SELECT COUNT(fid) FROM {files} WHERE filepath = '%s'", $filepath))) {
+    return FALSE;
+  }
+
+  // Now we check the media mover files table, but we need to ignore the
+  // curent file. To do this, we have to check each of the kinds of
+  // files that we have against the current filepath
+  foreach ($file_types as $file_type) {
+    $check_files[] = $file_type .' = "'. $filepath .'"';
+  }
+
+  $clause = implode(' OR ', $check_files);
+  $query = "SELECT COUNT(mmfid) FROM {media_mover_files} WHERE $clause AND mmfid != \"%s\"";
+
+  if ($result = db_result(db_query($query, $file['mmfid']))) {
+    return FALSE;
+  }
+
+  // We did not find it, this file is unique.
+  return TRUE;
 }
 
 
@@ -3070,7 +3175,7 @@ function media_mover_api_rerun_node_form($cid, $nid) {
     '#value' => t('You are about to re-process %title with the %config Media Mover configuration.', array('%config' => $configuration->name, '%title' => $node->title)),
   );
 
-  // only alert about deletion if we actuall will delete files
+  // only alert about deletion if we will actually delete files
   if ($node->media_mover[$cid]) {
     // build the list of files
     foreach ($node->media_mover[$cid] as $file) {
@@ -3084,9 +3189,9 @@ function media_mover_api_rerun_node_form($cid, $nid) {
     );
   }
 
-  $form['node'] = array(
+  $form['nid'] = array(
     '#type' => 'value',
-    '#value' => $node,
+    '#value' => $node->nid,
   );
 
   $form['configuration'] = array(
@@ -3111,8 +3216,10 @@ function media_mover_api_rerun_node_form($cid, $nid) {
  * @param array $form_values
  */
 function media_mover_api_rerun_node_form_submit($form_id, $form_values) {
+	// load our node
+	$node = node_load($form_state['values']['nid']);
   // first delete existing files for this node if we have them
-  $files = $form_state['values']['node']->media_mover[$form_state['values']['configuration']->cid];
+  $files = $node->media_mover[$form_state['values']['configuration']->cid];
   if ($files) {
     foreach($files as $file) {
       media_mover_api_file_delete_call($file);
@@ -3124,9 +3231,9 @@ function media_mover_api_rerun_node_form_submit($form_id, $form_values) {
     watchdog('Media Mover', 'Deleted media mover transcoded files from '. l($form_state['values']['node']->title, drupal_get_path_alias('node/'. $form_state['values']['node']->nid)));
   }
   // now rerun the config on this nid and set the output
-  drupal_set_message(media_mover_api_run_config($form_state['values']['configuration'], true, $form_state['values']['node']->nid));
+  drupal_set_message(media_mover_api_run_config($form_state['values']['configuration'], TRUE, $form_state['values']['node']->nid));
   // clear the cache so the node is rebuilt
-  cache_clear_all('media_mover_files_node_'. $form_state['values']['node']->nid, 'cache_media_mover', true);
+  cache_clear_all('media_mover_files_node_'. $form_state['values']['node']->nid, 'cache_media_mover', TRUE);
   return 'node/'. $form_state['values']['node']->nid;
 }
 
@@ -3151,16 +3258,17 @@ function media_mover_api_rss($node) {
         // take the first file that we find on the array
         $file = array_shift($files);
         // structure the RSS
-        $rss = array(
-          array(
-            'key' => 'enclosure',
-            'attributes' => array(
-              'url' => $GLOBALS['base_url'] .'/'. $file['complete_file'],
-              'length' => format_size(filesize($file['complete_file'])),
-              'type' => file_get_mimetype($file['complete_file']),
-            )
+        $data = array(
+          'key' => 'enclosure',
+          'attributes' => array(
+            'url' => $GLOBALS['base_url'] .'/'. $file['complete_file'],
+            'type' => file_get_mimetype($file['complete_file']),
           )
         );
+        if (file_exists($file['complete_file'])) {
+          $data['attributes']['length'] = format_size(filesize($file['complete_file']));
+        }
+        $rss = array($data);
         return $rss;
       }
     }
@@ -3177,7 +3285,7 @@ function media_mover_api_rss($node) {
  * implementation of hook_xspf_playlist_thumbnail
  *
  */
-function media_mover_api_xspf_playlist_thumbnail($op, $node = null, $config = null) {
+function media_mover_api_xspf_playlist_thumbnail($op, $node = NULL, $config = NULL) {
   switch($op) {
     // defines what options xspf can use
     case 'define':
@@ -3190,7 +3298,7 @@ function media_mover_api_xspf_playlist_thumbnail($op, $node = null, $config = nu
 
     case 'return':
       if ($file = $node->media_mover[$config][0]['complete_file']) {
-        if (! strstr($file, 'http://')) {
+        if (! strpos($file, '://')) {
           $file = file_create_url($file);
         }
         return $file;
@@ -3225,7 +3333,7 @@ function media_mover_api_xspf_playlist_use($op, $node, $config) {
         foreach($mmfiles as $mmfile) {
           $filepath = $mmfile['complete_file'];
           // make sure that the file path is complete
-          if (! strstr($filepath, 'http://')) {
+          if (! strpos($filepath, '://')) {
             $filepath = file_create_url($filepath);
           }
           // only add the file if we have an incoming item
@@ -3251,12 +3359,12 @@ function media_mover_api_xspf_playlist_use($op, $node, $config) {
  */
 function theme_media_mover_files($files) {
   foreach ($files as $file) {
-    if ($custom = module_invoke($file['storage_module'], 'media_mover', 'theme', null, $file) ) {
+    if ($custom = module_invoke($file['storage_module'], 'media_mover', 'theme', NULL, $file) ) {
       $output .= $custom;
     }
     else {
       if ($file['storage_file']) {
-        $output .= print_r($file, true);
+        $output .= print_r($file, TRUE);
       } // if
     }
   } // foreach
@@ -3280,7 +3388,7 @@ function media_mover_api_files_node_edit_display($node) {
     if (user_access('administer media_mover') || (user_access('administer own media_mover files') && $user->uid == $node->uid )) {
       $header[] = t('Delete');
       $header[] = t('Re-process');
-      $reprocess = true;
+      $reprocess = TRUE;
     }
     // build the table data for each item
     foreach ($node->media_mover as $cid => $files) {
@@ -3291,7 +3399,7 @@ function media_mover_api_files_node_edit_display($node) {
           $rows[] = array(
             array(
               'data' => t('Configuration: !name',
-                array('!name' => l($configuration->name, 'admin/media_mover/config/'. $cid))),
+                array('!name' => l($configuration->name, 'admin/build/media_mover/config/'. $cid))),
               'colspan' => 4
             ),
           );
@@ -3299,10 +3407,10 @@ function media_mover_api_files_node_edit_display($node) {
         }
         foreach ($files as $file) {
   	      $rows[] = array(
-  	        l($file['mmfid'], 'admin/media_mover/file/edit/'. $file['mmfid'], array('title' => t('Edit file')), "destination=node/$node->nid/edit"),
+  	        l($file['mmfid'], 'admin/build/media_mover/file/edit/'. $file['mmfid'], array('title' => t('Edit file')), "destination=node/$node->nid/edit"),
   	        $file['complete_file'] ? $file['complete_file'] : t('No file path available'),
-  	        $reprocess ? l(t('Delete'), 'admin/media_mover/file/delete/'. $file['mmfid'], array('title' => t('Delete file')), "destination=node/$node->nid/edit") : null,
-  	        $reprocess ? l(t('Re-process'), 'media_mover/rerun/'. $file['cid'] .'/node/'. $node->nid, array('title' => t('Reprocess file')), "destination=node/$node->nid/edit") : null,
+  	        $reprocess ? l(t('Delete'), 'admin/build/media_mover/file/delete/'. $file['mmfid'], array('title' => t('Delete file')), "destination=node/$node->nid/edit") : NULL,
+  	        $reprocess ? l(t('Re-process'), 'media_mover/rerun/'. $file['cid'] .'/node/'. $node->nid, array('title' => t('Reprocess file')), "destination=node/$node->nid/edit") : NULL,
   	      );
         }
       }

@@ -1,0 +1,6 @@
+; $Id: media_mover_ftp.info,v 1.1.4.2 2009/12/09 16:49:41 arthuregg Exp $
+name = FTP Media Mover
+description = Adds FTP harvesting to Media Mover
+package = "Media Mover"
+dependencies[] = media_mover_api 
+core = 6.x

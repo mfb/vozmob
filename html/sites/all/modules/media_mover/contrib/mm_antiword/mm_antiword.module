@@ -2,6 +2,30 @@
 
 // $Id$
 
+/* ************************************************ */
+/* Drupal Hooks */
+/* ************************************************ */
+
+/**
+ * Implementation of hook_menu().
+ */
+function mm_antiword_menu() {
+  // test page
+  $items['admin/build/media_mover/settings/mm_antiword'] = array(
+    'title' => 'Antiword',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mm_antiword_admin_form'),
+    'access arguments' => array('administer media_mover'),
+    'type' => MENU_LOCAL_TASK,
+  );
+  return $items;
+}
+
+
+/* ************************************************ */
+/* Contrib Hooks */
+/* ************************************************ */
+
 /**
  * Implementation of media_mover hook
  * @param $op is the operator to return
@@ -35,13 +59,13 @@ function mm_antiword_media_mover($op = null, $action = null, $configuration = nu
 
     case 'process':
       return mm_antiword_process($file, $configuration);
-
-    case 'admin':
-      return mm_antiword_admin();
-    break;
   }
 }
 
+
+/* ************************************************ */
+/* Internal functions */
+/* ************************************************ */
 
 /**
  * Creates the configuration form
@@ -86,7 +110,7 @@ function mm_antiword_config($action, $configuration, $verb) {
  * Provides the administration settings
  * @return unknown_type
  */
-function mm_antiword_admin() {
+function mm_antiword_admin_form() {
   $form['mm_antiword'] = array(
     '#type' => 'fieldset',
     '#title' => t('Media Mover Antiword Document Converter'),
@@ -97,8 +121,7 @@ function mm_antiword_admin() {
     '#default_value' => variable_get('mm_antiword_path', '/usr/bin/antiword'),
     '#descript' => t('Path to the Antiword binary. You can find it by using the command line and typing "which antiword"'),
   );
-
-  return $form;
+  return system_settings_form($form);
 }
 
 
@@ -111,37 +134,33 @@ function mm_antiword_admin() {
  * @return string
  */
 function mm_antiword_process($file, $configuration) {
-  // Is the path correct to the Zip binary?
-  if (! file_exists(variable_get('mm_antiword_path', '/usr/bin/antiword'))) {
-    watchdog('MM Antiword', 'Path to anitword binary was not found', null, WATCHDOG_ERROR);
-    return;
+  if (! mm_antiword_binary_check() ) {
+    return false;
   }
+
   // get the path to Zip
   $path_to_antiword = variable_get('mm_antiword_path', '/usr/bin/antiword');
 
   // get the path to the file to operate on. We need this
   // to pass out of the function
-  $file_path = media_mover_api_config_current_file($file);
+  $filepath = media_mover_api_config_current_file($file);
 
+  $output_dir = media_mover_api_dir_path($configuration['module'] .'/'. $configuration['action']);
+  //drupal_set_message('output dir =' . $output_dir);
   // create the output file path in the media mover files directory
-  $output_file = media_mover_api_dir_path($configuration['module'] .'/'. $configuration['action']) .'/'. basename($file_path) .'.'. $configuration['mm_antiword_output_type'];
+  $output_file = file_create_filename(basename($filepath) .'.'. $configuration['mm_antiword_output_type'], $output_dir);
 
   // build the command
   $command = array(
     $path_to_antiword,
     '-m '. $configuration['mm_antiword_output_char_type'],
     mm_antiword_output_configuration($configuration),
-    escapeshellarg($file_path),
+    escapeshellarg($filepath),
     '>',
     escapeshellarg($output_file),
   );
 
-  // run the command
-  ob_start();
-    passthru(implode(' ', $command), $command_return);
-    $output = ob_get_contents();
-  ob_end_clean();
-
+  exec(implode(' ', $command), $output, $return);
   // return the converted file
   return $output_file;
 }
@@ -166,4 +185,25 @@ function mm_antiword_output_configuration($configuration) {
     break;
   }
   return $configuration;
+}
+
+
+/**
+ * Ensure that the antiword binary works
+ * @return boolean
+ */
+function mm_antiword_binary_check() {
+  // Is the path correct to the antiword binary?
+  if (! is_file(variable_get('mm_antiword_path', '/usr/bin/antiword'))) {
+    watchdog('MM Antiword', 'Path to anitword binary was not found', null, WATCHDOG_ERROR);
+    return false;
+  }
+
+  // Is the antiword binary executable?
+  if (! file_exists(variable_get('mm_antiword_path', '/usr/bin/antiword'))) {
+    watchdog('MM Antiword', 'Antiword is not executable.', null, WATCHDOG_ERROR);
+    return false;
+  }
+
+  return true;
 }

@@ -1,20 +1,12 @@
+<<<<<<< README.txt
+;$Id: README.txt,v 1.8.2.14.2.3 2009/12/02 23:44:43 arthuregg Exp $ 
+=======
 
-;$Id: README.txt,v 1.8.2.14.2.1 2008/10/29 02:16:43 arthuregg Exp $ 
+;$Id: README.txt,v 1.8.2.14.2.3 2009/12/02 23:44:43 arthuregg Exp $ 
+>>>>>>> 1.8.2.14.2.2
 
 
 This is the Media Mover API module. 
-
-If you're using the s3 module, please download the pear and s3 drivers here:
-
-http://mediamover.24b6.net/drivers
-
-
------------------------------------------------------------------------
-REQUIRES
------------------------------------------------------------------------
-FFmpeg requires ffmpeg_wrapper module
-S3 support requires the drivers file referenced above
-mimedetect is required for FFmpeg and S3 support
 
 -----------------------------------------------------------------------
  INSTALLATION

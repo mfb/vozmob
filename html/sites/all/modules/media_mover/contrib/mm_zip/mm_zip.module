@@ -2,6 +2,28 @@
 
 // $Id$
 
+/* ************************************************ */
+/* Drupal Hooks */
+/* ************************************************ */
+
+/**
+ * Implementation of hook_menu().
+ */
+function mm_zip_menu() {
+  // Settings page
+  $items['admin/build/media_mover/settings/mm_zip'] = array(
+    'title' => 'Zip',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mm_zip_admin_form'),
+    'access arguments' => array('administer media_mover'),
+    'type' => MENU_LOCAL_TASK,
+  );
+  return $items;
+}
+
+/* ************************************************ */
+/* Contrib Hooks */
+/* ************************************************ */
 
 /**
  * Implementation of media_mover hook
@@ -45,10 +67,30 @@ function mm_zip_media_mover($op = null, $action = null, $configuration = null, &
     case 'complete':
       return mm_zip_process($file, $configuration);
 
-    case 'admin':
-      return mm_zip_admin();
-    break;
   }
+}
+
+
+/* ************************************************ */
+/* Internal functions */
+/* ************************************************ */
+
+/**
+ * Provides the administration settings
+ * @return unknown_type
+ */
+function mm_zip_admin_form() {
+  $form['mm_zip'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Media Mover Zip Compression'),
+  );
+  $form['mm_zip']['mm_zip_path'] = array(
+    '#title' => t('Path to Zip binary'),
+    '#type' => 'textfield',
+    '#default_value' => variable_get('mm_zip_path', '/usr/bin/zip'),
+    '#descript' => t('Path to the Zip binary. You can find it by using the command line and typing "whereis zip"'),
+  );
+  return system_settings_form($form);
 }
 
 
@@ -67,26 +109,6 @@ function mm_zip_config($action, $configuration, $verb) {
     '#description' => t('This compresses files with the Zip utility.'),
     '#collapsed' => false,
   );
-  return $form;
-}
-
-
-/**
- * Provides the administration settings
- * @return unknown_type
- */
-function mm_zip_admin() {
-  $form['mm_zip'] = array(
-    '#type' => 'fieldset',
-    '#title' => t('Media Mover Zip Compression'),
-  );
-  $form['mm_zip']['mm_zip_path'] = array(
-    '#title' => t('Path to Zip binary'),
-    '#type' => 'textfield',
-    '#default_value' => variable_get('mm_zip_path', '/usr/bin/zip'),
-    '#descript' => t('Path to the Zip binary. You can find it by using the command line and typing "whereis zip"'),
-  );
-
   return $form;
 }
 

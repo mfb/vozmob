@@ -1,7 +1,0 @@
-; $Id$
-name = FFmpeg Media Mover module
-description = Runs FFmpeg for the Media Mover modules
-package = "Media Mover"
-dependencies[] = media_mover_api 
-dependencies[] = ffmpeg_wrapper
-core=6.x

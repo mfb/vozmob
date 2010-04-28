@@ -1,6 +1,6 @@
 <?php
 
-// $Id: mm_mailhandler.module,v 1.1.2.5 2009/06/11 15:46:38 arthuregg Exp $;
+// $Id: mm_mailhandler.module,v 1.1.2.6 2009/11/30 13:41:43 arthuregg Exp $;
 
 define('MM_EMAIL_ATTACHMENTS_SUBDIRECTORY', 'email_attachements');
 define('MM_EMAIL_WATCHDOG_TYPE', 'media_mover');
@@ -236,7 +236,7 @@ function mm_mailhandler_retrieve_message($mailbox, $i, &$context) {
 
   if ($result) {
 
-    $header = imap_header($result, $i);
+    $header = imap_header($result, imap_msgno($result, $i));
     // Initialize the subject in case it's missing.
     if (!isset($header->subject)) {
       $header->subject = '';

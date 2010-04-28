@@ -1,6 +1,6 @@
 <?php
 
-// ;$Id: mm_dir.module,v 1.1.2.12.2.7 2009/04/01 06:06:33 arthuregg Exp $
+// ;$Id: mm_dir.module,v 1.1.2.12.2.13 2010/04/20 16:24:37 arthuregg Exp $
 
 
 define('MM_DIR_HARVEST_ACTION', 1 );
@@ -51,19 +51,6 @@ function mm_dir_media_mover($op = null, $action = null, $configuration = null, &
       }
     break;
 
-    // validate the selections
-    case 'config_validate':
-      switch ($action) {
-      	case MM_DIR_HARVEST_ACTION:
-      		return mm_dir_config_harvest_validate($configuration);
-        break;
-      	case 2:
-      	case 3:
-      		return mm_dir_config_storage_validate($configuration);
-        break;
-      }
-    break;
-
     // functions called on harvest op
     // returns an array of $files
     case 'harvest':
@@ -93,21 +80,22 @@ function mm_dir_media_mover($op = null, $action = null, $configuration = null, &
  * @return array $form
  */
 function mm_dir_config_harvest($configuration) {
-	$form['mm_dir_conf'] = array(
+  $form['mm_dir_conf'] = array(
     '#type' => 'fieldset',
     '#title' => t('Directory harvest configuration'),
     '#description' => t('This harvests files from a local directory.'),
+	  '#element_validate' => array('mm_dir_config_harvest_validate'),
   );
   $form['mm_dir_conf']['path'] = array(
     '#title' => t('Directory path'),
     '#type' => 'textfield',
     '#default_value' => $configuration['path'],
-    '#description' => t('Absolute path to the directory you wish to harvest from. Note you may encounter open base dir issues wtih some PHP installations if your directory is not inside of your web root.'),
+    '#description' => t('Absolute path or relative path from Drupal\'s root (eg: sites/default/files) to the directory you wish to harvest from. Note you may encounter open base dir issues wtih some PHP installations if your directory is not inside of your web root.'),
   );
   $form['mm_dir_conf']['file_types'] = array(
     '#title' => t('File types'),
     '#type' => 'textfield',
-    '#default_value' => $configuration['file_types'] ? $configuration['file_types'] : 'avi mov wmv mpeg mp4 mpeg2 dv 3gp 3g2 mpeg4',
+    '#default_value' => isset($configuration['file_types']) ? $configuration['file_types'] : 'avi mov wmv mpeg mp4 mpeg2 dv 3gp 3g2 mpeg4',
     '#description' => t('Space separated list of file types that can be harvested. These are file extensions and are values like "avi mov wmv mpeg mp4 mpeg2 dv".'),
   );
   return $form;
@@ -120,15 +108,33 @@ function mm_dir_config_harvest($configuration) {
  * @param array $configuration
  * @return array
  */
-function mm_dir_config_harvest_validate($configuration) {
-  // is the path valid?
-  if (! file_check_directory($configuration['path'], FILE_CREATE_DIRECTORY) ) {
-    $errors[] = array(
-      'element' => 'path',
-      'message' => t('Sorry, the path you have chosen does not exist or is not writable.')
-	);
+function mm_dir_config_harvest_validate($element, &$form_state) {
+  // Extract the values for this element
+  if($values = media_mover_api_extract_form_data($element, $form_state)) {
+    // Handy function to get the form_state values key
+    $key = media_mover_api_form_get_key($element, $form_state, 'path');
+
+    // Check for whitespace
+    if ($values['path'] != rtrim($values['path'])) {
+      drupal_set_message(t('Whitespace from the end of the file harvest path has been removed'));
+      // Handy function to get the form_state values key
+      $form_state['values'][$key] = rtrim($values['path']);
+    }
+
+    // is the path valid?
+    if (! is_dir($values['path'] ) ) {
+      // This is mostly from file_check_directory, which we aren't using because we
+      // don't care if the directory is writable for a harvest.
+      if ((FILE_CREATE_DIRECTORY) && @mkdir($values['path'])) {
+        drupal_set_message(t('The directory %directory has been created.', array('%directory' => $values['path'])));
+        @chmod($values['path'], 0775); // Necessary for non-webserver users.
+      }
+      else {
+        form_set_error($form_item, t('Sorry, the directory %directory does not exist.', array('%directory' => $values['path'])));
+        return FALSE;
+      }
+    }
   }
-  return $errors;
 }
 
 
@@ -144,6 +150,7 @@ function mm_dir_config_storage($configuration) {
     '#title' => t('Directory storage configuration'),
     '#description' => t('This stores files in a local directory.'),
     '#collapsed' => false,
+	  '#element_validate' => array('mm_dir_config_storage_validate'),
   );
   $form['mm_dir_conf']['path'] = array(
     '#title' => t('Directory path'),
@@ -161,15 +168,25 @@ function mm_dir_config_storage($configuration) {
  * @param array $configuration
  * @return array
  */
-function mm_dir_config_storage_validate($configuration) {
-  // is destination valid?
-  if (! file_check_directory($configuration['path'], FILE_CREATE_DIRECTORY) ) {
-    $errors[] = array(
-      'element' => 'path',
-      'message' => t('Sorry, either the target directory can not be created or the webserver does not have sufficient permissions to create it.'),
-    );
+function mm_dir_config_storage_validate($element, &$form_state) {
+  // Extract the values for this element
+  if ($values = media_mover_api_extract_form_data($element, $form_state)) {
+
+    // Handy function to get the form_state values key
+    $key = media_mover_api_form_get_key($element, $form_state, 'path');
+
+    // Check for whitespace
+    if ($values['path'] != rtrim($values['path'])) {
+      drupal_set_message(t('Whitespace from the end of the file storage path has been removed'));
+      // Handy function to get the form_state values key
+      $form_state['values'][$key] = rtrim($values['path']);
+    }
+
+    // is destination valid?
+    if (! file_check_directory($values['path'], FILE_CREATE_DIRECTORY) ) {
+      form_set_error($key, t('Sorry, either the target directory can not be created or the webserver does not have sufficient permissions to create it.'));
+    }
   }
-  return $errors;
 }
 
 
@@ -182,28 +199,46 @@ function mm_dir_config_storage_validate($configuration) {
 function mm_dir_harvest ($configuration) {
 	// check to see if the directory exists
 	if (is_dir($configuration['path'])) {
-    // build the file types to harvest
-    $search = array(' ', ',');
-    $replace = array('|', '|');
-    $filetypes = str_replace($search, $replace, $configuration['file_types']);
 
-    // make sure that we have both lower and upper case versions of the file
-    // extensions. file_scan_directory uses ereg() for the mask which
-    // means we have to pass both upper and lower case version
-    $filetypes = strtoupper($filetypes) .'|'. strtolower($filetypes);
+	  // If file_types is not set, find all files
+	  if (! $configuration['file_types']) {
+      $pattern = "\.*";
+    }
+    else {
+      // build the file types to harvest
+      $search = array(' ', ',');
+      $replace = array('|', '|');
+      $filetypes = str_replace($search, $replace, rtrim($configuration['file_types']));
 
-    // now add the regex to the pattern
-    $pattern = ".*($filetypes)$";
+      // make sure that we have both lower and upper case versions of the file
+      // extensions. file_scan_directory uses ereg() for the mask which
+      // means we have to pass both upper and lower case version. This assumes
+      // that file extension is one case
+      $filetypes = strtoupper($filetypes) . '|' . strtolower($filetypes);
+
+      // now add the regex to the pattern
+      $pattern = "\.($filetypes)$";
+    }
+
     // get files restricted by file extension
     $found_files = file_scan_directory($configuration['path'], $pattern);
 
     // check the returned files
     if ($found_files) {
       foreach ($found_files as $file) {
+        $stat = stat($file->filename);
         // now we need to see if we have this file in the database. Note that in
         // this instance, we are not checking dates on files vs. the database
-        $result = db_fetch_array(db_query('SELECT mmfid FROM {media_mover_files} WHERE cid = %d AND harvest_file = "%s"', $configuration['cid'], $file->filename));
+        $result = db_fetch_array(db_query('SELECT mmfid, date FROM {media_mover_files} WHERE cid = %d AND harvest_file = "%s"', $configuration['cid'], $file->filename));
   	    if (! $result) {
+          // If there's no record of the file in the database, treat it as new.
+          $files[] = array('harvest_file' => $file->filename);
+        }
+        elseif ($result['date'] < $stat['mtime']) {
+          // Check if the file in the database has changed since it was last harvested.
+          // If so, delete the old file and add the new one.
+          $oldfile = media_mover_api_file_get($result['mmfid']);
+          media_mover_api_file_delete_call($oldfile);
           $files[] = array('harvest_file' => $file->filename);
         }
 	    }

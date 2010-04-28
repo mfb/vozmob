@@ -1,6 +1,0 @@
-; $Id: mm_i18nsync.info,v 1.1.2.1.2.1 2008/09/26 16:58:18 arthuregg Exp $
-name = Media Mover i18n Sync
-description = Syncronizes Media Mover items across translations
-package = "Media Mover"
-dependencies = media_mover_api i18nsync
-core=6.x

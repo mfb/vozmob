@@ -1,0 +1,436 @@
+<?php
+// $Id: mm_emfield.module,v 1.1.2.1 2010/04/06 22:56:07 aaron Exp $
+
+/**
+ * @file
+ * This file contains the integration between Media Mover and Emfield
+ * Options for harvesting from and storing to are provided
+ */
+
+define('MM_EMFIELD_HARVEST', 1);
+define('MM_EMFIELD_STORE', 2);
+define('MM_EMFIELD_COMPLETE', 3);
+
+/**
+ * Implementation of media_mover hook
+ * @param string $op
+ *   is the operator to return
+ * @param int $action
+ *   action id that is being called
+ * @param array $configuration is the specific configuration saved for the action for this configuration
+ * @param array $file
+ *   is the file in use
+ * @param array $job
+ *   is the full configuration data currently running
+ * @param int $nid
+ *   special param for processing individual nodes
+ */
+function mm_emfield_media_mover($op, $action = null, $configuration = null, &$file = array(), $job = null, $nid = null) {
+  if (module_exists('emfield')) {
+    switch ($op) {
+      case 'name':
+        return t('Media Mover: Embedded Media Field (Emfield) module');
+
+      case 'actions':
+        return array(
+          'harvest' => array(MM_EMFIELD_HARVEST => t('Harvest data from an Embedded Media Field')),
+          'storage' => array(MM_EMFIELD_STORE => t('Save data in an Embedded Media Field')),
+          'complete' => array(MM_EMFIELD_COMPLETE => t('Save data in an Embedded Media Field')),
+        );
+
+      case 'config':
+        switch ($action) {
+          case MM_EMFIELD_HARVEST:
+            return mm_emfield_config_harvest($action, $configuration);
+          case MM_EMFIELD_COMPLETE:
+          case MM_EMFIELD_STORE:
+            return mm_emfield_config_save_node($configuration);
+        }
+        break;
+
+      case 'harvest':
+        return mm_emfield_harvest($configuration, $nid, $job);
+
+      case 'complete':
+      case 'storage':
+        return mm_emfield_node_save($configuration, $file);
+
+      case 'delete':
+        if ($action == MM_EMFIELD_STORE || $action == MM_EMFIELD_COMPLETE) {
+          mm_emfield_node_file_delete($configuration, $file);
+        }
+        break;
+    }
+  }
+}
+
+/**
+ * Media Mover: Media Mover hook functions
+ */
+
+/**
+ * Return the configuration form for harvesting from Embedded Media Fields.
+ */
+function mm_emfield_config_harvest($action, $configuration) {
+  $form = array();
+  $form['mm_emfield_harvest_conf'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Harvest Configuration'),
+    '#description' => t('This module harvests files attached to an Embedded Media Field'),
+  );
+  // get content types
+  if ($types = node_get_types()) {
+    foreach ($types as $type) {
+      $options[$type->type] = $type->name;
+    }
+  }
+  $form['mm_emfield_harvest_conf']['mm_emfield_harvest_node_type'] = array(
+    '#title' => t('Select content types to harvest from'),
+    '#type' => 'select',
+    '#options' => $options,
+    '#default_value' => $configuration['mm_emfield_harvest_node_type'],
+    '#description' => t('Choose which content types to harvest from.'),
+  );
+  $form['mm_emfield_harvest_conf']['mm_config_harvest_field'] = array(
+    '#type' => 'select',
+    '#multiple' => true,
+    '#title' => t('Select files from these Embedded Media Fields'),
+    '#description' => t('Select the Embedded Media Fields to harvest files from.'),
+    '#options' => mm_emfield_fields(),
+    '#default_value' => $configuration['mm_config_harvest_field'],
+  );
+//   $form['mm_emfield_harvest_conf']['file_types'] = array(
+//     '#title' => t('File types'),
+//     '#type' => 'textfield',
+//     '#default_value' => $configuration['file_types'] ? $configuration['file_types'] : 'avi mov wmv mpeg mp4 mpeg2 dv 3gp 3g2 mpeg4',
+//     '#description' => t('Space separated list of file types that can be harvested. These are file extensions and are values like "avi mov wmv mpeg mp4 mpeg2 dv".'),
+//   );
+  return $form;
+}
+
+/**
+ * Return the configuration form for saving to Embedded Media Fields
+ * @param int $action
+ * @param array $configuration
+ * @return array
+ */
+function mm_emfield_config_save_node($configuration) {
+  $form = array();
+  $form['mm_emfield_'. $configuration['verb']] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Emfield !verb Configuration', array('!verb' => $configuration['verb'])),
+    '#description' => t('This module saves data to an Embedded Media Field'),
+    '#collapsed' => false,
+  );
+
+  // Add the $action extension to keep name spacing.
+  $form['mm_emfield_'. $configuration['verb']]['mm_emfield_field_save_'. $configuration['verb']] = array(
+    '#type' => 'select',
+    '#title' => t('Save the file to this Embedded Media Field'),
+    '#description' => t('Select the Embedded Media Field to save files to. There must be incoming node data for this to function correctly.'),
+    '#options' => mm_emfield_fields(),
+    '#default_value' => $configuration['mm_emfield_field_save_'. $configuration['verb']],
+  );
+  $form['mm_emfield_'. $configuration['verb']]['mm_emfield_new_node_'. $configuration['verb']] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Create new node with data'),
+    '#description' => t('Create a new node with the data that was harvested.'),
+    '#default_value' => $configuration['mm_emfield_new_node_'. $configuration['verb']] ? $configuration['mm_emfield_new_node_'. $configuration['verb']] : 0,
+  );
+
+  // ----------------------------------
+  // Node creation options
+  $form['mm_emfield_'. $configuration['verb']]['node_create_'. $configuration['verb']] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Node creation options'),
+    '#collapsed' => $configuration['mm_emfield_new_node_'. $configuration['verb']] ? false : true,
+    '#collapsible' => true,
+    '#description' => t('When creating a new node, these options will be used'),
+  );
+
+  // Get content types.
+  if ($types = node_get_types()) {
+    foreach ($types as $type) {
+      $options[$type->type] = $type->name;
+    }
+  }
+  $form['mm_emfield_'. $configuration['verb']]['node_create_'. $configuration['verb']]['mm_emfield_save_type_'. $configuration['verb']] = array(
+    '#title' => t('Save node as type'),
+    '#type' => 'select',
+    '#options' => $options,
+    '#default_value' => $configuration['mm_emfield_save_type_'. $configuration['verb']],
+    '#description' => t('Save the harvested and processed data as this node type'),
+  );
+  $form['mm_emfield_'. $configuration['verb']]['node_create_'. $configuration['verb']]['mm_emfield_save_author_'. $configuration['verb']] = array(
+    '#type' => 'textfield',
+    '#title' => t('Default author'),
+    '#maxlength' => 60,
+    '#autocomplete_path' => 'user/autocomplete',
+    '#default_value' => $configuration['mm_emfield_save_author_'. $configuration['verb']] ? $configuration['mm_emfield_save_author_'. $configuration['verb']]  : t('Anonymous'),
+    '#description' => t('If a user is not passed in, this will be the default author.'),
+  );
+  $form['mm_emfield_'. $configuration['verb']]['node_create_'. $configuration['verb']]['mm_emfield_title_default_'. $configuration['verb']] = array(
+    '#type' => 'textfield',
+    '#title' => t('Default title'),
+    '#maxlength' => 60,
+    '#default_value' => $configuration['mm_emfield_title_default_'. $configuration['verb']],
+    '#description' => t('If a title is not passed in, this will be the default node title. If left blank and there is no title information, the file name will be used.'),
+  );
+  $form['mm_emfield_'. $configuration['verb']]['node_create_'. $configuration['verb']]['mm_emfield_body_default_'. $configuration['verb']] = array(
+    '#type' => 'textarea',
+    '#title' => t('Default body'),
+    '#default_value' => $configuration['mm_emfield_body_default_'. $configuration['verb']],
+    '#description' => t('If a body is not passed in, this will be the default node body.'),
+  );
+  $form['mm_emfield_'. $configuration['verb']]['node_create_'. $configuration['verb']]['mm_emfield_save_options_'. $configuration['verb']] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Node options'),
+    '#options' => array(
+      'comment' => t('Enable comments'),
+      'status' => t('Published'),
+      'promote' => t('Promoted to front page'),
+      'sticky' => t('Sticky at the top of lists'),
+      ),
+     '#default_value' => $configuration['mm_emfield_save_options_'. $configuration['verb']] ? $configuration['mm_emfield_save_options_'. $configuration['verb']] : array(),
+  );
+
+  // Language options.
+  if (module_exists('locale')) {
+    $options = locale_language_list();
+    $form['mm_emfield_'. $configuration['verb']]['node_create_'. $configuration['verb']]['mm_emfield_save_language_'. $configuration['verb']] = array(
+      '#type' => 'select',
+      '#title' => t('Save node in language'),
+      '#description' => t('Save the node in this language when creating it'),
+      '#options' => $options,
+      '#default_value' => $configuration['mm_emfield_save_language_'. $configuration['verb']],
+    );
+  }
+
+  $form['mm_emfield_'. $configuration['verb']]['mm_emfield_file_source_delete_'. $configuration['verb']] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Delete source material'),
+    '#description' => t('The source material will be deleted. CAUTION: this will forever remove uploaded content. Use at your own risk'),
+    '#default_value' => $configuration['mm_emfield_file_source_delete_'. $configuration['verb']] ? $configuration['mm_emfield_file_source_delete_'. $configuration['verb']] : 0,
+  );
+
+  return $form;
+}
+
+/**
+ * Harvest files from an Embedded Media Field
+ * @param array $configuration
+ *   The configuration array.
+ * @param int $nid
+ *   Node id if a single node is being processed.
+ * @return array
+ */
+function mm_emfield_harvest($configuration, $nid, $job) {
+  $files = array();
+  $fields = content_fields();
+
+  $harvest_conditions = '';
+  // Are we harvesting from a specific NID ?
+  if ($nid) {
+    $harvest_conditions = ' AND n.nid = '. $nid;
+  }
+
+  // We need to harvest from each field that was selected.
+  foreach ($configuration['mm_config_harvest_field'] as $field_name) {
+    // Get the relevant database information for this field.
+    $db_info = content_database_info($fields[$field_name]);
+
+    $results = db_query("SELECT c.". $field_name ."_embed AS harvest_file, n.nid
+      FROM {". $db_info['table'] ."} c
+      LEFT JOIN {node} n ON c.nid = n.nid
+      LEFT JOIN {media_mover_files} m ON m.cid = %d
+      WHERE ((n.nid IS NOT NULL AND m.nid IS NULL)
+        OR (n.nid IS NOT NULL AND n.nid = m.nid AND c.". $field_name ."_embed <> m.harvest_file))
+        AND n.type = \"%s\"
+        AND c.". $field_name ."_embed NOT IN (SELECT harvest_file FROM {media_mover_files} WHERE cid = %d)
+        AND n.created >= %d
+      ORDER BY n.created
+      ", $configuration['cid'], $configuration['mm_emfield_harvest_node_type'], $configuration['cid'], $job->stop_time);
+
+      // Now build the outgoing file data.
+      while ($result = db_fetch_array($results)) {
+        $files[] = $result;
+      }
+  }
+  return $files;
+}
+
+/**
+ * Save to the Embedded Media Field
+ * @param array $configuration
+ *   the configuration array
+ * @param array $file
+ *   media mover file array
+ * @return string
+ *   new file location
+ */
+function mm_emfield_node_save($configuration, &$file) {
+  // Get the path to the file to operate on.
+  // We need this to pass out of the function.
+  $url = media_mover_api_config_current_file($file);
+
+  // Is there a node attached to this file?
+  if ($node = media_mover_api_get_node_from_file($file) ) {
+    // Get CCK content.
+    content_load($node);
+  }
+
+  // Get the field that we will save to.
+  $field = content_fields($configuration['mm_emfield_field_save_'. $configuration['verb']]);
+
+  // We have to have a provided file so emfield does not die.
+  // @TODO PHP Stream Wrappers should address this in d7.
+  if (!$item = mm_emfield_parse_url($file, $field)) {
+    watchdog('MM Emfield', 'Failed to parse %url for provider media to attach to the Embedded Media Field for !file.', array('%url' => $url, '!file' => l(t('MM file @file', array('@file' => $file['mmfid'])),  'admin/media_mover/file/edit/'. $file['mmfid'])), WATCHDOG_ERROR);
+    return $url;
+  }
+
+  // If the admin requested that source material be deleted, delete it now. DANGER CAKES!
+  // Note that we only do this if the current file path is NOT the source material.
+  if ($configuration['mm_emfield_file_source_delete_'. $configuration['verb']] && $url != $file['harvest_file'] ) {
+    file_delete($file['harvest_file']);
+    watchdog('MM Emfield', 'Deleted source material %file', array(
+      '%file' => $file['harvest_file'],
+    ), WATCHDOG_INFO, 'node/' . $node->nid);
+  }
+
+  // Is there a node attached to the $file array and we are not supposed to create a new node?
+  if (!$node && ! $configuration['mm_emfield_new_node_'. $configuration['verb']]) {
+    // Set an alert.
+    watchdog('MM Emfield', 'No node data was passed for storing file data in a specified Embedded Media Field: !file',
+      array('!file' => l(t('MM file @file', array('@file' => $file['mmfid'])), 'admin/media_mover/file/edit/'. $file['mmfid'])), WATCHDOG_ERROR);
+    // We can not save the file; exit.
+    return;
+  }
+
+  // Should we start building a new node?
+  if ($configuration['mm_emfield_new_node_'. $configuration['verb']]) {
+    // Start building the node.
+    $node = new STDClass();
+    // Set node type.
+    $node->type = $configuration['mm_emfield_save_type_'. $configuration['verb']];
+
+    // Set the title.
+    if (! $node->title = $configuration['mm_emfield_title_default_'. $configuration['verb']]) {
+      if (! $node->title = $file['data']['node']->title) {
+        $node->title = basename($url);
+      }
+    }
+
+    // Set the body, cascade from default to nothing.
+    if (! $node->body = $configuration['mm_emfield_body_default_'. $configuration['verb']]) {
+      if (! $node->body = $file['data']['node']->body) {
+        $node->body = '';
+      }
+    }
+
+    // If we have a language setting.
+    $node->language = $configuration['mm_emfieldn_save_language_'. $configuration['verb']] ? $configuration['mm_emfield_save_language_' . $configuration['verb']] : null;
+
+    // Node options.
+    $node->comment = $configuration['mm_emfield_save_options_'. $configuration['verb']]['comment'] ? 2 : 0;
+    $node->status = $configuration['mm_emfield_save_options_'. $configuration['verb']]['status'] ? 1 : 0;
+    $node->sticky = $configuration['mm_emfield_save_options_'. $configuration['verb']]['sticky'] ? 1 : 0;
+    $node->promote = $configuration['mm_emfield_save_options_'. $configuration['verb']]['promote'] ? 1 : 0;
+
+    // Now build the node author.
+    if (! $user = $file['data']['user']) {
+      if (! $user = user_load(array('name' => $configuration['mm_emfield_save_author_'. $configuration['verb']]))) {
+        $user = user_load(array('uid' => 0));
+      }
+    }
+
+    // Attach the user data to the node.
+    $node->uid = $user->uid;
+    $node->name = $user->name;
+    $node->mail = $user->mail;
+
+  }
+
+  // Save the node to add the emfield data.
+  $node->{$field['field_name']}[0] = $item;
+
+  node_save($node);
+
+  return $url;
+}
+
+/**
+ * Return array of content fields for display in configuration forms.
+ */
+function mm_emfield_fields() {
+  $fields = array();
+  foreach (content_fields() as $field) {
+    if (in_array($field['type'], array('emvideo', 'emimage', 'emaudio'))) {
+      $fields[$field['field_name']] = $field['widget']['label'];
+    }
+  }
+  return $fields;
+}
+
+/**
+ * This is a helper function to find a local file in the files list so that
+ * CCK does not die when we try to save the file to it.
+ * @param $file
+ * @return unknown_type
+ */
+function mm_emfield_parse_url($file, $field) {
+  for ($i = MMA_FILE_STATUS_COMPLETE_COMPLETE; $i >= 0; $i--) {
+    if ($url = $file[media_mover_api_verb_base_status($i) .'_file']) {
+      if ($url) {
+        $item = emfield_parse_embed($field, $url, $field['module']);
+        if (!empty($item)) {
+          $item['embed'] = $url;
+          return $item;
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Delete files associated with this configuration.
+ * @TODO should we delete the full node here?
+ *
+ * @param $configuration
+ * @param $file
+ * @return unknown_type
+ */
+function mm_emfield_node_file_delete($configuration, $file) {
+  // Check that this file is associated with a node; otherwise we cannot do
+  // anything.
+  if (! $nid = $file['nid']) {
+    return;
+  }
+
+  // Get all the node data.
+  $node = node_load($nid);
+  content_load($node);
+
+  // Build the name of the field that we are looking for
+  $field = $configuration['mm_emfield_field_save_' . $configuration['verb']];
+
+  // Make sure that this field exists on the node
+  if (!$node->{$field}) {
+  	return;
+  }
+
+  // If we have a url, we can just delete that media and save the node.
+  if ($url = $file['complete_file']) {
+    // We need to look at the files stored in this field to find the url.
+    foreach ($node->{$field} as $key => $node_field) {
+      // Is this the file that we are looking for?
+      if ($node_field['embed'] == $url) {
+        // Remove the file from the node
+        unset($node->{$field}[$key]);
+        // Save the node without the file
+        node_save($node);
+        watchdog('MM Emfield', 'Deleted media attached to an Embedded Media Field for !node', array('!node' => l($node->title, 'node/'. $node->nid)), WATCHDOG_INFO);
+      }
+    }
+  }
+}

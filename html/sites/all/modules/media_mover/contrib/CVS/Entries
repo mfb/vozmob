@@ -1,11 +1,15 @@
 D/mm_antiword////
 D/mm_auto_run////
 D/mm_dir////
-D/mm_i18nsync////
 D/mm_mailhandler////
 D/mm_run_control////
 D/mm_s3////
 D/mm_token////
 D/mm_views////
-D/mm_workflow_ng////
 D/mm_zip////
+D/media_mover_ftp////
+D/mm_cck////
+D/mm_emfield////
+D/mm_ffmpeg////
+D/mm_imageache////
+D/mm_node////
