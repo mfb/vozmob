@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_argument_default_taxonomy_tid.inc,v 1.1.4.2 2010/03/22 22:34:14 merlinofchaos Exp $
+// $Id: views_plugin_argument_default_taxonomy_tid.inc,v 1.1.4.3 2010/04/29 18:36:14 merlinofchaos Exp $
 /**
  * @file
  *   Taxonomy tid default argument.
@@ -12,7 +12,7 @@ class views_plugin_argument_default_taxonomy_tid extends views_plugin_argument_d
     $options['term_page'] = array('default' => TRUE);
     $options['node'] = array('default' => FALSE);
     $options['limit'] = array('default' => FALSE);
-    $options['vids'] = array('default' => NULL);
+    $options['vids'] = array('default' => array());
 
     return $options;
   }

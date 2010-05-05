@@ -1,5 +1,5 @@
 <?php
-// $Id: og.pages.inc,v 1.1.2.3 2009/08/08 17:37:37 weitzman Exp $
+// $Id: og.pages.inc,v 1.1.2.5 2010/03/14 07:57:59 amitaibu Exp $
 
 /**
  * @file
@@ -147,7 +147,7 @@ function og_create_admin_confirm_submit($form, &$form_state) {
     'body' => _og_mail_text('og_new_admin_body', $variables)
   );
 
-  module_invoke_all('og', 'admin create', $node->nid, $account->uid, $message);
+  module_invoke_all('og', 'admin new', $node->nid, $account->uid, $message);
 
   $form_state['#redirect'] = "og/users/$node->nid";
 }
@@ -347,11 +347,18 @@ function og_confirm_subscribe_submit($form, &$form_state) {
  * Confirm og unsubscription form
  */
 function og_confirm_unsubscribe($form_state, $group_node, $account) {
+  global $user;
   $form['group_node'] = array('#type' => 'value', '#value' => $group_node);
   $form['account'] = array('#type' => 'value', '#value' => $account);
-  return confirm_form($form, 
-               t('Are you sure you want to remove !name from the group %title?', array('!name' => theme('username', $account), '%title' => $group_node->title)),
-               'og/users/'. $group_node->nid, ' ', t('Remove'), t('Cancel'));
+  if ($account->uid == $user->uid) {
+    $message = t('Are you sure you want to leave the group %title?', array('%title' => $group_node->title));
+    $confirm_text = t("Leave"); 
+  }
+  else {
+    $message = t('Are you sure you want to remove !name from the group %title?', array('!name' => theme('username', $account), '%title' => $group_node->title));
+    $confirm_text = t("Remove");
+  }
+  return confirm_form($form, $message, 'og/users/'. $group_node->nid, ' ', $confirm_text, t('Cancel'));
 }
 
 /**
@@ -366,8 +373,12 @@ function og_confirm_unsubscribe_submit($form, &$form_state) {
   if ($user->uid == $account->uid) {
     og_get_subscriptions($account->uid, 1, TRUE); // Clear cache.
     $user = user_load(array('uid' => $user->uid));
+    $message = t('You left the group %group.', array('%group' => $group_node->title));
+  } 
+  else {
+    $message = t('%user removed from %group.', array('%user' => $account->name, '%group' => $group_node->title));
   }
-  drupal_set_message(t('%user removed from %group.', array('%user' => $account->name, '%group' => $group_node->title)));
+  drupal_set_message($message);
   
   // Determine where to go next. GHP if accessible, or else site front page.
   $form_state['redirect'] = node_access('view', $group_node) ? "node/". $group_node->nid : '';

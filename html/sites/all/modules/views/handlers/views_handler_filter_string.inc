@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_filter_string.inc,v 1.7.2.4 2010/03/08 19:53:47 merlinofchaos Exp $
+// $Id: views_handler_filter_string.inc,v 1.7.2.5 2010/04/29 19:29:15 merlinofchaos Exp $
 
 /**
  * Basic textfield filter to handle string filtering commands
@@ -240,11 +240,11 @@ class views_handler_filter_string extends views_handler_filter {
 
   function op_equal($field, $upper) {
     // operator is either = or !=
-    $this->query->add_where($this->options['group'], "$upper(%s) $this->operator $upper('%s')", $field, $this->value);
+    $this->query->add_where($this->options['group'], "$upper($field) $this->operator $upper('%s')", $this->value);
   }
 
   function op_contains($field, $upper) {
-    $this->query->add_where($this->options['group'], "$upper(%s) LIKE $upper('%%%s%%')", $field, $this->value);
+    $this->query->add_where($this->options['group'], "$upper($field) LIKE $upper('%%%s%%')", $this->value);
   }
 
   function op_word($field, $upper) {
@@ -260,8 +260,7 @@ class views_handler_filter_string extends views_handler_filter {
       $words = trim($match[2], ',?!();:-');
       $words = $phrase ? array($words) : preg_split('/ /', $words, -1, PREG_SPLIT_NO_EMPTY);
       foreach ($words as $word) {
-        $where[] = "$upper(%s) LIKE $upper('%%%s%%')";
-        $values[] = $field;
+        $where[] = "$upper($field) LIKE $upper('%%%s%%')";
         $values[] = trim($word, " ,!?");
       }
     }
@@ -282,31 +281,31 @@ class views_handler_filter_string extends views_handler_filter {
   }
 
   function op_starts($field, $upper) {
-    $this->query->add_where($this->options['group'], "$upper(%s) LIKE $upper('%s%%')", $field, $this->value);
+    $this->query->add_where($this->options['group'], "$upper($field) LIKE $upper('%s%%')", $this->value);
   }
 
   function op_not_starts($field, $upper) {
-    $this->query->add_where($this->options['group'], "$upper(%s) NOT LIKE $upper('%s%%')", $field, $this->value);
+    $this->query->add_where($this->options['group'], "$upper($field) NOT LIKE $upper('%s%%')", $this->value);
   }
 
   function op_ends($field, $upper) {
-    $this->query->add_where($this->options['group'], "$upper(%s) LIKE $upper('%%%s')", $field, $this->value);
+    $this->query->add_where($this->options['group'], "$upper($field) LIKE $upper('%%%s')", $this->value);
   }
 
   function op_not_ends($field, $upper) {
-    $this->query->add_where($this->options['group'], "$upper(%s) NOT LIKE $upper('%%%s')", $field, $this->value);
+    $this->query->add_where($this->options['group'], "$upper($field) NOT LIKE $upper('%%%s')", $this->value);
   }
 
   function op_not($field, $upper) {
-    $this->query->add_where($this->options['group'], "$upper(%s) NOT LIKE $upper('%%%s%%')", $field, $this->value);
+    $this->query->add_where($this->options['group'], "$upper($field) NOT LIKE $upper('%%%s%%')", $this->value);
   }
 
   function op_shorter($field, $upper) {
-    $this->query->add_where($this->options['group'], "LENGTH($upper(%s)) < %d", $field, $this->value);
+    $this->query->add_where($this->options['group'], "LENGTH($upper($field)) < %d", $this->value);
   }
 
   function op_longer($field, $upper) {
-    $this->query->add_where($this->options['group'], "LENGTH($upper(%s)) > %d", $field, $this->value);
+    $this->query->add_where($this->options['group'], "LENGTH($upper($field)) > %d", $this->value);
   }
 
   function op_empty($field) {

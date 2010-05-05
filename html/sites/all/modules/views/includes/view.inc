@@ -1,5 +1,5 @@
 <?php
-// $Id: view.inc,v 1.151.2.32 2010/03/22 20:55:07 merlinofchaos Exp $
+// $Id: view.inc,v 1.151.2.33 2010/04/29 18:39:31 merlinofchaos Exp $
 /**
  * @file view.inc
  * Provides the view object type and associated methods.
@@ -32,8 +32,10 @@ class view extends views_db_object {
   // Where the results of a query will go.
   var $result = array();
 
-  // May be used to override the current page number.
+  // May be used to override the current pager info.
   var $current_page = NULL;
+  var $items_per_page = NULL;
+  var $offset = NULL;
 
   // Places to put attached renderings:
   var $attachment_before = '';
@@ -115,10 +117,12 @@ class view extends views_db_object {
    * Set the items per page on the pager.
    */
   function set_items_per_page($items_per_page) {
-    if (empty($this->query->pager)) {
-      $this->query->init_pager($this);
+    $this->items_per_page = $items_per_page;
+
+    // If the pager is already initialized, pass it through to the pager.
+    if (!empty($this->query->pager)) {
+      $this->query->pager->set_items_per_page($items_per_page);
     }
-    $this->query->pager->set_items_per_page($items_per_page);
   }
 
   /**
@@ -127,6 +131,18 @@ class view extends views_db_object {
   function get_offset() {
     if (!empty($this->query->pager)) {
       return $this->query->pager->get_offset();
+    }
+  }
+
+  /**
+   * Set the offset on the pager.
+   */
+  function set_offset($offset) {
+    $this->offset = $offset;
+
+    // If the pager is already initialized, pass it through to the pager.
+    if (!empty($this->query->pager)) {
+      $this->query->pager->set_offset($offset);
     }
   }
 
@@ -325,6 +341,32 @@ class view extends views_db_object {
         $this->_init_handler($key, $info);
       }
       $this->inited = TRUE;
+    }
+  }
+
+  /**
+   * Initialize the pager
+   *
+   * Like style initialization, pager initialization is held until late
+   * to allow for overrides.
+   */
+  function init_pager() {
+    if (empty($this->query->pager)) {
+      $this->query->pager = $this->display_handler->get_plugin('pager');
+
+      if ($this->query->pager->use_pager()) {
+        $this->query->pager->set_current_page($this->current_page);
+      }
+
+      // These overrides may have been set earlier via $view->set_*
+      // functions.
+      if (isset($this->items_per_page)) {
+        $this->query->pager->set_items_per_page($this->items_per_page);
+      }
+
+      if (isset($this->offset)) {
+        $this->query->pager->set_offset($this->offset);
+      }
     }
   }
 

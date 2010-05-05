@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_query.inc,v 1.1.2.7 2010/02/22 17:41:54 merlinofchaos Exp $
+// $Id: views_plugin_query.inc,v 1.1.2.8 2010/04/29 18:39:31 merlinofchaos Exp $
 /**
  * @file
  * Defines the base query class, which is the underlying layer in a View.
@@ -74,14 +74,6 @@ class views_plugin_query extends views_plugin {
    */
   function set_offset($offset) {
     $this->offset = $offset;
-  }
-
-  function init_pager(&$view) {
-    // @todo -- probably this should be a method on the display rather than directly calling
-    // get plugin?
-    if (empty($this->pager)) {
-      $this->pager = $view->display_handler->get_plugin('pager');
-    }
   }
 
   /**

@@ -1,5 +1,5 @@
 <?php
-// $Id: og_notifications.pages.inc,v 1.1.2.1 2009/08/19 07:48:22 karthik Exp $
+// $Id: og_notifications.pages.inc,v 1.1.2.2 2010/02/07 13:36:25 amitaibu Exp $
 
 /**
  * @file
@@ -25,7 +25,7 @@ function og_notifications_user_page($account = NULL) {
   }
 
   if (!empty($groups)) {
-    $output = drupal_get_form('og_notifications_add_form', $account, $groups) . drupal_get_form('og_notifications_manage_form', $account);
+    $output = drupal_get_form('og_notifications_add_form', $account, $groups);
   }
   else {
     // If there are no active groups available do not show either form. This
@@ -62,8 +62,6 @@ function og_notifications_add_form($form_state, $account, $groups) {
     '#type' => 'fieldset',
     '#title' => t('Add subscription'),
     '#tree' => TRUE,
-    '#collapsible' => TRUE,
-    '#theme' => 'notifications_form_table',
     '#header' => &$header
   );
   $form['subscription']['group'][0] = array(

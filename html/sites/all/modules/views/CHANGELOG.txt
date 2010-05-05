@@ -10,6 +10,14 @@ Views 6.x-3.0-dev
     o #765296: field IDs could get out of sync, causing render path to try to render a field that did not exist leading to whitescreens.
     o #769528: Rename tests/views_query.inc to tests/views_query.test
     o #774366 by Dave Reid: getInfo() in tests needs to be public static functions
+    o #770006 by macdee: Taxonomy term default plugin mysteriously broken.
+    o #767146 by bangpound: Validation not passed down into row style plugin.
+    o #513396 by yhager and jcisio: Views trim was not multibyte safe.
+    o #550420 by blauerberg: Views RSS did not properly pass readmore flag from node to RSS item.
+    o #781296 by dereine: Node: Type "link to its node" option broken.
+    o #754294 by dagmar: Fix warnings on taxonomy term filter.
+    o #698270 by dagmar: Pager plugin re-org (again).
+    o #769010 by andrea.gariboldi: Overuse of query substitutions fails on some databases.
 
 Views 6.x-3.0-alpha3
     o #705668 by dereine: Fix glossary view, add tests for glossary view.
