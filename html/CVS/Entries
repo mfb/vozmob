@@ -5,18 +5,18 @@ D/profiles////
 D/scripts////
 D/sites////
 D/themes////
-/.htaccess/1.90.2.3/Wed Apr  1 07:47:45 2009//TDRUPAL-6
-/INSTALL.mysql.txt/1.10/Wed Apr  1 07:47:45 2009//TDRUPAL-6
-/INSTALL.pgsql.txt/1.7/Wed Apr  1 07:47:45 2009//TDRUPAL-6
-/INSTALL.txt/1.61.2.4/Wed Apr  1 07:47:45 2009//TDRUPAL-6
-/LICENSE.txt/1.5.4.1/Wed Apr  1 07:47:45 2009//TDRUPAL-6
-/MAINTAINERS.txt/1.19.2.2/Fri May  1 22:05:57 2009//TDRUPAL-6
-/UPGRADE.txt/1.12/Wed Apr  1 07:47:45 2009//TDRUPAL-6
-/cron.php/1.36/Wed Apr  1 07:47:45 2009//TDRUPAL-6
-/install.php/1.113.2.9/Fri May  1 22:05:57 2009//TDRUPAL-6
-/robots.txt/1.9.2.1/Wed Apr  1 07:47:45 2009//TDRUPAL-6
-/update.php/1.252.2.3/Fri Apr 17 07:59:26 2009//TDRUPAL-6
-/xmlrpc.php/1.15/Wed Apr  1 07:47:46 2009//TDRUPAL-6
-/COPYRIGHT.txt/1.2.2.2/Wed Sep 16 05:23:16 2009//TDRUPAL-6
-/index.php/1.94/Fri Jul 17 05:28:55 2009//TDRUPAL-6
-/CHANGELOG.txt/1.253.2.34/Wed Sep 16 23:12:34 2009//TDRUPAL-6
+/.htaccess/1.90.2.5/Wed May  5 23:31:14 2010//TDRUPAL-6
+/CHANGELOG.txt/1.253.2.38/Wed May  5 23:31:14 2010//TDRUPAL-6
+/COPYRIGHT.txt/1.2.2.2/Tue Oct 20 22:55:52 2009//TDRUPAL-6
+/INSTALL.mysql.txt/1.10/Thu Jun  4 16:12:35 2009//TDRUPAL-6
+/INSTALL.pgsql.txt/1.7/Thu Jun  4 16:12:35 2009//TDRUPAL-6
+/INSTALL.txt/1.61.2.4/Thu Jun  4 16:12:35 2009//TDRUPAL-6
+/LICENSE.txt/1.5.4.1/Thu Jun  4 16:12:35 2009//TDRUPAL-6
+/MAINTAINERS.txt/1.19.2.2/Thu Jun  4 16:12:35 2009//TDRUPAL-6
+/UPGRADE.txt/1.12/Thu Jun  4 16:12:35 2009//TDRUPAL-6
+/cron.php/1.36/Thu Jun  4 16:12:35 2009//TDRUPAL-6
+/index.php/1.94/Wed Apr 28 22:37:52 2010//TDRUPAL-6
+/install.php/1.113.2.10/Wed May  5 23:31:14 2010//TDRUPAL-6
+/robots.txt/1.9.2.1/Thu Jun  4 16:12:35 2009//TDRUPAL-6
+/update.php/1.252.2.3/Thu Jun  4 16:12:36 2009//TDRUPAL-6
+/xmlrpc.php/1.15/Thu Jun  4 16:12:36 2009//TDRUPAL-6

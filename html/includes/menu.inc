@@ -1,5 +1,5 @@
 <?php
-// $Id: menu.inc,v 1.255.2.31 2009/04/27 12:50:13 goba Exp $
+// $Id: menu.inc,v 1.255.2.34 2010/02/01 18:00:49 goba Exp $
 
 /**
  * @file
@@ -748,13 +748,14 @@ function menu_tree_output($tree) {
 
   $num_items = count($items);
   foreach ($items as $i => $data) {
-    $extra_class = NULL;
+    $extra_class = array();
     if ($i == 0) {
-      $extra_class = 'first';
+      $extra_class[] = 'first';
     }
     if ($i == $num_items - 1) {
-      $extra_class = 'last';
+      $extra_class[] = 'last';
     }
+    $extra_class = implode(' ', $extra_class);
     $link = theme('menu_item_link', $data['link']);
     if ($data['below']) {
       $output .= theme('menu_item', $link, $data['link']['has_children'], menu_tree_output($data['below']), $data['link']['in_active_trail'], $extra_class);
@@ -1503,7 +1504,25 @@ function menu_set_active_item($path) {
 }
 
 /**
- * Set (or get) the active trail for the current page - the path to root in the menu tree.
+ * Sets or gets the active trail (path to root menu root) of the current page.
+ *
+ * @param $new_trail
+ *   Menu trail to set, or NULL to use previously-set or calculated trail. If
+ *   supplying a trail, use the same format as the return value (see below).
+ * @return
+ *   Path to menu root of the current page, as an array of menu link items,
+ *   starting with the site's home page. Each link item is an associative array
+ *   with the following components:
+ *   - 'title': Title of the item.
+ *   - 'href': Drupal path of the item.
+ *   - 'localized_options': Options for passing into the l() function.
+ *   - 'type': A menu type constant, such as MENU_DEFAULT_LOCAL_TASK, or 0 to
+ *     indicate it's not really in the menu (used for the home page item).
+ *   If $new_trail is supplied, the value is saved in a static variable and
+ *   returned. If $new_trail is not supplied, and there is a saved value from
+ *   a previous call, the saved value is returned. If $new_trail is not supplied
+ *   and there is no saved value, the path to the current page is calculated,
+ *   saved as the static value, and returned.
  */
 function menu_set_active_trail($new_trail = NULL) {
   static $trail;
@@ -1566,7 +1585,9 @@ function menu_set_active_trail($new_trail = NULL) {
 }
 
 /**
- * Get the active trail for the current page - the path to root in the menu tree.
+ * Gets the active trail (path to root menu root) of the current page.
+ *
+ * See menu_set_active_trail() for details of return value.
  */
 function menu_get_active_trail() {
   return menu_set_active_trail();
@@ -1669,15 +1690,28 @@ function menu_cache_clear_all() {
  * is different and leaves stale data in the menu tables.
  */
 function menu_rebuild() {
-  variable_del('menu_rebuild_needed');
+  if (!lock_acquire('menu_rebuild')) {
+    // Wait for another request that is already doing this work.
+    // We choose to block here since otherwise the router item may not 
+    // be avaiable in menu_execute_active_handler() resulting in a 404.
+    lock_wait('menu_rebuild');
+    return FALSE;
+  }
+
   $menu = menu_router_build(TRUE);
   _menu_navigation_links_rebuild($menu);
   // Clear the menu, page and block caches.
   menu_cache_clear_all();
   _menu_clear_page_cache();
+  
   if (defined('MAINTENANCE_MODE')) {
     variable_set('menu_rebuild_needed', TRUE);
   }
+  else {
+    variable_del('menu_rebuild_needed');
+  }
+  lock_release('menu_rebuild');
+  return TRUE;
 }
 
 /**
