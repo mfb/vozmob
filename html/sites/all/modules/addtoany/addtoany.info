@@ -1,0 +1,11 @@
+; $ID$
+name = AddToAny
+description = "Helps readers share, save, bookmark, and email your posts and pages using any service, such as Facebook, Twitter, Delicious, Digg, and over 100 more using the <a href='http://www.addtoany.com/' target='_blank'>AddToAny</a> widget."
+core = 6.x
+
+; Information added by drupal.org packaging script on 2009-10-10
+version = "6.x-2.4"
+core = "6.x"
+project = "addtoany"
+datestamp = "1255206003"
+
