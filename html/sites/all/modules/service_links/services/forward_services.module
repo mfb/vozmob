@@ -1,0 +1,21 @@
+<?php
+// $Id: forward_services.module,v 1.1.2.1 2009/04/03 11:22:13 thecrow Exp $
+
+/**
+ * @file
+ * Add the support for Forward module
+ */
+
+function forward_services_service_links() {
+  $links = array();
+
+  $links['forward'] = array(
+    'name' => 'Forward',
+    'link' => url('forward', array('absolute' => TRUE, 'query' => 'path=node/')) .'<node-id>',
+    'description' => t('Send to a friend'),
+  );
+  
+  return $links;
+}
+
+?>

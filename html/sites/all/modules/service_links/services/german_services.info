@@ -1,0 +1,6 @@
+; $Id: german_services.info,v 1.1.2.1 2009/04/11 18:10:52 thecrow Exp $
+name = "German Services"
+description = "Provide the German Services: Alltagz, Colivia, Icio, InfoPirat, Linkarena, Mister Wong, Netselektor, Oneview, Readster, seekXL, SeoIGG, Weblinkr, Webnews, Yigg"
+core = 6.x
+package = Service Links
+dependencies[] = service_links

@@ -1,0 +1,7 @@
+; $Id: general_services.info,v 1.1.2.2 2009/04/11 18:10:52 thecrow Exp $
+name = "General Services"
+description = "Provide the Services: del.icio.us, Digg, Facebook, Furl, Google Bookmark, Icerocket, Linkedin, Magnolia, Mister Wong, MySpace, Newsvine, Propeller, Reddit, StumbleUpon, Technorati, Twitter, Yahoo Bookmark, Yahoo Buzz"
+core = "6.x"
+package = Service Links
+dependencies[] = service_links
+

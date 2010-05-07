@@ -1,0 +1,354 @@
+# $Id: service_links.pot,v 1.1.2.1 2009/04/03 11:22:23 thecrow Exp $
+#
+# LANGUAGE translation of Drupal (services/favorite_services.module)
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from file: 
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"POT-Creation-Date: 2009-04-03 12:17+0200\n"
+"PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
+"Last-Translator: NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: services/favorite_services.module:11
+msgid "Add this page in your favorites"
+msgstr ""
+
+#: services/forward_services.module:15
+msgid "Send to a friend"
+msgstr ""
+
+#: services/general_services.module:18
+msgid "Bookmark this post on del.icio.us."
+msgstr ""
+
+#: services/general_services.module:23
+msgid "Digg this post on digg.com"
+msgstr ""
+
+#: services/general_services.module:28
+msgid "Thumb this up at StumbleUpon"
+msgstr ""
+
+#: services/general_services.module:34
+msgid "Share this on Twitter"
+msgstr ""
+
+#: services/general_services.module:42
+msgid "Submit to Propeller."
+msgstr ""
+
+#: services/general_services.module:48
+msgid "Submit this post on reddit.com."
+msgstr ""
+
+#: services/general_services.module:54
+msgid "Submit this post on ma.gnolia.com."
+msgstr ""
+
+#: services/general_services.module:60
+msgid "Submit this post on newsvine.com."
+msgstr ""
+
+#: services/general_services.module:66
+msgid "Submit this post on furl.net."
+msgstr ""
+
+#: services/general_services.module:72
+msgid "Share on Facebook."
+msgstr ""
+
+#: services/general_services.module:78
+msgid "Share on MySpace."
+msgstr ""
+
+#: services/general_services.module:84
+msgid "Bookmark this post on Google."
+msgstr ""
+
+#: services/general_services.module:90
+msgid "Bookmark this post on Yahoo."
+msgstr ""
+
+#: services/general_services.module:96
+msgid "Buzz up this post on Yahoo! Buzz."
+msgstr ""
+
+#: services/general_services.module:102
+msgid "Publish this post to LinkedIn"
+msgstr ""
+
+#: services/general_services.module:108
+msgid "Search Technorati for links to this post."
+msgstr ""
+
+#: services/general_services.module:114
+msgid "Search IceRocket for links to this post."
+msgstr ""
+
+#: service_links.module:23
+msgid "Display links to social sharing websites like Digg, del.icio.us, reddit, Technorati etc."
+msgstr ""
+
+#: service_links.module:26
+msgid "Control which and where service links should be active."
+msgstr ""
+
+#: service_links.module:154 service_links.info:0
+msgid "Service links"
+msgstr ""
+
+#: service_links.module:155
+msgid "Service links with FishEye effect"
+msgstr ""
+
+#: service_links.module:164;168
+msgid "Bookmark/Search this post"
+msgstr ""
+
+#: service_links.module:181
+msgid "Alternative icon folder"
+msgstr ""
+
+#: service_links.module:183
+msgid "Subfolder under images/ containing icons for fisheye effect (b.e. big_icons/)"
+msgstr ""
+
+#: service_links.module:372
+msgid "Bookmark/Search this post with:"
+msgstr ""
+
+#: service_links.module:34
+msgid "access service links"
+msgstr ""
+
+#: service_links.module:34
+msgid "administer service links"
+msgstr ""
+
+#: service_links.module:0
+msgid "service_links"
+msgstr ""
+
+#: service_links.info:0
+msgid "Module engine for add various service links about sharing networks to nodes."
+msgstr ""
+
+#: service_links.info:0 services/favorite_services.info:0 services/forward_services.info:0 services/general_services.info:0 services/share_services.info:0
+msgid "6.x"
+msgstr ""
+
+#: service_links.info:0 services/favorite_services.info:0 services/forward_services.info:0 services/general_services.info:0
+msgid "Service Links"
+msgstr ""
+
+#: service_links.admin.inc:37
+msgid "No service available."
+msgstr ""
+
+#: service_links.admin.inc:41
+msgid "Service Name"
+msgstr ""
+
+#: service_links.admin.inc:41
+msgid "Show"
+msgstr ""
+
+#: service_links.admin.inc:41
+msgid "Weight"
+msgstr ""
+
+#: service_links.admin.inc:53
+msgid "Where to show the service links"
+msgstr ""
+
+#: service_links.admin.inc:54
+msgid "Set the node types and categories you want to display links for."
+msgstr ""
+
+#: service_links.admin.inc:58
+msgid "Node types"
+msgstr ""
+
+#: service_links.admin.inc:66
+msgid "Categories"
+msgstr ""
+
+#: service_links.admin.inc:74
+msgid "When and how to show the links"
+msgstr ""
+
+#: service_links.admin.inc:78
+msgid "Service links in links"
+msgstr ""
+
+#: service_links.admin.inc:80;87
+msgid "Disabled"
+msgstr ""
+
+#: service_links.admin.inc:80;87
+msgid "Teaser view"
+msgstr ""
+
+#: service_links.admin.inc:80;87
+msgid "Full-page view"
+msgstr ""
+
+#: service_links.admin.inc:80;87
+msgid "Teasers and full-page view"
+msgstr ""
+
+#: service_links.admin.inc:81
+msgid "When to display the services in the links section."
+msgstr ""
+
+#: service_links.admin.inc:85
+msgid "Service links in nodes"
+msgstr ""
+
+#: service_links.admin.inc:88
+msgid "When to display the services after the node text."
+msgstr ""
+
+#: service_links.admin.inc:92
+msgid "Service links style"
+msgstr ""
+
+#: service_links.admin.inc:94
+msgid "Only Text"
+msgstr ""
+
+#: service_links.admin.inc:94
+msgid "Only Image"
+msgstr ""
+
+#: service_links.admin.inc:94
+msgid "Image and Text"
+msgstr ""
+
+#: service_links.admin.inc:98
+msgid "Open link in..."
+msgstr ""
+
+#: service_links.admin.inc:100
+msgid "Same window"
+msgstr ""
+
+#: service_links.admin.inc:100
+msgid "New window"
+msgstr ""
+
+#: service_links.admin.inc:105
+msgid "Short Links"
+msgstr ""
+
+#: service_links.admin.inc:109
+msgid "Use short links"
+msgstr ""
+
+#: service_links.admin.inc:111
+msgid "Never"
+msgstr ""
+
+#: service_links.admin.inc:111
+msgid "Only when requested"
+msgstr ""
+
+#: service_links.admin.inc:111
+msgid "Always"
+msgstr ""
+
+#: service_links.admin.inc:116
+msgid "How generate short links"
+msgstr ""
+
+#: service_links.admin.inc:118
+msgid "Use node/xxx alias"
+msgstr ""
+
+#: service_links.admin.inc:118
+msgid "Use TinyURL.com service"
+msgstr ""
+
+#: service_links.admin.inc:118
+msgid "Redirect only the Domain name"
+msgstr ""
+
+#: service_links.admin.inc:118
+msgid "Combo: domain redirect and node/xxx alias"
+msgstr ""
+
+#: service_links.admin.inc:122
+msgid "Domain to redirect"
+msgstr ""
+
+#: service_links.admin.inc:123
+msgid "Write here the complete address without trailing slash %name"
+msgstr ""
+
+#: service_links.admin.inc:133
+msgid "Aggregator2 settings"
+msgstr ""
+
+#: service_links.admin.inc:137
+msgid "Use link to original article aggregated by aggregator2 module"
+msgstr ""
+
+#: service_links.admin.inc:152
+msgid "Domain redirect address is not set."
+msgstr ""
+
+#: service_links.admin.inc:155
+msgid "No trailing slash!"
+msgstr ""
+
+#: service_links.admin.inc:182
+msgid "Show %name link"
+msgstr ""
+
+#: services/share_services.module:16
+msgid "Social web"
+msgstr ""
+
+#: services/favorite_services.info:0
+msgid "Favorite Services"
+msgstr ""
+
+#: services/favorite_services.info:0
+msgid "Add the page in your favorite, work just for IE and  Firefox"
+msgstr ""
+
+#: services/forward_services.info:0
+msgid "Forward Services"
+msgstr ""
+
+#: services/forward_services.info:0
+msgid "Add the support for Forward module to Service Links with what send the link through email."
+msgstr ""
+
+#: services/general_services.info:0
+msgid "General Services"
+msgstr ""
+
+#: services/general_services.info:0
+msgid "Provide the Services: del.icio.us, Digg, Facebook, Furl, Google Bookmark, Icerocket, Linkedin, Magnolia, MySpace, Newsvine, Propeller, Reddit, StumbleUpon, Technorati, Twitter, Yahoo Bookmark, Yahoo Buzz"
+msgstr ""
+
+#: services/share_services.info:0
+msgid "Share Services"
+msgstr ""
+
+#: services/share_services.info:0
+msgid "Provide the integration with Share module"
+msgstr ""
+
+#: services/share_services.info:0
+msgid "Share - tabs"
+msgstr ""

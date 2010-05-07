@@ -1,0 +1,5 @@
+; $Id: service_links.info,v 1.4.4.2 2009/04/03 11:21:03 thecrow Exp $
+name = "Service links"
+description = "Module engine for add various service links about sharing networks to nodes."
+core = 6.x
+package = Service Links

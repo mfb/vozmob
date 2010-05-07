@@ -1,0 +1,6 @@
+; $Id: favorite_services.info,v 1.1.2.1 2009/04/03 11:22:13 thecrow Exp $
+name = "Favorite Services"
+description = "Add the page in your favorite, work just for IE and  Firefox"
+core = 6.x
+package = Service Links
+dependencies[] = service_links
