@@ -1,0 +1,197 @@
+<?php
+// $Id: addtoany.module,v 1.7.2.4 2009/10/10 19:52:53 micropat Exp $
+
+/**
+ * @file
+ * Stand alone module file to handle AddToAny button integration
+ */
+
+/**
+ * Implementation of hook_perm().
+ */
+function addtoany_perm() {
+  $perms[] = 'administer addtoany';
+  $perms[] = 'view addtoany';
+  return $perms;
+}
+
+/**
+ * Implementation of hook_link().
+ */
+function addtoany_link($type, $node = NULL, $teaser = FALSE) {
+  $links = array();
+
+  $types = variable_get('addtoany_nodetypes', array());
+
+  $show  = (!empty($types[$node->type]) && 
+           (($teaser && variable_get('addtoany_display_in_teasers', '1')!=0) ||
+           (!$teaser && variable_get('addtoany_display_in_nodelink', '1')!=0)));
+           
+  if ($type === 'node' && $show && user_access('view addtoany')) {
+    $links['addtoany'] = array(
+        'title' => _addtoany_create_button($node, $teaser),
+        'html' => TRUE,
+      );
+  }
+
+  return $links;
+}
+
+/**
+ * Implementation of hook_nodeapi().
+ */
+function addtoany_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  switch ($op) {
+    case 'view':
+      // Only show comments on the full non-teasered page
+      if (!$a3 && $a4) {
+        $types  = variable_get('addtoany_nodetypes', array());
+        
+        $show  = (!empty($types[$node->type]) && 
+                   variable_get('addtoany_display_in_nodecont', '0'));
+         
+        $weight = variable_get('addtoany_display_weight', 40);
+        
+        if ($show && user_access('view addtoany')) {
+          $node->content['addtoany'] = array(
+            '#value' => _addtoany_create_button($node, FALSE),
+            '#weight' => $weight,
+          );
+        }
+      }
+    break;
+  }
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+function addtoany_menu() {
+  $items = array();
+
+  $items['admin/settings/addtoany'] = array(
+    'title'            => t('AddToAny'),
+    'description'      => t('Settings for your <a href="http://www.addtoany.com/" target="blank">AddToAny</a> Share/Save buttons.'),
+    'page callback'    => 'drupal_get_form',
+    'page arguments'   => array('addtoany_admin_settings'),
+    'access arguments' => array('administer addtoany'),
+    'file'             => 'addtoany.admin.inc',
+  );
+
+  return $items;
+}
+
+/**
+ * Implementation of hook_block().
+ */
+function addtoany_block($op = 'list', $delta = 0) {
+  if ($op == 'list') {
+    $blocks[0]['info'] = t('AddToAny button');
+    return $blocks;
+  }
+  else if ($op == 'view' && user_access('view addtoany')) {
+    $block['subject'] = t('AddToAny');
+    $block['content'] = _addtoany_create_button(menu_get_object());
+    return $block;
+  }
+}
+
+/**
+ * Implementation of hook_footer().  Would use drupal_add_js, but external scripts are not well supported
+ *
+ * @return
+ *   String containing JavaScript code for the drop-down
+ */
+function addtoany_footer($main = 0) {
+	global $_addtoany_script;
+	return $_addtoany_script;
+}
+
+function _addtoany_create_script($node = NULL) {
+
+	// Drop-down disabled?
+	if(variable_get('addtoany_dropdown_disabled', '0')) return;
+	
+	if (is_object($node)) {
+	  	$link_name 	= check_plain($node->title);
+		$link_url 	= url('node/'. $node->nid, array('absolute' => 1) );
+	} else { // Front page
+		$link_name 	= check_plain(variable_get('page_title_front', variable_get('site_name', '')));
+	  	$link_url	= url('<front>', array('absolute' => 1));
+	}
+
+	global $_addtoany_script, $_addtoany_script_init;
+	
+	if ( ! $_addtoany_script_init)
+		$_addtoany_script = '<script type="text/javascript">';
+	else
+		$_addtoany_script .= '<script type="text/javascript">';
+		
+	$_addtoany_script .= 'a2a_linkname="'. $link_name .'";a2a_linkurl="'. $link_url .'";';
+	
+	if ( ! $_addtoany_script_init) {
+		$_addtoany_script .= variable_get('addtoany_additional_js', '');
+		$_addtoany_script .= '</script><script type="text/javascript" src="http://static.addtoany.com/menu/page.js"></script>';
+	} else {
+		$_addtoany_script .= 'a2a_init("page");</script>';
+	}
+	
+	$_addtoany_script_init = TRUE;
+	
+	return $_addtoany_script;
+}
+
+/**
+ * Internal function to generate code for AddToAny button
+ *
+ * @return
+ *   String containing html code for the button
+ */
+function _addtoany_create_button($node=NULL, $teaser = FALSE) {
+  global $_addtoany_counter, $base_path;
+  
+  $_addtoany_counter++;
+  if ($_addtoany_counter == 1) {
+      drupal_add_css((drupal_get_path('module', 'addtoany') .'/addtoany.css'));
+  }
+  
+  _addtoany_create_script($node);
+
+  $disable_dropdown = variable_get('addtoany_dropdown_disabled', '0');
+  
+  if (is_object($node)) {
+  	$link_name 	= rawurlencode($node->title);
+	$link_url 	= rawurlencode(url('node/'. $node->nid, array('absolute' => 1) ));
+  } else { // Front page
+	$link_name 	= rawurlencode(variable_get('page_title_front', variable_get('site_name', '')));
+  	$link_url	= rawurlencode(url('<front>', array('absolute' => 1)));
+  }
+  
+  
+  $button_setting = variable_get('addtoany_image', 'share_save_171_16.png|171|16');
+  
+  if ($button_setting == "custom") {
+  	$button_image 		= variable_get('addtoany_custom_image', '');
+  	$button_width    	= '';
+	$button_height		= ''; 
+  } else {
+	  $button 			= explode('|', $button_setting);
+	  $button_filename 	= $button[0];
+	  $button_width    	= ' width="' . $button[1] . '"';
+	  $button_height	= ' height="' . $button[2] . '"';
+	  $button_image 	= $base_path . drupal_get_path('module', 'addtoany') . '/images/' . $button_filename;
+  }
+     
+  return ( sprintf('
+      <a%s href="http://www.addtoany.com/share_save?linkurl=%s&amp;linkname=%s"><img src="%s"%s%s %s/></a>
+      ',
+	  $disable_dropdown ? '' : ' class="a2a_dd"',
+	  $link_url,
+      $link_name,
+      $button_image,
+      $button_width,
+      $button_height,
+      variable_get('addtoany_image_attributes', 'alt="Share/Save"')
+  ));
+
+}
