@@ -21,19 +21,24 @@ Drupal.behaviors.overlayCycle = function() {
     $(this).overlay({
       expose: '#000',
       onLoad: function() {
-        // Set up the slideshow.
-        this.getContent().find('div.views-field-field-image-fid div.field-content').each(function() {
-          if (!this.loaded) {
-            $(this).before('<div class="cycle-nav" id="cycle-nav-' + cycleIndex + '"></div>').cycle({ 
-              fx:    'fade',
-              pager: '#cycle-nav-' + cycleIndex,
-              pause: 1
-            });
-            cycleIndex = 1 + cycleIndex;
-            this.loaded = true;
-          }
-          $(this).cycle('resume');
-        });
+        if (this.getContent().find('div.media-mover-video').length) {
+          this.getContent().find('div.views-field-field-image-fid').hide();
+        }
+        else {
+          // Set up the slideshow.
+          this.getContent().find('div.views-field-field-image-fid div.field-content').each(function() {
+            if (!this.loaded) {
+              $(this).before('<div class="cycle-nav" id="cycle-nav-' + cycleIndex + '"></div>').cycle({ 
+                fx:    'fade',
+                pager: '#cycle-nav-' + cycleIndex,
+                pause: 1
+              });
+              cycleIndex = 1 + cycleIndex;
+              this.loaded = true;
+            }
+            $(this).cycle('resume');
+          });
+        }
       },
       onClose: function() {
         this.getContent().find('div.views-field-field-image-fid div.field-content').each(function() {

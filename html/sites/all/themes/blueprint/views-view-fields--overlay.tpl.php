@@ -51,6 +51,7 @@
           <?php endif; ?>
           <?php if (substr($mmfid['complete_file'], -4, 4) == '.flv'): ?>
             <?php $playlist[$mmfid['fid']] = array('url' => file_create_url($mmfid['complete_file'])); ?>
+            <?php $video = 'flowplayer-video '; ?>
           <?php endif; ?>
         <?php endforeach; ?>
       <?php endforeach; ?>
@@ -63,14 +64,16 @@
         <?php endforeach; ?>
         <?php ksort($playlist); ?>
         <?php $playlist = array_merge($playlist); ?>
-        <div class="media-mover-audio<?php if (!empty($node->field_image[0])): ?> media-mover-audio-image<?php endif; ?>">
+        <div class="media-mover-<?php if (empty($video)): ?>audio<?php else: ?>video<?php endif; if (!empty($node->field_image[0])): ?> media-mover-audio-image<?php endif; ?>">
           <?php print theme('flowplayer', array('clip' => array('autoPlay' => TRUE, 'autoBuffering' => TRUE), 'playlist' => $playlist, 'plugins' => array('controls' => array('fullscreen' => FALSE, 'playlist' => TRUE))), 'flowplayer-audio-' . $node->nid); ?>
         </div>
       <?php endif; ?>
     </div>
     <div class="overlay-share">
       <div class="share-button"><?php print l(t('Share'), 'node/' . $node->nid); ?></div>
-      <?php print theme('links', service_links_render($node, TRUE)); ?>
+      <?php if (module_exists('service_links')): ?>
+        <?php print theme('links', service_links_render($node, TRUE)); ?>
+      <?php endif; ?>
     </div>
   <?php endif; ?>
 

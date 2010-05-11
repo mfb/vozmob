@@ -52,13 +52,14 @@ div.overlay-links li {
   list-style-image: url(../images/icons/menu-leaf.gif);
 }
 
-.media-mover-audio .flowplayer {
+.media-mover-audio-image .flowplayer {
   width: 512px;
-  height: 408px;
+  height: 26px;
 }
 
-.media-mover-audio-image .flowplayer {
-  height: 24px;
+.media-mover-video .flowplayer {
+  width: 512px;
+  height: 384px;
 }
 
 audio {
