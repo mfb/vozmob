@@ -14,7 +14,7 @@ Drupal.behaviors.overlayCycle = function() {
   });
 
   $('div.overlay-launcher a[rel]').each(function() {
-    $(this).overlay({expose: '#000'});
+    $(this).overlay({expose: '#000', close: '.close'});
   });
 
   $('div.field-field-image div.field-items a[rel]').each(function() {
@@ -41,5 +41,10 @@ Drupal.behaviors.overlayCycle = function() {
         });
       }
     });
+  });
+  $('div.overlay-share ul').hide();
+  $('div.overlay-share .share-button').click(function() {
+    $('div.overlay-share ul').toggle();
+    return false;
   });
 };

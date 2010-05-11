@@ -14,7 +14,7 @@
  * @param $hook
  *   The name of the template being rendered ("block" in this case.)
  */
-function phptemplate_preprocess_block_editing(&$vars, $hook) {
+function blueprint_preprocess_block_editing(&$vars, $hook) {
   $block = $vars['block'];
   // Display 'edit block' for custom blocks.
   if ($block->module == 'block') {

@@ -1,7 +1,9 @@
 <div class="clear-block comment<?php print ($comment->new) ? ' comment-new' : ''; print(isset($comment->status) && $comment->status == COMMENT_NOT_PUBLISHED) ? ' comment-unpublished' : ''; if (isset($author_comment)) print ' author'; print ' '. $zebra; ?>">
-  <div class="picture span-3">
-    <?php print $picture ?>
-  </div>
+  <?php if ($picture): ?>
+    <div class="picture span-3">
+      <?php print $picture ?>
+    </div>
+  <?php endif; ?>
 
   <div class="comment-content">
     <div class="meta">
@@ -10,7 +12,7 @@
           <a id="new"></a>
           <span class="new"><?php print drupal_ucfirst($new) ?></span>
         <?php endif; ?>
-        <?php print l('#'. $comment_count, 'node/'. $comment->nid, array('fragment' => 'comment-'. $comment->cid)); ?>
+        <?php print $comment_count_link ?>
       </div>
       <?php if ($submitted): ?>
         <span class="username"><?php print theme('username', $comment); ?></span> <span class="date"><?php print t('wrote !date ago', array( '!date' => format_interval(time() - $comment->timestamp))); ?></span>

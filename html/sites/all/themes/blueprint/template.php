@@ -1,5 +1,5 @@
 <?php
-// $Id: template.php,v 1.15.2.1.2.17 2009/03/19 13:05:12 designerbrent Exp $
+// $Id: template.php,v 1.15.2.1.2.23 2010/03/22 14:31:28 designerbrent Exp $
 
 /**
  * Uncomment the following line during development to automatically
@@ -14,29 +14,32 @@
  * @param $vars
  *   A sequential array of variables passed to the theme function.
  */
-function phptemplate_preprocess_page(&$vars) {
+function blueprint_preprocess_page(&$vars) {
   global $user;
   $vars['path'] = base_path() . path_to_theme() .'/';
   $vars['user'] = $user;
 
-  // Fixup the $head_title and $title vars to display better.
-  $title = drupal_get_title();
-  $headers = drupal_set_header();
+  //Play nicely with the page_title module if it is there.
+  if (!module_exists('page_title')) {
+    // Fixup the $head_title and $title vars to display better.
+    $title = drupal_get_title();
+    $headers = drupal_set_header();
+    
+    // wrap taxonomy listing pages in quotes and prefix with topic
+    if (arg(0) == 'taxonomy' && arg(1) == 'term' && is_numeric(arg(2))) {
+      $title = t('Topic') .' &#8220;'. $title .'&#8221;';
+    }
+    // if this is a 403 and they aren't logged in, tell them they need to log in
+    else if (strpos($headers, 'HTTP/1.1 403 Forbidden') && !$user->uid) {
+      $title = t('Please login to continue');
+    }
+    $vars['title'] = $title;
 
-  // wrap taxonomy listing pages in quotes and prefix with topic
-  if (arg(0) == 'taxonomy' && arg(1) == 'term' && is_numeric(arg(2))) {
-    $title = t('Topic') .' &#8220;'. $title .'&#8221;';
-  }
-  // if this is a 403 and they aren't logged in, tell them they need to log in
-  else if (strpos($headers, 'HTTP/1.1 403 Forbidden') && !$user->uid) {
-    $title = t('Please login to continue');
-  }
-  $vars['title'] = $title;
-
-  if (!drupal_is_front_page()) {
-    $vars['head_title'] = $title .' | '. $vars['site_name'];
-    if ($vars['site_slogan'] != '') {
-      $vars['head_title'] .= ' &ndash; '. $vars['site_slogan'];
+    if (!drupal_is_front_page()) {
+      $vars['head_title'] = $title .' | '. $vars['site_name'];
+      if ($vars['site_slogan'] != '') {
+        $vars['head_title'] .= ' &ndash; '. $vars['site_slogan'];
+      }
     }
   }
 
@@ -116,7 +119,7 @@ function phptemplate_preprocess_page(&$vars) {
  * @param $vars
  *   A sequential array of variables passed to the theme function.
  */
-function phptemplate_preprocess_node(&$vars) {
+function blueprint_preprocess_node(&$vars) {
   jquery_plugin_add('cycle', 'theme', 'header');
   jquery_plugin_add('expose');
   jquery_plugin_add('overlay');
@@ -170,9 +173,19 @@ function phptemplate_preprocess_node(&$vars) {
  * @param $vars
  *   A sequential array of variables passed to the theme function.
  */
-function phptemplate_preprocess_comment(&$vars) {
+function blueprint_preprocess_comment(&$vars) {
   static $comment_count = 1; // keep track the # of comments rendered
   
+  // Calculate the comment number for each comment with accounting for pages.
+  $page = 0;
+  $comments_previous = 0;
+  if (isset($_GET['page'])) {
+    $page = $_GET['page'];
+    $comments_per_page = variable_get('comment_default_per_page_' . $vars['node']->type, 1);
+    $comments_previous = $comments_per_page * $page;
+  }
+  $vars['comment_count'] =  $comments_previous + $comment_count;
+    
   // if the author of the node comments as well, highlight that comment
   $node = node_load($vars['comment']->nid);
   if ($vars['comment']->uid == $node->uid) {
@@ -182,16 +195,22 @@ function phptemplate_preprocess_comment(&$vars) {
   if (!user_access('administer comments')) {
     $vars['links'] = '';
   }
-  // if subjects in comments are turned off, don't show the title then
-  if (!variable_get('comment_subject_field', 1)) {
+  // If comment subjects are disabled, don't display them.
+  if (variable_get('comment_subject_field_' . $vars['node']->type, 1) == 0) {
     $vars['title'] = '';
   }
-  // if user has no picture, add in a filler
-  if (empty($vars['comment']->picture)) {
-    $vars['picture'] = '<div class="no-picture">&nbsp;</div>';
-  }
 
-  $vars['comment_count'] = $comment_count++;  
+  // Add the pager variable to the title link if it needs it.
+  $fragment = 'comment-' . $vars['comment']->cid;
+  $query = '';
+  if (!empty($page)) {
+    $query = 'page='. $page;
+  }
+  $vars['title'] = l($vars['comment']->subject, 'node/'. $vars['node']->nid, array('query' => $query, 'fragment' => $fragment));
+  $vars['comment_count_link'] = l('#'. $vars['comment_count'], 'node/'. $vars['node']->nid, array('query' => $query, 'fragment' => $fragment));
+
+
+  $comment_count++;
 }
 
 /**
@@ -202,7 +221,7 @@ function phptemplate_preprocess_comment(&$vars) {
  * @param $hook
  *   The name of the template being rendered ("block" in this case.)
  */
-function phptemplate_preprocess_block(&$vars, $hook) {
+function blueprint_preprocess_block(&$vars, $hook) {
   $block = $vars['block'];
 
   // Special classes for blocks.
@@ -218,7 +237,7 @@ function phptemplate_preprocess_block(&$vars, $hook) {
   
   if (user_access('administer blocks')) {
     include_once './' . drupal_get_path('theme', 'blueprint') . '/template.block-editing.inc';
-    phptemplate_preprocess_block_editing($vars, $hook);
+    blueprint_preprocess_block_editing($vars, $hook);
     $classes[] = 'with-block-editing';
   }
 
@@ -233,7 +252,7 @@ function phptemplate_preprocess_block(&$vars, $hook) {
  * @param $vars
  *   A sequential array of variables passed to the theme function.
  */
-function phptemplate_preprocess_box(&$vars) {
+function blueprint_preprocess_box(&$vars) {
   // rename to more common text
   if (strpos($vars['title'], 'Post new comment') === 0) {
     $vars['title'] = 'Add your comment';
@@ -420,7 +439,7 @@ function blueprint_forum_icon($new_posts, $num_posts = 0, $comment_mode = 0, $st
  * More: http://www.sysarchitects.com/node/70
  */
 function blueprint_forum_topic_navigation($node) {
-  return '';
+  return 'NoTHIN';
 }
 
 /**

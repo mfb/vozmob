@@ -1,4 +1,4 @@
-# $Id: README.txt,v 1.18.2.2.2.11 2009/03/03 05:29:42 designerbrent Exp $
+# $Id: README.txt,v 1.18.2.2.2.13 2010/02/02 19:25:52 designerbrent Exp $
 
 
 --- README  -------------------------------------------------------------
@@ -29,7 +29,7 @@ Requirements: Drupal 6.x
 
 --- FEATURES --------------------------------------------------------
 
-- uses Blueprint 0.8 CSS framework: http://www.blueprintcss.org/
+- uses Blueprint 0.8 (or greater) CSS framework: http://www.blueprintcss.org/
 - normalizes Drupal's CSS to be consistent
 - properly aggregates all blueprint CSS files into a single file when this setting is enabled
 - put scripts at bottom of page for nice performance gains, read more: http://developer.yahoo.com/performance/rules.html#js_bottom
@@ -163,6 +163,10 @@ What this ends up doing is removing the text title of the site, and replacing it
 
 
 --- CHANGELOG --------------------------------------------------------
+
+1.x, 2010-02-02
+----------------------
+- Fixed: Added a temporary fix to the BlueprintCSS that makes the input boxes not aligned properly. [#700464]
 
 1.x, 2008-12-08
 ----------------------

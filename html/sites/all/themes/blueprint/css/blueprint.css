@@ -1,7 +1,12 @@
 /* @group blueprint overrides */
 
 body {
-  margin: 0;
+margin: 0px;
+	background-image:url(http://www.designaction.org/clients/vozmob/html/images/body_header_tile.png);
+	background-repeat:repeat-x;
+	font-family:arial, helvetica, sans-serif;
+	background-color:#fff;
+	font-size: 13px;
 }
 
 div.container {
@@ -343,7 +348,7 @@ div.node div.picture {
   margin: 0 0 0.8em 0.8em;
 }
 
-div.node ul.links {
+ul.links {
   display: block;
   text-align: right;
 }
@@ -496,3 +501,20 @@ ul.pager span.pager-ellipsis {
   background-position: 0 0;
   padding-left:18px;
 }
+
+/* @group Fixes */
+
+/* These are fixes to an issue in blueprint.
+See: http://blueprintcss.lighthouseapp.com/projects/15318-blueprint-css/tickets/94-checkbox-and-radio-button-alignment
+http://drupal.org/node/491052
+http://drupal.org/node/700464 */
+
+input[type=checkbox], input[type=radio], input.checkbox, input.radio {
+  top: 0;
+}
+
+textarea, input {
+  vertical-align: inherit;
+}
+
+/* @end */

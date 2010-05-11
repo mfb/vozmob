@@ -1,14 +1,14 @@
 D/css////
 D/images////
 D/scripts////
-/page.tpl.php/1.15.4.7/Result of merge//TDRUPAL-6--1
 /node.tpl.php/1.4.4.2/Fri Dec 19 20:34:31 2008//TDRUPAL-6--1
-/README.txt/1.18.2.2.2.11/Wed Apr  1 07:47:46 2009//TDRUPAL-6--1
-/block.tpl.php/1.1.4.3/Wed Apr  1 07:47:46 2009//TDRUPAL-6--1
-/blueprint.info/1.1.2.5/Wed Apr  1 07:47:46 2009/-ko/TDRUPAL-6--1
-/box.tpl.php/1.1.4.2/Wed Apr  1 07:47:46 2009//TDRUPAL-6--1
-/comment.tpl.php/1.5.2.1.2.6/Wed Apr  1 07:47:46 2009//TDRUPAL-6--1
-/forum-list.tpl.php/1.1.2.3/Wed Apr  1 07:47:46 2009/-ko/TDRUPAL-6--1
-/system.patch/1.1.2.3/Wed Apr  1 07:47:46 2009//TDRUPAL-6--1
-/template.block-editing.inc/1.1.2.3/Wed Apr  1 07:47:46 2009/-ko/TDRUPAL-6--1
-/template.php/1.15.2.1.2.17/Result of merge//TDRUPAL-6--1
+/README.txt/1.18.2.2.2.13/Tue Apr 27 20:34:13 2010//TDRUPAL-6--1
+/block.tpl.php/1.1.4.3/Thu Mar  5 03:15:00 2009//TDRUPAL-6--1
+/blueprint.info/1.1.2.7/Tue Apr 27 20:34:13 2010/-ko/TDRUPAL-6--1
+/box.tpl.php/1.1.4.2/Thu Mar  5 03:15:00 2009//TDRUPAL-6--1
+/comment.tpl.php/1.5.2.1.2.8/Tue Apr 27 20:34:13 2010//TDRUPAL-6--1
+/forum-list.tpl.php/1.1.2.3/Thu Mar  5 03:15:00 2009/-ko/TDRUPAL-6--1
+/page.tpl.php/1.15.4.7/Tue Apr 27 20:34:13 2010//TDRUPAL-6--1
+/system.patch/1.1.2.3/Thu Mar  5 03:15:00 2009//TDRUPAL-6--1
+/template.block-editing.inc/1.1.2.4/Tue Apr 27 20:34:13 2010/-ko/TDRUPAL-6--1
+/template.php/1.15.2.1.2.23/Result of merge+Tue Apr 27 20:34:13 2010//TDRUPAL-6--1

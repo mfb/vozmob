@@ -19,7 +19,7 @@
  * @ingroup views_templates
  */
 ?>
-<?php foreach ($fields as $id => $field): ?>
+<div class="overlay_wrapper"><?php foreach ($fields as $id => $field): ?>
   <?php if (!empty($field->separator)): ?>
     <?php print $field->separator; ?>
   <?php endif; ?>
@@ -68,6 +68,11 @@
         </div>
       <?php endif; ?>
     </div>
+    <div class="overlay-share">
+      <div class="share-button"><?php print l(t('Share'), 'node/' . $node->nid); ?></div>
+      <?php print theme('links', service_links_render($node, TRUE)); ?>
+    </div>
   <?php endif; ?>
 
 <?php endforeach; ?>
+</div>

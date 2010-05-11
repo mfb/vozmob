@@ -16,8 +16,10 @@
     </div>
   <?php endif; ?>
 
-  <div class="content clear-block">
-    <?php print $picture ?>
+  <div class="content2 clear-block">
+    <?php if ($page): ?>
+      <?php print $picture; ?>
+    <?php endif; ?>
 
     <?php if ($overlay_launcher): ?>
       <div class="overlay-launcher">
@@ -37,7 +39,12 @@
   <?php endif; ?>
 
   <?php if ($links): ?>
-    <div class="node-links"><?php print $links; ?></div>
+    <div class="node-links">
+      <?php if (!$page): ?>
+        <?php print $picture; ?>
+      <?php endif; ?>
+      <?php print $links; ?>
+    </div>
   <?php endif; ?>
 
 </div>
