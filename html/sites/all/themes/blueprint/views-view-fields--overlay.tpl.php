@@ -80,4 +80,5 @@
   <?php endif; ?>
 
 <?php endforeach; ?>
+<?php print theme('links', array_merge(blog_link('node', $node), comment_link('node', $node, TRUE)), array('class' => 'overlay-links')); ?>
 </div>

@@ -9,9 +9,9 @@ Drupal.behaviors.overlayCycle = function() {
     $(this).attr('href', '#overlay-' + nid);
   });
   var cycleIndex = 0;
-  $('div.view-overlay div.views-field-title').each(function() {
-    $(this).before('<div class="overlay-links">' + $(this).parents('div.node').find('div.node-links').html() + '</div>');
-  });
+//  $('div.view-overlay div.views-field-title').each(function() {
+//    $(this).before('<div class="overlay-links">' + $(this).parents('div.node').find('div.node-links').html() + '</div>');
+//  });
 
   $('div.overlay-launcher a[rel]').each(function() {
     $(this).overlay({expose: '#000', close: '.close'});
