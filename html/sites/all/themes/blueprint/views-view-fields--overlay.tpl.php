@@ -70,12 +70,14 @@
       <?php endif; ?>
     </div>
   <?php endif; ?>
-  <div class="overlay-share">
-    <div class="share-button"><?php print l(t('Share'), 'node/' . $node->nid); ?></div>
-    <?php if (module_exists('service_links')): ?>
-      <?php print theme('links', service_links_render($node, TRUE)); ?>
-    <?php endif; ?>
-  </div>
+  <?php if ($field->class == 'field-image-fid'): ?>
+    <div class="overlay-share">
+      <div class="share-button"><?php print l(t('Share'), 'node/' . $node->nid); ?></div>
+      <?php if (module_exists('service_links')): ?>
+        <?php print theme('links', service_links_render($node, TRUE)); ?>
+      <?php endif; ?>
+    </div>
+  <?php endif; ?>
 
 <?php endforeach; ?>
 </div>
