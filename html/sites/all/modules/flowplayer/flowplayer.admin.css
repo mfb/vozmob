@@ -1,4 +1,4 @@
-/* $Id: flowplayer.admin.css,v 1.1.2.1 2009/02/19 16:33:33 robloach Exp $ */
+/* $Id: flowplayer.admin.css,v 1.1.2.2 2010/02/09 23:11:05 robloach Exp $ */
 
 /**
  * @file
@@ -27,4 +27,9 @@ fieldset#flowplayer-color .form-item label {
 
 #flowplayer-preview-wrapper {
   clear: both;
+}
+
+#flowplayer-preview {
+  width: 320px;
+  height: 216px;
 }

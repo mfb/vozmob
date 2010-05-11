@@ -1,5 +1,5 @@
 <?php
-// $Id: flowplayer.module,v 1.2.2.8 2009/09/08 15:09:10 robloach Exp $
+// $Id: flowplayer.module,v 1.2.2.12 2010/03/12 20:40:19 jbrown Exp $
 
 /**
  * @file
@@ -53,7 +53,6 @@ function flowplayer_help($path, $arg) {
         'playlist' => array(
           array(
             'url' => 'http://flowplayer.org/img/demos/national.jpg',
-            'scaling' => 'orig',
           ),
           array(
             'url' => 'http://flowplayer.org/demos/plugins/fake_empire.mp3',
@@ -85,7 +84,7 @@ function flowplayer_add($selector = NULL, $config = NULL) {
   // Add Flowplayer to the page if it hasn't been added yet.
   if ($flowplayer_added === FALSE) {
     // Add the FlowPlayer JavaScript and CSS to the page.
-    drupal_add_js(drupal_get_path('module', 'flowplayer') .'/flowplayer/example/flowplayer.min.js');
+    drupal_add_js(drupal_get_path('module', 'flowplayer') .'/flowplayer/flowplayer.min.js');
     drupal_add_css(drupal_get_path('module', 'flowplayer') .'/flowplayer.css');
 
     // Tell the JavaScript where flowplayer.swf is.
@@ -124,9 +123,8 @@ function flowplayer_add($selector = NULL, $config = NULL) {
     }
 
     // Merge scaling option in the defaults.
-    $scaling = variable_get('flowplayer_scaling', NULL);
-    if (!empty($scaling)) {
-      $config['clip']['scaling'] = $scaling;
+    if (!isset($config['clip']['scaling'])) {
+      $config['clip']['scaling'] = variable_get('flowplayer_scaling', 'fit');
     }
 
     // The player colors.
@@ -196,6 +194,7 @@ function flowplayer_theme() {
         'config' => NULL,
         'id' => 'flowplayer',
         'attributes' => array(),
+        'contents' => '',
       ),
     ),
   );
@@ -212,8 +211,12 @@ function flowplayer_theme() {
  *   (optional) The ID of the DIV element to use.
  * @param $attributes
  *   (optional) Any additional attributes to associate with the DIV.
+ * @param $contents
+ *   (optional) The contents that will appear within the Flowplayer div. For
+ *   more information about what you can do with this, visit the splash support
+ *   examples: http://flowplayer.org/demos/skinning/splash-info.html
  */
-function theme_flowplayer($config = NULL, $id = 'flowplayer', $attributes = array()) {
+function theme_flowplayer($config = NULL, $id = 'flowplayer', $attributes = array(), $contents = '') {
   // Prepare the ID.
   $id = form_clean_id($id);
 
@@ -230,5 +233,5 @@ function theme_flowplayer($config = NULL, $id = 'flowplayer', $attributes = arra
   flowplayer_add('#'. $id, $config);
 
   // Return the markup.
-  return "<div id='$id' $attributes></div>";
+  return "<div id='$id' $attributes>$contents</div>";
 }

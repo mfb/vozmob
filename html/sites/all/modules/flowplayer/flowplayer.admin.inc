@@ -1,5 +1,5 @@
 <?php
-// $Id: flowplayer.admin.inc,v 1.1.2.4 2009/11/10 17:18:16 robloach Exp $
+// $Id: flowplayer.admin.inc,v 1.1.2.5 2010/02/09 23:17:51 robloach Exp $
 
 /**
  * @file
@@ -35,7 +35,7 @@ function flowplayer_admin_settings() {
       'scale' => t('Scale: Fill all available space, ignoring metadata'),
     ),
     '#description' => t('The <a href="@options">scaling-property</a> for the video. Scale is the default option.', array('@options' => 'http://flowplayer.org/documentation/configuration/clips.html#scaling')),
-    '#default_value' => variable_get('flowplayer_scaling', 'scale'), 
+    '#default_value' => variable_get('flowplayer_scaling', 'fit'), 
   );
 
   // Construct the color picker
