@@ -399,20 +399,6 @@ $handler->display->display_options['fields']['body']['alter']['trim'] = 0;
 $handler->display->display_options['fields']['body']['alter']['word_boundary'] = 1;
 $handler->display->display_options['fields']['body']['alter']['ellipsis'] = 1;
 $handler->display->display_options['fields']['body']['alter']['html'] = 0;
-/* Field: Node translation: Translate link */
-$handler->display->display_options['fields']['translate_node']['id'] = 'translate_node';
-$handler->display->display_options['fields']['translate_node']['table'] = 'node';
-$handler->display->display_options['fields']['translate_node']['field'] = 'translate_node';
-$handler->display->display_options['fields']['translate_node']['label'] = '';
-$handler->display->display_options['fields']['translate_node']['alter']['alter_text'] = 0;
-$handler->display->display_options['fields']['translate_node']['alter']['make_link'] = 0;
-$handler->display->display_options['fields']['translate_node']['alter']['trim'] = 0;
-$handler->display->display_options['fields']['translate_node']['alter']['word_boundary'] = 1;
-$handler->display->display_options['fields']['translate_node']['alter']['ellipsis'] = 1;
-$handler->display->display_options['fields']['translate_node']['alter']['strip_tags'] = 0;
-$handler->display->display_options['fields']['translate_node']['alter']['html'] = 0;
-$handler->display->display_options['fields']['translate_node']['hide_empty'] = 0;
-$handler->display->display_options['fields']['translate_node']['empty_zero'] = 0;
 /* Argument: Node: Nid */
 $handler->display->display_options['arguments']['nid']['id'] = 'nid';
 $handler->display->display_options['arguments']['nid']['table'] = 'node';
