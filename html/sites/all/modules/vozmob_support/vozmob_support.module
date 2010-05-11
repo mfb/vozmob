@@ -98,7 +98,6 @@ $presets['feature'] = array (
   ),
 );
 
-$presets = array();
 $presets['features'] = array (
   'presetname' => 'features',
   'actions' => 
@@ -117,7 +116,6 @@ $presets['features'] = array (
   ),
 );
 
-$presets = array();
 $presets['overlay'] = array (
   'presetname' => 'overlay',
   'actions' => 
