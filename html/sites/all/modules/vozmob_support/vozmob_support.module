@@ -137,3 +137,13 @@ $presets['overlay'] = array (
 
   return $presets;
 } 
+
+function vozmob_support_link_alter(&$links, $node) {
+  $sms = $links['sms_sendtophone'];
+  unset($links['sms_sendtophone']);
+  $links['sms_sendtophone'] = $sms;
+  $links = comment_link('node', $node, TRUE) + $links;
+  //if ($GLOBALS['user']->uid == 1) {
+  //  drupal_set_message(print_r($links, TRUE));
+  //}
+}
