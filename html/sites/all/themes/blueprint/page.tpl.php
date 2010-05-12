@@ -28,7 +28,7 @@
 <div id="header_wrap"><!--header_wrap to contain header outside of main container div-->
 
   <div id="header">
-  
+  <?php print l('', '<front>', array('attributes' => array('class' => 'home-link'))); ?>  
   <div id="headerinner"><?php print $header; ?></div>
     <h1 id="logo">
       <a title="<?php print $site_name; ?><?php if ($site_slogan != '') print ' &ndash; '. $site_slogan; ?>" href="<?php print url(); ?>"><?php print $site_name; ?><?php if ($site_slogan != '') print ' &ndash; '. $site_slogan; ?></a>
