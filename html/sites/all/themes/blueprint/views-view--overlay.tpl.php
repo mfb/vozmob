@@ -21,7 +21,6 @@
  */
 ?>
 <div class="view view-<?php print $css_name; ?> view-id-<?php print $name; ?> view-display-id-<?php print $display_id; ?> view-dom-id-<?php print $dom_id; ?>" id="overlay-<?php print $view->args[0]; ?>">
-  <div class="close"><?php print t('Close Window'); ?></div>
   <?php if ($admin_links): ?>
     <div class="views-admin-links views-hide">
       <?php print $admin_links; ?>
