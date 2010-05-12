@@ -153,4 +153,7 @@ function vozmob_support_link_alter(&$links, $node) {
       'attributes' => array('class' => 'sms-sendtophone', 'title' => t('Send a story via MMS or e-mail.')),
     );
   }
+  if (isset($links['upload_attachments'])) {
+    unset($links['upload_attachments']);
+  }
 }

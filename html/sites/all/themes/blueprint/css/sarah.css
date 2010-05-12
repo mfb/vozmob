@@ -240,15 +240,11 @@ padding:30px 10px 0 0px;
 .overlay_wrapper .views-field-name, .overlay_wrapper .views-field-created {
 	padding-top:5px;
 }
+
 div.overlay-links ul.links {
-width:100%	
-float:none;
-	position:absolute;
-	bottom: 10px;
-	left:10px;
-	width:87%;
-       
+  width: 600px;       
 }
+
 div.overlay-links ul{
 border-top:5px solid #ff9900;
 width:100%;

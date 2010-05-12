@@ -85,3 +85,5 @@ body.page-blogs div.node-links div.picture { display: inline; }
 body.page-blog div.picture { float: right; }
 
 #header a.home-link { display: block; width: 640px; height: 96px; float: left; }
+
+div.view-overlay div.picture { display: none; }
