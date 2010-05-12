@@ -77,6 +77,7 @@ img.default-thumb { width: 96px; height: 72px }
 
 body.page-taxonomy .node-links li.service-links, li.service-links { clear: none; }
 body.page-taxonomy .node-links li.service_links_delicious, li.service_links_delicious { clear: left; }
+div.view-overlay li.service_links_delicious { clear: none; }
 
 body.page-blog div.node-links { clear: left; }
 
