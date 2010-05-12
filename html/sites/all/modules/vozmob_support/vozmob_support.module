@@ -146,9 +146,11 @@ function vozmob_support_link_alter(&$links, $node) {
       $links['service-links ' . $key] = $link;
     }
   }
-  $links['sms_sendtophone'] = array(
-    'title' => t('Send to phone'),
-    'href' => "node/{$node->nid}/sendto",
-    'attributes' => array('class' => 'sms-sendtophone', 'title' => t('Send a story via MMS or e-mail.')),
-  );
+  if (user_access('forward content')) {
+    $links['sms_sendtophone'] = array(
+      'title' => t('Send to phone'),
+      'href' => "node/{$node->nid}/sendto",
+      'attributes' => array('class' => 'sms-sendtophone', 'title' => t('Send a story via MMS or e-mail.')),
+    );
+  }
 }
