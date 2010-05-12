@@ -55,7 +55,7 @@ function vozmob_support_form_alter(&$form, $form_state, $form_id) {
 function vozmob_support_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
   // Move the messaging_sendto form down to the bottom of the node.
   if ($op == 'view' && isset($node->content['messaging_sendto']['#weight'])) {
-    $node->content['messaging_sendto']['#weight'] = 40;
+    unset($node->content['messaging_sendto']);
   }
 }
 
@@ -146,7 +146,9 @@ function vozmob_support_link_alter(&$links, $node) {
       $links['service-links ' . $key] = $link;
     }
   }
-  $sms = $links['sms_sendtophone'];
-  unset($links['sms_sendtophone']);
-  $links['sms_sendtophone'] = $sms;
+  $links['sms_sendtophone'] = array(
+    'title' => t('Send to phone'),
+    'href' => "node/{$node->nid}/sendto",
+    'attributes' => array('class' => 'sms-sendtophone', 'title' => t('Send a story via MMS or e-mail.')),
+  );
 }
