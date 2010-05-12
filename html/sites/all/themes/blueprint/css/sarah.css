@@ -219,7 +219,7 @@ body.page-node  #node-7311 .content2 ul li a{
 }
 /** Overlay **/
 div.view-overlay {
-	height:	650px;
+	height:	750px;
 	}
 
 .overlay_wrapper .views-field-title {
@@ -245,16 +245,26 @@ div.overlay-links ul.links {
 width:100%	
 float:none;
 	position:absolute;
-	bottom: 15px;
+	bottom: 10px;
 	left:10px;
-	width:auto;
-        border-top:5px solid #ff9900;
+	width:87%;
+       
+}
+div.overlay-links ul{
+border-top:5px solid #ff9900;
+width:100%;
 }
 	
 div.overlay-links ul.links li {
 	display:inline;
 	float:left;
-       margin: 0 20px
+       margin: 0 10px
+       
+}
+div.overlay-links ul.links li.service_links_delicious, div.overlay-links ul.links li.service_links_digg, div.overlay-links ul.links li.service_links_facebook, div.overlay-links ul.links li.service_links_twitter{
+       margin:2px;
+       padding:2px;
+
 }
 
 .field-content p  { color: #555555; font-weight: 400 }
