@@ -331,21 +331,6 @@ $handler->display->display_options['fields']['field_image_fid']['label_type'] = 
 $handler->display->display_options['fields']['field_image_fid']['format'] = 'overlay_default';
 $handler->display->display_options['fields']['field_image_fid']['multiple']['group'] = 1;
 $handler->display->display_options['fields']['field_image_fid']['multiple']['multiple_reversed'] = 0;
-/* Field: Node: Add comment link */
-$handler->display->display_options['fields']['comments_link_1']['id'] = 'comments_link_1';
-$handler->display->display_options['fields']['comments_link_1']['table'] = 'node';
-$handler->display->display_options['fields']['comments_link_1']['field'] = 'comments_link';
-$handler->display->display_options['fields']['comments_link_1']['label'] = '';
-$handler->display->display_options['fields']['comments_link_1']['alter']['alter_text'] = 0;
-$handler->display->display_options['fields']['comments_link_1']['alter']['make_link'] = 0;
-$handler->display->display_options['fields']['comments_link_1']['alter']['trim'] = 0;
-$handler->display->display_options['fields']['comments_link_1']['alter']['word_boundary'] = 1;
-$handler->display->display_options['fields']['comments_link_1']['alter']['ellipsis'] = 1;
-$handler->display->display_options['fields']['comments_link_1']['alter']['strip_tags'] = 0;
-$handler->display->display_options['fields']['comments_link_1']['alter']['html'] = 0;
-$handler->display->display_options['fields']['comments_link_1']['hide_empty'] = 0;
-$handler->display->display_options['fields']['comments_link_1']['empty_zero'] = 0;
-$handler->display->display_options['fields']['comments_link_1']['teaser'] = 1;
 /* Field: Node: Title */
 $handler->display->display_options['fields']['title']['id'] = 'title';
 $handler->display->display_options['fields']['title']['table'] = 'node';
