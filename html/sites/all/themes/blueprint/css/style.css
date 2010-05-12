@@ -79,3 +79,7 @@ body.page-taxonomy .node-links li.service-links, li.service-links { clear: none;
 body.page-taxonomy .node-links li.service_links_delicious, li.service_links_delicious { clear: left; }
 
 body.page-blog div.node-links { clear: left; }
+
+body.page-blog div.node-links div.picture { display: none; }
+body.page-blogs div.node-links div.picture { display: inline; }
+body.page-blog div.picture { float: right; }
