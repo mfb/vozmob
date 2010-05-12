@@ -17,9 +17,6 @@
   <?php endif; ?>
 
   <div class="content2 clear-block">
-    <?php if ($page): ?>
-      <?php print $picture; ?>
-    <?php endif; ?>
 
     <?php if ($overlay_launcher): ?>
       <div class="overlay-launcher">
