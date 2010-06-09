@@ -1,7 +1,6 @@
 /views_access.test/1.1.2.2/Fri Apr 16 22:11:07 2010//TDRUPAL-6--3
 /views_argument_default.test/1.1.4.3/Fri Apr 16 22:11:07 2010//TDRUPAL-6--3
 /views_argument_validator.test/1.1.2.4/Sun Apr 18 08:19:11 2010//TDRUPAL-6--3
-/views_basic.test/1.1.2.2/Fri Apr 16 22:11:07 2010//TDRUPAL-6--3
 /views_cache.test/1.1.2.2/Fri Apr 16 22:11:07 2010//TDRUPAL-6--3
 /views_exposed_form.test/1.1.4.3/Sun Feb 14 15:54:32 2010//TDRUPAL-6--3
 /views_glossary.test/1.1.2.3/Fri Apr 16 22:11:07 2010//TDRUPAL-6--3
@@ -9,9 +8,10 @@
 /views_handlers.test/1.1.2.2/Sun Apr 18 08:19:11 2010//TDRUPAL-6--3
 /views_module.test/1.1.4.2/Thu Apr 29 18:26:02 2010//TDRUPAL-6--3
 /views_pager.test/1.1.4.7/Mon Mar 22 20:05:05 2010//TDRUPAL-6--3
-/views_query.test/1.1.4.2/Fri Apr 16 22:11:07 2010//TDRUPAL-6--3
 /views_test.info/1.1.4.2/Tue Dec 22 00:38:03 2009//TDRUPAL-6--3
-/views_test.install/1.1.4.2/Tue Dec 22 00:38:03 2009//TDRUPAL-6--3
-/views_test.module/1.1.4.4/Sat Feb 13 21:01:42 2010//TDRUPAL-6--3
 /views_test.views_default.inc/1.1.4.4/Wed Mar 10 20:12:06 2010//TDRUPAL-6--3
+/views_basic.test/1.1.2.3/Wed Jun  9 17:25:20 2010//TDRUPAL-6--3
+/views_query.test/1.1.4.3/Wed Jun  9 17:25:20 2010//TDRUPAL-6--3
+/views_test.install/1.1.4.3/Wed Jun  9 17:25:20 2010//TDRUPAL-6--3
+/views_test.module/1.1.4.5/Wed Jun  9 17:25:20 2010//TDRUPAL-6--3
 D

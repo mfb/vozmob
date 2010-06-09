@@ -1,5 +1,5 @@
 <?php
-// $Id: taxonomy.views.inc,v 1.50.2.15 2010/04/29 18:17:35 merlinofchaos Exp $
+// $Id: taxonomy.views.inc,v 1.50.2.16 2010/05/24 09:13:03 dereine Exp $
 /**
  * @file
  *
@@ -46,6 +46,9 @@ function taxonomy_views_data() {
   // vocabulary name
   $data['vocabulary']['name'] = array(
     'title' => t('Vocabulary name'), // The item it appears as on the UI,
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
     'field' => array(
       'help' => t('Name of the vocabulary a term is a member of. This will be the vocabulary that whichever term the "Taxonomy: Term" field is; and can similarly cause duplicates.'),
       'handler' => 'views_handler_field',

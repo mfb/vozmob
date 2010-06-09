@@ -18,6 +18,7 @@ Views 6.x-3.0-dev
     o #754294 by dagmar: Fix warnings on taxonomy term filter.
     o #698270 by dagmar: Pager plugin re-org (again).
     o #769010 by andrea.gariboldi: Overuse of query substitutions fails on some databases.
+    o #807506 by damZ: Improve the usefulness of ViewsSqlTest.
 
 Views 6.x-3.0-alpha3
     o #705668 by dereine: Fix glossary view, add tests for glossary view.
