@@ -29,12 +29,12 @@
  * @ingroup views_templates
  */
 ?>
+<div class="<?php print $classes; ?>">
   <?php if ($feed_icon): ?>
     <div class="feed-icon">
       <?php print $feed_icon; ?>
     </div>
   <?php endif; ?>
-<div class="<?php print $classes; ?>">
   <?php if ($admin_links): ?>
     <div class="views-admin-links views-hide">
       <?php print $admin_links; ?>
@@ -58,6 +58,16 @@
     </div>
   <?php endif; ?>
 
+  <?php if ($pager): ?>
+    <?php
+      preg_match('|<li class="pager-previous first">(.*?)</li>|', $pager, $matches);
+      $pager_previous = '<ul class="pager"><li class="pager-previous first">' . $matches[1] . '</li></ul>';
+      preg_match('|<li class="pager-next last">(.*?)</li>|', $pager, $matches);
+      $pager_next = '<ul class="pager"><li class="pager-next last">' . $matches[1] . '</li></ul>';
+    ?>
+    <?php print $pager_previous; ?>
+  <?php endif; ?>
+
   <?php if ($rows): ?>
     <div class="view-content">
       <?php print $rows; ?>
@@ -69,7 +79,7 @@
   <?php endif; ?>
 
   <?php if ($pager): ?>
-    <?php print $pager; ?>
+    <?php print $pager_next; ?>
   <?php endif; ?>
 
   <?php if ($attachment_after): ?>

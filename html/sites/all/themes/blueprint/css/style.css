@@ -88,3 +88,11 @@ body.page-blog div.picture { float: right; }
 #header a.home-link { display: block; width: 640px; height: 96px; float: left; }
 
 div.view-overlay div.picture { display: none; }
+
+div.view-features ul li {
+  list-style-image: none;
+  list-style-type: none;
+}
+div.view-features ul.pager {
+  float: left;
+}
