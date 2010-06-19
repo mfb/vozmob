@@ -9,6 +9,8 @@ function mms_us_att_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
   if (preg_match($pattern, $header->fromaddress)) {
     // Remove AT&T spam from message and trim whitespace.
     $node->body = trim(preg_replace('/--.*?This mobile text message is brought to you by AT&T/s', '', $node->body));
+    // Remove HTML <title>.
+    $node->body = preg_replace('/<title>.*</title>/', '', $node->body);
     $node->teaser = node_teaser($node->body);
 
     // Discard empty messages.
