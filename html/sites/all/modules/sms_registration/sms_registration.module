@@ -89,7 +89,7 @@ function sms_registration_mailsave_clean(&$node, $result, $i, $header, $mailbox)
 
   // If user has authenticated and message was sent to a registration address and from a mobile number.
   if (!empty($node->uid) && strcasecmp($sms_registration_address, $to_address) == 0 && isset($providers[$from[1]])) {
-    $username =  trim($node->body);
+    $username = strtok(trim($node->body), "\r\n");
     //if it comes from a valid sms email gateway and it was sent to one of the email registration accounts
     $password = user_password(8);
     if (empty($account)) {
