@@ -3,29 +3,23 @@
 
 /**
  * @file
- * Cleanup messages received from Gizmo.
+ * Cleanup messages received from miscellaneous sources.
  */
 
 /**
  * Implementation of hook_mailsave_clean().
  */
 function msg_format_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
-
-    $node->teaser = node_teaser($node->body);
-
-    if (empty($node->title) && empty($node->body)) {
-      $node->title = t('New Story');
-    }
-    // Set node title and reset the body if the author just puts short text in the body
-    if (empty($node->title) && !empty($node->body) && strlen($node->body) <= 60) {
-      $node->title = urldecode(truncate_utf8($body, 60, TRUE, TRUE));
-      $node->body = '';
-    }
-
-    // If there is no title and a long body, use body to set the title
-    if (empty($node->title) && !empty($node->body)) {
-      $node->title = urldecode(truncate_utf8($body, 60, TRUE, TRUE));
-    }
+  // Strip <title> tag.
+  $node->body = preg_replace('/<title>.*</title>/', '', $node->body);
+  $node->teaser = node_teaser($node->body);
+  // Set node title.
+  if (empty($node->title)) {
+    $node->title = truncate_utf8(decode_entities(strip_tags($node->body)), 60, TRUE, TRUE);
+  }
+  if (empty($node->title)) {
+    $node->title = t('New story');
+  }
 }
 
 function msg_format_mailsave_clean_info() {
@@ -35,6 +29,5 @@ function msg_format_mailsave_clean_info() {
     'author'      => 'Gabriela Rodriguez',
     'description' => t('Clean up MMS messages.'),
   );
-
   return $items;
 }
