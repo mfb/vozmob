@@ -1,0 +1,22 @@
+<?php
+// $Id$
+/**
+ * @file mm_auto_run.install
+ * Contains install and update functions for Media Mover Auto Run.
+ */
+
+/**
+ * Implementation of hook_install().
+ */
+function mm_auto_run_install() {
+  // Increase module weight so it runs after other modules which process files.
+  db_query("UPDATE {system} SET weight = 1 WHERE name = 'mm_auto_run'");
+}
+
+/**
+ * Increase module weight from 0 to 1.
+ */
+function mm_auto_run_update_6000() {
+  $ret[] = update_sql("UPDATE {system} SET weight = 1 WHERE name = 'mm_auto_run'");
+  return $ret;
+}
