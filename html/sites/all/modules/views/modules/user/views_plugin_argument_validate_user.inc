@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_argument_validate_user.inc,v 1.2.2.4 2010/03/11 01:23:34 merlinofchaos Exp $
+// $Id: views_plugin_argument_validate_user.inc,v 1.2.2.5 2010/06/16 20:17:44 merlinofchaos Exp $
 
 /**
  * Validate whether an argument is a valid user.
@@ -102,7 +102,7 @@ class views_plugin_argument_validate_user extends views_plugin_argument_validate
     // See if we're filtering users based on roles.
     if (!empty($this->options['restrict_roles']) && !empty($this->options['roles'])) {
       $roles = $this->options['roles'];
-      $acccont->roles = array();
+      $account->roles = array();
       $account->roles[] = $account->uid ? DRUPAL_AUTHENTICATED_RID : DRUPAL_ANONYMOUS_RID;
       $result = db_query('SELECT rid FROM {users_roles} WHERE uid = %d', $account->uid);
       while ($role = db_fetch_object($result)) {

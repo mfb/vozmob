@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field.inc,v 1.14.2.34 2010/04/08 21:38:38 merlinofchaos Exp $
+// $Id: views_handler_field.inc,v 1.14.2.36 2010/06/30 19:19:02 merlinofchaos Exp $
 /**
  * @defgroup views_field_handlers Views' field handlers
  * @{
@@ -94,6 +94,13 @@ class views_handler_field extends views_handler {
           else {
             $table_alias = $this->table_alias;
           }
+
+          if (empty($table_alias)) {
+            vpr(t('Handler @handler tried to add additional_field @identifier but @table could not be added!', array('@handler' => $this->definition['handler'], '@identifier' => $identifier, '@table' => $info['table'])));
+            $this->aliases[$identifier] = 'broken';
+            continue;
+          }
+
           $params = array();
           if (!empty($info['params'])) {
             $params = $info['params'];
@@ -304,7 +311,7 @@ class views_handler_field extends views_handler {
       $output = t('<p>You must add some additional fields to this display before using this field. These fields may be marked as <em>Exclude from display</em> if you prefer. Note that due to rendering order, you cannot use fields that come after this field; if you need a field not listed here, rearrange your fields.</p>');
       // We have some options, so make a list.
       if (!empty($options)) {
-        $output = t('<p>The following substitution patterns are available for this display. Use the pattern shown on the left to display the value indicated on the right. Note that due to rendering order, you cannot use fields that come after this field; if you need a field not listed here, rearrange your fields.</p>');
+        $output = t('<p>The following tokens are available for this field. Note that due to rendering order, you cannot use fields that come after this field; if you need a field not listed here, rearrange your fields.</p>');
         foreach (array_keys($options) as $type) {
           if (!empty($options[$type])) {
             $items = array();
@@ -504,7 +511,7 @@ class views_handler_field extends views_handler {
       $tokens = $this->get_render_tokens($alter);
       $value = $this->render_altered($alter, $tokens);
     }
- 
+
     if (!empty($alter['strip_tags'])) {
       $value = strip_tags($value);
     }

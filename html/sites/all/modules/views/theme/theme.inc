@@ -1,5 +1,5 @@
 <?php
-// $Id: theme.inc,v 1.73.2.29 2010/04/08 17:33:36 merlinofchaos Exp $
+// $Id: theme.inc,v 1.73.2.30 2010/06/16 19:18:23 merlinofchaos Exp $
 
 /**
  * @file theme.inc
@@ -414,8 +414,8 @@ function template_preprocess_views_view_grid(&$vars) {
       }
     }
     if ($row) {
-      // Fill up the last line.
-      if (count($rows)) {
+      // Fill up the last line only if it's configured, but this is default.
+      if (!empty($handler->options['fill_single_line']) || count($rows)) {
         for ($i = 0; $i < ($columns - $row_count); $i++) {
           $row[] = '';
         }
