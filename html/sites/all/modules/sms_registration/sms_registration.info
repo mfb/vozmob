@@ -2,7 +2,7 @@
 name = SMS registration
 description = Allow users to register through SMS or MMS email gateways using Mailhandler to receive email.
 dependencies[] = mailsave
+dependencies[] = mms_email_gateway
 dependencies[] = sms_user
-dependencies[] = sms_email_gateway
 core = 6.x 
 package = SMS Framework
