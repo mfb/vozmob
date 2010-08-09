@@ -1,0 +1,5 @@
+; $Id: features.info,v 1.1.2.1 2009/06/21 21:03:34 yhahn Exp $
+name = "Features"
+description = "Provides feature management for Drupal."
+core = 6.x
+package = "Features"
