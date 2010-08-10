@@ -15,7 +15,7 @@ $view->disabled = FALSE; /* Edit this to true to make a default view disabled in
 
 /* Display: Defaults */
 $handler = $view->new_display('default', 'Defaults', 'default');
-$handler->display->display_options['title'] = 'Feature story';
+$handler->display->display_options['title'] = 'Historia Destacada';
 $handler->display->display_options['access']['type'] = 'none';
 $handler->display->display_options['cache']['type'] = 'none';
 $handler->display->display_options['exposed_form']['type'] = 'basic';
@@ -152,13 +152,15 @@ $view->disabled = FALSE; /* Edit this to true to make a default view disabled in
 
 /* Display: Defaults */
 $handler = $view->new_display('default', 'Defaults', 'default');
-$handler->display->display_options['title'] = 'Recently featured stories';
+$handler->display->display_options['title'] = 'Historias Recientemente Destacadas';
+$handler->display->display_options['use_ajax'] = TRUE;
 $handler->display->display_options['access']['type'] = 'none';
 $handler->display->display_options['cache']['type'] = 'none';
 $handler->display->display_options['exposed_form']['type'] = 'basic';
-$handler->display->display_options['pager']['type'] = 'some';
+$handler->display->display_options['pager']['type'] = 'mini';
 $handler->display->display_options['pager']['options']['items_per_page'] = '5';
 $handler->display->display_options['pager']['options']['offset'] = '0';
+$handler->display->display_options['pager']['options']['id'] = '0';
 $handler->display->display_options['style_plugin'] = 'default';
 $handler->display->display_options['row_plugin'] = 'fields';
 /* Field: Content: Image (field_image) */
@@ -416,7 +418,8 @@ $view->disabled = FALSE; /* Edit this to true to make a default view disabled in
 
 /* Display: Defaults */
 $handler = $view->new_display('default', 'Defaults', 'default');
-$handler->display->display_options['title'] = 'New stories';
+$handler->display->display_options['title'] = 'Historias Nuevas';
+$handler->display->display_options['use_ajax'] = TRUE;
 $handler->display->display_options['use_more'] = TRUE;
 $handler->display->display_options['use_more_always'] = TRUE;
 $handler->display->display_options['use_more_text'] = 'More New Stories';
@@ -424,7 +427,7 @@ $handler->display->display_options['access']['type'] = 'none';
 $handler->display->display_options['cache']['type'] = 'none';
 $handler->display->display_options['exposed_form']['type'] = 'basic';
 $handler->display->display_options['pager']['type'] = 'some';
-$handler->display->display_options['pager']['options']['items_per_page'] = '5';
+$handler->display->display_options['pager']['options']['items_per_page'] = '10';
 $handler->display->display_options['pager']['options']['offset'] = '0';
 $handler->display->display_options['style_plugin'] = 'default';
 $handler->display->display_options['row_plugin'] = 'fields';
@@ -518,7 +521,8 @@ $handler->display->display_options['fields']['body']['field'] = 'body';
 $handler->display->display_options['fields']['body']['label'] = '';
 $handler->display->display_options['fields']['body']['alter']['alter_text'] = 0;
 $handler->display->display_options['fields']['body']['alter']['make_link'] = 0;
-$handler->display->display_options['fields']['body']['alter']['trim'] = 0;
+$handler->display->display_options['fields']['body']['alter']['trim'] = 1;
+$handler->display->display_options['fields']['body']['alter']['max_length'] = '160';
 $handler->display->display_options['fields']['body']['alter']['word_boundary'] = 1;
 $handler->display->display_options['fields']['body']['alter']['ellipsis'] = 1;
 $handler->display->display_options['fields']['body']['alter']['strip_tags'] = 0;
@@ -530,12 +534,6 @@ $handler->display->display_options['sorts']['created']['id'] = 'created';
 $handler->display->display_options['sorts']['created']['table'] = 'node';
 $handler->display->display_options['sorts']['created']['field'] = 'created';
 $handler->display->display_options['sorts']['created']['order'] = 'DESC';
-/* Filter: Node: Promoted to front page */
-$handler->display->display_options['filters']['promote']['id'] = 'promote';
-$handler->display->display_options['filters']['promote']['table'] = 'node';
-$handler->display->display_options['filters']['promote']['field'] = 'promote';
-$handler->display->display_options['filters']['promote']['value'] = '1';
-$handler->display->display_options['filters']['promote']['expose']['operator'] = FALSE;
 /* Filter: Node: Published */
 $handler->display->display_options['filters']['status']['id'] = 'status';
 $handler->display->display_options['filters']['status']['table'] = 'node';
@@ -553,6 +551,10 @@ $handler->display->display_options['filters']['type']['expose']['operator'] = FA
 
 /* Display: Page */
 $handler = $view->new_display('page', 'Page', 'page_1');
+$handler->display->display_options['defaults']['pager'] = FALSE;
+$handler->display->display_options['pager']['type'] = 'full';
+$handler->display->display_options['pager']['options']['items_per_page'] = '5';
+$handler->display->display_options['pager']['options']['offset'] = '0';
 $handler->display->display_options['path'] = 'stories';
 $handler->display->display_options['menu']['title'] = 'Home';
 $handler->display->display_options['menu']['description'] = 'Feature story';
