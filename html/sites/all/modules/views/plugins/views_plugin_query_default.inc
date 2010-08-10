@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_query_default.inc,v 1.1.2.22 2010/04/29 18:39:31 merlinofchaos Exp $
+// $Id: views_plugin_query_default.inc,v 1.1.2.23 2010/07/27 21:41:17 merlinofchaos Exp $
 /**
  * @file views_plugin_query_default.inc
  * Defines the default query object which builds SQL to execute using the
@@ -1031,7 +1031,7 @@ class views_plugin_query_default extends views_plugin_query{
    * Builds the necessary info to execute the query.
    */
   function build(&$view) {
-    $view->init_pager($view);
+    $view->init_pager();
 
     // Let the pager modify the query to add limits.
     $this->pager->query();

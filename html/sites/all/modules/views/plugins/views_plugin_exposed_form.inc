@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_exposed_form.inc,v 1.1.2.9 2010/01/19 21:53:07 merlinofchaos Exp $
+// $Id: views_plugin_exposed_form.inc,v 1.1.2.10 2010/07/27 22:40:09 merlinofchaos Exp $
 
 /**
  * The base plugin to handle exposed filter forms.
@@ -220,7 +220,7 @@ class views_plugin_exposed_form extends views_plugin {
    *   $view->exposed_raw_input
    */
   function exposed_form_submit(&$form, &$form_state, &$exclude) {
-    if (!empty($form_state['values']['op']) && $form_state['values']['op'] == t('Reset')) {
+    if (!empty($form_state['values']['op']) && $form_state['values']['op'] == t($this->options['reset_button_label'])) {
       $this->reset_form($form, $form_state);
     }
     if (isset($form_state['pager_plugin'])) {

@@ -1,5 +1,5 @@
 <?php
-// $Id: views.install,v 1.46.2.11 2010/06/16 20:37:25 merlinofchaos Exp $
+// $Id: views.install,v 1.46.2.12 2010/07/27 22:26:24 merlinofchaos Exp $
 /**
  * @file views.install
  * Contains install and update functions for Views.
@@ -283,7 +283,7 @@ function views_update_6001() {
     if (strlen($new) >= 32) {
       $new = md5($new);
     }
-    update_sql($ret, "UPDATE {blocks} SET delta = '$new' WHERE bid = $block->bid");
+    $ret[] = update_sql("UPDATE {blocks} SET delta = '$new' WHERE bid = $block->bid");
   }
 
   return $ret;

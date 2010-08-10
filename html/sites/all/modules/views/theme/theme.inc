@@ -1,5 +1,5 @@
 <?php
-// $Id: theme.inc,v 1.73.2.30 2010/06/16 19:18:23 merlinofchaos Exp $
+// $Id: theme.inc,v 1.73.2.31 2010/07/27 22:51:27 merlinofchaos Exp $
 
 /**
  * @file theme.inc
@@ -82,21 +82,11 @@ function template_preprocess_views_view(&$vars) {
   if (user_access('administer views') && module_exists('views_ui') && empty($view->hide_admin_links) && !variable_get('views_no_hover_links', FALSE)) {
     $vars['admin_links_raw'] = array(
       array(
-        'title' => t('Edit'),
+        'title' => t('Edit view'),
         'alt' => t("Edit this view"),
         'href' => "admin/build/views/edit/$view->name",
         'fragment' => 'views-tab-' . $view->current_display,
         'query' => drupal_get_destination(),
-      ),
-      array(
-        'title' => t('Export'),
-        'alt' => t("Export this view"),
-        'href' => "admin/build/views/export/$view->name",
-      ),
-      array(
-        'title' => t('Clone'),
-        'alt' => t("Create a copy of this view"),
-        'href' => "admin/build/views/clone/$view->name",
       ),
     );
 

@@ -26,6 +26,27 @@ Views 6.x-3.0-dev
     o SA-CONTRIB-2010-067: Fix CSRF and XSS vulnerabilities.
     o #841260: Introduce a field to evaluate math expressions. Relies on CTools 1.7 (not yet released).
     o by dereine:  allow test cases to add a example plugin.
+    o #727894 by stella: Give stronger classes on exposed widgets for easier theming.
+    o #768060 by EmanueleQuinto: Better empty field replacement that continues to respect other rewriting rules.
+    o #464490 by dereine: Allow links to specify that they are absolute.
+    o #780898 by ericduran: New display IDs not used until view is saved.
+    o #317653 by Steven Jones: Allow singular/plural formatting in numeric fields.
+    o #781050 by lewisvance: Performance improvement in unpack_options().
+    o #734706 by joachim: Use proper access control to prevent unregistered users from seeing links to inaccessible contact pages.
+    o #827188 by dereine: Comment ID field should be numeric, not the generic field handler.
+    o #827780 by dereine: Fix RSS feed live preview not getting proper PRE tags.
+    o #397252 by thekevinday: Allow "glossary" type views to do case insensitive searches.
+    o #780362 by ericduran: Validate display id when changed.
+    o #594402 by joachim: Clarify text on "Moderation" field.
+    o #839214 by AlexisWilke: Improve encoding on help text snippets.
+    o #792582 by ducktape: Validate that view names are not purely numeric, which cannot be loaded by views_get_view().
+    o #846054 by celeritas: Exposed form "Reset" button failed to reset if the name was changed in form options.
+    o #848506 by dereine: Add aggregator item ID as an aggregator field.
+    o #798764 by setvik: Fix broken AJAX in some IE circumstances due to odd IE behavior.
+    o #827300 by dereine: Fix authenticated users showing up as "No role" in role summary view.
+    o #857264 by dereine: Remove unneeded "clone" and "export" hover links.
+    o #611728 by incrn8: Respect db_rewrite_sql when choosing taxonomy terms for taxonomy filter.
+    o #746846 by lavamind: url encoding on options could cause visual problems in jump menu.
 
 Views 6.x-3.0-alpha3
     o #705668 by dereine: Fix glossary view, add tests for glossary view.

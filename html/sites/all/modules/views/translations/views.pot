@@ -1,4 +1,4 @@
-# $Id: views.pot,v 1.8.2.3 2010/03/11 23:05:35 merlinofchaos Exp $
+# $Id: views.pot,v 1.8.2.4 2010/07/27 21:51:44 merlinofchaos Exp $
 #
 # LANGUAGE translation of Drupal (general)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
@@ -823,7 +823,7 @@ msgid "A date in any machine readable format. CCYY-MM-DD HH:MM:SS is preferred."
 msgstr ""
 
 #: handlers/views_handler_filter_date.inc:27
-msgid "An offset from the current time such as \"+1 day\" or \"-2 hours -30 minutes""
+msgid "An offset from the current time such as \"+1 day\" or \"-2 hours -30 minutes\""
 msgstr ""
 
 #: handlers/views_handler_filter_date.inc:77;83;87
