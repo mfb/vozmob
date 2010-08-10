@@ -96,3 +96,9 @@ div.view-features ul li {
 div.view-features ul.pager {
   float: left;
 }
+
+div.view-id-feature div.view-content { width: 690px; height: 320px; }
+div.view-id-feature div.views-row-2, div.view-id-feature div.views-row-3, div.view-id-feature div.views-row-4, div.view-id-feature div.views-row-5 { display: none; }
+#feature-cycle-nav { position: relative; top: -50px; left: 300px; }
+a#feature-cycle-prev, a#feature-cycle-next { z-index: 10; }
+div.view-id-feature .views-row { width: 690px; }

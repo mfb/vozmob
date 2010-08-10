@@ -1,6 +1,13 @@
 // $Id$
 
-Drupal.behaviors.overlayCycle = function() {
+Drupal.behaviors.featureCycle = function(context) {
+  $('div.view-id-feature div.view-content:not(.feature-cycle-processed)', context)
+    .addClass('feature-cycle-processed')
+    .cycle({fx: 'scrollHorz', timeout: 10000, prev: '#feature-cycle-prev', next: '#feature-cycle-next',
+     prevNextClick: function(isNext, zeroBasedSlideIndex, slideElement) { $('div.view-id-feature div.view-content').cycle('pause'); } });
+}
+
+Drupal.behaviors.overlayCycle = function(context) {
   // Set up the overlay and expose behaviors.
   $('div.field-field-image div.field-items a, div.overlay-launcher a').each(function() {
     // Get the nid for this image field and set the rel attribute to the overlay for this node.
