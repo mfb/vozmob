@@ -1,0 +1,5 @@
+; $Id: masquerade.info,v 1.2.2.1 2008/09/25 12:04:19 deekayen Exp $
+name = Masquerade
+description = "This module allows permitted users to masquerade as other users."
+core = 6.x
+php = 5.1
