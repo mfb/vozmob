@@ -39,8 +39,8 @@ drupal_add_js(drupal_get_path('theme', 'blueprint') . '/scripts/cycle.js', 'them
   <?php endif; ?>
 
   <span id="feature-cycle-nav">
-    <a href="#" id="feature-cycle-prev"><?php print theme('image', drupal_get_path('theme', 'blueprint') . '/images/arrow-l-sm.png', t('Previous story'), t('Previous story')); ?></a>
-    <a href="#" id="feature-cycle-next"><?php print theme('image', drupal_get_path('theme', 'blueprint') . '/images/arrow-r-sm.png', t('Next story'), t('Next story')); ?></a>
+    <a href="#" id="feature-cycle-prev" title="<?php print t('Previous story'); ?>"></a>
+    <a href="#" id="feature-cycle-next" title="<?php print t('Next story'); ?>"></a>
   </span>
 
   <?php if ($header): ?>

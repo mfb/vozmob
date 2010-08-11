@@ -100,5 +100,9 @@ div.view-features ul.pager {
 div.view-id-feature div.view-content { width: 690px; height: 320px; }
 div.view-id-feature div.views-row-2, div.view-id-feature div.views-row-3, div.view-id-feature div.views-row-4, div.view-id-feature div.views-row-5 { display: none; }
 #feature-cycle-nav { position: relative; top: -50px; left: 300px; }
-a#feature-cycle-prev, a#feature-cycle-next { z-index: 10; }
+a#feature-cycle-prev, a#feature-cycle-next { z-index: 10; display: inline-block; width: 17px; height: 16px; }
+a#feature-cycle-prev { background-image: url(../images/arrow-l-sm.png); }
+a#feature-cycle-next { background-image: url(../images/arrow-r-sm.png); }
+a#feature-cycle-prev:hover { background-image: url(../images/arrow-l-sm-hover.png); }
+a#feature-cycle-next:hover { background-image: url(../images/arrow-r-sm-hover.png); }
 div.view-id-feature .views-row { width: 690px; }
