@@ -1,0 +1,125 @@
+# $Id$
+#
+# Swedish translation of Drupal (imagecache_profiles)
+# Generated from files:
+#  imagecache_profiles.module,v 1.4.2.16 2010/03/25 10:58:23 andypost
+#  imagecache_profiles.info,v 1.1.4.1 2008/12/19 18:05:14 v1nce
+#  imagecache_profiles.install,v 1.1.2.2 2009/08/29 14:02:17 andypost
+#  imagecache_profiles_handler_field_user_picture.inc,v 1.1.2.7 2010/03/24 15:28:43 andypost
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Imagecache Profiles 6.x\n"
+"POT-Creation-Date: 2010-03-30 14:04+0200\n"
+"PO-Revision-Date: 2010-03-30 14:20+0100\n"
+"Last-Translator: Magnus Gunnarsson <magnus.gunnarsson76@gmail.com>\n"
+"Language-Team: drupalsverige.se\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+"X-Poedit-Language: Swedish\n"
+"X-Poedit-Country: SWEDEN\n"
+"X-Poedit-SourceCharset: utf-8\n"
+
+#: imagecache_profiles.module:10
+#: imagecache_profiles.info:0
+msgid "Utilizes imagecache presets for user profile pictures."
+msgstr "Använder Imagecaches förinställningar för användares profilbilder."
+
+#: imagecache_profiles.module:67
+msgid "@user's picture"
+msgstr "bild för @user"
+
+#: imagecache_profiles.module:67
+msgid "Anonymous"
+msgstr "Gäst"
+
+#: imagecache_profiles.module:74
+msgid "View user profile."
+msgstr "Visa användarprofil."
+
+#: imagecache_profiles.module:100;186
+msgid "Profile picture preset"
+msgstr "Förinställd bild för profilbild"
+
+#: imagecache_profiles.module:103
+msgid "This will set the picture size when viewing a user's profile page."
+msgstr "Detta kommer att ange bildstorlek vid visning av en användares profilsida."
+
+#: imagecache_profiles.module:108;187
+msgid "Comment picture preset"
+msgstr "Förinställd bild för kommentar"
+
+#: imagecache_profiles.module:111
+msgid "This will set the picture size when viewing a comment post."
+msgstr "Detta kommer att ange bildstorlek vid visning av ett kommentarinlägg."
+
+#: imagecache_profiles.module:116;188
+msgid "Default picture preset"
+msgstr "Förinställd standardbild"
+
+#: imagecache_profiles.module:119
+msgid "This will set the default user picture size throughout the site."
+msgstr "Detta kommer att ange standardbilden för användare på webbplatsen."
+
+#: imagecache_profiles.module:124
+msgid "Picture minimum width"
+msgstr "Minsta bredd på bild"
+
+#: imagecache_profiles.module:126
+msgid "Minimum width dimension for picture, in pixels. To prevent upscaling this value should be set to your maximum imagecache preset width."
+msgstr "Minsta bredd för bild i pixlar. För att förhindra uppskalning bör detta värde vara satt till din största förinställda bredd för ImageCache."
+
+#: imagecache_profiles.module:132
+msgid "Picture minimum height"
+msgstr "Minsta höjd på bild"
+
+#: imagecache_profiles.module:134
+msgid "Minimum height dimension for picture, in pixels. To prevent upscaling this value should be set to your maximum imagecache preset height."
+msgstr "Minsta höjd för bild i pixlar. För att förhindra uppskalning bör detta värde vara satt till din största förinställda höjd för ImageCache."
+
+#: imagecache_profiles.module:209
+msgid "The imagecache profile setting %setting was deleted."
+msgstr "ImageCaches profilinställning %setting raderades."
+
+#: imagecache_profiles.module:213
+msgid "The imagecache profile setting %setting was changed."
+msgstr "ImageCaches profilinställning %setting ändrades."
+
+#: imagecache_profiles.module:229
+msgid "Minimum dimensions are %dimensions."
+msgstr "Minsta mått är %dimensions."
+
+#: imagecache_profiles.module:232
+msgid "Minimum width is %width."
+msgstr "Minsta bredd är %width."
+
+#: imagecache_profiles.module:236
+msgid "Minimum height is %height."
+msgstr "Minsta höjd är %height."
+
+#: imagecache_profiles.module:255
+msgid "Your picture must be at least @min_user_picture_width pixels wide and @min_user_picture_height pixels tall (your image was @width x @height pixels)."
+msgstr "Din bild måste vara minst @min_user_picture_width pixlar bred och @min_user_picture_height pixlar högl (din bild var @width x @height pixlar)."
+
+#: imagecache_profiles.install:26
+msgid "%var updated from %value to %presetid"
+msgstr "%var uppdaterad från %value till %presetid"
+
+#: imagecache_profiles.install:36
+msgid "%var not updated: no imagecache preset could be found for %value. <a href=\"@settings_page\"> Update your profile picture presets manually </a>"
+msgstr "%var ej uppdaterad: inga förinställningar för ImageCache kunde hittas för %value. <a href=\"@settings_page\">Uppdatera dina förinställningar för profilbilder manuellt </a>"
+
+#: imagecache_profiles.info:0
+msgid "Imagecache Profile Pictures"
+msgstr "Imagecache för profilbilder"
+
+#: imagecache_profiles.info:0
+msgid "ImageCache"
+msgstr "ImageCache"
+
+#: views/imagecache_profiles_handler_field_user_picture.inc:23
+msgid "Imagecache preset"
+msgstr "Förinställning för Imagecache"
+
