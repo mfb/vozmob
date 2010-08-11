@@ -106,3 +106,6 @@ a#feature-cycle-next { background-image: url(../images/arrow-r-sm.png); }
 a#feature-cycle-prev:hover { background-image: url(../images/arrow-l-sm-hover.png); }
 a#feature-cycle-next:hover { background-image: url(../images/arrow-r-sm-hover.png); }
 div.view-id-feature .views-row { width: 690px; }
+
+div.col-right div.block-views div.item-list ul { margin: 0; padding:0 0 20px; }
+div.col-right div.block-views div.item-list ul li { clear: both; display: block; list-style-image: none; list-style-type: none; }
