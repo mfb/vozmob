@@ -16,23 +16,39 @@
   <!--[if lte IE 6]>
   	<link href="<?php print $path; ?>css/ie6.css" rel="stylesheet"  type="text/css"  media="screen, projection" />
   <![endif]-->  
+  <link rel="stylesheet" href="<?php print $path; ?>css/daniel.css" type="text/css" media="screen, projection">
+  <link rel="stylesheet" href="<?php print $path; ?>css/poonam.css" type="text/css" media="screen, projection">
+  <link rel="stylesheet" href="<?php print $path; ?>css/sarah.css" type="text/css" media="screen, projection">
 </head>
 
 <body class="<?php print $body_classes; ?>">
 
-<div class="container">
+
+
+<div id="header_wrap"><!--header_wrap to contain header outside of main container div-->
+
   <div id="header">
+  <?php print l('', '<front>', array('attributes' => array('class' => 'home-link'))); ?>  
+  <div id="headerinner"><?php print $header; ?></div>
     <h1 id="logo">
       <a title="<?php print $site_name; ?><?php if ($site_slogan != '') print ' &ndash; '. $site_slogan; ?>" href="<?php print url(); ?>"><?php print $site_name; ?><?php if ($site_slogan != '') print ' &ndash; '. $site_slogan; ?></a>
     </h1>
-    <?php print $header; ?>
+    
+   
+  </div>
+  
+   <div id="menu">
+    
     <?php if (isset($primary_links)) : ?>
-      <?php print theme('links', $primary_links, array('id' => 'nav', 'class' => 'links')) ?>
+      <?php print theme('links', $primary_links, array('id' => 'nav', 'class' => 'header_links')) ?>
     <?php endif; ?>
     <?php if (isset($secondary_links)) : ?>
-      <?php print theme('links', $secondary_links, array('id' => 'subnav', 'class' => 'links')) ?>
+      <?php print theme('links', $secondary_links, array('id' => 'subnav', 'class' => 'header_links')) ?>
     <?php endif; ?>    
-  </div>
+    </div>
+</div><!--end #header_wrap-->
+
+<div class="container">
 
   <?php if ($left): ?>
     <div class="<?php print $left_classes; ?>"><?php print $left; ?></div>
@@ -62,14 +78,16 @@
       print $feed_icons;
     ?>
 
+
+        <div id="">
+
     <?php if ($footer_message | $footer): ?>
-      <div id="footer" class="clear">
-        <?php if ($footer): ?>
-          <?php print $footer; ?>
-        <?php endif; ?>
-        <?php if ($footer_message): ?>
-          <div id="footer-message"><?php print $footer_message; ?></div>
-        <?php endif; ?>
+      <div id="" class="clear">
+       
+       
+        
+        
+   </div>     
       </div>
     <?php endif; ?>
   </div>
@@ -84,5 +102,32 @@
 
 </div>
 
+<div id="footer">
+<div id="footer2">
+<a href=""><img src="http://designaction.org/clients/vozmob/images/footer/copy_left.png" /></a>
+<ul>
+<li><a href ="">Contact Info</a></li>
+<li>/</li>
+<li><a href ="">About Vozmob</a></li>
+<li>/</li>
+<li><a href ="">Subscribe</a></li>
+<li>/</li>
+<li><a href ="">Login</a></li>
+<li>/</li>
+</ul>
+<a href=""><img src="http://designaction.org/clients/vozmob/images/footer/idepsca.png" /></a>
+<a href=""><img src="http://designaction.org/clients/vozmob/images/footer/annenberg.png" /></a>
+<p>Powered by</p>
+<a href=""><img src="http://designaction.org/clients/vozmob/images/footer/drupal.png" /></a>
+
+
+<?php if ($footer): ?>
+         
+        <?php endif; ?>
+        
+        <?php if ($footer_message): ?>
+
+        <?php endif; ?></div></div>
 </body>
 </html>
+
