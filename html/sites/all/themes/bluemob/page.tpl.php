@@ -16,9 +16,6 @@
   <!--[if lte IE 6]>
   	<link href="<?php print $path; ?>css/ie6.css" rel="stylesheet"  type="text/css"  media="screen, projection" />
   <![endif]-->  
-  <link rel="stylesheet" href="<?php print $path; ?>css/daniel.css" type="text/css" media="screen, projection">
-  <link rel="stylesheet" href="<?php print $path; ?>css/poonam.css" type="text/css" media="screen, projection">
-  <link rel="stylesheet" href="<?php print $path; ?>css/sarah.css" type="text/css" media="screen, projection">
 </head>
 
 <body class="<?php print $body_classes; ?>">
