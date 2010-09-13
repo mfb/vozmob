@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_display.inc,v 1.20.2.40 2010/06/17 02:47:02 merlinofchaos Exp $
+// $Id: views_plugin_display.inc,v 1.20.2.42 2010/07/27 22:25:04 merlinofchaos Exp $
 /**
  * @file
  * Contains the base display plugin.
@@ -1065,7 +1065,7 @@ class views_plugin_display extends views_plugin {
         $form['display_id'] = array(
           '#type' => 'textfield',
           '#description' => t('This is machine name of the display.'),
-          '#default_value' => $this->display->id,
+          '#default_value' => !empty($this->display->new_id) ? $this->display->new_id : $this->display->id,
           '#required' => TRUE,
           '#size' => 64,
         );
@@ -1671,6 +1671,10 @@ class views_plugin_display extends views_plugin {
       break;
       case 'display_id':
         if ($form_state['values']['display_id']) {
+          if (preg_match('/[^a-zA-Z0-9_]/', $form_state['values']['display_id'])) {
+            form_error($form['display_id'], t('Display id must be alphanumeric or underscores only.'));
+          }
+
           foreach ($this->view->display as $id => $display) {
             if ($id != $this->view->current_display && ($form_state['values']['display_id'] == $id || $form_state['values']['display_id'] == $display->new_id)) {
               form_error($form['display_id'], t('Display id should be unique.'));
@@ -1728,7 +1732,7 @@ class views_plugin_display extends views_plugin {
     $section = $form_state['section'];
     switch ($section) {
       case 'display_id':
-        if ($this->display->id != $form_state['values']['display_id']) {
+        if (isset($form_state['values']['display_id'])) {
           $this->display->new_id = $form_state['values']['display_id'];
         }
         break;

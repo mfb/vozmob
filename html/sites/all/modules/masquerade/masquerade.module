@@ -1,0 +1,702 @@
+<?php
+// $Id: masquerade.module,v 1.16.2.42 2010/07/22 13:41:19 deekayen Exp $
+
+/**
+ * @file masquerade.module
+ *
+ * The masquerade module allows administrators to masquerade as other user.
+ */
+
+/**
+ * Implementation of hook_help().
+ */
+function masquerade_help($path, $arg) {
+  switch ($path) {
+    case 'admin/help#masquerade':
+      return t('<p>The masquerade module adds a link on a user\'s profile page that allows permitted users to masquerade as that user. Upon masquerading, a link to "switch back" to the original user will appear in the menu. While masquerading, the option to masquerade as another user will not appear. All masquerading transactions are logged, and $user->masquerading will be set; this could be displayed via theme.</p><p>In the masquerade settings a list of roles are presented; any checked role is considered an "administrator" and requires the second level "masquerade as admin" permission to masquerade as. User #1 is automatically considered an administrator, regardless of roles.</p>');
+    case 'admin/settings/masquerade':
+      return t('Only the users with <strong>masquerade as admin</strong> permission, will be able to masquerade as the users who belong to the roles selected below. User #1 is automatically considered an administrator, regardless of roles.');
+  }
+}
+
+/**
+ * Implementation of hook_perm().
+ *
+ * @return array
+ */
+function masquerade_perm() {
+  return array('masquerade as user', 'masquerade as admin');
+}
+
+/**
+ * Implementation of hook_init().
+ */
+function masquerade_init() {
+  global $user;
+
+  // load from table uid + session id
+  $uid = db_result(db_query("SELECT uid_from FROM {masquerade} WHERE sid = '%s' AND uid_as = %d", session_id(), $user->uid));
+  // using if so that we get unset rather than false if not masqing
+  if ($uid) {
+    $_SESSION['masquerading'] = $uid;
+  }
+  else {
+    $_SESSION['masquerading'] = null;
+  }
+}
+
+/**
+ * Implementation of hook_cron()
+ *
+ * Cleanup masquerade records where people didn't use the switch back link
+ * that would have cleanly removed the user switch record.
+ */
+function masquerade_cron() {
+  // see http://drupal.org/node/268487 before modifying this query
+  db_query('DELETE FROM {masquerade} WHERE sid NOT IN (SELECT s.sid FROM {sessions} AS s)');
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+function masquerade_menu() {
+  $items = array();
+
+  $default_test_user = _masquerade_user_load(variable_get('masquerade_test_user', ''));
+  if ($default_test_user && ($default_test_user->uid || $default_test_user->name == variable_get('anonymous', t('Anonymous')))) {
+    $items['masquerade/switch/' . $default_test_user->uid] = array(
+      'title' => 'Masquerade as @testuser',
+      'title arguments' => array('@testuser' => $default_test_user->name),
+      'page callback' => 'masquerade_switch_user_page',
+      'page arguments' => array(2),
+      'access callback' => 'masquerade_access',
+      'access arguments' => array('switch'),
+      'type' => MENU_NORMAL_ITEM,
+    );
+  }
+
+  $items['masquerade/switch/%'] = array(
+    'title' => 'Masquerading',
+    'page callback' => 'masquerade_switch_user_page',
+    'page arguments' => array(2),
+    'access callback' => 'masquerade_access',
+    'access arguments' => array('switch', 2),
+    'type' => MENU_NORMAL_ITEM,
+  );
+  $items['masquerade/unswitch'] = array(
+    'title' => 'Switch back',
+    'page callback' => 'masquerade_switch_back_page',
+    'access callback' => 'masquerade_access',
+    'access arguments' => array('unswitch'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+  $items['masquerade/autocomplete'] = array(
+    'title' => '',
+    'page callback' => 'masquerade_autocomplete',
+    'access callback' => 'masquerade_access',
+    'access arguments' => array('autocomplete'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['masquerade/autocomplete/multiple'] = array(
+    'title' => '',
+    'page callback' => 'masquerade_autocomplete_multiple',
+    'access callback' => 'masquerade_access',
+    'access arguments' => array('autocomplete'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['masquerade/autocomplete-user'] = array(
+    'title' => 'Masquerade autocomplete',
+    'page callback' => 'masquerade_autocomplete_user',
+    'access arguments' => array('access user profiles'),
+    'type' => MENU_CALLBACK,
+  );
+  $items['admin/settings/masquerade'] = array(
+    'title' => 'Masquerade',
+    'description' => 'Masquerade module allows administrators to masquerade as other users.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('masquerade_admin_settings'),
+    'access callback' => 'user_access',
+    'access arguments' => array('administer permissions'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
+}
+
+/**
+ * Implementation of hook_menu_link_alter().
+ *
+ * We need to add a token to the Masquerade paths to protect against CSRF
+ * attacks. Since menu items in Drupal do not support dynamic elements these
+ * tokens need to be added during rendering via an implementation of
+ * hook_translated_menu_link_alter. Set the 'alter'-option to TRUE to make sure
+ * the links get passed through hook_translated_menu_link_alter.
+ */
+function masquerade_menu_link_alter(&$item) {
+  if (($item['page callback'] == 'masquerade_switch_user_page') || ($item['page callback'] == 'masquerade_switch_back_page')) {
+    $item['options']['alter'] = TRUE;
+  }
+}
+
+/**
+ * Implementation of hook_translated_menu_link_alter().
+ *
+ * Dynamically add the CSRF protection token to the Masquerade menu items.
+ */
+function masquerade_translated_menu_link_alter(&$item, $map) {
+  if ($item['page_callback'] == 'masquerade_switch_user_page' && isset($map[2])) {
+    $item['localized_options']['query']['token'] = drupal_get_token('masquerade/switch/' . $map[2]);
+  }
+  elseif ($item['page_callback'] == 'masquerade_switch_back_page') {
+    $item['localized_options']['query']['token'] = drupal_get_token('masquerade/unswitch');
+  }
+}
+
+
+/**
+ * Determine if the current user has permission to switch users.
+ *
+ * @param string $type
+ *   Either 'switch', 'unswitch', 'user', or 'autocomplete'.
+ *
+ * @param object $uid
+ *   An optional parameter indicating a specific uid to switch to.
+ *   Otherwise, return if the user can switch to any user account.
+ *
+ * @return
+ *   TRUE, if the user can perform the requested action, FALSE otherwise.
+ */
+function masquerade_access($type, $uid = NULL) {
+  switch ($type) {
+    case 'unswitch':
+      return !empty($_SESSION['masquerading']) || arg(2) == 'menu-customize' || arg(2) == 'menu';
+    case 'autocomplete':
+      return !empty($_SESSION['masquerading']) || (user_access('masquerade as user') || user_access('masquerade as admin'));
+      break;
+    case 'user':
+      global $user;
+      return db_result(db_query("SELECT TRUE FROM {masquerade_users} WHERE uid_from = %d", $user->uid));
+      break;
+    case 'switch':
+      global $user;
+      if ($uid) {
+        if (!is_numeric($uid)) {
+          return FALSE;
+        }
+        $account = user_load(array('uid' => $uid));
+        $switch_to_account = db_result(db_query("SELECT TRUE FROM {masquerade_users} WHERE uid_from = %d AND uid_to = %d", $user->uid, $account->uid));
+      }
+      return empty($_SESSION['masquerading']) && (user_access('masquerade as user') || user_access('masquerade as admin') || $switch_to_account);
+      break;
+  }
+}
+
+function masquerade_admin_settings() {
+  // create a list of roles; all selected roles are considered administrative.
+  $rids = array();
+  $result = db_query("SELECT r.rid, r.name FROM {role} r ORDER BY r.name");
+  while ($obj = db_fetch_object($result)) {
+    $rids[$obj->rid] = $obj->name;
+  }
+
+  $form['masquerade_admin_roles'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Roles that are considered "administrators" for masquerading'),
+    '#options' => $rids,
+    '#default_value' => variable_get('masquerade_admin_roles', array()),
+  );
+
+  $test_name = _masquerade_user_load(variable_get('masquerade_test_user', ''));
+
+  $form['masquerade_test_user'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Menu <em>Quick Switch</em> user'),
+    '#autocomplete_path' => 'masquerade/autocomplete',
+    '#default_value' => isset($test_name->name) ? check_plain($test_name->name) : '',
+    '#description' => t('Enter the username of an account you wish to switch easily between via a menu item.'),
+    '#maxlength' => NULL,
+  );
+
+  $quick_switch_users = array();
+  foreach ((variable_get('masquerade_quick_switches', array())) as $uid) {
+    $u = user_load(array('uid' => $uid));
+    if ($uid == 0) {
+      $u->name = variable_get('anonymous', t('Anonymous'));
+    }
+    $quick_switch_users[] = $u->name;
+  }
+  $form['masquerade_quick_switches'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Masquerade Block <em>Quick Switch</em> users'),
+    '#autocomplete_path' => 'masquerade/autocomplete/multiple',
+    '#default_value' => !empty($quick_switch_users) ? implode(', ', $quick_switch_users) : '',
+    '#description' => t('Enter the usernames, separated by commas, of accounts to show as quick switch links in the Masquerade block.'),
+    '#maxlength' => NULL,
+  );
+
+  $form = system_settings_form($form);
+  $form['#validate'][] = 'masquerade_admin_settings_validate';
+  $form['#submit'][] = 'masquerade_admin_settings_submit';
+
+  return $form;
+}
+
+function masquerade_admin_settings_validate($form, &$form_state) {
+  if (!empty($form_state['values']['masquerade_test_user'])) {
+    $test_user = _masquerade_user_load($form_state['values']['masquerade_test_user']);
+    if (!$test_user) {
+      form_set_error('masquerade_test_user', t('%user does not exist. Please enter a valid username.', array('%user' => $form_state['values']['masquerade_test_user'])));
+    }
+  }
+  // Needs to rebuild menu in masquerade_admin_settings_submit().
+  $form_state['masquerade_rebuild_menu'] = (variable_get('masquerade_test_user', '') != $form_state['values']['masquerade_test_user']);
+
+  // A comma-separated list of users.
+  $masquerade_switches = drupal_explode_tags($form_state['values']['masquerade_quick_switches']);
+  // Change user names to user ID's for system_settings_form_submit() to save.
+  $masquerade_uids = array();
+  foreach ($masquerade_switches as $switch_user) {
+    $test_user = _masquerade_user_load($switch_user);
+    if (!$test_user) {
+      form_set_error('masquerade_quick_switches', t('%user does not exist. Please enter a valid username.', array('%user' => $switch_user)));
+    }
+    else {
+      $masquerade_uids[] = $test_user->uid;
+    }
+  }
+  $form_state['values']['masquerade_quick_switches'] = $masquerade_uids;
+}
+
+function masquerade_admin_settings_submit($form, &$form_state) {
+  // Rebuild the menu system so the menu "Quick Switch" user is updated.
+  if ($form_state['masquerade_rebuild_menu']) {
+    menu_rebuild();
+  }
+}
+
+/**
+ * Wrapper around user_load() to allow the loading of anonymous users.
+ *
+ * @param $username
+ *   The username of the user you wish to load (i.e. $user->name). To load the
+ *   anonymous user, pass the value of the 'anonymous' variable.
+ *
+ * @return
+ *   A fully-loaded $user object upon successful user load or FALSE if user
+ *   cannot be loaded.
+ */
+function _masquerade_user_load($username) {
+  if (!empty($username)) {
+    $user = '';
+    $anon = variable_get('anonymous', t('Anonymous'));
+    if ($username == $anon) {
+      $user = user_load(array('name' => ''));
+      $user->name = $anon;
+    }
+    else {
+      $user = user_load(array('name' => $username));
+    }
+    return $user;
+  }
+  return FALSE;
+}
+
+/**
+ * Implementation of hook_user().
+ */
+function masquerade_user($op, &$edit, &$edit_user, $category = NULL) {
+  static $old_session_id;
+
+  switch ($op) {
+
+    case 'logout':
+      if (!empty($edit_user->masquerading)) {
+        global $user;
+        cache_clear_all($user->uid, 'cache_menu', true);
+        $real_user = user_load(array('uid' => $user->masquerading));
+        watchdog('masquerade', "User %user no longer masquerading as %masq_as.", array('%user' => $real_user->name, '%masq_as' => $user->name), WATCHDOG_INFO);
+        db_query("DELETE FROM {masquerade} WHERE sid = '%s' AND uid_as = %d", session_id(), $edit_user->uid);
+      }
+      break;
+
+    case 'view':
+      // check if user qualifies as admin
+      $roles = array_keys(array_filter(variable_get('masquerade_admin_roles', array())));
+      $perm = $edit_user->uid == 1 || array_intersect(array_keys((array)$edit_user->roles), $roles) ?
+        'masquerade as admin' :
+        'masquerade as user';
+
+      global $user;
+      if (user_access($perm) && empty($edit_user->masquerading) && $user->uid != $edit_user->uid) {
+        $edit_user->content['Masquerade'] = array('#value' => l(t('Masquerade as !user', array('!user' => $edit_user->name)), 'masquerade/switch/'. $edit_user->uid, array('query' => array('token' => drupal_get_token('masquerade/switch/'. $edit_user->uid)), 'destination' => $_GET['q'], 'attributes' => array('class' => 'masquerade-switch'))),
+          '#weight' => 10
+        );
+      }
+      break;
+
+    case 'form':
+      $form = array();
+      if ($category == 'account') {
+        $form['masquerade'] = array(
+          '#type' => 'fieldset',
+          '#title' => t('Masquerade settings'),
+          '#access' => user_access('administer permissions'),
+        );
+        $result = db_query("SELECT uid_to FROM {masquerade_users} WHERE uid_from = %d", $edit_user->uid);
+        $masquerade_users = array();
+        while ($uid_to = db_result($result)) {
+          $u = user_load($uid_to);
+          $masquerade_users[] = $u->name;
+        }
+        $form['masquerade']['masquerade_users'] = array(
+          '#type' => 'textfield',
+          '#title' => t('Enter the users this user is able to masquerade as'),
+          '#description' => t('Enter a comma separated list of user names that this user can masquerade as.'),
+          '#autocomplete_path' => 'masquerade/autocomplete-user',
+          '#default_value' => implode(", ", $masquerade_users),
+        );
+      }
+      return $form;
+      break;
+
+    case 'validate':
+      if ($category == 'account' && isset($edit['masquerade_users'])) {
+        $users = drupal_explode_tags($edit['masquerade_users']);
+        foreach ($users as $user) {
+          if (!user_load(array('name' => $user))) {
+            form_set_error('masquerade_users', t('%user is not a valid user name.', array('%user' => $user)));
+          }
+        }
+      }
+      break;
+
+    case 'submit':
+      $old_session_id = session_id();
+      break;
+
+    case 'update':
+      if ($category == 'account') {
+        $users = drupal_explode_tags($edit['masquerade_users']);
+        db_query("DELETE FROM {masquerade_users} WHERE uid_from = %d", $edit_user->uid);
+        foreach ($users as $user) {
+          $u = user_load(array('name' => $user));
+          db_query("INSERT INTO {masquerade_users} VALUES (%d, %d)", $edit_user->uid, $u->uid);
+        }
+        $edit['masquerade_users'] = NULL;
+      }
+      break;
+
+    case 'after_update':
+      if (isset($old_session_id) && session_id() != $old_session_id) {
+        db_query("UPDATE {masquerade} SET sid = '%s' WHERE sid = '%s'", session_id(), $old_session_id);
+      }
+      break;
+  }
+}
+
+/**
+ * Implementation of hook_block().
+ */
+function masquerade_block($op = 'list', $delta = 0, $edit = array()) {
+  switch ($op) {
+    case 'list':
+      $blocks[0]['info'] =  t('Masquerade');
+      $blocks[0]['cache'] = BLOCK_CACHE_PER_USER;
+      return $blocks;
+    case 'view':
+      switch ($delta) {
+        case 0:
+          if (masquerade_access('autocomplete') || masquerade_access('user')) {
+            $block['subject'] = t('Masquerade');
+            $block['content'] = drupal_get_form('masquerade_block_1');
+            return $block;
+          }
+          break;
+      }
+      break;
+  }
+}
+
+/**
+ * Masquerade block form.
+ */
+function masquerade_block_1($record) {
+  global $user;
+  $markup_value = '';
+  if ($_SESSION['masquerading']) {
+    $quick_switch_link[] = l(t('Switch back'), 'masquerade/unswitch', array('query' => array('token' => drupal_get_token('masquerade/unswitch'))));
+    if ($user->uid > 0) {
+      $markup_value = t('You are masquerading as <a href="@user-url">%masq_as</a>.', array('@user-url' => url('user/' . $user->uid), '%masq_as' => $user->name)) . theme('item_list', $quick_switch_link);
+    }
+    else {
+      $markup_value = t('You are masquerading as %anonymous.', array('%anonymous' => variable_get('anonymous', t('Anonymous'))))  . theme('item_list', $quick_switch_link);
+    }
+  }
+  else {
+    $masquerade_switches = variable_get('masquerade_quick_switches', array());
+
+    // Add in user-specific switches.
+    $result = db_query("SELECT uid_to FROM {masquerade_users} WHERE uid_from = %d", $user->uid);
+    while ($uid_to = db_result($result)) {
+      $masquerade_switches[] = $uid_to;
+    }
+
+    foreach ($masquerade_switches as $switch_user) {
+      if (!isset($_SESSION['user']->uid) || $switch_user != $_SESSION['user']->uid) {
+        $user_name = user_load(array('uid' => $switch_user));
+        $switch_link = 'masquerade/switch/'. $user_name->uid;
+        if ($user_name->uid) {
+          $quick_switch_link[] = l($user_name->name, $switch_link, array('query' => array('token' => drupal_get_token($switch_link))));
+        }
+        if ($switch_user == 0) {
+          $user_name->name = variable_get('anonymous', t('Anonymous'));
+          $quick_switch_link[] = l($user_name->name, $switch_link, array('query' => array('token' => drupal_get_token($switch_link))));
+        }
+      }
+    }
+
+    if (masquerade_access('autocomplete')) {
+      $markup_value .= t('Enter the username to masquerade as.') . '<br /><br />';
+      $form['masquerade_user_field'] = array(
+        '#prefix' => '<div class="container-inline">',
+        '#type' => 'textfield',
+        '#size' => '18',
+        '#default_value' => $_SESSION['masquerading'] ? t('Switch back to use') : '',
+        '#autocomplete_path' => 'masquerade/autocomplete',
+        '#required' => TRUE,
+      );
+      $form['submit'] = array(
+        '#type' => 'submit',
+        '#value' => t('Go'),
+        '#suffix' => '</div>',
+      );
+    }
+
+    if (isset($quick_switch_link) && count($quick_switch_link)) {
+      $markup_value .= '<div id="quick_switch_links">'. t('Quick switches:') . theme('item_list', $quick_switch_link) .'</div>';
+    }
+  }
+  $form['masquerade_desc'] = array(
+    '#prefix' => '<div class="form-item"><div class="description">',
+    '#type' => 'markup',
+    '#value' => $markup_value,
+    '#suffix' => '</div></div>',
+  );
+  return $form;
+}
+
+/**
+ * Masquerade block form validation.
+ */
+function masquerade_block_1_validate($form, &$form_state) {
+  global $user;
+  unset($form);
+  $name = $form_state['values']['masquerade_user_field'];
+  if ($name == variable_get('anonymous', t('Anonymous'))) {
+    $name = '';
+  }
+  if ($_SESSION['masquerading']) {
+    form_set_error('masquerade_user_field', t('You are already masquerading. Please <a href="@unswitch">switch back</a> to your account to masquerade as another user.', array('@unswitch' => url('masquerade/unswitch', array('query' => array('token' => drupal_get_token('masquerade/unswitch')))))));
+  }
+  if (module_exists('alt_login')) {
+    $alt_login = db_fetch_object(db_query("SELECT u.name FROM {users} u INNER JOIN {alt_login} al ON u.uid = al.uid WHERE al.alt_login = '%s'", $name));
+    if ($alt_login->name) {
+      $name = $alt_login->name;
+    }
+  }
+  $masq_user = user_load(array('name' => $name));
+  if (!$masq_user) {
+    form_set_error('masquerade_user_field', t('User %masq_as does not exist. Please enter a valid username.', array('%masq_as' => $form_state['values']['masquerade_user_field'])));
+  }
+  else if ($masq_user->uid == $user->uid) {
+    form_set_error('masquerade_user_field', t('You cannot masquerade as yourself. Please choose a different user to masquerade as.'));
+  }
+  else if (variable_get('site_offline', 0) && !user_access('administer site configuration', $masq_user)) {
+    form_set_error('masquerade_user_field', t('It is not possible to masquerade in off-line mode as !user does not have the %config-perm permission. Please <a href="@site-maintenance">set the site status</a> to "online" to masquerade as !user.', array('!user' => theme('username', $masq_user), '%config-perm' => 'administer site configuration', '@site-maintenance' => url('admin/settings/site-maintenance'))));
+  }
+  else {
+    $form_state['values']['masquerade_user_field'] = $name;
+  }
+}
+
+/**
+ * Masquerade block form submission.
+ */
+function masquerade_block_1_submit($form, &$form_state) {
+  unset($form);
+  $masq_user = user_load(array('name' => $form_state['values']['masquerade_user_field']));
+  if (!masquerade_switch_user($masq_user->uid)) {
+    drupal_access_denied();
+  }
+  else {
+    drupal_goto(referer_uri());
+  }
+}
+
+/**
+ * Returns JS array for Masquerade autocomplete fields.
+ */
+function masquerade_autocomplete($string) {
+  $matches = array();
+  $result = db_query_range("SELECT u.name FROM {users} u WHERE LOWER(u.name) LIKE LOWER('%s%%')", $string, 0, 10);
+  while ($user = db_fetch_object($result)) {
+    $matches[$user->name] = check_plain($user->name);
+  }
+  if (stripos(variable_get('anonymous', t('Anonymous')), $string) === 0) {
+    $matches[variable_get('anonymous', t('Anonymous'))] = variable_get('anonymous', t('Anonymous'));
+  }
+  if (module_exists('devel')) {
+    $GLOBALS['devel_shutdown'] = FALSE;
+  }
+  exit(drupal_json($matches));
+}
+
+/**
+ * Returns JS array for Masquerade autocomplete fields. Supports multiple entries separated by a comma.
+ */
+function masquerade_autocomplete_multiple($string) {
+  // The user enters a comma-separated list of users. We only autocomplete the last user.
+  $array = drupal_explode_tags($string);
+
+  // Fetch last tag
+  $last_string = trim(array_pop($array));
+
+  $matches = array();
+  $result = db_query_range("SELECT u.name FROM {users} u WHERE LOWER(u.name) LIKE LOWER('%s%%')", $last_string, 0, 10);
+
+  $prefix = count($array) ? implode(', ', $array) .', ' : '';
+
+  while ($user = db_fetch_object($result)) {
+    $matches[$prefix . $user->name] = check_plain($user->name);
+  }
+  // This will add anonymous to the list, but not sorted.
+  if (stripos(variable_get('anonymous', t('Anonymous')), $last_string) === 0) {
+    $matches[$prefix . variable_get('anonymous', t('Anonymous'))] = variable_get('anonymous', t('Anonymous'));
+  }
+  if (module_exists('alt_login')) {
+    $result = db_query_range("SELECT alt_login FROM {alt_login} u WHERE LOWER(alt_login) LIKE LOWER('%s%%')", $string, 0, 10);
+    while ($user = db_fetch_object($result)) {
+      $matches[$user->alt_login] = check_plain($user->alt_login);
+    }
+  }
+  if (module_exists('devel')) {
+    $GLOBALS['devel_shutdown'] = FALSE;
+  }
+  exit(drupal_json($matches));
+}
+
+/**
+ * Replacement function for user_autocomplete which allows the use of a comma
+ * separated list of user names.
+ */
+function masquerade_autocomplete_user($string) {
+  $array = drupal_explode_tags($string);
+  $search = trim(array_pop($array));
+  $matches = array();
+  if ($search) {
+    $prefix = count($array) ? implode(', ', $array) .', ' : '';
+    $result = db_query_range("SELECT name FROM {users} WHERE LOWER(name) LIKE LOWER('%s%%')", $search, 0, 10);
+    while ($user = db_fetch_object($result)) {
+      $matches[$prefix . $user->name] = check_plain($user->name);
+    }
+  }
+
+  drupal_json($matches);
+}
+
+/**
+ * Page callback to switch users.
+ */
+function masquerade_switch_user_page($uid) {
+  if (isset($_GET['token']) && drupal_valid_token($_GET['token'], 'masquerade/switch/' . $uid) && masquerade_switch_user($uid)) {
+    drupal_goto(referer_uri());
+  }
+  else {
+    drupal_access_denied();
+  }
+}
+
+/**
+ * Function that allows a user with the right permissions to become
+ * the selected user.
+ *
+ * @param $uid
+ *   The user ID to switch to.
+ *
+ * @return
+ *   TRUE if the user was sucessfully switched, or FALSE if there was an error.
+ */
+function masquerade_switch_user($uid) {
+  global $user;
+  if (!is_numeric($uid)) {
+    drupal_set_message(t('A user id was not correctly passed to the switching function.'));
+    watchdog('masquerade', 'The user id provided to switch users was not numeric.', NULL, WATCHDOG_ERROR);
+    return drupal_goto(referer_uri());
+  }
+
+  $new_user = user_load(array('uid' => $uid));
+
+  $roles = array_keys(array_filter(variable_get('masquerade_admin_roles', array())));
+  $perm = $uid == 1 || array_intersect(array_keys($new_user->roles), $roles) ?
+    'masquerade as admin' :
+    'masquerade as user';
+
+  // Check to see if we need admin permission.
+  if (!user_access($perm) && !$_SESSION['masquerading'] && !db_result(db_query("SELECT TRUE FROM {masquerade_users} WHERE uid_from = %d AND uid_to = %d", $user->uid, $new_user->uid))) {
+    watchdog('masquerade', 'This user requires administrative permissions to switch to the user %user.', array('%user' => $new_user->name), WATCHDOG_ERROR);
+    return FALSE;
+  }
+
+  if ($user->uid == $uid || isset($user->masquerading)) {
+    watchdog('masquerade', 'This user is already %user.', array('%user' => $new_user->name), WATCHDOG_ERROR);
+    return FALSE;
+  }
+
+  if (variable_get('site_offline', 0) && !user_access('administer site configuration', $new_user)) {
+    drupal_set_message(t('It is not possible to masquerade in off-line mode as %user does not have the %config-perm permission. Please <a href="@site-maintenance">set the site status</a> to "online" to masquerade as %user.', array('%user' => $new_user->name, '%config-perm' => 'administer site configuration', '@site-maintenance' => url('admin/settings/site-maintenance'))));
+    return FALSE;
+  }
+
+  db_query("INSERT INTO {masquerade} (uid_from, uid_as, sid) VALUES (%d, %d, '%s')",
+  $user->uid, $new_user->uid, session_id());
+  // switch user
+
+  watchdog('masquerade', 'User %user now masquerading as %masq_as.', array('%user' => $user->name, '%masq_as' => $new_user->name ? $new_user->name : variable_get('anonymous', t('Anonymous'))), WATCHDOG_INFO);
+  drupal_set_message(t('You are now masquerading as !masq_as.', array('!masq_as' => theme('username', $new_user))));
+  $user->masquerading = $new_user->uid;
+  $user = $new_user;
+  return TRUE;
+}
+
+/**
+ * Page callback that allows a user who is currently masquerading to become
+ * a new user.
+ */
+function masquerade_switch_back_page() {
+  if (isset($_GET['token']) && drupal_valid_token($_GET['token'], 'masquerade/unswitch')) {
+    global $user;
+    $olduser = $user;
+    masquerade_switch_back();
+    drupal_set_message(t('You are no longer masquerading as !masq_as and are now logged in as !user.', array('!user' => theme('username', $user), '!masq_as' => theme('username', $olduser))));
+    drupal_goto(referer_uri());
+  }
+  else {
+    drupal_access_denied();
+  }
+}
+
+/**
+ * Function for a masquerading user to switch back to the previous user.
+ */
+function masquerade_switch_back() {
+  // switch user
+  global $user;
+  cache_clear_all($user->uid, 'cache_menu', true);
+  $uid = db_result(db_query("SELECT m.uid_from FROM {masquerade} m WHERE m.sid = '%s' AND m.uid_as = %d ", session_id(), $user->uid));
+  // erase record
+  db_query("DELETE FROM {masquerade} WHERE sid = '%s' AND uid_as = %d ", session_id(), $user->uid);
+  $oldname = ($user->uid == 0 ? variable_get('anonymous', t('Anonymous')) : $user->name);
+  $user = user_load(array('uid' => $uid));
+  watchdog('masquerade', 'User %user no longer masquerading as %masq_as.', array('%user' => $user->name, '%masq_as' => $oldname), WATCHDOG_INFO);
+}
+

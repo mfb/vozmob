@@ -1,5 +1,5 @@
 <?php
-// $Id: imagecache_ui.pages.inc,v 1.6 2009/05/03 17:27:46 drewish Exp $
+// $Id: imagecache_ui.pages.inc,v 1.6.2.1 2010/05/03 14:42:53 drewish Exp $
 
 /**
  * Preset Admin callbacks and required functions.
@@ -135,12 +135,12 @@ function imagecache_ui_preset_form($form_state, $preset = array()) {
 
   $form['presetid'] = array(
     '#type' => 'value',
-    '#value' => $preset['presetid'],
+    '#value' => isset($preset['presetid']) ? $preset['presetid'] : '',
   );
 
   // Browsers don't submit disabled form values so we've got to put two copies
   // of the name on the form: one for the submit handler and one for the user.
-  if ($preset['storage'] === IMAGECACHE_STORAGE_DEFAULT) {
+  if (isset($preset['storage']) && $preset['storage'] === IMAGECACHE_STORAGE_DEFAULT) {
     $form['presetname'] = array(
       '#type' => 'value',
       '#value' => $preset['presetname'],
@@ -158,7 +158,7 @@ function imagecache_ui_preset_form($form_state, $preset = array()) {
       '#type' => 'textfield',
       '#size' => '64',
       '#title' => t('Preset Namespace'),
-      '#default_value' => $preset['presetname'],
+      '#default_value' => isset($preset['presetname']) ? $preset['presetname'] : '',
       '#description' => t('The namespace is used in URL\'s for images to tell imagecache how to process an image. Please only use alphanumeric characters, underscores (_), and hyphens (-) for preset names.'),
       '#validate' => array('imagecache_element_presetname_validate' => array()),
     );
@@ -166,7 +166,7 @@ function imagecache_ui_preset_form($form_state, $preset = array()) {
 
   $form['submit'] = array(
     '#type' => 'submit',
-    '#value' => $preset['storage'] === IMAGECACHE_STORAGE_DEFAULT ? t('Override Defaults') : t('Save Preset'),
+    '#value' => isset($preset['storage']) && $preset['storage'] === IMAGECACHE_STORAGE_DEFAULT ? t('Override Defaults') : t('Save Preset'),
     '#weight' => 9,
   );
 
@@ -391,7 +391,7 @@ function imagecache_ui_action_form($form_state, $preset, $action) {
   );
   $form['actionid'] = array(
     '#type' => 'value',
-    '#value' => $action['actionid'],
+    '#value' => isset($action['actionid']) ? $action['actionid']: '',
   );
   $form['action'] = array(
     '#type' => 'value',

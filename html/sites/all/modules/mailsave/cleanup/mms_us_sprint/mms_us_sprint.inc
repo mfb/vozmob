@@ -65,8 +65,19 @@ function mms_us_sprint_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
       if (preg_match('!<strong>Subject:</strong> (.*)!', $message_view->data, $matches)) {
         $node->title = $matches[1];
       }
+
+      // Get invite ID.
+      strtok($url, '=');
+      $invite = strtok('&');
+
       //set the node body to the mms message body
       $node->body = preg_replace('!(.+)<pre id="guestTxtMemoDisplayId" class="guestTxtMemoDisplay">(.+)</pre>(.+)!i', '\\2', $scraped_form);
+
+      // Get the caption / additional text. (where are multiple captions stored?)
+      $json = drupal_http_request('http://pictures.sprintpcs.com/ui-refresh/guest/getMessageContainerJSON.do%3FcomponentType%3DmediaDetail&sortCode=17&count=10&invite=' . $invite . '&externalMessageId=' . $invite . '&folderFullName=null&isDRMProtected=false&drm=false&shareName=MMS&offset=0&cp=cp');
+      $message_object = json_decode($json->data);
+      $node->body .= '<p>' . $message_object->Results[0]->description . '</p>';
+
       $node->teaser = node_teaser($node->body);
       // build an array of input elements to form get string to pull zip file
       //$input_element_array = preg_split("!<(input )|<(select )!i", $scraped_form);
@@ -75,8 +86,6 @@ function mms_us_sprint_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
       //array_walk($input_element_array, 'mms_us_sprint_build_zip_get', &$zip_get);
       // implode the mms_us_sprint_get into a formatted GET string
       //$url = 'http://pictures.sprintpcs.com/downloadmsgmedia/?' . implode('&',$zip_get);
-      strtok($url, '=');
-      $invite = strtok('&');
       // @fixme: This code only supports downloading up to 10 items. Have to add more elementID parameters to download more.
       $url = 'http://pictures.sprintpcs.com/downloadmsgmedia/?' . 'externalMessageId=' . $invite . '&messageId=' . $invite . '&shareType=MultiPictures&fileName=Sprintpictures&invite='
         . $invite . '&elementID2=2&elementID3=3&elementID4=4&elementID5=5&elementID6=6&elementID7=7&elementID8=8&elementID9=9&elementID10=10&elementID11=11';

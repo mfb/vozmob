@@ -1,0 +1,554 @@
+#
+# Arabic translation of Drupal (general)
+# Copyright YEAR NAME <EMAIL@ADDRESS>
+# Generated from files:
+#  imagecache_actions.inc,v 1.19 2009/02/06 11:41:27 drewish
+#  imagecache.module,v 1.98 2009/02/17 21:36:18 drewish
+#  imagecache_ui.module,v 1.28 2009/02/17 21:57:31 drewish
+#  imagecache.info,v 1.5 2008/05/30 15:46:59 dopry
+#  imagecache_ui.info,v 1.5 2008/08/08 17:05:12 drewish
+#  imagecache.install,v 1.25 2009/01/06 19:48:59 drewish
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: ifadah.net\n"
+"POT-Creation-Date: 2010-03-06 13:22+0100\n"
+"PO-Revision-Date: 2010-04-04 20:39+0300\n"
+"Last-Translator: Abdo <ifadah@hotmail.com>\n"
+"Language-Team: Ifadah-Team <ifadah@hotmail.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=6; plural=((n==1)?(0):((n==0)?(1):((n==2)?(2):((((n%100)>=3)&&((n%100)<=10))?(3):((((n%100)>=11)&&((n%100)<=99))?(4):5)))));\n"
+"X-Poedit-Language: Arabic\n"
+"X-Poedit-Country: SYRIAN ARAB REPUBLIC\n"
+
+#: imagecache_actions.inc:12
+msgid "Allow Upscaling"
+msgstr "اسمح بالتكبير"
+
+#: imagecache_actions.inc:13
+msgid "Let scale make images larger than their original size"
+msgstr "اسمح لأدات المقاس بجعل حجم الصورة أكبر من حجمها الأصلي"
+
+#: imagecache_actions.inc:20;216
+msgid "Yes"
+msgstr "نعم"
+
+#: imagecache_actions.inc:20;216
+msgid "No"
+msgstr "لا"
+
+#: imagecache_actions.inc:64
+msgid "<strong>Inside dimensions</strong>: Final dimensions will be less than or equal to the entered width and height. Useful for ensuring a maximum height and/or width."
+msgstr "<strong>الأبعاد الداخلية</strong> : الأبعاد النهائية ستكون أصغر أو مساوية للطول و العرض المحددين. مفيدة لتحديد الطول و /أو العرض الأقصى."
+
+#: imagecache_actions.inc:65
+msgid "<strong>Outside dimensions</strong>: Final dimensions will be greater than or equal to the entered width and height. Ideal for cropping the result to a square."
+msgstr "<strong>الأبعاد الخارجية</strong> : الأبعاد النهائية ستكون أكبر أو مساوية للطول و العرض المحددين. مثالية لتأطير الناتج بشكل مربع."
+
+#: imagecache_actions.inc:70
+msgid "Scale to fit"
+msgstr "غير الحجم بشكل متناسب"
+
+#: imagecache_actions.inc:71;93
+msgid "Inside dimensions"
+msgstr "الأبعاد الداخلية"
+
+#: imagecache_actions.inc:71;93
+msgid "Outside dimensions"
+msgstr "الأبعاد الخارجية"
+
+#: imagecache_actions.inc:78;128
+#: imagecache.module:803
+msgid "Width"
+msgstr "العرض"
+
+#: imagecache_actions.inc:80;130
+#: imagecache.module:805
+msgid "Enter a width in pixels or as a percentage. i.e. 500 or 80%."
+msgstr "أدخل العرض بالبكسل أو بالنسبة المئوية على شكل 500 أو 80%. "
+
+#: imagecache_actions.inc:84;134
+#: imagecache.module:809
+msgid "Height"
+msgstr "الطول"
+
+#: imagecache_actions.inc:86;136
+#: imagecache.module:811
+msgid "Enter a height in pixels or as a percentage. i.e. 500 or 80%."
+msgstr "أدخل الطول بالبكسل أو بالنسبة المئوية على شكل 500 أو 80%"
+
+#: imagecache_actions.inc:140
+msgid "X offset"
+msgstr "الموقع على محور X "
+
+#: imagecache_actions.inc:142
+msgid "Enter an offset in pixels or use a keyword: <em>left</em>, <em>center</em>, or <em>right</em>."
+msgstr "أدخل المكان بالبكسل أو استعمل الكلمات المفتاحية <em>left</em>, <em>center</em> أو <em>right</em>."
+
+#: imagecache_actions.inc:146
+msgid "Y offset"
+msgstr "الموقع على محور Y"
+
+#: imagecache_actions.inc:148
+msgid "Enter an offset in pixels or use a keyword: <em>top</em>, <em>center</em>, or <em>bottom</em>."
+msgstr "أدخل الموقع بالبكسل أو استعمل الكلمات المفتاحية <em>left</em>, <em>center</em> أو <em>right</em>."
+
+#: imagecache_actions.inc:196
+msgid "Rotation angle"
+msgstr "زاوية الدوران"
+
+#: imagecache_actions.inc:197
+msgid "The number of degrees the image should be rotated. Positive numbers are clockwise, negative are counter-clockwise."
+msgstr "عدد الدرجات التي تريد تطبيقها لدوران الصورة. العدد الموجب يدير الصورة حسب عقارب الساعة و العدد السالب يدرها بعكس عقارب الساعة."
+
+#: imagecache_actions.inc:202
+msgid "Randomize"
+msgstr "ولد بشكل عشوائي"
+
+#: imagecache_actions.inc:203
+msgid "Randomize the rotation angle for each image. The angle specified above is used as a maximum."
+msgstr "ولد زاوية الدوران لكل صورة  بشكل عشوائي. قيمة الزاوية المحددة فوق ستستخدم كحد أقصى,"
+
+#: imagecache_actions.inc:208
+msgid "Background color"
+msgstr "لون الخلفية"
+
+#: imagecache_actions.inc:209
+msgid "The background color to use for exposed areas of the image. Use web-style hex colors (#FFFFFF for white, #000000 for black)."
+msgstr "اللون الذي سيستخدم في المناطق المعروضة من الصورة. استعمل طريقة الويب في كتابة الألوان مثال : #FFFFFF للأبيض,  #000000 للأسود."
+
+#: imagecache_actions.inc:215
+msgid "degrees:"
+msgstr "درجة:"
+
+#: imagecache_actions.inc:216
+msgid "randomize:"
+msgstr "ولد بشكل عشوائي:"
+
+#: imagecache_actions.inc:217
+msgid "background:"
+msgstr "الخلفية:"
+
+#: imagecache_actions.inc:247
+msgid "<strong>NOTE:</strong> The sigma parameter below is currently <em>only</em> used when the Imagemagick toolkit is active."
+msgstr "<strong>ملاحظة:</strong> الإعداد sigma أدناه يستعمل حالياً <em>فقط</em> عند تفعيل طقم الأدوات Imagemagick."
+
+#: imagecache_actions.inc:252
+msgid "Radius"
+msgstr "نصف القطر"
+
+#: imagecache_actions.inc:253
+msgid "The radius of the gaussian, in pixels, not counting the center pixel. If you're using Imagemagick, you can set this to 0 to let Imagemagick select a suitable radius. Typically 0.5 to 1 for screen resolutions. (default 0.5)"
+msgstr "نصف قطر الغاوسي, في البكسيل, بغض النظر عن بكسيل المركز. إذا كنت تستخدم Imagemagick, تستطيع تحديد هذه القيمة على الصفر للسماح لـ  Imagemagick باختيار القيمة المناسبة, عادة نستعمل قيمة بين 0.5 و 1 للشاشة( 0.5 هي القيمة الإفتراضية). "
+
+#: imagecache_actions.inc:258
+msgid "Sigma"
+msgstr "سيغما"
+
+#: imagecache_actions.inc:259
+msgid "The standard deviation of the gaussian, in pixels. General rule of thumb: if radius < 1 then sigma = radius, else sigma = sqrt(radius). (default 0.5)"
+msgstr "الانحراف المعياري للغاوسي, بالبكسيل. قاعدة عامة: إذا كان تصف القطر أصغر من 1 إذاً سيغما = نصف القطر, وأما غير ذلك فسيغما = الجذر التربيعي لنصف القطر (الافتراضي 0.5)"
+
+#: imagecache_actions.inc:264
+msgid "Amount"
+msgstr "مقدار"
+
+#: imagecache_actions.inc:265
+msgid "The percentage of the difference between the original and the blur image that is added back into the original. Typically 50 to 200. (default 100)."
+msgstr "النسبة المئوية للفرق بين الصورة الأصلية و الصورة المطمسة التي يتم إضافتها خلف هذه الصورة. عادة من 50 إلى 200 . (الافتراضي 100)."
+
+#: imagecache_actions.inc:270
+msgid "Threshold"
+msgstr "عتبة"
+
+#: imagecache_actions.inc:271
+msgid "The threshold, as a fraction of max RGB levels, needed to apply the difference amount.  Typically 0 to 0.2. (default 0.05)."
+msgstr "العتبة, بشكل جزء صغير من مستويات الـRVB,  مما هو مطلوب لتطبيق مقدار الفرق. القيمة النموذجية تكون بين 0 إلى 0.2 (الافتراضي 0.05)"
+
+#: imagecache_actions.inc:277
+msgid "radius:"
+msgstr "نصف القطر:"
+
+#: imagecache_actions.inc:278
+msgid "sigma:"
+msgstr "سيغما:"
+
+#: imagecache_actions.inc:279
+msgid "amount:"
+msgstr "مقدار:"
+
+#: imagecache_actions.inc:280
+msgid "threshold:"
+msgstr "عتبة:"
+
+#: imagecache_actions.inc:29;50;108;160;181;236;292
+#: imagecache.module:398;415;440;512;539;546;746;794
+msgid "imagecache"
+msgstr "imagecache"
+
+#: imagecache_actions.inc:29
+msgid "imagecache_scale_image failed. image: %image, data: %data."
+msgstr "فشل imagecache_scale_image. الصورة : %image, البيانات : %data."
+
+#: imagecache_actions.inc:50
+msgid "imagecache_scale_and_crop failed. image: %image, data: %data."
+msgstr "فشل imagecache_scale_and_crop. الصورة : %image, البيانات : %data."
+
+#: imagecache_actions.inc:108
+msgid "imagecache_deprecated_scale failed. image: %image, data: %data."
+msgstr "فشل imagecache_deprecated_scale. الصورة : %image, البيانات : %data."
+
+#: imagecache_actions.inc:160
+msgid "imagecache_crop failed. image: %image, data: %data."
+msgstr "فشل imagecache_crop. الصورة : %image, البيانات : %data."
+
+#: imagecache_actions.inc:181
+msgid "imagecache_desaturate failed. image: %image, data: %data."
+msgstr "فشل imagecache_desaturate. الصورة : %image, البيانات : %data"
+
+#: imagecache_actions.inc:236
+msgid "imagecache_rotate_image failed. image: %image, data: %data."
+msgstr "فشل imagecache_rotate_image. الصورة : %image, البيانات : %data"
+
+#: imagecache_actions.inc:292
+msgid "imagecache_sharpen_image failed. image: %image, data: %data."
+msgstr "فشل imagecache_rotate_image. الصورة : %image, البيانات : %data"
+
+#: imagecache.module:594
+msgid "@preset image"
+msgstr "صورة @preset"
+
+#: imagecache.module:598
+msgid "@preset image linked to node"
+msgstr "الصورة @preset تربط بالعقدة "
+
+#: imagecache.module:602
+msgid "@preset image linked to image"
+msgstr "الصورة @preset تربط بالصورة  "
+
+#: imagecache.module:606
+msgid "@preset file path"
+msgstr "@preset مسار الملف"
+
+#: imagecache.module:610
+msgid "@preset URL"
+msgstr "@preset URL"
+
+#: imagecache.module:398
+msgid "ImageCache already generating: %dst, Lock file: %tmp."
+msgstr "ImageCache يولد بالفعل : %dst, ملف القفل : %tmp."
+
+#: imagecache.module:415
+msgid "Failed generating an image from %image using imagecache preset %preset."
+msgstr "فشل توليد الصورة من %image باستخدام قالب  imagecache  %preset. "
+
+#: imagecache.module:440
+msgid "non-existant action %action"
+msgstr "اجراء غير موجود %action"
+
+#: imagecache.module:512
+msgid "Failed to create imagecache directory: %dir"
+msgstr "فشل إنشاء دليل imagecache : %dir"
+
+#: imagecache.module:539
+msgid "action(id:%id): %action failed for %src"
+msgstr "الاجراء id:%id : فشل %action لاجل  %src"
+
+#: imagecache.module:546
+msgid "Cached image file %dst already exists. There may be an issue with your rewrite configuration."
+msgstr "ملف تخزين الصورة  %dst  موجود فعلاً. ربما هناك مشكلة في ضبط إعادة الكتابة."
+
+#: imagecache.module:746
+msgid "Unknown file type(%path) stat: %stat "
+msgstr "نوع الملف غير معروف %path احصائيات : %stat"
+
+#: imagecache.module:794
+msgid "imagecache_resize_image failed. image: %image, data: %data."
+msgstr "فشل imagecache_resize_image. الصورة : %image, معلومات : %data."
+
+#: imagecache.module:57
+msgid "administer imagecache"
+msgstr " إدارة  imagecache"
+
+#: imagecache.module:57
+msgid "flush imagecache"
+msgstr " تفريغ imagecache"
+
+#: imagecache.module:59
+msgid "view imagecache "
+msgstr "عرض imagecache"
+
+#: imagecache.module:59
+msgid "presetname"
+msgstr "اسم القالب"
+
+#: imagecache_ui.module:15
+msgid "Manage ImageCache presets."
+msgstr "إدارة قوالب ImageCache"
+
+#: imagecache_ui.module:17
+msgid "Place the following snippet in your module as part of <code>hook_imagecache_default_presets()</code>."
+msgstr "ضع الكود التالي قي الوحدة كجزء من <code>hook_imagecache_default_presets()</code>."
+
+#: imagecache_ui.module:158
+msgid "Preset Name"
+msgstr "اسم القالب"
+
+#: imagecache_ui.module:158
+msgid "Storage"
+msgstr "المخزن"
+
+#: imagecache_ui.module:158;362
+msgid "Actions"
+msgstr "الإجراءات"
+
+#: imagecache_ui.module:167
+msgid "Default"
+msgstr "إفتراضي"
+
+#: imagecache_ui.module:168
+msgid "View"
+msgstr "عرض"
+
+#: imagecache_ui.module:169;175;182;274
+msgid "Flush"
+msgstr "تفريغ"
+
+#: imagecache_ui.module:172
+msgid "Override"
+msgstr "تجاوز"
+
+#: imagecache_ui.module:173;180
+msgid "Edit"
+msgstr "تحرير"
+
+#: imagecache_ui.module:174
+msgid "Revert"
+msgstr "عودة"
+
+#: imagecache_ui.module:176;183
+msgid "Export"
+msgstr "تصدير"
+
+#: imagecache_ui.module:179
+msgid "Normal"
+msgstr "عادي"
+
+#: imagecache_ui.module:181;248;408;629
+msgid "Delete"
+msgstr "حذف"
+
+#: imagecache_ui.module:198;339;348
+msgid "Preset Namespace"
+msgstr "نطاف تسمية القالب"
+
+#: imagecache_ui.module:200
+msgid "The namespace is used in URLs for images to tell imagecache how to process an image. Please only use alphanumeric characters, underscores (_), and hyphens (-) for preset names."
+msgstr "يتم استعمال نطاق الاسم في بناء مسار الصورة لإخبار  imagecache كيفية معالجة الصور. لتسمية القوالب استخدم فقط الأحرف و الأرقام, الخط الفاصل السفلي (_), و الخط الفاصل (-)."
+
+#: imagecache_ui.module:205
+msgid "Create New Preset"
+msgstr "انشئ قالب جديد"
+
+#: imagecache_ui.module:213
+msgid "Preset %name (ID: @id) was created."
+msgstr "تم إنشاء القالب %name  ID: @id ."
+
+#: imagecache_ui.module:222
+msgid "The namespace you have chosen is already in use."
+msgstr "نطاق الاسم المختار سبق و تم استعماله."
+
+#: imagecache_ui.module:229
+msgid "Please only use alphanumeric characters, underscores (_), and hyphens (-) for preset names."
+msgstr " استحدم فقط الأحرف و الأرقام, الخط الفاصل السفلي (_), و الخط الفاصل (-), لتسمية القوالب."
+
+#: imagecache_ui.module:235;261;290
+msgid "The specified preset was not found"
+msgstr "لم يتم العثور على القالب المحدد"
+
+#: imagecache_ui.module:243
+msgid "Are you sure you want to delete the preset %preset?"
+msgstr "هل تريد فعلاً حذف القالب %preset؟"
+
+#: imagecache_ui.module:247;273;628
+msgid "This action cannot be undone."
+msgstr "لا يمكن التراجع عن هذا الاجراء."
+
+#: imagecache_ui.module:248;274;629
+msgid "Cancel"
+msgstr "الغاء"
+
+#: imagecache_ui.module:255
+msgid "Preset %name (ID: @id) was deleted."
+msgstr "تم حذف القالب %name  ID: @id."
+
+#: imagecache_ui.module:269
+msgid "Are you sure you want to flush the preset %preset?"
+msgstr "هل تريد فعلاً تفريغ القالب %preset؟"
+
+#: imagecache_ui.module:281
+msgid "Preset %name (ID: @id) was flushed."
+msgstr "تم تفريغ القالب %name  ID: @id."
+
+#: imagecache_ui.module:324
+msgid "The specified preset was not found."
+msgstr "لم يتم العثور على القالب المحدد."
+
+#: imagecache_ui.module:350
+msgid "The namespace is used in URL's for images to tell imagecache how to process an image. Please only use alphanumeric characters, underscores (_), and hyphens (-) for preset names."
+msgstr "يتم استعمال نطاق الاسم في بناء مسار الصورة لإخبار  imagecache كيفية معالجة الصور. لتسمية القوالب استخدم فقط الأحرف و الأرقام, الخط الفاصل السفلي (_), و الخط الفاصل (-)."
+
+#: imagecache_ui.module:404
+msgid "Configure"
+msgstr "ضبط"
+
+#: imagecache_ui.module:417
+msgid "New Actions"
+msgstr "اجراءات جديدة"
+
+#: imagecache_ui.module:429
+msgid "Add !action"
+msgstr "إضافة !action"
+
+#: imagecache_ui.module:470
+msgid "Override Defaults"
+msgstr "تجاهل القيم الافتراضية"
+
+#: imagecache_ui.module:470
+msgid "Update Preset"
+msgstr "حدث القالب"
+
+#: imagecache_ui.module:487
+msgid "Preview"
+msgstr "معاينة"
+
+#: imagecache_ui.module:500
+msgid "Action"
+msgstr "اجراء"
+
+#: imagecache_ui.module:500
+msgid "Settings"
+msgstr "اعدادات"
+
+#: imagecache_ui.module:514;657
+msgid "Weight"
+msgstr "وزن"
+
+#: imagecache_ui.module:567;612
+msgid "Unknown Action."
+msgstr "اجراء غير معروف"
+
+#: imagecache_ui.module:572;616
+msgid "Unknown Preset."
+msgstr "قالب غير معروف"
+
+#: imagecache_ui.module:592
+msgid "Update Action"
+msgstr "حدث الاجراء"
+
+#: imagecache_ui.module:601
+msgid "The action was succesfully updated."
+msgstr "تم تحديث الاجراء بنجاح"
+
+#: imagecache_ui.module:605
+msgid "Unknown Action: @action_id"
+msgstr "اجراء غير معروف : @action_id"
+
+#: imagecache_ui.module:624
+msgid "Are you sure you want to delete the !action action from preset !preset?"
+msgstr "هل تريد فعلاً حذف الاجراء !action من القالب !preset ؟"
+
+#: imagecache_ui.module:637
+msgid "The action has been deleted."
+msgstr "تم حذف الاجراء."
+
+#: imagecache_ui.module:663
+msgid "Add Action"
+msgstr "أضف اجراء"
+
+#: imagecache_ui.module:27
+#: imagecache.info:0;0
+#: imagecache_ui.info:0
+msgid "ImageCache"
+msgstr "ImageCache"
+
+#: imagecache_ui.module:28
+msgid "Administer imagecache presets and actions."
+msgstr "يدير قوالب imagecache و الاجرأت"
+
+#: imagecache_ui.module:33
+msgid "List"
+msgstr "سرد"
+
+#: imagecache_ui.module:39
+msgid "Add new preset"
+msgstr "أضف قالب جديد"
+
+#: imagecache.install:52;73;261
+msgid "The primary identifier for an imagecache_preset."
+msgstr "المعرف الأولي ل  imagecache_preset."
+
+#: imagecache.install:57
+msgid "The primary identifier for a node."
+msgstr "المعرف الأولي للعقدة."
+
+#: imagecache.install:68;272
+msgid "The primary identifier for an imagecache_action."
+msgstr "المعرف الأولي ل imagecache_action."
+
+#: imagecache.install:79
+msgid "The weight of the action in the preset."
+msgstr "وزن هذا الاجراء في القالب."
+
+#: imagecache.install:85;278
+msgid "The module that defined the action."
+msgstr "الوحدة التي حددت هذا الاجراء."
+
+#: imagecache.install:90
+msgid "The unique ID of the action to be executed."
+msgstr "المعرف المميز (ID ) لهذا الاجراء ليتم تنفيذه."
+
+#: imagecache.install:95
+msgid "The configuration data for the action."
+msgstr "بيانات ضبط هذا الاجراء."
+
+#: (duplicate) imagecache.install:15
+#: ;22 ;29
+msgid "ImageCache Directory"
+msgstr "دليل ImageCache"
+
+#: (duplicate) imagecache.install:16
+msgid "%p does not a directory or is not readable by the webserver."
+msgstr "%p لا يشكل دليل أو أنه غير قابل للقراءة من قبل خادم الويب."
+
+#: (duplicate) imagecache.install:23
+#: ;40
+msgid "%p is not writeable by the webserver."
+msgstr "%p غير قابل للكتابة من قبل خادم الويب."
+
+#: (duplicate) imagecache.install:30
+msgid "An unknown error occured."
+msgstr "حدث خطأ غير معروف."
+
+#: (duplicate) imagecache.install:31
+msgid "An unknown error occured trying to verify %p is a directory and is writable."
+msgstr "حدث خطأ غير معروف تأكد بأن %p هو الدليل و أنه متاح للكتابة."
+
+#: (duplicate) imagecache.install:39
+msgid "ImageCache Temp Directory"
+msgstr "الدليل المؤقت ل ImageCache"
+
+#: imagecache.info:0
+msgid "Dynamic image manipulator and cache."
+msgstr "التخزين ومناور الصورة الديناميكية."
+
+#: imagecache_ui.info:0
+msgid "ImageCache UI"
+msgstr "ImageCache UI"
+
+#: imagecache_ui.info:0
+msgid "ImageCache User Interface."
+msgstr "واجهة المستخدم  ImageCache"
+

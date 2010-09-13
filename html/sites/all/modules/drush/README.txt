@@ -1,0 +1,162 @@
+// $Id: README.txt,v 1.46 2010/06/16 15:08:02 weitzman Exp $
+
+DESCRIPTION
+-----------
+Drush is a command line shell and Unix scripting interface for Drupal.
+If you are unfamiliar with shell scripting, reviewing the documentation
+for your shell (e.g. man bash) or reading an online tutorial (e.g. search
+for "bash tutorial") will help you get the most out of Drush.
+
+Drush core ships with lots of useful commands for interacting with code
+like modules/themes/profiles/translations. Similarly, it runs update.php, executes sql
+queries and DB migrations, and misc utilities like run cron or clear cache.
+
+INSTALLATION
+------------
+For Linux/Unix/Mac:
+  1. Untar the tarball into a folder outside of your web site (/path/to/drush)
+     (e.g. if drush is in your home directory, ~/drush can be used for /path/to/drush)
+  2. Make the 'drush' command executable:
+       $ chmod u+x /path/to/drush/drush
+  3. (Optional, but recommended:) To ease the use of drush,
+     - create a link to drush in a directory that is in your $PATH, e.g.:
+       $ ln -s /path/to/drush/drush /usr/local/bin/drush
+     OR
+     - create an alias to drush:
+       $ alias drush='/path/to/drush/drush'
+       For example, if drush is in your home directory:
+       $ alias drush='~/drush/drush'
+       This goes into .profile, .bash_aliases or .bashrc in your home folder.
+       NOTE:  You must log out and then log back in again or re-load your bash
+       configuration file to apply your changes to your current session:
+       $ source .bashrc
+
+     NOTE FOR ADVANCED USERS
+     - If you want to run drush with a specific version of php, rather than the
+       one found by the drush command, you can instead create an alias that
+       executes the drush.php file directly:
+       $ alias drush='/path/to/php/php5 /path/to/drush/drush.php'
+       If you do this, to allow Drush to detect the number of available columns,
+       you need to add the line 'export COLUMNS' to the .profile file in your
+       home folder.
+
+  4. Start using drush by running "drush" from your Drupal root directory.
+
+     (or, if you did not follow step 3, by running "/path/to/drush/drush"
+      or navigating to /path/to/drush and running "./drush" )
+
+    If you have troubles, try using the -l and -r options when invoking drush. See below.
+
+For Windows:
+  - Follow step 1. Use drush by navigating to /path/to/drush
+    and running 'drush.bat'.
+  - Whenever the documentation or the help text refers to
+   'drush [option] <command>' or something similar, 'drush' has to be replaced
+    by 'drush.bat'.
+  - If drush.bat is not working for you, either add the directory in which your
+    php.exe resides to your PATH or edit drush.bat to point to your php.exe.
+
+USAGE
+-----
+Once installed and setup, you can use drush as follows while in
+any Drupal directory:
+
+  $ drush [options] <command> [argument1] [argument2]
+
+Use the 'help' command to get a list of available options and commands:
+
+  $ drush help
+
+For multisite installations, you might need to use the -l or other command line
+options just to get drush to work:
+
+  $ drush -l http://example.com help
+
+Related Options:
+  -r <path>, --root=<path>      Drupal root directory to use
+                                (default: current directory or anywhere in a Drupal directory tree)
+  -l <uri> , --uri=<uri>        URI of the drupal site to use
+                                (only needed in multisite environments)
+  -v, --verbose                 Display verbose output.
+  --php                         The absolute path to your php binary.
+
+NOTE: If you do not specify a URI with -l and drush falls back to the default
+site configuration, Drupal's $GLOBAL['base_url'] will be set to http://default.
+This may cause some functionality to not work as expected.
+
+The drush cli command provide a customized bash shell with support for handy new
+functions like cdd which whisks you to any directory in your drupal site.
+
+Many commands support a --pipe option which returns machine readable output. See
+`drush pm-list --status=enabled --pipe` as an example
+
+EXAMPLES
+--------
+Inside the "examples" folder you will find some example files to help you
+get started with your drush configuration file (example.drushrc.php),
+site alias definitions (example.aliases.drushrc.php) and drush commands
+(example.drush.inc).
+
+DRUSHRC.PHP
+--------
+If you get tired of typing options all the time, you can add them to your drush.php alias or
+create a drushrc.php file. These provide additional options for your drush call. They provide
+great flexibility for a multi-site installation, for example. See example.drushrc.php.
+
+SITE ALIASES
+--------
+Drush lets you run commands on a remote server, or even on a set of remote servers.
+See http://drupal.org/node/670460 and example.aliases.drushrc.php for more information.
+
+COMMANDS
+--------
+Drush ships with a number of commands, but you can easily write
+your own. In fact, writing a drush command is no harder than writing simple
+Drupal modules, since drush command files closely follow the structure of
+ordinary Drupal modules.
+
+See example.drush.inc for light details on the internals of a drush command file.
+Otherwise, the core commands in drush are good models for your own commands.
+
+You can put your drush command file in a number of places:
+
+  - In a folder specified with the --include option (see above).
+  - Along with one of your existing modules. If your command is related to an
+    existing module, this is the preferred approach.
+  - In a .drush folder in your HOME folder. Note, that you have to create the
+    .drush folder yourself.
+  - In the system-wide drush commands folder, e.g. /usr/share/drush/commands
+
+In any case, it is important that you end the filename with ".drush.inc", so
+that drush can find it.
+
+REQUIREMENTS
+------------
+* To use drush from the command line, you'll need a CLI-mode capable PHP
+  binary. The minimum PHP version is 5.2.
+* drush also runs on Windows; however, drush commands make use of
+  unix command line tools, so to use it effectively, you have to install
+  some of them, e.g. from GnuWin32 (http://gnuwin32.sourceforge.net/). More info
+  about Drush on Windows available at http://drupal.org/node/594744.
+* Drush works with Drupal 5, Drupal 6 and Drupal 7.  However, occasionally
+  recent changes to the most recent version of Drupal can introduce issues
+  with drush.  On Drupal 5, drush requires update_status v5.x-2.5 or later
+  in order to use pm-updatecode.  If you have an earlier version of update_status,
+  upgrade it via "drush dl update_status" before using pm-updatecode.
+
+FAQ
+---
+  Q: What does "drush" stand for?
+  A: The Drupal Shell.
+
+  Q: How do I pronounce drush?
+  A: Some people pronounce the dru with a long u like drupal. Fidelity points go to
+  them, but they are in the minority. Most pronounce drush so that it rhymes with
+  hush, rush, flush, etc. This is the preferred pronunciation.
+
+CREDITS
+-------
+Originally developed by Arto Bendiken <http://bendiken.net/> for Drupal 4.7.
+Redesigned by Franz Heinzmann (frando) <http://unbiskant.org/> in May 2007 for Drupal 5.
+Maintained by Moshe Weitzman <http://drupal.org/moshe> with much help from
+Owen Barton, Adrian Rossouw, greg.1.anderson.

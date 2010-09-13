@@ -1,4 +1,4 @@
-$Id: API.txt,v 1.5.2.1 2009/03/07 19:52:05 greggles Exp $
+$Id: API.txt,v 1.5.2.2 2010/03/29 22:15:51 greggles Exp $
 
 This document explains how to provide "Pathauto integration" in a
 module. You need this if you would like to provide additional tokens
@@ -23,6 +23,10 @@ need to implement two functions:
 
 See the token.module and it's API.txt for more information about this
 process.
+
+If the token is intended to generate a path expected to contain slashes,
+the token name must end in 'path', 'path-raw' or 'alias'. This indicates to
+Pathauto that the slashes should not be removed from the replacement value.
 
 When an object is created (whether it is a node or a user or a
 taxonomy term) the data that Pathauto hands to the token_values in the

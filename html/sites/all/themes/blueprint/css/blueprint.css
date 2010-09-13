@@ -1,12 +1,7 @@
 /* @group blueprint overrides */
 
 body {
-margin: 0px;
-	background-image:url(http://www.designaction.org/clients/vozmob/html/images/body_header_tile.png);
-	background-repeat:repeat-x;
-	font-family:arial, helvetica, sans-serif;
-	background-color:#fff;
-	font-size: 13px;
+  margin: 0;
 }
 
 div.container {
@@ -348,7 +343,7 @@ div.node div.picture {
   margin: 0 0 0.8em 0.8em;
 }
 
-ul.links {
+div.node ul.links {
   display: block;
   text-align: right;
 }

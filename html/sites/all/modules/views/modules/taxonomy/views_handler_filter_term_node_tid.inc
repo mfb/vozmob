@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_filter_term_node_tid.inc,v 1.8.2.3 2010/01/25 21:19:18 merlinofchaos Exp $
+// $Id: views_handler_filter_term_node_tid.inc,v 1.8.2.4 2010/07/27 22:55:56 merlinofchaos Exp $
 
 /**
  * Filter by term id
@@ -119,10 +119,10 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
       else {
         $options = array();
         if ($this->options['limit']) {
-          $result = db_query("SELECT * FROM {term_data} WHERE vid = %d ORDER BY weight, name", $vocabulary->vid);
+          $result = db_query(db_rewrite_sql("SELECT * FROM {term_data} t WHERE vid = %d ORDER BY weight, name", 't', 'tid'), $vocabulary->vid);
         }
         else {
-          $result = db_query("SELECT td.* FROM {term_data} td INNER JOIN {vocabulary} v ON td.vid = v.vid ORDER BY v.weight, v.name, td.weight, td.name");
+          $result = db_query(db_rewrite_sql("SELECT td.* FROM {term_data} td INNER JOIN {vocabulary} v ON td.vid = v.vid ORDER BY v.weight, v.name, td.weight, td.name", 'td', 'tid'));
         }
         while ($term = db_fetch_object($result)) {
           $options[$term->tid] = $term->name;

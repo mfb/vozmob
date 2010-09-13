@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field.inc,v 1.14.2.36 2010/06/30 19:19:02 merlinofchaos Exp $
+// $Id: views_handler_field.inc,v 1.14.2.38 2010/07/27 21:50:26 merlinofchaos Exp $
 /**
  * @defgroup views_field_handlers Views' field handlers
  * @{
@@ -161,6 +161,7 @@ class views_handler_field extends views_handler {
         'text' => array('default' => '', 'translatable' => TRUE),
         'make_link' => array('default' => FALSE),
         'path' => array('default' => '', 'translatable' => TRUE),
+        'absolute' => array('default' => '', 'translatable' => FALSE),
         'alt' => array('default' => '', 'translatable' => TRUE),
         'link_class' => array('default' => ''),
         'prefix' => array('default' => '', 'translatable' => TRUE),
@@ -238,6 +239,16 @@ class views_handler_field extends views_handler {
         ),
         '#maxlength' => 255,
       );
+       $form['alter']['absolute'] = array(
+         '#type' => 'checkbox',
+         '#title' => t('Use absolute path'),
+         '#default_value' => $this->options['alter']['absolute'],
+         '#process' => array('views_process_dependency'),
+         '#dependency' => array(
+           'edit-options-alter-make-link' => array(1)
+         ),
+       );
+
       $form['alter']['link_class'] = array(
         '#title' => t('Link class'),
         '#type' => 'textfield',
@@ -488,7 +499,9 @@ class views_handler_field extends views_handler {
 
     if (empty($this->last_render)) {
       if (($this->last_render !== 0 && $this->last_render !== '0') || !empty($this->options['empty_zero'])) {
-        $this->last_render = $this->options['empty'];
+        $this->options['alter']['alter_text'] = 1;
+        $this->options['alter']['text'] = $this->options['empty'];
+        $this->last_render = $this->render_text($this->options['alter']);
       }
     }
 
@@ -566,7 +579,8 @@ class views_handler_field extends views_handler {
     }
 
     $options = array(
-      'html' => 'true',
+      'html' => TRUE,
+      'absolute' => !empty($alter['absolute']) ? TRUE : FALSE,
     );
 
     // $path will be run through check_url() by l() so we do not need to

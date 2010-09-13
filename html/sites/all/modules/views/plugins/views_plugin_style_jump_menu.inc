@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_style_jump_menu.inc,v 1.1.4.3 2010/03/13 00:06:16 merlinofchaos Exp $
+// $Id: views_plugin_style_jump_menu.inc,v 1.1.4.4 2010/07/27 23:28:05 merlinofchaos Exp $
 /**
  * @file
  * Contains the table style plugin.
@@ -96,7 +96,6 @@ class views_plugin_style_jump_menu extends views_plugin_style {
           if ($this->view->field[$this->options['grouping']]->options['label']) {
             $grouping = $this->view->field[$this->options['grouping']]->options['label'] . ': ' . $grouping;
           }
-          $grouping = url($grouping);
         }
         $sets[$grouping][] = $row;
       }
@@ -112,6 +111,7 @@ class views_plugin_style_jump_menu extends views_plugin_style {
     foreach ($sets as $title => $records) {
       foreach ($records as $row) {
         $path = strip_tags($this->get_field($this->view->row_index, $this->options['path']));
+        $path = url($path);
         $field = strip_tags($this->row_plugin->render($row));;
         if ($title) {
           $options[$title][$path] = $field;
