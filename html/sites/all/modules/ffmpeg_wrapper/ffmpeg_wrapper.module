@@ -434,7 +434,7 @@ function ffmpeg_wrapper_get_codecs($return = 'rows') {
     // we know where the codecs are by looking at the output of ffmpeg -formats or ffmpeg -codecs
     // depending of version SVN-r > 20561 or version > 0.5
     $ffmpeg_version = ffmpeg_wrapper_get_version('svn');
-    if ( ((int)$ffmpeg_version >= 20561) || ((int)$ffmpeg_version > 1000 && (float)$ffmpeg_version > 0.5) ) {
+    if ( ((int)$ffmpeg_version >= 20561) || ((int)$ffmpeg_version < 1000 && (float)$ffmpeg_version > 0.5) ) {
       $output = ffmpeg_wrapper_run_command('-codecs');
       $codecs_formats_pos = strpos($output, 'Codecs:');
       $codecs_formats_pos_end = strpos($output, 'Note,');
