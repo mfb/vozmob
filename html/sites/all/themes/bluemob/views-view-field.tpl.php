@@ -22,5 +22,5 @@
 ?>
 <?php print $output; ?>
 <?php if ($field->options['id'] == 'field_image_fid' && !$output): ?>
-  <?php print l(theme('image', drupal_get_path('theme', 'blueprint') . '/images/vozmobthumb.gif', 'VozMob', 'VozMob', array('class' => 'default-thumb imagecache')), 'node/' . $row->nid, array('html' => TRUE)); ?>
+  <?php print l(theme('image', drupal_get_path('theme', 'bluemob') . '/images/vozmobthumb.gif', 'VozMob', 'VozMob', array('class' => 'default-thumb imagecache')), 'node/' . $row->nid, array('html' => TRUE)); ?>
 <?php endif; ?>

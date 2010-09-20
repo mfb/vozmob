@@ -1,0 +1,10 @@
+/* put IE hacks in here */
+#headerinner {
+	position:relative;
+	top:-8px;}	
+.region-count-1 {
+	line-height:10px}
+ul.header_links li {
+	list-style-image: none;
+	float:left;
+	display:inline:}

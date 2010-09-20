@@ -16,19 +16,16 @@
   <!--[if lte IE 6]>
   	<link href="<?php print $path; ?>css/ie6.css" rel="stylesheet"  type="text/css"  media="screen, projection" />
   <![endif]-->  
-  <link rel="stylesheet" href="<?php print $path; ?>css/daniel.css" type="text/css" media="screen, projection">
-  <link rel="stylesheet" href="<?php print $path; ?>css/poonam.css" type="text/css" media="screen, projection">
-  <link rel="stylesheet" href="<?php print $path; ?>css/sarah.css" type="text/css" media="screen, projection">
 </head>
 
-<body class="<?php print $body_classes; ?><?php if (!arg(1)) print ' page-blogs'; ?>">
+<body class="<?php print $body_classes; ?>">
 
 
 
 <div id="header_wrap"><!--header_wrap to contain header outside of main container div-->
 
   <div id="header">
-  
+  <?php print l('', '<front>', array('attributes' => array('class' => 'home-link'))); ?>  
   <div id="headerinner"><?php print $header; ?></div>
     <h1 id="logo">
       <a title="<?php print $site_name; ?><?php if ($site_slogan != '') print ' &ndash; '. $site_slogan; ?>" href="<?php print url(); ?>"><?php print $site_name; ?><?php if ($site_slogan != '') print ' &ndash; '. $site_slogan; ?></a>
@@ -68,12 +65,12 @@
         print '<div id="messages">'. $messages .'</div>';
       }
       
-      if (arg(1)) print theme('user_picture', user_load(arg(1)));
       if ($title != '') {
         print '<h2>'. $title .'</h2>';
       }      
 
       print $help; // Drupal already wraps this one in a class      
+
       print $content;
       print $feed_icons;
     ?>

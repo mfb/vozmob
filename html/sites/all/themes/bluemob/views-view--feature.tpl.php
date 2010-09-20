@@ -29,7 +29,7 @@
  * @ingroup views_templates
  */
 jquery_plugin_add('cycle', 'theme', 'header');
-drupal_add_js(drupal_get_path('theme', 'blueprint') . '/scripts/cycle.js', 'theme');
+drupal_add_js(drupal_get_path('theme', 'bluemob') . '/scripts/cycle.js', 'theme');
 ?>
 <div class="<?php print $classes; ?>">
   <?php if ($admin_links): ?>

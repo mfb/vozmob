@@ -45,7 +45,7 @@
         <?php foreach ($cid as $mmfid): ?>
           <?php if (strtolower(substr($mmfid['complete_file'], -4, 4)) == '.mp3'): ?>
             <?php if (empty($playlist) && empty($node->field_image[0])): ?>
-              <?php $playlist[$mmfid['fid']] = base_path() . drupal_get_path('theme', 'blueprint') . '/images/audio_icon_large.gif'; ?>
+              <?php $playlist[$mmfid['fid']] = base_path() . drupal_get_path('theme', 'bluemob') . '/images/audio_icon_large.gif'; ?>
             <?php endif; ?>
             <?php $playlist[$mmfid['fid']] = array('url' => file_create_url($mmfid['complete_file'])); ?>
           <?php endif; ?>

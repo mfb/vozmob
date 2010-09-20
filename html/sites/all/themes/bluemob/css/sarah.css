@@ -166,7 +166,7 @@ background-color: #535353;
 padding-left:10px;
 font-size:14px;
 font-weight:bold;
-margin-bottom: 30px;
+margin-bottom: 0;
 }
 #footer2 img{
 float:left;
@@ -174,7 +174,7 @@ margin:20px 10px 0 0px;
 }
 #footer2 p{
 float:left;
-margin:35px 13px 0 35px;
+margin:35px 13px 0 10px;
 }
 #footer2 ul {
 margin:30px 70px 0 0;

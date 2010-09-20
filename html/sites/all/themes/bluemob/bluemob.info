@@ -1,0 +1,10 @@
+; $Id: page.tpl.php,v 1.15.4.1 2008/08/27 04:47:37 m3avrck Exp $
+name = BlueMob
+description = A sub theme of the Blueprint theme.
+base theme = blueprint 
+core = 6.x
+engine = phptemplate
+stylesheets[screen,projection][] = css/style.css
+stylesheets[screen,projection][] = css/daniel.css
+stylesheets[screen,projection][] = css/poonam.css
+stylesheets[screen,projection][] = css/sarah.css
