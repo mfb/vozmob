@@ -629,7 +629,7 @@ function ffmpeg_wrapper_get_file_formats($ret = 'row') {
     $startpos = strpos($formats, 'File formats:');
     // depending of version SVN-r > 20561 or version > 0.5 string changes
     $ffmpeg_version = ffmpeg_wrapper_get_version('svn');
-    if ( ((int)$ffmpeg_version >= 20561) || ((float)$ffmpeg_version > 0.5)  ) {
+    if ( ((int)$ffmpeg_version >= 20561) || ((int)$ffmpeg_version < 1000 && (float)$ffmpeg_version > 0.5)  ) {
       $endpos = strpos($formats, 'FFmpeg version');
     }
     else {
