@@ -720,6 +720,10 @@ function ffmpeg_wrapper_get_version($format) {
   if ($format == 'version') {
     return $version_number;
   }
+  // Return SVN revision number format used by Debian lenny.
+  if (preg_match('/^r([0-9]+)\+/', $version_number, $matches)) {
+    return $matches[1];
+  }
   // is FALSE if the string is not found
   if (strpos($version_number, 'SVN-r') == 0) {
     $version_release = substr($version_number, 5);
