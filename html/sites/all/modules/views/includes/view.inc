@@ -1,5 +1,5 @@
 <?php
-// $Id: view.inc,v 1.151.2.33 2010/04/29 18:39:31 merlinofchaos Exp $
+// $Id: view.inc,v 1.151.2.37 2010/08/17 21:12:06 merlinofchaos Exp $
 /**
  * @file view.inc
  * Provides the view object type and associated methods.
@@ -541,7 +541,7 @@ class view extends views_db_object {
       $class = get_class($this->query);
       if ($class && $class != 'stdClass') {
         // return if query is already initialized.
-        return;
+        return TRUE;
       }
     }
 
@@ -552,11 +552,19 @@ class view extends views_db_object {
       $this->base_database = $views_data['table']['base']['database'];
     }
 
+    // Load the options.
+    $query_options = $this->display_handler->get_option('query');
+
     // Create and initialize the query object.
     $plugin = !empty($views_data['table']['base']['query class']) ? $views_data['table']['base']['query class'] : 'views_query';
     $this->query = views_get_plugin('query', $plugin);
 
-    $this->query->init($this->base_table, $this->base_field);
+    if (empty($this->query)) {
+      return FALSE;
+    }
+
+    $this->query->init($this->base_table, $this->base_field, $query_options['options']);
+    return TRUE;
   }
 
   /**
@@ -1083,8 +1091,8 @@ class view extends views_db_object {
    */
   function build_title() {
     $this->init_display();
-    if (empty($this->built)) {
-      $this->init_query();
+    if (empty($this->built)) {   
+      $this->init_query();    
     }
     $this->init_handlers();
 
@@ -1438,7 +1446,7 @@ class view extends views_db_object {
     $output = '';
     $output .= $this->export_row('view', $indent);
     // Set the API version
-    $output .= $indent . '$view->api_version = ' . views_api_version() . ";\n";
+    $output .= $indent . '$view->api_version = \'' . views_api_version() . "';\n";
     $output .= $indent . '$view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */' . "\n";
 
     foreach ($this->display as $id => $display) {
@@ -1784,21 +1792,14 @@ class views_db_object {
       $plugin['title'] = t('Broken');
     }
 
-    // 'default' is singular and is unique, so just go with 'default'
-    // for it. For all others, start counting.
+
     if (empty($id)) {
-      $id = ($type == 'default') ? $type : $type . '_1';
       $title = $plugin['title'];
 
-      $count = 1;
-
-      // Loop through IDs based upon our style plugin name until
-      // we find one that is unused.
-      while (!empty($this->display[$id])) {
-        $id = $type . '_' . ++$count;
-        if (empty($title)) {
-          $title = $plugin['title'] . ' ' . $count;
-        }
+      $id = $this->generate_display_id($type);
+      $count = str_replace($type . '_', '', $id);
+      if (empty($title)) {
+        $title = $plugin['title'] . ' ' . $count;
       }
     }
 
@@ -1808,6 +1809,31 @@ class views_db_object {
 
     // Add the new display object to the view.
     $this->display[$id] = $display;
+    return $id;
+  }
+
+  /**
+   * Generate a display id of a certain plugin type.
+   *
+   * @param $type
+   *   Which plugin should be used for the new display id.
+   */
+  function generate_display_id($type) {
+    // 'default' is singular and is unique, so just go with 'default'
+    // for it. For all others, start counting.
+    if ($type == 'default') {
+      return 'default';
+    }
+    // Initial id.
+    $id = $type . '_1';
+    $count = 1;
+
+    // Loop through IDs based upon our style plugin name until
+    // we find one that is unused.
+    while (!empty($this->display[$id])) {
+      $id = $type . '_' . ++$count;
+    }
+
     return $id;
   }
 

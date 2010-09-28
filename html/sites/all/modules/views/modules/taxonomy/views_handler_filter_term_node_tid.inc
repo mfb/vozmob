@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_filter_term_node_tid.inc,v 1.8.2.4 2010/07/27 22:55:56 merlinofchaos Exp $
+// $Id: views_handler_filter_term_node_tid.inc,v 1.8.2.6 2010/08/13 22:59:44 merlinofchaos Exp $
 
 /**
  * Filter by term id
@@ -18,6 +18,7 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
     $options['limit'] = array('default' => TRUE);
     $options['vid'] = array('default' => 0);
     $options['hierarchy'] = array('default' => 0);
+    $options['error_message'] = array('default' => TRUE);
 
     return $options;
   }
@@ -29,10 +30,10 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
     }
 
     if ($this->options['limit']) {
-      // We only do this when the form is displayed so this query doesn't run
-      // unnecessarily just when the object is constructed.
+      // We only do this when the form is displayed.
       if ($this->options['vid'] == 0) {
-        $this->options['vid'] = db_result(db_query('SELECT MIN(vid) FROM {vocabulary} v'));
+        $first_vocabulary = reset($vocabularies);
+        $this->options['vid'] = $first_vocabulary->vid;
       }
 
       $form['vid'] = array(
@@ -272,8 +273,11 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
       $tids[] = $term->tid;
     }
 
-    if ($missing) {
+    if ($missing && !empty($this->options['error_message'])) {
       form_error($form, format_plural(count($missing), 'Unable to find term: @terms', 'Unable to find terms: @terms', array('@terms' => implode(', ', array_keys($missing)))));
+    }
+    elseif ($missing && empty($this->options['error_message'])) {
+      $tids = array(0);
     }
 
     return $tids;
@@ -288,6 +292,11 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
     if ($this->options['type'] != 'select') {
       unset($form['expose']['reduce']);
     }
+    $form['error_message'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Display error message'),
+      '#default_value' => !empty($this->options['error_message']),
+    );
   }
 
   function admin_summary() {

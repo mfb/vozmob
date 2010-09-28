@@ -1,5 +1,5 @@
 <?php
-// $Id: views.module,v 1.332.2.29 2010/04/29 18:26:02 merlinofchaos Exp $
+// $Id: views.module,v 1.332.2.30 2010/08/13 23:13:16 merlinofchaos Exp $
 /**
  * @file
  * Primarily Drupal hooks and global API functions to manipulate views.
@@ -312,6 +312,13 @@ function views_page() {
 function views_block($op = 'list', $delta = 0, $edit = array()) {
   switch ($op) {
     case 'list':
+      // Try to avoid instantiating all the views just to get the blocks info.
+      views_include('cache');
+      $cache = views_cache_get('views_block_items', TRUE);
+      if ($cache && is_array($cache->data)) {
+        return $cache->data;
+      }
+
       $items = array();
       $views = views_get_all_views();
       foreach ($views as $view) {
@@ -365,6 +372,8 @@ function views_block($op = 'list', $delta = 0, $edit = array()) {
       foreach ($views as $view) {
         $view->destroy();
       }
+
+      views_cache_set('views_block_items', $items, TRUE);
 
       return $items;
     case 'view':
