@@ -4,6 +4,7 @@ description = A sub theme of the Blueprint theme.
 base theme = blueprint 
 core = 6.x
 engine = phptemplate
+scripts[] = scripts/general.js
 stylesheets[screen,projection][] = css/style.css
 stylesheets[screen,projection][] = css/daniel.css
 stylesheets[screen,projection][] = css/poonam.css
