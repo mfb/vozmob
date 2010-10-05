@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_query_default.inc,v 1.1.2.23 2010/07/27 21:41:17 merlinofchaos Exp $
+// $Id: views_plugin_query_default.inc,v 1.1.2.24 2010/08/14 00:18:23 merlinofchaos Exp $
 /**
  * @file views_plugin_query_default.inc
  * Defines the default query object which builds SQL to execute using the
@@ -71,7 +71,8 @@ class views_plugin_query_default extends views_plugin_query{
   /**
    * Constructor; Create the basic query object and fill with default values.
    */
-  function init($base_table = 'node', $base_field = 'nid') {
+  function init($base_table = 'node', $base_field = 'nid', $options) {
+    parent::init($base_table, $base_field, $options);
     $this->base_table = $base_table;  // Predefine these above, for clarity.
     $this->base_field = $base_field;
     $this->relationships[$base_table] = array(
@@ -147,6 +148,30 @@ class views_plugin_query_default extends views_plugin_query{
    */
   function set_header($header) {
     $this->header = $header;
+  }
+
+  function option_definition() {
+    $options = parent::option_definition();
+    $options['disable_sql_rewrite'] = array(
+      'default' => FALSE,
+      'translatable' => FALSE,
+      'bool' => TRUE,
+    );
+
+    return $options;
+  }
+
+  /**
+   * Add settings for the ui.
+   */
+  function options_form(&$form, &$form_state) {
+    $form['disable_sql_rewrite'] = array(
+      '#title' => t('Disable SQL rewriting'),
+      '#description' => t('Disabling SQL rewriting will disable node_access checks as well as other modules that implement hook_db_rewrite_sql().'),
+      '#type' => 'checkbox',
+      '#default_value' => !empty($this->options['disable_sql_rewrite']),
+      '#prefix' =>  '<div class="messages warning">' . t('WARNING: Disabling SQL rewriting means that node access security is disabled. This may allow users to see data they should not be able to see if your view is misconfigured. Please use this option only if you understand and accept this security risk.') . '</div>',
+    );
   }
 
   // ----------------------------------------------------------------
@@ -1050,8 +1075,12 @@ class views_plugin_query_default extends views_plugin_query{
    */
   function execute(&$view) {
     $external = FALSE; // Whether this query will run against an external database.
-    $query = db_rewrite_sql($view->build_info['query'], $view->base_table, $view->base_field, array('view' => &$view));
-    $count_query = db_rewrite_sql($view->build_info['count_query'], $view->base_table, $view->base_field, array('view' => &$view));
+    $query = $view->build_info['query'];
+    $count_query = $view->build_info['count_query'];
+    if (empty($this->options['disable_sql_rewrite'])) {
+      $query = db_rewrite_sql($view->build_info['query'], $view->base_table, $view->base_field, array('view' => &$view));
+      $count_query = db_rewrite_sql($view->build_info['count_query'], $view->base_table, $view->base_field, array('view' => &$view));
+    }
     $args = $view->build_info['query_args'];
 
     vpr($query);

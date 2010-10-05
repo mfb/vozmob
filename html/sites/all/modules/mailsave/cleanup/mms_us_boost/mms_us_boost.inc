@@ -19,7 +19,7 @@ function mms_us_boost_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
       $message_view = drupal_http_request($url);
       // Get the message subject.
       if (preg_match('!<strong>Subject:</strong> (.*)!', $message_view->data, $matches)) {
-        $node->title = $matches[1];
+        $node->title = decode_entities(strip_tags($matches[1]));
       }
       $url = str_replace('share.do', 'guest/downloadMedia.do', $url);
       $attachment_view = drupal_http_request($url);

@@ -1,5 +1,5 @@
 <?php
-// $Id: field_file.inc,v 1.34 2010/04/24 06:27:52 quicksketch Exp $
+// $Id: field_file.inc,v 1.38 2010/08/08 22:23:57 quicksketch Exp $
 
 /**
  * @file
@@ -38,7 +38,7 @@ function field_file_load($fid, $reset = NULL) {
     }
 
     if (!$file) {
-      $file = array('fid' => 0, 'filepath' => '', 'filename' => '', 'filemime' => '', 'filesize' => 0);
+      $file = (object) array('fid' => 0, 'filepath' => '', 'filename' => '', 'filemime' => '', 'filesize' => 0);
     }
 
     foreach (module_implements('file_load') as $module) {
@@ -52,7 +52,7 @@ function field_file_load($fid, $reset = NULL) {
 
   // Cast to an array for the field storage.
   // Contrary to fields, hook_file() and core file functions expect objects.
-  return (array)$files[$fid];
+  return isset($files[$fid]) ? (array) $files[$fid] : FALSE;
 }
 
 /**
@@ -85,7 +85,7 @@ function field_file_save_upload($source, $validators = array(), $dest = FALSE) {
     return 0;
   }
   if (!@chmod($file->filepath, 0664)) {
-    watchdog('filefield', 'Could not set permissons on destination file: %file', array('%file' => $file->filepath));
+    watchdog('filefield', 'Could not set permissions on destination file: %file', array('%file' => $file->filepath));
   }
 
   // Let modules add additional properties to the yet barebone file object.
@@ -156,7 +156,10 @@ function field_file_save_file($filepath, $validators = array(), $dest = FALSE, $
   // Call the validation functions.
   $errors = array();
   foreach ($validators as $function => $args) {
-    array_unshift($args, $file);
+      // Add the $file variable to the list of arguments and pass it by
+      // reference (required for PHP 5.3 and higher).
+    array_unshift($args, NULL);
+    $args[0] = &$file;
     $errors = array_merge($errors, call_user_func_array($function, $args));
   }
 

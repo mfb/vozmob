@@ -1,5 +1,5 @@
 <?php
-// $Id: theme.inc,v 1.73.2.31 2010/07/27 22:51:27 merlinofchaos Exp $
+// $Id: theme.inc,v 1.73.2.32 2010/08/13 21:34:08 merlinofchaos Exp $
 
 /**
  * @file theme.inc
@@ -224,7 +224,11 @@ function template_preprocess_views_view_summary(&$vars) {
     $args = $view->args;
     $args[$argument->position] = $argument->summary_argument($row);
 
-    $vars['rows'][$id]->url = url($view->get_url($args), $url_options);
+    $base_path = NULL;
+    if (!empty($argument->options['style_options']['base_path'])) {
+      $base_path = $argument->options['style_options']['base_path'];
+    }
+    $vars['rows'][$id]->url = url($view->get_url($args, $base_path), $url_options);
     $vars['rows'][$id]->count = intval($row->{$argument->count_alias});
     if ($vars['rows'][$id]->url == base_path() . $_GET['q'] || $vars['rows'][$id]->url == base_path() . drupal_get_path_alias($_GET['q'])) {
       $vars['classes'][$id] = 'active';
@@ -257,7 +261,11 @@ function template_preprocess_views_view_summary_unformatted(&$vars) {
     $args = $view->args;
     $args[$argument->position] = $argument->summary_argument($row);
 
-    $vars['rows'][$id]->url = url($view->get_url($args), $url_options);
+    $base_path = NULL;
+    if (!empty($argument->options['style_options']['base_path'])) {
+      $base_path = $argument->options['style_options']['base_path'];
+    }
+    $vars['rows'][$id]->url = url($view->get_url($args, $base_path), $url_options);
     $vars['rows'][$id]->count = intval($row->{$argument->count_alias});
     if ($vars['rows'][$id]->url == base_path() . $_GET['q'] || $vars['rows'][$id]->url == base_path() . drupal_get_path_alias($_GET['q'])) {
       $vars['classes'][$id] = 'active';

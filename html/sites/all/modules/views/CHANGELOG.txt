@@ -47,6 +47,23 @@ Views 6.x-3.0-dev
     o #857264 by dereine: Remove unneeded "clone" and "export" hover links.
     o #611728 by incrn8: Respect db_rewrite_sql when choosing taxonomy terms for taxonomy filter.
     o #746846 by lavamind: url encoding on options could cause visual problems in jump menu.
+    o #859368 by dereine: Click sort using wrong add_orderby() line caused some click sorts to fail.
+    o #852854 by bojanz: Grammar fix on taxonomy default argument help text.
+    o #526106 by Blackice2999: Fix occasional off-by-one-day problem with date arguments.
+    o #843866 by dagmar: Allow summary views to specify their path rather than assuming the view path all the time.
+    o #785960 by dereine: Reset button should appear after Apply button, not before.
+    o #863666 by dereine: Revert button redirects to wrong place after view is reverted.
+    o #666870 by dereine and dww: Exposed sorts do not default properly.
+    o #703980 by jmiccolis: Custom date needs to better support "r".
+    o #743682 by nicedawg: Prevent exposed filter in a block from showing up twice on validation error.
+    o #768972 by dereine, cyberwolf and nicedawg: Add an option to disable an error message if terms do not exist on taxonomy term filter.
+    o #692988 by joachim: Eliminate an unnecessary query in taxonomy filter.
+    o #812608 by drunken monkey: Views outputs unquoted version in exports.
+    o #402944 by drewish: Cache views block list to reduce overhead when listing blocks.
+    o #348975 by dereine: Allow cloning of displays.
+    o #792184 by mgriego: Remove unnecessary special handling of option defaulting which actually causes problems in the new world order.
+    o #621142 by dereine and Scott Reynolds: Allow the query plugin to have its own settings.
+    o #910942 by dereine: Fixes views_test.info by specifying core = 6.x
 
 Views 6.x-3.0-alpha3
     o #705668 by dereine: Fix glossary view, add tests for glossary view.

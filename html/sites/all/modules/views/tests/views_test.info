@@ -1,8 +1,8 @@
-; $Id: views_test.info,v 1.1.4.2 2009/12/22 00:38:03 merlinofchaos Exp $
+; $Id: views_test.info,v 1.1.4.3 2010/09/14 17:51:08 dereine Exp $
 name = Views Test
 description = Test module for Views.
 package = Views
-core = 7.x
+core = 6.x
 dependencies[] = views
 hidden = TRUE
 files[] = views_test.module

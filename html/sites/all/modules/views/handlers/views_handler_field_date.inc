@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_date.inc,v 1.2.2.1 2009/06/02 18:20:12 merlinofchaos Exp $
+// $Id: views_handler_field_date.inc,v 1.2.2.2 2010/08/13 22:27:20 merlinofchaos Exp $
 /**
  * A handler to provide proper displays for dates.
  *
@@ -66,6 +66,9 @@ class views_handler_field_date extends views_handler_field {
         case 'time span':
           return t(($time_diff < 0 ? '%time hence' : '%time ago'), array('%time' => format_interval(abs($time_diff), is_numeric($custom_format) ? $custom_format : 2)));
         case 'custom':
+          if ($custom_format == 'r') {
+            return format_date($value, $format, $custom_format, null, 'en');
+          }
           return format_date($value, $format, $custom_format);
         default:
           return format_date($value, $format);

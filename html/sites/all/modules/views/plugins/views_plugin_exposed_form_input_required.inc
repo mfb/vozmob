@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_exposed_form_input_required.inc,v 1.1.2.3 2010/01/19 22:11:28 merlinofchaos Exp $
+// $Id: views_plugin_exposed_form_input_required.inc,v 1.1.2.4 2010/08/13 22:56:25 merlinofchaos Exp $
 
 /**
  * Exposed form plugin that provides basic exposed form
@@ -24,7 +24,7 @@ class views_plugin_exposed_form_input_required extends views_plugin_exposed_form
     $form['text_input_required'] = array(
       '#type' => 'textarea',
       '#title' => t('Text on demand'),
-      '#description' => t('Text to display instead results until user select and apply an expose filter.'),
+      '#description' => t('Text to display instead of results until the user selects and applies an exposed filter.'),
       '#default_value' => $this->options['text_input_required'],
     );
 

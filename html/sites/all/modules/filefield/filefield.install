@@ -1,5 +1,5 @@
 <?php
-// $Id: filefield.install,v 1.38 2010/04/24 01:51:43 quicksketch Exp $
+// $Id: filefield.install,v 1.40 2010/06/29 19:27:05 quicksketch Exp $
 /**
  * @file
  * FileField: Defines a CCK file field type.
@@ -8,7 +8,7 @@
  * and Drupal's {files} table to store the actual file data.
  */
 
-include_once('field_file.inc');
+require_once dirname(__FILE__) . '/field_file.inc';
 
 /**
  * Implementation of hook_install().
@@ -115,7 +115,7 @@ function filefield_update_6001() {
   }
 
   $ret = array();
-  include_once(drupal_get_path('module', 'content') .'/includes/content.admin.inc');
+  module_load_include('inc', 'content', 'includes/content.admin');
 
   // Rename the field type from file to filefield. adhere to module namespace.
   $ret[] = update_sql("UPDATE {content_node_field} SET type = 'filefield', module = 'filefield', active = 1 WHERE type = 'file'");
@@ -216,7 +216,7 @@ function filefield_update_6100() {
         $field['description_field'] = $field['show_description'];
       }
       _content_field_write($field);
-      $ret[] = array('success' => TRUE, 'query' => t('The File field %field has been updated with new settings.', array('%field' => $field['field_name'])));
+      $ret[] = array('success' => TRUE, 'query' => t('The file field %field has been updated with new settings.', array('%field' => $field['field_name'])));
     }
   }
 

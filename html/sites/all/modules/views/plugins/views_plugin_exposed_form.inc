@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_exposed_form.inc,v 1.1.2.10 2010/07/27 22:40:09 merlinofchaos Exp $
+// $Id: views_plugin_exposed_form.inc,v 1.1.2.12 2010/08/13 22:52:07 merlinofchaos Exp $
 
 /**
  * The base plugin to handle exposed filter forms.
@@ -128,7 +128,12 @@ class views_plugin_exposed_form extends views_plugin {
       $this->view->js_settings = $form_state['js settings'];
     }
 
-    return $output;
+    if (!$this->view->display_handler->displays_exposed() || (!$block && $this->view->display_handler->get_option('exposed_block'))) {
+      return "";
+    }
+    else {
+      return $output;
+    }
   }
 
   function query() {
@@ -138,7 +143,7 @@ class views_plugin_exposed_form extends views_plugin {
       $handler = $view->sort[$exposed_data['sort_by']];
       if (isset($handler)) {
         $view->query->orderby = array();
-        if (isset($exposed_data['sort_order']) && in_array($exposed_data['sort_order'], array('asc', 'desc'))) {
+        if (isset($exposed_data['sort_order']) && in_array($exposed_data['sort_order'], array('ASC', 'DESC'))) {
           $handler->options['order'] = $exposed_data['sort_order'];
         }
         $handler->query();
@@ -181,13 +186,15 @@ class views_plugin_exposed_form extends views_plugin {
         '#title' => t($this->options['exposed_sorts_label']),
       );
       $sort_order = array(
-        'asc' => t($this->options['sort_asc_label']),
-        'desc' => t($this->options['sort_desc_label']),
+        'ASC' => t($this->options['sort_asc_label']),
+        'DESC' => t($this->options['sort_desc_label']),
       );
+      $first_sort = reset($this->view->sort);
       $form['sort_order'] = array(
         '#type' => 'select',
         '#options' => $sort_order,
         '#title' => t('Order'),
+        '#default_value' => $first_sort->options['order'],
       );
       $form['submit']['#weight'] = 10;
       if (isset($form['reset'])) {

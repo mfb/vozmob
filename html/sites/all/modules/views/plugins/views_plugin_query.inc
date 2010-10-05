@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_query.inc,v 1.1.2.8 2010/04/29 18:39:31 merlinofchaos Exp $
+// $Id: views_plugin_query.inc,v 1.1.2.9 2010/08/14 00:18:23 merlinofchaos Exp $
 /**
  * @file
  * Defines the base query class, which is the underlying layer in a View.
@@ -17,7 +17,9 @@ class views_plugin_query extends views_plugin {
   /**
    * Constructor; Create the basic query object and fill with default values.
    */
-  function init($base_table, $base_field) {  }
+  function init($base_table, $base_field, $options) {
+    $this->options = $options;
+  }
 
   /**
    * Generate a query and a countquery from all of the information supplied
@@ -61,6 +63,19 @@ class views_plugin_query extends views_plugin {
    * If NULL, aggregation is not allowed.
    */
   function get_aggregation_info() { }
+
+  /**
+   * Add settings for the ui.
+   */
+  function options_form(&$form, &$form_state) { }
+
+  function options_validate(&$form, &$form_state) { }
+
+  function options_submit(&$form, &$form_state) { }
+
+  function summary_title() {
+    return t('Settings');
+  }
 
   /**
    * Set a LIMIT on the query, specifying a maximum number of results.

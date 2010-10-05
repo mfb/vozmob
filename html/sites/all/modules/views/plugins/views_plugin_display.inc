@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_display.inc,v 1.20.2.42 2010/07/27 22:25:04 merlinofchaos Exp $
+// $Id: views_plugin_display.inc,v 1.20.2.44 2010/08/14 00:18:23 merlinofchaos Exp $
 /**
  * @file
  * Contains the base display plugin.
@@ -257,6 +257,7 @@ class views_plugin_display extends views_plugin {
       'title' => array('title'),
       'css_class' => array('css_class'),
       'use_ajax' => array('use_ajax'),
+      'query' => array('query'),
       'items_per_page' => array('items_per_page', 'offset', 'use_pager', 'pager_element'),
       'pager' => array('pager'),
       'use_more' => array('use_more', 'use_more_always', 'use_more_text'),
@@ -291,36 +292,13 @@ class views_plugin_display extends views_plugin {
     }
   }
 
-  /**
-   * Set default options.
-   *
-   * Displays put their options in a different place than everything else; also
-   * displays spread their options out. We don't want to set defaults for
-   * items that are normally defaulted elsewhere.
-   */
-  function _set_option_defaults(&$storage, $options, $level = 0) {
-    foreach ($options as $option => $definition) {
-      // If defaulted to elsewhere and we're not the default display, skip.
-      if ($level == 0 && !$this->is_default_display() && !empty($options['defaults']['default'][$option])) {
-        continue;
-      }
-
-      if (isset($definition['contains']) && is_array($definition['contains'])) {
-        $storage[$option] = array();
-        $this->_set_option_defaults($storage[$option], $definition['contains'], $level++);
-      }
-      else {
-        $storage[$option] = isset($definition['default']) ? $definition['default'] : NULL;
-      }
-    }
-  }
-
   function option_definition() {
     $options = array(
       'defaults' => array(
         'default' => array(
           'access' => TRUE,
           'cache' => TRUE,
+          'query' => TRUE,
           'title' => TRUE,
           'css_class' => TRUE,
 
@@ -414,6 +392,12 @@ class views_plugin_display extends views_plugin {
       'cache' => array(
         'contains' => array(
           'type' => array('default' => 'none', 'export' => 'export_plugin'),
+         ),
+      ),
+      'query' => array(
+        'contains' => array(
+          'type' => array('default' => 'views_query', 'export' => 'export_plugin'),
+          'options' => array('default' => array(), 'export' => FALSE),
          ),
       ),
       // Note that exposed_form plugin has options in a separate array,
@@ -625,6 +609,9 @@ class views_plugin_display extends views_plugin {
           }
 
           break;
+        case 'query':
+          $views_data = views_fetch_data($this->view->base_table);
+          $name = !empty($views_data['table']['base']['query class']) ? $views_data['table']['base']['query class'] : 'views_query';
         default:
           $option_name = $type;
           $options = $this->get_option($type);
@@ -638,13 +625,17 @@ class views_plugin_display extends views_plugin {
             $options = $options['options'];
           }
       }
-
       $plugin = views_get_plugin($type, $name);
+
       if (!$plugin) {
         return;
       }
-
-      $plugin->init($this->view, $this->display, $options);
+      if ($type != 'query') {
+        $plugin->init($this->view, $this->display, $options);
+      }
+      else {
+        $plugin->init($this->view->base_table, $this->view->base_field, $options);
+      }
       $cache[$type][$name] = $plugin;
     }
 
@@ -926,6 +917,13 @@ class views_plugin_display extends views_plugin {
         'desc' => t('Allow grouping and aggregation (calculation) of fields.'),
       );
     }
+
+    $options['query'] = array(
+      'category' => 'advanced',
+      'title' => t('Query settings'),
+      'value' => t('Settings'),
+      'desc' => t('Allow to set some advanced settings for the query plugin'),
+    );
 
     $access_plugin = $this->get_plugin('access');
     if (!$access_plugin) {
@@ -1230,6 +1228,35 @@ class views_plugin_display extends views_plugin {
             '#value' => $cache['type'],
           );
           $plugin->options_form($form['cache_options'], $form_state);
+        }
+        break;
+      case 'query':
+        $query_options = $this->get_option('query');
+        $plugin_name = $query_options['type'];
+
+        $form['#title'] .= t('Query options');
+        $this->view->init_query();
+        if ($this->view->query) {
+          if (isset($this->view->query->definition['help topic'])) {
+            $form['#help_topic'] = $this->view->query->definition['help topic'];
+          }
+
+          if (isset($this->view->query->definition['module'])) {
+            $form['#help_module'] = $this->view->query->definition['module'];
+          }
+
+          $form['query'] = array(
+            '#tree' => TRUE,
+            'type' => array(
+              '#type' => 'value',
+              '#value' => $plugin_name,
+            ),
+            'options' => array(
+              '#tree' => TRUE,
+            ),
+          );
+          
+          $this->view->query->options_form($form['query']['options'], $form_state);
         }
         break;
       case 'style_plugin':
@@ -1697,6 +1724,11 @@ class views_plugin_display extends views_plugin {
           $plugin->options_validate($form['access_options'], $form_state);
         }
         break;
+      case 'query':
+        if ($this->view->query) {
+          $this->view->query->options_validate($form['query'], $form_state);
+        }
+        break;
       case 'cache_options':
         $plugin = $this->get_plugin('cache');
         if ($plugin) {
@@ -1781,6 +1813,14 @@ class views_plugin_display extends views_plugin {
           $this->set_option('cache', $form_state['values'][$section]);
         }
         break;
+      case 'query':
+        $plugin = $this->get_plugin('query');
+        if ($plugin) {
+          $plugin->options_submit($form['query']['options'], $form_state);
+          $this->set_option('query', $form_state['values'][$section]);
+        }
+        break;
+
       case 'title':
       case 'css_class':
       case 'link_display':
