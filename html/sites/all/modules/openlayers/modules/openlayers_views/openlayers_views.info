@@ -1,0 +1,7 @@
+; $Id: openlayers_views.info,v 1.4.2.1 2009/11/02 20:00:01 tmcw Exp $
+name = OpenLayers Views
+description = Provides OpenLayers Views plugins.
+core = 6.x
+package = OpenLayers
+dependencies[] = openlayers
+dependencies[] = views

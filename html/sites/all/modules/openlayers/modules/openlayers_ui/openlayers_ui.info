@@ -1,0 +1,6 @@
+; $Id: openlayers_ui.info,v 1.1.2.3 2009/11/11 21:16:19 tmcw Exp $
+name = "OpenLayers UI"
+description = "Provides a user interface to manage OpenLayers maps."
+core = "6.x"
+package = "OpenLayers"
+dependencies[] = "openlayers"

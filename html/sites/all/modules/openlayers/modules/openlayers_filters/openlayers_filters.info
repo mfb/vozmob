@@ -1,0 +1,6 @@
+; $Id: openlayers_filters.info,v 1.3 2009/09/21 04:36:31 zzolo Exp $
+name = OpenLayers Filters
+description = The OpenLayers Filters module provides input filters to allow for inline maps.
+core = 6.x
+package = OpenLayers
+dependencies[] = openlayers

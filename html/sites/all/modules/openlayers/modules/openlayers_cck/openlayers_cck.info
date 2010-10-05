@@ -1,0 +1,7 @@
+; $Id: openlayers_cck.info,v 1.5.2.1 2010/02/08 01:04:41 tmcw Exp $
+name = OpenLayers CCK
+description = Provides CCK fields and widgets through an OpenLayers interface.
+core = 6.x
+package = OpenLayers
+dependencies[] = openlayers
+dependencies[] = content
