@@ -1,0 +1,55 @@
+// $Id: 
+
+FAST GALLERY MODULE CHANGES
+---------------------------
+
+ACKNOWLEDGEMENTS
+----------------
+ * rapsli (Raphael Schär)
+
+
+CHANGES LOG
+-----------
+2010/04/27
+* UTF-8 support #783310 by silvio
+* XMP Support #783344 by silvio
+
+2009/12/01
+* added option to choose if the exif information should be refreshed upon update or not
+
+2009/11/25
+* Prevent from reading exif information from png files (http://drupal.org/node/613776) by rapsli
+
+2009/10/26
+* Multiple IPTC Keywords http://drupal.org/node/226703 by chachasikes
+* Error with exif extraction http://drupal.org/node/473140 by raintonr
+
+2009/09/24 dman
+* Cleaned up PHP E_ALL notices (undefined variables) in a few places, including exif.class
+* Typo in exif_nodeapi()
+* Applied fix for array-structured Geo tags http://drupal.org/node/473140
+
+2009/09/24
+* Applied Drupal Code styles
+
+2009/09/21
+* Better communications for users who don't have the exif_read_data function available
+
+2009/09/15
+* committed patch for iptc support
+
+2009/04/13
+* changed to fit the new CCK Datastructure.
+
+2009/03/30
+* better support for datefields
+
+2009/03/17
+ * if the datetime exif data is read we make sure to put it into the correct form (2004-02-12T15:19:21) so that we don't
+   need to use a text field only, but could use some date CCK field
+
+2009/02/05
+ * give the user the option to either show or not show the exif form fields created with cck on the node-form
+
+2009/01/23
+ * Initial first version providing support for CCK.

@@ -1,0 +1,63 @@
+<?php
+// $Id: exif_location.module,v 1.1.2.3 2010/03/19 22:17:00 rapsli Exp $
+
+/**
+ * implementation of hook_nodeapi
+ * @param stdClass $node
+ * @param string $op
+ * @param string $a3
+ * @param string $a4
+ */
+function exif_location_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  switch ($op) {
+    case 'presave':
+      $lid = 0;
+      /* Go get the location from EXIF fields */
+      if (is_array($node->field_gps_gpslongitude) &&
+          is_array($node->field_gps_gpslatitude)) {
+        $longitude = $node->field_gps_gpslongitude[0]['value'];
+        $latitude = $node->field_gps_gpslatitude[0]['value'];
+        if (is_array($node->locations) && array_key_exists($lid, $node->locations)) {
+          /*
+           * We cannot just overwrite existing locations or they will
+           * be created and not ammended by the loction module.
+           */
+          $node->locations[$lid]['longitude'] = $longitude;
+          $node->locations[$lid]['latitude'] = $latitude;
+        } 
+        else {
+          $node->locations[$lid] =
+            array(
+              'longitude' => $longitude,
+              'latitude,' => $latitude,
+            );
+        }
+        $lid++;
+
+        /* Remove any other locations */
+        while (array_key_exists($lid, $node->locations)) {
+          $node->locations[$lid]['longitude'] = '';
+          $node->locations[$lid]['latitude'] = '';
+          $lid++;
+        }
+      }
+      break;
+  }
+}
+
+/**
+ * Implementation of hook_form_alter
+ * @param array $form
+ * @param array $form_state
+ * @param array $form_id
+ */
+function exif_location_form_alter(&$form, $form_state, $form_id) {
+  /* Comment out the return below to enable this */
+  return;
+  /* Remove the location element from the node form */
+  if (isset($form['#node']) &&
+      $form['#node']->type == 'image' &&
+      $form_id == $form['#node']->type .'_node_form') {
+    $form['locations']['#access'] = FALSE;
+  }
+}

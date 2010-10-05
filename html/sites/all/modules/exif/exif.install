@@ -1,0 +1,26 @@
+<?php
+// $Id: exif.install,v 1.4.2.6 2010/04/27 20:53:13 rapsli Exp $
+/**
+ * @file the install part of the module
+*/
+
+/**
+ * Implementation of hook_install().
+ */
+function exif_install() {
+    db_query("UPDATE {system} SET weight = %d WHERE name = '%s'", -10, 'exif');
+}
+
+function exif_requirements($phase) {
+  $t = get_t();
+  if ($phase == 'runtime' || $phase == 'install') {
+    if (!function_exists('exif_read_data')) {
+      $requirements['exif_read_data'] = array(
+        'title' => $t('Function exif_read_data not available'),
+        'value' => $t('The Function exif_read_data is not available on the system.'),
+        'severity' => REQUIREMENT_ERROR,
+      );
+    }
+  }
+  return $requirements;
+}

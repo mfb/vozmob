@@ -1,0 +1,347 @@
+<?php
+// $Id: exif.module,v 1.9.2.18 2010/07/23 17:47:46 rapsli Exp $:
+
+/**
+ * @file implementing the drupal api
+ */
+/**
+ * @author: Raphael Schär - www.rapsli.ch
+ */
+
+function exif_menu() {
+  $items['admin/settings/exif'] = array(
+    'title' => 'Exif',
+    'page callback' => 'exif_admin_settings',
+    'access arguments' => array('administer site configuration'),
+    'description' => t('Display available fields'),
+    'access callback' => 'user_access',
+    'file' => 'exif.admin.inc',
+    'type' => MENU_NORMAL_ITEM,
+  );
+  $items['admin/settings/exif/general'] = array(
+    'title' => 'Exif',
+    'page callback' => 'exif_admin_settings',
+    'access arguments' => array('administer site configuration'),
+    'description' => t('Display available fields'),
+    'access callback' => 'user_access',
+    'file' => 'exif.admin.inc',
+    'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+  $items['admin/settings/exif/config'] = array(
+    'title' => 'Config',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('exif_admin_settings_form'),
+    'access arguments' => array('administer site configuration'),
+    'description' => t('Some Settings'),
+    'access callback' => 'user_access',
+    'file' => 'exif.admin.inc',
+    'type' => MENU_LOCAL_TASK,
+  );
+  return $items;
+}
+
+/**
+ * implementation of hook_nodeapi
+ */
+function exif_nodeapi(&$node, $op, $teaser = NULL, $page = NULL) {
+
+  if ($teaser) {
+    return;
+  }
+
+  switch ($op) {
+
+    case 'update':
+      //we are only going to update if we have said so
+      if (!variable_get('exif_update', TRUE)) {
+        break;
+      }
+    case 'insert':
+      if (! _exif_check_for_exif_data($node->type)) {
+        return;
+      }
+      $info = content_types($node->type);
+      $fields = $info['fields'];
+      $exif = _exif_get_class();
+
+      //get all the fields that will be filled with exif data
+      $ar_exif_fields = $exif->getExifFields($fields);
+
+      //get the path to the image
+      $image_path = _exif_get_image_path($fields, $node);
+
+      $fid = db_result(db_query("SELECT fid FROM {files} WHERE filepath = '%s'", $image_path));
+      $file = file_create_path($image_path);
+
+      $data1 = _exif_reformat($exif->readExifTags($file, $ar_exif_fields));
+      $data2 = $exif->readIPTCTags($file, $ar_exif_fields);
+
+      if (class_exists('SXMPFiles')) {
+        $data3 = $exif->readXMPTags($file, $ar_exif_fields);
+        $data = array_merge($data1, $data2, $data3);
+      }
+      else {
+        $data = array_merge($data1, $data2);
+      }
+
+      // Loop through every exif enabled field and set its value to the
+      // corresponding exif value. If no exif value was found, set the field
+      // value to NULL, to avoid strange behaviour in other field modules
+      // (date).
+      foreach ($ar_exif_fields as $ar_exif_field) {
+        $exif_name = $ar_exif_field['section'] .'_'. $ar_exif_field['tag'];
+        $exif_value = isset($data[$exif_name]) ? $data[$exif_name] : NULL;
+
+        $field_name = 'field_'. $exif_name;
+        if (! $exif_value) {
+          if (variable_get('exif_empty_values', TRUE)) {
+            $node->{$field_name}[0]['value'] = NULL;
+          }
+          continue;
+        }
+        $field = $fields[$field_name];
+
+        // Setup the field value array for delta = 0.
+        switch ($exif_name) {
+          case 'exif_datetimeoriginal':
+          case 'exif_datetimedigitized':
+          case 'ifd0_datetime':
+            $first_delta = _exif_date_handler($field, $exif_value);
+            break;
+          default:
+            $first_delta = array('value' => $data[$exif_name]);
+            break;
+        }
+        $node->{$field_name}[0] = $first_delta;
+      }
+      break;
+  }
+}
+
+/**
+ * Date API hook.
+ *
+ * Make exif a date format in Date API. This makes it possible to alter the
+ * format exif dates is parsed as.
+ */
+function exif_date_format_types() {
+  return array('exif' => 'EXIF');
+}
+
+/**
+ * Date API hook.
+ *
+ * Make the EXIF date format default for the 'exif' date type.
+ */
+function exif_date_formats() {
+  return array(
+  array(
+      'type' => 'exif',
+      'format' => 'Y:m:d H:i:s',
+  ),
+  );
+}
+
+/**
+ * Helper function to handle all date values from exif header. This is
+ * designed for the date_api and date modules, but is compatible if these
+ * aren't enabled.
+ *
+ * @param array $field
+ *   The field definition for the matcing exif date
+ * @param string $exif_date
+ *   The date extracted from exif header.
+ * @return array
+ *   The field value array for delta = 0
+ */
+function _exif_date_handler($field, $exif_date) {
+  if (! module_exists('date_api')) {
+    // Don't bother doing anything if the webmaster doesn't ...
+    return array('value' => $exif_date);
+  }
+
+  require_once drupal_get_path('module', 'date_api') .'/date_api_elements.inc';
+  $date_datetime = date_convert_from_custom($exif_date, variable_get('date_format_exif', 'Y:m:d H:i:s'));
+  if (! in_array($field['type'], array('date', 'datetime', 'datestamp'))) {
+    // Field is not a date field type, so we return a ISO-8601 representation
+    return array('value' => date_convert($date_datetime, DATE_DATETIME, DATE_ISO));
+  }
+
+  // Exif doesn't handles timezones, so we assume the exif date is in the
+  // timezone configured for this date field.  This means the exif date needs
+  // to be converted to UTC before it's stored.
+  $timezone = date_get_timezone($field['tz_handling']);
+  $date = date_make_date($date_datetime, $timezone, DATE_DATETIME, $field['granularity']);
+
+  // Store date offset before converting to UTC as this is lost when setting
+  // timezone to 'UTC'.
+  $offset = date_offset_get($date);
+  date_timezone_set($date, timezone_open('UTC'));
+
+  // Finally, convert the date object in UTC to a date according to the field
+  // type: DATE_ISO, DATE_DATETIME or DATE_UNIX.
+  $date_field = date_convert($date, DATE_OBJECT, $field['type']);
+  return array(
+    'value' => $date_field,
+    'value2' => $date_field,
+    'timezone' => $timezone,
+    'offset' => $offset,
+    'offset2' => $offset,
+  );
+}
+
+/**
+ * Let's check if this node type contains an image field.
+ *
+ * @param $fields fields from this content type
+ * @return boolean
+ */
+function _exif_check_for_exif_data($node_type) {
+
+  $new_types = array();
+  //fill up array with checked nodetypes
+  foreach (variable_get('exif_nodetypes', array()) as $type) {
+    if ($type != "0" ) {
+      $new_types[] = $type;
+    }
+  }
+  if (in_array($node_type, $new_types)) {
+    return TRUE;
+  }
+  return FALSE;
+}
+
+/**
+ * From a given node we are going to get the imagepath of the image. if it's an image node
+ * it's just going to be images[IMAGE_ORIGINAL]. If it's an imagefield node, we have to go
+ * through the fields and look if there is an imagefield and then return the path
+ *
+ * @param $fields
+ * @param $node
+ * @return unknown_type
+ */
+function _exif_get_image_path($fields, &$node) {
+  if ($node->type == 'image') {
+    return $node->images[IMAGE_ORIGINAL];
+  }
+
+  foreach ($fields as $field) {
+    if ($field['type'] == 'filefield') {
+      $tmp = $node->$field['field_name'];
+      return $tmp[0]['filepath'];
+    }
+  }
+  return NULL;
+}
+
+
+/**
+ * Helper function to reformat fields where required.
+ *
+ * Some values (lat/lon) break down into structures, not strings.
+ */
+function _exif_reformat($data) {
+  $date_array = array('datetimeoriginal', 'datetime', 'datetimedigitized');
+
+  // Make the key lowercase as CCK field names must be
+  $data = array_change_key_case($data, CASE_LOWER);
+
+  foreach ($data as $key => &$value) {
+    if (is_array($value))  {
+      $value = array_change_key_case($value, CASE_LOWER);
+    }
+
+    // Check for individual keys
+    switch ($key) {
+      case 'gpslatitude':
+        $value = _exif_DMS2D($value, $data['gpslatituderef']);
+        break;
+
+      case 'gpslongitude':
+        $value = _exif_DMS2D($value, $data['gpslongituderef']);
+        break;
+
+      case 'gps_gpslatitude':
+        $value = _exif_DMS2D($value, $data['gps_gpslatituderef']);
+        break;
+
+      case 'gps_gpslongitude':
+        $value = _exif_DMS2D($value, $data['gps_gpslongituderef']);
+        break;
+         
+    }
+  }
+  return $data;
+}
+
+/**
+ * Helper function to change GPS co-ords into decimals.
+ */
+function _exif_DMS2D($value, $ref) {
+  $parts = split('/', $value[0]);
+  $dec = (float) ((float) $parts[0] /  (float) $parts[1]);
+
+  $parts = split('/', $value[1]);
+  $dec += (float) (((float) $parts[0] /  (float) $parts[1]) / 60);
+
+  $parts = split('/', $value[2]);
+  $dec += (float) (((float) $parts[0] /  (float) $parts[1]) / 3600);
+
+  if ($ref == 'S' || $ref == 'W') $dec *= -1;
+  return $dec;
+}
+
+/**
+ * Helper function to get the exif class
+ * @return Exif
+ */
+function _exif_get_class() {
+  include_once drupal_get_path('module', 'exif') .'/exif.class.php';
+  $exif = Exif::getInstance();
+  return $exif;
+}
+
+/**
+ * Implementation of hook_hoken_list
+ * @param array $type
+ */
+function fast_gallery_token_list($type = 'node') {
+  if ($type == 'node') {
+    $exif = _exif_get_class();
+    $ar_iptc = $exif->getHumanReadableIPTCkey();
+    foreach ($ar_iptc as $iptc) {
+      $tokens['iptc']['iptc_' . $iptc] = 'IPTC Field: ' . $iptc;
+    }
+    return $tokens;
+  }
+}
+
+/**
+ * implementation of hook_token_values
+ * @param unknown_type $type
+ * @param unknown_type $object
+ * @param unknown_type $options
+ */
+function fast_gallery_token_values($type, $object = NULL, $options = array()) {
+  if ($type == 'node') {
+    $node = $object;
+    $exif = _exif_get_class();
+    $ar_iptc = $exif->getHumanReadableIPTCkey();
+
+    $info = content_types($node->type);
+    $fields = $info['fields'];
+    //get the path to the image
+    $image_path = _exif_get_image_path($fields, $node);
+    
+    //dsm("start reading");
+    $iptc_values = $exif->readIPTCTags($image_path, array(), array('style' => 'fullSmall'));
+    //dsm($iptc_values);
+
+    // TODO: needs to be finished
+    foreach ($iptc_values as $key => $iptc) {
+      $tokens['iptc_' . $key] = 'IPTC Field: ' . utf8_encode($iptc);
+    }
+    //dsm($tokens);
+    return $tokens;
+  }
+}
