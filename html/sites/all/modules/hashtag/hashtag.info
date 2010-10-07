@@ -1,0 +1,5 @@
+; $Id$
+name = Hash tag
+description = Convert hash tags in node bodies to taxonomy tags.
+core = 6.x
+dependencies[] = taxonomy
