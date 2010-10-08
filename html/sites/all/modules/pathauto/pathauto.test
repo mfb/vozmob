@@ -1,5 +1,5 @@
 <?php
-// $Id: pathauto.test,v 1.1.2.7 2010/07/31 16:57:41 davereid Exp $
+// $Id: pathauto.test,v 1.1.2.11 2010/09/27 15:52:58 greggles Exp $
 
 /**
  * @file
@@ -7,16 +7,6 @@
  *
  * @ingroup pathauto
  */
-
-/**
- * Implements hook_simpletest_alter().
- */
-function pathauto_simpletest_alter(&$groups) {
-  // Enforce dependency on token for all pathauto tests.
-  if (!drupal_get_filename('module', 'token')) {
-    unset($groups['Pathauto']);
-  }
-}
 
 /**
  * Helper test class with some added functions for testing.
@@ -30,12 +20,17 @@ class PathautoTestHelper extends DrupalWebTestCase {
     if (isset($args[0]) && is_array($args[0])) {
       $modules = array_merge($modules, $args[0]);
     }
-    call_user_func_array(array('parent', 'setUp'), $modules);
+
+    $parent_callback = 'parent::setUp';
+    if (version_compare(PHP_VERSION, '5.3.0', '<')) {
+      $parent_callback = array($this, 'parent::setUp');
+    }
+    call_user_func_array($parent_callback, $modules);
   }
 
   function assertToken($type, $object, $token, $expected) {
-    $tokens = pathauto_token_values($type, $object);
-    $this->assertEqual($tokens[$token], $expected, t("Token value for [@token] was '!actual', expected value '!expected'.", array('@token' => $token, '!actual' => $tokens[$token], '!expected' => $expected)));
+    $tokens = pathauto_get_placeholders($type, $object);
+    $this->assertEqual($tokens['values'][$token], $expected, t("Token value for [@token] was '!actual', expected value '!expected'.", array('@token' => $token, '!actual' => $tokens['values'][$token], '!expected' => $expected)));
   }
 
   function saveAlias($source, $alias, $language = '') {
@@ -58,7 +53,7 @@ class PathautoTestHelper extends DrupalWebTestCase {
     return $this->assertAliasExists(array('source' => $uri['path']));
   }
 
-  function assertNoEntityAlias($entity_type, $entity, $expected_alias, $language = '') {
+  function assertNoEntityAlias($entity_type, $entity, $language = '') {
     $uri = $this->entity_uri($entity_type, $entity);
     $this->assertEntityAlias($entity_type, $entity, $uri['path'], $language);
   }
@@ -75,9 +70,9 @@ class PathautoTestHelper extends DrupalWebTestCase {
   }
 
   function assertAliasExists($conditions) {
-    $alias = $this->path_load($conditions);
-    $this->assertTrue($alias, t('Alias with conditions @conditions found.', array('@conditions' => var_export($conditions, TRUE))));
-    return $alias;
+    $path = $this->path_load($conditions);
+    $this->assertTrue($path, t('Alias with conditions @conditions found.', array('@conditions' => var_export($conditions, TRUE))));
+    return $path;
   }
 
   function assertNoAliasExists($conditions) {
@@ -154,6 +149,24 @@ class PathautoTestHelper extends DrupalWebTestCase {
     db_query("DELETE FROM {url_alias}");
     drupal_clear_path_cache();
   }
+
+  function addVocabulary(array $vocabulary = array()) {
+    $vocabulary += array(
+      'name' => drupal_strtolower($this->randomName(5)),
+      'nodes' => array('story' => 'story'),
+    );
+    taxonomy_save_vocabulary($vocabulary);
+    return (object) $vocabulary;
+  }
+
+  function addTerm(stdClass $vocabulary, array $term = array()) {
+    $term += array(
+      'name' => drupal_strtolower($this->randomName(5)),
+      'vid' => $vocabulary->vid,
+    );
+    taxonomy_save_term($term);
+    return (object) $term;
+  }
 }
 
 /**
@@ -228,6 +241,16 @@ class PathautoUnitTestCase extends PathautoTestHelper {
   }
 
   /**
+   * Test _pathauto_get_raw_tokens().
+   */
+  function testGetRawTokens() {
+    $raw_tokens = _pathauto_get_raw_tokens();
+    $this->assertFalse(in_array('node-path', $raw_tokens), 'Non-raw tokens not included.');
+    $this->assertTrue(in_array('node-path-raw', $raw_tokens), 'Token [catpath] has a matching raw token.');
+    $this->assertFalse(in_array('node-url-raw', $raw_tokens), 'Token [catalias] does not have a matching raw token.');
+  }
+
+  /**
    * Test the different update actions in pathauto_create_alias().
    */
   function testUpdateActions() {
@@ -276,6 +299,27 @@ class PathautoUnitTestCase extends PathautoTestHelper {
     pathauto_node_update_alias($node, 'bulkupdate');
     $this->assertEntityAlias('node', $node, 'content/sixth-title');
   }
+
+  /**
+   * Test that pathauto_create_alias() will not create an alias for a pattern
+   * that does not get any tokens replaced.
+   */
+  function testNoTokensNoAlias() {
+    $node = $this->drupalCreateNode(array('title' => ''));
+    $this->assertNoEntityAlias('node', $node);
+
+    $node->title = 'hello';
+    pathauto_nodeapi($node, 'update');
+    $this->assertEntityAlias('node', $node, 'content/hello');
+  }
+
+  /**
+   * Test the handling of path vs non-path tokens in pathauto_clean_token_values().
+   *
+   * @see PathautoBookTokenTestCase::testBookPathAlias()
+   */
+  //function testPathTokens() {
+  //}
 }
 
 /**
@@ -379,7 +423,7 @@ class PathautoFunctionalTestCase extends PathautoFunctionalTestHelper {
     $node2 = $this->drupalCreateNode(array('title' => 'node2'));
 
     // Delete all current URL aliases.
-    db_query("DELETE FROM {url_alias}");
+    $this->deleteAllAliases();
 
     $edit = array(
       'operation' => 'pathauto_update_alias',
@@ -399,7 +443,7 @@ class PathautoFunctionalTestCase extends PathautoFunctionalTestHelper {
     $account = $this->drupalCreateUser();
 
     // Delete all current URL aliases.
-    db_query("DELETE FROM {url_alias}");
+    $this->deleteAllAliases();
 
     $edit = array(
       'operation' => 'pathauto_update_alias',
@@ -410,6 +454,51 @@ class PathautoFunctionalTestCase extends PathautoFunctionalTestHelper {
 
     $this->assertEntityAlias('user', $account, 'users/' . drupal_strtolower($account->name));
     $this->assertEntityAlias('user', $this->admin_user, 'user/' . $this->admin_user->uid);
+  }
+
+  function testSettingsValidation() {
+    $edit = array();
+    $edit['pathauto_max_length'] = 'abc';
+    $edit['pathauto_max_component_length'] = 'abc';
+    $this->drupalPost('admin/build/path/pathauto', $edit, 'Save configuration');
+    $this->assertText('The field Maximum alias length is not a valid number.');
+    $this->assertText('The field Maximum component length is not a valid number.');
+    $this->assertNoText('The configuration options have been saved.');
+
+    $edit['pathauto_max_length'] = '0';
+    $edit['pathauto_max_component_length'] = '0';
+    $this->drupalPost('admin/build/path/pathauto', $edit, 'Save configuration');
+    $this->assertText('The field Maximum alias length cannot be less than 1.');
+    $this->assertText('The field Maximum component length cannot be less than 1.');
+    $this->assertNoText('The configuration options have been saved.');
+
+    $edit['pathauto_max_length'] = '999';
+    $edit['pathauto_max_component_length'] = '999';
+    $this->drupalPost('admin/build/path/pathauto', $edit, 'Save configuration');
+    $this->assertText('The field Maximum alias length cannot be greater than 128.');
+    $this->assertText('The field Maximum component length cannot be greater than 128.');
+    $this->assertNoText('The configuration options have been saved.');
+
+    $edit['pathauto_max_length'] = '50';
+    $edit['pathauto_max_component_length'] = '50';
+    $this->drupalPost('admin/build/path/pathauto', $edit, 'Save configuration');
+    $this->assertText('The configuration options have been saved.');
+  }
+
+  function testPatternsValidation() {
+    $edit = array();
+    $edit['pathauto_node_pattern'] = '[title-raw]/[user-created-small]/[cat]/[term]';
+    $edit['pathauto_node_page_pattern'] = 'page';
+    $this->drupalPost('admin/build/path/pathauto', $edit, 'Save configuration');
+    $this->assertText('The Default path pattern (applies to all node types with blank patterns below) is using the following invalid tokens: [user-created-small], [cat].');
+    $this->assertText('The Pattern for all Page paths should contain at least one token to ensure unique URL aliases are created.');
+    $this->assertNoText('The configuration options have been saved.');
+
+    $edit['pathauto_node_pattern'] = '[title-raw]';
+    $edit['pathauto_node_page_pattern'] = 'page/[title-raw]';
+    $edit['pathauto_node_story_pattern'] = '';
+    $this->drupalPost('admin/build/path/pathauto', $edit, 'Save configuration');
+    $this->assertText('The configuration options have been saved.');
   }
 }
 
@@ -425,7 +514,7 @@ class PathautoLocaleTestCase extends PathautoFunctionalTestHelper {
   function setUp() {
     parent::setUp(array('locale', 'translation'), array('administer languages'));
 
-    // Add predefined language and reset the locale cache.
+    // Add predefined French language and reset the locale cache.
     require_once './includes/locale.inc';
     locale_add_language('fr', NULL, NULL, LANGUAGE_LTR, '', 'fr');
     language_list('language', TRUE);
@@ -504,6 +593,11 @@ class PathautoBookTokenTestCase extends PathautoTestHelper {
     // Add a child page on an existing child page.
     $sub_child_node1 = $this->drupalCreateNode(array('type' => 'book', 'title' => 'Sub-sub Page1', 'book' => array('bid' => $parent_node->book['bid'], 'plid' => $child_node1->book['mlid'])));
     $this->assertToken('node', $sub_child_node1, 'bookpathalias', 'root/sub-page1');
+
+    // Test that path tokens should not be altered.
+    $this->saveEntityAlias('node', $child_node1, 'My Crazy/Alias/');
+    pathauto_nodeapi($sub_child_node1, 'update');
+    $this->assertEntityAlias('node', $sub_child_node1, 'My Crazy/Alias/sub-sub-page1');
   }
 }
 
@@ -573,23 +667,5 @@ class PathautoTaxonomyTokenTestCase extends PathautoFunctionalTestHelper {
     $non_term_node = $this->drupalCreateNode(array('type' => 'story'));
     $this->assertToken('node', $non_term_node, 'termpath', '');
     $this->assertToken('node', $non_term_node, 'termalias', '');
-  }
-
-  function addVocabulary(array $vocabulary = array()) {
-    $vocabulary += array(
-      'name' => drupal_strtolower($this->randomName(5)),
-      'nodes' => array('story' => 'story'),
-    );
-    taxonomy_save_vocabulary($vocabulary);
-    return (object) $vocabulary;
-  }
-
-  function addTerm(stdClass $vocabulary, array $term = array()) {
-    $term += array(
-      'name' => drupal_strtolower($this->randomName(5)),
-      'vid' => $vocabulary->vid,
-    );
-    taxonomy_save_term($term);
-    return (object) $term;
   }
 }

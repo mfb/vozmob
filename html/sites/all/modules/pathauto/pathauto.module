@@ -1,5 +1,5 @@
 <?php
-// $Id: pathauto.module,v 1.118.2.27 2010/07/31 16:57:41 davereid Exp $
+// $Id: pathauto.module,v 1.118.2.31 2010/10/07 17:43:15 davereid Exp $
 
 /**
  * @defgroup pathauto Pathauto: Automatically generates aliases for content
@@ -97,18 +97,21 @@ function pathauto_token_list($type = 'all') {
   if (module_exists('taxonomy')) {
     if ($type == 'taxonomy' || $type == 'all') {
       $tokens['taxonomy']['catpath'] = t('As [cat], but including its supercategories separated by /.');
-      $tokens['taxonomy']['catpath-raw'] = t('As [cat-raw], but including its supercategories separated by /. WARNING - raw user input.');
-      $tokens['taxonomy']['catalias'] = t('URL alias for the term.');
+      $tokens['taxonomy']['catpath-raw'] = t('As [cat-raw], but including its supercategories separated by /.');
+      $tokens['taxonomy']['catalias'] = t('The URL alias of the taxonomy term.');
+      $tokens['taxonomy']['catalias-raw'] = t('The URL alias of the taxonomy term.');
     }
     if ($type == 'node' || $type == 'all') {
       $tokens['node']['termpath'] = t('As [term], but including its supercategories separated by /.');
-      $tokens['node']['termpath-raw'] = t('As [term-raw], but including its supercategories separated by /. WARNING - raw user input.');
-      $tokens['node']['termalias'] = t('URL alias for the term.');
+      $tokens['node']['termpath-raw'] = t('As [term-raw], but including its supercategories separated by /.');
+      $tokens['node']['termalias'] = t('The URL alias of the taxonomy term.');
+      $tokens['node']['termalias-raw'] = t('The URL alias of the taxonomy term.');
     }
   }
   if (module_exists('book')) {
     if ($type == 'node' || $type == 'all') {
-      $tokens['node']['bookpathalias'] = t('URL alias for the parent book.');
+      $tokens['node']['bookpathalias'] = t('The URL alias of the parent book of the node.');
+      $tokens['node']['bookpathalias-raw'] = t('The URL alias of the parent book of the node.');
     }
   }
   return $tokens;
@@ -125,8 +128,10 @@ function pathauto_token_values($type, $object = NULL, $options = array(), $label
       // Token [bookpathalias].
       if (module_exists('book')) {
         $values['bookpathalias'] = '';
+        $values['bookpathalias-raw'] = '';
         if (!empty($object->book['plid']) && $parent = book_link_load($object->book['plid'])) {
-          $values['bookpathalias'] = drupal_get_path_alias($parent['href']);
+          $values['bookpathalias-raw'] = drupal_get_path_alias($parent['href']);
+          $values['bookpathalias']     = check_plain($values['bookpathalias-raw']);
         }
       }
 
@@ -153,25 +158,22 @@ function pathauto_token_values($type, $object = NULL, $options = array(), $label
       $values[$label . 'path'] = '';
       $values[$label . 'path-raw'] = '';
       $values[$label . 'alias'] = '';
+      $values[$label . 'alias-raw'] = '';
 
       // Tokens [catpath] and [catpath-raw].
       if (isset($object->tid)) {
-        module_load_include('inc', 'pathauto');
         $parents = taxonomy_get_parents_all($object->tid);
         $catpath = $catpath_raw = array();
         foreach ($parents as $parent) {
-          array_unshift($catpath, pathauto_cleanstring(check_plain($parent->name)));
-          array_unshift($catpath_raw, pathauto_cleanstring($parent->name));
+          array_unshift($catpath, check_plain($parent->name));
+          array_unshift($catpath_raw, $parent->name);
         }
-        $values[$label . 'path'] = implode('/', $catpath);
-        $values[$label . 'path-raw'] = implode('/', $catpath_raw);
+        $values[$label . 'path'] = !empty($options['pathauto']) ? $catpath : implode('/', $catpath);
+        $values[$label . 'path-raw'] = !empty($options['pathauto']) ? $catpath_raw : implode('/', $catpath_raw);
 
-        // Token [catalias].
-        $values[$label . 'alias'] = drupal_get_path_alias(taxonomy_term_path($object));
-        if (!strncasecmp($values[$label .'alias'], 'taxonomy', 8)) {
-          // @todo What is this doing??
-          $values[$label . 'alias'] = check_plain($object->name);
-        }
+        // Token [catalias-raw] and [catalias].
+        $values[$label . 'alias-raw'] = drupal_get_path_alias(taxonomy_term_path($object));
+        $values[$label . 'alias']     = check_plain($values[$label . 'alias-raw']);
       }
       break;
   }
