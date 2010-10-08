@@ -520,7 +520,8 @@ function media_mover_api_run_config_harvest($config, $verb, $nid) {
   if (! media_mover_api_harvest_lock($config)) {
     // set some output display
     $output .= t('Harvesting.... ') .'<br />';
-    $files = module_invoke($config->{$verb}->module, 'media_mover', $verb, $config->{$verb}->action, $config->{$verb}->configuration, NULL, $config, $nid);
+    $file = NULL;
+    $files = call_user_func_array($config->{$verb}->module . '_media_mover', array($verb, $config->{$verb}->action, $config->{$verb}->configuration, &$file, $config, $nid));
     $output .= t('Configuration process: <em>harvest</em> found !count files', array('!count' => count($files))) .'<br />';
     // store the harvested files
     if (count($files)) {
@@ -1153,7 +1154,7 @@ function media_mover_api_update_file($file, $status = FALSE) {
   );
   foreach (media_mover_api_verbs() as $verb) {
     if (isset($file["{$verb}_module"])) {
-      module_invoke($file["{$verb}_module"], 'media_mover', 'update', $file["{$verb}_action"], NULL, $file);
+      call_user_func_array($file["{$verb}_module"] . '_media_mover', array('update', $file["{$verb}_action"], NULL, &$file));
     }
   }
   db_unlock_tables('media_mover_files');
@@ -2855,7 +2856,7 @@ function media_mover_api_file_fetch_get_additional($item) {
   // get ready to fetch additional items
   $fetch_items = array();
   foreach (media_mover_api_verbs() as $verb) {
-    if ($new_items = module_invoke($configuration->{$verb}->module, 'media_mover', 'fetch', $item_config->{$verb}->action, $configuration, $item)) {
+    if ($new_items = call_user_func_array($configuration->{$verb}->module . '_media_mover', array('fetch', $item_config->{$verb}->action, $configuration, &$item))) {
       $fetch_items[$item_config->{$verb}->module][$configuration->{$verb}->action] = $new_items;
     }
   }
@@ -3013,7 +3014,7 @@ function media_mover_api_file_delete_confirm_form_submit($form, &$form_state) {
 
   // invoke the hook media mover $op delete
   foreach (media_mover_api_verbs() as $verb) {
-    module_invoke($configuration->{$verb}->module, 'media_mover', 'delete', $configuration->{$verb}->action, $configuration->{$verb}->configuration, $file, $configuration);
+    call_user_func_array($configuration->{$verb}->module . '_media_mover', array('delete', $configuration->{$verb}->action, $configuration->{$verb}->configuration, &$file, $configuration));
   }
 
   // delete the file cache for this node
@@ -3091,7 +3092,7 @@ function media_mover_api_file_delete_call($file) {
 
   // call the modules that added files to this
   foreach (media_mover_api_verbs() as $verb) {
-    module_invoke($configuration->{$verb}->module, 'media_mover', 'delete', $configuration->{$verb}->action, $configuration->{$verb}->configuration, $file, $configuration);
+    call_user_func_array($configuration->{$verb}->module . '_media_mover', array('delete', $configuration->{$verb}->action, $configuration->{$verb}->configuration, &$file, $configuration));
   }
 
   // now clear the cache if we have a node
