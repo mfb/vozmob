@@ -1,0 +1,567 @@
+# $Id$
+#
+# Swedish translation of Drupal (token)
+# Generated from files:
+#  token.pages.inc,v 1.7.2.2 2010/03/26 00:03:19 davereid
+#  token.info,v 1.2.2.1 2007/10/29 04:40:41 eaton
+#  token.rules.inc,v 1.1.2.4 2009/08/05 17:17:10 fago
+#  token_comment.inc,v 1.3.4.6 2010/03/11 19:06:27 davereid
+#  token_node.inc,v 1.5.4.21 2010/03/25 17:49:43 davereid
+#  token.module,v 1.7.4.20 2010/03/26 00:03:19 davereid
+#  token_taxonomy.inc,v 1.3.4.4 2010/03/25 20:18:50 davereid
+#  token_user.inc,v 1.3.4.5 2010/03/11 17:39:12 davereid
+#  tokenSTARTER.module,v 1.1.2.3 2010/03/11 19:28:54 davereid
+#  token_actions.module,v 1.4.2.9 2010/03/25 17:49:43 davereid
+#  tokenSTARTER.info,v 1.1.2.1 2009/04/19 21:31:24 greggles
+#  token_actions.info,v 1.1.2.1 2008/07/08 19:40:17 greggles
+#  token.js,v 1.3.2.2 2010/03/26 00:03:19 davereid
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Token 6.x\n"
+"POT-Creation-Date: 2010-03-30 02:14+0200\n"
+"PO-Revision-Date: 2010-03-30 02:54+0100\n"
+"Last-Translator: Magnus Gunnarsson <magnus.gunnarsson76@gmail.com>\n"
+"Language-Team: drupalsverige.se\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n!=1);\n"
+"X-Poedit-Language: Swedish\n"
+"X-Poedit-Country: SWEDEN\n"
+"X-Poedit-SourceCharset: utf-8\n"
+
+#: token.pages.inc:26;61
+#: token.info:0
+msgid "Token"
+msgstr "Symbol"
+
+#: token.pages.inc:26
+msgid "Replacement value"
+msgstr "Ersättningsvärde"
+
+#: token.pages.inc:29
+msgid "tokens"
+msgstr "symboler"
+
+#: token.pages.inc:62
+msgid "Description"
+msgstr "Beskrivning"
+
+#: token.pages.inc:87
+msgid "No tokens available."
+msgstr "Inga symboler tillgängliga."
+
+#: token.pages.inc:97
+msgid "Click a token to insert it into the field you've last clicked."
+msgstr "Klicka på en symbol för att infoga den i det fält du senast klickade i."
+
+#: token.rules.inc:17
+msgid "Token replacement patterns"
+msgstr "Mönster för symbolersättning"
+
+#: token.rules.inc:105
+msgid "Replacement patterns for @name"
+msgstr "Ersättningsmönster för @name"
+
+#: token_comment.inc:67
+msgid "Comment ID"
+msgstr "Kommentarens ID"
+
+#: token_comment.inc:68
+msgid "Comment's node ID"
+msgstr "ID för noden kommentaren hör till"
+
+#: token_comment.inc:69
+msgid "Comment title"
+msgstr "Kommentarens titel"
+
+#: token_comment.inc:70
+msgid "Comment title. WARNING - raw user input"
+msgstr "Kommentarens titel. VARNING - obearbetad inmatning från användare"
+
+#: token_comment.inc:71
+msgid "Comment body"
+msgstr "Kommentarens brödtext"
+
+#: token_comment.inc:72
+msgid "Comment body. WARNING - raw user input"
+msgstr "Kommentarens brödtext. VARNING - obearbetad inmatning från användare"
+
+#: token_comment.inc:74
+msgid "Comment author's user id"
+msgstr "Användar-ID för kommentarens författare"
+
+#: token_comment.inc:75
+msgid "Comment author's user name"
+msgstr "Användarnamn för kommentarens författare"
+
+#: token_comment.inc:76
+msgid "Comment author's user name. WARNING - raw user input"
+msgstr "Användarnamn för kommentarens författare. VARNING - obearbetad inmatning från användare"
+
+#: token_comment.inc:77
+msgid "Comment author's home page."
+msgstr "Hemsida för kommentarens författare."
+
+#: token_comment.inc:79
+msgid "Comment author's e-mail."
+msgstr "E-post till kommentarens författare."
+
+#: token_comment.inc:80
+msgid "Comment author's e-mail. WARNING - raw user input."
+msgstr "E-post till kommentarens författare. VARNING - obearbetad inmatning från användare."
+
+#: token_comment.inc:82
+msgid "Comment creation"
+msgstr "Kommentar skapad"
+
+#: token_node.inc:29
+#: token.module:68
+msgid "Anonymous"
+msgstr "Gäst"
+
+#: token_node.inc:164
+msgid "Node ID"
+msgstr "ID för Nod"
+
+#: token_node.inc:165
+msgid "Node type"
+msgstr "Nodtyp"
+
+#: token_node.inc:166
+msgid "Node type (user-friendly version)"
+msgstr "Nodtyp (användarvänlig variant)"
+
+#: token_node.inc:167
+msgid "Node language"
+msgstr "Nodens språk"
+
+#: token_node.inc:168
+msgid "Node title"
+msgstr "Nodens titel"
+
+#: token_node.inc:169
+msgid "Unfiltered node title. WARNING - raw user input."
+msgstr "Ofiltrerad nodtitel. VARNING - obearbetad inmatning från användare."
+
+#: token_node.inc:171
+msgid "Node author's user id"
+msgstr "Användar-ID för nodens författare"
+
+#: token_node.inc:172
+msgid "Node author's user name"
+msgstr "Användarnamn för nodens författare"
+
+#: token_node.inc:173
+msgid "Node author's user name. WARNING - raw user input."
+msgstr "Användar-ID för nodens författare. VARNING - obearbetad inmatning från användare."
+
+#: token_node.inc:174
+msgid "Node author's e-mail."
+msgstr "E-postadress för nodens författare."
+
+#: token_node.inc:175
+msgid "Node author's e-mail. WARNING - raw user input."
+msgstr "E-postadress för nodens författare. VARNING - obearbetad inmatning från användare."
+
+#: token_node.inc:176
+msgid "The number of comments on a node."
+msgstr "Antalet kommentarer på en nod"
+
+#: token_node.inc:177
+msgid "The number of new comments on a node."
+msgstr "Antalet nya kommentarer på en nod"
+
+#: token_node.inc:179
+msgid "Name of top taxonomy term"
+msgstr "Namnet på nodens översta taxonomiterm"
+
+#: token_node.inc:180
+msgid "Unfiltered name of top taxonomy term. WARNING - raw user input."
+msgstr "Ofiltrerat namn på nodens översta taxonomiterm. VARNING - obearbetad inmatning från användare."
+
+#: token_node.inc:181
+msgid "ID of top taxonomy term"
+msgstr "ID för nodens översta taxonomiterm"
+
+#: token_node.inc:182
+msgid "Name of top term's vocabulary"
+msgstr "Vokabulärnamn för nodens översta taxonomiterm"
+
+#: token_node.inc:183
+msgid "Unfiltered name of top term's vocabulary. WARNING - raw user input."
+msgstr "Ofiltrerat vokabulärnamn för nodens översta taxonomiterm. VARNING - obearbetad inmatning från användare."
+
+#: token_node.inc:184
+msgid "ID of top term's vocabulary"
+msgstr "ID för översta taxonomitermen"
+
+#: token_node.inc:189
+msgid "Node creation"
+msgstr "Nod skapad"
+
+#: token_node.inc:190
+msgid "All tokens for node creation dates can also be used with with the \"mod-\" prefix; doing so will use the modification date rather than the creation date."
+msgstr "Alla symboler för en nods skapandedatum kan också användas med \"mod-\"prefix vilket gör att datumet för senaste ändring används istället för datumet för skapandet."
+
+#: token_node.inc:192
+msgid "The name of the menu the node belongs to."
+msgstr "Namnet på den meny som noden hör till."
+
+#: token_node.inc:193
+msgid "The name of the menu the node belongs to. WARNING - raw user input."
+msgstr "Namnet på den meny som noden hör till. VARNING - obearbetad inmatning från användare."
+
+#: token_node.inc:194
+msgid "The menu path (as reflected in the breadcrumb), not including Home or [menu]. Separated by /."
+msgstr "Menysökvägen (som i länkstigen), omfattar ej Hem eller [menu]. Avdelad med /."
+
+#: token_node.inc:195
+msgid "The unfiltered menu path (as reflected in the breadcrumb), not including Home or [menu]. Separated by /. WARNING - raw user input."
+msgstr "Ofiltrerad menysökväg (som i länkstigen), omfattar ej Hem eller [menu]. Avdelad med /. VARNING - obearbetad inmatning från användare."
+
+#: token_node.inc:196
+msgid "The text used in the menu as link text for this item."
+msgstr "Texten som används som länktext för detta menyalternativ i menyn."
+
+#: token_node.inc:197
+msgid "The unfiltered text used in the menu as link text for this item. WARNING - raw user input."
+msgstr "Den ofiltrerad text som används som länktext för detta menyalternativ i menyn. VARNING - obearbetad inmatning från användare."
+
+#: token_node.inc:283
+msgid "The title of the node's book parent."
+msgstr "Nodens bokförälders titel."
+
+#: token_node.inc:284
+msgid "The id of the node's book parent."
+msgstr "Nodens bokförälders ID."
+
+#: token_node.inc:285
+msgid "The titles of all parents in the node's book hierarchy."
+msgstr "Alla överliggande titlar i nodens bokhierarki."
+
+#: token_node.inc:287
+msgid "The unfiltered title of the node's book parent. WARNING - raw user input."
+msgstr "Den ofiltrerade titeln för nodens överliggande bok. VARNING - obearbetad inmatning från användare."
+
+#: token_node.inc:288
+msgid "The unfiltered titles of all parents in the node's book hierarchy. WARNING - raw user input."
+msgstr "De ofiltrerade titlarna för alla överliggande titlar i nodens bokhierarki. VARNING - obearbetad inmatning från användare."
+
+#: token_taxonomy.inc:47
+msgid "The id number of the category."
+msgstr "Kategorins ID-nummer."
+
+#: token_taxonomy.inc:48
+msgid "The name of the category."
+msgstr "Kategorins namn."
+
+#: token_taxonomy.inc:49
+msgid "The unfiltered name of the category. WARNING - raw user input."
+msgstr "Den ofiltrerade kategorins namn.  VARNING - obearbetad inmatning från användare."
+
+#: token_taxonomy.inc:50
+msgid "The optional description of the taxonomy term."
+msgstr "Den frivilliga beskrivningen för taxonomitermen."
+
+#: token_taxonomy.inc:51
+msgid "The id number of the category's parent vocabulary."
+msgstr "Kategorins överliggande vokabulärs ID-nummer."
+
+#: token_taxonomy.inc:52
+msgid "The vocabulary that the page's first category belongs to."
+msgstr "Vokabulären som sidans första kategori hör till."
+
+#: token_taxonomy.inc:53
+msgid "The unfiltered vocabulary that the page's first category belongs to. WARNING - raw user input."
+msgstr "Det ofiltrerade vokabulär som sidans första kategori hör till. VARNING - obearbetad inmatning från användaren."
+
+#: token_taxonomy.inc:54
+msgid "The optional description of the taxonomy vocabulary."
+msgstr "Den frivilliga beskrivningen för taxonomins vokabulär."
+
+#: token_user.inc:59
+msgid "User's name"
+msgstr "Användarens namn"
+
+#: token_user.inc:60
+msgid "User's unfiltered name. WARNING - raw user input."
+msgstr "Ofiltrerad version av användarens namn. VARNING - obearbetad inmatning från användare."
+
+#: token_user.inc:62
+msgid "User's ID"
+msgstr "Användarens ID"
+
+#: token_user.inc:63
+msgid "User's email address"
+msgstr "Användarens e-postadress"
+
+#: token_user.inc:65
+msgid "User's registration date"
+msgstr "Användarens registreringsdatum"
+
+#: token_user.inc:66
+msgid "User's registration date in 'time-since' format. (40 years 2 months)"
+msgstr "Användares registreringsdatum i format 'time-since' (40 år och 2 månader)"
+
+#: token_user.inc:67
+msgid "User's last login date"
+msgstr "Datum då användaren senast loggade in"
+
+#: token_user.inc:68
+msgid "User's last login date in 'time-since' format. (40 years 2 months)"
+msgstr "Användares senaste inloggningsdatum i format 'time-since' (40 år och 2 månader)"
+
+#: token_user.inc:69
+msgid "The current date in the user's timezone"
+msgstr "Aktuellt datum enligt användarens tidszon"
+
+#: token_user.inc:70
+msgid "The URL of the user's profile page."
+msgstr "URL till användarens profilsida"
+
+#: token_user.inc:71
+msgid "The URL the user's account editing page."
+msgstr "URL till sidan för att redigera användarens konto"
+
+#: token.module:21
+msgid "List of the currently available tokens on this site"
+msgstr "Lista på aktuella symboler på denna webbplats"
+
+#: token.module:72
+msgid "Drupal"
+msgstr "Drupal"
+
+#: token.module:102
+msgid "The name of the currently logged in user."
+msgstr "Namnet på den nuvarande inloggade användaren."
+
+#: token.module:103
+msgid "The user ID of the currently logged in user."
+msgstr "Användar-ID för den nuvarande inloggade användaren."
+
+#: token.module:104
+msgid "The email address of the currently logged in user."
+msgstr "E-postadressen för den nuvarande inloggade användaren."
+
+#: token.module:105
+msgid "The URL of the current Drupal website."
+msgstr "Den nuvarande URL:en för den aktuella webbplatsen."
+
+#: token.module:106
+msgid "The name of the current Drupal website."
+msgstr "Namnet för den aktuella webbplatsen."
+
+#: token.module:107
+msgid "The slogan of the current Drupal website."
+msgstr "Slogan för den aktuella webbplatsen."
+
+#: token.module:108
+msgid "The mission of the current Drupal website."
+msgstr "Syftet för den aktuella webbplatsen."
+
+#: token.module:109
+msgid "The contact email address for the current Drupal website."
+msgstr "E-postadressen för den aktuella webbplatsen."
+
+#: token.module:110
+msgid "The current date on the site's server."
+msgstr "Det aktuella datumet på webbplatsens server."
+
+#: token.module:111
+msgid "The current"
+msgstr "Den nuvarande"
+
+#: token.module:385
+msgid "!description year (four digit)"
+msgstr "!description år (fyra siffror)"
+
+#: token.module:386
+msgid "!description year (two digit)"
+msgstr "!description  (två siffror)"
+
+#: token.module:387
+msgid "!description month (full word)"
+msgstr "!description månad (fullständigt ord)"
+
+#: token.module:388
+msgid "!description month (abbreviated)"
+msgstr "!description månad (förkortad)"
+
+#: token.module:389
+msgid "!description month (two digits with leading zeros)"
+msgstr "!description månad (två siffror med inledande nollor)"
+
+#: token.module:390
+msgid "!description month (one or two digits without leading zeros)"
+msgstr "!description (en eller två siffror utan inledande nollor)"
+
+#: token.module:391
+msgid "!description week (two digits with leading zeros)"
+msgstr "!description vecka (två veckor med inledande nollor)"
+
+#: token.module:393
+msgid "!description date (numeric representation of the day of the week)"
+msgstr "!description date (numeriskt representation av veckodagen)"
+
+#: token.module:395
+msgid "!description day (full word)"
+msgstr "!description dag (fullständigt ord)"
+
+#: token.module:396
+msgid "!description day (abbreviation)"
+msgstr "!description dag (förkortat)"
+
+#: token.module:397
+msgid "!description day (two digits with leading zeros)"
+msgstr "!description dag (två siffror med inledande nollor)"
+
+#: token.module:398
+msgid "!description day (one or two digits without leading zeros)"
+msgstr "!description dag (en eller två siffror utan inledande nollor)"
+
+#: token.module:399
+msgid "!description in UNIX timestamp format (1269441371)"
+msgstr "!description i UNIX format för tidsstämpel (1269441371)"
+
+#: tokenSTARTER.module:23
+msgid "A randomly generated SHA1 hash."
+msgstr "Slumpvis genererad SHA1 hashsumma."
+
+#: tokenSTARTER.module:24
+msgid "The current timestamp in seconds past January 1, 1970."
+msgstr "Den aktuella tidsstämpeln i sekunder sedan första januari 1970."
+
+#: tokenSTARTER.module:25
+msgid "A randomly generated single-digit number."
+msgstr "Ett slumpvis genererat ensiffrigt tal."
+
+#: tokenSTARTER.module:26
+msgid "A randomly generated three-digit number."
+msgstr "Ett slumpvis genererat tresiffrigt tal."
+
+#: tokenSTARTER.module:27
+msgid "A randomly generated ten-digit number."
+msgstr "Ett slumpvis genererat tiosiffrigt tal."
+
+#: tokenSTARTER.module:28
+msgid "Randomly generated single-digit letter."
+msgstr "Ett slumpvis genererat tecken."
+
+#: tokenSTARTER.module:29
+msgid "Randomly generated three-digit letters."
+msgstr "Tre slumpvis genererade tecken."
+
+#: tokenSTARTER.module:30
+msgid "Randomly generated ten-digit letters."
+msgstr "Tio slumpvis genererade tecken."
+
+#: token_actions.module:22
+msgid "Display a tokenized message to the user"
+msgstr "Visa ett meddelande med symbolersättning för användaren"
+
+#: token_actions.module:32
+msgid "Send tokenized e-mail"
+msgstr "Skicka ett e-postmeddelande med symbolersättning"
+
+#: token_actions.module:43
+msgid "Redirect to a tokenized URL"
+msgstr "Peka om till en symbolersatt URL"
+
+#: token_actions.module:77
+msgid "Recipient"
+msgstr "Mottagare"
+
+#: token_actions.module:81
+msgid "The email address to which the message should be sent."
+msgstr "Den e-postadress som meddelandet skall skickas till."
+
+#: token_actions.module:85
+msgid "Subject"
+msgstr "Ämne"
+
+#: token_actions.module:89
+msgid "The subject of the message."
+msgstr "Meddelandets ämnesrad."
+
+#: token_actions.module:93;153
+msgid "Message"
+msgstr "Meddelande"
+
+#: token_actions.module:97
+msgid "The message that should be sent."
+msgstr "Meddelandet som skall skickas."
+
+#: token_actions.module:104;164;205
+msgid "Placeholder tokens"
+msgstr "Symboler för platshållare"
+
+#: token_actions.module:105
+msgid "The following placeholder tokens can be used in to generate the URL path. Some tokens may not be available, depending on the context in which the action is triggered."
+msgstr "Följande platshållarsymboler kan användas för att generera sökvägen i URL:en. Vissa symboler är inte alltid tillgängliga beroende på det sammanhang i vilken åtgärden utlöses i."
+
+#: token_actions.module:157
+msgid "The message to be displayed to the current user."
+msgstr "Meddelandet som skall visas för aktuell användare."
+
+#: token_actions.module:165
+msgid "The following placeholder tokens can be used in the custom message text. Some tokens may not be available, depending on the context in which the action is triggered."
+msgstr "Följande platshållarsymboler kan användas i den anpassade meddelandetexten. Vissa symboler är inte alltid tillgängliga beroende på det sammanhang i vilken åtgärden utlöses i."
+
+#: token_actions.module:196
+msgid "URL"
+msgstr "URL"
+
+#: token_actions.module:197
+msgid "The URL to which the user should be redirected. This can be an internal URL like node/1234 or an external URL like http://drupal.org."
+msgstr "Den URL som användaren skall omdirigeras till. Detta kan vara en intern URL som node/1234 eller en extern URL som http://drupal.org."
+
+#: token_actions.module:206
+msgid "The following placeholder tokens can be used in the URL path. Some tokens may not be available, depending on the context in which the action is triggered."
+msgstr "Följande platshållarsymboler kan användas i URL:en. Vissa symboler är inte alltid tillgängliga beroende på det sammanhang i vilken åtgärden utlöses i."
+
+#: token_actions.module:138
+msgid "action"
+msgstr "åtgärd"
+
+#: token_actions.module:138
+msgid "Sent email to %recipient"
+msgstr "Skickade e-post till %recipient"
+
+#: token_actions.module:141
+msgid "error"
+msgstr "fel"
+
+#: token_actions.module:141
+msgid "Unable to send email to %recipient"
+msgstr "Kunde inte skicka e-post till %recipient"
+
+#: token.info:0
+msgid "Provides a shared API for replacement of textual placeholders with actual data."
+msgstr "Tillhandahåller ett gemensamt API för ersättning av textuella platshållare med riktig data."
+
+#: tokenSTARTER.info:0
+msgid "TokenSTARTER"
+msgstr "TokenSTARTER"
+
+#: tokenSTARTER.info:0
+msgid "Provides additional tokens and a base on which to build your own tokens."
+msgstr "Tillhandahåller ytterligare symboler och en grund att bygga egna symboler på."
+
+#: token_actions.info:0
+msgid "Token actions"
+msgstr "Åtgärder för Token"
+
+#: token_actions.info:0
+msgid "Provides enhanced versions of core Drupal actions using the Token module."
+msgstr "Tillhandahåller förbättrade versioner av åtgärder i Drupals kärna med hjälp av modulen Token."
+
+#: token.js:0
+msgid "Insert this token into your form"
+msgstr "Infoga denna symbol i ditt formulär"
+
+#: token.js:0
+msgid "First click a text field to insert your tokens into."
+msgstr "Klicka först i ett textfält att infoga din symbol till."
+
