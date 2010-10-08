@@ -1,6 +1,6 @@
 <?php
 
-/* $Id: mm_ffmpeg.module,v 1.1.4.3 2009/12/09 16:49:41 arthuregg Exp $ */
+/* $Id: mm_ffmpeg.module,v 1.1.4.5 2010/06/24 05:38:01 arthuregg Exp $ */
 
 
 /*
@@ -121,11 +121,8 @@ function mm_ffmpeg_video_thumbnail($file, $configuration) {
     return false;
   }
 
-  // can we get the mime type for this?
-  if (function_exists('mimedetect_mime')) {
-    $mime = mimedetect_mime($output_file);
-    $file['data']['file']['mime'] = $mime;
-  }
+  // Get the mimetype
+  $file['data']['file']['mime'] = file_get_mimetype($output_file);
 
   // run media mover's file perms
   media_mover_api_set_file_perm($output_file);
@@ -269,8 +266,13 @@ function mm_ffmpeg_video(&$file, $configuration) {
   $file['data']['file']['filesize'] = filesize($output_file);
 
 
-  // get any meta data for this file
-  $file['data']['file']['meta'] = ffmpeg_wrapper_file_data($output_file);
+  // get any meta data for this file, support ffmpeg 1&2
+  if (function_exists('ffmpeg_wrapper_get_file_data')) {
+    $file['data']['file']['meta'] = ffmpeg_wrapper_get_file_data($output_file);
+  }
+  else {
+    $file['data']['file']['meta'] = ffmpeg_wrapper_file_data($output_file);
+  }
 
   // return the completed file
   return $output_file;
@@ -347,8 +349,13 @@ function mm_ffmpeg_config($configuration) {
   drupal_add_css(drupal_get_path('module', 'mm_ffmpeg') .'/mm_ffmpeg.css', 'module');
   drupal_add_js(drupal_get_path('module', 'mm_ffmpeg') .'/mm_ffmpeg.js');
 
-    // get the configuration form
-  return ffmpeg_wrapper_configuration_form($configuration, 'edit-'. media_mover_api_form_prefix($configuration));
+  // Get the configuration form- support ffmpeg wrapper 6.1 and 6.2
+  if (function_exists('ffmpeg_wrapper_configuration_form')) {
+    return ffmpeg_wrapper_configuration_form($configuration, 'edit-'. media_mover_api_form_prefix($configuration));
+  }
+  else {
+    return ffmpeg_wrapper_ui_configuration_form($configuration, 'edit-'. media_mover_api_form_prefix($configuration));
+  }
 }
 
 

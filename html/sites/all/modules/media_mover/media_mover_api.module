@@ -1,6 +1,6 @@
 <?php
 
-/* $Id: media_mover_api.module,v 1.1.2.110.2.82 2010/03/25 15:47:11 msonnabaum Exp $ */
+/* $Id: media_mover_api.module,v 1.1.2.110.2.86 2010/05/10 19:09:21 arthuregg Exp $ */
 
 
 /*
@@ -519,9 +519,8 @@ function media_mover_api_run_config_harvest($config, $verb, $nid) {
   // and make sure that no other harvest is running.
   if (! media_mover_api_harvest_lock($config)) {
     // set some output display
-    $output .= t('Harvesting.... ') .'<br />';
-    $file = NULL;
-    $files = call_user_func_array($config->{$verb}->module . '_media_mover', array($verb, $config->{$verb}->action, $config->{$verb}->configuration, &$file, $config, $nid));
+    $output = t('Harvesting.... ') .'<br />';
+    $files = _media_mover_api_module_invoke($config->{$verb}->module, 'media_mover', $verb, $config->{$verb}->action, $config->{$verb}->configuration, $null = NULL, $config, $nid);
     $output .= t('Configuration process: <em>harvest</em> found !count files', array('!count' => count($files))) .'<br />';
     // store the harvested files
     if (count($files)) {
@@ -586,16 +585,21 @@ function media_mover_api_run_config_verb_file($file, $config, $verb) {
   // make sure no one else is trying to operate on this file
   if (media_mover_api_file_lock($file['mmfid'], $status, $status + 1) )  {
     // now we run the actual verb on this file
-    // @NOTE not using module_invoke here b/c it doesn't seem to pass by reference correctly ($file)
-    $filepath = call_user_func_array($config->{$verb}->module .'_media_mover', array($verb, $config->{$verb}->action, $config->{$verb}->configuration, &$file, $config));
+    $filepath = _media_mover_api_module_invoke($config->{$verb}->module, 'media_mover', $verb, $config->{$verb}->action, $config->{$verb}->configuration, $file, $config);
+    // Action was successful
     if ($filepath) {
-      // sucessful. Increase the file status
-      $new_status = $status + 2;
+
+      // If the action modified the status, we do not change the status.
+      // By default, advance the status.
+      if ($file['status'] == $status) {
+        // Increase the file status
+        $new_status = $status + 2;
+      }
       // add the new file path to the file array. Some modules may return
       // TRUE instead of a file path. If this is the case, get the current file
       // from this file
       if ($filepath === TRUE) {
-        $filepath == media_mover_api_config_current_file($file);
+        $filepath = media_mover_api_config_current_file($file);
       }
       // we do this here to keep the api simple for module developers
       $file[$verb .'_file'] = $filepath;
@@ -1154,7 +1158,7 @@ function media_mover_api_update_file($file, $status = FALSE) {
   );
   foreach (media_mover_api_verbs() as $verb) {
     if (isset($file["{$verb}_module"])) {
-      call_user_func_array($file["{$verb}_module"] . '_media_mover', array('update', $file["{$verb}_action"], NULL, &$file));
+      _media_mover_api_module_invoke($file["{$verb}_module"], 'media_mover', 'update', $file["{$verb}_action"], $null = NULL, $file);
     }
   }
   db_unlock_tables('media_mover_files');
@@ -1906,7 +1910,7 @@ function media_mover_api_build_add_config($configuration) {
           }
 
           // get the config form from the modules
-          if (! $action_form = module_invoke($module, 'media_mover', 'config', $action_id, $config)) {
+          if (! $action_form = _media_mover_api_module_invoke($module, 'media_mover', 'config', $action_id, $config)) {
             // this action has no config, make a default
             $no_options_form = array();
             $no_options_form[$module .'_nooptions_'. $action_id] = array(
@@ -2059,7 +2063,7 @@ function media_mover_api_add_config_form_submit($form, &$form_state) {
 
   // we need to allow modules to manipulate the configuration now that it is created
   foreach (media_mover_api_verbs() as $verb) {
-    module_invoke($configuration->{$verb}->module, 'media_mover', 'config_add', $configuration->{$verb}->action, $configuration);
+    _media_mover_api_module_invoke($configuration->{$verb}->module, 'media_mover', 'config_add', $configuration->{$verb}->action, $configuration);
   }
 
   drupal_set_message(t('Media mover configuration %name created.', array('%name' => $form_state['values']['name'])));
@@ -2222,7 +2226,7 @@ function media_mover_api_config_edit_form($form, $cid) {
   // build each form element for this configuration
   foreach(media_mover_api_verbs() as $weight => $verb) {
     // get the form for this configuration role
-    $config_role_form = module_invoke($configuration->{$verb}->module, 'media_mover', 'config', $configuration->{$verb}->action, $configuration->{$verb}->configuration);
+    $config_role_form = _media_mover_api_module_invoke($configuration->{$verb}->module, 'media_mover', 'config', $configuration->{$verb}->action, $configuration->{$verb}->configuration);
 
     // prefix the incoming form values with verb and action data
     $prefix = media_mover_api_form_prefix($configuration->{$verb}->configuration);
@@ -2365,7 +2369,7 @@ function media_mover_api_config_form_validate($form, &$form_state, $add = FALSE)
     $config = media_mover_api_collect_form_data($verb, $form_state['values']);
 
     // now pass this back to the module functions for validation
-    if ( $all_errors[$verb] = module_invoke($config['module'], 'media_mover', 'config_validate', $config['action'], $config['configuration'])) {
+    if ( $all_errors[$verb] = _media_mover_api_module_invoke($config['module'], 'media_mover', 'config_validate', $config['action'], $config['configuration'])) {
       // now add the action on. Do this here so that module
       // authors don't have to worry about passing back data
       foreach($all_errors[$verb] as $id => $error) {
@@ -2856,7 +2860,8 @@ function media_mover_api_file_fetch_get_additional($item) {
   // get ready to fetch additional items
   $fetch_items = array();
   foreach (media_mover_api_verbs() as $verb) {
-    if ($new_items = call_user_func_array($configuration->{$verb}->module . '_media_mover', array('fetch', $item_config->{$verb}->action, $configuration, &$item))) {
+    $function = $configuration->{$verb}->module . '_media_mover';
+    if ($new_items = $function('fetch', $item_config->{$verb}->action, $configuration, $item)) {
       $fetch_items[$item_config->{$verb}->module][$configuration->{$verb}->action] = $new_items;
     }
   }
@@ -3014,7 +3019,7 @@ function media_mover_api_file_delete_confirm_form_submit($form, &$form_state) {
 
   // invoke the hook media mover $op delete
   foreach (media_mover_api_verbs() as $verb) {
-    call_user_func_array($configuration->{$verb}->module . '_media_mover', array('delete', $configuration->{$verb}->action, $configuration->{$verb}->configuration, &$file, $configuration));
+    _media_mover_api_module_invoke($configuration->{$verb}->module, 'media_mover', 'delete', $configuration->{$verb}->action, $configuration->{$verb}->configuration, $file, $configuration);
   }
 
   // delete the file cache for this node
@@ -3092,7 +3097,7 @@ function media_mover_api_file_delete_call($file) {
 
   // call the modules that added files to this
   foreach (media_mover_api_verbs() as $verb) {
-    call_user_func_array($configuration->{$verb}->module . '_media_mover', array('delete', $configuration->{$verb}->action, $configuration->{$verb}->configuration, &$file, $configuration));
+    _media_mover_api_module_invoke($configuration->{$verb}->module, 'media_mover', 'delete', $configuration->{$verb}->action, $configuration->{$verb}->configuration, $file, $configuration);
   }
 
   // now clear the cache if we have a node
@@ -3330,18 +3335,20 @@ function media_mover_api_xspf_playlist_use($op, $node, $config) {
     break;
 
     case 'return':
-      // get files for the running configuration
-      if ($mmfiles = $node->media_mover[$config]) {
+      // get files for the running configuration. Don't rely on the node to have the files
+      if ($mmfiles = media_mover_api_node_files_fetch($node->nid)) {
         $items = array();
-        foreach($mmfiles as $mmfile) {
-          $filepath = $mmfile['complete_file'];
-          // make sure that the file path is complete
-          if (! strpos($filepath, '://')) {
-            $filepath = file_create_url($filepath);
-          }
-          // only add the file if we have an incoming item
-          if ($xspf_item = xspf_playlist_node_build_file_item($node, $filepath)) {
-            $items[] = $xspf_item;
+        foreach($mmfiles as $cid) {
+          foreach($cid as $mmfile) {
+            $filepath = $mmfile['complete_file'];
+            // make sure that the file path is complete
+            if (! strpos($filepath, '://')) {
+              $filepath = file_create_url($filepath);
+            }
+            // only add the file if we have an incoming item
+            if ($xspf_item = xspf_playlist_node_build_file_item($node, $filepath)) {
+              $items[] = $xspf_item;
+            }
           }
         }
         return $items;
@@ -3362,7 +3369,7 @@ function media_mover_api_xspf_playlist_use($op, $node, $config) {
  */
 function theme_media_mover_files($files) {
   foreach ($files as $file) {
-    if ($custom = module_invoke($file['storage_module'], 'media_mover', 'theme', NULL, $file) ) {
+    if ($custom = _media_mover_api_module_invoke($file['storage_module'], 'media_mover', 'theme', $null = NULL, $file) ) {
       $output .= $custom;
     }
     else {
@@ -3459,4 +3466,21 @@ function theme_media_mover_api_configuration_no_options($module_name, $action_id
     '#type' => 'markup',
   );
   return $form;
+}
+
+/**
+ * Custom implemenation of module_invoke().
+ *
+ * Because of referenced parameter warnings in PHP 5.3, we need a custom call
+ * in many places, so that we can properly send &$file or &$configuration.
+ *
+ * @TODO: This is a bit of a hack; however, it's a quick refactor that doesn't
+ * require extensive modification to modules implementing hook_media_mover,
+ * as the parameters will be respected as before.
+ */
+function _media_mover_api_module_invoke($module, $hook, $op, $action, &$context1 = NULL, &$context2 = NULL, $context3 = NULL, $context4 = NULL, $context5 = NULL) {
+  if (module_hook($module, $hook)) {
+    $function = $module .'_'. $hook;
+    return $function($op, $action, $context1, $context2, $context3, $context4, $context5);
+  }
 }
