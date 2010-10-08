@@ -1,0 +1,6 @@
+; $Id: openlayers_test.info,v 1.2.2.2 2010/03/22 23:55:10 zzolo Exp $
+
+name = OpenLayers Tests
+description = OpenLayers test module.  There is no reason to install this.
+core = 6.x
+package = OpenLayers

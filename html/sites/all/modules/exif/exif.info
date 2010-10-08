@@ -1,0 +1,9 @@
+; $Id: exif.info,v 1.4.2.2 2009/02/05 20:11:54 rapsli Exp $
+name = Exif
+description = "Display Exif metadata on image nodes."
+dependencies[] = content
+dependencies[] = text
+dependencies[] = exif_helper
+package = Image
+core = 6.x
+

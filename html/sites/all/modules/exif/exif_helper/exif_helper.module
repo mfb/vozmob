@@ -1,0 +1,80 @@
+<?php
+// $Id: exif_helper.module,v 1.1.2.2 2010/03/19 22:17:00 rapsli Exp $
+
+/**
+ * @file Intention of this little module: exif.module needs to have a weight of -10
+ * at least it has to be processed before CCK is processed, so that EXIF information
+ * can be taken from the fields and be written into the CCK fields.
+ *
+ * Problem: We don't want to display the emty fields on node creation, since they are
+ * reserved for exif information -> we don't want to confuse users with this, so are
+ * going to make them hidden -> Information needs to be processed AFTER CCK.
+ *
+ * Solution: Creating a new little module.
+ */
+
+function exif_helper_menu() {
+  $items['admin/settings/exif/visibility'] = array(
+    'title' => 'visibility',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('exif_helper_settings_form'),
+    'access arguments' => array('administer site configuration'),
+    'description' => t('Some visibility settings'),
+    'access callback' => 'user_access',
+    'type' => MENU_LOCAL_TASK,
+  );
+  return $items;
+}
+
+/**
+ * implementation of hook_form_alter
+ * @param $form_id
+ * @param $form
+ */
+function exif_helper_form_alter(&$form, $form_state, $form_id) {
+
+  if ($form['#id'] != 'node-form') {
+    return;
+  }
+
+  $ar_keys = array();
+  foreach ($form as $key => $value) {
+    $ar_keys[] = array('field_name' => $key);
+  }
+  $exif = _exif_get_class();
+  $ar_exif_fields = $exif->getExifFields($ar_keys);
+  $node = $form['#node'];
+
+  if (($node->nid > 0 && variable_get('exif_helper_show_on_update', 0)==0) ||
+  (!isset($node->nid) && variable_get('exif_helper_show_on_creation', 0) == 0)) {
+    foreach ($ar_exif_fields as $variable) {
+      $form["field_" . $variable['section'] . "_" . $variable['tag']]['#type'] = 'hidden';
+    }
+  }
+
+}
+
+/**
+ * Form definition for the admin of the helper module
+ */
+function exif_helper_settings_form() {
+  $form['exif_helper'] = array(
+    '#value' => t('When a user creates a node by default the CCK information will not be shown. 
+    This doesn\'t make any sense and would only confuse the user. The values for those fields 
+    is taken from the picture it-self. Nevertheless the information is visibile when you display 
+    the node just plain or through views or whatever. We are just talking here about the actual 
+    creation form'),
+  );
+  $form['exif_helper_show_on_creation'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Show CCK Fields on Node-Creation form'),
+    '#default_value' => variable_get('exif_helper_show_on_creation', 0),
+  );
+  
+  $form['exif_helper_show_on_update'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Show CCK Fields on Node-Update form'),
+    '#default_value' => variable_get('exif_helper_show_on_update', 0),
+  );
+  return system_settings_form($form);
+}

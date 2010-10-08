@@ -1,0 +1,5 @@
+; $Id: 
+name = Exif Helper
+description = "Some helper functions."
+package = Image
+core = 6.x
