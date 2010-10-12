@@ -11,7 +11,7 @@
  */
 function msg_format_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
   // Strip <title> tag.
-  $node->body = preg_replace('/<title>.*</title>/', '', $node->body);
+  $node->body = preg_replace('@<title>.*</title>@', '', $node->body);
   $node->teaser = node_teaser($node->body);
   // Set node title.
   if (empty($node->title)) {

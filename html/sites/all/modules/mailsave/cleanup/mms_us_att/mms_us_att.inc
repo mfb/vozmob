@@ -13,7 +13,7 @@ function mms_us_att_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
     // Remove AT&T spam from message and trim whitespace.
     $node->body = trim(preg_replace('/--.*?This mobile text message is brought to you by AT&T/s', '', $node->body));
     // Remove HTML <title>.
-    $node->body = preg_replace('/<title>.*</title>/', '', $node->body);
+    $node->body = preg_replace('@<title>.*</title>@', '', $node->body);
     $node->teaser = node_teaser($node->body);
 
     // Discard empty messages.
@@ -23,7 +23,7 @@ function mms_us_att_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
 
     // Add extra text parts into node body.
     foreach ($node->mimeparts as $key => $mimepart) {
-      if ($key > 1 && strpos($mimepart->filemime, 'TEXT/') === 0 && strpos($node->body, $mimepart->data) === FALSE) {
+      if ($key > 1 && strpos($mimepart->filemime, 'TEXT/') === 0 && $mimepart->filemime != 'TEXT/X-VCARD' && strpos($node->body, $mimepart->data) === FALSE) {
         $node->body .= "\n" . $mimepart->data;
       }
     }

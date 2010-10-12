@@ -19,7 +19,7 @@ function mailsave_to_textpart_mailsave($node, $result, $i, $header, $mailbox) {
 
   // Find all TEXT parts which follow an IMAGE part.
   foreach ($node->mimeparts as $key => $mimepart) {
-    $text = (strpos($mimepart->filemime, 'TEXT/') === 0) ? TRUE : FALSE;
+    $text = (strpos($mimepart->filemime, 'TEXT/') === 0 && $mimepart->filemime != 'TEXT/X-VCARD') ? TRUE : FALSE;
     if ($text && $image) {
       $mimepairs[] = array('image' => $key - 1, 'text' => $key);
     }
