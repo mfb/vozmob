@@ -7,6 +7,7 @@
 function hashtag_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
   if ($op == 'presave') {
     if ($vid = hashtag_get_tag_vid_for_node_type($node->type)) {
+      // @todo We should not assume that the body is in HTML format.
       $body = decode_entities(strip_tags($node->body));
       // Hash tags may appear in the title or body.
       $tags = hashtag_extract_tags(array($node->title, $body));
