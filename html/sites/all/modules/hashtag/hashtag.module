@@ -50,6 +50,6 @@ function hashtag_get_tag_vid_for_node_type($type) {
  * Returns a canonical tag, using the same logic as StatusNet.
  */
 function hashtag_canonical_tag($tag) {
-  $tag = mb_convert_case($tag, MB_CASE_LOWER, 'UTF-8');
+  $tag = drupal_strtolower($tag);
   return str_replace(array('-', '_', '.'), '', $tag);
 }
