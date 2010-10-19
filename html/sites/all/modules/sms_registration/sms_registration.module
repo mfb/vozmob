@@ -5,7 +5,7 @@
  * Implementation of hook_menu().
  */
 function sms_registration_menu() {
-  $items['admin/settings/sms_registration'] = array(
+  $items['admin/smsframework/registration'] = array(
     'title' => 'SMS Registration',
     'description' => 'Configure SMS registration settings.',
     'page callback' => 'drupal_get_form',
