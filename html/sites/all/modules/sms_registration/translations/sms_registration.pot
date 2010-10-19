@@ -3,6 +3,7 @@
 # LANGUAGE translation of Drupal (general)
 # Copyright YEAR NAME <EMAIL@ADDRESS>
 # Generated from files:
+#  sms_registration.admin.inc: n/a
 #  sms_registration.module: n/a
 #  sms_registration.info: n/a
 #
@@ -10,7 +11,7 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
-"POT-Creation-Date: 2009-05-26 13:39-0700\n"
+"POT-Creation-Date: 2010-10-18 18:25-0700\n"
 "PO-Revision-Date: YYYY-mm-DD HH:MM+ZZZZ\n"
 "Last-Translator: NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <EMAIL@ADDRESS>\n"
@@ -19,31 +20,51 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
 
-#: sms_registration.module:96
-msgid "Thanks! Do you want to have a blog in vozmob? If yes please send one word identifying the blog."
-msgstr "Gracias! Quiere un blog en vozmob? Si es asi entonces envienos una palabra con su nombre."
+#: sms_registration.admin.inc:10
+msgid "Registration address"
+msgstr ""
 
-#: sms_registration.module:97;98
+#: sms_registration.admin.inc:11
+msgid "Enter the e-mail address used to receive site registrations."
+msgstr ""
+
+#: sms_registration.admin.inc:16
+msgid "User name prefix"
+msgstr ""
+
+#: sms_registration.admin.inc:17
+msgid "Enter a user name prefix on randomly generated user names."
+msgstr ""
+
+#: sms_registration.admin.inc:22
+msgid "Default role"
+msgstr ""
+
+#: sms_registration.admin.inc:23
+msgid "Select a default role granted to users registering via SMS."
+msgstr ""
+
+#: sms_registration.module:83
+msgid "Thanks! Do you want to have a blog on !site_name? If yes please send one word identifying the blog."
+msgstr ""
+
+#: sms_registration.module:84
 msgid "Media posted"
 msgstr ""
 
-#: sms_registration.module:110
+#: sms_registration.module:100
 msgid "Welcome, !name. Your blog was created. Your password is !pass"
-msgstr "Bienvenid@ !name. Su blog ha sido creado. Su clave es !pass"
-
-#: sms_registration.module:113
-msgid "The blog was not created. Please choose another name."
-msgstr "El blog no pudo ser creado. Por favor elija otro nombre."
-
-#: sms_registration.module:9
-msgid "administer sms registration"
 msgstr ""
 
-#: sms_registration.module:18
+#: sms_registration.module:103
+msgid "The blog was not created. Please choose another name."
+msgstr ""
+
+#: sms_registration.module:9
 msgid "SMS Registration"
 msgstr ""
 
-#: sms_registration.module:19
+#: sms_registration.module:10
 msgid "Configure SMS registration settings."
 msgstr ""
 
@@ -58,4 +79,3 @@ msgstr ""
 #: sms_registration.info:0
 msgid "SMS Framework"
 msgstr ""
-
