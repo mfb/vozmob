@@ -1,23 +1,19 @@
 <?php
-// $Id: mailhandler.module,v 1.96.2.3 2008/10/26 21:43:24 zstolar Exp $
+// $Id: mailhandler.module,v 1.96.2.30 2010/08/04 18:10:25 developmentseed Exp $
 
 
 /**
  * Implementation of hook_cron(). Process msgs from all enabled mailboxes.
  */
 function mailhandler_cron() {
-
   // Include mailhandler retrieval functions
   module_load_include('inc', 'mailhandler', 'mailhandler.retrieve');
-
   // Retrieve messages
   $result = db_query('SELECT * FROM {mailhandler} WHERE enabled = 1 ORDER BY mail');
   while ($mailbox = db_fetch_array($result)) {
-    mailhandler_cron_retrieve($mailbox);
+    mailhandler_node_process_mailbox($mailbox, 'auto', variable_get('mailhandler_max_retrieval', 0), array());
   }
-
 }
-
 
 /**
  * Implementation of hook_perm().
@@ -35,23 +31,23 @@ function mailhandler_menu() {
   $items = array();
 
   $items['admin/content/mailhandler'] = array(
-    'title' => t('Mailhandler'),
-    'description' => t('Manage mailboxes and retrieve messages.'),
+    'title' => 'Mailhandler Mailboxes',
+    'description' => 'Manage mailboxes and retrieve messages.',
     'page callback' => 'mailhandler_list_mailboxes',
     'access arguments' => array('administer mailhandler'),
     'file' => 'mailhandler.admin.inc',
   );
 
   $items['admin/content/mailhandler/list'] = array(
-    'title' => t('List'),
-    'description' => t('Manage mailboxes and retrieve messages.'),
+    'title' => 'List',
+    'description' => 'Manage mailboxes and retrieve messages.',
     'type' => MENU_DEFAULT_LOCAL_TASK,
     'access arguments' => array('administer mailhandler'),
     'weight' => -10,
   );
 
   $items['admin/content/mailhandler/add'] = array(
-    'title' => t('Add mailbox'),
+    'title' => 'Add mailbox',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mailhandler_add_edit_mailbox', NULL),
     'access arguments' => array('administer mailhandler'),
@@ -60,7 +56,7 @@ function mailhandler_menu() {
   );
 
   $items['admin/content/mailhandler/clone/%'] = array(
-    'title' => t('Add mailbox'),
+    'title' => 'Add mailbox',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mailhandler_add_edit_mailbox', 4, TRUE),
     'access arguments' => array('administer mailhandler'),
@@ -68,17 +64,18 @@ function mailhandler_menu() {
     'file' => 'mailhandler.admin.inc',
   );
 
-  $items['admin/content/mailhandler/retrieve/%'] = array(
-    'title' => t('Retrieve'),
-    'page callback' => 'mailhandler_admin_retrieve',
-    'page arguments' => array(4),
+  $items['admin/content/mailhandler/retrieve/%mailhandler_mailbox'] = array(
+    'title' => 'Retrieve',
+    'page callback' => 'mailhandler_node_process_mailbox',
+    // Cast variable as string so menu system does not mistake it for a path argument
+    'page arguments' => array(4, 'ui', (string) variable_get('mailhandler_max_retrieval', 0)),
     'access arguments' => array('administer mailhandler'),
     'type' => MENU_CALLBACK,
     'file' => 'mailhandler.retrieve.inc',
   );
 
   $items['admin/content/mailhandler/edit/%'] = array(
-    'title' => t('Edit mailbox'),
+    'title' => 'Edit mailbox',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mailhandler_add_edit_mailbox', 4),
     'access arguments' => array('administer mailhandler'),
@@ -87,7 +84,7 @@ function mailhandler_menu() {
   );
 
   $items['admin/content/mailhandler/delete/%'] = array(
-    'title' => t('Delete mailbox'),
+    'title' => 'Delete mailbox',
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mailhandler_admin_delete_confirm', 4),
     'access arguments' => array('administer mailhandler'),
@@ -96,7 +93,7 @@ function mailhandler_menu() {
   );
 
   $items['admin/settings/mailhandler'] = array(
-    'title' => 'Mailhandler',
+    'title' => 'Mailhandler Settings',
     'description' => t('Set the default content type for incoming messages and set the cron limit.'),
     'page callback' => 'drupal_get_form',
     'page arguments' => array('mailhandler_admin_settings'),
@@ -107,13 +104,22 @@ function mailhandler_menu() {
   return $items;
 }
 
+/**
+ * Load mailbox array, is a menu loader callback
+ * @param $mid
+ *   Int mailbox ID to load
+ * @return
+ *   Array of mailbox configuration
+ */
+function mailhandler_mailbox_load($mid) {
+  return db_fetch_array(db_query("SELECT * FROM {mailhandler} WHERE mid = %d", $mid));
+}
 
 /**
  * Implementation of hook_help().
  */
 function mailhandler_help($path = 'admin/help#mailhandler', $arg) {
   $output = '';
-  $link->add = l(t('Add mailbox'), 'admin/content/mailhandler/add');
 
   // Gather examples of useful commands, and build a definition list with them:
   $commands[] = array('command' => 'taxonomy: [term1, term2]',
@@ -152,7 +158,7 @@ function mailhandler_help($path = 'admin/help#mailhandler', $arg) {
    ));
       $output .= '<h3 id="commands">'. t('Useful Commands') .'</h3>';
       $output .= $commands_list;
-      $output .= '<p>'. t('For more information please read the configuration and customization handbook <a href="%mailhandler">Mailhandler page</a>.', array('%mailhandler' => 'http://www.drupal.org/handbook/modules/mailhandler/')) .'</p>';
+      $output .= '<p>'. t('For more information please read the configuration and customization handbook <a href="@mailhandler">Mailhandler page</a>.', array('@mailhandler' => url('http://www.drupal.org/handbook/modules/mailhandler', array('absolute' => TRUE)))) .'</p>'; 
       return $output;
     case 'admin/content/mailhandler':
       return t('The mailhandler module allows registered users to create or edit nodes and comments via email. Authentication is usually based on the From: email address. There is also an email filter that can be used to prettify incoming email. Users may post taxonomy terms, teasers, and other node parameters using the Command capability.');
@@ -167,44 +173,10 @@ function mailhandler_help($path = 'admin/help#mailhandler', $arg) {
 
 
 /**
- * Implementation of hook_init to add mailhandler.css
- */
-function mailhandler_init() {
-  drupal_add_css(drupal_get_path('module', 'mailhandler') .'/mailhandler.css');
-  return;
-}
-
-
-// The following functions are called by both mailhandler.admin.inc and mailhandler.retrieve.inc so they
-// are defined here to make them available to both
-
-/**
- * Establish a connection to the mailbox specified by the array $mailbox
- */
-function mailhandler_open_mailbox($mailbox) {
-
-  if ($mailbox['domain']) {
-    if ($mailbox['imap'] == 1) {
-      $box = '{'. $mailbox['domain'] .':'. $mailbox['port'] . $mailbox['extraimap'] .'}'. $mailbox['folder'];
-    }
-    else {
-      $box = '{'. $mailbox['domain'] .':'. $mailbox['port'] .'/pop3'. $mailbox['extraimap'] .'}'. $mailbox['folder'];
-    }
-    $result = imap_open($box, $mailbox['name'], $mailbox['pass']);
-    $err = 'domain';
-  }
-  else {
-    $box = $mailbox['folder'];
-    $result = imap_open($box, '', '');
-  }
-
-  return $result;
-
-}
-
-
-/**
  * Fetch data for a specific mailbox from the database.
+ * 
+ * TODO: remove this callback now that we have mailhandler_mailbox_load which is also a menu loader, 
+ * though, there are other modules that may depend on this legacy callback, like "mail comment"
  */
 function mailhandler_get_mailbox($mid) {
   return db_fetch_array(db_query("SELECT * FROM {mailhandler} WHERE mid = %d", $mid));
@@ -249,4 +221,569 @@ function mailhandler_default_type() {
 
   return $default_type;
 
+}
+
+/**
+ * Run message retrieval and node processing on a mailbox - is a wrapper around mailhandler_retrieve
+ * 
+ * Batch API smashes the stack, so this function is called twice when fetching
+ * messages via batch in order to return the results from the batch.
+ * 
+ * @param $mailbox
+ *   Array of mailbox configuration
+ * @param $mode
+ *   String ui or auto (ie cron) processing
+ * @param $limit
+ *   Int maximum number of messages to retrieve
+ * @param $messages
+ *   Array of retrieved messages
+ */
+function mailhandler_node_process_mailbox($mailbox = FALSE, $mode = FALSE, $limit = FALSE, $messages = array()) {
+  if (empty($messages)) {
+    if ($mode == 'ui') {
+      mailhandler_retrieve($mailbox, $mode, $limit);
+    }
+    else {
+      if ($messages = mailhandler_retrieve($mailbox, $mode, $limit)) {
+        foreach ($messages as $message) {
+          mailhandler_node_process_message($message['header'], $message['origbody'], $message['mailbox'], $message['mimeparts']);
+        }
+      }
+    }
+  }
+  else {
+    // See mailhandler_mailhandler_batch_results.  This hook is invoked
+    // and mailhandler_process_mailbox is called a second time in order
+    // to obtain the messages that were retrieved and continue processing.
+    // This is necessary because we cannot obtain the results back from 
+    // batch processing directly.
+    foreach ($messages as $message) {
+      mailhandler_node_process_message($message['header'], $message['origbody'], $message['mailbox'], $message['mimeparts']);
+    }
+  }
+}
+
+/**
+ * Implementation of hook_mailhandler_batch_results()
+ * 
+ * See mailhandler_process_mailbox()
+ * 
+ */
+function mailhandler_mailhandler_batch_results($results) {
+  mailhandler_node_process_mailbox(FALSE, FALSE, FALSE, $results);
+  // Give the results back for any other modules to use
+  return $results;
+}
+
+// TODO: add arguments
+function mailhandler_node_process_message($header, $origbody, $mailbox, $mimeparts) {
+  mailhandler_switch_user();
+  // we must process before authenticating because the password may be in Commands
+  $node = mailhandler_node_prepare_message($header, $origbody, $mailbox);
+
+  // Authenticate the message
+  if (!$node = mailhandler_mailhandler_authenticate('execute', $mailbox['authentication'], array($node, $header, $origbody, $mailbox))) {
+    watchdog('mailhandler', 'Message failed authentication', array(), WATCHDOG_ERROR);
+    return FALSE;
+  }
+
+  // Put $mimeparts on the node
+  $node->mimeparts = $mimeparts;
+
+  // we need to change the current user
+  // this has to be done here to allow modules
+  // to create users
+  mailhandler_switch_user($node->uid);
+
+  // modules may override node elements before submitting. they do so by returning the node.
+  foreach (module_list() as $name) {
+    if (module_hook($name, 'mailhandler')) {
+      $function = $name .'_mailhandler';
+      if (!($node = $function($node, $result, $i, $header, $mailbox))) {
+        // Exit if a module has handled the submitted data.
+        break;
+      }
+    }
+  }
+
+  if ($node) {
+    if ($node->type == 'comment') {
+      $nid = mailhandler_comment_submit($node, $header, $mailbox, $origbody);
+      $type = 'comment';
+    }
+    else {
+      $nid = mailhandler_node_submit($node, $header, $mailbox, $origbody);
+      $type = 'node';
+    }
+  }
+  
+  // Invoke a second hook for modules to operate on the newly created/edited node/comment.
+  foreach (module_list() as $name) {
+    if (module_hook($name, 'mailhandler_post_save')) {
+      $function = $name .'_mailhandler_post_save';
+      // Pass in the $nid (which could be a $cid, depending on $node->type)
+      $function($nid, $type);
+    }
+  }
+  
+  // switch back to original user
+  mailhandler_switch_user();
+
+  // Put something in the results array for the counter in the batch finished callback
+  $context['results'][] = $mailbox['mail'];
+
+  mailhandler_switch_user();
+}
+
+/**
+ * Append default commands. Separate commands from body. Strip signature.
+ * Return a node object.
+ */
+function mailhandler_node_prepare_message($header, $body, $mailbox) {
+
+  // Initialise a node object
+  $node = new stdClass();
+
+  $node->pass = NULL;
+
+  // Initialize parameters
+  $sep = $mailbox['sigseparator'];
+
+  // Copy any name/value pairs from In-Reply-To or References e-mail headers to $node. Useful for maintaining threading info.
+  if (!empty($header->references)) {
+    // we want the final element in references header, watching out for white space
+    $threading = substr(strrchr($header->references, '<'), 0);
+  }
+  else if (!empty($header->in_reply_to)) {
+    $threading = str_replace(strstr($header->in_reply_to, '>'), '>', $header->in_reply_to); // Some MUAs send more info in that header.
+  }
+  if (isset($threading) && $threading = rtrim(ltrim($threading, '<'), '>')) { //strip angle brackets
+    if ($threading) $node->threading = $threading;
+    parse_str($threading, $tmp);
+    if ($tmp['host']) {
+      $tmp['host'] = ltrim($tmp['host'], '@'); // strip unnecessary @ from 'host' element
+    }
+    foreach ($tmp as $key => $value) {
+      $node->$key = $value;
+    }
+  }
+
+  // Prepend the default commands for this mailbox
+  if ($mailbox['commands']) {
+    $body = trim($mailbox['commands']) ."\n". $body;
+  }
+  if ($commands = mailhandler_commands_parse($body, $sep)) {
+    // The node type must be set first in order to properly initialize the node
+    foreach ($commands['commands'] as $command) {
+      if ($command[0] == 'type') {
+        $node->type = $command[1];
+      }
+    }
+  }
+  // Set a default type if none provided
+  if (!isset($node->type)) $node->type = mailhandler_default_type();
+  // Apply defaults to the $node object, and allow modules to add default values
+  require_once(drupal_get_path('module', 'node') . '/node.pages.inc');
+  node_object_prepare($node);
+
+  // If cron is called by anon then node_object_prepare sets uid to 0, but otherwise global $user.
+  // Manually set this to 0 since that's what the rest of the code expects.
+  $node->uid = 0;
+  // In order to fall back to the permission system for comment status, the status property must
+  // be unset if type is comment.  It will get set by explicit commands, and if not, by 
+  // comment_save itself.
+  if($node->type == 'comment') {
+    unset($node->status);
+  }
+  // Execute the commands
+  if (!empty($commands['commands'])) {
+    mailhandler_node_process_message_commands($node, $commands['commands']);
+  }
+  // Isolate the body from the commands and the sig
+  $tmp = array_slice($commands['lines'], $commands['endcommands'], $commands['i'] - $commands['endcommands']);
+  // flatten and assign the body to node object. note that filter() is called within node_save() [tested with blog post]
+  $type = node_get_types('type', $node->type);
+  if ($type->has_body) {
+    $node->body = implode("\n", $tmp);
+  }
+
+  if (empty($node->teaser)) $node->teaser = node_teaser($node->body);
+
+  // decode encoded subject line
+  $subjectarr = imap_mime_header_decode($header->subject);
+  if (empty($subjectarr)) {
+    $node->title = truncate_utf8(trim(decode_entities(strip_tags(check_markup($node->body)))), 29, TRUE);
+  }
+  else {
+    for ($i = 0; $i < count($subjectarr); $i++) {
+      if ($subjectarr[$i]->charset != 'default')
+      $node->title .= drupal_convert_to_utf8($subjectarr[$i]->text, $subjectarr[$i]->charset);
+      else
+      $node->title .= $subjectarr[$i]->text;
+    }
+  }
+  $node->date = $node->changed = format_date($header->udate, 'custom', 'Y-m-d H:i:s O');
+  $node->format = $mailbox['format'];
+  
+  // If an nid command was supplied, and type is not 'comment', append the revision number
+  if (isset($node->nid) && !empty($node->nid) && $node->type != 'comment') {
+    $vid = db_result(db_query('SELECT n.vid FROM {node} n WHERE n.nid = %d', $node->nid));
+    if ($vid) {
+      $node->revision = $node->vid = $vid;
+    }
+  }
+  return $node;
+}
+
+/**
+ * Create the comment.
+ */
+function mailhandler_comment_submit($node, $header, $mailbox, $origbody) {
+  global $user;
+  if (!$node->subject) $node->subject = $node->title;
+  // When submitting comments, 'comment' means actualy the comment's body, and not the comments status for a node.
+  // We need to reset the comment's body, so it doesn't colide with a default 'comment' command. 
+  $node->comment = $node->body;
+  // comment_save will not fall back to permission system if we set the status explicitly
+  // See comment_save.  += will not overwrite an existing array property.
+  if (property_exists($node, 'status')) {
+    // In comment module, status of 1 means unpublished, status of 0 means published.
+    $node->status == 1 ? $node->status = 0 : $node->status = 1;
+  }
+  // We want the comment to have the email time, not the current time
+  $node->timestamp = $node->created;
+  // comment_save gets an array
+  $edit = (array)$node;
+
+  // post the comment. if unable, send a failure email when so configured
+  $cid = comment_save($edit);
+  if (!$cid && $mailbox['replies']) {
+    // $fromaddress really refers to the mail header which is authoritative for authentication
+    list($fromaddress, $fromname) = mailhandler_get_fromaddress($header, $mailbox);
+    $error_text = t('Sorry, your comment experienced an error and was not posted. Possible reasons are that you have insufficient permission to post comments or the node is no longer open for comments.');
+    $params = array('body' => $origbody, 'error_messages' => array(), 'error_text' => $error_text, 'from' => $fromaddress, 'header' => $header, 'node' => $node);
+    drupal_mail('mailhandler', 'mailhandler_error_comment', $fromaddress, user_preferred_language($user), $params);
+    watchdog('mailhandler', 'Comment submission failure: %subject.', array('%subject' => $edit['subject']), WATCHDOG_ERROR);
+  }
+  
+  return $cid;
+}
+
+/**
+ * Create the node.
+ */
+function mailhandler_node_submit($node, $header, $mailbox, $origbody) {
+  global $user;
+  list($fromaddress, $fromname) = mailhandler_get_fromaddress($header, $mailbox);
+  // Reset the static cache
+  form_set_error(NULL, '', TRUE);
+  node_validate($node);
+  if (!$error_messages = form_set_error()) {
+    // Prepare the node for save and allow modules make changes
+    $node = node_submit($node);
+    // Save the node
+    if (!empty($node->nid)) {
+      if (node_access('update', $node)) {
+        node_save($node);
+        watchdog('mailhandler', 'Updated %title by %from.', array('%title' => $node->title, '%from' => $fromaddress));
+      }
+      else {
+        $error_text = t('The e-mail address !from may not update !type items.', array('!from' => $fromaddress, '!type' => $node->type));
+        watchdog('mailhandler', 'Node submission failure: %from may not update %type items.', array('%from' => $fromaddress, '%type' => $node->type), WATCHDOG_WARNING);
+      }
+    }
+    else {
+      $account = user_load($node->uid);
+      if (node_access('create', $node, $account)) {
+        node_save($node);
+        watchdog('mailhandler', 'Added %title by %from.', array('%title' => $node->title, '%from' => $fromaddress));
+      }
+      else {
+        $error_text = t('The e-mail address !from may not create !type items.', array('!from' => $fromaddress, '!type' => $node->type));
+        watchdog('mailhandler', 'Node submission failure: %from may not create %type items.', array('%from' => $fromaddress, '%type' => $node->type), WATCHDOG_WARNING);
+      }
+    }
+    // Return the node is successfully saved
+    if (!isset($error_text)) {
+      return $node;
+    } 
+  }
+  else {
+    $error_text = t('Your submission is invalid:');
+    watchdog('mailhandler', 'Node submission failure: validation error.', array(), WATCHDOG_WARNING);
+  }
+
+  if (isset($error_text)) {
+    if ($mailbox['replies']) {
+      $params = array('body' => $origbody, 'error_messages' => $error_messages, 'error_text' => $error_text, 'from' => $fromaddress, 'header' => $header, 'node' => $node);
+      drupal_mail('mailhandler', 'mailhandler_error_node', $fromaddress, user_preferred_language($user), $params);
+    }
+  }
+  
+  // return FALSE if the node was not successfully saved
+  return FALSE;
+}
+
+/**
+ * Accept a taxonomy term name and replace with a tid. this belongs in taxonomy.module.
+ */
+function mailhandler_term_map(&$term, $index = array(), $vid = FALSE) {
+  // provide case insensitive and trimmed map so as to maximize likelihood of successful mapping
+  if ($vid) {
+    $and = 'AND vid =' . db_escape_string($vid);
+  }
+  $term = db_result(db_query("SELECT tid FROM {term_data} WHERE LOWER('%s') LIKE LOWER(name) $and", trim($term)));
+}
+
+function mailhandler_node_process_message_commands(&$node, $commands) {
+  if (module_exists('taxonomy')) {
+    $vocabs = taxonomy_get_vocabularies($node->type);
+    $node->taxonomy = array();
+    foreach ($commands as $data) {
+      // TODO: allow for nested arrays in commands ... Possibly trim() values after explode().
+      // If needed, turn this command value into an array
+      if (substr($data[1], 0, 1) == '[' && substr($data[1], -1, 1) == ']') {
+        $data[1] = rtrim(ltrim($data[1], '['), ']'); //strip brackets
+        $data[1] = explode(",", $data[1]);
+        // allow for key value pairs
+        foreach ($data[1] as $key => $value) {
+          $data_tmp = explode(":", $value, 2);
+          if (isset($data_tmp[1])) { // is it a key value pair?
+            // remove old, add as key value pair
+            unset($data[1][$key]);
+            $data_tmp[0] = trim($data_tmp[0]);
+            $data[1][$data_tmp[0]] = $data_tmp[1];
+          }
+        }
+      }
+      $data[0] = strtolower(str_replace(' ', '_', $data[0]));
+      // if needed, map term names into IDs. this should move to taxonomy_mailhandler()
+      if ($data[0] == 'taxonomy' && !is_numeric($data[1][0])) {
+        array_walk($data[1], 'mailhandler_term_map');
+        // Only add term if node type can use that term's vocab
+        $term = taxonomy_get_term($data[1][0]);
+        if (array_key_exists($term->vid, $vocabs)) {
+          $node->taxonomy = array_merge($node->taxonomy, $data[1]);
+        }
+        unset($data[0]);
+      }
+      else if (substr($data[0], 0, 9) == 'taxonomy[' && substr($data[0], -1, 1) == ']'){
+        // make sure a valid vid is passed in:
+        $vid = substr($data[0], 9, -1);
+        $vocabulary = taxonomy_vocabulary_load($vid);
+        // if the vocabulary is not activated for that node type, unset $data[0], so the command will be ommited from $node
+        // TODO: add an error message
+        if (!in_array($node->type, $vocabulary->nodes)) {
+          unset($data[0]);
+        }
+        else if (!$vocabulary->tags) {
+          array_walk($data[1], 'mailhandler_term_map', $vid);
+          $node->taxonomy = array_merge($node->taxonomy, $data[1]);
+          unset($data[0]);
+        }
+        else if ($vocabulary->tags) {
+          // for freetagging vocabularies, we just pass the list of terms
+          $node->taxonomy['tags'][$vid] = implode(',', $data[1]);
+          unset($data[0]); // unset, so it won't be included when populating the node object
+        }
+      }
+      if (!empty($data[0])) {
+        $node->$data[0] = $data[1];
+      }
+    }
+  }
+  else {
+    watchdog('mailhandler', 'Unable to process commands. Taxonomy module must be enabled for Mailhandler command processing to work.');
+  }
+}
+
+/**
+ * Implementation of hook_mail().
+ */
+function mailhandler_mail($key, &$message, $params) {
+  $variables = array(
+    '!body' => $params['body'],
+    '!from' => $params['from'],
+    '!site_name' => variable_get('site_name', 'Drupal'),
+    '!subject' => $params['header']->subject,
+    '!type' => $params['node']->type,
+  );
+  $message['subject'] = t('Email submission to !site_name failed - !subject', $variables);
+  $message['body'][] = $params['error_text'];
+  foreach ($params['error_messages'] as $key => $error) {
+    $message['body'][$key] = decode_entities(strip_tags($error));
+  }
+  $message['body'][] = t("You sent:\n\nFrom: !from\nSubject: !subject\nBody:\n!body", $variables);
+}
+
+/**
+ * Implementation of hook_mailhandler_authenticate_info()
+ */
+function mailhandler_mailhandler_authenticate_info() {
+  $info = array(
+    'mailhandler_default' => array(
+      'title' => 'Mailhandler Default',
+      'description' => 'Checks whether the sender matches a valid user in the database',
+      'callback' => 'mailhandler_authenticate_default',
+      'module' => 'mailhandler',
+      'extension' => NULL, // as in $type in module_load_include
+      'basename' => NULL, // as in $name in module_load_include
+    )
+  );
+  if (module_exists('tokenauth')) {
+    $info += array(
+      'mailhandler_tokenauth' => array(
+        'title' => 'Mailhandler Tokenauth',
+        'description' => 'Authenticate messages based on users token from Tokenauth module',
+        'callback' => 'mailhandler_authenticate_tokenauth',
+        'module' => 'mailhandler',
+        'extension' => NULL,
+        'basename' => NULL,
+      ),
+    );
+  }
+  return $info;
+}
+
+/**
+ * Authenticate message based on sender's email address
+ *   If the sender's email address matches an email address of a valid user, then assign
+ *   that user's uid and name to the node object.
+ *   
+ * @param $node
+ *   Object a node object
+ * @param $header
+ *   Object of message header information
+ * @param $origbody
+ *   String message body text
+ * @param $mailbox
+ *   Array of mailbox configuration
+ * 
+ * @return object, the node object
+ */
+function mailhandler_authenticate_default($node, $header, $origbody, $mailbox) {
+  list($fromaddress, $fromname) = mailhandler_get_fromaddress($header, $mailbox);
+  if ($from_user = mailhandler_user_load($fromaddress, $node->pass, $mailbox)) {
+    $node->uid = $from_user->uid;
+    $node->name = $from_user->name;
+  }
+  // Try using mailalias email aliases
+  else if (function_exists('mailalias_user') && $from_user = mailhandler_user_load_alias($fromaddress, $node, $mailbox)) {
+    $node->uid = $from_user->uid;
+    $node->name = $from_user->name;
+  }
+  else {
+    // Authentication failed.  Try as anonymous.
+    $node->uid = 0;
+    $node->name = $fromname;
+  }
+  return $node;
+}
+
+/**
+ * Authenticate message based on token from tokenauth module
+ *   If the user's token is found somewhere in the "to" field, assign that user's uid and name 
+ *   to the node object.  A rough search for the token somewhere in the "toaddress" is performed
+ *   instead of an exact, ordered match in order to allow some freedom in the format of allowed
+ *   "toaddress".  For example, if using a catchall email address, the toaddress could be:
+ *   
+ *   f93ksj35dx@example.com - where f93ksj35dx is the user's token
+ *   or alternatively:
+ *   f93ksj35dx-foo@example.com - where f93ksj35dx is the user's token and foo is the name of an
+ *   Organic Group to which the message should be assigned.  
+ *   
+ *   A rough search allows for different approaches to use this single authentication method.
+ *   
+ * @param $node
+ *   Object a node object
+ * @param $header
+ *   Object of message header information
+ * @param $origbody
+ *   String message body text
+ * @param $mailbox
+ *   Array of mailbox configuration
+ * 
+ * @return object, the node object
+ */
+function mailhandler_authenticate_tokenauth($node, $header, $origbody, $mailbox) {
+  if (module_exists('tokenauth')) {
+    list($fromaddress, $fromname) = mailhandler_get_fromaddress($header, $mailbox);
+    // If user with given email address exists and their token is in the toaddress, allow.
+    if (($from_user = mailhandler_user_load($fromaddress, $node->pass, $mailbox))
+    && strpos($header->to[0]->mailbox, tokenauth_get_token($from_user->uid)) !== FALSE) {
+      $node->uid = $from_user->uid;
+      $node->name = $from_user->name;
+    }
+    // Try using mailalias email aliases
+    else if (function_exists('mailalias_user') && ($from_user = mailhandler_user_load_alias($fromaddress, $node, $mailbox))
+    && strpos($header->to[0]->mailbox, tokenauth_get_token($from_user->uid)) !== FALSE) {
+      $node->uid = $from_user->uid;
+      $node->name = $from_user->name;
+    }
+    else {
+      // If token authentication fails, try as anonymous.
+      $node->uid = 0;
+      $node->name = $fromname;
+    }
+  }
+  return $node;
+}
+
+/**
+ * Determine from address either using the mailbox setting or via the header information
+ * 
+ * @param $header
+ *   Object message header information
+ * @param $mailbox
+ *   Array mailbox settings
+ * @return array
+ */
+function mailhandler_get_fromaddress($header, $mailbox) {
+  if (($fromheader = strtolower($mailbox['fromheader'])) && isset($header->$fromheader)) {
+    $from = $header->$fromheader;
+  }
+  else {
+    $from = $header->from;
+  }
+  return array($from[0]->mailbox .'@'. $from[0]->host, (isset($from[0]->personal)) ? $from[0]->personal : '');
+}
+
+/**
+ * Retrieve user information from his email address.
+ */
+function mailhandler_user_load($mail, $pass, $mailbox) {
+  if ($mailbox['security'] == 1) {
+    if (!$account = user_load(array('mail' => $mail, 'pass' => $pass))) {
+      watchdog('mailhandler', 'Wrong password used in message commands for %address', array('%address' => $mail), WATCHDOG_NOTICE);
+    }
+    return $account;
+  }
+  else {
+    return user_load(array('mail' => $mail));
+  }
+}
+
+/**
+ * Look up a user based on their mailalias addresses
+ * 
+ * Helper function for mailhandler_authenticate_tokenauth()
+ * 
+ * @param $fromaddress
+ *   String from address
+ * @param $node
+ *   Object node object
+ * @param $mailbox
+ *   Array of mailhandler mailbox configuration
+ *   
+ * @return Object user object or FALSE
+ */
+function mailhandler_user_load_alias($fromaddress, $node, $mailbox) {
+  $result = db_query("SELECT mail FROM {users} WHERE data LIKE '%%%s%%'", $fromaddress);
+  while ($alias = db_result($result)) {
+    if ($from_user = mailhandler_user_load($alias, $node->pass, $mailbox)) {
+      return $from_user;
+      break;
+    }
+  }
+  return FALSE;
 }

@@ -226,7 +226,7 @@ msgid ""
 msgstr "Volitelné. V některých případech je potřeba pro připojení k mailserveru zadat další příkazy (např. \"/notls\", \"/novalidate-cert\" apod.). Podívejte se do dokumentace k <a href=\"http://php.net/imap_open\">imap_open</a>. Příkazy začínají znakem \"/\" a tímto znakem se také oddělují."
 
 #: mailhandler.module:786
-msgid "Mime preference"
+msgid "MIME preference"
 msgstr "Nastavení MIME"
 
 #: mailhandler.module:786
@@ -250,7 +250,7 @@ msgstr "Vyžadovat heslo"
 #: mailhandler.module:787
 msgid ""
 "Disable security if your site does not require a password in the Commands "
-"section of incoming e-mails. Note: Security=Enabled and Mime preference=HTML "
+"section of incoming e-mails. Note: Security=Enabled and MIME preference=HTML "
 "is an unsupported combination."
 msgstr "Zvolte \"vypnuto\", pokud nevyžadujete heslo v příchozích e-mailech. Poznámka: Nastavení MIME=HTML a Bezpečnost=Vyžadovat heslo je nepodporovaná kombinace."
 

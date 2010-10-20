@@ -30,16 +30,24 @@ Then visit cron.php to kickoff a pull from your mail server and processing of pe
 follow the 'retrieve' link for your newly created mailbox. You should see new nodes on
 your site (go to admin/content/node) or receive error message replies via email.
 
-2. You may add extra security to to a Mailhandler mailbox if desired on the Admin page.
+2. You may add extra security to a Mailhandler mailbox if desired on the Admin page.
 
 3. Install mailalias.module if you want to assist users who might contribute from multiple email addresses.
 
 4. Consider installing the Marksmarty module and using its filter in the input format that you assign in your mailbox form. This filter does a nice job of prettying up plain text email for presentation on the Web.
 
+
 Developer Usage
 -----------------------------
 
-See the API link located in the Help
+Mailhandler has several hooks which other modules may implement:
+
+* hook_mailhandler allows for the message to be altered during node creation (see mailhandler_node_process_message
+  in mailhandler.module)
+* hook_mailhandler_post_save allows operations on a newly saved node created by mailhandler (see mailhandler_node_process_message
+  in mailhandler.module)
+* hook_mailhandler_authenticate_info allows modules to define one or more mailhandler authentication plugins (see 
+  mailhandler.module for implementations)
 
 Credits
 ----------

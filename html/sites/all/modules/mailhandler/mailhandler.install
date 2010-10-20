@@ -124,6 +124,12 @@ function mailhandler_uninstall() {
         'not null' => TRUE,
         'default' => 0,
       ),
+      'authentication' => array(
+        'type' => 'varchar',
+        'length' => '255',
+        'not null' => TRUE,
+        'default' => 'mailhandler_default',
+      ),
     ),
     'primary key' => array('mid'),
     'indexes' => array(
@@ -143,6 +149,17 @@ function mailhandler_update_1() {
   //return _system_update_utf8(array('mailhandler'));
 }
 
+function mailhandler_update_6001() {
+  $ret = array();
+  db_add_field($ret, 'mailhandler', 'authentication', array(
+    'type' => 'varchar', 
+    'not null' => TRUE,
+    'length' => '255',
+    'default' => 'mailhandler_default',
+  ));
+  return $ret;
+}
+
 
 /**
  * Check that the IMAP extension exists for PHP.
@@ -159,8 +176,3 @@ function mailhandler_requirements($phase) {
   );
   return $requirements;
 }
-
-
-/**
-
-**/

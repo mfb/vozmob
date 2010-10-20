@@ -196,7 +196,7 @@ msgid "Optional. In some circumstances you need to issue extra commands to conne
 msgstr ""
 
 #: mailhandler.module:786
-msgid "Mime preference"
+msgid "MIME preference"
 msgstr ""
 
 #: mailhandler.module:786
@@ -216,7 +216,7 @@ msgid "Require password"
 msgstr ""
 
 #: mailhandler.module:787
-msgid "Disable security if your site does not require a password in the Commands section of incoming e-mails. Note: Security=Enabled and Mime preference=HTML is an unsupported combination."
+msgid "Disable security if your site does not require a password in the Commands section of incoming e-mails. Note: Security=Enabled and MIME preference=HTML is an unsupported combination."
 msgstr ""
 
 #: mailhandler.module:788
