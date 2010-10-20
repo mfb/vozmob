@@ -369,7 +369,7 @@ function mailhandler_admin_settings() {
   $form['mailhandler_default_encoding'] = array(
     '#type' => 'textfield',
     '#title' => t('Default character encoding'),
-    '#default_value' => 'UTF-8',
+    '#default_value' => variable_get('mailhandler_default_encoding', 'UTF-8'),
     '#description' => t('The default character encoding to use when an incoming message does not define an encoding.')
   );
 
