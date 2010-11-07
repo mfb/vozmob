@@ -1,0 +1,59 @@
+<?php 
+
+function vozmob_og_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  switch ($op) {
+    // when in view mode as opposed to edit, delete, etc.
+    case 'view':
+
+
+    break;
+	}
+}
+
+/**
+ * Implementation of hook_mailhandler()
+ * Check incoming mail to see if it needs to be associated with a
+ * group. This uses the to address (to@domain.com)
+ */
+function vozmob_og_mailhandler(&$node, $result, $i, $header, $mailbox) {
+
+	$to_address = $header->toaddress;
+	$split_address = split("@", $to_address);
+	$email_name = $split_address[0];
+
+	 // Get the full user object. 
+  $user = user_load($node->uid);
+
+	// Load group node object, so we can get the path of the group
+	$group = node_load($user->og_groups[$group->nid]);
+	$group_path = $group->path;
+
+	// Get the group's path, which we presume the user has set as a path alia with only one path argument
+	// TODO - make this smarter
+	$group_path = $group->path;
+
+	// We need to make sure this user is a member
+  // @TODO This should hook into OG's check if a user can post to a group
+	if (! $user->og_groups[$group->nid]) {
+    watchdog('vozmob_og', 'User !user attempted to post to !group that they are not a member of.',
+      array(
+        '!user' => l($user->name, 'user/' . $user->uid),
+        '!group' => l($group->title, 'node/' . $group->nid)
+      ),
+      'warning');
+    return;
+  }
+	
+	// Does email address match path of a group?
+	if ($email_name == $group_path) {
+		watchdog('vozmob_og', 'This email address matches the path of a group.');
+		$node->og_groups[$group->nid] = $group->nid;
+	}
+	// Otherwise add a tag that maches the email name
+	// TODO - this doesn't work yet
+	else {
+		$node->taxonomy[] = $email_name;
+	}
+  // return the modified node
+  return $node;
+}
