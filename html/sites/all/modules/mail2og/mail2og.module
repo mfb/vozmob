@@ -353,18 +353,18 @@ function mail2og_block_info() {
 function mail2og_mailhandler(&$node, $result, $i, $header, $mailbox) {
   // If no groups are enabled, exit
   if (in_array(0, variable_get('mail2og_enabled_groups', array()))) {
-    return;
+    return $node;
   }
 
   // now we need to look for the emailbox name to see if it belongs to a group
   if (! $group = mail2og_find_email_address($header->toaddress) ) {
-    return;
+    return $node;
   }
 
   // now check to see if this group is enabled, or if all groups are allowed
   $enabled_groups = variable_get('mail2og_enabled_groups', array());
   if (! in_array($group->nid, $enabled_groups) && ! isset($enabled_groups[1]) ) {
-    return;
+    return $node;
   }
 
   // get the full user object. We need to make sure this user is a member
@@ -377,7 +377,7 @@ function mail2og_mailhandler(&$node, $result, $i, $header, $mailbox) {
         '!group' => l($group->title, 'node/' . $group->nid)
       ),
       'warning');
-    return;
+    return $node;
   }
   // is this user in this group and can they send to it?
   if (! user_access('send to group')) {
@@ -386,7 +386,7 @@ function mail2og_mailhandler(&$node, $result, $i, $header, $mailbox) {
         '!user' => l($user->name, 'user/'. $user->uid)
       ),
       'warning');
-    return;
+    return $node;
   }
 
   // check for content type permission
@@ -398,7 +398,7 @@ function mail2og_mailhandler(&$node, $result, $i, $header, $mailbox) {
         '!content' => $content_type,
       ),
       'warning');
-    return;
+    return $node;
   }
 
   // set the content type
