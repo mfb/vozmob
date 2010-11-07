@@ -1,0 +1,739 @@
+<?php
+// $Id: mail2og.module,v 1.1.2.8 2009/09/17 14:28:52 arthuregg Exp $
+
+/**
+ *  @TODO improve token replacement on CCK field
+ *  @TODO add default values to CCK field
+ *
+ */
+
+
+/* ******************************************* */
+/* Drupal hooks                                */
+/* ******************************************* */
+
+/**
+ * Implementation of hook_menu()
+ */
+function mail2og_menu() {
+  $items = array();
+  $items['admin/og/mail2og'] = array(
+    'title' => 'Mail to OG',
+    'description' => 'Configure a gateway for email to og posts',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('mail2og_administration_form'),
+    'access arguments' => array('administer mail2og'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+  return $items;
+}
+
+
+/**
+ * Implementation of hook_perm
+ * @return unknown_type
+ */
+function mail2og_perm() {
+  return array('administer mail2og', 'send to group');
+}
+
+
+/**
+ * Implementation of hook_block
+ * @param $op
+ *   string, current operator
+ * @param $deleta
+ *   string, what block is being called
+ * @param $edit
+ *   array, edit values
+ * @return array
+ */
+function mail2og_block($op, $delta = '', $edit = array()) {
+  switch ($op) {
+    case 'list':
+      return array('mail2og_block_info' => array(
+        'info' => t('Email information for Mail2og')),
+      );
+      break;
+    case 'view':
+      return $delta();
+      break;
+  }
+}
+
+
+/**
+ * Implemntation of hook_nodeapi()
+ * @NOTE I am not sure that this is really the way to do this. It seems like
+ *       this function should be able to be done through CCK's token
+ *       implementation, however, we need the full node object to do the
+ *       correct replacement, so we do this durring the presave process
+ * @param $node
+ * @param $op
+ * @param $a3
+ * @param $a4
+ * @return unknown_type
+ */
+function mail2og_nodeapi(&$node, $op, $a3, $a4) {
+  if ($op == 'view') {
+    // mail2og_find_email_address('this_is_a_test_with___and___and__@24b6.net');
+  }
+
+  switch ($op) {
+    case 'presave':
+      if (module_exists('token')) {
+        foreach (mail2og_fields() as $field) {
+          $text = token_replace($node->{$field['field_name']}[0]['value'], 'mail2og', $node);
+          $node->{$field['field_name']}[0]['value'] = $text;
+        }
+      }
+    break;
+  }
+}
+
+
+/**
+ * Implementation of hook_theme
+ * @param $existing
+ * @param $type
+ * @param $theme
+ * @param $path
+ * @return array
+ */
+function mail2og_theme($existing, $type, $theme, $path) {
+  return array(
+    'mail2og_block_display_email_info' => array(
+      'arguments' => array(
+        'group' => NULL,
+        'email' => NULL,
+      ),
+    ),
+    'mail2og_field' => array(
+      '#input' => TRUE,
+      '#columns' => array('value'), '#delta' => 0,
+      '#process' => array('mail2og_emailfield_process'),
+      '#autocomplete_path' => FALSE,
+    ),
+    'mail2og_emailfield' => array(
+      'arguments' => array('element' => NULL),
+    ),
+    'mail2og_emailfield_formatter' => array(
+      'arguments' => array('element' => NULL),
+    ),
+  );
+}
+
+
+/**
+ * Implementation of FAPI hook_elements().
+ *
+ * Any FAPI callbacks needed for individual widgets can be declared here,
+ * and the element will be passed to those callbacks for processing.
+ *
+ * Drupal will automatically theme the element using a theme with
+ * the same name as the hook_elements key.
+ *
+ * Autocomplete_path is not used by text_widget but other widgets can use it
+ * (see nodereference and userreference).
+ */
+function mail2og_elements() {
+  return array(
+    'mail2og_emailfield' => array(
+      '#input' => TRUE,
+      '#columns' => array('value'), '#delta' => 0,
+      '#process' => array('mail2og_emailfield_process'),
+      '#autocomplete_path' => FALSE,
+    ),
+  );
+}
+
+
+/* ******************************************* */
+/* Internal Functions                          */
+/* ******************************************* */
+
+
+/**
+ * Helper function to find all the mail2og cck fields
+ */
+function mail2og_fields() {
+  if (module_exists('content')) {
+    $return = array();
+    $fields = content_types($node->type);
+    foreach($fields as $content_type) {
+      if ($content_type['fields']) {
+        foreach ($content_type['fields'] as $field_name => $field) {
+          if ($field['type'] == 'mail2og_emailfield') {
+            $return[$field_name] = $field;
+          }
+        }
+      }
+    }
+    return $return;
+  }
+}
+
+
+/**
+ * Helper function to find an email address mailbox in a cck field
+ * @param $email
+ *   string, email address mailbox to search for
+ * @param $cck_field
+ *   array, cck field
+ * @return
+ */
+function mail2og_find_email_address($email, $cck_field = null) {
+  if (! $cck_field) {
+    $fields = mail2og_fields();
+  }
+  else {
+    $fields = array($cck_field);
+  }
+
+  // get each of the fields that match our criteria
+  foreach ($fields as $field) {
+    // get the relevant database information for this field
+    $db_info = content_database_info($field);
+    // look for this email address in the correct col
+    $result = db_result(db_query('SELECT field.nid FROM '. $db_info['table'] .' field WHERE '. $db_info['columns']['value']['column'] .'  = "%s"', $email));
+    if ($result) {
+      return node_load($result);
+    }
+  }
+}
+
+
+/**
+ * Admin settings for mail2og()
+ * sets default content types
+ * allow/disallow posting options - non-members, members,
+ */
+function mail2og_administration_form() {
+  // @TODO add more settings to control some og posting options, etc.
+
+  // select the groups to enable
+  $form['mail2og_enabled_groups'] = array(
+    '#type' => 'select',
+    '#multiple' => true,
+    '#title' => t('Enable mail2og on'),
+    '#options' =>  array_merge(array(0 => t('No groups'), 1 => t('All groups')), og_all_groups_options()),
+    '#default_value' => variable_get('mail2og_enabled_groups', 0),
+    '#description' => t('Select the groups you want to enable mail2og on. Default is all')
+  );
+
+  // set the default content type. Check the kind of OG content types that are
+  // enabled
+  if ($og_types = og_get_types('group_post')) {
+    $og_types = array_combine(array_values($og_types), array_values($og_types));
+    $form['mail2og_default_node_type'] = array(
+      '#type' => 'select',
+      '#title' => t('Default content post type'),
+      '#options' => $og_types,
+      '#default_value' => variable_get('mail2og_default_node_type', 0),
+      '#description' => t('Select default content type for submissions. Default will use the content type defined by mailhandler.')
+    );
+  }
+
+  // get a list of the mailboxes that are enabled on the system
+  $result = db_query('SELECT * FROM {mailhandler} ORDER BY mail');
+  $options = array(0 => t('Choose a mailbox'));
+  while ($mailbox = db_fetch_object($result)) {
+    $options[$mailbox->mid] = $mailbox->mail;
+    $boxes_exist = true;
+  }
+  // ensure that we have mailboxes
+  if (! $boxes_exist) {
+    drupal_set_message(t('There are no Mailhandler mailboxes configured. Please !configure one before setting up mail2og.',
+      array('!configure' => l(t('configure'), 'admin/content/mailhandler')))
+    );
+  }
+  else {
+    $form['mail2og_mailbox_setting'] = array(
+      '#type' => 'select',
+      '#title' => t('Mailbox for retriving group email'),
+      '#options' => $options,
+      '#default_value' => variable_get('mail2og_mailbox_setting', null),
+      '#description' => t('Select the mailhandler mailbox you wish to use to retrive group emails'),
+    );
+  }
+
+  // if we have a mailbox set, load it so we can get the domain
+  if ($mid = variable_get('mail2og_mailbox_setting', null)) {
+    $box = mailhandler_get_mailbox($mid);
+    //print_R($box);
+  }
+  if (! $domain = variable_get('mail2og_default_email_domain', false)) {
+    preg_match("/^.*@(.*)$/", $box['mail'], $matches);
+    if (! $domain = $matches[1]) {
+      $domain = null;
+    }
+  }
+
+  $form['mail2og_default_email_domain'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Default email address domain'),
+    '#default_value' => $domain,
+    '#description' => t('This sets the default email address domain that users
+      will send their posts to. This will automatically be set based on the
+      mailbox you choose, or you can set it by hand here. This should be something like: example.com'),
+  );
+
+  $form['#submit'][] = 'mail2og_default_mailbox_domain_submit';
+  return system_settings_form($form);
+}
+
+
+/**
+ * Sets the default mail domain for admin/settings/mail2og if it was not set
+ * @param $form
+ * @param $form_state
+ * @return unknown_type
+ */
+function mail2og_default_mailbox_domain_submit($form, $form_state) {
+  // if the default email domain was not set and the mailhandler mailbox setting was,
+  // use the mailhandler data to populate this field
+  if (! $form_state['values']['mail2og_default_email_domain'] && $form_state['values']['mail2og_mailbox_setting']) {
+    $mailbox = mailhandler_get_mailbox($form_state['values']['mail2og_mailbox_setting']);
+    variable_set('mail2og_default_email_domain', $mailbox['domain']);
+  }
+}
+
+
+/**
+ * Block to display on group pages
+ * @TODO make this work a bit better with the new CCK value
+ * @return string
+ */
+function mail2og_block_info() {
+  // is this user allowed to post?
+  if (! user_access('send to group')) {
+    return;
+  }
+  // make sure we are on a group page
+  if (! $group = og_determine_context()) {
+    return;
+  }
+
+  // are we using a mailbox?
+  if ($mailbox = variable_get('mail2og_mailbox_setting', 0)) {
+    $mailbox = mailhandler_get_mailbox($mailbox);
+    // parse the domain
+    $domain = preg_replace("/(.*\@)/", '', $to_address);
+    // create the group name
+    $name = mail2og_email_to_address_create($group->title);
+    // prefix the domain with modified group domain
+    $email = "$name@$domain";
+  }
+  // are we using a cck field?
+  elseif (! $field = variable_get('mail2og_og_cck_name', null)) {
+    $field = $group->$field;
+    $email = $field['#value'];
+  }
+
+  // nothing to see here
+  if (! $email) {
+    return;
+  }
+
+  // @TODO make sure that this user has rights to
+  // post to this specific group
+
+  return array(
+    'subject' => t('Post by email'),
+    'content' => theme('mail2og_block_display_email_info', $group, $email)
+  );
+}
+
+
+/**
+ * Implementation of hook_mailhandler()
+ * Check incoming mail to see if it needs to be associated with a
+ * group. This uses the to address (to@domain.com)
+ */
+function mail2og_mailhandler(&$node, $result, $i, $header, $mailbox) {
+  // If no groups are enabled, exit
+  if (in_array(0, variable_get('mail2og_enabled_groups', array()))) {
+    return;
+  }
+
+  // now we need to look for the emailbox name to see if it belongs to a group
+  if (! $group = mail2og_find_email_address($header->toaddress) ) {
+    return;
+  }
+
+  // now check to see if this group is enabled, or if all groups are allowed
+  $enabled_groups = variable_get('mail2og_enabled_groups', array());
+  if (! in_array($group->nid, $enabled_groups) && ! isset($enabled_groups[1]) ) {
+    return;
+  }
+
+  // get the full user object. We need to make sure this user is a member
+  // @TODO This should hook into OG's check if a user can post to a group
+  $user = user_load($node->uid);
+  if (! $user->og_groups[$group->nid]) {
+    watchdog('mail2og', 'User !user attempted to post to !group that they are not a member of.',
+      array(
+        '!user' => l($user->name, 'user/' . $user->uid),
+        '!group' => l($group->title, 'node/' . $group->nid)
+      ),
+      'warning');
+    return;
+  }
+  // is this user in this group and can they send to it?
+  if (! user_access('send to group')) {
+    watchdog('mail2og', 'User !user did not have sufficient permissions to post via email',
+      array(
+        '!user' => l($user->name, 'user/'. $user->uid)
+      ),
+      'warning');
+    return;
+  }
+
+  // check for content type permission
+  $content_type = variable_get('mail2og_default_node_type', false);
+  if (! user_access("create $content_type content", $user)) {
+    watchdog('mail2og', 'User !user did not have sufficient permissions to create !content content',
+      array(
+        '!user' => l($user->name, 'user/'. $user->uid),
+        '!content' => $content_type,
+      ),
+      'warning');
+    return;
+  }
+
+  // set the content type
+  $node->type = $content_type;
+  // add the group id to this node
+  $node->og_groups[$group->nid] = $group->nid;
+  // set the access to the group
+  // @TODO this needs to be in admin settings
+  $node->og_access = variable_get('mail2og_default_node_access', true);
+  // set the public/private flag
+  // @TODO this needs to be in admin settings
+  $node->og_public = variable_get('mail2og_default_public', false);
+
+  // return the modified node
+  return $node;
+}
+
+
+/**
+ * Helper function to clean the group title of non-alpha characters
+ * @param $title
+ * @return string
+ */
+function mail2og_email_to_address_create($title) {
+  // @TODO support other kinds of replacement here
+  // take the incoming title and swap all non-alpha characters
+  return strtolower(preg_replace("/[^a-zA-Z0-9]/", "_", $title));
+}
+
+
+/* ******************************************* */
+/* CCK functions                               */
+/* ******************************************* */
+
+// @NOTE All of these functions were cribbed from the cck text module. It is likely that they are very very wrong.
+
+/**
+ * Implementation of hook_field_info().
+ */
+function mail2og_field_info() {
+  return array(
+    'mail2og_emailfield' => array(
+      'label' => t('Email to OG'),
+      'description' => t('Connect an organic group to email.'),
+      'content_icon' => 'icon_content_text.png',
+      'callbacks' => array(
+        'default value' => CONTENT_CALLBACK_CUSTOM,
+      ),
+    ),
+  );
+}
+
+
+/**
+ * Implementation of hook_field_settings().
+ */
+function mail2og_field_settings($op, &$field) {
+  switch ($op) {
+    case 'save':
+      return array('mail2og_emailfield_process');
+
+    case 'database columns':
+      $columns['value'] = array('type' => 'text', 'size' => 'medium', 'not null' => FALSE, 'sortable' => TRUE, 'views' => TRUE);
+      return $columns;
+
+    case 'views data':
+      $allowed_values = content_allowed_values($field);
+      if (count($allowed_values)) {
+        $data = content_views_field_views_data($field);
+        $db_info = content_database_info($field);
+        $table_alias = content_views_tablename($field);
+
+        // Filter: Add a 'many to one' filter.
+        $copy = $data[$table_alias][$field['field_name'] .'_value'];
+        $copy['title'] = t('@label (!name) - Allowed values', array('@label' => t($field['widget']['label']), '!name' => $field['field_name']));
+        $copy['filter']['handler'] = 'content_handler_filter_many_to_one';
+        unset($copy['field'], $copy['argument'], $copy['sort']);
+        $data[$table_alias][$field['field_name'] .'_value_many_to_one'] = $copy;
+        // Argument : swap the handler to the 'many to one' operator.
+        $data[$table_alias][$field['field_name'] .'_value']['argument']['handler'] = 'content_handler_argument_many_to_one';
+        return $data;
+      }
+  }
+}
+
+
+/**
+ * Implementation of hook_field().
+ */
+function mail2og_field($op, &$node, $field, &$items, $teaser, $page) {
+  switch ($op) {
+    case 'validate':
+      if (is_array($items)) {
+        foreach ($items as $delta => $item) {
+          $error_element = isset($item['_error_element']) ? $item['_error_element'] : '';
+          if (is_array($item) && isset($item['_error_element'])) unset($item['_error_element']);
+          if (! empty($item['value'])) {
+            if (! valid_email_address($item['value'])) {
+            //  form_set_error($error_element, t('%name: not a valid email address.', array('%name' => t($field['widget']['label']))));
+            }
+          }
+        }
+      }
+      return $items;
+
+    case 'sanitize':
+      foreach ($items as $delta => $item) {
+        if (!empty($field['text_processing'])) {
+          $check = is_null($node) || (isset($node->build_mode) && $node->build_mode == NODE_BUILD_PREVIEW);
+          $text = isset($item['value']) ? check_markup($item['value'], $item['format'], $check) : '';
+        }
+        else {
+          $text = check_plain($item['value']);
+        }
+      }
+  }
+}
+
+
+/**
+ * Implementation of hook_content_is_empty().
+ */
+function mail2og_content_is_empty($item, $field) {
+  if (empty($item['value']) && (string)$item['value'] !== '0') {
+    return TRUE;
+  }
+  return FALSE;
+}
+
+
+/**
+ * Implementation of hook_field_formatter_info().
+ */
+function mail2og_field_formatter_info() {
+  return array(
+    'default' => array(
+      'label' => t('Default'),
+      'field types' => array('mail2og_emailfield'),
+      'multiple values' => CONTENT_HANDLE_CORE,
+    ),
+  );
+}
+
+
+/**
+ * Implementation of hook_widget_info().
+ *
+ * Here we indicate that the content module will handle
+ * the default value and multiple values for these widgets.
+ *
+ * Callbacks can be omitted if default handing is used.
+ * They're included here just so this module can be used
+ * as an example for custom modules that might do things
+ * differently.
+ */
+function mail2og_widget_info() {
+  return array(
+    'mail2og_emailfield' => array(
+      'label' => t('Connect Email to OG'),
+      'field types' => array('mail2og_emailfield'),
+    ),
+  );
+}
+
+
+/**
+ * Implementation of hook_widget_settings().
+ */
+function mail2og_widget_settings($op, $widget) {
+  switch ($op) {
+    case 'save':
+      return array('size');
+  }
+}
+
+
+/**
+ * Implementation of hook_widget().
+ *
+ * Attach a single form element to the form. It will be built out and
+ * validated in the callback(s) listed in hook_elements. We build it
+ * out in the callbacks rather than here in hook_widget so it can be
+ * plugged into any module that can provide it with valid
+ * $field information.
+ *
+ * Content module will set the weight, field name and delta values
+ * for each form element. This is a change from earlier CCK versions
+ * where the widget managed its own multiple values.
+ *
+ * If there are multiple values for this field, the content module will
+ * call this function as many times as needed.
+ *
+ * @param $form
+ *   the entire form array, $form['#node'] holds node information
+ * @param $form_state
+ *   the form_state, $form_state['values'][$field['field_name']]
+ *   holds the field's form values.
+ * @param $field
+ *   the field array
+ * @param $items
+ *   array of default values for this field
+ * @param $delta
+ *   the order of this item in the array of subelements (0, 1, 2, etc)
+ *
+ * @return
+ *   the form item for a single element for this field
+ */
+function mail2og_widget(&$form, &$form_state, $field, $items, $delta = 0) {
+  $element = array(
+    '#type' => $field['widget']['type'],
+    '#default_value' => isset($items[$delta]) ? $items[$delta] : '',
+  );
+  return $element;
+}
+
+
+/**
+ * Process an individual element.
+ *
+ * Build the form element. When creating a form using FAPI #process,
+ * note that $element['#value'] is already set.
+ *
+ * The $fields array is in $form['#field_info'][$element['#field_name']].
+ */
+function mail2og_emailfield_process($element, $edit, $form_state, $form) {
+  $field = $form['#field_info'][$element['#field_name']];
+  $field_key = $element['#columns'][0];
+  $delta = $element['#delta'];
+  $element[$field_key] = array(
+    '#type' => 'textfield',
+    '#default_value' => isset($element['#value'][$field_key]) ? $element['#value'][$field_key] : NULL,
+    '#size' => !empty($field['widget']['size']) ? $field['widget']['size'] : 60,
+    '#attributes' => array('class' => 'mail2og_emailfield'),
+    '#element_validate' => array('mail2og_cck_widget_validate'),
+    // The following values were set by the content module and need
+    // to be passed down to the nested element.
+    '#title' => $element['#title'],
+    '#description' => $element['#description'],
+    '#required' => $element['#required'],
+    '#field_name' => $element['#field_name'],
+    '#type_name' => $element['#type_name'],
+    '#delta' => $element['#delta'],
+    '#columns' => $element['#columns'],
+  );
+
+  $element[$field_key]['#maxlength'] = !empty($field['max_length']) ? $field['max_length'] : NULL;
+
+  if (!empty($field['text_processing'])) {
+    $filter_key = $element['#columns'][1];
+    $format = isset($element['#value'][$filter_key]) ? $element['#value'][$filter_key] : FILTER_FORMAT_DEFAULT;
+    $parents = array_merge($element['#parents'] , array($filter_key));
+    $element[$filter_key] = filter_form($format, 1, $parents);
+  }
+
+  // Used so that hook_field('validate') knows where to flag an error.
+  $element['_error_element'] = array(
+    '#type' => 'value',
+    '#value' => implode('][', array_merge($element['#parents'], array($field_key))),
+  );
+
+  return $element;
+}
+
+
+/**
+ * mail2og cck widget validator
+ * This actually does value replacement as well inorder to make sure that a user
+ * gets good data into the email field
+ * @param $element
+ * @param $form_state
+ * @return unknown_type
+ */
+function mail2og_cck_widget_validate($element, &$form_state) {
+  // get the field name so we can check the form_state values for it and validate
+  if (! $email = $form_state['values'][$element['#field_name']][$element['#delta']]['value']) {
+    // No email address, build the email address from the node title
+    $to = mail2og_email_to_address_create($form_state['values']['title']);
+    // get the default domain
+    $domain = variable_get('mail2og_default_email_domain', null);
+    // create the email address
+    $form_state['values'][$element['#field_name']][$element['#delta']]['value'] = "$to@$domain";
+    drupal_set_message(t('Automatically generated a email address: !address for this group.', array('!address' => "$to@$domain")));
+  }
+  // There is incoming data, we need to see if we can validate it  
+  else {
+  	// Was the entered text a valid email address?
+    if (! valid_email_address($email)) {
+    	// Now we try to create a valid email address with the domain 
+    	$email = $email.'@'. variable_get('mail2og_default_email_domain', null);
+    	if (! valid_email_address($email)) {
+    		form_error($element, t('The email address you entered is not valid, please try again.'));
+    	}
+    	// Now we just need to update the field with the new value
+    	$form_state['values'][$element['#field_name']][0]['value'] = $email;
+    }      
+  }    
+}
+
+
+/* ******************************************* */
+/* Theme functions                             */
+/* ******************************************* */
+
+/**
+ * Theme function for 'default' text field formatter.
+ */
+function theme_mail2og_formatter_default($element) {
+  return $element['#item']['safe'];
+}
+
+
+/**
+ * FAPI theme for an individual text elements.
+ *
+ * The textfield or textarea is already rendered by the
+ * textfield or textarea themes and the html output
+ * lives in $element['#children']. Override this theme to
+ * make custom changes to the output.
+ *
+ * $element['#field_name'] contains the field name
+ * $element['#delta]  is the position of this element in the group
+ */
+function theme_mail2og_emailfield($element) {
+  return $element['#children'];
+}
+
+
+/**
+ * Displays the group email info
+ * @param $group
+ * @param $email
+ * @return string
+ */
+function theme_mail2og_block_display_email_info($group, $email) {
+  $html = array();
+  $html[] = t('You can post to this group by sending an email to %email', array('%email' => $email));
+  return implode('<br/>', $html);
+}
