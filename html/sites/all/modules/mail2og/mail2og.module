@@ -455,7 +455,7 @@ function mail2og_field_info() {
 /**
  * Implementation of hook_field_settings().
  */
-function mail2og_field_settings($op, &$field) {
+function mail2og_field_settings($op, $field) {
   switch ($op) {
     case 'save':
       return array('mail2og_emailfield_process');
