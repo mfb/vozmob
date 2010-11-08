@@ -391,7 +391,7 @@ function mail2og_mailhandler(&$node, $result, $i, $header, $mailbox) {
 
   // check for content type permission
   $content_type = variable_get('mail2og_default_node_type', false);
-  if (! user_access("create $content_type content", $user)) {
+  if (!node_access('create', $content_type, $user)) {
     watchdog('mail2og', 'User !user did not have sufficient permissions to create !content content',
       array(
         '!user' => l($user->name, 'user/'. $user->uid),
