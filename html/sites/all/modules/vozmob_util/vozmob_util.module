@@ -4,7 +4,7 @@
 /**
  * Assign a path under admin/build.
  */
-function vozmob_util_menu($may_cache) {
+function vozmob_util_menu() {
   $items['admin/build/truncate'] = array(
     'access arguments' => array('delete all site data'),
     'page callback' => 'drupal_get_form',

@@ -1,7 +1,6 @@
-; $Id: i18ncontent.info,v 1.1.2.4 2008/09/25 16:09:28 jareyero Exp $
+; $Id: i18ncontent.info,v 1.1.2.6 2009/11/28 16:35:50 jareyero Exp $
 name = Content type translation
-description = Translates content type related strings: name, description, help text...
-dependencies[] = i18n
+description = Add multilingual options for content and translate related strings: name, description, help text...
 dependencies[] = i18nstrings
 package = Multilanguage
 core = 6.x

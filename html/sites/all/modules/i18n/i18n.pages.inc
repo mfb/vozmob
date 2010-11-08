@@ -1,5 +1,5 @@
 <?php
-// $Id: i18n.pages.inc,v 1.1.2.4 2009/08/29 19:24:01 hass Exp $
+// $Id: i18n.pages.inc,v 1.1.2.7 2010/06/01 14:15:16 jareyero Exp $
 
 /**
  * @file
@@ -87,6 +87,7 @@ function i18n_node_select_translation($form_state, $node, $translations) {
       $form['translations']['language'][$language->language] = array('#value' => $language->name);
       $form['translations']['node'][$language->language] = array(
         '#type' => 'textfield',
+        '#maxlength' => 255,
         '#autocomplete_path' => 'i18n/node/autocomplete/' . $node->type . '/' . $language->language,
         '#default_value' => $trans_nid ? i18n_node_nid2autocomplete($trans_nid) : '',
       );
@@ -248,7 +249,7 @@ function _i18n_node_references($string, $match = 'contains', $params = array(), 
   $references = array();
   while ($node = db_fetch_object($result)) {
     $references[$node->nid] = array(
-      'title' => check_plain($node->title),
+      'title' => $node->title,
       'rendered' => check_plain($node->title),
     );
   }
@@ -259,7 +260,7 @@ function _i18n_node_references($string, $match = 'contains', $params = array(), 
  * Theme select translation form
  * @ingroup themeable
  */
-function theme_i18n_node_select_translation(&$elements) {
+function theme_i18n_node_select_translation($elements) {
   $output = '';
   if (isset($elements['nid'])) {
     $rows = array();

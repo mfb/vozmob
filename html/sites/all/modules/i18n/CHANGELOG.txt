@@ -1,7 +1,98 @@
-// $Id: CHANGELOG.txt,v 1.15.4.67 2009/08/29 21:08:24 hass Exp $
+// $Id: CHANGELOG.txt,v 1.15.4.102 2010/09/20 07:51:17 jareyero Exp $
 
-6.x-1.1 to .......
+6.x-1.7 to .......
 ------------------
+- Renamed locales_target 'status' field to i18n_status, for compatibility with other modules, #857442
+- Added page overview for multilingual variables, help clean up of leftover values, #905428
+
+6.x-1.6 to 6.x-1.7
+------------------
+- Fixed: Missing function i18n_taxonomy_translate_term_name(), by srobert72, #870366
+- Fixed: Parameter 1 to menu_nodeapi() expected to be a reference (php5.3), by setvik, #886700
+- Fixed: Multilingual variables cache being rebuilt every page load, by patrick2000, #905428
+- Improved variable api, added i18n_variable(), extended i18n_variable_del()
+- Improved variable settings, variables for default language are now set to main table
+
+6.x-1.5 to 6.x-1.6
+------------------
+- Fixed: issues with i18nvariables, do not check anymore i18n_variables on initialization, by Jose, #850708
+- Fixed: Menu item's language is lost after node update, by neochief, #514630
+- Fixed: PHP notices, by eMPee584, #769318
+- Delete description on menu item delete, #844208 by plach
+- Fixed: Node type help not translated, by NaX, #685788
+- Some improvements to i18nmenu API, by plach, #386372 
+- Renamed theme_taxonomy_term_page() to theme_i18ntaxonomy_term_page() to avoid namespace conflicts
+- Added some taxonomy API functions: i18ntaxonomy_translate_term_name()....
+- Fixed: Access denied to database query (LOCK TABLES) on i18n_variable_set(), #769260
+- Reworked variable initialization to fix multiple issues (front page, etc), #826774
+- Some changes to variables API, added new function: i18n_variable_get()
+- Fixed: Node type help not translated, by NaX, #685788
+
+6.x-1.4 to 6.x-1.5
+------------------
+- Fixed: taxonomy name/help not translated, by miro_dietiker, #686896
+- Disabled language selection when editing menu items, by swentel, #694680
+- Reworked variable initialization to fox static cache issues with Drupal 6.17 (drupal_is_front_page), #817164
+- Fixed l10n_client support, added missing strings for translation, by miro_dietiker, khaled.zaidan, #304434
+- Fixed duplicates in locales source, by Dippers, #782036
+- Fixed warning during update script (possibly ids are the same), #783978
+- Fixed maxlength, for node translation autocomplete, by cedrid, #802418
+- Fixed i18n_init not run early enough, inconsistent menu items, #614548
+- Fixed wrong data type in query for i18n_blocks (pgsql), by jmpoure, #709272
+- Added i18nstrings_string() for 'plain strings', don't do unneeded filtering.
+- Fixed: Make menu title translatable (blocks), by moritzz, #356375
+- Moved i18nviews module to new project,http://drupal.org/project/i18nviews, #788290
+- Fixed: errors when taxonomy not set, #743492
+- Fixed update issues, for i18nstrings, #79644
+- New feature: Optionally translate default language in tt(), by miro_dietiker and markus_petrux, #676002
+- Moved i18n_test module to "Testing" package, #799730
+- Fixed: The "All languages" option can't save back on blocks, #766678
+- Marked obsolete functions tt() and to(). Replaced by i18nstrings() and i18nstrings_update()
+- Restore back function tt() to prevent "Fatal error: Call to undefined function tt()" in other modules, by markus_petrux, #358839
+- Added support for optional default language translation, by Miro Dietiker, #676002
+
+6.x-1.3 to 6.x-1.4
+------------------
+- Added some unit tests for strings, blocks and taxonomy
+- Fixed: Block translations deleted on refresh, #732680
+- Fixed: warning in node form causes PHP notice, by swentel, #664944
+- Fixed: i18nblocks conflicts with modules and themes, by JohnAlbin, #457512
+- Some clean up to i18nstrings API: Dropped update option from i18nstrings_translate()
+- Disable content selection during synchronization, by Pisco, #648348
+- Add CSS class to body tag based on language, by Garrett Albright, #661448
+- Added compatibility with ctools page manager, by Kars-T, #698942
+- Added support for taxonomy_override_selector, by hefox, #619726
+- Fixed: Configure string translation tab not showing up, #732368
+- Fixed: Views content negotiation filter not working, by markus_petrux, #650552
+- PHP 5.3 compatibiliby issue, by Berdir, #623138
+
+6.x-1.2 to 6.x-1.3
+-------------------
+- Security update: Reworked string translation (i18nstrings) API, see #731632
+- Fixed: Multiple issues with file synchronization, new files, other modules, #363065
+- Usability: Added proper validation to vocabulary form, by andrewlevine #577066
+- Fixed: Translated primary and secondary links appear even if they are disabled, by yrocq #631388
+- Reworked i18nstrings API using proper namespaces, kept tt() for compatibility
+- Added: New plugin for views translation, by nedjo, joostvdl, #360024
+
+6.x-1.1 to 6.x-1.2
+------------------ 
+- Fixed: location fields not showing up for synchronization options, #426294
+- Fixed: pgsql compatibility in upgrade scripts, by jandd, #383728
+- Fixed: Translate all custom block titles (not only custom blocks), by brucepearson, #541048
+- Added: Primary and secondary links' menus translation using preprocess, by neochief, #514108
+- Changed: hook_locale(), new 'info' op, obsoleted 'refresh'
+- Fixed: Some text groups losing strings when refreshed, #442428
+- Fixed: Checkboxes fields are not translating in profile view pages, by neochief, #520692
+- Added: Translate tags vocablary name on node form, by dboulet, #494576
+- Fixed i18n Filter in Views results in SQL Error, by markus_petrux, #522162
+- Added tag support for taxonomy synchronization, #605600
+- Fixed buggy taxonomy synchronization, #365606, #365606, #379306
+- Cleaning some module dependencies and old code.
+- Fixed: Select translations autocomplete wrong filtering by hass, #557980
+- Added: Translated taxonomy tokens by Hugo Wetterberg, googletorp, #344794
+- Fixed: Global variable corruption by etzel, #580280
+- New i18ncck module by neochief
 - Got started with some unit tests and base test clase.
 - Added support for image synchronization, #329825
 - Added filefield/imagefield synchronization, by dasjo, #278426
