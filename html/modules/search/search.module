@@ -1,5 +1,5 @@
 <?php
-// $Id: search.module,v 1.250.2.11 2010/08/06 11:18:01 goba Exp $
+// $Id: search.module,v 1.250.2.12 2010/11/03 12:15:24 goba Exp $
 
 /**
  * @file
@@ -1018,7 +1018,7 @@ function search_get_keys() {
  * @param $prompt
  *   A piece of text to put before the form (e.g. "Enter your keywords")
  * @return
- *   An HTML string containing the search form.
+ *   A Form API array for the search form.
  */
 function search_form(&$form_state, $action = '', $keys = '', $type = NULL, $prompt = NULL) {
 

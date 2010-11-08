@@ -1,5 +1,5 @@
 <?php
-// $Id: database.pgsql.inc,v 1.68.2.9 2010/05/28 15:02:16 goba Exp $
+// $Id: database.pgsql.inc,v 1.68.2.10 2010/11/03 19:01:25 goba Exp $
 
 /**
  * @file
@@ -643,7 +643,7 @@ function db_drop_table(&$ret, $table) {
  *   created field will be set to the value of the key in all rows.
  *   This is most useful for creating NOT NULL columns with no default
  *   value in existing tables.
- * @param $keys_new
+ * @param $new_keys
  *   Optional keys and indexes specification to be created on the
  *   table along with adding the field. The format is the same as a
  *   table specification but without the 'fields' element.  If you are
