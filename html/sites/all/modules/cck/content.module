@@ -1,5 +1,5 @@
 <?php
-// $Id: content.module,v 1.301.2.118 2009/08/30 14:16:55 markuspetrux Exp $
+// $Id: content.module,v 1.301.2.122 2010/08/25 18:34:15 karens Exp $
 /**
  * @file
  * Allows administrators to associate custom fields to content types.
@@ -2252,7 +2252,10 @@ function content_access($op, $field, $account = NULL, $node = NULL) {
   if (is_null($account)) {
     $account = $user;
   }
-
+  // Check for valid field data.
+  if (!isset($field['field_name'])) {
+    return FALSE;
+  }
   $access = module_invoke_all('field_access', $op, $field, $account, $node);
   foreach ($access as $value) {
     if ($value === FALSE) {
@@ -2470,13 +2473,23 @@ function content_content_extra_fields($type_name) {
     'description' => t('Node module form.'),
     'weight' => 20
   );
+  $extra['author'] = array(
+    'label' => t('Authoring information'),
+    'description' => t('Node module form.'),
+    'weight' => 20,
+  );
+  $extra['options'] = array(
+    'label' => t('Publishing options'),
+    'description' => t('Node module form.'),
+    'weight' => 25,
+   );
   if (module_exists('comment')) {
     $extra['comment_settings'] = array(
       'label' => t('Comment settings'),
       'description' => t('Comment module form.'),
       'weight' => 30
     );
-  }  
+  }
   if (module_exists('locale') && variable_get("language_content_type_$type_name", 0)) {
     $extra['language'] = array(
       'label' => t('Language'),
@@ -2661,6 +2674,33 @@ function content_inactive_fields($type_name = NULL) {
     if (!in_array($field['field_name'], $active)) {
       $inactive[$field['type_name']][$field['field_name']] = content_field_instance_expand($field);
     }
+  }
+  if (!empty($type_name)) {
+    return $inactive[$type_name];
+  }
+  return $inactive;
+}
+
+ 
+/**
+ * Helper function to identify inactive instances.
+ * This will be the same results as content_inactive_fields(),
+ * EXCEPT that his function will return inactive instances even 
+ * if the fields have other (shared) instances that are still active.
+ */
+function content_inactive_instances($type_name = NULL) {
+  module_load_include('inc', 'content', 'includes/content.crud');
+  if (!empty($type_name)) {
+    $param = array('type_name' => $type_name);
+    $inactive = array($type_name => array());
+  }
+  else {
+    $param = array();
+    $inactive = array();
+  }
+  $all = content_field_instance_read($param, TRUE);
+  foreach ($all as $field) {
+    $inactive[$field['type_name']][$field['field_name']] = content_field_instance_expand($field);
   }
   if (!empty($type_name)) {
     return $inactive[$type_name];
