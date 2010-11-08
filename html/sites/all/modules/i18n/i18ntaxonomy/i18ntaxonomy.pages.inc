@@ -1,5 +1,5 @@
 <?php
-// $Id: i18ntaxonomy.pages.inc,v 1.1.2.7 2008/10/03 11:32:22 hass Exp $
+// $Id: i18ntaxonomy.pages.inc,v 1.1.2.10 2010/08/12 02:06:20 mirodietiker Exp $
 
 /**
  * @file
@@ -22,12 +22,7 @@ function i18ntaxonomy_term_page($str_tids = '', $depth = 0, $op = 'page') {
     $names = array();
     while ($term = db_fetch_object($result)) {
       $tids[] = $term->tid;
-      if (i18ntaxonomy_vocabulary($term->vid) == I18N_TAXONOMY_LOCALIZE) {
-        $names[] = tt("taxonomy:term:$term->tid:name", $term->name);
-      }
-      else {
-        $names[] = $term->name;
-      }
+      $names[] = i18ntaxonomy_translate_term_name($term);
     }
 
     if ($names) {
@@ -47,7 +42,7 @@ function i18ntaxonomy_term_page($str_tids = '', $depth = 0, $op = 'page') {
           $breadcrumb = array_reverse($breadcrumb);
           drupal_set_breadcrumb($breadcrumb);
 
-          $output = theme('taxonomy_term_page', $tids, taxonomy_select_nodes($tids, $terms['operator'], $depth, TRUE));
+          $output = theme('i18ntaxonomy_term_page', $tids, taxonomy_select_nodes($tids, $terms['operator'], $depth, TRUE));
           drupal_add_feed(url('taxonomy/term/'. $str_tids .'/'. $depth .'/feed'), 'RSS - '. $title);
           return $output;
           break;
@@ -60,6 +55,7 @@ function i18ntaxonomy_term_page($str_tids = '', $depth = 0, $op = 'page') {
           if (count($tids) == 1) {
             $terms = array(taxonomy_get_term($tids[0]));
             $terms = i18ntaxonomy_localize_terms($terms, array('description'));
+            $terms['operator'] = 'or';
             // HTML will be removed from feed description, so no need to filter here.
             $channel['description'] = $terms[0]->description;
           }
@@ -93,7 +89,7 @@ function i18ntaxonomy_term_page($str_tids = '', $depth = 0, $op = 'page') {
  *
  * @ingroup themeable
  */
-function theme_taxonomy_term_page($tids, $result) {
+function theme_i18ntaxonomy_term_page($tids, $result) {
   drupal_add_css(drupal_get_path('module', 'taxonomy') .'/taxonomy.css');
 
   $output = '';
@@ -102,7 +98,7 @@ function theme_taxonomy_term_page($tids, $result) {
   if (count($tids) == 1) {
     $term = taxonomy_get_term($tids[0]);
     if (i18ntaxonomy_vocabulary($term->vid) == I18N_TAXONOMY_LOCALIZE) {
-      $description = tt('taxonomy:term:'. $term->tid .':description', $term->description);
+      $description = i18nstrings("taxonomy:term:$term->tid:description", $term->description);
     }
     else {
       $description = $term->description;
@@ -124,7 +120,7 @@ function theme_taxonomy_term_page($tids, $result) {
 /**
  * Helper function for autocompletion.
  *
- * @ TODO Optimized localization. We cannot just tt() huge lists of terms.
+ * @ TODO Optimized localization. We cannot just i18nstrings() huge lists of terms.
  */
 function i18ntaxonomy_autocomplete($vid, $string = '') {
   // The user enters a comma-separated list of tags. We only autocomplete the last tag.

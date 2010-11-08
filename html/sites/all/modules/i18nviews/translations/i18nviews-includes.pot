@@ -1,4 +1,4 @@
-# $Id: i18nviews-includes.pot,v 1.1.2.2 2009/06/25 23:11:39 hass Exp $
+# $Id: i18nviews-includes.pot,v 1.1 2010/05/17 14:03:58 jareyero Exp $
 #
 # LANGUAGE translation of Drupal (i18nviews-includes)
 # Copyright YEAR NAME <EMAIL@ADDRESS>

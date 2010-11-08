@@ -1,0 +1,127 @@
+<?php
+// $Id: i18nviews.module,v 1.1.4.1 2010/05/17 14:22:39 jareyero Exp $
+
+/**
+ * @file
+ * Views support for Internationalization (i18n) package
+ *
+ * This module translates some views strings on the fly using i18n string system
+ *
+ * @author Jose A. Reyero, 2007
+ */
+
+/**
+ * Implementation of hook_help().
+ */
+function i18nviews_help($path, $arg) {
+  switch ($path) {
+    case 'admin/modules#description' :
+      $output = '<p>'. t('Supports translation for views strings: title, header, footer...') .'</p>';
+      $output .= '<p>'. t('To search and translate strings, use the <a href="@translate-interface">translation interface</a> pages.', array('@translate-interface' => url('admin/build/translate'))) .'</p>';
+      return $output;
+  }
+}
+
+/**
+ * Implementation of hook_locale().
+ */
+function i18nviews_locale($op = 'groups') {
+  switch ($op) {
+    case 'groups':
+      return array('views' => t('Views'));
+    case 'info':
+      // Only when i18nstrings is used as views localization plugin
+      if (variable_get('views_localization_plugin', 'core') == 'i18nstrings') {
+        $info['views']['refresh callback'] = 'i18nviews_locale_refresh';
+        $info['views']['format'] = TRUE;
+        return $info;
+      }
+      break;
+  }
+}
+
+/**
+ * Refresh views locales, 3.x version
+ */
+function i18nviews_locale_refresh() {
+  $views = views_get_all_views();
+  foreach ($views as $view) {
+    $view->save_locale_strings();
+  }
+  return TRUE; // Completed successfully
+}
+
+/**
+ * Field handler for taxonomy term fields.
+ *
+ * Remake of views_handler_field_allterms with term name translation.
+ */
+function i18nviews_views_handler_field_allterms($fieldinfo, $fielddata, $value, $data) {
+  if ($fieldinfo['vocabulary']) {
+    $terms = taxonomy_node_get_terms_by_vocabulary($data->nid, $fieldinfo['vocabulary']);
+  }
+  else {
+    $terms = taxonomy_node_get_terms($data->nid);
+  }
+  // Translate all these terms.
+  _i18ntaxonomy_translate_terms($terms);
+
+  if ($fielddata['options'] == 'nolink') {
+    foreach ($terms as $term) {
+      $links[] = check_plain($term->name);
+    }
+    $links = !empty($links) ? implode(' | ', $links) : '';
+  }
+  else {
+    $node = new stdClass();
+    $node->taxonomy = $terms;
+    $links = theme('links', taxonomy_link('taxonomy terms', $node));
+  }
+  return $links;
+}
+
+/**
+ * Implementation of hook_views_api().
+ */
+function i18nviews_views_api() {
+  return array(
+    'api' => '2.0',
+    'path' => drupal_get_path('module', 'i18nviews') . '/includes',
+  );
+}
+
+/**
+ * Return the Views fields that should be translated.
+ *
+ * @return
+ *   Array of field names.
+ */
+function _i18nviews_display_fields() {
+  return array('title', 'header', 'footer', 'empty');
+}
+
+/**
+ * Implementation of hook_form_id_alter().
+ *
+ * Add a submit handler to the submit button on views_ui_edit_display_form.
+ */
+function i18nviews_form_views_ui_edit_display_form_alter(&$form, $form_state) {
+  $form['buttons']['submit']['#submit'][] = 'i18nviews_views_ui_edit_display_submit';
+}
+
+/**
+ * Submit handler for views_ui_edit_display_form.
+ *
+ * Creates or updates translation source records for specified Views fields.
+ */
+function i18nviews_views_ui_edit_display_submit($form, &$form_state) {
+  $fields = _i18nviews_display_fields();
+  foreach ($fields as $field) {
+    if (isset($form_state['values'][$field])) {
+      $name = $form_state['view']->name;
+      $group = $form_state['display_id'];
+      $format = isset($form_state['values'][$field . '_format']) ? $form_state['values'][$field . '_format'] : NULL;
+      i18nstrings_update("views:$name:$group:$field", $form_state['values'][$field], $format);
+    }
+  }
+}

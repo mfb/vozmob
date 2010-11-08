@@ -7,15 +7,14 @@ D/i18nstrings////
 D/i18nsync////
 D/i18ntaxonomy////
 D/translations////
-D/i18nviews////
-/README.txt/1.18.2.4/Wed Apr  1 07:47:45 2009//TDRUPAL-6--1
-/i18n.admin.inc/1.2.2.7/Wed Apr  1 07:47:45 2009//TDRUPAL-6--1
-/i18n.info/1.5.2.5/Wed Apr  1 07:47:45 2009//TDRUPAL-6--1
-/i18n.js/1.1.2.3/Wed Apr  1 07:47:45 2009//TDRUPAL-6--1
-/CHANGELOG.txt/1.15.4.67/Tue Sep 15 15:04:18 2009//TDRUPAL-6--1
-/INSTALL.txt/1.21.2.6/Tue Sep 15 15:04:18 2009//TDRUPAL-6--1
-/i18n.install/1.15.2.8/Mon Jul 27 16:30:57 2009//TDRUPAL-6--1
-/i18n.module/1.41.2.38/Tue Sep 15 15:04:18 2009//TDRUPAL-6--1
-/i18n.pages.inc/1.1.2.4/Tue Sep 15 15:04:18 2009//TDRUPAL-6--1
 D/i18ncck////
 D/tests////
+/CHANGELOG.txt/1.15.4.102/Mon Nov  8 01:30:35 2010//TDRUPAL-6--1
+/INSTALL.txt/1.21.2.6/Mon Nov  8 01:30:16 2010//TDRUPAL-6--1
+/README.txt/1.18.2.5/Mon Nov  8 01:30:35 2010//TDRUPAL-6--1
+/i18n.admin.inc/1.2.2.8/Mon Nov  8 01:30:35 2010//TDRUPAL-6--1
+/i18n.info/1.5.2.5/Mon Nov  8 01:30:16 2010//TDRUPAL-6--1
+/i18n.install/1.15.2.9/Mon Nov  8 01:30:35 2010//TDRUPAL-6--1
+/i18n.js/1.1.2.3/Mon Nov  8 01:30:16 2010//TDRUPAL-6--1
+/i18n.module/1.41.2.51/Mon Nov  8 01:30:35 2010//TDRUPAL-6--1
+/i18n.pages.inc/1.1.2.7/Mon Nov  8 01:30:35 2010//TDRUPAL-6--1
