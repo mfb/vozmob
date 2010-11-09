@@ -1,14 +1,31 @@
-//$Id: CHANGELOG.txt,v 1.1.6.390 2010/01/25 23:13:40 markuspetrux Exp $
+//$Id: CHANGELOG.txt,v 1.1.6.399 2010/08/25 18:34:15 karens Exp $
 
 CCK 6.x-2.x
 ===========
 
+- #863226 by KarenS, make sure we have a function that will return inactive instances when other instances of the same field are still active.
+
+CCK 6.x-2.8
+===========
+
+Bugfixes:
+- SA-CONTRIB-2010-088 follow up fix for nodereference_autocomplete_access() and content_access().
+
+CCK 6.x-2.7
+===========
+
 Features:
+- #692822 by Dave Reid, add authoring info and publishing options to CCK extra fields.
 - #670344 by dagmar: Make CCK compatible with both, views 2 and views 3.
 
 Bugfixes:
+- #470470 by neilnz, use iLIKE for postgres selects.
+- #769592 by vkareh, add default values to nodeapi.
+- #714762 by Robbert, make diff module integration PHP5 compliant.
+- Add db_rewrite_sql() check to nodereference formatters.
 - #625768 CCK 6.x-2.6, got fatal error on update.php while running userreference_update_6002().
 - #649106 by thekevinday: Fix content_copy_form_alter(), where $form_state argument is not passed by reference.
+- #446390 by mani.atico and fago: improve rules condition to be more robust when checking for empty values.
 
 CCK 6.x-2.6
 ===========

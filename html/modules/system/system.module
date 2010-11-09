@@ -1,5 +1,5 @@
 <?php
-// $Id: system.module,v 1.585.2.55 2010/08/11 21:10:41 goba Exp $
+// $Id: system.module,v 1.585.2.56 2010/11/04 10:54:46 goba Exp $
 
 /**
  * @file
@@ -1923,7 +1923,7 @@ function _system_zonelist() {
  */
 function system_check_http_request() {
   // Try to get the content of the front page via drupal_http_request().
-  $result = drupal_http_request(url('', array('absolute' => TRUE)));
+  $result = drupal_http_request(url('', array('absolute' => TRUE)), array(), 'GET', NULL, 0);
   // We only care that we get a http response - this means that Drupal
   // can make a http request.
   $works = isset($result->code) && ($result->code >= 100) && ($result->code < 600);

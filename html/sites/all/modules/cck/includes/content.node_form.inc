@@ -1,5 +1,5 @@
 <?php
-// $Id: content.node_form.inc,v 1.7.2.21 2009/07/18 00:40:20 markuspetrux Exp $
+// $Id: content.node_form.inc,v 1.7.2.22 2010/08/14 05:17:39 markuspetrux Exp $
 
 /**
  * @file
@@ -243,7 +243,7 @@ function content_multiple_value_form(&$form, &$form_state, $field, $items) {
     $form_element['#prefix'] = '<div id="'. $field_name_css .'-items">';
     $form_element['#suffix'] = '</div>';
     $form_element[$field_name .'_add_more']['#prefix'] = '<div class="content-add-more clear-block">';
-    $form_element[$field_name .'_add_more']['#suffix'] =  '</div>';
+    $form_element[$field_name .'_add_more']['#suffix'] = '</div>';
   }
   return $form_element;
 }
@@ -264,7 +264,6 @@ function content_add_more_submit($form, &$form_state) {
     $form_state['item_count'][$field_name] = count($form_state['values'][$field_name]);
   }
 }
-
 
 /**
  * Menu callback for AHAH addition of new empty widgets.
