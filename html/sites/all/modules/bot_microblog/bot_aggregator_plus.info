@@ -1,5 +1,5 @@
 ; $Id$
-name = Bot Aggregator
+name = Bot Aggregator Plus
 package = Bot
 dependencies[] = bot
 dependencies[] = aggregator
