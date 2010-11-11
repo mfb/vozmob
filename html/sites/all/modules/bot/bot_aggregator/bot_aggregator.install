@@ -1,0 +1,43 @@
+<?php
+// $Id: bot_aggregator.install,v 1.1.2.1 2010/05/10 17:53:28 morbus Exp $
+
+/**
+ * Implementation of hook_schema().
+ */
+function bot_aggregator_schema() {
+  $schema['bot_aggregator'] = array(
+    'description' => t('Stores feed-to-channel configuration.'),
+    'fields' => array(
+      'fid' => array(
+        'description'   => 'The {aggregator_feed} this configuration belongs to.',
+        'not null'      => TRUE,
+        'type'          => 'int',
+        'unsigned'      => TRUE,
+      ),
+      'channel' => array(
+        'default'     => '',
+        'description' => t('The IRC channel or channels where this feed is reported to.'),
+        'length'      => 255,
+        'not null'    => TRUE,
+        'type'        => 'varchar',
+      ),
+    ),
+  );
+
+  return $schema;
+}
+
+/**
+ * Implementation of hook_install().
+ */
+function bot_aggregator_install() {
+  drupal_install_schema('bot_aggregator');
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function bot_aggregator_uninstall() {
+  drupal_uninstall_schema('bot_aggregator');
+  variable_del('bot_aggregator_last_timestamp');
+}

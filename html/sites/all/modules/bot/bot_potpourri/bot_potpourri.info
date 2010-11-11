@@ -1,0 +1,6 @@
+; $Id: bot_potpourri.info,v 1.1.2.1 2010/05/11 15:54:20 morbus Exp $
+name = Bot Potpourri
+package = Bot
+dependencies[] = bot
+description = Enables a collection of gentle and pleasant smelling utilities.
+core = 6.x

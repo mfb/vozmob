@@ -1,0 +1,97 @@
+<?php
+// $Id: bot_potpourri.module,v 1.1.2.3 2010/05/12 13:45:50 morbus Exp $
+
+/**
+ * @file
+ * Enables a collection of gentle and pleasant smelling utilities.
+ */
+
+/**
+ * Implementation of hook_help().
+ */
+function bot_potpourri_help($path, $arg) {
+  switch ($path) {
+    case 'irc:features':
+      return array(t('Timezones'));
+    case 'irc:features#timezones':
+      return t('Display timezones with "BOTNAME: timezone BST". Convert timezones with "tz 10AM MST to EST" or "tz 14:27 UTC in Europe/London". Timestamps are allowed if combined and with no spaces: "tz 2010-10-23T10:00 EST to UTC". All returned dates are DST-aware.');
+  }
+}
+
+/**
+ * Listen for conversation directed at, or around, the bot.
+ *
+ * @param $data
+ *   The regular $data object prepared by the IRC library.
+ * @param $from_query
+ *   Boolean; whether this was a queried request.
+ */
+function bot_potpourri_irc_msg_channel($data, $from_query = FALSE) {
+  $substitutions = array('!who' => $data->nick, '!channel' => $data->channel);
+  $to = $from_query ? $data->nick : $data->channel;
+  $addressed = bot_name_regexp();
+
+  // display or convert timezones from one to another.
+  if (preg_match("/^($addressed)?(TZ|timezone) (.+)$/i", $data->message, $matches)) {
+    $message = bot_potpourri_timezone($matches[4]);
+    bot_message($to, strtr($message, $substitutions));
+  }
+}
+
+/**
+ * All responses are available via a query.
+ */
+function bot_potpourri_irc_msg_query($data) {
+  bot_potpourri_irc_msg_channel($data, TRUE);
+}
+
+/**
+ * Given a string, return a timezone display or conversion.
+ */
+function bot_potpourri_timezone($string) {
+  preg_match('/(.+) (in|to) (.+?)\?*$/i', $string, $matches);
+
+  // test cases for this condition:
+  //   14:27 UTC to GMT
+  //   14:27 Europe/London to EST
+  //   2010-10-23T10:00 EST in UTC
+  //   10 A.M. America/New_York to EST
+  //   0300 EST in EST
+  //   12AM EST in EST
+  //   6 pm EST in EST
+  //   EST to BST
+  if (count($matches) == 4) {
+    $src_string = $matches[1]; // remove spaces before AM/PM.
+    $src_string = preg_replace("/ ([ap]\.?m\.? )/i ", '\1', $src_string);
+    $src_parts  = explode(' ', trim($src_string));
+    $src_time   = isset($src_parts[1]) ? $src_parts[0] : NULL;
+    $src_zone   = isset($src_parts[1]) ? $src_parts[1] : $src_parts[0];
+    $dst_zone   = isset($matches[3]) ? $matches[3] : $src_zone;
+  }
+  else { // case: BST
+    $src_time = NULL;
+    $src_zone = $string;
+    $dst_zone = $string;
+  }
+
+  // for reasons I have yet to determine, these catches are NOT firing
+  // from within a Drupal bootstrap. Compensate by checking existence.
+
+  try {
+    $src_dtzone = new DateTimeZone($src_zone);
+    $src_dttime = new DateTime($src_time, $src_dtzone);
+  } catch(Exception $e) { } // sadness for the emptiness.
+  if (!isset($src_dtzone)) {
+    return(t('!who: unknown or bad source timezone.'));
+  }
+
+  try {
+    $dst_dtzone = new DateTimeZone($dst_zone);
+  } catch(Exception $e) { } // soOOO lOoneneLlly.
+  if (!isset($dst_dtzone)) {
+    return(t('!who: unknown or bad destination timezone.'));
+  }
+
+  $src_dttime->setTimezone($dst_dtzone); // convert src to dst and return.
+  return t('!converted.', array('!converted' => $src_dttime->format('Y-m-d H:i T')));
+}

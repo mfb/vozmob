@@ -1,5 +1,5 @@
 <?php
-// $Id: bot_agotchi.module,v 1.4.2.5.2.9 2009/02/06 00:36:39 morbus Exp $
+// $Id: bot_agotchi.module,v 1.4.2.5.2.10 2010/05/10 12:51:54 morbus Exp $
 
 /**
  * @file
@@ -137,7 +137,7 @@ function _bot_agotchi_greeting_triggers() {
     'h([aeu]llo|i( there)?|owdy|ey|ola)',
     'salut',
     'bonjour',
-    'niihau',
+    'ni hao',
     'que\s*tal',
   ));
 }
@@ -153,7 +153,7 @@ function _bot_agotchi_greeting_responses() {
     'hello',
     'salut',
     'eh oh',
-    'niihau',
+    'ni hao',
     'privet',
     'bonjour',
     'que tal',

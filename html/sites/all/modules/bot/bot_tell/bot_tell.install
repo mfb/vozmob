@@ -1,5 +1,5 @@
 <?php
-// $Id: bot_tell.install,v 1.1.2.1 2008/07/11 02:47:30 morbus Exp $
+// $Id: bot_tell.install,v 1.1.2.2 2010/05/12 17:01:15 morbus Exp $
 
 /**
  * Implementation of hook_schema().
@@ -41,6 +41,20 @@ function bot_tell_schema() {
         'type'        => 'int',
         'unsigned'    => TRUE,
       ),
+      'futurestamp' => array(
+        'default'     => 0,
+        'description' => t('The Unix timestamp when this message should be delivered.'),
+        'not null'    => TRUE,
+        'type'        => 'int',
+        'unsigned'    => TRUE,
+      ),
+      'future_to' => array(
+        'default'     => '',
+        'description' => t('The IRC channel or nick where a future message will be delivered.'),
+        'length'      => 255,
+        'not null'    => TRUE,
+        'type'        => 'varchar',
+      ),
     ),
     'primary key' => array('mid'),
   );
@@ -60,4 +74,27 @@ function bot_tell_install() {
  */
 function bot_tell_uninstall() {
   drupal_uninstall_schema('bot_tell');
+}
+
+
+/**
+ * Add our future fields for reminder functionality.
+ */
+function bot_tell_update_6100() {
+  $ret = array();
+  db_add_field($ret, 'bot_tell_queue', 'futurestamp', array(
+    'default'     => 0,
+    'description' => t('The Unix timestamp when this message should be delivered.'),
+    'not null'    => TRUE,
+    'type'        => 'int',
+    'unsigned'    => TRUE,
+  ));
+  db_add_field($ret, 'bot_tell_queue', 'future_to', array(
+    'default'     => '',
+    'description' => t('The IRC channel or nick where a future message will be delivered.'),
+    'length'      => 255,
+    'not null'    => TRUE,
+    'type'        => 'varchar',
+  ));
+  return $ret;
 }
