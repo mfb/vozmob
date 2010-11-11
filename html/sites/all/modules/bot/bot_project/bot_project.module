@@ -250,7 +250,16 @@ function bot_project_irc_msg_channel($data, $from_query = FALSE) {
       $seen_count = bot_project_url_save(str_replace('.xml', '', $url), $ticket[1]);
       $xml = simplexml_load_string($result->data);
       if (!$xml) { continue; }
-      $message = str_replace('.xml', '', $url) . ' => ' . $xml->subject . ' => ' . implode(', ', array($xml->author['name'], isset($xml->assigned_to) ? $xml->assigned_to['name'] : t('Anonymous'), $xml->tracker['name'], $xml->priority['name'], $seen_count));
+      $message = str_replace('.xml', '', $url) . ' => ' . $xml->subject . ' => ' . implode(', ', array(
+        $xml->project['name'],
+        $xml->tracker['name'],
+        $xml->author['name'],
+        $xml->priority['name'], 
+        $xml->status['name'], 
+        isset($xml->assigned_to) ? $xml->assigned_to['name'] : t('Anonymous'),
+        format_plural(count($xml->journals->journal), '1 comment', '@count comments'),
+        $seen_count,
+      ));
       bot_message($to, $message);
     }
   }
