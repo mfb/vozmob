@@ -65,6 +65,11 @@ function bot_project_uninstall() {
   variable_del('bot_project_trac_num_max');
   variable_del('bot_project_trac_url');
   variable_del('bot_project_trac_url_regexp');
+  variable_del('bot_project_redmine_enable');
+  variable_del('bot_project_redmine_num_min');
+  variable_del('bot_project_redmine_num_max');
+  variable_del('bot_project_redmine_url');
+  variable_del('bot_project_redmine_url_regexp');
 
   // branch names create dynamic variables. get 'em all here.
   db_query("DELETE FROM {variable} WHERE name LIKE 'bot_project_api_branch_%'");

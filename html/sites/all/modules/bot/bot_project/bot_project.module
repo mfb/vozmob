@@ -215,6 +215,45 @@ function bot_project_irc_msg_channel($data, $from_query = FALSE) {
       bot_message($to, $message);
     }
   }
+
+  // ======================================================================== */
+  // If Redmine issue lookups are enabled...                                  */
+  // ======================================================================== */
+  if (variable_get('bot_project_redmine_enable', FALSE)) {
+    $urls_to_scrape = array();
+
+    // Looking for URLs in conversation?
+    if ($regex = variable_get('bot_project_redmine_url_regexp', '')) {
+      if (preg_match_all('!(' . $regex . ')!i', $data->message, $url_matches)) {
+        foreach ($url_matches[1] as $url) {
+          $urls_to_scrape[] = $url . '.xml';
+        }
+      }
+    }
+
+    // Maybe it's a numerical lookup instead...
+    if (variable_get('bot_project_redmine_url', NULL)) {
+      if (preg_match('/^#?(\d+)$/', $data->message, $url_matches)) {
+        $num = $url_matches[1];
+        if ($num > variable_get('bot_project_redmine_num_min', 0) && $num < variable_get('bot_project_redmine_num_max', 99999)) {
+          $urls_to_scrape[] = variable_get('bot_project_redmine_url', NULL) . 'issues/' . $num . '.xml';
+        }
+      }
+    }
+
+    // Retrieve each desired URL.
+    foreach ($urls_to_scrape as $url) {
+      if (variable_get('bot_project_too_lazy_to_recompile_for_ssl', 0)) { $url = str_replace('https', 'http', $url); }
+      // @todo I'm too lazy to recompile PHP with SSL support, and too Drupal-oriented to switch to cURL. I'm awesome.
+      $result = drupal_http_request($url);
+      if ($result->code != 200) { continue; }
+      $seen_count = bot_project_url_save(str_replace('.xml', '', $url), $ticket[1]);
+      $xml = simplexml_load_string($result->data);
+      if (!$xml) { continue; }
+      $message = str_replace('.xml', '', $url) . ' => ' . $xml->subject . ' => ' . implode(', ', array($xml->author['name'], isset($xml->assigned_to) ? $xml->assigned_to['name'] : t('Anonymous'), $xml->tracker['name'], $xml->priority['name'], $seen_count));
+      bot_message($to, $message);
+    }
+  }
 }
 
 /**
@@ -381,6 +420,42 @@ function bot_project_settings() {
   $form['bot_project_trac']['bot_project_trac_num_max'] = array(
     '#default_value' => variable_get('bot_project_trac_num_max', 99999),
     '#description'   => t('Lookup data ("#1234", "1234", or "r1234" as the entire message) at the base URL smaller than this number.'),
+    '#title'         => t('Maximum numerical for lookups'),
+    '#type'          => 'textfield',
+  );
+
+  $form['bot_project_redmine'] = array(
+    '#collapsible'   => TRUE,
+    '#title'         => t('Redmine integration'),
+    '#type'          => 'fieldset',
+  );
+  $form['bot_project_redmine']['bot_project_redmine_enable'] = array(
+    '#default_value' => variable_get('bot_project_redmine_enable', FALSE),
+    '#description'   => t('Requires REST web service to be enabled in Redmine settings (authentication tab).'),
+    '#title'         => t('Enable Redmine lookups'),
+    '#type'          => 'checkbox',
+  );
+  $form['bot_project_redmine']['bot_project_redmine_url_regexp'] = array(
+    '#default_value' => variable_get('bot_project_redmine_url_regexp', NULL),
+    '#description'   => t('Lookup data when matched in conversation (ex. %example).', array('%example' => 'http://www.example.com/redmine/issues/\d+')),
+    '#title'         => t('URL regexp for data lookups'),
+    '#type'          => 'textfield',
+  );
+  $form['bot_project_redmine']['bot_project_redmine_url'] = array(
+    '#default_value' => variable_get('bot_project_redmine_url', NULL),
+    '#description'   => t('Define the base URL used with numerical lookups (ex. %example).', array('%example' => 'http://www.example.com/redmine/')),
+    '#title'         => t('Base URL (for numerical lookups)'),
+    '#type'          => 'textfield',
+  );
+  $form['bot_project_redmine']['bot_project_redmine_num_min'] = array(
+    '#default_value' => variable_get('bot_project_redmine_num_min', 0),
+    '#description'   => t('Lookup data ("#1234" or "1234" as the entire message) at the base URL larger than this number.'),
+    '#title'         => t('Minimum numerical value for lookups'),
+    '#type'          => 'textfield',
+  );
+  $form['bot_project_redmine']['bot_project_redmine_num_max'] = array(
+    '#default_value' => variable_get('bot_project_redmine_num_max', 99999),
+    '#description'   => t('Lookup data ("#1234" or "1234" as the entire message) at the base URL smaller than this number.'),
     '#title'         => t('Maximum numerical for lookups'),
     '#type'          => 'textfield',
   );
