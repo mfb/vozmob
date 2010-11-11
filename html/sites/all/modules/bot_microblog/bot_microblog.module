@@ -126,9 +126,9 @@ function bot_microblog_exception($e) {
 }
 
 /**
- * Implementation of hook_bot_aggregator_message_alter().
+ * Implementation of hook_bot_aggregator_plus_message_alter().
  */
-function bot_microblog_bot_aggregator_message_alter(&$message, $feed, $item) {
+function bot_microblog_bot_aggregator_plus_message_alter(&$message, $feed, $item) {
   // Custom formatting for Twitter feeds.
   if (strpos($feed->url, 'http://search.twitter.com/search.atom') === 0) {
     $link = explode('/', $item->link);
