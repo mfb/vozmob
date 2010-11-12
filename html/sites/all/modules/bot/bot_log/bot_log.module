@@ -1,5 +1,5 @@
 <?php
-// $Id: bot_log.module,v 1.1.2.7.2.7 2009/03/18 16:47:30 morbus Exp $
+// $Id: bot_log.module,v 1.1.2.7.2.10 2010/10/21 12:51:36 morbus Exp $
 
 /**
  * @file
@@ -73,13 +73,14 @@ function bot_log_irc_msg_channel($data) {
 
   // we've been asked for a bookmark to the current log. never accessible from PMs.
   if (preg_match("/^${addressed}log (bookmark|pointer)\s*[!\?\.]*\s*$/i", $data->message)) {
+    $lc_channel = drupal_strtolower($data->channel); // lowercase the channel everywhere.
     $logged_channels = array_map('drupal_strtolower', variable_get('bot_log_channels', array()));
-    if (in_array(drupal_strtolower($data->channel), $logged_channels)) { // clients can send case.
-      $path = 'bot/log/' . str_replace('#', '', $data->channel) . '/' . gmdate('Y-m-d');
+    if (in_array($lc_channel, $logged_channels)) { // clients can send case; we always LC.
+      $path = 'bot/log/' . str_replace('#', '', $lc_channel) . '/' . gmdate('Y-m-d');
       bot_message($data->channel, url($path, array('fragment' => 'T' . $log_id, 'absolute' => TRUE)));
     }
     else {
-      bot_message($data->channel, t('!channel is not logged; no URL exists.', array('!channel' => $data->channel)));
+      bot_message($data->channel, t('!channel is not logged; no URL exists.', array('!channel' => $lc_channel)));
     }
   }
 }
@@ -283,8 +284,8 @@ function theme_bot_log_day($channel, $date, $logs, $format = 'html') {
       $permalink = l(format_date($log['timestamp'], 'custom', '[H:i:s]'), 'bot/log/' . $channel . '/' . $date, array('attributes' => array('id' => $fragment), 'fragment' => $fragment));
 
       // change row color based on the speaker.
-      $last_nick = $last_nick ? $last_nick : $log['nick'];
-      $last_class = $last_class ? $last_class : 'bot-log-nick-odd';
+      $last_nick  = !empty($last_nick) ? $last_nick : $log['nick'];
+      $last_class = !empty($last_class) ? $last_class : 'bot-log-nick-odd';
       $nick_class = ($last_nick == $log['nick']) ? $last_class : (($last_class == 'bot-log-nick-even') ? 'bot-log-nick-odd' : 'bot-log-nick-even');
 
       // format message.
@@ -403,13 +404,13 @@ function bot_log_settings(){
   // we don't use checkboxes because it doesn't want
   // to accept an array key name of "#channel".
   $form['bot_log_channels'] = array (
-    '#default_value' => variable_get('bot_log_channels', array()),
-    '#description'   => t('Select the channels to log.'),
-    '#multiple'      => TRUE,
-    '#options'       => $channel_options,
-    '#size'          => 10,
-    '#type'          => 'select',
-    '#title'         => t('IRC channels'),
+    '#default_value'  => variable_get('bot_log_channels', array()),
+    '#description'    => t('Select the channels to log.'),
+    '#multiple'       => TRUE,
+    '#options'        => $channel_options,
+    '#size'           => 10,
+    '#type'           => 'select',
+    '#title'          => t('IRC channels'),
   );
 
   // @todo if we've been logging a channel, but no longer join it, the logs

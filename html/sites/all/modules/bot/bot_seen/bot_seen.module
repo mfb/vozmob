@@ -1,5 +1,5 @@
 <?php
-// $Id: bot_seen.module,v 1.1.2.12.2.7 2009/02/06 17:44:31 morbus Exp $
+// $Id: bot_seen.module,v 1.1.2.12.2.8 2010/05/12 22:00:44 morbus Exp $
 
 /**
  * @file
@@ -111,7 +111,7 @@ function bot_seen_all_nicks_for_regexp() {
   foreach ($irc->channel as $channel_name => $data) {
     foreach ($irc->channel[$channel_name]->users as $nick_name => $data) {
       $nick_name = preg_quote($nick_name, '/');
-      $nick_name = preg_replace('/^(.)(.*)/', '(\1)(\2)', $nick_name);
+      $nick_name = preg_replace('/^(\\\\?.)(.*)/', '(\1)(\2)', $nick_name);
       $nicks[] = '/\b' . $nick_name . '\b/i';
     }
   }

@@ -1,5 +1,5 @@
 <?php
-// $Id: bot_karma.module,v 1.1.2.6 2009/03/05 14:09:36 morbus Exp $
+// $Id: bot_karma.module,v 1.1.2.7 2010/10/21 12:51:36 morbus Exp $
 
 /**
  * @file
@@ -64,7 +64,7 @@ function bot_karma_irc_msg_channel($data, $from_query = FALSE) {
 
   // addressing is required. "bot_module: karma foo?".
   if (preg_match("/^${addressed}karma\s+(.*?)[!\?\.]*\s*$/i", $data->message, $matches)) {
-    $result = db_fetch_object(db_query('SELECT term, karma FROM {bot_karma} WHERE term = "%s"', trim(drupal_strtolower($matches[2]))));
+    $result = db_fetch_object(db_query("SELECT term, karma FROM {bot_karma} WHERE term = '%s'", trim(drupal_strtolower($matches[2]))));
     $karma = $result->term ? $result->karma : 0; // instead of saying "no results", everything has a karma of 0. it's true! life sucks.
     bot_message($to, t('!term has karma of !karma.', array('!term' => trim($matches[2]), '!karma' => $karma))); // maintain user case!
   }

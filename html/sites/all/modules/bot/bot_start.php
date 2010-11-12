@@ -1,5 +1,5 @@
 <?php
-// $Id: bot_start.php,v 1.2.2.4.2.5 2009/05/08 17:13:16 morbus Exp $
+// $Id: bot_start.php,v 1.2.2.4.2.6 2010/05/10 12:41:24 morbus Exp $
 
 /*
  * @file
@@ -49,10 +49,10 @@ $bot = new drupal_wrapper(); // wrapper that integrates with Drupal hooks.
 $irc = new Net_SmartIRC(); // MmmmmmM. The IRC object itself. Magick happens here.
 $irc->setDebug( variable_get('bot_debugging', 0) ? SMARTIRC_DEBUG_ALL : SMARTIRC_DEBUG_NONE );
 // the (boolean) here is required, as Net_SmartIRC doesn't respect a FAPI checkbox value of 1, only TRUE.
-$irc->setAutoReconnect((boolean)variable_get('bot_auto_reconnect', 1)); // reconnect to the server if disconnected.
-$irc->setAutoRetry((boolean)variable_get('bot_auto_retry', 1)); // retry if a server connection fails.
+$irc->setAutoReconnect((boolean) variable_get('bot_auto_reconnect', 1)); // reconnect to the server if disconnected.
+$irc->setAutoRetry((boolean) variable_get('bot_auto_retry', 1)); // retry if a server connection fails.
+$irc->setUseSockets((boolean) variable_get('bot_real_sockets', 1)); // socket_connect or fsockopen?
 $irc->setChannelSyncing(TRUE); // keep a list of joined users per channel.
-$irc->setUseSockets(TRUE); // uses real sockets instead of fsock().
 
 // send every message type the library supports to our wrapper class.
 // we can automate the creation of these actionhandlers, but not the

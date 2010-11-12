@@ -1,11 +1,11 @@
 <?php
-// $Id: bot_aggregator.install,v 1.1.2.3.2.3 2008/05/02 01:21:17 morbus Exp $
+// $Id: bot_aggregator_plus.install,v 1.1.2.3.2.3 2008/05/02 01:21:17 morbus Exp $
 
 /**
  * Implementation of hook_schema().
  */
-function bot_aggregator_schema() {
-  $schema['bot_aggregator'] = array(
+function bot_aggregator_plus_schema() {
+  $schema['bot_aggregator_plus'] = array(
     'description' => t('The single table necessary for Bot Aggregator storage.'),
     'fields' => array(
       'iid' => array(
@@ -24,14 +24,14 @@ function bot_aggregator_schema() {
 /**
  * Implementation of hook_install().
  */
-function bot_aggregator_install() {
-  drupal_install_schema('bot_aggregator');
+function bot_aggregator_plus_install() {
+  drupal_install_schema('bot_aggregator_plus');
 }
 
 /**
  * Implementation of hook_uninstall().
  */
-function bot_aggregator_uninstall() {
-  drupal_uninstall_schema('bot_aggregator');
-  db_query("DELETE FROM {variable} WHERE name LIKE '%s'", 'bot_aggregator_%');
+function bot_aggregator_plus_uninstall() {
+  drupal_uninstall_schema('bot_aggregator_plus');
+  db_query("DELETE FROM {variable} WHERE name LIKE '%s'", 'bot_aggregator_plus_%');
 }

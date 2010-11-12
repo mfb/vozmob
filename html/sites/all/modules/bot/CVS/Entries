@@ -5,9 +5,11 @@ D/bot_log////
 D/bot_project////
 D/bot_seen////
 D/bot_tell////
-/CHANGELOG.txt/1.14.2.16.2.36/Wed Sep 16 05:25:45 2009//TDRUPAL-6--1
-/README.txt/1.6.2.5.2.1/Mon Jul 27 16:30:57 2009//TDRUPAL-6--1
-/bot.info/1.2.2.1.2.2/Mon Jul 27 16:30:57 2009//TDRUPAL-6--1
-/bot.install/1.1.2.1.2.1/Mon Jul 27 16:30:57 2009//TDRUPAL-6--1
-/bot.module/1.9.2.9.2.15/Mon Jul 27 16:30:57 2009//TDRUPAL-6--1
-/bot_start.php/1.2.2.4.2.5/Mon Jul 27 16:30:57 2009//TDRUPAL-6--1
+/CHANGELOG.txt/1.14.2.16.2.44/Thu Nov 11 20:04:33 2010//TDRUPAL-6--1
+/README.txt/1.6.2.5.2.1/Tue Jul 14 00:06:50 2009//TDRUPAL-6--1
+/bot.info/1.2.2.1.2.2/Tue Jul 14 00:06:50 2009//TDRUPAL-6--1
+/bot.install/1.1.2.1.2.1/Tue Jul 14 00:06:50 2009//TDRUPAL-6--1
+/bot.module/1.9.2.9.2.21/Thu Nov 11 20:04:33 2010//TDRUPAL-6--1
+/bot_start.php/1.2.2.4.2.6/Thu Nov 11 20:04:33 2010//TDRUPAL-6--1
+D/bot_aggregator////
+D/bot_potpourri////

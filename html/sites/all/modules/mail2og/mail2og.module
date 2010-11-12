@@ -411,6 +411,10 @@ function mail2og_mailhandler(&$node, $result, $i, $header, $mailbox) {
   // set the public/private flag
   // @TODO this needs to be in admin settings
   $node->og_public = variable_get('mail2og_default_public', false);
+  // Set node language to organic group language.
+  if (!empty($group->og_language)) {
+    $node->language = $group->og_language;
+  }
 
   // return the modified node
   return $node;

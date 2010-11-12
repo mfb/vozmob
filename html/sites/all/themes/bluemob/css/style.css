@@ -1,7 +1,7 @@
 /* put your custom CSS in here */
 body {
 	margin: 0px;
-	background-image:url(http://www.designaction.org/clients/vozmob/html/images/body_header_tile.png);
+	background-image:url(../images/body_header_tile.png);
 	background-repeat:repeat-x;
 	font-family:arial, helvetica, sans-serif;
 	background-color:#fff;

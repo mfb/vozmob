@@ -21,7 +21,7 @@ body {
 /** header styles 	**/
 #header_wrap {
 	margin:	0 auto;
-	background-image:url(http://designaction.org/clients/vozmob/html/images/body_header_tile.png);
+	background-image:url(../images/body_header_tile.png);
 	background-repeat:repeat-x;
 	}
 #header {
@@ -37,7 +37,7 @@ body {
 #menu {
 	font-family: Arial, Helvetica, sans-serif;
 	background-color:#333333;
-	background-image: url(http://designaction.org/clients/vozmob/html/images/menu_background.png);
+	background-image: url(../images/menu_background.png);
 	border-top: 1px solid #333;
 	border-bottom: 3px solid #FF9900;
 	overflow:hidden;
@@ -66,7 +66,7 @@ ul.header_links {
 	float:left;
 }
 ul.header_links li a:hover {
-	background-image: url(http://designaction.org/clients/vozmob/html/images/menu2_background.png);
+	background-image: url(../images/menu2_background.png);
 	background-repeat:repeat-x;
 }
 
@@ -134,7 +134,7 @@ div.block{
 /* left border in main column*/
 
 div.container {
-	background:url(http://designaction.org/clients/vozmob/html/images/body_border.png) repeat-y;
+	background:url(../images/body_border.png) repeat-y;
 }
 
 

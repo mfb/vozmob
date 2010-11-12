@@ -1,5 +1,5 @@
 <?php
-// $Id: bot_factoid.module,v 1.1.2.6.2.16 2009/03/05 14:09:36 morbus Exp $
+// $Id: bot_factoid.module,v 1.1.2.6.2.18 2010/05/12 17:20:23 morbus Exp $
 
 /**
  * @file
@@ -248,7 +248,7 @@ function bot_factoid_save($string) {
 
     // due to interaction with bot_tell, we need to ignore factoids that look like they
     // could be messages left for bot_tell. hardcoding sucks, but this is best for now.
-    if (module_exists('bot_tell') && preg_match('/^tell /', $factoid->subject)) {
+    if (module_exists('bot_tell') && preg_match('/^(remind|tell) /i', $factoid->subject)) {
       return 0;
     }
 

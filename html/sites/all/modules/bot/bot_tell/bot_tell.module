@@ -1,5 +1,5 @@
 <?php
-// $Id: bot_tell.module,v 1.1.2.7 2009/08/10 18:50:49 morbus Exp $
+// $Id: bot_tell.module,v 1.1.2.10 2010/05/13 14:39:11 morbus Exp $
 
 /**
  * @file
@@ -12,9 +12,29 @@
 function bot_tell_help($path, $arg) {
   switch ($path) {
     case 'irc:features':
-      return array(t('Tell'));
+      return array(t('Reminders'), t('Tell'));
+    case 'irc:features#reminders':
+      return t('Reminders can be set with "BOTNAME: remind NICK (at|by|in|on) DURATION (about|how|that|to) MESSAGE". For example: "BOTNAME: remind Morbus in 1 hour and 6 minutes that his bot is awesome", "BOTNAME: remind me in 23 minutes to check my pot roast.", or even "BOTNAME: remind Monty on Wed, 12 May 2010 13:10:21 -0400 that this was when this code debuted."');
     case 'irc:features#tell':
       return t('Queue messages with "BOTNAME: tell Morbus that his bot_module help messages are awesome." Queued messages will be delivered publicly when the recipient sends a message to the channel.');
+  }
+}
+
+/**
+ * Implementation of hook_irc_bot_cron().
+ */
+function bot_tell_irc_bot_cron_fastest() {
+  // look for futurestamped messages that need to be delivered.
+  $results = db_query_range("SELECT * FROM {bot_tell_queue} WHERE futurestamp != 0 AND futurestamp <= %d ORDER BY timestamp ASC", time(), 0, 3);
+  while ($result = db_fetch_object($results)) { // deliver up to three at at a time to prevent flooding.
+    $message = t('!recipient: !author asked me to remind you !message', array(
+      '!recipient'  => $result->recipient, // sending to yourself? you're a You, punk.
+      '!author'     => ($result->recipient == $result->author) ? 'You' : $result->author,
+      '!message'    => $result->message,
+    ));
+
+    bot_message($result->future_to, $message); // PING! PIIiIiiINnNGGG!
+    db_query('DELETE FROM {bot_tell_queue} WHERE mid = %d', $result->mid);
   }
 }
 
@@ -60,6 +80,26 @@ function bot_tell_irc_msg_channel($data, $from_query = FALSE) {
     bot_tell_save($data->nick, $matches[3], preg_replace("/^($addressed)\s*/", '', $data->message)); // see that? it's saved! in one line!
     bot_message($to, t("!nick: I'll pass that on when !recipient is around.", array('!nick' => $data->nick, '!recipient' => $matches[3])));
   }
+
+  // check for reminders to deliver in the future.
+  if (preg_match("/^($addressed)remind\s+([a-zA-Z0-9\[\]\{\}\\\|\^\`\-\_\*]*)\s+(at|by|on|in)\s+(.*?)\s+((about|how|that|to).*)$/i", $data->message, $matches)) {
+    $recipient    = $matches[3] == 'me' ? $data->nick : $matches[3];
+    $future_to    = $from_query ? $recipient : $data->channel; // deliver where?
+    $futurestamp  = strtotime(str_replace(' and ', ' ', $matches[5]));
+
+    if (!$futurestamp) { // what crazy crap did you send me?!
+      return bot_message($to, 'Unknown or bad time format.');
+    }
+
+    // we've got a working futurestamp and all that other jazz, so save it.
+    bot_tell_save($data->nick, $recipient, $matches[6], $futurestamp, $future_to);
+
+    // future message accepted, keptin.
+    $recipient    = $matches[3] == 'me' ? 'you' : $matches[3];
+    $futurestamp  = date(DATE_RFC2822, $futurestamp);
+    bot_message($to, t("!nick: I'll remind !recipient about that on !futurestamp.",
+      array('!nick' => $data->nick, '!recipient' => $recipient, '!futurestamp' => $futurestamp)));
+  }
 }
 
 /**
@@ -92,7 +132,8 @@ function bot_tell_load($recipient) {
   $messages = array();
 
   if (bot_tell_pending_cache($recipient)) {
-    $results = db_query("SELECT * FROM {bot_tell_queue} WHERE LOWER(recipient) = '%s' ORDER BY timestamp ASC", drupal_strtolower($recipient));
+    // we only get messages that have no futurestamp (i.e., "deliver immediately"). futurestamps are checked in cron only.
+    $results = db_query("SELECT * FROM {bot_tell_queue} WHERE LOWER(recipient) = '%s' AND futurestamp = 0 ORDER BY timestamp ASC", drupal_strtolower($recipient));
 
     while ($result = db_fetch_object($results)) {
       $messages[] = $result;
@@ -110,16 +151,25 @@ function bot_tell_load($recipient) {
  * @param $recipient
  *   The IRC user who is to be delivered the message.
  * @param $message
- *   The entirety of the message being sent.
+ *   The message to be delivered to the recipient.
+ * @param $futurestamp
+ *   If a reminder, the timestamp to deliver the message.
+ * @param $future_to
+ *   If a reminder, the location to deliver the message.
  */
-function bot_tell_save($author, $recipient, $message) {
+function bot_tell_save($author, $recipient, $message, $futurestamp = 0, $future_to = NULL) {
   $tell = new stdClass();
-  $tell->author     = $author;
-  $tell->recipient  = $recipient;
-  $tell->message    = $message;
-  $tell->timestamp  = time();
+  $tell->author       = $author;
+  $tell->recipient    = $recipient;
+  $tell->message      = $message;
+  $tell->timestamp    = time();
+  $tell->futurestamp  = $futurestamp;
+  $tell->future_to    = $future_to;
   drupal_write_record('bot_tell_queue', $tell);
-  bot_tell_pending_cache($recipient, 'insert');
+
+  if (!$futurestamp) { // only cache immediates.
+    bot_tell_pending_cache($recipient, 'insert');
+  }
 }
 
 /**

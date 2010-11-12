@@ -1,5 +1,5 @@
 <?php
-// $Id: bot.module,v 1.9.2.9.2.15 2009/05/08 17:13:16 morbus Exp $
+// $Id: bot.module,v 1.9.2.9.2.21 2010/11/10 13:48:28 morbus Exp $
 
 /**
  * @file
@@ -121,7 +121,7 @@ function bot_irc_msg_channel($data, $from_query = FALSE) {
     if (!$help_matches[2]) { // no specific help was asked for so give 'em a list.
       $irc_features = array_filter(module_invoke_all('help', 'irc:features', NULL));
       asort($irc_features); // alphabetical listing of features. the chainsaw is family.
-      bot_message($to, t('Detailed information is available by asking for "help <feature>" where <feature> is one of: !features.', array('!features' => implode(', ', $irc_features))));
+      bot_message($to, t('Detailed information is available with "BOTNAME: help <feature>" where <feature> is one of: !features.', array('!features' => implode(', ', $irc_features))));
     }
     else { // a specific type of help was required, so load up just that bit of text.
       $feature_name = 'irc:features#'. preg_replace('/[^\w\d]/', '_', drupal_strtolower(trim($help_matches[2])));
@@ -155,6 +155,47 @@ function bot_irc_msg_nickchange($data) {
     array_shift($message); // no more "/msg". ideally, we do this crap to make the UI/config more understandable.
     $to = array_shift($message); // now we've got the $to and the remaining payload, so splice it back together.
     bot_message($to, implode(" ", $message));
+  }
+}
+
+/**
+ * Implementation of hook_irc_msg_quit() {
+ */
+function bot_irc_msg_quit($data) {
+  if (preg_match("/.*?${addressed}.*?flood.*?/i", $data->rawmessage)) {
+    watchdog('bot', '@error', array('@error' => $data->rawmessage)); // just in case.
+    global $irc; // if an error comes through that contains "flood", try and slow ourselves.
+    $irc->setSenddelay($irc->_senddelay + 250); // increase it by a quarter second each time.
+    watchdog('bot', 'Flood detected: increasing send delay to @time.', array('@time' => $irc->_senddelay));
+  }
+}
+
+/**
+ * Implementation of hook_irc_msg_error() {
+ */
+function bot_irc_msg_error($data) {
+  watchdog('bot', '@error', array('@error' => $data->rawmessage), WATCHDOG_ERROR);
+}
+
+/**
+ * Implementation of hook_irc_msg_unknown() {
+ */
+function bot_irc_msg_unknown($data) {
+  watchdog('bot', '@unknown', array('@unknown' => $data->rawmessage));
+
+  // if we're banned from a channel, remove it from joins.
+  if ($data->rawmessageex[1] == SMARTIRC_ERR_BANNEDFROMCHAN) {
+    $channels = preg_split('/\s*,\s*/', variable_get('bot_channels', '#test'));
+    foreach ($channels as $index => $channel) {
+      if ($channel == $data->rawmessageex[3]) {
+        unset($channels[$index]); // there's not a whole lot we can do at this point, so wave goodbye to the banners.
+        watchdog('bot', '@channel has banned the bot. Removing from joins.', array('@channel' => $data->rawmessageex[3]));
+      }
+    }
+
+    // resave the new channels list without banned chans.
+    variable_set('bot_channels', implode(", ", $channels));
+    bot_irc_bot_cron(); // resets our settings caches.
   }
 }
 
@@ -322,6 +363,12 @@ function bot_settings() {
   $form['bot_connection']['bot_auto_reconnect'] = array(
     '#default_value'  => variable_get('bot_auto_reconnect', 1),
     '#title'          => t('Reconnect to the IRC server if disconnected'),
+    '#type'           => 'checkbox',
+  );
+  $form['bot_connection']['bot_real_sockets'] = array(
+    '#default_value'  => variable_get('bot_real_sockets', 1), // prefer socket_connect.
+    '#description'    => t('If the bot is having connection problems, try disabling this to use fsockopen() instead.'),
+    '#title'          => t('Use real sockets for IRC server connection'),
     '#type'           => 'checkbox',
   );
   $form['bot_connection']['bot_debugging'] = array(

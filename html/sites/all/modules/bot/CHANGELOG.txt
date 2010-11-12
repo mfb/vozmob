@@ -1,7 +1,22 @@
-// $Id: CHANGELOG.txt,v 1.14.2.16.2.36 2009/09/01 15:26:39 morbus Exp $
+// $Id: CHANGELOG.txt,v 1.14.2.16.2.44 2010/10/21 12:51:36 morbus Exp $
 
 Bot 6.x-1.x, xxxx-xx-xx
 -----------------------
+  * #937836 and #937820: PostgreSQL and E_STRICT fixes (thanks Shiny).
+  * #477596: Fixed regexp error in bot_seen.module (thanks Gurpartap).
+  * bot_tell.module can now remind you of things: "BOTNAME: help Reminders?"
+  * bot_potpourri.module added (thanks, ae1): "BOTNAME: help Timezones?"
+  * bot_aggregator.module added (thanks cwgordon7/snufkin). Additions:
+    - Configuration has been moved to the feed config form, not our own.
+    - Different feeds can now be sent to different channels, based on config.
+  * If we receive an error containing "flood", we slow down our sends.
+  * If the server or client library receives an error, we'll watchdog it.
+  * If a channel bans us, it is now permanently removed from the join list.
+  * #648606: Chinese "ni hao" is mis-spelled in greetings (thanks JohnAlbin).
+  * Advanced/debugging option added: whether to use real sockets or not.
+  * bot_project: fixed broken Trac metadata from ticket/revision exports.
+  * bot_project: function lookups now allow dashes in the branch name.
+  * irc_bot_cron_faster (one minute) and _fastest (15 seconds) are available.
   * #564524: bot_project now reports comment counts on d.o URLs (thanks killes).
   * bot_tell now accepts :;, after a told nick (thanks webchick).
   * Channels are now joined every 15 seconds instead of at initial connection.

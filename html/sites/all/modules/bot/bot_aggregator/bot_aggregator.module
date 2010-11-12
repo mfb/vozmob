@@ -1,0 +1,145 @@
+<?php
+// $Id: bot_aggregator.module,v 1.1.2.2 2010/05/12 17:01:15 morbus Exp $
+
+/**
+ * @file
+ * Enables the reporting of aggregated feed items to configured channels.
+ */
+
+/**
+ * Implementation of hook_help().
+ */
+function bot_aggregator_help($path, $arg) {
+  switch ($path) {
+    case 'irc:features':
+      return array(t('Aggregator'));
+    case 'irc:features#aggregator':
+      return t('Enables the reporting of aggregated feed items to configured channels.');
+  }
+}
+
+/**
+ * Implementation of hook_menu().
+ */
+function bot_aggregator_menu() {
+  $items['admin/settings/bot/aggregator'] = array(
+    'access arguments'  => array('administer bot'),
+    'description'       => t('Configure the reporting of aggregated feed items via the bot.'),
+    'page callback'     => 'drupal_get_form',
+    'page arguments'    => array('bot_aggregator_settings'),
+    'title'             => 'Bot Aggregator',
+  );
+
+  return $items;
+}
+
+/**
+ * Implementation of hook_irc_bot_cron().
+ */
+function bot_aggregator_irc_bot_cron_fastest() {
+  $channels = bot_aggregator_feed_channels();
+
+  $last_timestamp = variable_get('bot_aggregator_last_timestamp', 0);
+  if ($last_timestamp == 0) { // first check ever? start 5 minutes ago.
+    variable_set('bot_aggregator_last_timestamp', time() - (60 * 5));
+    $last_timestamp = variable_get('bot_aggregator_last_timestamp', 0);
+  }
+
+  // every 15 seconds, we'll display a maximum of three feed items that have come in since our last timestamp.
+  $results = db_query_range('SELECT ai.timestamp, ai.title, ai.link, af.fid, af.title AS feed_title FROM {aggregator_item} ai LEFT
+    JOIN {aggregator_feed} af ON ai.fid = af.fid WHERE ai.timestamp > %d ORDER BY ai.timestamp ASC', $last_timestamp, 0, 3);
+
+  while ($result = db_fetch_object($results)) {
+    if (isset($channels[$result->fid])) {
+      $message = t('!feed => !title => !link', array(
+        '!feed'   => decode_entities(strip_tags($result->feed_title)),
+        '!title'  => decode_entities(strip_tags($result->title)),
+        '!link'   => decode_entities(strip_tags($result->link)),
+      ));
+
+      foreach ($channels[$result->fid] as $channel) {
+        bot_message($channel, $message);
+      }
+    }
+
+    variable_set('bot_aggregator_last_timestamp', $result->timestamp);
+  }
+}
+
+/**
+ * Implementation of hook_form_alter().
+ */
+function bot_aggregator_form_aggregator_form_feed_alter(&$form, $form_state) {
+  // get a list of all joined channels, sans passwords.
+  $joined_channels = preg_split('/\s*,\s*/', variable_get('bot_channels', '#test'));
+  $channel_options = array(); // HOW MAY I HELP YOU!?
+  foreach ($joined_channels as $k => $v) {
+    $channel = preg_replace('/(.*) .*/', '\1', $v);
+    $channel_options[$channel] = $channel;
+  }
+
+  $channels = bot_aggregator_feed_channels();
+
+  // we don't use checkboxes because it doesn't want
+  // to accept an array key name of "#channel".
+  $form['bot_aggregator_channels'] = array (
+    '#default_value'  => $channels[$form['fid']['#value']],
+    '#description'    => t('Select the channels which this feed\'s items should be reported to. If this feed is new or has never been updated prior to selecting IRC channels, all feed items may be considered "new" and reported to IRC. This might cause 10 or more messages to appear before the bot gets into its normal update rhythm.'),
+    '#multiple'       => TRUE,
+    '#options'        => $channel_options,
+    '#size'           => 10,
+    '#type'           => 'select',
+    '#title'          => t('IRC channels'),
+  );
+
+  // put the save and delete buttons below the above.
+  $form['delete']['#weight'] = $form['submit']['#weight'] = 5;
+
+  // our custom submit handles the database saving.
+  $form['#submit'][] = 'bot_aggregator_form_aggregator_form_feed_submit';
+}
+
+/**
+ * FAPI #submit handler; saves the feed-to-channel configuration.
+ */
+function bot_aggregator_form_aggregator_form_feed_submit($form, &$form_state) {
+  db_query('DELETE FROM {bot_aggregator} WHERE fid = %d', $form_state['values']['fid']);
+
+  // our config has been deleted above. add it back unless the entire feed is being deleted.
+  if (count($form_state['values']['bot_aggregator_channels']) && $form_state['values']['op'] != t('Delete')) {
+    $fid = isset($form_state['values']['fid']) ? $form_state['values']['fid'] // brand new addition? hunt for fid.
+      : db_result(db_query('SELECT fid FROM {aggregator_feed} WHERE url = "%s"', $form_state['values']['url']));
+
+    foreach ($form_state['values']['bot_aggregator_channels'] as $channel) {
+      $record = new stdClass();
+      $record->fid      = $fid;
+      $record->channel  = $channel;
+      drupal_write_record('bot_aggregator', $record);
+    }
+  }
+}
+
+/**
+ * Return the list of all feed-to-channel configurations.
+ */
+function bot_aggregator_feed_channels() {
+  $channels = array(); // got nothing? return nothing.
+  $results = db_query('SELECT * FROM {bot_aggregator}');
+  while ($result = db_fetch_object($results)) {
+    $channels[$result->fid][$result->channel] = $result->channel;
+  } // NP: The Backyardigans with Julia nearby. Scarlett sleepy.
+  return $channels;
+}
+
+/**
+ * Configures the reporting of aggregated feed items via the bot.
+ */
+function bot_aggregator_settings() {
+  $form['redirection'] = array(
+    '#value' => '<p>' . t('To define which channels an aggregated feed is reported to, edit the <a href="@url">feed configuration itself</a>.',
+      array('@url' => url('admin/content/aggregator'))) . '</p>', // just a helpful bit of redirection in lieu of a README no one will see.
+  );
+
+  return $form;
+}
+
