@@ -101,7 +101,7 @@
 
 <div id="footer">
 <div id="footer2">
-<a href=""><img src="http://designaction.org/clients/vozmob/images/footer/copy_left.png" /></a>
+<?php print theme('image', path_to_theme() . '/images/copy_left.png', t('Copyleft')); ?>
 <ul>
 <li><a href ="">Contact Info</a></li>
 <li>/</li>
@@ -112,10 +112,10 @@
 <li><a href ="">Login</a></li>
 <li>/</li>
 </ul>
-<a href=""><img src="http://designaction.org/clients/vozmob/images/footer/idepsca.png" /></a>
-<a href=""><img src="http://designaction.org/clients/vozmob/images/footer/annenberg.png" /></a>
+<?php print theme('image', path_to_theme() . '/images/idepsca.png', 'IDEPSCA'); ?>
+<?php print theme('image', path_to_theme() . '/images/annenberg.png', 'Annenberg'); ?>
 <p>Powered by</p>
-<a href=""><img src="http://designaction.org/clients/vozmob/images/footer/drupal.png" /></a>
+<?php print theme('image', path_to_theme() . '/images/drupal.png', 'Drupal'); ?>
 
 
 <?php if ($footer): ?>
