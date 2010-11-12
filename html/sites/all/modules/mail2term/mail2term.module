@@ -1,0 +1,66 @@
+<?php
+// $Id$
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function mail2term_form_taxonomy_form_term_alter(&$form, &$form_state) {
+  $form['identification']['mail2term'] = array(
+    '#default_value' => implode(' ', mail2term_get_components($form['#term']['tid'])),
+    '#description' => t('Enter one or more email space-separated address components for which incoming messages should be tagged with this term.'),
+    '#title' => t('E-mail address components'),
+    '#type' => 'textfield',
+  );
+  $form['#submit'][] = 'mail2term_submit';
+}
+
+/**
+ * Get e-mail address components associated with a term.
+ */
+function mail2term_get_components($tid) {
+  $components = array();
+  $result = db_query('SELECT mail FROM {mail2term} WHERE tid = %d', $tid);
+  while ($row = db_fetch_object($result)) {
+    $components[] = $row->mail;
+  }
+  return $components;
+}
+
+/**
+ * Implements hook_mailhandler().
+ */
+function mail2term_mailhandler($node, $result, $i, $header, $mailbox) {
+  $local = strtok($header->toaddress, '@');
+  $components = explode('+', $local);
+  foreach ($components as $component) {
+    $result = db_query(db_rewrite_sql("SELECT m.tid FROM {mail2term} m INNER JOIN {term_data} t ON m.tid = t.tid INNER JOIN {vocabulary_node_types} v ON t.vid = v.vid WHERE m.mail = '%s' AND v.type = '%s'", 't', 'tid'), $component, $node->type);
+    while ($term = db_fetch_object($result)) {
+      $node->taxonomy[$term->tid] = $term->tid;
+    }
+  }
+  return $node;
+}
+
+/**
+ * Submit handler.
+ */
+function mail2term_submit($form, &$form_state) {
+  $components = explode(' ', $form_state['values']['mail2term']);
+  db_query('DELETE FROM {mail2term} WHERE tid = %d', $form_state['values']['tid']);
+  foreach ($components as $component) {
+    $component = trim($component);
+    if (preg_match('/^[[:alnum:]._-]+$/', $component)) {
+      $record = array('tid' => $form_state['values']['tid'], 'mail' => $component);
+      drupal_write_record('mail2term', $record);
+    }
+  }
+}
+
+/**
+ * Implements hook_taxonomy().
+ */
+function mail2term_taxonomy($op, $type, $array = NULL) {
+  if ($op == 'delete' && $type == 'term') {
+    db_query('DELETE FROM {mail2term} WHERE tid = %d', $array['tid']);
+  }
+}
