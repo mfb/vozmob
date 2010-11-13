@@ -10,7 +10,7 @@
       <?php endif; ?>
 
       <?php if ($terms): ?>
-        <div class="terms"><strong>Tags:</strong> <?php print $terms ?></div>
+        <div class="terms"><strong><?php print t('Tags'); ?>:</strong> <?php print $terms ?></div>
       <?php endif;?>
     </div>
   <?php endif; ?>
