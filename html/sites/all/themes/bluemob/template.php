@@ -1,4 +1,18 @@
-<?php 
+<?php
+
+/**
+ * Intercept page template variables
+ *
+ * @param $vars
+ *   A sequential array of variables passed to the theme function.
+ */
+function bluemob_preprocess_page(&$vars) {
+  global $user;
+  $headers = drupal_set_header();
+  if (strpos($headers, 'HTTP/1.1 403 Forbidden') && !$user->uid) {
+    $vars['content'] .= "\n" . l(t('Please login to continue'), 'user/login', array('query' => drupal_get_destination()));
+  }
+}
 
 /**
  * Intercept node template variables
