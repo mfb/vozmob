@@ -31,6 +31,9 @@ function mms_us_metropcs_mailsave_clean(&$node, $result, $i, $header, $mailbox) 
         }
       }
 
+      // Remove IMG elements from body.
+      $node->body = preg_replace('/<IMG.*?>/', '', $node->body);
+
       // Store the amended body.
       $node->body = $body;
       $node->teaser = node_teaser($node->body);
