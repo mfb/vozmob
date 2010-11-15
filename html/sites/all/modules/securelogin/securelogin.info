@@ -1,0 +1,4 @@
+; $Id: securelogin.info,v 1.3 2008/04/14 17:26:04 avf Exp $
+name = Secure Login
+description = "Enables secure login"
+core = 6.x

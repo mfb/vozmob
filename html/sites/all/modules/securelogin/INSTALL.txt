@@ -1,0 +1,9 @@
+$Id: INSTALL.txt,v 1.2 2008/04/14 17:26:04 avf Exp $
+
+Secure Login module installation
+
+1. Untar the module into your Drupal modules/ directory
+2. Read the README before enabling the module and before upgrading!
+3. Enable the module in admin/build/modules
+4. Configure the module in admin/settings/securelogin
+

@@ -1,0 +1,16 @@
+<?php
+/* $Id: securelogin.install,v 1.2 2008/04/14 17:26:04 avf Exp $ */
+
+/**
+* Delete variables on uninstall
+*/
+function securelogin_uninstall() {
+
+  variable_del('securelogin_redirect');
+  variable_del('securelogin_secure_forms');
+  variable_del('securelogin_loginform');
+  variable_del('securelogin_profileform');
+  variable_del('securelogin_registerform');
+} // function securelogin_uninstall
+
+?>
