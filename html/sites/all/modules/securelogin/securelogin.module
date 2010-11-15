@@ -102,12 +102,21 @@ function securelogin_form_alter(&$form, $form_state, $form_id) {
     $sec_url = variable_get('securelogin_baseurl', preg_replace('@^http://@', 'https://', $base_url));
 
     // Check if we already have https. The later check does not work with clean urls enabled
-    if ($_SERVER['HTTPS'] != 'on') {
+    if (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] != 'on') {
       // Redirect form to secure page, if necessary
       if (variable_get('securelogin_secure_forms', FALSE)) {
-        $sec_form_url = $sec_url . '/' . $_GET['q'];
+        $sec_form_url = variable_get('clean_url', '0') ? $sec_url . '/' . $_GET['q'] : $sec_url;
         if ($_SERVER['SCRIPT_URI'] != $sec_form_url) {
-          drupal_goto($sec_form_url, 'securelogin_original_baseurl=' . urlencode($orig_url));
+          $exclude = variable_get('clean_url', '0') ? array('q') : array();
+          $query = drupal_query_string_encode($_GET, $exclude);
+          if (variable_get('securelogin_redirect', TRUE)) {
+            if ($query) {
+              $query .= '&';
+            }
+            $query .= 'securelogin_original_baseurl=' . urlencode($orig_url);
+          }
+          unset($_REQUEST['destination']);
+          drupal_goto($sec_form_url, $query, NULL, 301);
         }
       }
     }
@@ -136,5 +145,15 @@ function securelogin_boot() {
     if (variable_get('securelogin_redirect', TRUE)) {
       $base_url = $_REQUEST['securelogin_original_baseurl'];
     }
+  }
+
+}
+
+/**
+ * Implements hook_init().
+ */
+function securelogin_init() {
+  if (user_is_logged_in() && arg(0) == 'user' && (arg(1) == 'login' || arg(1) == 'register')) {
+    drupal_goto('user');
   }
 }
