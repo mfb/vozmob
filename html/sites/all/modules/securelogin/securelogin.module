@@ -106,7 +106,7 @@ function securelogin_form_alter(&$form, $form_state, $form_id) {
       // Redirect form to secure page, if necessary.
       if (variable_get('securelogin_secure_forms', FALSE)) {
         // Build destination URL.
-        $sec_form_url = variable_get('clean_url', '0') ? $sec_url . '/' . $_GET['q'] : $sec_url;
+        $sec_form_url = variable_get('clean_url', '0') ? $sec_url . '/' . $_GET['q'] : $sec_url . '/';
         if (empty($_SERVER['SCRIPT_URI']) || $_SERVER['SCRIPT_URI'] != $sec_form_url) {
           // Apply query string to destination URL, excluding $_GET['q'] if
           // clean URLs are enabled.
