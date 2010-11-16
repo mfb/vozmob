@@ -23,8 +23,6 @@ function mms_us_metropcs_mailsave_clean(&$node, $result, $i, $header, $mailbox) 
         $body .= $cell;
       }
     }
-
-    // Store the amended body.
     $node->body = $body;
 
     // Remove IMG elements from body.
@@ -35,10 +33,9 @@ function mms_us_metropcs_mailsave_clean(&$node, $result, $i, $header, $mailbox) 
 
     $node->teaser = node_teaser($node->body);
 
-    // Set node title and reset the body if the author just puts short text in the body
-    if (empty($node->title) && !empty($node->body) && strlen($node->body) <= 60) {
-      $node->title = truncate_utf8(decode_entities(strip_tags($body)), 60, TRUE, TRUE);
-      $node->body = '';
+    // Rebuild the title already built by Mailhandler from the original body.
+    if (strpos($node->title, 'New Page 1') === 0) {
+      $node->title = truncate_utf8(decode_entities(strip_tags($node->body)), 60, TRUE, TRUE);
     }
 
     // Get rid of extra text attachments
