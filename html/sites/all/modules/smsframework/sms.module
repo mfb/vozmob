@@ -348,6 +348,7 @@ function sms_sms_carriers() {
     'sms.sasktel.com' => t('Sasktel (Canada)'),
     'mas.aw' => t('Setar Mobile email (Aruba)'),
     'messaging.sprintpcs.com' => t('Sprint'),
+    'mypixmessages.com' => t('Straight Talk'),
     'tms.suncom.com' => t('Suncom'),
     'tmomail.net' => t('T-Mobile'),
     'sms.t-mobile.at' => t('T-Mobile (Austria)'),

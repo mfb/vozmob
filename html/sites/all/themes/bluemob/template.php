@@ -21,6 +21,7 @@ function bluemob_preprocess_page(&$vars) {
  *   A sequential array of variables passed to the theme function.
  */
 function bluemob_preprocess_node(&$vars) {
+  
   jquery_plugin_add('cycle', 'theme', 'header');
   jquery_plugin_add('expose');
   jquery_plugin_add('overlay');
@@ -58,6 +59,12 @@ function bluemob_preprocess_node(&$vars) {
       }
     }
   }
+  
+  // Unset sms send link and comment link in terms. Only show terms. 
+  unset($vars['taxonomy']['sms_sendtophone']);
+  unset($vars['taxonomy']['comment_add']);
+  $vars['terms'] = theme('links', $vars['taxonomy'], array('class' => 'links inline'));
+
 
   switch ($node->type) {
     case 'page':
