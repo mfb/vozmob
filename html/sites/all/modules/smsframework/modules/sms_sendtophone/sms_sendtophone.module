@@ -1,5 +1,5 @@
 <?php
-// $Id: sms_sendtophone.module,v 1.4.2.2 2008/11/07 20:22:02 diggersf Exp $
+// $Id: sms_sendtophone.module,v 1.4.2.2.2.1 2010/11/18 05:37:26 univate Exp $
 
 /**
  * Implementation of hook_init().

@@ -1,5 +1,5 @@
 <?php
-// $Id: sms.module,v 1.8.2.9.2.3 2009/06/02 14:41:01 diggersf Exp $
+// $Id: sms.module,v 1.8.2.9.2.4 2010/11/18 05:37:26 univate Exp $
 
 /**
  * @file
@@ -173,6 +173,16 @@ function sms_perm() {
 }
 
 /**
+ * Implementation of hook_theme().
+ */
+function sms_theme() {
+  $items['sms_admin_default_form'] =
+  $items['sms_carriers_admin_form'] = array('arguments' => array('form' => NULL));
+
+  return $items;
+}
+
+/**
  * SMS gateway menutitle callback.
  */
 function sms_admin_gateway_title($gateway_id) {
@@ -305,16 +315,18 @@ function carrier_save($domain, $edit) {
 function sms_sms_carriers() {
   return array(
     'sms.3rivers.net' => t('3 River Wireless'),
-    'cingularme.com' => t('Cingular (GoPhone prepaid)'),
     'airtelkk.com' => t('Airtel (Karnataka, India)'),
     'msg.acsalaska.com' => t('Alaska Communications Systems'),
     'message.alltel.com' => t('Alltel Wireless'),
     'txt.att.net' => t('AT&T/Cingular'),
-    'txt.bell.ca' => t('Solo Mobile'),
+    'txt.bell.ca' => t('Bell Mobility (Canada)'),
     'myboostmobile.com' => t('Boost Mobile'),
-    'mobile.celloneusa.com' => t('CellularOne'),
+    'mobile.celloneusa.com' => t('Cellular One (Dobson)'),
+    'south1.com' => t('Cellular South'),
     'cwemail.com' => t('Centennial Wireless'),
+    '139.com' => t('ChinaMobile (139)'),
     'gocbw.com' => t('Cincinnati Bell Wireless'),
+    'cingularme.com' => t('Cingular (GoPhone prepaid/7-11 Speakout)'),
     'ideasclaro-ca.com' => t('Claro (Nicaragua)'),
     'mms.claro.com.uy' => t('Claro (Uruguay)'),
     'comcel.com.co' => t('Comcel'),
@@ -336,7 +348,6 @@ function sms_sms_carriers() {
     'movistar.com.co' => t('Movistar (Colombia)'),
     'sms.co.za' => t('MTN (South Africa)'),
     'text.mtsmobility.com' => t('MTS (Canada)'),
-    'page.nextel.com' => t('Nextel'),
     'nextel.net.ar' => t('Nextel (Argentina)'),
     'orange.fr' => t('Orange (France)'),
     'orange.pl' => t('Orange (Poland)'),
@@ -347,7 +358,8 @@ function sms_sms_carriers() {
     'pcs.rogers.com' => t('Rogers (Canada)'),
     'sms.sasktel.com' => t('Sasktel (Canada)'),
     'mas.aw' => t('Setar Mobile email (Aruba)'),
-    'messaging.sprintpcs.com' => t('Sprint'),
+    'page.nextel.com' => t('Sprint (Nextel)'),
+    'messaging.sprintpcs.com' => t('Sprint (PCS)'),
     'tms.suncom.com' => t('Suncom'),
     'tmomail.net' => t('T-Mobile'),
     'sms.t-mobile.at' => t('T-Mobile (Austria)'),
