@@ -44,7 +44,7 @@ function sms_registration_mailsave_clean(&$node, $result, $i, $header, $mailbox)
   }
 
   list($from_address, $from_name) = mailhandler_get_fromaddress($header, $mailbox);
-  $from = explode('@', $from_address);
+  $from = explode('@', strtolower($from_address));
   // Recognize MMS e-mail gateways as valid SMS e-mail gateways.
   $from[1] = mms_email_gateway_rewrite_to_sms($from[1]);
   $providers = sms_carriers();
