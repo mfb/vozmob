@@ -1,4 +1,18 @@
-<?php 
+<?php
+
+/**
+ * Intercept page template variables
+ *
+ * @param $vars
+ *   A sequential array of variables passed to the theme function.
+ */
+function bluemob_preprocess_page(&$vars) {
+  global $user;
+  $headers = drupal_set_header();
+  if (strpos($headers, 'HTTP/1.1 403 Forbidden') && !$user->uid) {
+    $vars['content'] .= "\n" . l(t('Please login to continue'), 'user/login', array('query' => drupal_get_destination()));
+  }
+}
 
 /**
  * Intercept node template variables
@@ -7,6 +21,7 @@
  *   A sequential array of variables passed to the theme function.
  */
 function bluemob_preprocess_node(&$vars) {
+  
   jquery_plugin_add('cycle', 'theme', 'header');
   jquery_plugin_add('expose');
   jquery_plugin_add('overlay');
@@ -44,6 +59,12 @@ function bluemob_preprocess_node(&$vars) {
       }
     }
   }
+  
+  // Unset sms send link and comment link in terms. Only show terms. 
+  unset($vars['taxonomy']['sms_sendtophone']);
+  unset($vars['taxonomy']['comment_add']);
+  $vars['terms'] = theme('links', $vars['taxonomy'], array('class' => 'links inline'));
+
 
   switch ($node->type) {
     case 'page':

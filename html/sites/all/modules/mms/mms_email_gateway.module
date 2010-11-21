@@ -42,6 +42,9 @@ function mms_email_gateway_mailsave_clean(&$node, $result, $i, $header, $mailbox
       if ($attachments['filemime'] == 'video/3gpp') {
         $node->mailsave_attachments[$key]['filename'] .= '.3gp';
       }
+      if ($attachments['filemime'] == 'image/jpeg') {
+        $node->mailsave_attachments[$key]['filename'] .= '.jpg';
+      }
     }
   }
 }
