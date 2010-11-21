@@ -1,4 +1,4 @@
-; $Id: sms_sendtophone.info,v 1.3 2008/08/07 18:08:59 diggersf Exp $
+; $Id: sms_sendtophone.info,v 1.3.4.1 2010/11/18 05:37:26 univate Exp $
 name = Send to phone
 description = Provides various tools for sending bits of information via SMS.
 dependencies[] = sms

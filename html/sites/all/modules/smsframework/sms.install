@@ -1,5 +1,5 @@
 <?php
-// $Id: sms.install,v 1.8.4.2 2009/06/01 21:52:11 diggersf Exp $
+// $Id: sms.install,v 1.8.4.3 2010/11/18 05:37:26 univate Exp $
 
 /**
  * Implementation of hook_install().

@@ -1,0 +1,581 @@
+<?php
+// $Id: sms_valid.module,v 1.1.4.2 2010/11/18 06:14:34 univate Exp $
+/**
+ * @file
+ * Number validation feature module for Drupal SMS Framework.
+ *
+ * @package sms
+ * @subpackage sms_valid
+ */
+
+
+/**
+ * Implement hook_sms_validate()
+ *
+ * @param $op
+ *   Validation operation to work on.
+ * @param $number
+ *   Phone number string.
+ * @param $options
+ *   Array of options.
+ *
+ * @return
+ *   NULL if validation succeeded. Error string if failed.
+ *
+ * @ingroup hooks
+ */
+function sms_valid_sms_validate($op, &$number, &$options) {
+  if ($op == 'process') {
+    if (variable_get('sms_valid_use_rulesets', FALSE) || array_key_exists('test', $options)) {
+      $result = sms_valid_validate($number, $options);
+
+      if ($result['pass']) {
+        return NULL;
+      }
+      else {
+        return array_pop($result['log']);
+      }
+    }
+  }
+}
+
+
+/**
+ * Implementation of hook_menu()
+ *
+ * @return
+ *   Drupal menu item array.
+ *
+ * @ingroup hooks
+ */
+function sms_valid_menu() {
+  $items = array();
+
+  $items['admin/smsframework/validation'] = array(
+    'title'  => 'Number validation',
+    'description' => 'Configure number validation and rulesets.',
+    'page callback'    => 'drupal_get_form',
+    'page arguments'   => array('sms_valid_admin_settings_form', NULL),
+    'access arguments' => array('administer smsframework'),
+    'file'   => 'sms_valid.admin.inc',
+  );
+
+  $items['admin/smsframework/validation/settings'] = array(
+    'title'  => 'Settings',
+    'type'   => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -10,
+  );
+
+  $items['admin/smsframework/validation/rulesets'] = array(
+    'title'  => 'Rulesets',
+    'page callback'    => 'drupal_get_form',
+    'page arguments'   => array('sms_valid_admin_rulesets_form', NULL),
+    'access arguments' => array('administer smsframework'),
+    'type'   => MENU_LOCAL_TASK,
+    'weight' => -9,
+    'file'   => 'sms_valid.admin.inc',
+  );
+
+  $items['admin/smsframework/validation/ruleset'] = array(
+    'title'  => 'Add/Edit ruleset',
+    'page callback'    => 'drupal_get_form',
+    'page arguments'   => array('sms_valid_admin_ruleset_form'),
+    'access arguments' => array('administer smsframework'),
+    'type'   => MENU_LOCAL_TASK,
+    'weight' => -8,
+    'file'   => 'sms_valid.admin.inc',
+  );
+
+  $items['admin/smsframework/validation/ruleset/%'] = array(
+    'title'  => 'Edit ruleset',
+    'page callback'    => 'drupal_get_form',
+    'page arguments'   => array('sms_valid_admin_ruleset_form', 4),
+    'access arguments' => array('administer smsframework'),
+    'type'   => MENU_CALLBACK,
+    'weight' => -7,
+    'file'   => 'sms_valid.admin.inc',
+  );
+
+  $items['admin/smsframework/validation/test'] = array(
+    'title'  => 'Test validation',
+    'page callback'    => 'drupal_get_form',
+    'page arguments'   => array('sms_valid_admin_test_form', NULL),
+    'access arguments' => array('administer smsframework'),
+    'type'   => MENU_LOCAL_TASK,
+    'weight' => -6,
+    'file'   => 'sms_valid.admin.inc',
+  );
+
+  return $items;
+}
+
+
+/**
+ * Implementation of hook_theme()
+ *
+ * @return
+ *   Array of Drupal theme items.
+ *
+ * @ingroup hooks
+ */
+function sms_valid_theme() {
+  return array(
+    'sms_valid_admin_rulesets_form' => array(
+      'arguments' => array('form' => NULL),
+      'file' => 'sms_valid.admin.inc',
+    ),
+    'sms_valid_admin_ruleset_form' => array(
+      'arguments' => array('form' => NULL),
+      'file' => 'sms_valid.admin.inc',
+    ),
+  );
+}
+
+
+/**
+ * Get all rulesets
+ *
+ * @return
+ *   Array of rulesets.
+ */
+function sms_valid_get_all_rulesets() {
+  $result = db_query("SELECT * FROM {sms_valid_rules}");
+
+  $rulesets = array();
+  while ($row = db_fetch_array($result)) {
+    $prefix = $row['prefix'];
+    $rulesets[$prefix] = $row;
+    $rulesets[$prefix]['rules'] = unserialize($row['rules']);
+  }
+  return $rulesets;
+}
+
+
+/**
+ * Get a ruleset for a given prefix
+ *
+ * @param $prefix
+ *   A numberic prefix.
+ *
+ * @return
+ *   A ruleset array or FALSE.
+ */
+function sms_valid_get_ruleset($prefix) {
+  $result = db_query("SELECT * FROM {sms_valid_rules} WHERE prefix = %d LIMIT 1",
+                     $prefix);
+  if (db_affected_rows()) {
+    $ruleset = db_fetch_array($result);
+    $ruleset['rules'] = unserialize($ruleset['rules']);
+    return $ruleset;
+  }
+  return FALSE;
+}
+
+
+/**
+ * Get the best ruleset for a given phone number
+ *
+ * @param $number
+ *   A phone number.
+ *
+ * @return
+ *   A ruleset array or NULL.
+ */
+function sms_valid_get_ruleset_for_number($number) {
+  // Strip all non-digit chars including whitespace
+  $number = preg_replace('/[^0-9]/', '', $number);
+
+  // Make an array of potential prefixes from the given number
+  for ($i = 0; $i < strlen($number); $i++) {
+    $potential_prefixes[] = substr($number, 0, $i + 1);
+  }
+
+  // Get the potential rulesets from the DB
+  $result = db_query("SELECT * FROM {sms_valid_rules} WHERE prefix IN ("
+                     . db_placeholders($potential_prefixes, 'int') . ")",
+                     $potential_prefixes);
+
+  // Choose the ruleset with the best match (most chars = highest prefix)
+  $best_ruleset = NULL;
+  $last_prefix  = NULL;
+  while ($row = db_fetch_array($result)) {
+    if ($row['prefix'] > $last_prefix) { $best_ruleset = $row; }
+    $best_ruleset['rules'] = unserialize($best_ruleset['rules']);
+  }
+
+  return $best_ruleset;
+}
+
+
+/**
+ * Get prefixes for a given ISO country code
+ *
+ * @param $iso2
+ *   A two-character ISO-3166-1 alpha-2 country code
+ *
+ * @return
+ *   Array of prefix numbers.
+ */
+function sms_valid_get_prefixes_for_iso2($iso2) {
+  $result = db_query("SELECT prefix FROM {sms_valid_rules} WHERE iso2 = '%s'",
+                     $prefix);
+  $prefixes = array();
+  while ($row = db_fetch_object($result)) {
+    $prefixes[] = $row->prefix;
+  }
+  return $prefixes;
+}
+
+
+/**
+ * Check what directions are enabled for a ruleset
+ *
+ * @param $prefix
+ *   A prefix number.
+ * @param $dir
+ *   The direction code that you want to check. See SMS_DIR_* constants.
+ *
+ * @return
+ *   Boolean. Whether the ruleset is enabled for this direction.
+ */
+function sms_valid_ruleset_is_enabled($prefix, $dir = SMS_DIR_OUT) {
+  $result = db_query("SELECT dirs_enabled FROM {sms_valid_rules} WHERE prefix = %d LIMIT 1",
+                     $prefix);
+  $dirs_enabled = db_result($result);
+
+  // There must be a better way of doing this, but this works ok
+  if ($dirs_enabled == SMS_DIR_ALL) {
+    return TRUE;
+  }
+  if ($dirs_enabled == SMS_DIR_OUT && $dir == SMS_DIR_OUT) {
+    return TRUE;
+  }
+  if ($dirs_enabled == SMS_DIR_IN  && $dir == SMS_DIR_IN) {
+    return TRUE;
+  }
+  return FALSE;
+}
+
+
+/**
+ * Set enabled directions for a ruleset
+ *
+ * @param $prefix
+ *   A prefix number.
+ * @param $dir
+ *   The direction code that you want to set. See SMS_DIR_* constants.
+ *
+ * @return
+ *   Bollean. Result of the DB query.
+ */
+function sms_valid_ruleset_set_status($prefix, $dir = SMS_DIR_ALL) {
+  return db_query("UPDATE {sms_valid_rules} SET dirs_enabled = %d WHERE prefix = %d",
+                  $dir, $prefix);
+}
+
+
+/**
+ * Create or update a ruleset
+ *
+ * @param $ruleset
+ *   A ruleset array.
+ *
+ * @return
+ *   Boolean. Result of the DB query.
+ */
+function sms_valid_save_ruleset($ruleset) {
+  $prefix = $ruleset['prefix'];
+  $name   = $ruleset['name'];
+  $iso2   = $ruleset['iso2'];
+  $rules_z = serialize($ruleset['rules']);
+  $dirs_enabled = $ruleset['dirs_enabled'];
+
+  if (sms_valid_get_ruleset($prefix)) {
+    // The ruleset exists so we should update
+    return db_query("UPDATE {sms_valid_rules} SET
+                    name = '%s', rules = '%s', dirs_enabled = %d,
+                    iso2 = '%s' WHERE prefix = %d",
+                    $name, $rules_z, $dirs_enabled, $iso2, $prefix);
+  }
+  else {
+    // The ruleset does not exist so we should create
+    return db_query("INSERT INTO {sms_valid_rules}
+                     (prefix, name, rules, dirs_enabled, iso2)
+                     VALUES
+                     (%d, '%s', '%s', %d, '%s')",
+                     $prefix, $name, $rules_z, $dirs_enabled, $iso2);
+  }
+}
+
+
+/**
+ * Delete a ruleset
+ *
+ * @param $prefix
+ *   A prefix number.
+ *
+ * @return
+ *   Boolean. Result of the DB query.
+ */
+function sms_valid_delete_ruleset($prefix) {
+  return db_query("DELETE FROM {sms_valid_rules} WHERE prefix = %d", $prefix);
+}
+
+
+/**
+ * Get the rules for a prefix
+ *
+ * @param $rules
+ *   A prefix number.
+ *
+ * @return
+ *   An array of rules.
+ */
+function sms_valid_get_rules($prefix) {
+  $ruleset = sms_valid_get_ruleset($prefix);
+  return unserialize($ruleset['rules']);
+}
+
+
+/**
+ * Distill rules text into a rules array
+ *
+ * @param $text
+ *   A text string containing rules for a ruleset.
+ *
+ * @return
+ *   An array of rules.
+ */
+function sms_valid_text_to_rules($text) {
+  $lines = explode("\n", $text);
+  $rules = array();
+
+  foreach ($lines as $line) {
+    if (empty($line)) { continue; }
+
+    // Capture any comments and then strip them
+    preg_match('/\#(.*)/', $line, $matches);
+    $comment = trim($matches[1]);
+    $line = trim(preg_replace('/\#.*/', '', $line));
+
+    // Check if we are allowing or denying, deny by default
+    $allow = preg_match('/\+/', $line) ? TRUE : FALSE;
+
+    // Erase non-digit chars to get the prefix
+    $rule_prefix = trim(preg_replace('/[\D]/', '', $line));
+
+    // Add to rules array
+    $rules[$rule_prefix] = array('allow'   => $allow,
+                                 'comment' => $comment);
+  }
+  return $rules;
+}
+
+
+/**
+ * Implode a rules array into rules text
+ *
+ * @param $rules
+ *   A rules array.
+ *
+ * @return
+ *   A text string containing rules for a ruleset.
+ */
+function sms_valid_rules_to_text($rules) {
+  $lines   = array();
+
+  if ($rules && is_array($rules)) {
+    foreach ($rules as $rule_prefix => $rule) {
+      $allow       = ($rule['allow']) ? '+' : '-';
+      $comment     = ($rule['comment']) ? '    # '. $rule['comment'] : '';
+      $lines[]     = $rule_prefix . $allow . $comment;
+    }
+  }
+
+  return implode("\n", $lines);
+}
+
+
+/**
+ * Get country codes for form options
+ *
+ * @param $include_null_option
+ *   Whether to include a null option in the resulting array. TRUE or FALSE.
+ *
+ * @return
+ *   Options array that can be used in a form select element.
+ */
+function sms_valid_get_rulesets_for_form($include_null_option = FALSE) {
+  // We only really need a null option on the send form
+  if ($include_null_option) {
+    $options[-1] = '(auto select)';
+  }
+
+  // Other options
+  $rulesets = sms_valid_get_all_rulesets();
+  foreach ($rulesets as $prefix => $ruleset) {
+    $suffix = (!empty($ruleset['iso2'])) ? ' ('. $ruleset['iso2'] .')' : '';
+    $options[$prefix] = $prefix .' : '. $ruleset['name'] . $suffix;
+  }
+  return $options;
+}
+
+
+/**
+ * Check if number is a local number
+ *
+ * @param $number
+ *   A phone number
+ *
+ * @return
+ *   Boolean. Whether this is a local number.
+ */
+function sms_valid_is_local_number($number) {
+  $prefix = variable_get('sms_valid_local_number_prefix', '0');
+  // A blank prefix string makes this return false 
+  if ($prefix !== '' && preg_match("/^$prefix/", $number)) {
+    return TRUE;
+  } else {
+    return FALSE;
+  }
+}
+
+
+/**
+ * Validate a number
+ *
+ * @param $number
+ *   A phone number.
+ * @param $options
+ *   An array of options.
+ *   - dir  : Direction of message. See SMS_DIR_* constants.
+ *
+ * @return
+ *   Array with the validation result.
+ *   - pass : The validation result.
+ *       - TRUE  if the number passed validation checks.
+ *       - FALSE if the number is denied by validation.
+ *       - NULL  if the number could not be validated.
+ *   - log  : Array of log strings. The last record is the most significant.
+ */
+function sms_valid_validate(&$number, &$options = array()) {
+  $result = array('pass' => NULL, 'log' => array());
+
+  // Set the default direction if not specified in options
+  $dir = (array_key_exists('dir', $options)) ? $options['dir'] : SMS_DIR_OUT;
+
+  $use_global_ruleset   = variable_get('sms_valid_use_global_ruleset',  FALSE);
+  $global_ruleset       = variable_get('sms_valid_global_ruleset',       '64');
+  $local_number_prefix  = variable_get('sms_valid_local_number_prefix',   '0');
+  $local_number_ruleset = variable_get('sms_valid_local_number_ruleset', '64');
+  $last_resort_enabled  = variable_get('sms_valid_last_resort_enabled', FALSE);
+  $last_resort_ruleset  = variable_get('sms_valid_last_resort_ruleset',  NULL);
+
+  // Check if we should use a specific ruleset prefix
+  if (array_key_exists('prefix', $options) && $options['prefix'] >= 0) {
+    $specific_prefix = $options['prefix'];
+  }
+  else {
+    $specific_prefix = NULL;
+  }
+
+  // Check for zero-length value
+  if (!strlen($number)) {
+    $result['log'][] = t('You must enter a phone number.');
+    return $result;
+  }
+
+  // Remove all whitespace
+  $number = preg_replace('/[^\d]/', '', $number);
+
+  // Check if we should use a specific ruleset
+  if ($specific_prefix) {
+    $prefix  = $specific_prefix;
+    $ruleset = sms_valid_get_ruleset($prefix);
+    // Strip ruleset prefix (if exist) and leading zeros from the number
+    $num     = preg_replace("/^$prefix/", '', $number);
+    $num     = ltrim($num, '0');
+  }
+  // Check if we should use the global ruleset
+  elseif ($use_global_ruleset) {
+    $result['log'][] = 'Using the global prefix validation ruleset.';
+    $prefix  = $global_ruleset;
+    $ruleset = sms_valid_get_ruleset($prefix);
+    $num     = $number;
+  }
+  // Check if this is a local number
+  elseif (sms_valid_is_local_number($number)) {
+    $prefix  = $local_number_ruleset;
+    $ruleset = sms_valid_get_ruleset($prefix);
+    $result['log'][] = 'Identified local number. Using ruleset prefix '. $prefix;
+    // Strip the local prefix from number
+    $num     = preg_replace("/^$local_number_prefix/", '', $number);
+  }
+  // Perform ruleset discovery
+  else {
+    $ruleset  = sms_valid_get_ruleset_for_number($number);
+
+    if ($ruleset) {
+      $result['log'][] = 'Identified ruleset prefix '. $prefix;
+      $prefix = $ruleset['prefix'];
+    }
+    else {
+      // Could not identify ruleset prefix
+      $result['log'][] = 'Could NOT identify the ruleset prefix for number '. $number;
+
+      if ($last_resort_enabled && $last_resort_ruleset) {
+        // We have a last resort to use
+        $result['log'][] = 'Using last resort ruleset prefix '. $last_resort_ruleset;
+        $prefix  = $last_resort_ruleset;
+        $ruleset = sms_valid_get_ruleset($prefix);
+      }
+      else {
+        // No last resort. Fail hard.
+        $result['log'][] = 'No matching rulesets and no last resort ruleset configured.';
+        $result['log'][] = 'Cannot validate this number. Denied by default.';
+        return $result;
+      }
+    }
+    // Strip the ruleset prefix from the number
+    $num = preg_replace("/^$prefix/", '', $number);
+  }
+
+  // Get the rules for this ruleset
+  $rules = $ruleset['rules'];
+
+  // Sort the rules by prefix (key) in reverse order (largest to smallest)
+  krsort($rules);
+
+  // Check whether this ruleset is enabled for the direction of communication
+  if (! sms_valid_ruleset_is_enabled($prefix, $dir)) {
+    $result['log'][] = "Number prefix $prefix does not allow messages in this direction.";
+    $result['pass']  = FALSE;
+    return $result;
+  }
+
+  // Test the number against each rule prefix until we get a match
+  if (! empty($rules)) {
+    foreach ($rules as $rule_prefix => $rule) {
+    $result['log'][] = 'Trying rule with prefix '. $rule_prefix .' on number '. $num;
+      if (preg_match("/^$rule_prefix/", $num)) {
+        if ($rule['allow']) {
+          // Set the full validated number and return
+          $number = $prefix . $num;
+          $result['log'][] = "Explicit allow for prefix $prefix $rule_prefix";
+          $result['pass']  = TRUE;
+          return $result;
+        }
+        else {
+          $result['log'][] = "Explicit deny for prefix $prefix $rule_prefix";
+          $result['pass']  = FALSE;
+          return $result;
+        }
+      }
+    }
+  }
+
+  # No matching rules. Default deny.
+  $result['log'][] = "Cannot validate this number. Denied by default.";
+  return $result;
+}
+

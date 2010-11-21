@@ -1,13 +1,43 @@
 <?php
-// $Id: sms_clickatell.module,v 1.4.2.3 2008/10/09 17:26:25 diggersf Exp $
+// $Id: sms_clickatell.module,v 1.4.2.3.2.1 2010/11/18 05:37:26 univate Exp $
 
 /**
  * @file
  * Adds support for sending SMS messages using the Clickatell gateway.
+ * Clickatell gateway module for Drupal SMS Framework. Outbound and Inbound.
+ *
+ * Thanks to diggersf for his great work on the original module.
+ *
+ * Applying a sender will only work with Approved Sender IDs in your Clickatell
+ * account | My Settings | Manage Sender IDs.
+ *
+ * The send callback in this module supports several options, including message
+ * sender. Please see {@link sms_clickatell_command()}
+ *
+ * To make inbound work you must configure clickatell to send the messages to a
+ * URL: http(s)://yourhost.example.com/sms/clickatell/receiver
+ *
+ * It is recommended that Clean URLs are on if you are using WAP PUSH, receipt
+ * functions or anything else that will handle a URL.
+ *
+ * I have included a message receipt function in this module. The main command
+ * in this function is commented out, since SMS Framework does not support
+ * receipts yet. To make receipts work you must configure clickatell to send the
+ * callbacks to a URL: http(s)://yourhost.example.com/sms/clickatell/receipt
+ *
+ * This module does not support Clickatell VMN tagging, short codes(?), MMS,
+ * binary messages and UDH-extended incoming messages.
+ *
+ * TODO: WAP Push functionality.
+ *
+ * @package smsframework
+ * @subpackage sms_clickatell
  */
 
 /**
  * Implementation of hook_gateway_info().
+ *
+ * @return array SMS Framework gateway info
  */
 function sms_clickatell_gateway_info() {
   return array(
@@ -20,6 +50,35 @@ function sms_clickatell_gateway_info() {
   );
 }
 
+/**
+ * Implementation of hook_menu
+ * Provides Drupal with path and menu item configuration for this module.
+ *
+ * @return array Drupal menu items
+ */
+function sms_clickatell_menu() {
+  $items = array();
+  $items['sms/clickatell/receiver'] = array(
+    'title' => 'Clickatell SMS message receiver',
+    'page callback' => 'sms_clickatell_receive_message',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  $items['sms/clickatell/receipt'] = array(
+    'title' => 'Clickatell SMS receipt receiver',
+    'page callback' => 'sms_clickatell_receive_receipt',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+  );
+  return $items;
+}
+
+/**
+ * Configuration form for gateway module
+ *
+ * @param array $configuration
+ * @return array Drupal form structure
+ */
 function sms_clickatell_admin_form($configuration) {
   $form['sms_clickatell_balance'] = array(
     '#type' => 'item',
@@ -57,14 +116,48 @@ function sms_clickatell_admin_form($configuration) {
     '#maxlength' => 64,
     '#default_value' => $configuration['sms_clickatell_password'],
   );
+  $form['sms_clickatell_from'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Default Sender (from)'),
+    '#description' => t('Name/number of the default sender. Will be used if a sender is not specified on message send.<br /><em>This will only work with <strong>Approved</strong> Sender IDs in your Clickatell account | My Settings | Manage Sender IDs.</em><br />A valid international format number up to 16 characters (eg: 447911222333) or alphanumeric string of 11 characters (eg: My Service).<br />If empty / sender not specified on message send / not Approved Seender ID, then Clickatell will apply a gateway number.'),
+    '#size' => 16,
+    '#maxlength' => 16,
+    '#default_value' => $configuration['sms_clickatell_from'],
+  );
+  $form['sms_clickatell_callback'] = array(
+    '#type' => 'select',
+    '#title' => t('Status Callback (delivery receipts)'),
+    '#description' => t('Enable delivery receipts when message status changes in the gateway.'),
+    '#multiple' => FALSE,
+    '#options' => array(
+      0 => t('No message status returned'),
+      1 => t('Return only intermediate status'),
+      2 => t('Return only final status of a message'),
+      3 => t('Return both intermediate and final status of a message'),
+    ),
+    '#default_value' => $configuration['sms_clickatell_callback'],
+  );
   
   return $form;
 }
 
 /**
  * Validates the submission of the configuration form.
- */ 
+ *
+ * @param array $form
+ * @param array $form_state
+ */
 function sms_clickatell_admin_form_validate($form, &$form_state) {
+  // Check default sender
+  if (!empty($form_state['values']['sms_clickatell_from'])) {
+    if (!is_numeric($form_state['values']['sms_clickatell_from'])) {
+      if (strlen($form_state['values']['sms_clickatell_from']) > 11) {
+        form_set_error('sms_clickatell_from', t('An alphanumeric sender is limited to a maximum of 11 characters.'));
+      }
+    }
+  }
+
+  // Attempt a connection with the given credentials
   $result = sms_clickatell_command('auth', array(), $form_state['values']);
   if (!$result['status']) {
     form_set_error('', t('A Clickatell gateway error occured: @error.', array('@error' => $result['message'])));
@@ -74,6 +167,8 @@ function sms_clickatell_admin_form_validate($form, &$form_state) {
 
 /**
  * Returns custom additions to be added to the send forms
+ *
+ * @return array Drupal form structure
  */
 function sms_clickatell_send_form() {
   $form['country'] = array(
@@ -89,12 +184,27 @@ function sms_clickatell_send_form() {
 
 /**
  * Callback for sending messages.
+ *
+ * Options for this send function: see {@link sms_txtlocal_command()}
+ *
+ * @param int $number MSISDN of message recipient. Expected to include the country code prefix.
+ * @param str $message Message body text.
+ * @param array $options Options from SMS Framework.
+ * @return bool Whether the send was successful or not.
  */
 function sms_clickatell_send($number, $message, $options) {
-  $number = $options['country'] . $number;
-  return sms_clickatell_command('sendmsg', array('number' => $number, 'message' => $message));
+  if (array_key_exists('country', $options)) {
+    /* Remove leading zeros before pre-pending country code */
+    $number = $options['country'] . preg_replace("/^[0]*/", '', $number);
+  }
+  return sms_clickatell_command('sendmsg', array('number' => $number, 'message' => $message, 'options' => $options));
 }
 
+/**
+ * Get account balance
+ *
+ * @return str Balance text
+ */
 function sms_clickatell_balance() {
   $result = sms_clickatell_command('getbalance');
   return str_replace('Credit: ', '', $result['data']);
@@ -102,6 +212,24 @@ function sms_clickatell_balance() {
 
 /**
  * Executes a command using the Clickatell API
+ *
+ * data array fields:
+ *   number - MSISDN of message recipient. Purely numeric and must begin with intl prefix, eg. 4477121231234.
+ *   message - Message text. Max 459 chars (3x SMS). Use %n for newline.
+ *   options - Array of additional options, as below.
+ *
+ * data['options'] array fields:
+ *   sender - Optional: Sender ID may be an MSISDN (max 16 chars) or an alphanumeric string (max 11 chars). See note about Approved Sender IDs in the header of this file. Clickatell param: 'from'
+ *   reference - Optional: Reference tag to apply to message. Will appear on any receipt. No spaces. Clickatell param: 'cliMsgId'
+ *   delaymins - Optional: Delay message sending by N minutes. Clickatell param: 'deliv_time'
+ *   expiremins - Optional: The message send will abort if not sent within N minutes. Clickatell param: 'validity'
+ *   priority - Optional: Queue priority to apply to the message. Can be 1, 2 or 3, where 1 is high priority. Clickatell param: 'queue'
+ *   expectreply - Optional: Route the message properly so that the user can reply. Clickatell param: 'mo'
+ *
+ * @param str $command One of 'auth', 'sendmsg' or 'getbalance'.
+ * @param array $data All data required to perform the command.
+ * @param array $config Gateway configuration parameters.
+ * @return bool Whether the command succeeded or not.
  */
 function sms_clickatell_command($command = 'auth', $data = array(), $config = NULL) {
   $gateway = sms_gateways('gateway', 'clickatell');
@@ -127,9 +255,58 @@ function sms_clickatell_command($command = 'auth', $data = array(), $config = NU
         $message = $unicode_message;
       }
       else {
-        $message = drupal_urlencode($data['message']);
+        $message = rawurlencode($data['message']);
       }
       $query = 'session_id='. sms_clickatell_get_session_id() .'&to='. $data['number'] .'&text='. $message;
+
+      // Check if the message requires concatenation (long messages)
+      // Note: concatenation over multiple messages reduces each SMS message length by 7 chars.
+      $msglen = strlen($message);
+      if($msglen > 306) {
+        $query .= '&concat=3';
+      } else if($msglen > 160) {
+        $query .= '&concat=2';
+      }
+
+      // Add any optional arguments
+      if (isset($data) && array_key_exists('options', $data)) {
+        // sender (Clickatell: from)
+        if (array_key_exists('sender', $data['options'])) {
+          $query .= '&from=' . $data['options']['sender'];
+          $sender_set = TRUE;
+        }
+        // delaymins (Clickatell: deliv_time)
+        if (array_key_exists('delaymins', $data['options']) && $data['options']['delaymins'] >= 10 && $data['options']['delaymins'] <= 10080) {
+          $query .= '&deliv_time=' . $data['options']['delaymins'];
+        }
+        // priority (Clickatell: queue)
+        if (array_key_exists('priority', $data['options']) && $data['options']['priority'] >= 1 && $data['options']['priority'] <= 3) {
+          $query .= '&queue=' . $data['options']['priority'];
+        }
+        // expiremins (Clickatell: validity)
+        if (array_key_exists('expiremins', $data['options']) && $data['options']['expiremins'] >= 1 && $data['options']['expiremins'] <= 1440) {
+          $query .= '&validity=' . $data['options']['expiremins'];
+        }
+        // reference (Clickatell: cliMsgId)
+        if (array_key_exists('reference', $data['options']) && strlen($data['options']['reference']) <= 32) {
+          $query .= '&cliMsgId=' . $data['options']['reference'];
+        }
+        // expectreply (Clickatell: mo)
+        if (array_key_exists('expectreply', $data['options'])) {
+          $query .= '&mo=' . $data['options']['expectreply'];
+        }
+      }
+
+      // If sender is not set and default sender exists, then apply default sender
+      if (!isset($sender_set) && $config['sms_clickatell_from']) {
+          $query .= '&from=' . $config['sms_clickatell_from'];
+      }
+
+      // Apply callback parameter if set
+      if ($config['sms_clickatell_callback']) {
+          $query .= '&callback=' . $config['sms_clickatell_callback'];
+      }
+
       break;
     case 'getbalance':
       $query = 'session_id='. sms_clickatell_get_session_id();
@@ -161,6 +338,11 @@ function sms_clickatell_command($command = 'auth', $data = array(), $config = NU
   return $result;
 }
 
+/**
+ * Get a new or existing Clickatell session ID
+ *
+ * @return str Clickatell session ID
+ */
 function sms_clickatell_get_session_id() {
   if (variable_get('sms_clickatell_session_id_timestamp', 0) < strtotime('-10 mins')) {
     if ($result = sms_clickatell_command()) {
@@ -176,27 +358,188 @@ function sms_clickatell_get_session_id() {
 }
 
 /**
- * Returns an array of error codes and messages that are generated by the Clickatell gateway
+ * Receive an SMS message and pass it into the SMS Framework
+ *
+ * Will generate an $options array with the following variables:
+ *   receiver - The destination MSISDN number. Clickatell param: 'to'
+ *   api_id - Your Clicaktell API ID. Clickatell param: 'api_id'
+ *   msg_id - The message ID code that refers to a message originally sent with the 'expectreply' or 'mo' parameter. Clickatell param: 'moMsgId'
+ *
+ * See Clickatell_two-way_technical_guide.pdf page 9.
+ * I have neglected the 'timestamp' var because it is passed in non-UTC timezone
+ * and is in MySQL format. It is more useful to capture a timestamp in your
+ * hook_sms_incoming() function.
  */
-function sms_clickatell_error_codes() {
+function sms_clickatell_receive_message() {
+  $number = $_REQUEST['from'];
+  $message = $_REQUEST['text'];
+  $options = array();
+  if (array_key_exists('to', $_REQUEST) && !empty($_REQUEST['to'])) {
+    $options['receiver'] = $_REQUEST['to'];
+  }
+  if (array_key_exists('api_id', $_REQUEST) && !empty($_REQUEST['api_id'])) {
+    $options['api_id'] = $_REQUEST['api_id'];
+  }
+  if (array_key_exists('moMsgId', $_REQUEST) && !empty($_REQUEST['moMsgId'])) {
+    $options['msg_id'] = $_REQUEST['moMsgId'];
+  }
+  sms_incoming($number, $message, $options);
+}
+
+/**
+ * Receive a message send receipt from Clickatell
+ *
+ * This is a draft really, since receipts are not yet supported by SMS Framework.
+ *
+ * Will generate an $options array with the following variables:
+ *   reference - A message reference code, if set on message send.
+ *   gateway_status - A Clickatell message status code.
+ *   gateway_status_text - A text string associated with the gateway_status.
+ *   receiver - The destination MSISDN number. Clickatell param: 'to'
+ *   api_id - Your Clicaktell API ID. Clickatell param: 'api_id'
+ *   charge - A credit amount that is charged. Decimal value. Clickatell param: 'charge'
+ *   cliMsgId - Same as reference. Clickatell param: 'cliMsgId'
+ *   moMsgId - The message ID code that refers to a message originally sent with the 'expectreply' or 'mo' parameter. Clickatell param: 'moMsgId'
+ *
+ * See Clickatell_HTTP.pdf page 10.
+ * I have neglected the 'timestamp' var because it is passed in non-UTC timezone
+ * and is in MySQL format. It is more useful to capture a timestamp in your
+ * hook_sms_incoming() function.
+ */
+function sms_clickatell_receive_receipt() {
+  $number = $_REQUEST['from'];
+  $gateway_status = $_REQUEST['status'];
+
+  $gateway_status_codes = sms_clickatell_message_status_codes();
+  $gateway_status_text = $gateway_status_codes[$gateway_status];
+
+  // SMS Framework status code (format gateway status to framework status code)
+  switch ($gateway_status) {
+    case '003':
+    case '004':
+      $status = 1;
+      break;
+    case '002':
+    case '011':
+      $status = 2;
+      break;
+    case '005':
+      $status = 11;
+      break;
+    case '010':
+      $status = 12;
+      break;
+    case '001':
+    case '006':
+    case '007':
+    case '009':
+    case '012':
+      $status = 13;
+      break;
+    default:
+      $status = 20;
+      break;
+  }
+
+  // Message reference tag
+  $reference = (array_key_exists('cliMsgId',$_REQUEST)) ? $_REQUEST['cliMsgId'] : NULL;
+
+  // Gateway-specific variables
+  $options = array();
+  $options['reference'] = $reference;
+  $options['gateway_status'] = $gateway_status;
+  $options['gateway_status_text'] = $gateway_status_text;
+  if (array_key_exists('to', $_REQUEST) && !empty($_REQUEST['to'])) {
+    $options['receiver'] = $_REQUEST['to'];
+  }
+  if (array_key_exists('api_id', $_REQUEST) && !empty($_REQUEST['api_id'])) {
+    $options['api_id'] = $_REQUEST['api_id'];
+  }
+  if (array_key_exists('moMsgId', $_REQUEST) && !empty($_REQUEST['moMsgId'])) {
+    $options['msg_id'] = $_REQUEST['moMsgId'];
+  }
+  if (array_key_exists('charge', $_REQUEST) && !empty($_REQUEST['charge'])) {
+    $options['charge'] = $_REQUEST['charge'];
+  }
+  if (array_key_exists('cliMsgId', $_REQUEST) && !empty($_REQUEST['cliMsgId'])) {
+    $options['cliMsgId'] = $_REQUEST['cliMsgId'];
+  }
+
+  // Invoke the SMS Framework receipt handler
+  //sms_receipt($number, $status, $options);
+}
+
+/**
+ * Returns an array of message status codes and strings that are generated by the Clickatell gateway
+ *
+ * Clickatell always uses leading zeros, so its important to enclose the code
+ * keys in quotes.
+ *
+ * @return array Associative array of message status codes and text strings.
+ */
+function sms_clickatell_message_status_codes() {
   return array(
-    001 => 'Authentication failed', 002 => 'Unknown username or password', 003 => 'Session ID expired',
-    004 => 'Account frozen', 005 => 'Missing session ID', 007 => 'IP Lockdown violation',
-    101 => 'Invalid or missing parameters', 102 => 'Invalid user data header',
-    103 => 'Unknown API message ID', 104 => 'Unknown client message ID',
-    105 => 'Invalid destination address', 106 => 'Invalid source address', 107 => 'Empty message',
-    108 => 'Invalid or missing API ID', 109 => 'Missing message ID',
-    110 => 'Error with email message',
-    111 => 'Invalid protocol', 112 => 'Invalid message type',
-    113 => 'Maximum message parts exceeded',
-    114 => 'Cannot route message',
-    115 => 'Message expired',
-    116 => 'Invalid Unicode data', 120 => 'Invalid delivery time',
-    201 => 'Invalid batch ID', 202 => 'No batch template',
-    301 => 'No credit left', 302 => 'Max allowed credit',
+    '001' => 'Message unknown',
+    '002' => 'Message queued',
+    '003' => 'Delivered to gateway',
+    '004' => 'Received by recipient',
+    '005' => 'Error with message',
+    '006' => 'User cancelled message delivery',
+    '007' => 'Error delivering message',
+    '008' => 'OK',
+    '009' => 'Routing error',
+    '010' => 'Message expired',
+    '011' => 'Message queued for later delivery',
+    '012' => 'Out of credit',
   );
 }
 
+/**
+ * Returns an array of error codes and messages that are generated by the Clickatell gateway
+ *
+ * @return array Associative array of error codes and error text.
+ */
+function sms_clickatell_error_codes() {
+  return array(
+    001 => 'Authentication failed',
+    002 => 'Unknown username or password',
+    003 => 'Session ID expired',
+    004 => 'Account frozen',
+    005 => 'Missing session ID',
+    007 => 'IP Lockdown violation',
+    101 => 'Invalid or missing parameters',
+    102 => 'Invalid user data header',
+    103 => 'Unknown API message ID',
+    104 => 'Unknown client message ID',
+    105 => 'Invalid destination address',
+    106 => 'Invalid source address',
+    107 => 'Empty message',
+    108 => 'Invalid or missing API ID',
+    109 => 'Missing message ID',
+    110 => 'Error with email message',
+    111 => 'Invalid protocol',
+    112 => 'Invalid message type',
+    113 => 'Maximum message parts exceeded',
+    114 => 'Cannot route message',
+    115 => 'Message expired',
+    116 => 'Invalid Unicode data',
+    120 => 'Invalid delivery time',
+    121 => 'Destination mobile number blocked',
+    122 => 'Destination mobile opted out',
+    123 => 'Invalid Sender ID',
+    128 => 'Number delisted',
+    201 => 'Invalid batch ID',
+    202 => 'No batch template',
+    301 => 'No credit left',
+    302 => 'Max allowed credit',
+  );
+}
+
+/**
+ * Returns an array of E.164 international country calling codes
+ *
+ * @return array Associative array of country calling codes and country names.
+ */
 function sms_clickatell_country_codes() {
   return array(
     93 => "Afghanistan",

@@ -1,6 +1,6 @@
 <?php
 
-// $Id: sms_email_gateway.install,v 1.1.2.2 2009/04/23 16:01:36 thehunmonkgroup Exp $
+// $Id: sms_email_gateway.install,v 1.1.2.3 2010/11/18 05:37:26 univate Exp $
 
 function sms_email_gateway_uninstall() {
   // TODO: leaving this here for now, in case we need it.

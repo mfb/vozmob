@@ -1,5 +1,5 @@
 <?php
-// $Id: sms.admin.inc,v 1.1.2.2 2009/06/02 14:41:01 diggersf Exp $
+// $Id: sms.admin.inc,v 1.1.2.3 2010/11/18 05:37:26 univate Exp $
 
 function sms_admin_default_form() {
   $gateways = sms_gateways();

@@ -1,5 +1,5 @@
 <?php
-// $Id: sms_blast.module,v 1.2.2.1 2008/10/09 17:26:24 diggersf Exp $
+// $Id: sms_blast.module,v 1.2.2.1.2.1 2010/11/18 05:37:26 univate Exp $
 
 /**
  * @file
@@ -51,12 +51,15 @@ function sms_blast_form() {
  */
 function sms_blast_form_submit(&$form, $form_state) {
   $result = db_query("SELECT uid FROM {sms_user} WHERE status = 2");
-  while ($row = db_fetch_array($result)) {
-    $users[] = $row;
-  }
+  $confirmed_user_qty = db_affected_rows();
 
-  foreach ($users as $user) {
-    sms_user_send($user['uid'], $form_state['values']['message']);
+  if ($confirmed_user_qty) {
+    while ($row = db_fetch_array($result)) {
+      sms_user_send($row['uid'], $form_state['values']['message']);
+    }
+    drupal_set_message(t('The message was sent to %count users.', array('%count' => $confirmed_user_qty)));
   }
-  drupal_set_message(t('The message was sent to %count users.', array('%count' => count($users))));
+  else {
+    drupal_set_message(t('There are 0 users with confirmed phone numbers. Message not sent.'));
+  }
 }

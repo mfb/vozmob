@@ -1,4 +1,4 @@
-; $Id: sms_blast.info,v 1.1.2.2 2008/10/09 17:26:24 diggersf Exp $
+; $Id: sms_blast.info,v 1.1.2.2.2.1 2010/11/18 05:37:26 univate Exp $
 name = SMS Blast
 description = Allows bulk text messages to be sent to registered users.
 package = SMS Framework
