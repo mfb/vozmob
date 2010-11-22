@@ -1,5 +1,5 @@
 <?php
-// $Id: sms_sendtophone.module,v 1.4.2.2.2.1 2010/11/18 05:37:26 univate Exp $
+// $Id: sms_sendtophone.module,v 1.4.2.2.2.3 2010/11/20 07:52:51 univate Exp $
 
 /**
  * Implementation of hook_init().
@@ -75,13 +75,18 @@ function sms_sendtophone_admin_overview() {
 function sms_sendtophone_page($type = NULL) {
   global $user;
   $user = user_load(array('uid' => $user-> uid));
-  if (user_access('send to any number') || !empty($user->sms_user['number'])) {
+  if (user_access('send to any number') || (!empty($user->sms_user['0']['number']) && $user->sms_user['0']['status'] == 2)) {
     $form = drupal_get_form('sms_sendtophone_form', $type);
   }
   else {
-    if (empty($user->sms_user['number']) && user_access('send to any number')) {
+    if (empty($user->sms_user['0']['number'])) {
       $register = array(
-        '#value' => t('You need need to <a href="@setup">setup</a> your mobile phone to send messages.', array('@setup' => url('user/'. $user->uid .'/mobile')))
+        '#value' => t('You need to <a href="@setup">setup</a> your mobile phone to send messages.', array('@setup' => url('user/'. $user->uid .'/mobile')))
+      );
+    }
+    elseif ($user->sms_user['0']['status'] != 2) {
+      $register = array(
+        '#value' => t('You need to <a href="@confirm">confirm</a> your mobile phone number to send messages.', array('@confirm' => url('user/'. $user->uid .'/mobile')))
       );
     }
     else {

@@ -1,5 +1,5 @@
 <?php
-// $Id: sms_user.module,v 1.3.2.10.2.12 2010/11/18 05:53:30 univate Exp $
+// $Id: sms_user.module,v 1.3.2.10.2.13 2010/11/20 04:15:52 univate Exp $
 
 /**
  * @file
@@ -309,7 +309,7 @@ function sms_user_validate_number(&$number) {
   if ($error = sms_validate_number($number)) {
     return $error;
   }
-    elseif (sms_user_get_uid($number, SMS_USER_CONFIRMED)) {
+  elseif (sms_user_get_uid($number)) {
     return t('This phone number is already registered to another user.');
   }
 }
