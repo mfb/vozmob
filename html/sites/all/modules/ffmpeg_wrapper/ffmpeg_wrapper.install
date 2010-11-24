@@ -31,14 +31,10 @@ function ffmpeg_wrapper_requirements($phase) {
   $requirements = array();
 
   if (! variable_get('ffmpeg_wrapper_path', false)) {
-   $error_message = t('The path to FFmpeg is not set correctly or missing. !url',
-      array('!url' => l(t('Please update your settings'), 'admin/settings/ffmpeg_wrapper'))
-    );
+    $error_message = t('The path to FFmpeg is not set correctly or missing.');
   }
   else if (! file_exists(variable_get('ffmpeg_wrapper_path', false))) {
-    $error_message = t('The path that you have set to FFmpeg does not appear to be correct. !url' ,
-      array('!url' => l(t('Please update your settings'), 'admin/settings/ffmpeg_wrapper'))
-    );
+    $error_message = t('The path that you have set to FFmpeg does not appear to be correct.');
   }
 
   if ($error_message) {
