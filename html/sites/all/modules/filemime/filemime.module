@@ -1,0 +1,22 @@
+<?php
+// $Id: filemime.module,v 1.1.2.6 2008/08/15 09:33:07 mfb Exp $
+
+/**
+ * @file
+ * Rewrite the MIME type for each file upload based on a server-side mime.types file and/or custom settings.
+ */
+
+/**
+ * Implementation of hook_menu().
+ */
+function filemime_menu() {
+  $items['admin/settings/filemime'] = array(
+    'title' => 'File MIME',
+    'description' => 'Configure the MIME extension mapping for uploaded files.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('filemime_settings'),
+    'access arguments' => array('administer site configuration'),
+    'file' => 'filemime.admin.inc',
+  );
+  return $items;
+}

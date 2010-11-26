@@ -1,0 +1,11 @@
+<?php
+// $Id: filemime.install,v 1.1.2.1 2008/08/15 09:20:24 mfb Exp $
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function filemime_uninstall() {
+  variable_del('filemime_file');
+  variable_del('filemime_types');
+  variable_del('mime_extension_mapping');
+}
