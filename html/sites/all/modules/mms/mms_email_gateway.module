@@ -6,13 +6,14 @@
  */
 function mms_email_gateway_get_map() {
   return array(
-    'comcel.com.co' => 'mms.comcel.net',
-    'messaging.sprintpcs.com' => 'pm.sprint.com',
-    'page.nextel.com' => 'messaging.nextel.com',
-    'sms.tigo.com.co' => 'mms.tigo.com.co',
-    'txt.att.net' => 'mms.att.net',
-    'vtext.com' => 'vzwpix.com',
-    'vmobl.com' => 'pixmbl.com',
+    'mms.comcel.net' => 'comcel.com.co',
+    'pm.sprint.com' => 'messaging.sprintpcs.com',
+    'messaging.nextel.com' => 'page.nextel.com',
+    'mms.tigo.com.co' => 'sms.tigo.com.co',
+    'mms.att.net' => 'txt.att.net',
+    'mypixmessages.com' => 'vtext.com',
+    'vzwpix.com' => 'vtext.com',
+    'pixmbl.com' => 'vmobl.com',
   );
 }
 
@@ -20,7 +21,7 @@ function mms_email_gateway_get_map() {
  * Rewrite an MMS gateway to its corresponding SMS gateway.
  */
 function mms_email_gateway_rewrite_to_sms($gateway) {
-  $gateways = array_flip(mms_email_gateway_get_map());
+  $gateways = mms_email_gateway_get_map();
   return isset($gateways[$gateway]) ? $gateways[$gateway] : $gateway;
 }
 
@@ -28,7 +29,7 @@ function mms_email_gateway_rewrite_to_sms($gateway) {
  * Rewrite an SMS gateway to its corresponding MMS gateway.
  */
 function mms_email_gateway_rewrite_to_mms($gateway) {
-  $gateways = mms_email_gateway_get_map();
+  $gateways = array_flip(mms_email_gateway_get_map());
   return isset($gateways[$gateway]) ? $gateways[$gateway] : $gateway;
 }
 
