@@ -12,6 +12,7 @@ function mms_email_gateway_get_map() {
     'sms.tigo.com.co' => 'mms.tigo.com.co',
     'txt.att.net' => 'mms.att.net',
     'vtext.com' => 'vzwpix.com',
+    'vmobl.com' => 'pixmbl.com',
   );
 }
 
