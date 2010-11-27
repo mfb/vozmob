@@ -360,7 +360,6 @@ function sms_sms_carriers() {
     'mas.aw' => t('Setar Mobile email (Aruba)'),
     'page.nextel.com' => t('Sprint (Nextel)'),
     'messaging.sprintpcs.com' => t('Sprint (PCS)'),
-    'mypixmessages.com' => t('Straight Talk'),
     'tms.suncom.com' => t('Suncom'),
     'tmomail.net' => t('T-Mobile'),
     'sms.t-mobile.at' => t('T-Mobile (Austria)'),
