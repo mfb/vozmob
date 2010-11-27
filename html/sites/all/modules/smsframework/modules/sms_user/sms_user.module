@@ -1,5 +1,5 @@
 <?php
-// $Id: sms_user.module,v 1.3.2.10.2.10 2009/06/01 21:42:28 thehunmonkgroup Exp $
+// $Id: sms_user.module,v 1.3.2.10.2.13 2010/11/20 04:15:52 univate Exp $
 
 /**
  * @file
@@ -8,6 +8,10 @@
 
 define('SMS_USER_PENDING', 1);
 define('SMS_USER_CONFIRMED', 2);
+
+define('SMS_USER_MAX_CHARS', 140);
+
+require_once 'sms_user.actions.inc';
 
 /**
  * Send a message to a user.
@@ -51,13 +55,14 @@ function sms_user_menu() {
     'access arguments' => array('administer sms_user'),
   );
 
-  $items['user/%user/mobile'] = array(
-    'title' => 'Mobile settings',
+  $items['user/%user/edit/mobile'] = array(
+    'title' => 'Mobile',
     'page callback' => 'sms_user_settings',
     'page arguments' => array(1),
     'type' => MENU_LOCAL_TASK,
     'access callback' => 'user_edit_access',
     'access arguments' => array(1),
+    'tab_parent' => 'user/%/edit',
   );
   return $items;
 }
@@ -118,6 +123,10 @@ function sms_user_settings($account) {
 
 function sms_user_settings_add_form(&$form_state, $account) {
   $form = sms_send_form();
+  $form['uid'] = array(
+    '#type' => 'hidden',
+    '#value' => $account->uid,
+  );
   $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Confirm number'),
@@ -134,21 +143,25 @@ function sms_user_settings_add_form_validate($form, &$form_state) {
 
 function sms_user_settings_add_form_submit($form, &$form_state, $account = NULL) {
   if (!$account) {
-    $account = user_load(array('uid' => arg(1)));
+    $account = user_load(array('uid' => $form_state['values']['uid']));
   }
   sms_user_send_confirmation($account, $form_state['values']['number'], $form_state['values']['gateway']);
 }
 
 function sms_user_settings_confirm_form(&$form_state, $account) {
+  $form['uid'] = array(
+    '#type' => 'hidden',
+    '#value' => $account->uid,
+  );
   $form['number'] = array(
     '#type' => 'item',
-    '#title' => t('Number'),
+    '#title' => t('Mobile phone number'),
     '#value' => $account->sms_user['number'],
   );
   $form['confirm_code'] = array(
     '#type' => 'textfield',
     '#title' => t('Confirmation code'),
-    '#description' => t('Enter the confirmation code that was sent to your phone.'),
+    '#description' => t('Enter the confirmation code sent by SMS to your mobile phone.'),
     '#size' => 4,
     '#maxlength' => 4,
   );
@@ -165,7 +178,7 @@ function sms_user_settings_confirm_form(&$form_state, $account) {
 
 function sms_user_settings_confirm_form_validate($form, &$form_state) {
   if ($form_state['clicked_button']['#value'] == t('Confirm number')) {
-    $account = user_load(array('uid' => arg(1)));
+    $account = user_load(array('uid' => $form_state['values']['uid']));
     if ($form_state['values']['confirm_code'] != $account->sms_user['code']) {
       form_set_error('confirm_code', t('The confirmation code is invalid.'));
     }
@@ -173,7 +186,7 @@ function sms_user_settings_confirm_form_validate($form, &$form_state) {
 }
 
 function sms_user_settings_confirm_form_submit($form, &$form_state) {
-  $account = user_load(array('uid' => arg(1)));
+  $account = user_load(array('uid' => $form_state['values']['uid']));
   if ($form_state['clicked_button']['#value'] == t('Delete & start over')) {
     sms_user_delete($account->uid);
   }
@@ -189,6 +202,10 @@ function sms_user_settings_confirm_form_submit($form, &$form_state) {
 }
 
 function sms_user_settings_reset_form(&$form_state, $account) {
+  $form['uid'] = array(
+    '#type' => 'hidden',
+    '#value' => $account->uid,
+  );
   $form['sms_user']['number'] = array(
     '#type' => 'item',
     '#title' => t('Your number'),
@@ -205,12 +222,16 @@ function sms_user_settings_reset_form(&$form_state, $account) {
 }
 
 function sms_user_settings_reset_form_submit($form, &$form_state) {
-  $account = user_load(array('uid' => arg(1)));
+  $account = user_load(array('uid' => $form_state['values']['uid']));
   sms_user_delete($account->uid);
   drupal_set_message(t('Your mobile information has been removed'), 'status');
 }
 
 function sms_user_settings_sleep_form(&$form_state, $account) {
+  $form['uid'] = array(
+    '#type' => 'hidden',
+    '#value' => $account->uid,
+  );
   $form['sleep'] = array(
     '#type' => 'fieldset',
     '#title' => t('Sleep Time'),
@@ -261,7 +282,7 @@ function sms_user_settings_sleep_form(&$form_state, $account) {
 }
 
 function sms_user_settings_sleep_form_submit($form, &$form_state) {
-  $account = user_load(array('uid' => arg(1)));
+  $account = user_load(array('uid' => $form_state['values']['uid']));
   $data = $account->sms_user;
   $data['sleep_enabled'] = $form_state['values']['sleep_enabled'];
   $data['sleep_start_time'] = $form_state['values']['sleep_start_time'];
@@ -288,7 +309,7 @@ function sms_user_validate_number(&$number) {
   if ($error = sms_validate_number($number)) {
     return $error;
   }
-    elseif (sms_user_get_uid($number, SMS_USER_CONFIRMED)) {
+  elseif (sms_user_get_uid($number)) {
     return t('This phone number is already registered to another user.');
   }
 }
@@ -321,6 +342,14 @@ function sms_user_user($op, &$edit, &$account, $category = NULL) {
         drupal_set_message(t('A confirmation message has been sent to your mobile phone. Please !link.', array('!link' => l(t('confirm your number'), 'user/'. $account->uid .'/mobile'))), 'status');
       }
       break;
+    case 'categories':
+      $categories['mobile'] = array(
+        'name' => 'mobile',
+        'title' => t('Mobile'),
+        'weight' => 10,
+      );
+      return $categories;
+      break;
   }
 }
 
@@ -328,12 +357,12 @@ function sms_user_load(&$edit, &$account, $category) {
   $result = db_query("SELECT number, status, code, gateway FROM {sms_user} WHERE uid = %d", $account->uid);
 
   while ($data = db_fetch_array($result)) {
-    $account->sms_user = array(
-      'number' => $data['number'],
-      'status' => $data['status'],
-      'code' => $data['code'],
-      'gateway' => unserialize($data['gateway']),
-    );
+    $user_data = unserialize($account->data);
+    $account->sms_user = $user_data['sms_user'];
+    $account->sms_user['number'] = $data['number'];
+    $account->sms_user['status'] = $data['status'];
+    $account->sms_user['code'] = $data['code'];
+    $account->sms_user['gateway'] = unserialize($data['gateway']);
   }
 }
 
@@ -348,7 +377,10 @@ function sms_user_save(&$edit, &$account, $category) {
       db_query("INSERT INTO {sms_user} (number, status, code, gateway, uid)
         VALUES ('%s', %d, '%s', '%s', %d)", array_merge($db_values, array($account->uid)));
     }
-    $edit['sms_user'] = NULL;
+    $edit['sms_user']['number'] = NULL;
+    $edit['sms_user']['status'] = NULL;
+    $edit['sms_user']['code'] = NULL;
+    $edit['sms_user']['gateway'] = NULL;
   }
 }
 
@@ -467,8 +499,12 @@ function sms_user_admin_settings() {
 
   $form['registration']['tokens']['content']['#value'] = theme('token_help', 'sms_user');
 
-
-
+  $form['sms_user_max_chars'] = array(
+    '#type' => 'textfield',
+    '#default_value' => variable_get('sms_user_max_chars', SMS_USER_MAX_CHARS),
+    '#size' => 3,
+    '#title' => t('Maximum number of chars for SMS sending using actions'),
+  );
   return system_settings_form($form);
 }
 
@@ -701,4 +737,11 @@ function sms_user_logout() {
   // Destroy the current session:
   session_destroy();
   $user = drupal_anonymous_user();
+}
+
+/**
+ * Implementation of hook_views_api().
+ */
+function sms_user_views_api() {
+  return array('api' => 2);
 }

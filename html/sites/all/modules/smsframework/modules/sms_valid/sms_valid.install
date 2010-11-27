@@ -1,0 +1,106 @@
+<?php
+// $Id: sms_valid.install,v 1.1.4.2 2010/11/18 06:14:34 univate Exp $
+/**
+ * @file
+ * SMS Framework Number Validation feature module: Install file
+ *
+ * @package sms
+ * @subpackage sms_valid
+ */ 
+
+
+/**
+ * Implementation of hook_install().
+ *
+ * @ingroup hooks
+ */
+function sms_valid_install() {
+  drupal_install_schema('sms_valid');
+  sms_valid_create_example_ruleset();
+}
+
+
+/**
+ * Implementation of hook_uninstall().
+ *
+ * @ingroup hooks
+ */
+function sms_valid_uninstall() {
+  drupal_uninstall_schema('sms_valid');
+}
+
+
+/**
+ * Implementation of hook_schema().
+ *
+ * @return
+ *   Drupal schema.
+ *
+ * @ingroup hooks
+ */
+function sms_valid_schema() {
+  $schema = array();
+  $schema['sms_valid_rules'] = array(
+    'fields' => array(
+      'prefix' => array(
+              'type'      => 'int',
+              'size'      => 'small',
+              'unsigned'  => TRUE,
+              'not null'  => TRUE,
+              'description' => 'Number prefix/code; 1-65535'),
+      'name' => array(
+              'type'      => 'varchar',
+              'length'    => 100,
+              'not null'  => TRUE,
+              'description' => 'Descriptive name for this prefix/ruleset'),
+      'rules' => array(
+              'type'      => 'text',
+              'not null'  => FALSE,
+              'serialize' => TRUE,
+              'description' => 'Serialized ruleset'),
+      'dirs_enabled' => array(
+              'type'      => 'int',
+              'size'      => 'tiny',
+              'not null'  => TRUE,
+              'default'   => 4,
+              'description' => 'Active msg directions. See SMS_DIR_* constants.'),
+      'iso2' => array(
+              'type'      => 'varchar',
+              'length'    => 2,
+              'not null'  => FALSE,
+              'description' => 'ISO 3166-1 alpha-2 country code'),
+    ),
+    'primary key' => array('prefix'),
+  );
+  
+  return $schema;
+}
+
+
+/**
+ * Create an example number validation ruleset
+ *
+ * @param $ret
+ *   Array of query results.
+ */
+function sms_valid_create_example_ruleset(&$ret = array()) {
+  $prefix = 64;
+  $name   = 'New Zealand';
+  $dirs_enabled = 4;
+  $iso2  = 'NZ';
+  $rules = array('21' => array('allow' => TRUE,  'comment' => 'Vodafone'),
+                 '22' => array('allow' => TRUE,  'comment' => 'Two Degrees Mobile'),
+                 '25' => array('allow' => FALSE, 'comment' => 'Telecom AMPS+TDMA (old)'),
+                 '26' => array('allow' => FALSE, 'comment' => 'Telecom pager network'),
+                 '27' => array('allow' => TRUE,  'comment' => 'Telecom CDMA'),
+                 '28' => array('allow' => TRUE,  'comment' => 'Slingshot'),
+                 '29' => array('allow' => TRUE,  'comment' => 'TelstraClear'),
+                );
+  $rules_z = serialize($rules);
+
+  $sql = "INSERT INTO {sms_valid_rules} (prefix,name,rules,dirs_enabled,iso2)".
+                                "VALUES (%d, '%s', '%s', %d, '%s')";
+  $result = db_query($sql, $prefix, $name, $rules_z, $dirs_enabled, $iso2);
+  $ret[]  = array('success' => $result !== FALSE, 'query' => check_plain($sql));
+}
+

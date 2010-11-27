@@ -1,0 +1,15 @@
+; $Id: sms_simplegateway.info,v 1.1.4.2 2010/11/18 11:05:46 univate Exp $
+;
+; SMS Framework gateway module for any simple HTTP GET/POST gateway interface
+;
+; To make inbound work you must configure your gateway to send the messages to
+; URL: http(s)://yourhost.example.com/sms/simplegateway/receiver
+;
+; Please also read the comment header in sms_simplegateway.module.
+;
+name = "Simple gateway"
+description = "Gateway: Configurable module for quick & easy integration to unknown gateway providers"
+package = SMS Framework
+version = 6.x-1.x-dev
+core = 6.x
+dependencies[] = sms

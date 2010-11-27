@@ -1,0 +1,4 @@
+; $Id: filemime.info,v 1.1.2.3 2008/08/15 09:29:08 mfb Exp $
+name = File MIME
+description = Rewrite the MIME type for each file upload based on a server-side mime.types file and/or custom settings.
+core = 6.x

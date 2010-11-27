@@ -1,4 +1,4 @@
-; $Id: sms_international.info,v 1.1.2.1 2009/02/09 15:17:19 diggersf Exp $
+; $Id: sms_international.info,v 1.1.2.1.2.1 2010/11/18 05:37:26 univate Exp $
 name = "SMS International"
 description = "Provides international number validation."
 dependencies[] = sms

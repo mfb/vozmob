@@ -1,0 +1,101 @@
+<?php
+// $Id: sms_track.install,v 1.1.4.2 2010/11/18 11:05:46 univate Exp $
+/**
+ * @file
+ * SMS Framework Message Tracking feature module: Install file
+ *
+ * @package sms
+ * @subpackage sms_track
+ */
+
+
+/**
+ * Implement hook_install()
+ */
+function sms_track_install() {
+  drupal_install_schema('sms_track');
+}
+
+
+/**
+ * Implement hook_uninstall()
+ */
+function sms_track_uninstall() {
+  drupal_uninstall_schema('sms_track');
+}
+
+
+/**
+ * Implement hook_schema()
+ *
+ * @return
+ *   Drupal schema array
+ */
+function sms_track_schema() {
+  $schema['sms_track'] = array(
+    'description' => t('Message tracking archive.'),
+    'fields' => array(
+      'id' => array(
+        'description' => t('The primary identifier.'),
+        'type'        => 'serial',
+        'unsigned'    => TRUE,
+        'not null'    => TRUE),
+      'reference' => array(
+        'description' => t('Reference code of message. Enough for an md5 hash.'),
+        'type'        => 'varchar',
+        'length'      => 32,
+        'not null'    => FALSE),
+      'dir' => array(
+        'description' => t('0=out 1=in.'),
+        'type'        => 'int',
+        'size'        => 'tiny',
+        'unsigned'    => TRUE,
+        'not null'    => TRUE),
+      'number' => array(
+        'description' => t('If direction=0 this is recipient. If direction=1 this is sender.'),
+        'type'        => 'varchar',
+        'length'      => 20,
+        'not null'    => TRUE),
+      'gw_number' => array(
+        'description' => t('If direction=0 this is sender. If direction=1 this is recipient.'),
+        'type'        => 'varchar',
+        'length'      => 20,
+        'not null'    => FALSE),
+      'message' => array(
+        'description' => t('Message text.'),
+        'type'        => 'text',
+        'size'        => 'normal',
+        'not null'    => FALSE),
+      'status' => array(
+        'description' => t('Message delivery status. See contants.'),
+        'type'        => 'int',
+        'size'        => 'tiny',
+        'unsigned'    => TRUE,
+        'not null'    => FALSE),
+      'created' => array(
+        'description' => t('The creation timestamp.'),
+        'type'        => 'int',
+        'unsigned'    => TRUE,
+        'not null'    => TRUE),
+      'updated' => array(
+        'description' => t('The modification timestamp.'),
+        'type'        => 'int',
+        'unsigned'    => TRUE,
+        'not null'    => FALSE),
+      'options' => array(
+        'description' => t('Options used when sending/receiving message.'),
+        'type'        => 'text',
+        'size'        => 'normal',
+        'not null'    => FALSE),
+      'log' => array(
+        'description' => t('An array of status changes.'),
+        'type'        => 'text',
+        'size'        => 'normal',
+        'not null'    => FALSE),
+      ),
+    'unique keys' => array(),
+    'primary key' => array('id'),
+  );
+
+  return $schema;
+}

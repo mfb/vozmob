@@ -1,0 +1,7 @@
+; $Id: sms_valid.info,v 1.1.4.2 2010/11/18 06:14:34 univate Exp $
+name = Validation
+description = Provides number validation features to the SMS Framework.
+core = 6.x
+
+package = SMS Framework
+dependencies[] = sms

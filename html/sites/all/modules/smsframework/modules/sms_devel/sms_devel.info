@@ -1,0 +1,6 @@
+; $Id: sms_devel.info,v 1.1.4.3 2010/11/18 11:04:24 univate Exp $
+name = Devel
+description = Dev and test tools to assist module/site development with the SMS Framework.
+core = 6.x
+package = SMS Framework
+dependencies[] = sms
