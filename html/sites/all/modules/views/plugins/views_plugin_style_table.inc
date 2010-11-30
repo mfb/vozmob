@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_style_table.inc,v 1.5.2.6 2010/03/11 00:06:14 merlinofchaos Exp $
+// $Id: views_plugin_style_table.inc,v 1.5.2.7 2010/11/16 00:23:17 merlinofchaos Exp $
 /**
  * @file
  * Contains the table style plugin.
@@ -200,6 +200,14 @@ class views_plugin_style_table extends views_plugin_style {
           '#default_value' => !empty($this->options['info'][$field]['sortable']),
           '#process' => array('views_process_dependency'),
           '#dependency' => array($id => array($field)),
+        );
+        $form['info'][$field]['default_sort_order'] = array(
+          '#type' => 'select',
+          '#options' => array('asc' => t('Ascending'), 'desc' => t('Descending')),
+          '#default_value' => !empty($this->options['info'][$field]['default_sort_order']) ? $this->options['info'][$field]['default_sort_order'] : 'asc',
+          '#process' => array('views_process_dependency'),
+          '#dependency_count' => 2,
+          '#dependency' => array($id => array($field), 'edit-style-options-info-' . $safe . '-sortable' => array(1)),
         );
         // Provide an ID so we can have such things.
         $radio_id = form_clean_id('edit-default-' . $field);

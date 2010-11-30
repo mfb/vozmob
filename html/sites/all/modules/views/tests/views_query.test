@@ -1,5 +1,5 @@
 <?php
-// $Id: views_query.test,v 1.1.4.4 2010/07/10 06:09:56 dereine Exp $
+// $Id: views_query.test,v 1.1.4.5 2010/11/25 20:17:11 dereine Exp $
 
 /**
  * @file
@@ -108,6 +108,21 @@ abstract class ViewsSqlTest extends ViewsTestCase {
     foreach ($this->dataSet() as $record) {
       drupal_write_record('views_test', $record);
     }
+  }
+  
+   
+  /**
+   * This function allows to enable views ui from a higher class which can't change the setup function anymore.
+   * 
+   * @TODO
+   *   Convert existing setUp functions.
+   */
+  function enableViewsUi() {
+    module_enable(array('views_ui'));
+    // @TODO Figure out why it's required to clear the cache here.
+    views_module_include('views_default.inc', TRUE);
+    views_get_all_views(TRUE);
+    menu_rebuild();
   }
 
   /**

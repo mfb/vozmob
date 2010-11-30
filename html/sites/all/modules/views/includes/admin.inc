@@ -1,5 +1,5 @@
 <?php
-// $Id: admin.inc,v 1.154.2.35 2010/08/13 23:18:53 merlinofchaos Exp $
+// $Id: admin.inc,v 1.154.2.43 2010/11/19 00:08:17 merlinofchaos Exp $
 /**
  * @file admin.inc
  * Provides the Views' administrative interface.
@@ -47,6 +47,9 @@ function views_ui_check_advanced_help() {
 function template_preprocess_views_ui_list_views(&$vars) {
   $items = array();
   $sorts = array();
+
+  // Add some js for easier gui.
+  views_add_js('view-list');
 
   $views = views_get_all_views();
 
@@ -244,14 +247,14 @@ function views_ui_list_views_form(&$form_state) {
     );
   }
 
-  $all = array('all' => t('<All>'));
-  $none = array('none' => t('<None>'));
+  $all = array('all' => t('- All -'));
+  $none = array('none' => t('- None -'));
 
   $form['type'] = array(
     '#type' => 'select',
     '#title' => t('Storage'),
     '#options' => array(
-      'all' => t('<All>'),
+      'all' => t('- All -'),
       t('Normal') => t('Normal'),
       t('Default') => t('Default'),
       t('Overridden') => t('Overridden'),
@@ -604,6 +607,7 @@ function views_ui_add_form(&$form_state) {
     '#title' => t('View description'),
     '#description' => t('This description will appear on the Views administrative UI to tell you what the view is about.'),
     '#default_value' => $view ? $view->description : '',
+    '#maxlength' => 255,
   );
 
   $form['tag'] = array(
@@ -1288,8 +1292,12 @@ function template_preprocess_views_ui_edit_item(&$vars) {
     }
   }
 
-  $vars['title'] = l($types[$type]['title'], "admin/build/views/nojs/config-type/$view->name/$display->id/$type", array('attributes' => array('class' => 'views-ajax-link')));
-//  $vars['title'] = l($types[$type]['title'], "admin/build/views/nojs/config-type/$view->name/$display->id/$type", array('attributes' => array('class' => 'views-ajax-link')));
+  if ($display->display_plugin != 'default') {
+    $vars['title'] = l($types[$type]['title'], "admin/build/views/nojs/config-type/$view->name/$display->id/$type", array('attributes' => array('class' => 'views-ajax-link')));
+  }
+  else {
+    $vars['title'] = $types[$type]['title'];
+  }
 
   $fields = array();
 
@@ -1464,16 +1472,26 @@ function views_ui_standard_form_buttons(&$form, &$form_state, $form_id, $name = 
   if (empty($name)) {
     $name = t('Update');
   }
-  // remove default validate handler
-  $form['#validate'] = array();
+
+  // Add the override and update button
+  if ($name == t('Update default display')) {
+    $form['buttons']['override_update'] = array(
+      '#type' => 'submit',
+      '#value' => t('Update and override'),
+      '#submit' => array(
+        'views_ui_edit_display_form_override_update_section',
+        'views_ui_standard_submit',
+        'views_ui_edit_display_form_override_update',
+      ),
+    );
+  }
 
   if (empty($form_state['ok_button'])) {
     // but be sure submit button validates!
     $form['buttons']['submit'] = array(
       '#type' => 'submit',
       '#value' => $name,
-      '#submit' => array($form_id . '_submit'),
-      '#validate' => array('views_ui_standard_submit', $form_id . '_validate'),
+      '#submit' => array('views_ui_standard_submit', $form_id . '_submit'),
     );
   }
 
@@ -2377,6 +2395,24 @@ function views_ui_edit_display_form_override($form, &$form_state) {
   $form_state['rebuild'] = TRUE;
 }
 /**
+ * Override handler and submit views_ui_edit_display_form
+ */
+function views_ui_edit_display_form_override_update(&$form, &$form_state) {
+  $display = &$form_state['view']->display[$form_state['display_id']];
+  $display->handler->options_override($form, $form_state);
+  $display->handler->options_submit($form, $form_state);
+  views_ui_cache_set($form_state['view']);
+}
+
+/**
+ * Override handler and submit views_ui_edit_display_form
+ */
+function views_ui_edit_display_form_override_update_section(&$form, &$form_state) {
+  // Update the #section so it knows what to mark changed.
+  $form['#section'] = str_replace('default-', $form_state['display_id'] . '-', $form['#section']);
+}
+
+/**
  * Form to config items in the views UI.
  */
 function views_ui_config_type_form(&$form_state) {
@@ -2966,7 +3002,7 @@ function views_ui_add_item_form(&$form_state) {
   $options = views_fetch_fields(array_keys($base_tables), $type, $display->handler->use_group_by());
 
   if (!empty($options)) {
-    $groups = array('all' => t('<All>'));
+    $groups = array('all' => t('- All -'));
     $form['group'] = array(
       '#type' => 'select',
       '#title' => t('Groups'),
@@ -3212,12 +3248,12 @@ function views_ui_config_item_group_form(&$form_state) {
   $type = $form_state['type'];
   $id = $form_state['id'];
 
-  $view->init_query();
-
   $form = array('options' => array('#tree' => TRUE));
   if (!$view->set_display($display_id)) {
     views_ajax_render(t('Invalid display id @display', array('@display' => $display_id)));
   }
+
+  $view->init_query();
 
   $item = $view->get_item($display_id, $type, $id);
 
@@ -3947,6 +3983,10 @@ function theme_views_ui_style_plugin_table($form) {
       'align' => 'center',
     ),
     array(
+      'data' => t('Default order'),
+      'align' => 'center',
+    ),
+    array(
       'data' => t('Default sort'),
       'align' => 'center',
     ),
@@ -3964,6 +4004,10 @@ function theme_views_ui_style_plugin_table($form) {
         'align' => 'center',
       );
       $row[] = array(
+        'data' => drupal_render($form['info'][$id]['default_sort_order']),
+        'align' => 'center',
+      );
+      $row[] = array(
         'data' => drupal_render($form['default'][$id]),
         'align' => 'center',
       );
@@ -3971,12 +4015,13 @@ function theme_views_ui_style_plugin_table($form) {
     else {
       $row[] = '';
       $row[] = '';
+      $row[] = '';
     }
     $rows[] = $row;
   }
 
   // Add the special 'None' row.
-  $rows[] = array(t('None'), '', '', '', array('align' => 'center', 'data' => drupal_render($form['default'][-1])));
+  $rows[] = array(t('None'), '', '', '', '', array('align' => 'center', 'data' => drupal_render($form['default'][-1])));
 
   $output .= theme('table', $header, $rows);
   $output .= drupal_render($form);

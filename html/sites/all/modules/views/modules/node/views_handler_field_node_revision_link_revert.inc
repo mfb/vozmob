@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_node_revision_link_revert.inc,v 1.1 2008/09/03 19:21:29 merlinofchaos Exp $
+// $Id: views_handler_field_node_revision_link_revert.inc,v 1.1.2.1 2010/11/18 01:01:48 merlinofchaos Exp $
 /**
  * Field handler to present a link to revert a node to a revision
  */
@@ -16,7 +16,7 @@ class views_handler_field_node_revision_link_revert extends views_handler_field_
     return user_access('revert revisions') || user_access('administer nodes');
   }
 
-  function render($values) {
+  function render_link($data, $values) {
     // ensure user has access to edit this node.
     $node = new stdClass();
     $node->nid = $values->{$this->aliases['nid']};
@@ -34,6 +34,11 @@ class views_handler_field_node_revision_link_revert extends views_handler_field_
     }
 
     $text = !empty($this->options['text']) ? $this->options['text'] : t('revert');
-    return l($text, "node/$node->nid/revisions/$node->vid/revert", array('query' => drupal_get_destination()));
+
+    $this->options['alter']['make_link'] = TRUE;
+    $this->options['alter']['path'] = "node/$node->nid/revisions/$node->vid/revert";
+    $this->options['alter']['query'] = drupal_get_destination();
+
+    return $text;
   }
 }

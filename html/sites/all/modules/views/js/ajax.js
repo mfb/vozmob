@@ -1,4 +1,4 @@
-// $Id: ajax.js,v 1.25.2.11 2010/04/08 21:29:51 merlinofchaos Exp $
+// $Id: ajax.js,v 1.25.2.13 2010/10/15 00:53:57 merlinofchaos Exp $
 /**
  * @file ajax_admin.js
  *
@@ -366,7 +366,7 @@ Drupal.Views.Ajax.handleErrors = function (xhr, path) {
   alert(Drupal.t("An error occurred at @path.\n\nError Description: @error", {'@path': path, '@error': error_text}));
 }
 
-// $Id: ajax.js,v 1.25.2.11 2010/04/08 21:29:51 merlinofchaos Exp $
+// $Id: ajax.js,v 1.25.2.13 2010/10/15 00:53:57 merlinofchaos Exp $
 
 Drupal.behaviors.ViewsGroupedTableDrag = function(context) {
   var table_id = 'arrange';

@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_filter.inc,v 1.6.2.16 2010/08/13 20:51:33 merlinofchaos Exp $
+// $Id: views_handler_filter.inc,v 1.6.2.17 2010/11/18 01:05:01 merlinofchaos Exp $
 /**
  * @defgroup views_filter_handlers Views' filter handlers
  * @{
@@ -423,8 +423,15 @@ class views_handler_filter extends views_handler {
 
       // Various ways to check for the absence of optional input.
       if (!empty($this->options['expose']['optional'])) {
-        if ($value == 'All' || $value === array()) {
-          return FALSE;
+
+        if (($this->operator == 'empty' || $this->operator == 'not empty') && $value === '') {
+          $value = ' ';
+        }
+
+        if ($this->operator != 'empty' && $this->operator != 'not empty') {
+          if ($value == 'All' || $value === array()) {
+            return FALSE;
+          }
         }
 
         if (!empty($this->no_single) && $value === '') {

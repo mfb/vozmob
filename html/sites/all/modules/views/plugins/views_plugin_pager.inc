@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_pager.inc,v 1.1.2.6 2010/04/29 18:39:31 merlinofchaos Exp $
+// $Id: views_plugin_pager.inc,v 1.1.2.7 2010/11/15 23:45:31 merlinofchaos Exp $
 
 /**
  * The base plugin to handle pager.
@@ -138,7 +138,8 @@ class views_plugin_pager extends views_plugin {
    * itself being executed.
    */
   function execute_count_query(&$count_query, $args) {
-    $this->total_items = db_result(db_query($count_query, $args));
+    $query_plugin = $this->view->query;
+    $this->total_items = $query_plugin->db_result($query_plugin->db_query($count_query, $args));
     if (!empty($this->options['offset'])) {
       $this->total_items -= $this->options['offset'];
     }

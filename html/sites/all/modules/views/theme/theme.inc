@@ -1,5 +1,5 @@
 <?php
-// $Id: theme.inc,v 1.73.2.32 2010/08/13 21:34:08 merlinofchaos Exp $
+// $Id: theme.inc,v 1.73.2.35 2010/11/16 00:23:17 merlinofchaos Exp $
 
 /**
  * @file theme.inc
@@ -24,7 +24,7 @@ function _views_theme_functions($hook, $view, $display = NULL) {
   if ($display) {
     $themes[] = $hook . '__' . $view->name . '__' . $display->id;
     $themes[] = $hook . '__' . $display->id;
-    $themes[] = $hook . '__' . preg_replace('/[^a-z0-9]/', '-', strtolower($view->tag));
+    $themes[] = $hook . '__' . preg_replace('/[^a-z0-9]/', '_', strtolower($view->tag));
     if ($display->id != $display->display_plugin) {
       $themes[] = $hook . '__' . $view->name . '__' . $display->display_plugin;
       $themes[] = $hook . '__' . $display->display_plugin;
@@ -154,7 +154,7 @@ function template_preprocess_views_view_fields(&$vars) {
     // render this even if set to exclude so it can be used elsewhere.
     $field_output = $view->style_plugin->get_field($view->row_index, $id);
     $empty = $field_output !== 0 && empty($field_output);
-    if (empty($field->options['exclude']) && (!$empty || empty($field->options['hide_empty']))) {
+    if (empty($field->options['exclude']) && (!$empty || (empty($field->options['hide_empty']) && empty($vars['options']['hide_empty'])))) {
       $object = new stdClass();
 
       $object->content = $field_output;
@@ -313,11 +313,10 @@ function template_preprocess_views_view_table(&$vars) {
         $vars['header'][$field] = $label;
       }
       else {
-        // @todo -- make this a setting
-        $initial = 'asc';
+        $initial = !empty($options['info'][$field]['default_sort_order']) ? $options['info'][$field]['default_sort_order'] : 'asc';
 
-        if ($active == $field && $order == 'asc') {
-          $initial = 'desc';
+        if ($active == $field) {
+          $initial = ($order == 'asc') ? 'desc' : 'asc';
         }
 
         $title = t('sort by @s', array('@s' => $label));

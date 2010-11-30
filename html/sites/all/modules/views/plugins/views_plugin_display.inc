@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_display.inc,v 1.20.2.44 2010/08/14 00:18:23 merlinofchaos Exp $
+// $Id: views_plugin_display.inc,v 1.20.2.47 2010/11/18 21:22:55 merlinofchaos Exp $
 /**
  * @file
  * Contains the base display plugin.
@@ -113,6 +113,16 @@ class views_plugin_display extends views_plugin {
           $this->set_option($area, array());
         }
       }
+    }
+
+    // Convert distinct setting from display to query settings.
+    $distinct = $this->get_option('distinct');
+    if (!empty($distinct)) {
+      $query_settings = $this->get_option('query');
+      $query_settings['options']['distinct'] = $distinct;
+      $this->set_option('query', $query_settings);
+      // Clear the values
+      $this->set_option('distinct', NULL);
     }
   }
 
@@ -262,7 +272,6 @@ class views_plugin_display extends views_plugin {
       'pager' => array('pager'),
       'use_more' => array('use_more', 'use_more_always', 'use_more_text'),
       'link_display' => array('link_display'),
-      'distinct' => array('distinct'),
       'exposed_block' => array('exposed_block'),
       'exposed_form' => array('exposed_form'),
 
@@ -282,6 +291,13 @@ class views_plugin_display extends views_plugin {
       'arguments' => array('arguments'),
       'filters' => array('filters', 'filter_groups'),
     );
+
+    // If the display cannot use a pager, then we cannot default it.
+    if (empty($this->definition['use pager'])) {
+      unset($sections['pager']);
+      unset($sections['items_per_page']);
+    }
+
     if ($section) {
       if (!empty($sections[$section])) {
         return $sections[$section];
@@ -310,7 +326,6 @@ class views_plugin_display extends views_plugin {
           'use_more' => TRUE,
           'use_more_always' => TRUE,
           'use_more_text' => TRUE,
-          'distinct' => TRUE,
           'exposed_block' => TRUE,
           'exposed_form' => TRUE,
 
@@ -372,10 +387,6 @@ class views_plugin_display extends views_plugin {
       ),
       'link_display' => array(
         'default' => '',
-      ),
-      'distinct' => array(
-        'default' => FALSE,
-        'bool' => TRUE,
       ),
       'group_by' => array(
         'default' => FALSE,
@@ -484,9 +495,15 @@ class views_plugin_display extends views_plugin {
         'default' => array(),
         'export' => 'export_handler',
       ),
-
-
     );
+
+    if (empty($this->definition['use pager'])) {
+      $options['defaults']['default']['use_pager'] = FALSE;
+      $options['defaults']['default']['items_per_page'] = FALSE;
+      $options['defaults']['default']['offset'] = FALSE;
+      $options['defaults']['default']['pager'] = FALSE;
+      $options['pager']['contains']['type']['default'] = 'some';
+    }
 
     if ($this->is_default_display()) {
       unset($options['defaults']);
@@ -870,22 +887,24 @@ class views_plugin_display extends views_plugin {
       );
     }
 
-    if (!empty($this->definition['use pager'])) {
+    $pager_plugin = $this->get_plugin('pager');
+    if (!$pager_plugin) {
+      // default to the no pager plugin.
+      $pager_plugin = views_get_plugin('pager', 'none');
+    }
 
-      $pager_plugin = $this->get_plugin('pager');
-      if (!$pager_plugin) {
-        // default to the no pager plugin.
-        $pager_plugin = views_get_plugin('pager', 'none');
-      }
+    $pager_str = $pager_plugin->summary_title();
 
-      $pager_str = $pager_plugin->summary_title();
+    $options['pager'] = array(
+      'category' => 'basic',
+      'title' => t('Use pager'),
+      'value' => $pager_str,
+      'desc' => t("Change this display's pager setting."),
+    );
 
-      $options['pager'] = array(
-        'category' => 'basic',
-        'title' => t('Use pager'),
-        'value' => $pager_str,
-        'desc' => t("Change this display's pager setting."),
-      );
+    // If pagers aren't allowed, change the text of the item:
+    if (empty($this->definition['use pager'])) {
+      $options['pager']['title'] = t('Items to display');
     }
 
     if (!empty($pager_plugin->definition['uses options'])) {
@@ -900,13 +919,6 @@ class views_plugin_display extends views_plugin {
         'desc' => t('Specify whether this display will provide a "more" link.'),
       );
     }
-
-    $options['distinct'] = array(
-      'category' => 'advanced',
-      'title' => t('Distinct'),
-      'value' => $this->get_option('distinct') ? t('Yes') : t('No'),
-      'desc' => t('Display only distinct items, without duplicates.'),
-    );
 
     $this->view->init_query();
     if ($this->view->query->get_aggregation_info()) {
@@ -1125,15 +1137,6 @@ class views_plugin_display extends views_plugin {
           '#title' => t('More link text'),
           '#description' => t("The text to display for the more link."),
           '#default_value' => $this->get_option('use_more_text'),
-        );
-        break;
-      case 'distinct':
-        $form['#title'] .= t('Display only distinct items, without duplicates.');
-        $form['distinct'] = array(
-          '#type' => 'checkbox',
-          '#title' => t('Distinct'),
-          '#description' => t('This will make the view display only distinct items. If there are multiple identical items, each will be displayed only once. You can use this to try and remove duplicates from a view, though it does not always work. Note that this can slow queries down, so use it with caution.'),
-          '#default_value' => $this->get_option('distinct'),
         );
         break;
       case 'group_by':
@@ -1618,7 +1621,7 @@ class views_plugin_display extends views_plugin {
         $pager = $this->get_option('pager');
         $form['pager']['type'] =  array(
           '#type' => 'radios',
-          '#options' => views_fetch_plugin_names('pager'),
+          '#options' => views_fetch_plugin_names('pager', empty($this->definition['use pager']) ? 'basic' : NULL),
           '#default_value' => $pager['type'],
         );
 
@@ -1834,9 +1837,6 @@ class views_plugin_display extends views_plugin {
         $this->set_option('use_more_always', intval($form_state['values']['use_more_always']));
         $this->set_option('use_more_text', $form_state['values']['use_more_text']);
         break;
-      case 'distinct':
-        $this->set_option($section, $form_state['values'][$section]);
-        break;
       case 'group_by':
         $this->set_option($section, $form_state['values'][$section]);
         break;
@@ -2021,12 +2021,7 @@ class views_plugin_display extends views_plugin {
   /**
    * Inject anything into the query that the display handler needs.
    */
-  function query() {
-    // Make the query distinct if the option was set.
-    if ($this->get_option('distinct')) {
-      $this->view->query->set_distinct();
-    }
-  }
+  function query() {  }
 
   /**
    * Not all display plugins will support filtering
@@ -2231,6 +2226,7 @@ class views_plugin_display extends views_plugin {
     return array(
       $delta => array(
         'info' => $desc,
+        'cache' => BLOCK_NO_CACHE,
       )
     );
   }

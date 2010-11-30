@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_node_link_edit.inc,v 1.1 2008/09/03 19:21:29 merlinofchaos Exp $
+// $Id: views_handler_field_node_link_edit.inc,v 1.1.2.1 2010/11/18 01:01:48 merlinofchaos Exp $
 /**
  * Field handler to present a link node edit.
  */
@@ -11,7 +11,7 @@ class views_handler_field_node_link_edit extends views_handler_field_node_link {
     $this->additional_fields['format'] = array('table' => 'node_revisions', 'field' => 'format');
   }
 
-  function render($values) {
+  function render_link($data, $values) {
     // ensure user has access to edit this node.
     $node = new stdClass();
     $node->nid = $values->{$this->aliases['nid']};
@@ -23,8 +23,12 @@ class views_handler_field_node_link_edit extends views_handler_field_node_link {
       return;
     }
 
+    $this->options['alter']['make_link'] = TRUE;
+    $this->options['alter']['path'] = "node/$node->nid/edit";
+    $this->options['alter']['query'] = drupal_get_destination();
+
     $text = !empty($this->options['text']) ? $this->options['text'] : t('edit');
-    return l($text, "node/$node->nid/edit", array('query' => drupal_get_destination()));
+    return $text;
   }
 }
 

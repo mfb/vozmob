@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_query_default.inc,v 1.1.2.24 2010/08/14 00:18:23 merlinofchaos Exp $
+// $Id: views_plugin_query_default.inc,v 1.1.2.26 2010/11/15 23:45:31 merlinofchaos Exp $
 /**
  * @file views_plugin_query_default.inc
  * Defines the default query object which builds SQL to execute using the
@@ -157,6 +157,10 @@ class views_plugin_query_default extends views_plugin_query{
       'translatable' => FALSE,
       'bool' => TRUE,
     );
+    $options['distinct'] = array(
+      'default' => FALSE,
+      'bool' => TRUE,
+    );
 
     return $options;
   }
@@ -171,6 +175,12 @@ class views_plugin_query_default extends views_plugin_query{
       '#type' => 'checkbox',
       '#default_value' => !empty($this->options['disable_sql_rewrite']),
       '#prefix' =>  '<div class="messages warning">' . t('WARNING: Disabling SQL rewriting means that node access security is disabled. This may allow users to see data they should not be able to see if your view is misconfigured. Please use this option only if you understand and accept this security risk.') . '</div>',
+    );
+    $form['distinct'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Distinct'),
+      '#description' => t('This will make the view display only distinct items. If there are multiple identical items, each will be displayed only once. You can use this to try and remove duplicates from a view, though it does not always work. Note that this can slow queries down, so use it with caution.'),
+      '#default_value' => !empty($this->options['distinct']),
     );
   }
 
@@ -1056,6 +1066,11 @@ class views_plugin_query_default extends views_plugin_query{
    * Builds the necessary info to execute the query.
    */
   function build(&$view) {
+    // Make the query distinct if the option was set.
+    if ($this->options['distinct']) {
+      $this->set_distinct();
+    }
+
     $view->init_pager();
 
     // Let the pager modify the query to add limits.
@@ -1116,10 +1131,10 @@ class views_plugin_query_default extends views_plugin_query{
         // We can't have an offset without a limit, so provide a very large limit instead.
         $limit  = intval(!empty($this->limit) ? $this->limit : 999999);
         $offset = intval(!empty($this->offset) ? $this->offset : 0);
-        $result = db_query_range($query, $args, $offset, $limit);
+        $result = $this->db_query_range($query, $args, $offset, $limit);
       }
       else {
-        $result = db_query($query, $args);
+        $result = $this->db_query($query, $args);
       }
 
       $view->result = array();
@@ -1139,6 +1154,53 @@ class views_plugin_query_default extends views_plugin_query{
     }
     $view->execute_time = views_microtime() - $start;
   }
+
+  /**
+   * Wrapper method for db_query().
+   *
+   * @param $query
+   *   A string containing an SQL query.
+   * @param $args
+   *   An array containing the query arguments.
+   * @return
+   *   A database query result resource, or FALSE if the query was not executed
+   *   correctly.
+   */
+  function db_query($query, $args = array()) {
+    return db_query($query, $args);
+  }
+
+  /**
+   * Wrapper method for db_query_range().
+   *
+   * @param $query
+   *   A string containing an SQL query.
+   * @param $from
+   *   The first result row to return.
+   * @param $count
+   *   The maximum number of result rows to return.
+   * @param $args
+   *   An array containing the query arguments.
+   * @return
+   *   A database query result resource, or FALSE if the query was not executed
+   *   correctly.
+   */
+  function db_query_range($query, $from, $count, $args = array()) {
+    return db_query_range($query, $from, $count, $args);
+  }
+
+  /**
+   * Wrapper method for db_result().
+   *
+   * @param $result
+   *   A database query result resource, as returned from db_query().
+   * @return
+   *   The resulting field or FALSE.
+   */
+  function db_result($result) {
+    return db_result($result);
+  }
+
 
   function add_signature(&$view) {
     $view->query->add_field(NULL, "'" . $view->name . ':' . $view->current_display . "'", 'view_name');

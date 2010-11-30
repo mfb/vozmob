@@ -1,5 +1,5 @@
 <?php
-// $Id: ajax.inc,v 1.19.2.3 2010/04/07 23:40:32 merlinofchaos Exp $
+// $Id: ajax.inc,v 1.19.2.4 2010/10/12 22:18:18 merlinofchaos Exp $
 
 /**
  * @file ajax.inc
@@ -121,7 +121,7 @@ function views_ajax_render($output = NULL, $title = NULL, $url = NULL, $js = NUL
 function views_ajax_form_wrapper($form_id, &$form_state) {
   // This won't override settings already in.
   $form_state += array(
-    're_render' => FALSE,
+    'rerender' => FALSE,
     'no_redirect' => !empty($form_state['ajax']),
   );
 

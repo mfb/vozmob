@@ -1,5 +1,5 @@
 <?php
-// $Id: aggregator.views.inc,v 1.2.2.3 2010/07/27 22:45:24 merlinofchaos Exp $
+// $Id: aggregator.views.inc,v 1.2.2.6 2010/11/16 00:18:36 merlinofchaos Exp $
 /**
  * @file
  * Provide views data and handlers for aggregator.module
@@ -55,6 +55,31 @@ function aggregator_views_data() {
     ),
   );
 
+  // iid
+  $data['aggregator_item']['iid'] = array(
+    'title' => t('Item ID'),
+    'help' => t('The unique ID of the aggregator item.'), // The help that appears on the UI,
+    // Information for displaying the iid
+    'field' => array(
+      'handler' => 'views_handler_field_numeric',
+      'click sortable' => TRUE,
+    ),
+    // Information for accepting a iid as an argument
+    'argument' => array(
+      'handler' => 'views_handler_argument_aggregator_iid',
+      'name field' => 'title', // the field to display in the summary.
+      'numeric' => TRUE,
+    ),
+    // Information for accepting a nid as a filter
+    'filter' => array(
+      'handler' => 'views_handler_filter_numeric',
+    ),
+    // Information for sorting on a nid.
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+  );
+
   // title
   $data['aggregator_item']['title'] = array(
     'title' => t('Title'), // The item it appears as on the UI,
@@ -97,6 +122,27 @@ function aggregator_views_data() {
     'help' => t('The author of the original imported item.'),
      // Information for displaying a title as a field
     'field' => array(
+      'handler' => 'views_handler_field_aggregator_xss',
+      'click sortable' => TRUE,
+     ),
+    'sort' => array(
+      'handler' => 'views_handler_sort',
+    ),
+    // Information for accepting a title as a filter
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
+    ),
+    'argument' => array(
+      'handler' => 'views_handler_argument_string',
+    ),
+  );
+
+  // guid
+  $data['aggregator_item']['guid'] = array(
+    'title' => t('GUID'), // The item it appears as on the UI,
+    'help' => t('The guid of the original imported item.'),
+     // Information for displaying a title as a field
+    'field' => array(
       'handler' => 'views_handler_field_xss',
       'click sortable' => TRUE,
      ),
@@ -118,7 +164,7 @@ function aggregator_views_data() {
     'help' => t('The actual content of the imported item.'),
      // Information for displaying a title as a field
     'field' => array(
-      'handler' => 'views_handler_field_aggregator_item_description',
+      'handler' => 'views_handler_field_aggregator_xss',
       'click sortable' => FALSE,
      ),
     // Information for accepting a title as a filter
@@ -361,11 +407,14 @@ function aggregator_views_handlers() {
       'views_handler_field_aggregator_category' => array(
         'parent' => 'views_handler_field',
       ),
-      'views_handler_field_aggregator_item_description' => array(
-        'parent' => 'views_handler_field_xss',
+      'views_handler_field_aggregator_xss' => array(
+        'parent' => 'views_handler_field',
       ),
 
       // argument handlers
+      'views_handler_argument_aggregator_iid' => array(
+        'parent' => 'views_handler_argument_numeric',
+      ),
       'views_handler_argument_aggregator_fid' => array(
         'parent' => 'views_handler_argument_numeric',
       ),

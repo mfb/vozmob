@@ -1,5 +1,5 @@
 <?php
-// $Id: view.inc,v 1.151.2.37 2010/08/17 21:12:06 merlinofchaos Exp $
+// $Id: view.inc,v 1.151.2.45 2010/11/18 23:05:56 merlinofchaos Exp $
 /**
  * @file view.inc
  * Provides the view object type and associated methods.
@@ -36,6 +36,7 @@ class view extends views_db_object {
   var $current_page = NULL;
   var $items_per_page = NULL;
   var $offset = NULL;
+  var $total_rows = NULL;
 
   // Places to put attached renderings:
   var $attachment_before = '';
@@ -327,7 +328,7 @@ class view extends views_db_object {
       return FALSE;
     }
 
-    // init the new display handler with data.
+    // init the new style handler with data.
     $this->style_plugin->init($this, $this->display[$this->current_display], $this->style_options);
     return TRUE;
   }
@@ -432,12 +433,6 @@ class view extends views_db_object {
     // if we get a summary view.
     if (empty($this->argument)) {
       return TRUE;
-    }
- 
-    // Don't render exposed filter form when there's form errors.
-    // Applies when filters are in a block ("exposed_block" option).
-    if (form_get_errors() && empty($form_state['rerender'])) {
-      return NULL;
     }
 
     // build arguments.
@@ -581,7 +576,7 @@ class view extends views_db_object {
       }
     }
 
-    // Let modules modify the view just prior to executing it.
+    // Let modules modify the view just prior to building it.
     foreach (module_implements('views_pre_build') as $module) {
       $function = $module . '_views_pre_build';
       $function($this);
@@ -616,6 +611,8 @@ class view extends views_db_object {
       $this->exposed_widgets = $exposed_form->render_exposed_form();
       if (form_set_error() || !empty($this->build_info['abort'])) {
         $this->built = TRUE;
+        // Don't execute the query, but rendering will still be executed to display the empty text.
+        $this->executed = TRUE;
         return empty($this->build_info['fail']);
       }
     }
@@ -695,6 +692,13 @@ class view extends views_db_object {
 
     // Attach displays
     $this->attach_displays();
+
+    // Let modules modify the view just after building it.
+    foreach (module_implements('views_post_build') as $module) {
+      $function = $module . '_views_post_build';
+      $function($this);
+    }
+
     return TRUE;
   }
 
@@ -763,6 +767,12 @@ class view extends views_db_object {
       }
     }
 
+    // Let modules modify the view just after executing it.
+    foreach (module_implements('views_post_execute') as $module) {
+      $function = $module . '_views_post_execute';
+      $function($this);
+    }
+
     $this->executed = TRUE;
   }
 
@@ -807,7 +817,7 @@ class view extends views_db_object {
 
       $this->style_plugin->pre_render($this->result);
 
-      // Let modules modify the view just prior to executing it.
+      // Let modules modify the view just prior to rendering it.
       foreach (module_implements('views_pre_render') as $module) {
         $function = $module . '_views_pre_render';
         $function($this);
@@ -1042,6 +1052,11 @@ class view extends views_db_object {
    * this sets the display handler if it hasn't been.
    */
   function access($displays = NULL, $account = NULL) {
+    // Noone should have access to disabled views.
+    if (!empty($this->disabled)) {
+      return FALSE;
+    }
+
     if (!isset($this->current_display)) {
       $this->init_display();
     }
@@ -1091,8 +1106,8 @@ class view extends views_db_object {
    */
   function build_title() {
     $this->init_display();
-    if (empty($this->built)) {   
-      $this->init_query();    
+    if (empty($this->built)) {
+      $this->init_query();
     }
     $this->init_handlers();
 

@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_comment_link_edit.inc,v 1.1 2008/09/03 19:21:29 merlinofchaos Exp $
+// $Id: views_handler_field_comment_link_edit.inc,v 1.1.2.2 2010/11/18 01:01:48 merlinofchaos Exp $
 /**
  * Field handler to present a link node edit.
  */
@@ -9,7 +9,26 @@ class views_handler_field_comment_link_edit extends views_handler_field_comment_
     $this->additional_fields['uid'] = 'uid';
   }
 
-  function render($values) {
+  function option_definition() {
+    $options = parent::option_definition();
+    $options['destination'] = array('default' => FALSE);
+
+    return $options;
+  }
+
+  function options_form(&$form, &$form_state) {
+    parent::options_form($form, $form_state);
+
+    $form['destination'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Use destination'),
+      '#description' => t('Add destination to the link'),
+      '#default_value' => $this->options['destination'],
+    );
+  }
+
+  function render_link($data, $values) {
+    parent::render_link($data, $values);
     // ensure user has access to edit this comment.
     $comment = new stdClass();
     $comment->cid = $values->{$this->aliases['cid']};
@@ -19,7 +38,13 @@ class views_handler_field_comment_link_edit extends views_handler_field_comment_
     }
 
     $text = !empty($this->options['text']) ? $this->options['text'] : t('edit');
-    return l($text, "comment/edit/" . $values->{$this->aliases['cid']});
+    unset($this->options['alter']['fragment']);
+
+    if (!empty($this->options['destination'])) {
+      $this->options['alter']['query'] = drupal_get_destination();
+    }
+
+    return $text;
   }
 }
 

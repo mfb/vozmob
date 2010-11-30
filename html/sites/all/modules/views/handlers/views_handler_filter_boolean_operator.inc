@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_filter_boolean_operator.inc,v 1.3.2.7 2010/03/13 00:50:55 merlinofchaos Exp $
+// $Id: views_handler_filter_boolean_operator.inc,v 1.3.2.8 2010/11/18 00:43:22 merlinofchaos Exp $
 /**
  * Simple filter to handle matching of boolean values
  *
@@ -142,7 +142,12 @@ class views_handler_filter_boolean_operator extends views_handler_filter {
       }
     }
     else {
-      $where .= '<> 0';
+      if (!empty($this->definition['use equal'])) {
+        $where .= '= 1';
+      }
+      else {
+        $where .= '<> 0';
+      }
     }
     $this->query->add_where($this->options['group'], $where);
   }

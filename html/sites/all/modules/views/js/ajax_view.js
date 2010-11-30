@@ -1,4 +1,4 @@
-// $Id: ajax_view.js,v 1.17.2.8 2010/03/25 18:25:33 merlinofchaos Exp $
+// $Id: ajax_view.js,v 1.17.2.9 2010/11/18 20:34:05 merlinofchaos Exp $
 
 /**
  * @file ajaxView.js
@@ -47,12 +47,14 @@ Drupal.behaviors.ViewsAjaxView = function() {
       ajax_path = ajax_path[0];
     }
     $.each(Drupal.settings.views.ajaxViews, function(i, settings) {
-      var view = '.view-dom-id-' + settings.view_dom_id;
-      if (!$(view).size()) {
-        // Backward compatibility: if 'views-view.tpl.php' is old and doesn't
-        // contain the 'view-dom-id-#' class, we fall back to the old way of
-        // locating the view:
-        view = '.view-id-' + settings.view_name + '.view-display-id-' + settings.view_display_id;
+      if (settings.view_dom_id) {
+        var view = '.view-dom-id-' + settings.view_dom_id;
+        if (!$(view).size()) {
+          // Backward compatibility: if 'views-view.tpl.php' is old and doesn't
+          // contain the 'view-dom-id-#' class, we fall back to the old way of
+          // locating the view:
+          view = '.view-id-' + settings.view_name + '.view-display-id-' + settings.view_display_id;
+        }
       }
 
 

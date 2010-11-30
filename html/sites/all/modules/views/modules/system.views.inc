@@ -1,5 +1,5 @@
 <?php
-// $Id: system.views.inc,v 1.7 2008/09/03 19:21:29 merlinofchaos Exp $
+// $Id: system.views.inc,v 1.7.2.2 2010/10/14 22:05:44 merlinofchaos Exp $
 /**
  * @file
  *
@@ -121,6 +121,17 @@ function system_views_data() {
     ),
   );
 
+  // extension
+  $data['files']['extension'] = array(
+    'title' => t('Extension'),
+    'help' => t('The extension of the file.'),
+    'real field' => 'filename',
+    'field' => array(
+      'handler' => 'views_handler_field_file_extension',
+      'click sortable' => FALSE,
+     ),
+  );
+
   // filesize
   $data['files']['filesize'] = array(
     'title' => t('Size'),
@@ -169,6 +180,18 @@ function system_views_data() {
     ),
   );
 
+  // uid field
+  $data['files']['uid'] = array(
+    'title' => t('User'),
+    'help' => t('The user, who uploaded the file.'),
+    'relationship' => array(
+      'base' => 'users',
+      'base field' => 'uid',
+      'handler' => 'views_handler_relationship',
+      'label' => t('User'),
+    ),
+  );
+
 
   return $data;
 }
@@ -187,6 +210,9 @@ function system_views_handlers() {
         'parent' => 'views_handler_field',
       ),
       'views_handler_field_file_status' => array(
+        'parent' => 'views_handler_field',
+      ),
+      'views_handler_field_file_extension' => array(
         'parent' => 'views_handler_field',
       ),
       'views_handler_filter_file_status' => array(

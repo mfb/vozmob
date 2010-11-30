@@ -1,5 +1,7 @@
 <?php
-// $Id: views_handlers.test,v 1.1.2.2 2010/04/18 08:19:11 dereine Exp $
+// $Id: views_handlers.test,v 1.1.2.3 2010/10/12 14:59:31 dereine Exp $
+
+module_load_include('test', 'views', 'tests/views_query');
 
 /**
 * @file
