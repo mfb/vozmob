@@ -11,6 +11,13 @@ function sms_registration_settings() {
     '#description' => t('Enter the e-mail address used to receive site registrations.'),
     '#default_value' => variable_get('sms_registration_address', ''),
   );
+  $form['sms_registration_request_user'] = array(
+    '#type' => 'radios',
+    '#options' => array('' => t('None'), 'name' => t('User name'), 'mail' => t('User e-mail address')),
+    '#title' => t('Request user fields on registration'),
+    '#description' => t('Select a user field to request from users after creating a new account.'),
+    '#default_value' => variable_get('sms_registration_request_user', 'name'),
+  );
   $form['sms_registration_username'] = array(
     '#type' => 'textfield',
     '#title' => t('User name prefix'),
