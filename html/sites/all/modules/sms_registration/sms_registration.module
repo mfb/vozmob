@@ -127,4 +127,6 @@ function sms_registration_mailhandler(&$node, $result, $i, $header, $mailbox) {
     // Do not post content from the registration address.
     $node = FALSE;
   }
+
+  return $node;
 }
