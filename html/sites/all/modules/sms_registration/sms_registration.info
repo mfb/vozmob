@@ -1,7 +1,7 @@
 ; $Id$
 name = SMS registration
 description = Allow users to register through SMS or MMS email gateways using Mailhandler to receive email.
-dependencies[] = mailsave
+dependencies[] = mailhandler
 dependencies[] = mms_email_gateway
 dependencies[] = sms_user
 core = 6.x 
