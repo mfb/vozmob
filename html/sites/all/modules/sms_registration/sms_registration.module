@@ -47,8 +47,16 @@ function sms_registration_mailhandler(&$node, $result, $i, $header, $mailbox) {
   $sms_registration_address = variable_get('sms_registration_address', '');
   $number = $from[0];
 
-  // If the user was not authenticated via user account email address and the message is from SMS gateway.
-  if (!$node->uid && isset($providers[$from[1]])) {
+  // If the message is not from SMS gateway, stop processing.
+  if (!isset($providers[$from[1]])) {
+    return $node;
+  }
+
+  // If the message is from SMS gateway, fire sms_incoming callbacks.
+  sms_email_gateway_process_incoming_message($from_address, $to_address, $node->title, $node->body, $header);
+
+  // If the user was not authenticated via user account email address.
+  if (!$node->uid) {
     // Look up the user by phone number.
     if (($uid = sms_user_get_uid($number)) && ($account = user_load(array('uid' => $uid, 'status' => 1)))) {
       $node->uid = $account->uid;
@@ -93,8 +101,8 @@ function sms_registration_mailhandler(&$node, $result, $i, $header, $mailbox) {
     $node->title = t('New story');
   }
 
-  // If user has authenticated and message was sent to a registration address and from a mobile number.
-  if (!empty($node->uid) && strcasecmp($sms_registration_address, $to_address) == 0 && isset($providers[$from[1]])) {
+  // If user has authenticated and message was sent to a registration address.
+  if ($node->uid && strcasecmp($sms_registration_address, $to_address) == 0) {
     $command = trim(strtok(trim(decode_entities(strip_tags($node->body))), "\r\n"));
     //if it comes from a valid sms email gateway and it was sent to one of the email registration accounts
     $password = user_password(8);
