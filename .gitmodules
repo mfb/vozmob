@@ -1,6 +1,6 @@
 [submodule "html/sites/all/themes/blueprint/blueprint"]
-	path = html/sites/all/themes/blueprint/blueprint
-	url = git://github.com/joshuaclayton/blueprint-css.git
+  path = html/sites/all/themes/blueprint/blueprint
+  url = git://github.com/joshuaclayton/blueprint-css.git
 [submodule "html/sites/all/modules/voip"]
 	path = html/sites/all/modules/voip
 	url = git://github.com/leoburd/voip.git
