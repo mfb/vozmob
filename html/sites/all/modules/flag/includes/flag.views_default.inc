@@ -1,5 +1,5 @@
 <?php
-// $Id: flag.views_default.inc,v 1.1.2.5 2009/02/22 22:20:39 quicksketch Exp $
+// $Id: flag.views_default.inc,v 1.1.2.5.2.3 2010/10/24 00:39:21 mooffie Exp $
 
 /**
  * @file
@@ -103,7 +103,7 @@ function flag_views_default_views() {
 
   $access = array(
     'type' => 'role',
-    'role' => drupal_map_assoc($flag->roles),
+    'role' => drupal_map_assoc($flag->roles['flag']),
     'perm' => '',
   );
 
@@ -146,7 +146,7 @@ function flag_views_default_views() {
 
   // Additional relationship for this view.
   $relationships_tab = $relationships;
-  $relationships_tab['flag_content_rel']['user_scope'] = 'all';
+  $relationships_tab['flag_content_rel']['user_scope'] = 'any';
   $relationships_tab += array(
     'uid' => array(
       'label' => 'bookmarks_user',
@@ -204,7 +204,7 @@ function flag_views_default_views() {
   $handler->override_option('access', $access);
   $handler->override_option('title', 'User bookmarks');
   $handler->override_option('empty', 'This user has not yet bookmarked any content.');
-  $handler->override_option('empty_format', '1');
+  $handler->override_option('empty_format', FILTER_FORMAT_DEFAULT);
   $handler->override_option('items_per_page', '25');
   $handler->override_option('use_pager', TRUE);
   $handler->override_option('style_plugin', 'table');

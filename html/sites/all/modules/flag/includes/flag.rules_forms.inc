@@ -1,5 +1,5 @@
 <?php
-// $Id: flag.rules_forms.inc,v 1.1.2.1 2009/03/14 06:06:14 quicksketch Exp $
+// $Id: flag.rules_forms.inc,v 1.1.2.1.2.1 2010/05/10 04:05:28 quicksketch Exp $
 
 /**
  * @file flag.rules_form.inc
@@ -97,7 +97,7 @@ function flag_rules_condition_flagged_label($settings, $argument_labels, $elemen
  ******************************************************************************/
 
 function theme_flag_rules_radios($element) {
-  
+
   if (!empty($element['#disabled'])) {
     drupal_set_message($element['#description'], 'error');
   }
