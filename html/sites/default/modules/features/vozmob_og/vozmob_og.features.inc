@@ -44,11 +44,11 @@ function vozmob_og_flag_default_flags() {
     'show_on_form' => 0,
     'access_author' => '',
     'i18n' => 0,
-    'api_version' => 2,
     'module' => 'vozmob_og',
     'locked' => array(
       '0' => 'name',
     ),
+    'api_version' => 2,
   );
   // Exported flag: "Moderated group".
   $flags['moderated_group'] = array(
@@ -81,11 +81,11 @@ function vozmob_og_flag_default_flags() {
     'i18n' => 0,
     'flag_confirmation' => '',
     'unflag_confirmation' => '',
-    'api_version' => 2,
     'module' => 'vozmob_og',
     'locked' => array(
       '0' => 'name',
     ),
+    'api_version' => 2,
   );
   return $flags;
 }
@@ -223,5 +223,14 @@ function vozmob_og_rules_defaults() {
         '#version' => 6003,
       ),
     ),
+  );
+}
+
+/**
+ * Implementation of hook_views_api().
+ */
+function vozmob_og_views_api() {
+  return array(
+    'api' => '3.0-alpha1',
   );
 }
