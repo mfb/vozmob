@@ -11,6 +11,86 @@ function vozmob_og_ctools_plugin_api() {
 }
 
 /**
+ * Implementation of hook_flag_default_flags().
+ */
+function vozmob_og_flag_default_flags() {
+  $flags = array();
+  // Exported flag: "Requires moderation".
+  $flags['moderate_node'] = array(
+    'content_type' => 'node',
+    'title' => 'Requires moderation',
+    'global' => '1',
+    'types' => array(
+      '0' => 'blog',
+    ),
+    'flag_short' => 'Post requires moderation',
+    'flag_long' => '',
+    'flag_message' => '',
+    'unflag_short' => 'Post has been moderated',
+    'unflag_long' => '',
+    'unflag_message' => '',
+    'unflag_denied_text' => '',
+    'link_type' => 'toggle',
+    'roles' => array(
+      'flag' => array(
+        '0' => 4,
+      ),
+      'unflag' => array(
+        '0' => 4,
+      ),
+    ),
+    'show_on_page' => 0,
+    'show_on_teaser' => 0,
+    'show_on_form' => 0,
+    'access_author' => '',
+    'i18n' => 0,
+    'api_version' => 2,
+    'module' => 'vozmob_og',
+    'locked' => array(
+      '0' => 'name',
+    ),
+  );
+  // Exported flag: "Moderated group".
+  $flags['moderated_group'] = array(
+    'content_type' => 'node',
+    'title' => 'Moderated group',
+    'global' => '1',
+    'types' => array(
+      '0' => 'group',
+    ),
+    'flag_short' => 'Make this a moderated group',
+    'flag_long' => '',
+    'flag_message' => '',
+    'unflag_short' => 'Make this an unmoderated group',
+    'unflag_long' => '',
+    'unflag_message' => '',
+    'unflag_denied_text' => '',
+    'link_type' => 'toggle',
+    'roles' => array(
+      'flag' => array(
+        '0' => '2',
+      ),
+      'unflag' => array(
+        '0' => '2',
+      ),
+    ),
+    'show_on_page' => 0,
+    'show_on_teaser' => 0,
+    'show_on_form' => 1,
+    'access_author' => '',
+    'i18n' => 0,
+    'flag_confirmation' => '',
+    'unflag_confirmation' => '',
+    'api_version' => 2,
+    'module' => 'vozmob_og',
+    'locked' => array(
+      '0' => 'name',
+    ),
+  );
+  return $flags;
+}
+
+/**
  * Implementation of hook_node_info().
  */
 function vozmob_og_node_info() {
@@ -28,4 +108,120 @@ function vozmob_og_node_info() {
     ),
   );
   return $items;
+}
+
+/**
+ * Implementation of hook_rules_defaults().
+ */
+function vozmob_og_rules_defaults() {
+  return array(
+    'rules' => array(
+      'rules_moderated_group_post' => array(
+        '#type' => 'rule',
+        '#set' => 'event_node_insert',
+        '#label' => 'moderated group post',
+        '#active' => 1,
+        '#weight' => '0',
+        '#categories' => array(
+          '0' => 'og',
+          'vozmob_og' => 'vozmob_og',
+        ),
+        '#status' => 'default',
+        '#conditions' => array(
+          '0' => array(
+            '#weight' => 0,
+            '#info' => array(
+              'label' => 'Content is a group post',
+              'arguments' => array(
+                'group' => array(
+                  'type' => 'node',
+                  'label' => 'Group post',
+                ),
+              ),
+              'module' => 'Organic groups',
+            ),
+            '#name' => 'og_rules_condition_content_is_group_post',
+            '#settings' => array(
+              '#argument map' => array(
+                'group' => 'node',
+              ),
+            ),
+            '#type' => 'condition',
+          ),
+          '1' => array(
+            '#type' => 'condition',
+            '#settings' => array(
+              'flag' => 'moderated_group',
+              '#argument map' => array(
+                'object' => 'node',
+                'user' => 'user',
+              ),
+            ),
+            '#name' => 'ogrulesextra_rules_condition_flagged_node',
+            '#info' => array(
+              'label' => 'Node parent(s) are flagged',
+              'base' => 'ogrulesextra_rules_condition_flagged',
+              'label callback' => 'ogrulesextra_rules_condition_flagged_label',
+              'arguments' => array(
+                'flag' => array(
+                  'type' => 'flag',
+                  'label' => 'Parent group flag',
+                  'flag_type' => 'node',
+                ),
+                'object' => array(
+                  'type' => 'node',
+                  'label' => 'Flagged content',
+                ),
+                'user' => array(
+                  'type' => 'user',
+                  'label' => 'User on whose behalf to check',
+                  'description' => 'For non-global flags, this is the user on whose behalf the flag is checked.',
+                ),
+              ),
+              'module' => 'Organic groups',
+            ),
+            '#weight' => 0,
+          ),
+        ),
+        '#actions' => array(
+          '0' => array(
+            '#weight' => 0,
+            '#info' => array(
+              'label' => 'Flag created content, under "Requires moderation"',
+              'base' => 'flag_rules_action_flag',
+              'label callback' => 'flag_rules_action_flag_label',
+              'arguments' => array(
+                'flag' => array(
+                  'type' => 'flag',
+                  'label' => 'Flag',
+                  'flag_type' => 'node',
+                ),
+                'object' => array(
+                  'type' => 'node',
+                  'label' => 'Flagged content',
+                ),
+                'flagging_user' => array(
+                  'type' => 'user',
+                  'label' => 'User on whose behalf to flag',
+                  'description' => 'For non-global flags, this is the user on whose behalf to flag the object. In addition, if checked below, the access permissions to the flag are checked against this user.',
+                ),
+              ),
+              'module' => 'Flag',
+            ),
+            '#name' => 'flag_rules_action_flag_node',
+            '#settings' => array(
+              'flag' => 'moderate_node',
+              'permission_check' => 0,
+              '#argument map' => array(
+                'object' => 'node',
+                'flagging_user' => 'author',
+              ),
+            ),
+            '#type' => 'action',
+          ),
+        ),
+        '#version' => 6003,
+      ),
+    ),
+  );
 }
