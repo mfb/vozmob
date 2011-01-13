@@ -1,4 +1,4 @@
-// $Id: ajax.js,v 1.25.2.13 2010/10/15 00:53:57 merlinofchaos Exp $
+// $Id: ajax.js,v 1.25.2.14 2010/12/09 19:22:30 merlinofchaos Exp $
 /**
  * @file ajax_admin.js
  *
@@ -82,8 +82,9 @@ Drupal.Views.Ajax.ajaxResponse = function(data) {
   else if (!data.tab) {
     // If no display, reset the form.
     Drupal.Views.Ajax.setForm('', Drupal.settings.views.ajax.defaultForm);
-    //Enable the save button.
+    //Enable the save and delete button.
     $('#edit-save').removeAttr('disabled');
+    $('#edit-delete').removeAttr('disabled');
     // Trigger an update for the live preview when we reach this state:
     if ($('#views-ui-preview-form input#edit-live-preview').is(':checked')) {
       $('#views-ui-preview-form').trigger('submit');
@@ -260,8 +261,9 @@ Drupal.behaviors.ViewsAjaxLinks = function() {
     // Turn on the hilite to indicate this is in use.
     $(this).addClass('hilite');
 
-    // Disable the save button.
+    // Disable the save and delete button.
     $('#edit-save').attr('disabled', 'true');
+    $('#edit-delete').attr('disabled', 'true');
 
     $(this).addClass('views-throbbing');
     $.ajax({
@@ -366,7 +368,7 @@ Drupal.Views.Ajax.handleErrors = function (xhr, path) {
   alert(Drupal.t("An error occurred at @path.\n\nError Description: @error", {'@path': path, '@error': error_text}));
 }
 
-// $Id: ajax.js,v 1.25.2.13 2010/10/15 00:53:57 merlinofchaos Exp $
+// $Id: ajax.js,v 1.25.2.14 2010/12/09 19:22:30 merlinofchaos Exp $
 
 Drupal.behaviors.ViewsGroupedTableDrag = function(context) {
   var table_id = 'arrange';

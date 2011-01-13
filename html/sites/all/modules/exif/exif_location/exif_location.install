@@ -1,15 +1,21 @@
 <?php
-// $Id: exif_location.install,v 1.1.2.3 2010/03/19 22:17:00 rapsli Exp $
+// $Id: exif_location.install,v 1.1.2.4 2010/10/08 17:57:43 rapsli Exp $
 
 /**
  * @file This is the exif location install part
  */
 
 /*
- * Hook sets weight must be less than exif module (zero by default).
+ * Hook sets weight must be higher than exif module (-10), but lower than location (0 by default).
  */
 function exif_location_install() {
   $ret = array();
-  $ret[] = db_query("UPDATE {system} SET weight = 2 WHERE name = 'exif_location'");
+  $ret[] = db_query("UPDATE {system} SET weight = -2 WHERE name = 'exif_location'");
   return $ret;
+}
+
+function exif_location_update_6001() {
+  $return = array();
+  $return[] = update_sql("UPDATE {system} SET weight = -2 WHERE name = 'exif_location'");
+  return $return;
 }

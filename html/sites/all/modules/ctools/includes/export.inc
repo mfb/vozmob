@@ -1,5 +1,5 @@
 <?php
-// $Id: export.inc,v 1.19.2.21 2010/08/03 15:39:32 merlinofchaos Exp $
+// $Id: export.inc,v 1.19.2.24 2010/12/31 20:55:42 merlinofchaos Exp $
 
 /**
  * @file
@@ -186,7 +186,7 @@ function ctools_export_crud_delete($table, $object) {
     // If we were sent an object, get the export key from it. Otherwise
     // assume we were sent the export key.
     $value = is_object($object) ? $object->{$export['key']} : $object;
-    db_query("DELETE FROM {$table} WHERE " . $export['key'] . " = '%s'", $value);
+    db_query("DELETE FROM {" . $table . "} WHERE " . $export['key'] . " = '%s'", $value);
   }
 }
 
@@ -468,11 +468,13 @@ function ctools_export_load_object($table, $type = 'all', $args = array()) {
  *   ctools_export_load_object() will be reset.
  */
 function ctools_export_load_object_reset($table = NULL) {
+  // Reset plugin cache to make sure new include files are picked up.
+  ctools_include('plugins');
+  ctools_get_plugins_reset();
   if (empty($table)) {
     ctools_static_reset('ctools_export_load_object');
     ctools_static_reset('ctools_export_load_object_all');
     ctools_static_reset('_ctools_export_get_defaults');
-    ctools_static_reset('ctools_plugin_api_info');
   }
   else {
     $cache = &ctools_static('ctools_export_load_object');
@@ -481,7 +483,6 @@ function ctools_export_load_object_reset($table = NULL) {
     unset($cache[$table]);
     unset($cached_database[$table]);
     unset($cached_defaults[$table]);
-    ctools_static_reset('ctools_plugin_api_info');
   }
 }
 
@@ -769,14 +770,6 @@ function ctools_export_get_schema($table) {
       'bulk export' => TRUE,
       'list callback' => "$schema[module]_{$table}_list",
       'to hook code callback' => "$schema[module]_{$table}_to_hook_code",
-      'api' => array(),
-    );
-
-    $schema['export']['api'] += array(
-      'owner' => $table,
-      'api' => $table,
-      'minimum_version' => 1,
-      'current_version' => 1,
     );
 
     // If the export definition doesn't have the "primary key" then the CRUD

@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_query.inc,v 1.1.2.9 2010/08/14 00:18:23 merlinofchaos Exp $
+// $Id: views_plugin_query.inc,v 1.1.2.11 2011/01/04 21:24:31 merlinofchaos Exp $
 /**
  * @file
  * Defines the base query class, which is the underlying layer in a View.
@@ -18,7 +18,9 @@ class views_plugin_query extends views_plugin {
    * Constructor; Create the basic query object and fill with default values.
    */
   function init($base_table, $base_field, $options) {
-    $this->options = $options;
+    $this->base_table = $base_table;
+    $this->base_field = $base_field;
+    $this->unpack_options($this->options, $options);
   }
 
   /**
@@ -141,6 +143,26 @@ class views_plugin_query extends views_plugin {
    */
   function set_group_operator($type = 'AND') {
     $this->group_operator = strtoupper($type);
+  }
+
+  /**
+   * Return info to base the uniqueness of the result on.
+   *
+   * @return $cache_info
+   *   A string or array with query unique data or FALSE to deactivate caching
+   */
+  function get_cache_info() {
+    return FALSE;
+  }
+
+  /**
+   * Return preview info.
+   *
+   * @return $rows
+   *   An array of strings with info to be shown in the preview.
+   */
+  function get_preview_info() {
+    return array(array('<strong>' . t('Query') . '</strong>', t('No info')));
   }
 
 }

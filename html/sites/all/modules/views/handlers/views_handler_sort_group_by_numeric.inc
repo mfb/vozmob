@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_sort_group_by_numeric.inc,v 1.1.2.1 2009/11/10 23:23:27 merlinofchaos Exp $
+// $Id: views_handler_sort_group_by_numeric.inc,v 1.1.2.2 2010/11/30 21:14:24 merlinofchaos Exp $
 /**
  * Handler for GROUP BY on simple numeric fields.
  */

@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_argument_validate_taxonomy_term.inc,v 1.4.2.6 2010/03/19 23:44:15 merlinofchaos Exp $
+// $Id: views_plugin_argument_validate_taxonomy_term.inc,v 1.4.2.7 2011/01/11 22:54:58 merlinofchaos Exp $
 /**
  * @file
  * Contains the 'taxonomy term' argument validator plugin.
@@ -150,8 +150,8 @@ class views_plugin_argument_validate_taxonomy_term extends views_plugin_argument
 
         if ($type == 'convert') {
           $this->argument->argument = $result->tid;
-          $this->argument->validated_title = check_plain($result->name);
         }
+        $this->argument->validated_title = check_plain($result->name);
 
         return TRUE;
     }

@@ -1,5 +1,5 @@
 <?php
-// $Id: ckeditor.inc,v 1.2.6.7 2010/09/10 02:14:07 sun Exp $
+// $Id: ckeditor.inc,v 1.2.6.11 2011/01/10 01:22:54 twod Exp $
 
 /**
  * @file
@@ -104,6 +104,7 @@ function wysiwyg_ckeditor_themes($editor, $profile) {
     }
     closedir($dir_handle);
     natcasesort($themes);
+    $themes = array_values($themes);
     return !empty($themes) ? $themes : array('default');
   }
   else {
@@ -184,15 +185,16 @@ function wysiwyg_ckeditor_settings($editor, $config, $theme) {
     $settings['language'] = $config['language'];
   }
   if (isset($config['resizing'])) {
-    $settings['resize_enabled'] = $config['resizing'];
+    // CKEditor tests "!== false", so ensure it is a Boolean.
+    $settings['resize_enabled'] = (bool) $config['resizing'];
   }
   if (isset($config['toolbar_loc'])) {
     $settings['toolbarLocation'] = $config['toolbar_loc'];
   }
 
+  $settings['toolbar'] = array();
   if (!empty($config['buttons'])) {
     $extra_plugins = array();
-    $settings['toolbar'] = array();
     $plugins = wysiwyg_get_plugins($editor['name']);
     foreach ($config['buttons'] as $plugin => $buttons) {
       foreach ($buttons as $button => $enabled) {
@@ -232,11 +234,9 @@ function wysiwyg_ckeditor_settings($editor, $config, $theme) {
     if (!empty($extra_plugins)) {
       $settings['extraPlugins'] = implode(',', $extra_plugins);
     }
-    // For now, all buttons are placed into one row.
-    if (!empty($settings['toolbar'])) {
-      $settings['toolbar'] = array($settings['toolbar']);
-    }
   }
+  // For now, all buttons are placed into one row.
+  $settings['toolbar'] = array($settings['toolbar']);
 
   return $settings;
 }
@@ -252,12 +252,13 @@ function wysiwyg_ckeditor_plugin_settings($editor, $profile, $plugins) {
       $settings[$name] = array();
       // Add path for native external plugins.
       if (empty($plugin['internal']) && isset($plugin['path'])) {
-        $settings[$name]['path'] = base_path() . $plugin['path'];
+        $settings[$name]['path'] = base_path() . $plugin['path'] . '/';
       }
       // Force native internal plugins to use the standard path.
       else {
         $settings[$name]['path'] = base_path() . $editor['library path'] . '/plugins/' . $name . '/';
       }
+      // CKEditor defaults to 'plugin.js' on its own when filename is not set.
       if (!empty($plugin['filename'])) {
         $settings[$name]['fileName'] = $plugin['filename'];
       }

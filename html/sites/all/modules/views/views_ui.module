@@ -1,5 +1,5 @@
 <?php
-// $Id: views_ui.module,v 1.109.2.5 2010/08/13 23:18:53 merlinofchaos Exp $
+// $Id: views_ui.module,v 1.109.2.7 2010/12/10 00:39:21 merlinofchaos Exp $
 /**
  * @file views_ui.module
  * Provide structure for the administrative interface to Views.
@@ -125,9 +125,17 @@ function views_ui_menu() {
     'page callback' => 'views_ui_reorder_view',
     'page arguments' => array(3, 5),
   );
-  $items['admin/build/views/%views_ui_js/details/%views_ui_cache'] = $callback + array(
+  $items['admin/build/views/%views_ui_js/human_name/%views_ui_cache'] = $callback + array(
     'page callback' => 'views_ui_edit_details',
-    'page arguments' => array(3, 5),
+    'page arguments' => array('human_name', 3, 5),
+  );
+  $items['admin/build/views/%views_ui_js/tag/%views_ui_cache'] = $callback + array(
+    'page callback' => 'views_ui_edit_details',
+    'page arguments' => array('tag', 3, 5),
+  );
+  $items['admin/build/views/%views_ui_js/description/%views_ui_cache'] = $callback + array(
+    'page callback' => 'views_ui_edit_details',
+    'page arguments' => array('description', 3, 5),
   );
   $items['admin/build/views/%views_ui_js/add-display/%views_ui_cache'] = $callback + array(
     'page callback' => 'views_ui_add_display',
@@ -251,6 +259,10 @@ function views_ui_cache_load($name) {
       // Check to see if someone else is already editing this view.
       global $user;
       $view->locked = db_fetch_object(db_query("SELECT s.uid, v.updated FROM {views_object_cache} v INNER JOIN {sessions}  s ON v.sid = s.sid WHERE s.sid != '%s' and v.name = '%s' and v.obj = 'view' ORDER BY v.updated ASC", session_id(), $view->name));
+      // Set a flag to indicate that this view is being edited.
+      // This flag will be used e.g. to determine whether strings
+      // should be localized.
+      $view->editing = TRUE;
     }
   }
 

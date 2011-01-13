@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_boolean.inc,v 1.2.2.2 2010/03/25 01:14:18 merlinofchaos Exp $
+// $Id: views_handler_field_boolean.inc,v 1.2.2.3 2011/01/10 23:14:26 merlinofchaos Exp $
 
 /**
  * A handler to provide proper displays for booleans.
@@ -59,7 +59,7 @@ class views_handler_field_boolean extends views_handler_field {
   }
 
   function render($values) {
-    $value = $values->{$this->field_alias};
+    $value = $this->get_value($values);
     if (!empty($this->options['not'])) {
       $value = !$value;
     }

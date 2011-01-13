@@ -1,5 +1,5 @@
 <?php
-// $Id: views_export.module,v 1.4.2.6 2010/11/18 01:08:58 merlinofchaos Exp $
+// $Id: views_export.module,v 1.4.2.7 2010/11/30 21:23:12 merlinofchaos Exp $
 
 /**
  * @file views_export.module
@@ -21,9 +21,10 @@ function views_export_menu() {
   );
 
   $items['admin/build/views/tools/export/results'] = array(
+    'title' => 'Bulk export results',
     'access arguments' => array('use views exporter'),
     'page callback' => 'views_export_export',
-    'type' => MENU_CALLBACK,
+    'type' => MENU_LOCAL_TASK,
   );
 
   return $items;
@@ -189,7 +190,7 @@ function views_export_export_form_submit(&$form, &$form_state) {
 
   $types = system_elements();
 
-  $info  = '; $Id: views_export.module,v 1.4.2.6 2010/11/18 01:08:58 merlinofchaos Exp $'."\n";
+  $info  = '; $Id: views_export.module,v 1.4.2.7 2010/11/30 21:23:12 merlinofchaos Exp $'."\n";
   $info .= "\n";
   $info .= strtr("name = @module Export Module\n", array('@module' => $form_state['values']['name']));
   $info .= strtr("description = Exports some views of @module\n", array('@module' => $form_state['values']['name']));

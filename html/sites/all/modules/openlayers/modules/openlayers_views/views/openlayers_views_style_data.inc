@@ -1,5 +1,5 @@
 <?php
-// $Id: openlayers_views_style_data.inc,v 1.1.2.28 2010/09/23 14:39:24 tmcw Exp $
+// $Id: openlayers_views_style_data.inc,v 1.1.2.30 2010/10/14 10:10:11 zzolo Exp $
 
 /**
  * @file
@@ -156,6 +156,12 @@ class openlayers_views_style_data extends views_plugin_style {
         '#options' => array_merge(array('' => ''), $fields),
         '#default_value' => $this->options['data_source']['name_field'],
     );
+    $form['data_source']['keep_orig_name_field'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Keep non-rendered title field attribute'),
+        '#description' => t('Check to ensure the title field will still be present as an attribute in its non-rendered form'),
+        '#default_value' => $this->options['data_source']['keep_orig_name_field']
+    );
     $form['data_source']['description_field'] = array(
         '#type' => 'select',
         '#title' => t('Description Field'),
@@ -163,6 +169,12 @@ class openlayers_views_style_data extends views_plugin_style {
         '#required' => FALSE,
         '#options' => array_merge(array('' => ''), $fields),
         '#default_value' => $this->options['data_source']['description_field'],
+    );
+    $form['data_source']['keep_orig_desc_field'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Keep non-rendered description field attribute'),
+        '#description' => t('Check to ensure the description field will still be present as an attribute in its non-rendered form'),
+        '#default_value' => $this->options['data_source']['keep_orig_desc_field']
     );
 
     // Attributes and variable styling description
@@ -385,6 +397,9 @@ class openlayers_views_style_data extends views_plugin_style {
           $name_field = $fields[$data_source['name_field']]['field_alias'];
           $feature['attributes']['name'] = $rendered_record[$name_field];
           $excluded_fields[] = $name_field;
+          if (!empty($data_source['keep_orig_name_field'])) {
+            $feature['attributes'][$data_source['name_field']] = $record->$name_field;
+          }
         }
         else {
           $feature['attributes']['name'] = '';
@@ -393,6 +408,9 @@ class openlayers_views_style_data extends views_plugin_style {
           $description_field = $fields[$data_source['description_field']]['field_alias'];
           $feature['attributes']['description'] = $rendered_record[$description_field];
           $excluded_fields[] = $description_field;
+          if (!empty($data_source['keep_orig_desc_field'])) {
+            $feature['attributes'][$data_source['description_field']] = $record->$description_field;
+          }
         }
         else {
           $feature['attributes']['description'] = '';

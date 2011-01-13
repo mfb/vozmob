@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_comment_node_link.inc,v 1.1.2.2 2010/11/16 00:43:46 merlinofchaos Exp $
+// $Id: views_handler_field_comment_node_link.inc,v 1.1.2.3 2011/01/10 23:14:26 merlinofchaos Exp $
 /**
 * Handler for showing comment module's node link.
  */
@@ -45,9 +45,9 @@ class views_handler_field_comment_node_link extends views_handler_field {
   function render($values) {
     // Build fake $node.
     $node = new stdClass();
-    $node->nid      = $values->{$this->aliases['nid']};
-    $node->type     = $values->{$this->aliases['type']};
-    $node->comment  = $values->{$this->aliases['comment']};
+    $node->nid      = $this->get_value($values, 'nid');
+    $node->type     = $this->get_value($values, 'type');
+    $node->comment  = $this->get_value($values, 'comment');
 
     // Call comment.module's hook_link: comment_link($type, $node = NULL, $teaser = FALSE)
     $links = comment_link('node', $node, $this->options['teaser']);

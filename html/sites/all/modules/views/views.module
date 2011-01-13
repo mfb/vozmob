@@ -1,5 +1,5 @@
 <?php
-// $Id: views.module,v 1.332.2.36 2010/11/18 23:16:54 merlinofchaos Exp $
+// $Id: views.module,v 1.332.2.39 2011/01/04 20:29:56 merlinofchaos Exp $
 /**
  * @file
  * Primarily Drupal hooks and global API functions to manipulate views.
@@ -552,6 +552,13 @@ function views_access() {
     }
 
     list($callback, $arguments) = $arg;
+    $arguments = $arguments ? $arguments : array();
+    // Bring dynamic arguments to the access callback.
+    foreach ($arguments as $key => $value) {
+      if (is_int($value) && isset($args[$value])) {
+        $arguments[$key] = $args[$value];
+      }
+    }
     if (function_exists($callback) && call_user_func_array($callback, $arguments)) {
       return TRUE;
     }
@@ -787,7 +794,6 @@ function views_get_handler($table, $field, $key, $override = NULL) {
     return $handler;
   }
 
-  // DEBUG -- identify missing handlers
   vpr("Missing handler: $table $field $key");
   $broken = array(
     'title' => t('Broken handler @table.@field', array('@table' => $table, '@field' => $field)),

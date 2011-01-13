@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_node_link_delete.inc,v 1.1.2.1 2010/11/18 01:01:48 merlinofchaos Exp $
+// $Id: views_handler_field_node_link_delete.inc,v 1.1.2.2 2011/01/10 23:14:26 merlinofchaos Exp $
 /**
  * Field handler to present a link to delete a node.
  */
@@ -14,10 +14,10 @@ class views_handler_field_node_link_delete extends views_handler_field_node_link
   function render_link($data, $values) {
     // ensure user has access to edit this node.
     $node = new stdClass();
-    $node->nid = $values->{$this->aliases['nid']};
-    $node->uid = $values->{$this->aliases['uid']};
-    $node->type = $values->{$this->aliases['type']};
-    $node->format = $values->{$this->aliases['format']};
+    $node->nid = $this->get_value($values, 'nid');
+    $node->uid = $this->get_value($values, 'uid');
+    $node->type = $this->get_value($values, 'type');
+    $node->format = $this->get_value($values, 'format');
     $node->status = 1; // unpublished nodes ignore access control
     if (!node_access('delete', $node)) {
       return;

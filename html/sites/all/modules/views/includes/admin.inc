@@ -1,5 +1,5 @@
 <?php
-// $Id: admin.inc,v 1.154.2.43 2010/11/19 00:08:17 merlinofchaos Exp $
+// $Id: admin.inc,v 1.154.2.55 2011/01/10 23:07:43 merlinofchaos Exp $
 /**
  * @file admin.inc
  * Provides the Views' administrative interface.
@@ -424,14 +424,9 @@ function views_ui_preview($js, $view) {
     $preview = $view->preview($form_state['display_id'], $args);
 
     // Get information from the preview for display.
-    if (!empty($view->build_info['query'])) {
-      $rows = array();
-      $query = db_prefix_tables($view->build_info['query']);
-      if ($view->build_info['query_args']) {
-        _db_query_callback($view->build_info['query_args'], TRUE);
-        $query = preg_replace_callback(DB_QUERY_REGEXP, '_db_query_callback', $query);
-      }
-      $rows[] = array('<strong>' . t('Query') . '</strong>', '<pre>' . check_plain($query) . '</pre>');
+    if (empty($view->build_info['fail'])) {
+      $rows = $view->query->get_preview_info();
+
       if (!empty($view->additional_queries)) {
         $queries = '<strong>' . t('These queries were run during view rendering:') . '</strong>';
         foreach ($view->additional_queries as $query) {
@@ -602,6 +597,13 @@ function views_ui_add_form(&$form_state) {
     '#attributes' => array('dir'=>'ltr'),
   );
 
+  $form['human_name'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Human readable name'),
+    '#description' => t('You can use a more descriptive name for this view here. Spaces are allowed'),
+    '#default_value' => $view ? $view->human_name : '',
+  );
+
   $form['description'] = array(
     '#type' => 'textfield',
     '#title' => t('View description'),
@@ -669,8 +671,10 @@ function views_ui_add_form_validate($form, &$form_state) {
 function views_ui_add_form_submit($form, &$form_state) {
   $view = $form_state['view'] ? $form_state['view'] : views_new_view();
   $view->name = $form_state['values']['name'];
+  $view->human_name = $form_state['values']['human_name'];
   $view->description = $form_state['values']['description'];
   $view->tag = $form_state['values']['tag'];
+  $view->core = VERSION;
   if (empty($form['base_table']['#disabled'])) {
     $view->base_table = $form_state['values']['base_table'];
   }
@@ -1144,15 +1148,28 @@ function template_preprocess_views_ui_edit_tab(&$vars) {
   $vars['title'] = check_plain($display->display_title);
   $vars['description'] = check_plain($plugin['help']);
 
-  // Special fields if tihs is the default display.
+  // Special fields if this is the default display.
   $vars['default'] = ($display->id == 'default');
   $vars['details_class'] = views_ui_item_css('details');
-  if (!empty($view->changed_sections['details'])) {
-    $vars['details_changed'] = TRUE;
+  
+  foreach (array('human_name', 'tag', 'description') as $property) {
+    if (!empty($view->changed_sections[$property])) {
+      $vars['details_changed'][$property] = TRUE;
+    }
+    switch ($property) {
+      case 'human_name':
+        $title = t('Human name');
+        break;
+      case 'tag':
+        $title = t('Tag');
+        break;
+      case 'description':
+        $title = t('Description');
+        break;
+    }
+    $value = empty($view->{$property}) ? t('None') : check_plain($view->{$property});
+    $vars['details'][$property] = $title . ': ' . l($value, "admin/build/views/nojs/$property/$view->name", array('attributes' => array('class' => 'views-ajax-link')));
   }
-
-  $tag = empty($view->tag) ? t('None') : $view->tag;
-  $vars['details'] = t('Description') . '/' . t('Tag') . ': ' . l($tag, "admin/build/views/nojs/details/$view->name", array('attributes' => array('class' => 'views-ajax-link')));
 
   // Calculate options from display plugin.
   $options = $categories = array();
@@ -1306,8 +1323,12 @@ function template_preprocess_views_ui_edit_item(&$vars) {
     // Get relationship labels
     $relationships = array();
     // @todo: get_handlers()
-    foreach ($display->handler->get_handlers('relationship') as $id => $handler) {
-      $relationships[$id] = $handler->label();
+    $handlers = $display->handler->get_option('relationships');
+    if ($handlers) {
+      foreach ($handlers as $id => $info) {
+        $handler = $display->handler->get_handler('relationship', $id);
+        $relationships[$id] = $handler->label();
+      }
     }
   }
 
@@ -1752,6 +1773,8 @@ function views_ui_ajax_form($js, $key, $view, $display_id) {
       $stack = $view->stack; // copy so the next shift doesn't break the array
       $top = array_shift($stack);
       $top[0] = $js; // change identifier into $js setting
+      $stepview = $top[2]; // Change view into a reference [#452384]
+      $top[2] = &$stepview;
       $form_state = call_user_func_array('views_ui_build_form_state', $top);
       $form_state['input'] = array(); // this is a new form, make sure it
       // doesn't try to inherit $_POST info.
@@ -2283,11 +2306,12 @@ function views_ui_reorder_displays_button(&$form_state, $view) {
 /**
  * Page callback to edit details of a view.
  */
-function views_ui_edit_details($js, $view) {
+function views_ui_edit_details($property, $js, $view) {
   views_include('ajax');
   $form_state = array(
     'view' => &$view,
     'ajax' => $js,
+    'property' => $property,
   );
 
   $output = views_ajax_form_wrapper('views_ui_edit_details_form', $form_state);
@@ -2312,20 +2336,35 @@ function views_ui_edit_details_form(&$form_state) {
   $form['#title'] = t('View details');
   $form['#section'] = 'details';
 
-  $form['description'] = array(
-    '#type' => 'textfield',
-    '#title' => t('View description'),
-    '#description' => t('This description will appear on the Views administrative UI to tell you what the view is about.'),
-    '#default_value' => $view->description,
-  );
-
-  $form['tag'] = array(
-    '#type' => 'textfield',
-    '#title' => t('View tag'),
-    '#description' => t('Enter an optional tag for this view; it is used only to help sort views on the administrative page.'),
-    '#default_value' => $view->tag,
-    '#autocomplete_path' => 'admin/views/ajax/autocomplete/tag',
-  );
+  switch ($form_state['property']) {
+    case 'human_name':
+      $form['human_name'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Human readable name'),
+        '#description' => t('You can use a more descriptive name for this view here. Spaces are allowed'),
+        '#default_value' => $view->human_name,
+      );
+      break;
+    
+    case 'tag':
+      $form['tag'] = array(
+        '#type' => 'textfield',
+        '#title' => t('View tag'),
+        '#description' => t('Enter an optional tag for this view; it is used only to help sort views on the administrative page.'),
+        '#default_value' => $view->tag,
+        '#autocomplete_path' => 'admin/views/ajax/autocomplete/tag',
+      );
+      break;
+    
+    case 'description':
+      $form['description'] = array(
+        '#type' => 'textfield',
+        '#title' => t('View description'),
+        '#description' => t('This description will appear on the Views administrative UI to tell you what the view is about.'),
+        '#default_value' => $view->description,
+      );
+      break;
+  }
 
   views_ui_standard_form_buttons($form, $form_state, 'views_ui_edit_details_form');
   return $form;
@@ -2335,8 +2374,7 @@ function views_ui_edit_details_form(&$form_state) {
  * Submit handler for views_ui_edit_details_form
  */
 function views_ui_edit_details_form_submit($form, &$form_state) {
-  $form_state['view']->description = $form_state['values']['description'];
-  $form_state['view']->tag = $form_state['values']['tag'];
+  $form_state['view']->{$form_state['property']} = $form_state['values'][$form_state['property']];
   views_ui_cache_set($form_state['view']);
   $form_state['redirect'] = 'admin/build/views/edit/' . $form_state['view']->name;
 }
@@ -2988,13 +3026,14 @@ function views_ui_add_item_form(&$form_state) {
   $display = &$view->display[$display_id];
 
   $types = views_object_types();
+  $ltitle = $types[$type]['ltitle'];
 
   if (!empty($types[$type]['type'])) {
     $type = $types[$type]['type'];
   }
 
   $form['#title'] = check_plain($display->display_title) . ': ';
-  $form['#title'] .= t('Add @type', array('@type' => $types[$type]['ltitle']));
+  $form['#title'] .= t('Add @type', array('@type' => $ltitle));
   $form['#section'] = $display_id . 'add-item';
 
   // Figure out all the base tables allowed based upon what the relationships provide.
@@ -3043,7 +3082,7 @@ function views_ui_add_item_form(&$form_state) {
   }
   else {
     $form['markup'] = array(
-      '#value' => '<div class="form-item">' . t('There are no @types available to add.', array('@types' =>  $types[$type]['ltitle'])) . '</div>',
+      '#value' => '<div class="form-item">' . t('There are no @types available to add.', array('@types' =>  $ltitle)) . '</div>',
     );
   }
   views_ui_standard_form_buttons($form, $form_state, 'views_ui_add_item_form', t('Add'));
@@ -3178,6 +3217,14 @@ function views_ui_config_item_form(&$form_state) {
       $form['#title'] = check_plain($view->display[$display_id]->display_title) . ': ';
       $form['#title'] .= t('Configure @type %item', array('@type' => $types[$type]['lstitle'], '%item' => $handler->ui_name()));
 
+      $form['form_description'] = array(
+        '#type' => 'markup',
+        '#weight' => -1000,
+        '#prefix' => '<div class="form-item description">',
+        '#suffix' => '</div>',
+        '#value' => $handler->definition['help'],
+      );
+
       $form['#section'] = $display_id . '-' . $type . '-' . $id;
 
       // Get form from the handler.
@@ -3219,6 +3266,7 @@ function views_ui_config_item_form_submit($form, &$form_state) {
   // Create a new handler and unpack the options from the form onto it. We
   // can use that for storage.
   $handler = views_get_handler($item['table'], $item['field'], $type);
+  $handler->init($form_state['view'], $item);
 
   // Add the incoming options to existing options because items using
   // the extra form may not have everything in the form here.
@@ -3357,7 +3405,6 @@ function views_ui_config_item_extra_form(&$form_state) {
     $handler = views_get_handler($item['table'], $item['field'], $type);
     if (empty($handler)) {
       $form['markup'] = array('#value' => t("Error: handler for @table > @field doesn't exist!", array('@table' => $item['table'], '@field' => $item['field'])));
-      break;
     }
     else {
       $handler->init($view, $item);
@@ -3424,22 +3471,22 @@ function views_ui_change_style_form(&$form_state) {
     $handler = views_get_handler($item['table'], $item['field'], $type);
     if (empty($handler)) {
       $form['markup'] = array('#value' => t("Error: handler for @table > @field doesn't exist!", array('@table' => $item['table'], '@field' => $item['field'])));
-      break;
     }
-    $handler->init($view, $item);
-    $types = views_object_types();
-    $form['#title'] = t('Change summary style for @type %item', array('@type' => $types[$type]['lstitle'], '%item' => $handler->ui_name()));
+    else {
+      $handler->init($view, $item);
+      $types = views_object_types();
+      $form['#title'] = t('Change summary style for @type %item', array('@type' => $types[$type]['lstitle'], '%item' => $handler->ui_name()));
 
-    $form['#section'] = $display_id . '-' . $type . '-' . $id . '-style-plugin';
+      $form['#section'] = $display_id . '-' . $type . '-' . $id . '-style-plugin';
 
-    $form['style_plugin'] =  array(
-      '#type' => 'radios',
-      '#options' => views_fetch_plugin_names('style', 'summary'),
-      '#default_value' => $item['style_plugin'],
-    );
+      $form['style_plugin'] =  array(
+        '#type' => 'radios',
+        '#options' => views_fetch_plugin_names('style', 'summary'),
+        '#default_value' => $item['style_plugin'],
+      );
 
-    $form_state['handler'] = &$handler;
-
+      $form_state['handler'] = &$handler;
+    }
     views_ui_standard_form_buttons($form, $form_state, 'views_ui_change_style_form');
   }
   return $form;
@@ -3509,27 +3556,28 @@ function views_ui_config_style_form(&$form_state) {
     $handler = views_get_handler($item['table'], $item['field'], $type);
     if (empty($handler)) {
       $form['markup'] = array('#value' => t("Error: handler for @table > @field doesn't exist!", array('@table' => $item['table'], '@field' => $item['field'])));
-      break;
     }
-    $handler->init($view, $item);
-    $types = views_object_types();
+    else {
+      $handler->init($view, $item);
+      $types = views_object_types();
 
-    $form['#title'] = check_plain($view->display[$display_id]->display_title) . ': ';
-    $form['#title'] .= t('Configure summary style for @type %item', array('@type' => $types[$type]['lstitle'], '%item' => $handler->ui_name()));
+      $form['#title'] = check_plain($view->display[$display_id]->display_title) . ': ';
+      $form['#title'] .= t('Configure summary style for @type %item', array('@type' => $types[$type]['lstitle'], '%item' => $handler->ui_name()));
 
-    $form['#section'] = $display_id . '-' . $type . '-style-options';
+      $form['#section'] = $display_id . '-' . $type . '-style-options';
 
-    $plugin = views_get_plugin('style', $handler->options['style_plugin']);
-    if ($plugin) {
-      $form['style_options'] = array(
-        '#tree' => TRUE,
-      );
-      $plugin->init($view, $view->display[$display_id], $handler->options['style_options']);
+      $plugin = views_get_plugin('style', $handler->options['style_plugin']);
+      if ($plugin) {
+        $form['style_options'] = array(
+          '#tree' => TRUE,
+        );
+        $plugin->init($view, $view->display[$display_id], $handler->options['style_options']);
 
-      $plugin->options_form($form['style_options'], $form_state);
+        $plugin->options_form($form['style_options'], $form_state);
+      }
+
+      $form_state['handler'] = &$handler;
     }
-
-    $form_state['handler'] = &$handler;
 
     views_ui_standard_form_buttons($form, $form_state, 'views_ui_config_style_form');
   }
@@ -3682,6 +3730,14 @@ function views_ui_admin_tools() {
     '#title' => t('Disable javascript with Views'),
     '#description' => t("If you are having problems with the javascript, you can disable it here; the Views UI should degrade and still be usable without javascript, it just not as good."),
     '#default_value' => variable_get('views_no_javascript', FALSE),
+  );
+
+  $form['views_localization_plugin'] =  array(
+    '#type' => 'radios',
+    '#title' => t('Translation method'),
+    '#options' => views_fetch_plugin_names('localization', NULL, array(), TRUE),
+    '#default_value' => variable_get('views_localization_plugin', 'core'),
+    '#description' => t('Select a translation method to use for Views data like header, footer, and empty text.'),
   );
 
   $regions = system_region_list(variable_get('theme_default', 'garland'));
@@ -4021,7 +4077,7 @@ function theme_views_ui_style_plugin_table($form) {
   }
 
   // Add the special 'None' row.
-  $rows[] = array(t('None'), '', '', '', '', array('align' => 'center', 'data' => drupal_render($form['default'][-1])));
+  $rows[] = array(t('None'), '', '', '', '', '', array('align' => 'center', 'data' => drupal_render($form['default'][-1])));
 
   $output .= theme('table', $header, $rows);
   $output .= drupal_render($form);

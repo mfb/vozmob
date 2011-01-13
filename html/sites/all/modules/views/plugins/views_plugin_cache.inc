@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_cache.inc,v 1.1.2.8 2010/10/12 23:23:55 merlinofchaos Exp $
+// $Id: views_plugin_cache.inc,v 1.1.2.9 2011/01/04 21:24:31 merlinofchaos Exp $
 
 /**
  * The base plugin to handle caching.
@@ -79,12 +79,14 @@ class views_plugin_cache extends views_plugin {
         // Not supported currently, but this is certainly where we'd put it.
         break;
       case 'results':
-        $data = array(
-          'result' => $this->view->result,
-          'total_rows' => $this->view->total_rows,
-          'current_page' => $this->view->get_current_page(),
-        );
-        cache_set($this->get_results_key(), $data, $this->table, $this->cache_set_expire($type));
+        if ($this->get_results_key() !== FALSE) {
+          $data = array(
+            'result' => $this->view->result,
+            'total_rows' => $this->view->total_rows,
+            'current_page' => $this->view->get_current_page(),
+          );
+          cache_set($this->get_results_key(), $data, $this->table, $this->cache_set_expire($type));
+        }
         break;
       case 'output':
         $this->gather_headers();
@@ -109,7 +111,11 @@ class views_plugin_cache extends views_plugin {
       case 'results':
         // Values to set: $view->result, $view->total_rows, $view->execute_time,
         // $view->current_page.
-        if ($cache = cache_get($this->get_results_key(), $this->table)) {
+        $results_key = $this->get_results_key();
+        if ($results_key === FALSE) {
+          return FALSE;
+        }
+        else if ($cache = cache_get($results_key, $this->table)) {
           if (!$cutoff || $cache->created > $cutoff) {
             $this->view->result = $cache->data['result'];
             $this->view->total_rows = $cache->data['total_rows'];
@@ -256,19 +262,26 @@ class views_plugin_cache extends views_plugin {
     global $user;
 
     if (!isset($this->_results_key)) {
-      $key_data = array(
-        'build_info' => $this->view->build_info,
-        'roles' => array_keys($user->roles),
-        'super-user' => $user->uid == 1, // special caching for super user.
-        'language' => $GLOBALS['language'],
-      );
-      foreach (array('exposed_info', 'page', 'sort', 'order') as $key) {
-        if (isset($_GET[$key])) {
-          $key_data[$key] = $_GET[$key];
-        }
+      $cache_info = $this->view->query->get_cache_info();
+      if ($cache_info === FALSE) {
+        $this->_results_key = FALSE;
       }
+      else {
+        $key_data = array(
+          'build_info' => $this->view->build_info,
+          'cache_info' => $this->view->query->get_cache_info(),
+          'roles' => array_keys($user->roles),
+          'super-user' => $user->uid == 1, // special caching for super user.
+          'language' => $GLOBALS['language'],
+        );
+        foreach (array('exposed_info', 'page', 'sort', 'order') as $key) {
+          if (isset($_GET[$key])) {
+            $key_data[$key] = $_GET[$key];
+          }
+        }
 
-      $this->_results_key = $this->view->name . ':' . $this->display->id . ':results:' . md5(serialize($key_data));
+        $this->_results_key = $this->view->name . ':' . $this->display->id . ':results:' . md5(serialize($key_data));
+      }
     }
 
     return $this->_results_key;

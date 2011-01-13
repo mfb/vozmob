@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_argument.inc,v 1.7.2.13 2010/11/16 01:03:44 merlinofchaos Exp $
+// $Id: views_handler_argument.inc,v 1.7.2.14 2010/12/17 21:42:23 merlinofchaos Exp $
 
 /**
  * @defgroup views_argument_handlers Handlers for arguments
@@ -112,6 +112,7 @@ class views_handler_argument extends views_handler {
   }
 
   function options_form(&$form, &$form_state) {
+    parent::options_form($form, $form_state);
     $defaults = $this->default_actions();
 
     $form['title'] = array(

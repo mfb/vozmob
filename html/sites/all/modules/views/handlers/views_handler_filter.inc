@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_filter.inc,v 1.6.2.17 2010/11/18 01:05:01 merlinofchaos Exp $
+// $Id: views_handler_filter.inc,v 1.6.2.18 2010/12/17 21:42:23 merlinofchaos Exp $
 /**
  * @defgroup views_filter_handlers Views' filter handlers
  * @{
@@ -83,6 +83,7 @@ class views_handler_filter extends views_handler {
    * are called.
    */
   function options_form(&$form, &$form_state) {
+    parent::options_form($form, $form_state);
     if ($this->can_expose()) {
       $this->show_expose_button($form, $form_state);
     }

@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_query_default.inc,v 1.1.2.26 2010/11/15 23:45:31 merlinofchaos Exp $
+// $Id: views_plugin_query_default.inc,v 1.1.2.28 2011/01/04 21:24:31 merlinofchaos Exp $
 /**
  * @file views_plugin_query_default.inc
  * Defines the default query object which builds SQL to execute using the
@@ -1067,7 +1067,7 @@ class views_plugin_query_default extends views_plugin_query{
    */
   function build(&$view) {
     // Make the query distinct if the option was set.
-    if ($this->options['distinct']) {
+    if (!empty($this->options['distinct'])) {
       $this->set_distinct();
     }
 
@@ -1076,9 +1076,16 @@ class views_plugin_query_default extends views_plugin_query{
     // Let the pager modify the query to add limits.
     $this->pager->query();
 
-    $view->build_info['query'] = $this->query();
-    $view->build_info['count_query'] = $this->query(TRUE);
-    $view->build_info['query_args'] = $this->get_where_args();
+    $this->query = $this->query();
+    if (empty($this->options['disable_sql_rewrite'])) {
+      $this->final_query = db_rewrite_sql($this->query, $view->base_table, $view->base_field, array('view' => &$view));
+      $this->count_query = db_rewrite_sql($this->query(TRUE), $view->base_table, $view->base_field, array('view' => &$view));;
+    }
+    else {
+      $this->final_query = $this->query;
+      $this->count_query = $this->query(TRUE);
+    }
+    $this->query_args = $this->get_where_args();
   }
 
   /**
@@ -1090,13 +1097,9 @@ class views_plugin_query_default extends views_plugin_query{
    */
   function execute(&$view) {
     $external = FALSE; // Whether this query will run against an external database.
-    $query = $view->build_info['query'];
-    $count_query = $view->build_info['count_query'];
-    if (empty($this->options['disable_sql_rewrite'])) {
-      $query = db_rewrite_sql($view->build_info['query'], $view->base_table, $view->base_field, array('view' => &$view));
-      $count_query = db_rewrite_sql($view->build_info['count_query'], $view->base_table, $view->base_field, array('view' => &$view));
-    }
-    $args = $view->build_info['query_args'];
+    $query = $this->final_query;
+    $count_query = $this->count_query;
+    $args = $this->query_args;
 
     vpr($query);
 
@@ -1266,6 +1269,40 @@ class views_plugin_query_default extends views_plugin_query{
       ),
     );
   }
+
+  /**
+   * Return info to base the uniqueness of the result on.
+   *
+   * @return $cache_info
+   *   A string or array with query unique data or FALSE to deactivate caching
+   */
+  function get_cache_info() {
+    return array(
+      'final_query' => $this->final_query,
+      'count_query' => $this->count_query,
+      'query_args' => $this->query_args,
+    );
+  }
+
+  /**
+   * Return preview info.
+   *
+   * @return $rows
+   *   An array of strings with info to be shown in the preview.
+   */
+  function get_preview_info() {
+    $rows = array();
+
+    $query = db_prefix_tables($this->query);
+    if ($this->query_args) {
+      _db_query_callback($this->query_args, TRUE);
+      $query = preg_replace_callback(DB_QUERY_REGEXP, '_db_query_callback', $query);
+    }
+    $rows[] = array('<strong>' . t('Query') . '</strong>', '<pre>' . check_plain($query) . '</pre>');
+
+    return $rows;
+  }
+
 }
 
 function views_query_default_aggregation_method_simple($group_type, $field) {

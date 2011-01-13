@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_contact_link.inc,v 1.1.2.5 2010/11/18 01:01:48 merlinofchaos Exp $
+// $Id: views_handler_field_contact_link.inc,v 1.1.2.6 2011/01/10 23:14:26 merlinofchaos Exp $
 /**
  * A field that links to the user contact page, if access is permitted.
  */
@@ -43,7 +43,7 @@ class views_handler_field_contact_link extends views_handler_field_user_link {
 
   function render_link($data, $values) {
     global $user;
-    $uid = $values->{$this->aliases['uid']};
+    $uid = $this->get_value($values, 'uid');
 
     if (empty($uid)) {
       return;

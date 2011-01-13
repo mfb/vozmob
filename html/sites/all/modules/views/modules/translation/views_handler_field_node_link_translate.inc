@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_node_link_translate.inc,v 1.1.2.1 2010/03/19 23:09:50 merlinofchaos Exp $
+// $Id: views_handler_field_node_link_translate.inc,v 1.1.2.2 2011/01/10 23:14:27 merlinofchaos Exp $
 /**
  * Field handler to present a link node translate.
  */
@@ -15,11 +15,11 @@ class views_handler_field_node_link_translate extends views_handler_field_node_l
   function render($values) {
     // ensure user has access to edit this node.
     $node = new stdClass();
-    $node->nid = $values->{$this->aliases['nid']};
-    $node->uid = $values->{$this->aliases['uid']};
-    $node->type = $values->{$this->aliases['type']};
-    $node->format = $values->{$this->aliases['format']};
-    $node->language = $values->{$this->aliases['language']};
+    $node->nid = $this->get_value($values, 'nid');
+    $node->uid = $this->get_value($values, 'uid');
+    $node->type = $this->get_value($values, 'type');
+    $node->format = $this->get_value($values, 'format');
+    $node->language = $this->get_value($values, 'language');
     $node->status = 1; // unpublished nodes ignore access control
     if (empty($node->language) || !translation_supported_type($node->type) || !node_access('view', $node) || !user_access('translate content')) {
       return;

@@ -1,11 +1,11 @@
-/CHANGELOG.txt/1.1.2.2/Sun May  2 10:27:31 2010//TDRUPAL-6--2
-/README.txt/1.17.2.8/Wed Sep  8 11:35:26 2010//TDRUPAL-6--2
-/openlayers.css/1.18.2.4/Wed Apr  7 21:00:39 2010//TDRUPAL-6--2
-/openlayers.info/1.7.2.2/Mon Sep 28 17:23:18 2009//TDRUPAL-6--2
-/openlayers.install/1.12.2.10/Sat Sep 11 19:08:34 2010//TDRUPAL-6--2
-/openlayers.module/1.69.2.82/Thu Sep  9 20:28:07 2010//TDRUPAL-6--2
 D/docs////
 D/includes////
 D/js////
 D/modules////
 D/tests////
+/CHANGELOG.txt/1.1.2.2/Mon Nov 22 18:58:31 2010//TDRUPAL-6--2
+/README.txt/1.17.2.8/Mon Nov 22 18:58:31 2010//TDRUPAL-6--2
+/openlayers.css/1.18.2.4/Mon Nov 22 18:58:31 2010//TDRUPAL-6--2
+/openlayers.info/1.7.2.2/Mon Nov 22 18:58:31 2010//TDRUPAL-6--2
+/openlayers.install/1.12.2.10/Mon Nov 22 18:58:31 2010//TDRUPAL-6--2
+/openlayers.module/1.69.2.85/Thu Jan 13 21:03:15 2011//TDRUPAL-6--2

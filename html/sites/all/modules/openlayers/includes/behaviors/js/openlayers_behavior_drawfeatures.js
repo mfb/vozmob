@@ -1,4 +1,4 @@
-// $Id: openlayers_behavior_drawfeatures.js,v 1.1.2.16 2010/09/27 21:45:44 tmcw Exp $
+// $Id: openlayers_behavior_drawfeatures.js,v 1.1.2.18 2010/11/13 13:43:42 zzolo Exp $
 
 /**
  * @file
@@ -19,14 +19,20 @@ Drupal.behaviors.openlayers_behavior_drawfeatures = function(context) {
       features.feature.layer.removeFeatures(features.object.features.shift());
     }
 
-    var features_copy = features.object.clone();
-    for(var i in features_copy.features) {
-      features_copy.features[i].geometry.transform(
-        features.object.map.projection,
-        new OpenLayers.Projection("EPSG:4326")
-      );
+    var features_copy = [];
+    for(var i in features.object.features) {
+      // Features marked as '_sketch' should not be persisted.
+      if (!features.object.features[i]._sketch) {
+        var feature_copy = features.object.features[i].clone();
+        feature_copy.geometry.transform(
+          features.object.map.projection,
+          new OpenLayers.Projection("EPSG:4326")
+        );
+        features_copy.push(feature_copy);
+      }
     }
-    this.element.val(WktWriter.write(features_copy.features));
+
+    this.element.val(WktWriter.write(features_copy));
   }
 
   var data = $(context).data('openlayers');
@@ -54,25 +60,27 @@ Drupal.behaviors.openlayers_behavior_drawfeatures = function(context) {
       var wktFormat = new OpenLayers.Format.WKT();
       var features = wktFormat.read(this.element.text());
 
-      if (features.constructor == Array) {
-        if (features.length == 1 && features[0] == undefined) {
-          features = [];
+      if (typeof features != 'undefined') {
+        if (features.constructor == Array) {
+          if (features.length == 1 && features[0] == undefined) {
+            features = [];
+          }
+          for (var i in features) {
+            features[i].geometry = features[i].geometry.transform(
+              new OpenLayers.Projection('EPSG:4326'),
+              data.openlayers.projection
+            );
+          }
         }
-        for (var i in features) {
-          features[i].geometry = features[i].geometry.transform(
+        else if (features.geometry) {
+          features.geometry = features.geometry.transform(
             new OpenLayers.Projection('EPSG:4326'),
             data.openlayers.projection
           );
+          features = [features];
         }
+        dataLayer.addFeatures(features);
       }
-      else {
-        features.geometry = features.geometry.transform(
-          new OpenLayers.Projection('EPSG:4326'),
-          data.openlayers.projection
-        );
-        features = [features];
-      }
-      dataLayer.addFeatures(features);
     }
 
     // registering events late, because adding data
@@ -115,16 +123,6 @@ Drupal.behaviors.openlayers_behavior_drawfeatures = function(context) {
 
     control.activateControl(control.getControlsByClass('OpenLayers.Control.Navigation')[0]);
     control.redraw();
-
-    this.element.parents('form').bind('submit', 
-      {
-        control: control, 
-        dataLayer: dataLayer 
-      }, function(evt) {
-        $.map(evt.data.control.controls, function(c) { c.deactivate(); });
-        dataLayer.events.triggerEvent('featuremodified');
-      }
-    );
 
     // Add modify feature tool
     control.addControls(new OpenLayers.Control.ModifyFeature(

@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_node_revision_link_revert.inc,v 1.1.2.1 2010/11/18 01:01:48 merlinofchaos Exp $
+// $Id: views_handler_field_node_revision_link_revert.inc,v 1.1.2.2 2011/01/10 23:14:26 merlinofchaos Exp $
 /**
  * Field handler to present a link to revert a node to a revision
  */
@@ -19,17 +19,17 @@ class views_handler_field_node_revision_link_revert extends views_handler_field_
   function render_link($data, $values) {
     // ensure user has access to edit this node.
     $node = new stdClass();
-    $node->nid = $values->{$this->aliases['nid']};
-    $node->vid = $values->{$this->aliases['vid']};
-    $node->uid = $values->{$this->aliases['uid']};
-    $node->format = $values->{$this->aliases['format']};
+    $node->nid = $this->get_value($values, 'nid');
+    $node->vid = $this->get_value($values, 'vid');
+    $node->uid = $this->get_value($values, 'uid');
+    $node->format = $this->get_value($values, 'format');
     $node->status = 1; // unpublished nodes ignore access control
     if (!node_access('update', $node)) {
       return;
     }
 
     // Current revision cannot be reverted.
-    if ($node->vid == $values->{$this->aliases['node_vid']}) {
+    if ($node->vid ==  $this->get_value($values, 'node_vid')) {
       return;
     }
 

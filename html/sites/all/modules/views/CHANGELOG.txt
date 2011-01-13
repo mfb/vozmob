@@ -146,6 +146,82 @@ Views 6.x-3.0-dev
     o #965496 by ayalon: Update and Override broke validation of most views admin forms.
     o #626732 by dereine: Added a test for analyze.
     o #870792 by bojanz, dereine: Test validation features of filter and filter_date handler.
+    o #868990: Fix undefined call to $view->set_use_pager()
+    o #976200 by Bevan: [Edit View] links not always clickable.
+    o #669636 followup by bojanz: Fix improper use of field_alias by row styles.
+    o #979046 by travist: Fix PHP 5.3 problem in views_access with no arguments.
+    o #978864 by linclark: Fix title bug with area handlers.
+    o #983460 by dereine: "Default sort" radio is in wrong column on table style settings.
+    o #783798 by dereine: GROUP BY can cause sort criteria to get incorrectly added to view.
+    o #983606 by jonathan1055: Breadcrumb disappears on bulk export results.
+    o #357529 by nedjo, dddave, dagmar, dereine, yhahn, others: Implement plugin to handle translations of views configuration data.
+    o #740686 by dereine, dagmar: Integrate the functionality of Semantic Views (though it takes a significantly diffrent form).
+    o #769458 by anrikun: Fix double encoding of alt/title text on link rewriting.
+    o #318944 by dereine: Prevent warning in table view when user has no permission to view any fields.
+    o #416178 by dereine: Profile field checkboxes did not properly filter false values.
+    o #989092 by dereine: Semantic views integration broke grid view a little.
+    o #868972 by dereine: Add a "summary" attribute for accessibility on table and grid styles.
+    o #768802 by dereine: Allow sort by node language.
+    o #738792 by dereine: Delete button should be disabled when ajax form is open, just like save button.
+    o #600742 by dagmar: Allow displays to be disabled.
+    o #898990 by dereine: Fix bad SQL generated on related terms relationship if no vocabularies selected.
+    o #468484 by dereine: Filter by unread not relationship safe.
+    o #833790 redux by dereine: Make sure field actually exists.
+    o #783514 by dereine: Allow breaking of strings with + and ,
+    o #607942 by dashton: Support "rel" attribute in link rewriting.
+    o #909886: -Any- option shows up on boolean exposed filters even when not optional.
+    o #909332 by dereine: Add col-first and col-last classes to grid style.
+    o #751308 by dereine: Provide an administrator warning when option_definition() data is incorrect.
+    o #522318 by dereine: Provide a "human readable" name for all Views.
+    o #817360 by John Morahan: Have Analyze button warn if view has no access control.
+    o #833220 by dereine: Properly validate value on date filter.
+    o #910256 by dagmar: Add an - All - option to exposed items per page.
+    o #779668 by esteewhy: Fix not technically valid use of break statements.
+    o #751308: Revert: Provide an administrator warning when option_definition() data is incorrect.
+    o by dereine: Fix fatal error in the field term_node_tid handler.
+    o #995032 by dereine: Fix update_N function by adding a return $ret.
+    o #995966 by dereine: Use voc_ids are variable.
+    o #994014 by idflood: Add missing semicolon to node translation link handler.
+    o #996634 by das-peter: Add missing rel to option_definition of the field handler.
+    o #808016 by dereine: Clarify short/medium/long date formats.
+    o #610418 by joachim: Add handler descriptions to handler edit forms.
+    o #368687 by dereine: Allow a relationship from node revision to master node.
+    o #759082 by dereine: Prevent invalid argument warning with no relationships.
+    o #946368 by dereine: User argument default ignoring node author checkbox in some cases.
+    o #867636 by chromix: Give jump menu an option to set default value to current path.
+    o #785036 by dereine and bojanz: Properly validate display IDs.
+    o #829928 by gordon: Allow strip tags to get a list of tags to keep.
+    o #958312 by tim.plunkett: Exports could have extraneous whitespace when exported from other modules like features.
+    o #927270 by Cyberwolf: Allow the "options callback" for the in_operator filter handler to also have an "options argument" in the definition.
+    o #608926 by Longwave: Remove unused theme("nodate") functionality.
+    o #497936: Profile fields with dashes in their names cause bad queries.
+    o #972620 by dereine: Add an administrative title field for all handlers to make it more possible to distinguish similar fields from each other in the UI.
+    o #905712 by dagmar: Add Published/Not published as text options to published field.
+    o #816354 by dereine: Provide a field to create administrative comments on displays.
+    o #807942, #807982, #809936, #810010, #811294, #811266 by dereine: Backport quite a lot of handler tests.
+    o #809970 by dereine: Backport area_text test.
+    o #808044 by dereine: Backport field date test.
+    o by dereine: Add a test for field math, and fix the field math :)
+    o by dereine: Add a test for filter equality.
+    o by dereine: Add a test for field counter.
+    o #1007730 by bojanz, merlinofchaos, dereine: Add tests for views_handler_filter_string.
+    o #759082 by dereine: Fix whitescreen due to incorrect relationship loop code.
+    o #1011266 by sime: Fix whitescreen due to changes in #759082.
+    o #1001542 by mikeytown2: view::set_display() has wrong return code when it fails.
+    o #996486 by geoffreyr: Improperly written SQL could crash when rewritten by tac_lite.
+    o #953718 by linclark: Register the special "broken" handlers for use with fields without handlers.
+    o #722330 by dereine: Views should include core version for updates.
+    o #978874 by StanAngeloff: Use empty() on distinct setting to ensure no notices.
+    o #1013170 by das-peter: Fix broken view::preview which was broken on #1001542.
+    o #644008 by Cyberwolf and dereine: Allow access plugins access to arguments.
+    o #635990 by voxpelli and dereine: Get caching system to better respect db_rewrite_sql
+    o #970514 by moshe, dereine: Provide basic drush integration for views.
+    o #1011004 by dereine: Add validation for query plugin option forms.
+    o #991202 by helmo: Add option to turn linebreaks into br tags in field rewriting.
+    o #1000760 by dereine: Prevent htmlspecialchars() error with string arguments.
+    o #452384 by sammys: Another PHP 5.3 fix.
+    o #975400 by bojanz: Improvements to field handlers getting and sanitizing values.
+    o #696550: Taxonomy validator should always set title when it successfully validates.
 
 Views 6.x-3.0-alpha3
     o #705668 by dereine: Fix glossary view, add tests for glossary view.

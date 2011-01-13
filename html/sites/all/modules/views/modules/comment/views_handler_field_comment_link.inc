@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_comment_link.inc,v 1.2.2.1 2010/11/18 01:01:48 merlinofchaos Exp $
+// $Id: views_handler_field_comment_link.inc,v 1.2.2.3 2011/01/10 23:14:26 merlinofchaos Exp $
 /**
  * Base field handler to present a link.
  */
@@ -31,18 +31,20 @@ class views_handler_field_comment_link extends views_handler_field {
   }
 
   function render($values) {
-    return $this->render_link(check_plain($values->{$this->field_alias}), $values);
+    $value = $this->get_value($values, 'cid');
+    return $this->render_link($this->sanitize_value($value), $values);
   }
 
   function render_link($data, $values) {
     $text = !empty($this->options['text']) ? $this->options['text'] : t('view');
+    $nid = $this->get_value($values, 'nid');
+    $cid = $this->get_value($values, 'cid');
 
     $this->options['alter']['make_link'] = TRUE;
-    $this->options['alter']['path'] = "node/" . $values->{$this->aliases['nid']};
+    $this->options['alter']['path'] = "node/" . $nid;
     $this->options['alter']['html'] = TRUE;
-    $this->options['alter']['fragment'] = "comment-" . $values->{$this->aliases['cid']};
+    $this->options['alter']['fragment'] = "comment-" . $cid;
 
     return $text;
   }
 }
-

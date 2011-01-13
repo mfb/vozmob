@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_user_mail.inc,v 1.1.2.1 2010/11/18 01:01:48 merlinofchaos Exp $
+// $Id: views_handler_field_user_mail.inc,v 1.1.2.2 2011/01/10 23:14:27 merlinofchaos Exp $
 /**
  * Field handler to provide acess control for the email field
  */
@@ -25,7 +25,7 @@ class views_handler_field_user_mail extends views_handler_field_user {
   }
 
   function render_link($data, $values) {
-    parent::render_link(check_plain($values->{$this->field_alias}), $values);
+    parent::render_link($data, $values);
 
     if ($this->options['link_to_user'] == 'mailto') {
       $this->options['alter']['make_link'] = TRUE;

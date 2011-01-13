@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_taxonomy.inc,v 1.3 2009/01/30 00:01:42 merlinofchaos Exp $
+// $Id: views_handler_field_taxonomy.inc,v 1.3.2.1 2011/01/10 23:14:27 merlinofchaos Exp $
 
 /**
  * Field handler to provide simple renderer that allows linking to a taxonomy
@@ -43,10 +43,11 @@ class views_handler_field_taxonomy extends views_handler_field {
    * Data should be made XSS safe prior to calling this function.
    */
   function render_link($data, $values) {
-    if (!empty($this->options['link_to_taxonomy']) && !empty($values->{$this->aliases['tid']}) && $data !== NULL && $data !== '') {
+    $tid = $this->get_value($values, 'tid');
+    if (!empty($this->options['link_to_taxonomy']) && !empty($tid) && $data !== NULL && $data !== '') {
       $term = new stdClass();
-      $term->tid = $values->{$this->aliases['tid']};
-      $term->vid = $values->{$this->aliases['vid']};
+      $term->tid = $tid;
+      $term->vid = $this->get_value($values, 'vid');
       $this->options['alter']['make_link'] = TRUE;
       $this->options['alter']['path'] = taxonomy_term_path($term);
     }
@@ -54,6 +55,7 @@ class views_handler_field_taxonomy extends views_handler_field {
   }
 
   function render($values) {
-    return $this->render_link(check_plain($values->{$this->field_alias}), $values);
+    $value = $this->get_value($values);
+    return $this->render_link($this->sanitize_value($value), $values);
   }
 }

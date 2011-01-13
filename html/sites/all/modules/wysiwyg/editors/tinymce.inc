@@ -1,5 +1,5 @@
 <?php
-// $Id: tinymce.inc,v 1.35.2.9 2010/10/18 19:56:52 sun Exp $
+// $Id: tinymce.inc,v 1.35.2.11 2010/12/19 23:27:09 sun Exp $
 
 /**
  * @file
@@ -199,11 +199,10 @@ function wysiwyg_tinymce_settings($editor, $config, $theme) {
   // Find the enabled buttons and the button row they belong on.
   // Also map the plugin metadata for each button.
   // @todo What follows is a pain; needs a rewrite.
+  // $settings['buttons'] are stacked into $settings['theme_advanced_buttons1']
+  // later.
+  $settings['buttons'] = array();
   if (!empty($config['buttons']) && is_array($config['buttons'])) {
-    // $settings['buttons'] are stacked into
-    // $settings['theme_advanced_buttons1'] later.
-    // @todo Add a toolbar designer based on jQuery UI.
-    $settings['buttons'] = array();
     // Only array keys in $settings['extensions'] matter; added to
     // $settings['plugins'] later.
     $settings['extensions'] = array();
@@ -317,7 +316,17 @@ function wysiwyg_tinymce_plugin_settings($editor, $profile, $plugins) {
       // Add path for native external plugins; internal ones are loaded
       // automatically.
       if (empty($plugin['internal']) && isset($plugin['path'])) {
-        $settings[$name] = base_path() . $plugin['path'];
+        // TinyMCE plugins commonly use the filename editor_plugin.js, but there
+        // is no default. Previously, Wysiwyg's API documentation suggested to
+        // have the 'path' contain the 'filename' property, so if 'filename' is
+        // not defined, automatically extract it from 'path' for backwards
+        // compatibility.
+        if (!isset($plugin['filename'])) {
+          $parts = explode('/', $plugin['path']);
+          $plugin['filename'] = array_pop($parts);
+          $plugin['path'] = implode('/', $parts);
+        }
+        $settings[$name] = base_path() . $plugin['path'] . '/' . $plugin['filename'];
       }
     }
   }
@@ -335,9 +344,10 @@ function wysiwyg_tinymce_proxy_plugin_settings($editor, $profile, $plugins) {
       'title' => $plugin['title'],
       'icon' => base_path() . $plugin['icon path'] . '/' . $plugin['icon file'],
       'iconTitle' => $plugin['icon title'],
-      // @todo These should only be set if the plugin defined them.
-      'css' => base_path() . $plugin['css path'] . '/' . $plugin['css file'],
     );
+    if (isset($plugin['css file'])) {
+      $settings[$name]['css'] = base_path() . $plugin['css path'] . '/' . $plugin['css file'];
+    }
   }
   return $settings;
 }

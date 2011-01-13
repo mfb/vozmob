@@ -1,5 +1,5 @@
 <?php
-// $Id: node.views.inc,v 1.93.2.16 2010/11/18 00:43:22 merlinofchaos Exp $
+// $Id: node.views.inc,v 1.93.2.19 2010/12/17 23:54:58 merlinofchaos Exp $
 /**
  * @file
  * Provide views data and handlers for node.module
@@ -161,6 +161,9 @@ function node_views_data() {
     'field' => array(
       'handler' => 'views_handler_field_boolean',
       'click sortable' => TRUE,
+      'output formats' => array(
+        'published-notpublished' => array(t('Published'), t('Not published')),
+      ),
     ),
     'filter' => array(
       'handler' => 'views_handler_filter_boolean_operator',
@@ -489,6 +492,13 @@ function node_views_data() {
     // Information for sorting on a nid.
     'sort' => array(
       'handler' => 'views_handler_sort',
+    ),
+    'relationship' => array(
+      'handler' => 'views_handler_relationship',
+      'base' => 'node',
+      'base field' => 'nid',
+      'title' => t('Node'),
+      'label' => t('Get the actual node from a node revision.'),
     ),
   );
 
@@ -852,6 +862,15 @@ function node_views_analyze($view) {
         // check for no access control
         $access = $display->handler->get_option('access');
         if (empty($access['type']) || $access['type'] == 'none') {
+          $result = db_query("SELECT r.name, p.perm FROM {role} r INNER JOIN {permission} p ON p.rid = r.rid WHERE r.name IN ('anonymous user', 'authenticated user')");
+          while ($role = db_fetch_object($result)) {
+            $role->perm = explode(', ', $role->perm);
+            $role->safe = in_array('access content', $role->perm);
+            $roles[$role->name] = $role;
+          }
+          if (!($roles['anonymous user']->safe && $roles['authenticated user']->safe)) {
+            $ret[] = views_ui_analysis(t('Some roles lack permission to access content, but display %display has no access control.', array('%display' => $display->display_title)), 'warning');
+          }
           $filters = $display->handler->get_option('filters');
           foreach ($filters as $filter) {
             if ($filter['table'] == 'node' && ($filter['field'] == 'status' || $filter['field'] == 'status_extra')) {

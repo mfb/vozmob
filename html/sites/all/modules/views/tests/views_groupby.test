@@ -1,5 +1,5 @@
 <?php
-// $Id: views_groupby.test,v 1.1.2.4 2010/04/16 22:11:07 dereine Exp $
+// $Id: views_groupby.test,v 1.1.2.5 2011/01/04 21:24:31 merlinofchaos Exp $
 
 module_load_include('test', 'views', 'tests/views_query');
 
@@ -252,8 +252,10 @@ class ViewsQueryGroupByTest extends ViewsSqlTest {
     $view->set_display('default');
     $output = $view->execute_display();
 
-    $this->assertTrue(strpos($view->build_info['query'], 'GROUP BY'), t('Make sure that GROUP BY is in the query'));
-    $this->assertTrue(strpos($view->build_info['query'], 'HAVING'), t('Make sure that HAVING is in the query'));
+    $cache_info = $view->query->get_cache_info();
+
+    $this->assertTrue(strpos($cache_info['final_query'], 'GROUP BY'), t('Make sure that GROUP BY is in the query'));
+    $this->assertTrue(strpos($cache_info['final_query'], 'HAVING'), t('Make sure that HAVING is in the query'));
   }
 
   function viewsGroupByCountViewOnlyFilters() {

@@ -1,5 +1,5 @@
 <?php
-// $Id: docs.php,v 1.13.2.9 2010/11/18 00:43:22 merlinofchaos Exp $
+// $Id: docs.php,v 1.13.2.10 2010/12/17 21:13:30 merlinofchaos Exp $
 /**
  * @file
  * This file contains no working PHP code; it exists to provide additional documentation
@@ -280,6 +280,9 @@ function hook_views_handlers() {
  *   - path: (optional) If includes are stored somewhere other than within
  *       the root module directory or a subdirectory called includes, specify
  *       its path here.
+ *   - template path: (optional) A path where the module has stored it's views template files.
+ *        When you have specificed this key views automatically uses the template files for the views.
+ *        You can use the same naming conventions like for normal views template files.
  */
 function hook_views_api() {
   return array(

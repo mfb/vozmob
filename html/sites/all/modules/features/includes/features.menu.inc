@@ -1,5 +1,5 @@
 <?php
-// $Id: features.menu.inc,v 1.1.2.12 2010/07/26 21:57:39 yhahn Exp $
+// $Id: features.menu.inc,v 1.1.2.13 2010/08/12 19:30:35 yhahn Exp $
 
 /**
  * Implementation of hook_features_api().
@@ -245,14 +245,16 @@ function menu_links_features_rebuild_ordered($menu_links, $reset = FALSE) {
       do {
         $current = count($unordered);
         foreach ($unordered as $key => $link) {
-          if (empty($link['parent_path'])) {
-            $ordered[$link['link_path']] = 0;
-            $all_links[$link['link_path']] = $link;
+          $identifier = menu_links_features_identifier($link);
+          $parent = isset($link['parent_path']) ? "{$link['menu_name']}:{$link['parent_path']}" : '';
+          if (empty($parent)) {
+            $ordered[$identifier] = 0;
+            $all_links[$identifier] = $link;
             unset($unordered[$key]);
           }
-          elseif (isset($ordered[$link['parent_path']])) {
-            $ordered[$link['link_path']] = $ordered[$link['parent_path']] + 1;
-            $all_links[$link['link_path']] = $link;
+          elseif (isset($ordered[$parent])) {
+            $ordered[$identifier] = $ordered[$parent] + 1;
+            $all_links[$identifier] = $link;
             unset($unordered[$key]);
           }
         }
@@ -262,9 +264,9 @@ function menu_links_features_rebuild_ordered($menu_links, $reset = FALSE) {
   }
 
   // Ensure any default menu items that do not exist are created.
-  foreach (array_keys($ordered) as $link_path) {
-    $link = $all_links[$link_path];
-    $existing = features_menu_link_load("{$link['menu_name']}:{$link['link_path']}");
+  foreach (array_keys($ordered) as $identifier) {
+    $link = $all_links[$identifier];
+    $existing = features_menu_link_load($identifier);
     if (!$existing || in_array($link, $menu_links)) {
       // Retrieve the mlid if this is an existing item.
       if ($existing) {

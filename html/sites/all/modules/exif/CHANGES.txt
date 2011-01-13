@@ -10,6 +10,11 @@ ACKNOWLEDGEMENTS
 
 CHANGES LOG
 -----------
+2010/10/08
+* Minor Bug with encoding
+* Bug in XMP #935220 by silvio 
+* Fixed exif_location #892986 by David Stosik 
+
 2010/04/27
 * UTF-8 support #783310 by silvio
 * XMP Support #783344 by silvio

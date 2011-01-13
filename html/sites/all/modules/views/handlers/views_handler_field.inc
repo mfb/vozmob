@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field.inc,v 1.14.2.46 2010/11/18 23:34:47 merlinofchaos Exp $
+// $Id: views_handler_field.inc,v 1.14.2.56 2011/01/10 23:53:30 merlinofchaos Exp $
 /**
  * @defgroup views_field_handlers Views' field handlers
  * @{
@@ -119,9 +119,11 @@ class views_handler_field extends views_handler {
    * Called to determine what to tell the clicksorter.
    */
   function click_sort($order) {
-    // Since fields should always have themselves already added, just
-    // add a sort on the field.
-    $this->query->add_orderby(NULL, NULL, $order, $this->field_alias);
+    if (isset($this->field_alias)) {
+      // Since fields should always have themselves already added, just
+      // add a sort on the field.
+      $this->query->add_orderby(NULL, NULL, $order, $this->field_alias);
+    }
   }
 
   /**
@@ -142,14 +144,142 @@ class views_handler_field extends views_handler {
   }
 
   /**
-   * Return DIV or SPAN based upon the field's element type.
+   * Return an HTML element based upon the field's element type.
    */
-  function element_type() {
+  function element_type($none_supported = FALSE, $default_empty = FALSE) {
+    if ($none_supported) {
+      if ($this->options['element_type'] === '0') {
+        return '';
+      }
+    }
+    if ($this->options['element_type']) {
+      return check_plain($this->options['element_type']);
+    }
+
+    if ($default_empty) {
+      return '';
+    }
+
     if (isset($this->definition['element type'])) {
       return $this->definition['element type'];
     }
 
     return 'span';
+  }
+
+  /**
+   * Return an HTML element for the label based upon the field's element type.
+   */
+  function element_label_type($none_supported = FALSE, $default_empty = FALSE) {
+    if ($none_supported) {
+      if ($this->options['element_label_type'] === '0') {
+        return '';
+      }
+    }
+    if ($this->options['element_label_type']) {
+      return check_plain($this->options['element_label_type']);
+    }
+
+    if ($default_empty) {
+      return '';
+    }
+
+    return 'span';
+  }
+
+  /**
+   * Return an HTML element for the wrapper based upon the field's element type.
+   */
+  function element_wrapper_type($none_supported = FALSE, $default_empty = FALSE) {
+    if ($none_supported) {
+      if ($this->options['element_wrapper_type'] === '0') {
+        return 0;
+      }
+    }
+    if ($this->options['element_wrapper_type']) {
+      return check_plain($this->options['element_wrapper_type']);
+    }
+
+    if ($default_empty) {
+      return '';
+    }
+
+    return 'div';
+  }
+
+  /**
+   * Provide a list of elements valid for field HTML.
+   *
+   * This function can be overridden by fields that want more or fewer
+   * elements available, though this seems like it would be an incredibly
+   * rare occurence.
+   */
+  function get_elements() {
+    return array(
+      '' => t('- Use default -'),
+      '0' => t('- None -'),
+      'div' => t('DIV'),
+      'span' => t('SPAN'),
+      'h1' => t('H1'),
+      'h2' => t('H2'),
+      'h3' => t('H3'),
+      'h4' => t('H4'),
+      'h5' => t('H5'),
+      'h6' => t('H6'),
+      'p' => t('P'),
+      'strong' => t('STRONG'),
+      'em' => t('EM'),
+    );
+  }
+
+  /**
+   * Return the class of the field.
+   */
+  function element_classes() {
+    $classes = $this->tokenize_value($this->options['element_class']);
+    return views_css_safe($classes);
+  }
+
+  /**
+   * Replace a value with tokens from the last field.
+   *
+   * This function actually figures out which field was last and uses its
+   * tokens so they will all be available.
+   */
+  function tokenize_value($value) {
+    if (strpos($value, '[') !== FALSE || strpos($value, '!') !== FALSE || strpos($value, '%') !== FALSE) {
+      $fake_item = array(
+        'alter_text' => TRUE,
+        'text' => $value,
+      );
+
+      // Get tokens from the last field.
+      $last_field = end($this->view->field);
+      if (isset($last_field->last_tokens)) {
+        $tokens = $last_field->last_tokens;
+      }
+      else {
+        $tokens = $last_field->get_render_tokens($fake_item);
+      }
+
+      $value = strip_tags($this->render_altered($fake_item, $tokens));
+    }
+
+    return $value;
+  }
+
+  /**
+   * Return the class of the field's label.
+   */
+  function element_label_classes() {
+    return views_css_safe($this->options['element_label_class']);
+  }
+
+  /**
+   * Return the class of the field's wrapper.
+   */
+  function element_wrapper_classes() {
+    return views_css_safe($this->options['element_wrapper_class']);
   }
 
   function option_definition() {
@@ -165,18 +295,33 @@ class views_handler_field extends views_handler {
         'path' => array('default' => '', 'translatable' => TRUE),
         'absolute' => array('default' => '', 'translatable' => FALSE),
         'alt' => array('default' => '', 'translatable' => TRUE),
+        'rel' => array('default' => ''),
         'link_class' => array('default' => ''),
         'prefix' => array('default' => '', 'translatable' => TRUE),
         'suffix' => array('default' => '', 'translatable' => TRUE),
         'target' => array('default' => '', 'translatable' => TRUE),
         'trim' => array('default' => FALSE),
+        'nl2br' => array('default' => FALSE),
         'max_length' => array('default' => ''),
         'word_boundary' => array('default' => TRUE),
         'ellipsis' => array('default' => TRUE),
         'strip_tags' => array('default' => FALSE),
+        'preserve_tags' => array('default' => ''),
         'html' => array('default' => FALSE),
       ),
     );
+    $options['element_type'] = array('default' => '');
+    $options['element_class'] = array('default' => '');
+
+    $options['element_label_type'] = array('default' => '');
+    $options['element_label_class'] = array('default' => '');
+    $options['element_label_colon'] = array('default' => TRUE);
+
+    $options['element_wrapper_type'] = array('default' => '');
+    $options['element_wrapper_class'] = array('default' => '');
+
+    $options['element_default_classes'] = array('default' => TRUE);
+
     $options['empty'] = array('default' => '', 'translatable' => TRUE);
     $options['hide_empty'] = array('default' => FALSE);
     $options['empty_zero'] = array('default' => FALSE);
@@ -191,17 +336,91 @@ class views_handler_field extends views_handler {
   function options_form(&$form, &$form_state) {
     parent::options_form($form, $form_state);
 
+    // Use prefix and suffix to fake a fieldset because we use #tree.
+    $form['style_prefix'] = array(
+      '#value' => '<fieldset id="views-validator-options"><legend>' . t('Style settings') . '</legend>',
+    );
+
+    $form['exclude'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Exclude from display'),
+      '#default_value' => $this->options['exclude'],
+      '#description' => t('Check this box to not display this field, but still load it in the view. Use this option to not show a grouping field in each record, or when doing advanced theming, or when you want to use this field as a token in other fields.'),
+    );
+
+    $form['element_type'] = array(
+      '#title' => t('HTML element'),
+      '#options' => $this->get_elements(),
+      '#type' => 'select',
+      '#default_value' => $this->options['element_type'],
+      '#description' => t('Most styles provide wrappers for fields. If the chosen style supports wrappers, wrap the field in this HTML element. The default will usually be either DIV or SPAN.'),
+    );
+
+    $form['element_class'] = array(
+      '#title' => t('Element class'),
+      '#description' => t('The class to provide on the wrapper element. You may enter data from this view as per the "Replacement patterns" used in "Rewrite the output of this field".'),
+      '#type' => 'textfield',
+      '#default_value' => $this->options['element_class'],
+    );
+
     $form['label'] = array(
       '#type' => 'textfield',
       '#title' => t('Label'),
       '#default_value' => isset($this->options['label']) ? $this->options['label'] : '',
       '#description' => t('The label for this field that will be displayed to end users if the style requires it.'),
     );
-    $form['exclude'] = array(
+
+    $form['element_label_type'] = array(
+      '#title' => t('Label HTML element'),
+      '#options' => $this->get_elements(FALSE),
+      '#type' => 'select',
+      '#default_value' => $this->options['element_label_type'],
+      '#description' => t('What HTML Element type to use to wrap the label.'),
+    );
+
+    $form['element_label_class'] = array(
+      '#title' => t('Label class'),
+      '#description' => t('The class to provide on the label wrapper element.'),
+      '#type' => 'textfield',
+      '#default_value' => $this->options['element_label_class'],
+    );
+
+    $form['element_label_colon'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Exclude from display'),
-      '#default_value' => $this->options['exclude'],
-      '#description' => t('Check this box to not display this field, but still load it in the view.  Use this option to not show a grouping field in each record, or when doing advanced theming.'),
+      '#title' => t('Place a colon after the label'),
+      '#default_value' => $this->options['element_label_colon'],
+      '#description' => t('If the label is to be inline with the value, place a colon between them. Not valid for styles such as table where the label is not placed with the value.'),
+    );
+
+    $form['element_wrapper_type'] = array(
+      '#title' => t('Wrapper HTML element'),
+      '#options' => $this->get_elements(FALSE),
+      '#type' => 'select',
+      '#default_value' => $this->options['element_wrapper_type'],
+      '#description' => t('What HTML Element type to use to wrap the field (and the label). This is not supported by some styles such as tables.'),
+    );
+
+    $form['element_wrapper_class'] = array(
+      '#title' => t('Wrapper class'),
+      '#description' => t('The class to provide on the wrapper element.'),
+      '#type' => 'textfield',
+      '#default_value' => $this->options['element_wrapper_class'],
+    );
+
+    $form['element_default_classes'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Add default classes'),
+      '#default_value' => $this->options['element_default_classes'],
+      '#description' => t('Use default Views classes to identify the field, field label and field content.'),
+    );
+
+    $form['style_suffix'] = array(
+      '#value' => '</fieldset>',
+    );
+
+    $form['alter'] = array(
+      '#title' => t('Rewriting'),
+      '#type' => 'fieldset',
     );
 
     if ($this->allow_advanced_render()) {
@@ -266,6 +485,16 @@ class views_handler_field extends views_handler {
         '#type' => 'textfield',
         '#default_value' => $this->options['alter']['alt'],
         '#description' => t('Text to place as "alt" text which most browsers display as a tooltip when hovering over the link.'),
+        '#process' => array('views_process_dependency'),
+        '#dependency' => array(
+          'edit-options-alter-make-link' => array(1)
+        ),
+      );
+      $form['alter']['rel'] = array(
+        '#title' => t('Rel Text'),
+        '#type' => 'textfield',
+        '#default_value' => $this->options['alter']['rel'],
+        '#description' => t('Include Rel attribute for use in lightbox2 or other javascript utility.'),
         '#process' => array('views_process_dependency'),
         '#dependency' => array(
           'edit-options-alter-make-link' => array(1)
@@ -407,9 +636,31 @@ If you would like to have the characters %5B and %5D please use the html entity 
         '#title' => t('Strip HTML tags'),
         '#description' => t('If checked, all HTML tags will be stripped.'),
         '#default_value' => $this->options['alter']['strip_tags'],
+      );
+      $form['alter']['preserve_tags'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Preserve certain tags'),
+        '#description' => t('List the tags that need to be preserved during the stripping process. example &quot;&lt;p&gt; &lt;br&gt;&quot; which will preserve all p and br elements'),
+        '#default_value' => $this->options['alter']['preserve_tags'],
+        '#dependency' => array(
+          'edit-options-alter-strip-tags' => array(1),
+        ),
+        '#process' => array('views_process_dependency'),
+      );
+
+      $form['alter']['nl2br'] = array(
+        '#type' => 'checkbox',
+        '#title' => t('Convert newlines to HTML &lt;br&gt; tags'),
+        '#description' => t('If checked, all newlines chars (e.g. \n) are converted into HTML &lt;br&gt; tags.'),
+        '#default_value' => $this->options['alter']['nl2br'],
         '#process' => array('views_process_dependency'),
       );
     }
+
+    // Use prefix and suffix to fake a fieldset because we use #tree.
+    $form['empty_prefix'] = array(
+      '#value' => '<fieldset id="views-validator-options"><legend>' . t('Empty field behavior') . '</legend>',
+    );
 
     $form['empty'] = array(
       '#type' => 'textfield',
@@ -431,6 +682,11 @@ If you would like to have the characters %5B and %5D please use the html entity 
       '#default_value' => $this->options['hide_empty'],
       '#description' => t('Do not display anything for this field if it is empty. Note that the field label may still be displayed. Check style or row style settings to hide labels for empty fields.'),
     );
+
+    $form['empty_suffix'] = array(
+      '#value' => '</fieldset>',
+    );
+
   }
 
   /**
@@ -452,14 +708,39 @@ If you would like to have the characters %5B and %5D please use the html entity 
   function pre_render($values) { }
 
   /**
+   * Get the value that's supposed to be rendered.
+   *
+   * @param $values
+   *   The values retrieved from the database.
+   * @param $field
+   *   Optional field where the value is stored.
+   */
+  function get_value($values, $field = NULL) {
+    $alias = isset($field) ? $this->aliases[$field] : $this->field_alias;
+    if (isset($values->{$alias})) {
+      return $values->{$alias};
+    }
+  }
+
+  /**
+   * Sanitize the value for output.
+   *
+   * @param $value
+   *   The value being rendered.
+   */
+  function sanitize_value($value) {
+    return check_plain($value);
+  }
+
+  /**
    * Render the field.
    *
    * @param $values
    *   The values retrieved from the database.
    */
   function render($values) {
-    $value = $values->{$this->field_alias};
-    return check_plain($value);
+    $value = $this->get_value($values);
+    return $this->sanitize_value($value);
   }
 
   /**
@@ -531,11 +812,15 @@ If you would like to have the characters %5B and %5D please use the html entity 
     }
 
     if (!empty($alter['strip_tags'])) {
-      $value = strip_tags($value);
+      $value = strip_tags($value, $alter['preserve_tags']);
     }
 
     if (!empty($alter['trim']) && !empty($alter['max_length'])) {
       $value = $this->render_trim_text($alter, $value);
+    }
+
+    if (!empty($alter['nl2br'])) {
+      $value = nl2br($value);
     }
 
     if (!empty($alter['make_link']) && !empty($alter['path'])) {
@@ -624,12 +909,16 @@ If you would like to have the characters %5B and %5D please use the html entity 
     $alt = strtr($alter['alt'], $tokens);
     // Set the title attribute of the link only if it improves accessibility
     if ($alt && $alt != $text) {
-      $options['attributes']['title'] = $alt;
+      $options['attributes']['title'] = html_entity_decode($alt, ENT_QUOTES);
     }
 
     $class = strtr($alter['link_class'], $tokens);
     if ($class) {
       $options['attributes']['class'] = $class;
+    }
+
+    if (!empty($alter['rel']) && $rel = strtr($alter['rel'], $tokens)) {
+      $options['attributes']['rel'] = $rel;
     }
 
     $target = check_plain(trim(strtr($alter['target'],$tokens)));
@@ -703,6 +992,7 @@ If you would like to have the characters %5B and %5D please use the html entity 
       }
     }
 
+    $this->last_tokens = $tokens;
     return $tokens;
   }
 
@@ -809,13 +1099,14 @@ class views_handler_field_file_size extends views_handler_field {
   }
 
   function render($values) {
-    if ($values->{$this->field_alias}) {
+    $value = $this->get_value($values);
+    if ($value) {
       switch ($this->options['file_size_display']) {
         case 'bytes':
-          return $values->{$this->field_alias};
+          return $value;
         case 'formatted':
         default:
-          return format_size($values->{$this->field_alias});
+          return format_size($value);
       }
     }
     else {
@@ -828,8 +1119,7 @@ class views_handler_field_file_size extends views_handler_field {
  * A handler to run a field through simple XSS filtering
  */
 class views_handler_field_xss extends views_handler_field {
-  function render($values) {
-    $value = $values->{$this->field_alias};
+  function sanitize_value($value) {
     return filter_xss($value);
   }
 }
@@ -837,4 +1127,3 @@ class views_handler_field_xss extends views_handler_field {
 /**
  * @}
  */
-

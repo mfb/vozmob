@@ -1,5 +1,5 @@
 <?php
-// $Id: openlayers_ui.presets.inc,v 1.1.2.30 2010/09/14 07:13:40 strk Exp $
+// $Id: openlayers_ui.presets.inc,v 1.1.2.32 2010/11/11 08:23:48 strk Exp $
 
 /**
  * @file
@@ -313,12 +313,24 @@ function openlayers_ui_presets_form(&$form_state, $preset = NULL, $edit = FALSE)
     foreach ($overlay_options_keys as $id) {
       $description = $overlay_options[$id];
       $form['layerstyles']['layers']['overlaylabels'][$id] = array('#type' => 'markup', '#value' => $description);
-      $form['layerstyles']['layer_styles'][$id] = array(
-        '#type' => 'select',
-        '#options' => array('-- '. t('Default style') .' --') + openlayers_ui_get_style_options(),
-        '#default_value' => !empty($defaults['layer_styles'][$id]) ?
-          $defaults['layer_styles'][$id] : '',
-      );
+      $form['layerstyles']['layer_styles'][$id]['#tree'] = TRUE;
+      $roles = array('default', 'select', 'temporary');
+      foreach ($roles as $role) {
+        $form['layerstyles']['layer_styles'][$id][$role] = array(
+          '#type' => 'select',
+          '#title' => $role,
+          '#options' => array('-- '. t('Default style') .' --') + openlayers_ui_get_style_options(),
+          // UPGRADE NOTE:
+          // Presets up to 6.x-2.x-alpha10 always had a single style
+          // per layer specified. Newer ones have them splitted by role
+          '#default_value' => is_array($defaults['layer_styles'][$id]) ?
+            ( !empty($defaults['layer_styles'][$id][$role]) ?
+              $defaults['layer_styles'][$id][$role] : '' )
+            : 
+            ( !empty($defaults['layer_styles'][$id]) ?
+              $defaults['layer_styles'][$id] : '' )
+        );
+      }
       $form['layerstyles']['layer_weight'][$id] = array(
         '#type' => 'weight',
         '#default_value' => $nextweight++,
@@ -600,16 +612,30 @@ function openlayers_ui_presets_form_process($values = array()) {
         // Sort overlay layers by weight, in case browser didn't
         // send them already sorted
         $overlays = array();
-        asort($values['layer_weight']);
-        foreach (array_keys($values['layer_weight']) as $key) {
-          if ( $values['layers']['overlays'][$key] ) {
-             $overlays[$key] = $key;
+        if ( ! empty($values['layers']['overlays']) ) {
+          asort($values['layer_weight']);
+          foreach (array_keys($values['layer_weight']) as $key) {
+            if ( $values['layers']['overlays'][$key] ) {
+               $overlays[$key] = $key;
+            }
           }
         }
 
         // Merge our different layer sections together
         $processed['layers'] = array_merge($baselayers, $overlays);
 
+        break;
+
+      case 'layer_styles':
+        $processed['layer_styles'] = array();
+        if ( ! empty($values['layer_styles']) ) {
+          foreach ($values['layer_styles'] as $layer => $stylespec) {
+            $layerarray = array_filter($stylespec);
+            if ( ! empty($layerarray) ) {
+              $processed['layer_styles'][$layer] = $layerarray;
+            }
+          }
+        }
         break;
 
       default:
