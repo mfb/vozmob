@@ -1,5 +1,5 @@
 <?php
-// $Id: search.module,v 1.250.2.12 2010/11/03 12:15:24 goba Exp $
+// $Id: search.module,v 1.250.2.13 2010/12/13 18:45:16 goba Exp $
 
 /**
  * @file
@@ -911,7 +911,7 @@ function _search_parse_query(&$word, &$scores, $not = FALSE) {
  *              Default: 'ORDER BY score DESC'
  *
  * @return
- *   An array of SIDs for the search results.
+ *   An array of objects for the search results.
  *
  * @ingroup search
  */

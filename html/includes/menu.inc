@@ -1,5 +1,5 @@
 <?php
-// $Id: menu.inc,v 1.255.2.37 2010/11/04 09:58:34 goba Exp $
+// $Id: menu.inc,v 1.255.2.38 2010/12/09 11:57:18 goba Exp $
 
 /**
  * @file
@@ -2432,6 +2432,7 @@ function _menu_router_build($callbacks) {
       'file' => '',
       'file path' => '',
       'include file' => '',
+      'module' => '',
     );
 
     // Calculate out the file to be included for each callback, if any.
