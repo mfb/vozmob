@@ -79,8 +79,6 @@ function vozmob_og_flag_default_flags() {
     'show_on_form' => 1,
     'access_author' => '',
     'i18n' => 0,
-    'flag_confirmation' => '',
-    'unflag_confirmation' => '',
     'module' => 'vozmob_og',
     'locked' => array(
       '0' => 'name',
@@ -129,7 +127,13 @@ function vozmob_og_rules_defaults() {
         '#status' => 'default',
         '#conditions' => array(
           '0' => array(
-            '#weight' => 0,
+            '#type' => 'condition',
+            '#settings' => array(
+              '#argument map' => array(
+                'group' => 'node',
+              ),
+            ),
+            '#name' => 'og_rules_condition_content_is_group_post',
             '#info' => array(
               'label' => 'Content is a group post',
               'arguments' => array(
@@ -140,24 +144,10 @@ function vozmob_og_rules_defaults() {
               ),
               'module' => 'Organic groups',
             ),
-            '#name' => 'og_rules_condition_content_is_group_post',
-            '#settings' => array(
-              '#argument map' => array(
-                'group' => 'node',
-              ),
-            ),
-            '#type' => 'condition',
+            '#weight' => 0,
           ),
           '1' => array(
-            '#type' => 'condition',
-            '#settings' => array(
-              'flag' => 'moderated_group',
-              '#argument map' => array(
-                'object' => 'node',
-                'user' => 'user',
-              ),
-            ),
-            '#name' => 'ogrulesextra_rules_condition_flagged_node',
+            '#weight' => 0,
             '#info' => array(
               'label' => 'Node parent(s) are flagged',
               'base' => 'ogrulesextra_rules_condition_flagged',
@@ -180,12 +170,29 @@ function vozmob_og_rules_defaults() {
               ),
               'module' => 'Organic groups',
             ),
-            '#weight' => 0,
+            '#name' => 'ogrulesextra_rules_condition_flagged_node',
+            '#settings' => array(
+              'flag' => 'moderated_group',
+              '#argument map' => array(
+                'object' => 'node',
+                'user' => 'user',
+              ),
+            ),
+            '#type' => 'condition',
           ),
         ),
         '#actions' => array(
           '0' => array(
-            '#weight' => 0,
+            '#type' => 'action',
+            '#settings' => array(
+              'flag' => 'moderate_node',
+              'permission_check' => 0,
+              '#argument map' => array(
+                'object' => 'node',
+                'flagging_user' => 'author',
+              ),
+            ),
+            '#name' => 'flag_rules_action_flag_node',
             '#info' => array(
               'label' => 'Flag created content, under "Requires moderation"',
               'base' => 'flag_rules_action_flag',
@@ -208,16 +215,75 @@ function vozmob_og_rules_defaults() {
               ),
               'module' => 'Flag',
             ),
-            '#name' => 'flag_rules_action_flag_node',
+            '#weight' => 0,
+          ),
+          '1' => array(
+            '#weight' => 0,
+            '#info' => array(
+              'label' => 'Unpublish created content',
+              'module' => 'Node',
+              'arguments' => array(
+                'node' => array(
+                  'label' => 'Content',
+                  'type' => 'node',
+                ),
+              ),
+              'base' => 'rules_core_action_execute',
+              'action_name' => 'node_unpublish_action',
+              'configurable' => FALSE,
+              'label callback' => 'rules_core_node_label_callback',
+              'label_skeleton' => 'Unpublish @node',
+            ),
+            '#name' => 'rules_core_node_unpublish_action',
             '#settings' => array(
-              'flag' => 'moderate_node',
-              'permission_check' => 0,
+              'auto_save' => 1,
               '#argument map' => array(
-                'object' => 'node',
-                'flagging_user' => 'author',
+                'node' => 'node',
               ),
             ),
             '#type' => 'action',
+          ),
+        ),
+        '#version' => 6003,
+      ),
+      'rules_moderated_group_post_good' => array(
+        '#type' => 'rule',
+        '#set' => 'event_flag_unflagged_moderate_node',
+        '#label' => 'Moderated group post good',
+        '#active' => 1,
+        '#weight' => '0',
+        '#categories' => array(
+          '0' => 'og',
+          '1' => 'vozmob_og',
+        ),
+        '#status' => 'default',
+        '#conditions' => array(),
+        '#actions' => array(
+          '0' => array(
+            '#type' => 'action',
+            '#settings' => array(
+              'auto_save' => 1,
+              '#argument map' => array(
+                'node' => 'node',
+              ),
+            ),
+            '#name' => 'rules_core_node_publish_action',
+            '#info' => array(
+              'label' => 'Publish flagged content',
+              'module' => 'Node',
+              'arguments' => array(
+                'node' => array(
+                  'label' => 'Content',
+                  'type' => 'node',
+                ),
+              ),
+              'base' => 'rules_core_action_execute',
+              'action_name' => 'node_publish_action',
+              'configurable' => FALSE,
+              'label callback' => 'rules_core_node_label_callback',
+              'label_skeleton' => 'Publish @node',
+            ),
+            '#weight' => 0,
           ),
         ),
         '#version' => 6003,
