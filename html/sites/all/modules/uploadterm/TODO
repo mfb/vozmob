@@ -1,0 +1,3 @@
+Presently variable_get's are coded for vocabulary vid, terms tids and fields. Could be set in admin interface.
+
+Requires resaving all nodes, could do a batch catch-up for previously saved content.

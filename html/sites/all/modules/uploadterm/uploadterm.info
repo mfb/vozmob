@@ -1,0 +1,6 @@
+; $Id$
+name = Upload Term
+description = Assign terms to nodes based on mime types of upload files.
+core = 6.x
+dependencies[] = upload
+dependencies[] = taxonomy

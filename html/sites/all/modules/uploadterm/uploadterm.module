@@ -1,0 +1,88 @@
+<?php
+
+/**
+ * @file
+ *  attach terms to node related to file mimetypes attached to node.
+ *
+ * Hardcoded variables at the moment:-
+ *   uploadterm_vocabulary int vid of vocabulary to use;
+ *   uploadterm_fields array of string names of fields to check on node;
+ *   uploadterm_mimeexact array of mappings term tid => exact mime string
+ *   uploadterm_mimeregex array of mappings term tid => preg match
+ */
+
+/**
+ * Implementation of hook_nodeapi().
+ */
+function uploadterm_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  if ($op == 'presave') {
+    uploadterm_node_presave($node);
+  }
+}
+
+/**
+ * hook_nodeapi($op = 'presave').
+ *
+ * Override any taxonomy terms in the media vocabulary. Add them related
+ * to any files attached in defined fields.
+ */
+function uploadterm_node_presave(&$node) {
+  // TODO hardcoded variable to admin interface
+  $vid = variable_get('uploadterm_vocabulary', 2);
+  $fields = variable_get('uploadterm_fields', array('files', 'field_image'));
+
+  $node->taxonomy[$vid] = array();
+
+  foreach ($fields as $field) {
+    if (isset($node->$field) && is_array($node->$field)) {
+      foreach ($node->$field as $file) {
+        if (! $file['remove'] &&  $file['list'] && $type = uploadterm_mimeterm($file['filemime'])) {
+          $node->taxonomy[$vid][$type] = $type;
+        }
+      }
+    }
+  }
+}
+
+/** 
+ * Implementation of hook_form_alter().
+ *
+ * Hides uploadterm_vocabulary from node_form.
+ */
+function uploadterm_form_alter(&$form, &$form_state, $form_id) {
+  if (isset($form['type']) && isset($form['#node']) && $form['type']['#value'] .'_node_form' == $form_id) {
+    $vid = variable_get('uploadterm_vocabulary', 2);
+    $form['taxonomy'][$vid] = array('#type' => 'value', '#default_value' => array());
+  }
+}
+
+/**
+ * Lookup mimetype.
+ *
+ * @param $mime
+ *  string mimetype
+ * @return
+ *  int term tid if matched; 0 if no match.
+ */
+function uploadterm_mimeterm($mime) {
+  $exact = variable_get('uploadterm_mimeexact', array());
+  $regex = variable_get('uploadterm_mimeregex', array(
+             403 => '/^audio\//',
+             404 => '/^image\//',
+             402 => '/^video\//',
+           ));
+
+  foreach ($exact as $tid => $string) {
+    if ($string == $mime) {
+      return $tid;
+    }
+  }
+
+  foreach ($regex as $tid => $pattern) {
+    if (preg_match($pattern, $mime)) {
+      return $tid;
+    }
+  }
+
+  return 0;
+}
