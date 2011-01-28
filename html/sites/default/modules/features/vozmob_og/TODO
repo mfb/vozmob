@@ -1,4 +1,0 @@
-All 'editors' can flag/unflag moderated content on any group;
-and see the 'moderation' tab. Should add access control to
-the flag http://drupal.org/node/954332 and custom menu access
-callback for the moderation view.

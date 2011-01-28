@@ -1,0 +1,12 @@
+<?php
+/**
+ * @file
+ *  Install and update for vozmob_og.
+ */
+
+/**
+ * Implementation of hook_install().
+ */
+function vozmob_og_install() {
+  db_query("UPDATE {system} SET weight = 20 WHERE name = 'vozmob_og'");
+}
