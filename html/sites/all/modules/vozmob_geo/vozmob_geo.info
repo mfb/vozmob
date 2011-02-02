@@ -1,0 +1,4 @@
+; $Id$
+name = VozMob Geo
+description = Provides integration between Exif and OpenLayers modules.
+core = 6.x

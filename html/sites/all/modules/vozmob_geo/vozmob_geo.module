@@ -1,0 +1,16 @@
+<?php
+// $Id$
+
+/**
+ * Implements hook_nodeapi().
+ */
+function vozmob_geo_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  switch ($op):
+    case 'presave':
+      if (!empty($node->field_gps_gpslongitude[0]['value']) && !empty($node->field_gps_gpslatitude[0]['value']) && empty($node->field_map[0]['openlayers_wkt'])) {
+        $node->field_map[0]['openlayers_wkt'] = 'GEOMETRYCOLLECTION(POINT(' . $node->field_gps_gpslongitude[0]['value'] . ' ' . $node->field_gps_gpslatitude[0]['value'] . '))';
+      }
+      break;
+  endswitch;
+}
+
