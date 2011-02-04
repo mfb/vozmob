@@ -1,5 +1,5 @@
 <?php
-// $Id: handlers.inc,v 1.109.2.23 2011/01/01 22:49:46 merlinofchaos Exp $
+// $Id: handlers.inc,v 1.109.2.24 2011/01/18 23:00:16 merlinofchaos Exp $
 /**
  * @file handlers.inc
  * Defines the various handler objects to help build and display views.
@@ -8,7 +8,7 @@
 /**
  * Instantiate and construct a new handler
  */
-function _views_create_handler($definition, $type = 'handler') {
+function _views_create_handler($definition, $type = 'handler', $handler_type = NULL) {
 //  vpr('Instantiating handler ' . $definition['handler']);
   if (empty($definition['handler'])) {
     return;
@@ -33,6 +33,15 @@ function _views_create_handler($definition, $type = 'handler') {
   }
 
   $handler->set_definition($definition);
+  if ($type == 'handler') {
+    $handler->is_handler = TRUE;
+    $handler->handler_type = $handler_type;
+  }
+  else {
+    $handler->is_plugin = TRUE;
+    $handler->plugin_type = $type;
+  }
+
   // let the handler have something like a constructor.
   $handler->construct();
 
@@ -97,7 +106,7 @@ function views_include_handler($handler, $definition, $type, $count = 0) {
 /**
  * Prepare a handler's data by checking defaults and such.
  */
-function _views_prepare_handler($definition, $data, $field) {
+function _views_prepare_handler($definition, $data, $field, $type) {
   foreach (array('group', 'title', 'title short', 'help', 'real field') as $key) {
     if (!isset($definition[$key])) {
       // First check the field level
@@ -111,7 +120,7 @@ function _views_prepare_handler($definition, $data, $field) {
     }
   }
 
-  return _views_create_handler($definition);
+  return _views_create_handler($definition, 'handler', $type);
 }
 
 /**
@@ -250,6 +259,26 @@ class views_handler extends views_object {
    */
   function init(&$view, $options) {
     $this->view = &$view;
+    $display_id = $this->view->current_display;
+    // Check to see if this handler type is defaulted. Note that
+    // we have to do a lookup because the type is singular but the
+    // option is stored as the plural.
+    $types = views_object_types();
+    $plural = $this->handler_type;
+    if (isset($types[$this->handler_type]['plural'])) {
+      $plural = $types[$this->handler_type]['plural'];
+    }
+    if ($this->view->display_handler->is_defaulted($plural)) {
+      $display_id = 'default';
+    }
+
+    $this->localization_keys = array(
+      $display_id,
+      $this->handler_type,
+      $options['table'],
+      $options['field']
+    );
+
     $this->unpack_options($this->options, $options);
 
     // This exist on most handlers, but not all. So they are still optional.

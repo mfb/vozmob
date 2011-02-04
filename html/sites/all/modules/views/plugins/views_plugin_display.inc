@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_display.inc,v 1.20.2.55 2011/01/10 22:40:49 merlinofchaos Exp $
+// $Id: views_plugin_display.inc,v 1.20.2.57 2011/01/20 20:09:08 merlinofchaos Exp $
 /**
  * @file
  * Contains the base display plugin.
@@ -248,7 +248,17 @@ class views_plugin_display extends views_plugin {
    * Can this display accept attachments?
    */
   function accept_attachments() {
-    return !empty($this->definition['accept attachments']);
+    if (empty($this->definition['accept attachments'])) {
+      return FALSE;
+    }
+    if (!empty($this->view->argument) && $this->get_option('hide_attachment_summary')) {
+      foreach ($this->view->argument as $argument_id => $argument) {
+        if ($argument->needs_style_plugin() && empty($argument->argument_validated)) {
+          return FALSE;
+        }
+      }
+    }
+    return TRUE;
   }
 
   /**
@@ -268,6 +278,7 @@ class views_plugin_display extends views_plugin {
       'enabled' => array('enabled'),
       'css_class' => array('css_class'),
       'use_ajax' => array('use_ajax'),
+      'hide_attachment_summary' => array('hide_attachment_summary'),
       'query' => array('query'),
       'items_per_page' => array('items_per_page', 'offset', 'use_pager', 'pager_element'),
       'pager' => array('pager'),
@@ -323,6 +334,7 @@ class views_plugin_display extends views_plugin {
 
           'display_description' => FALSE,
           'use_ajax' => TRUE,
+          'hide_attachment_summary' => TRUE,
           'items_per_page' => TRUE,
           'use_pager' => TRUE,
           'offset' => TRUE,
@@ -376,6 +388,10 @@ class views_plugin_display extends views_plugin {
         'translatable' => TRUE,
       ),
       'use_ajax' => array(
+        'default' => FALSE,
+        'bool' => TRUE,
+      ),
+      'hide_attachment_summary' => array(
         'default' => FALSE,
         'bool' => TRUE,
       ),
@@ -678,6 +694,9 @@ class views_plugin_display extends views_plugin {
         $plugin->init($this->view, $this->display, $options);
       }
       else {
+        $display_id = $this->is_defaulted($option_name) ? $this->display->id : 'default';
+        $plugin->localization_keys = array($display_id, $type);
+
         if (!isset($this->base_field)) {
           $views_data = views_fetch_data($this->view->base_table);
           $this->view->base_field = $views_data['table']['base']['field'];
@@ -743,6 +762,11 @@ class views_plugin_display extends views_plugin {
 
         $handler = views_get_handler($info['table'], $info['field'], $handler_type, $override);
         if ($handler) {
+          // Special override for area types so they know where they come from.
+          if ($handler_type == 'area') {
+            $handler->handler_type = $type;
+          }
+
           $handler->init($this->view, $info);
           $this->handlers[$type][$id] = &$handler;
         }
@@ -930,6 +954,14 @@ class views_plugin_display extends views_plugin {
         'title' => t('Use AJAX'),
         'value' => $this->get_option('use_ajax') ? t('Yes') : t('No'),
         'desc' => t('Change whether or not this display will use AJAX.'),
+      );
+    }
+    if (!empty($this->definition['accept attachments'])) {
+      $options['hide_attachment_summary'] = array(
+        'category' => 'advanced',
+        'title' => t('Hide attachments in summary'),
+        'value' => $this->get_option('hide_attachment_summary') ? t('Yes') : t('No'),
+        'desc' => t('Change whether or not to display attachments when displaying an argument summary.'),
       );
     }
 
@@ -1185,6 +1217,14 @@ class views_plugin_display extends views_plugin {
           '#type' => 'radios',
           '#options' => array(1 => t('Yes'), 0 => t('No')),
           '#default_value' => $this->get_option('use_ajax') ? 1 : 0,
+        );
+        break;
+      case 'hide_attachment_summary':
+        $form['#title'] .= t('Hide attachments when displaying argument summary');
+        $form['hide_attachment_summary'] = array(
+          '#type' => 'radios',
+          '#options' => array(1 => t('Yes'), 0 => t('No')),
+          '#default_value' => $this->get_option('hide_attachment_summary') ? 1 : 0,
         );
         break;
       case 'use_more':
@@ -1903,6 +1943,7 @@ class views_plugin_display extends views_plugin {
         break;
       case 'enabled':
       case 'use_ajax':
+      case 'hide_attachment_summary':
         $this->set_option($section, (bool)$form_state['values'][$section]);
         break;
       case 'use_more':

@@ -222,6 +222,21 @@ Views 6.x-3.0-dev
     o #452384 by sammys: Another PHP 5.3 fix.
     o #975400 by bojanz: Improvements to field handlers getting and sanitizing values.
     o #696550: Taxonomy validator should always set title when it successfully validates.
+    o #1001302 by dagmar: Enable attachment displays to have more links.
+    o #869172 by bendiy: Add an "external" parameter to field link rewriting so that external URLs can be formed properly even without a scheme.
+    o #1021784 by tim.plunkett: Extra space added in some classes erroneously.
+    o #839236: Fields named "buttons" would disappear from the rearrange UI due to conflict with the buttons on the form.
+    o #1025696 by zengenuity: Bad data in user roles get_value().
+    o #862072 by jhedstrom: Allow argument validator to test if user has edit or delete access to a node.
+    o #935176 by benoit.borrel: Add "system" table to Views data.
+    o #780768 by dereine: lack of clean URLs breaks some preview.
+    o #1008358: Updated for translation plugin to work properly with i18nviews.
+    o #962564 by joshuajabbour: Allow link attributes to be rewritten (internally).
+    o #672864 by dboulet: cols- class incorrect on table, grid.
+    o #981872 by infojunkie: Option to hide attachments in summary views.
+    o #839810 by marcp: Get UID from URL argument default plugin should accept uids from Views pages.
+    o #1012584 by dereine: Allow filtering on term descriptions.
+    o #1035168 by Ao: Fix strict warning in unread node filter.
 
 Views 6.x-3.0-alpha3
     o #705668 by dereine: Fix glossary view, add tests for glossary view.
