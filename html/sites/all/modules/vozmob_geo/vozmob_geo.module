@@ -6,7 +6,14 @@
  */
 function vozmob_geo_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
   switch ($op):
-    case 'presave':
+    case 'insert':
+    case 'update':
+      if (empty($node->field_map[0]['openlayers_wkt']) && preg_match('/loc:(.*)/', $node->body, $matches)) {
+        $locations = openlayers_geocoder_response($matches[1]);
+        if (isset($locations[0]['location'])) {
+          $node->field_map[0]['openlayers_wkt'] = 'GEOMETRYCOLLECTION(POINT(' . $locations[0]['location']['lng'] . ' ' . $locations[0]['location']['lat'] . '))';
+        }
+      }
       if (!empty($node->field_gps_gpslongitude[0]['value']) && !empty($node->field_gps_gpslatitude[0]['value']) && empty($node->field_map[0]['openlayers_wkt'])) {
         $node->field_map[0]['openlayers_wkt'] = 'GEOMETRYCOLLECTION(POINT(' . $node->field_gps_gpslongitude[0]['value'] . ' ' . $node->field_gps_gpslatitude[0]['value'] . '))';
       }

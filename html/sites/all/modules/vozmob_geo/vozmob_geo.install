@@ -1,0 +1,9 @@
+<?php
+// $Id$
+
+/**
+ * Implements hook_install().
+ */
+function vozmob_geo_install() {
+  db_query("UPDATE {system} SET weight = %d WHERE name = '%s'", -5, 'vozmob_geo');
+}
