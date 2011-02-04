@@ -191,6 +191,7 @@ function uploadterm_regex_get() {
 
 /**
  * Deletes any terms in the uploadterm vocabulary, creates the basic terms with regex.
+ * Re-tags all the content.
  */
 function uploadterm_vocabulary_term_reset() {
   $vid = variable_get('uploadterm_vocabulary', NULL);
@@ -203,4 +204,16 @@ function uploadterm_vocabulary_term_reset() {
   foreach ($terms as $term => $regex) {
     taxonomy_save_term($edit = array('name' => $term, 'vid' => $vid, 'uploadterm' => $regex));
   }
+  drupal_set_message(t('Added default media upload taxonomy terms.'));
+
+  // batch this?
+  $result = db_query('SELECT u.nid, u.vid, f.filemime FROM {upload} u INNER JOIN {files} f ON u.fid = f.fid');
+  while ($row = db_fetch_array($result)) {
+    if ($tid = uploadterm_mimeterm($row['filemime'])) {
+      db_query('INSERT INTO {term_node} (nid, vid, tid) VALUES (%d, %d, %d)', $row['nid'], $row['vid'], $tid);
+    }
+  }
+  drupal_set_message(t('Applied taxonomy terms to existing nodes.'));
+
+  cache_clear_all();
 }
