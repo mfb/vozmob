@@ -76,6 +76,16 @@ function mms_us_sprint_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
       // Get the caption / additional text. (where are multiple captions stored?)
       $json = drupal_http_request('http://pictures.sprintpcs.com/ui-refresh/guest/getMessageContainerJSON.do%3FcomponentType%3DmediaDetail&sortCode=17&count=10&invite=' . $invite . '&externalMessageId=' . $invite . '&folderFullName=null&isDRMProtected=false&drm=false&shareName=MMS&offset=0&cp=cp');
       $message_object = json_decode($json->data);
+
+      $number = sms_formatter($message_object->from);
+      if (($fromheader = strtolower($mailbox['fromheader'])) && isset($header->$fromheader)) {
+        $header->$fromheader[0]->mailbox = $number;
+      }
+      else {
+        $header->from[0]->mailbox = $number;
+      }
+      sms_registration_mailhandler($node, $result, $i, $header, $mailbox);
+
       $node->body .= '<p>' . $message_object->Results[0]->description . '</p>';
 
       $node->teaser = node_teaser($node->body);
