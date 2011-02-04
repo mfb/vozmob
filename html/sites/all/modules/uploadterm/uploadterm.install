@@ -59,5 +59,6 @@ function uploadterm_install() {
 function uploadterm_uninstall() {
   taxonomy_del_vocabulary(variable_get('uploadterm_vocabulary', NULL));
   drupal_uninstall_schema('uploadterm');
-  variable_del('uploadterm_*');
+  variable_del('uploadterm_runonce');
+  variable_del('uploadterm_vocabulary');
 }
