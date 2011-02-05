@@ -69,6 +69,10 @@ function uploadterm_form_alter(&$form, &$form_state, $form_id) {
  * Implements hook_form_FORM_ID_alter().
  */
 function uploadterm_form_taxonomy_form_term_alter(&$form, &$form_state) {
+  if ($form['vid']['#value'] != variable_get('uploadterm_vocabulary', NULL)) {
+    // Only add the regex box to terms in the vocabularies we control. 
+    return;
+  }
   if ($form_state['submitted'] || is_array($form_state['post']) && $form_state['post']['op'] == t('Delete')) {
     return;
   }
