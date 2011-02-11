@@ -6,6 +6,12 @@
  *
  * Hardcoded variables at the moment:-
  *   uploadterm_fields array of string names of fields to check on node;
+ *   uploadterm_iconpaths array of tid => icon path;
+ *
+ * Notes:
+ *   This module addresses a problem that is solved in D7 with the contrib 
+ * media module by adding a column to the core file upload table to hold the
+ * type.
  */
 
 /**
@@ -19,6 +25,15 @@ function uploadterm_init() {
     uploadterm_vocabulary_term_reset();
     variable_set('uploadterm_runonce', TRUE);
   }
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function uploadterm_theme() {
+  return array(
+    'uploadterm_images' => array('arguments' => array('terms')),
+  );
 }
 
 /**
@@ -220,4 +235,60 @@ function uploadterm_vocabulary_term_reset() {
   drupal_set_message(t('Applied taxonomy terms to existing nodes.'));
 
   cache_clear_all();
+}
+
+/********************************************************************
+ * Theme and display related functions.
+ */
+
+/**
+ * Location of icons.
+ *
+ * @todo 
+ * For the moment just override with variable_set('uploadterms_iconpaths', array());
+ * Should be related to the tid/regex - and could be uploaded from the term edit page.
+ * Then should be loaded with the term. Making this function useless, and replace with default fn.
+ *
+ * @return array keyed with relative path to each icon.
+ */
+function uploadterm_iconpath($tid = 0) {
+  static $iconpaths;
+
+  if (! isset($iconpaths)) {
+    $path = drupal_get_path('module', 'uploadterm') . '/icons/';
+    $iconpaths = variable_get('uploadterms_iconpaths', array(
+      457 => $path . 'video.png',
+      458 => $path . 'audio.png',
+      456 => $path . 'photo.png',
+      0 => $path . 'text.png', // default
+    ));
+  }
+
+  return $iconpaths[$tid];
+}
+
+/**
+ * Theme terms with with linked icons.
+ *
+ * @param $term
+ *  array term arrays.
+ * @return
+ *  array of themed icons with links to /taxonomy/term/tid pages.
+ *
+ * @ingroup themeable
+ */
+function theme_uploadterm_images($terms) {
+  $icons = array();
+  foreach ($terms as $term) {
+    // @todo term name translation?
+    $image = theme('image', uploadterm_iconpath($term['tid'], $term['name']));
+    // @todo we want to use this for node.tpl.php as well arrays or objects there? path set?
+    // taxonomy_term_path($term)
+    $icons[] = l($image, $term['path'], array('html' => TRUE));
+  }
+  if (! count($icons)) {
+    // default
+    $icons[] = theme('image', uploadterm_iconpath(), t('Text'));
+  }
+  return $icons;
 }

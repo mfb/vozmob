@@ -39,7 +39,7 @@ function uploadterm_install() {
 
   $vocabulary = array(
     'name' => 'Media',
-    'module' => 'uploadterm',
+    'module' => 'taxonomy', // we could override this and control the term path
     'description' => 'Attached media types',
     'nodes' => node_get_types('names'),
     'tags' => 0,
