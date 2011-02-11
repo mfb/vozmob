@@ -271,7 +271,7 @@ function uploadterm_iconpath($tid = 0) {
  * Theme terms with with linked icons.
  *
  * @param $term
- *  array term arrays.
+ *  array term arrays (as keyed by the views module).
  * @return
  *  array of themed icons with links to /taxonomy/term/tid pages.
  *
@@ -282,8 +282,6 @@ function theme_uploadterm_images($terms) {
   foreach ($terms as $term) {
     // @todo term name translation?
     $image = theme('image', uploadterm_iconpath($term['tid'], $term['name']));
-    // @todo we want to use this for node.tpl.php as well arrays or objects there? path set?
-    // taxonomy_term_path($term)
     $icons[] = l($image, $term['path'], array('html' => TRUE));
   }
   if (! count($icons)) {
