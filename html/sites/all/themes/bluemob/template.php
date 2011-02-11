@@ -108,3 +108,19 @@ function bluemob_media_element($file, $href) {
     return '<' . $element . ' controls="controls" src="' . check_url($href) . '" />';
   }
 }
+
+/**
+ * View features, field tid. 
+ * 
+ * @see views-view-field-field--features--tid.tpl.php
+ */
+function phptemplate_preprocess_views_view_field__features__tid(&$vars) {
+  if (! empty($vars['field']->items[$vars['row']->node_vid])) {
+    $vars['media']['terms'] = (array) $vars['field']->items[$vars['row']->node_vid];
+  }
+  else {
+    $vars['media']['terms'] = array();
+  }
+  $vars['media']['images'] = theme('uploadterm_images', $vars['media']['terms']);
+  $vars['media']['content'] = theme('item_list', $vars['media']['images'], NULL, 'ul', array('class' => 'inline links media'));
+}
