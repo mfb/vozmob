@@ -59,12 +59,28 @@ function bluemob_preprocess_node(&$vars) {
       }
     }
   }
-  
-  // Unset sms send link and comment link in terms. Only show terms. 
-  unset($vars['taxonomy']['sms_sendtophone']);
-  unset($vars['taxonomy']['comment_add']);
-  $vars['terms'] = theme('links', $vars['taxonomy'], array('class' => 'links inline'));
 
+  // split term by vocabulary and format appropriatly
+  $vocabulary = array();
+  foreach ($node->taxonomy as $tid => $term) {
+    $vocabulary[$term->vid]['taxonomy_term_' . $term->tid] = array(
+      'tid' => $term->tid,                  // views style
+      'name' => $term->name,                // views style
+      'title' => $term->name,               // taxonomy module style.
+      'href' => taxonomy_term_path($term),  // taxonomy module style
+       'attributes' => array(               // taxonomy module style
+        'rel' => 'tag',
+        'title' => strip_tags($term->description),
+      ),
+      'path' => taxonomy_term_path($term),  // views style
+    );
+  }
+  // tags
+  $vars['terms'] = theme('links', $vocabulary[1], array('class' => 'links inline'));
+  if (module_exists('uploadterm')) {
+    // media terms
+    $vars['mediaterms'] = theme('item_list', theme('uploadterm_images', $vocabulary[variable_get('uploadterm_vocabulary', 0)]), NULL, 'ul', array('class' => 'links inline media'));
+  }
 
   switch ($node->type) {
     case 'page':

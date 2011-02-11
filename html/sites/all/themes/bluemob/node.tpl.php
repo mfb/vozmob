@@ -3,12 +3,14 @@
   <?php if ($page == 0): ?>
     <h2><a href="<?php print $node_url ?>" title="<?php print $title ?>"><?php print $title ?></a></h2>
   <?php endif; ?>
-  <?php if ($submitted || $terms): ?>
+  <?php if ($submitted || $terms || $mediaterms): ?>
     <div class="meta">
       <?php if ($submitted): ?>
         <div class="submitted"><?php print $submitted ?></div>
       <?php endif; ?>
-
+      <?php if ($mediaterms): ?>
+        <div class="mediaterms"><?php print $mediaterms ?></div>
+      <?php endif; ?>
       <?php if ($terms): ?>
         <div class="terms"><strong>Tags:</strong> <?php print $terms ?></div>
       <?php endif;?>
