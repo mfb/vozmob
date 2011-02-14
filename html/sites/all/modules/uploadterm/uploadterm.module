@@ -22,8 +22,8 @@
  */
 function uploadterm_init() {
   if (! variable_get('uploadterm_runonce', FALSE)) {
-    uploadterm_vocabulary_term_reset();
     variable_set('uploadterm_runonce', TRUE);
+    uploadterm_vocabulary_term_reset();
   }
 }
 
@@ -128,7 +128,7 @@ function uploadterm_taxonomy($op, $type, $values) {
       uploadterm_term_regex_set($values['tid'], $values['uploadterm']);
     }
     if ($op == 'delete') {
-      db_query('DELETE FROM {uploadterm_terms} WHERE tid = %d', $array['tid']);
+      db_query('DELETE FROM {uploadterm_term} WHERE tid = %d', $values['tid']);
     }
   }
 }
@@ -208,6 +208,10 @@ function uploadterm_regex_get() {
   return $regex;
 }
 
+/********************************************************************
+ * Reset terms, and apply them to nodes - batch operation
+ */
+
 /**
  * Deletes any terms in the uploadterm vocabulary, creates the basic terms with regex.
  * Re-tags all the content.
@@ -219,22 +223,87 @@ function uploadterm_vocabulary_term_reset() {
     taxonomy_del_term($row['tid']);
   }
 
+  // create terms with defaults
   $terms = array('image' => '/^image\//', 'video' => '/^video\//', 'audio' => '/^audio\//');
   foreach ($terms as $term => $regex) {
     taxonomy_save_term($edit = array('name' => $term, 'vid' => $vid, 'uploadterm' => $regex));
   }
   drupal_set_message(t('Added default media upload taxonomy terms.'));
 
-  // batch this?
-  $result = db_query('SELECT u.nid, u.vid, f.filemime FROM {upload} u INNER JOIN {files} f ON u.fid = f.fid');
+  // (re-)tag content
+  $field_names = variable_get('uploadterm_fields', array('files', 'field_image'));
+  $batch = array(
+    'title' => t('Updating existing nodes with mimetypes'),
+    'operations' => array(),
+    'finished' => '_uploadterm_vocabulary_term_reset_finished',
+  );
+  foreach ($field_names as $field_name) {
+    // standard upload field
+    if ($field_name == 'files') {
+      $batch['operations'][] = array('_uploadterm_vocabulary_term_reset', array(array()));
+    }
+    // cck field
+    else {
+      module_load_include('inc', 'content', 'includes/content.crud');
+      $fields = content_field_instance_read(array('field_name' => $field_name));
+      foreach ($fields as $field) {
+        $field_db = content_database_info($field);
+        $batch['operations'][] = array('_uploadterm_vocabulary_term_reset', array($field_db));
+      }
+    }
+  }
+  batch_set($batch);
+  batch_process();
+  cache_clear_all();
+}
+
+/**
+ * batch_api operation callback
+ *
+ * @see uploadterm_vocabulary_term_reset().
+ */
+function _uploadterm_vocabulary_term_reset($field_db, &$context) {
+  if (empty($field_db)) {
+    $sql_from = '{upload} u INNER JOIN {files} f ON u.fid = f.fid';
+  }
+  else {
+    $sql_from = '{' . $field_db['table']  . '} u INNER JOIN {files} f ON f.fid = u. ' . $field_db['columns']['fid']['column'];
+  }
+
+  if (empty($context['sandbox'])) {
+    $context['sandbox']['progress'] = 0;
+    $context['sandbox']['max'] = db_result(db_query("SELECT COUNT(*) FROM $sql_from"));
+  }
+  $limit = 5000;
+
+  $result = db_query_range("SELECT u.nid, u.vid, f.filemime FROM $sql_from", $context['sandbox']['progress'], $limit);
   while ($row = db_fetch_array($result)) {
     if ($tid = uploadterm_mimeterm($row['filemime'])) {
       db_query('INSERT INTO {term_node} (nid, vid, tid) VALUES (%d, %d, %d)', $row['nid'], $row['vid'], $tid);
     }
+    $context['sandbox']['progress']++;
   }
-  drupal_set_message(t('Applied taxonomy terms to existing nodes.'));
 
-  cache_clear_all();
+  if ($context['sandbox']['progress'] != $context['sandbox']['max']) {
+    $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
+  } 
+  else {
+    $context['finished'] = 1;
+  }
+}
+
+/**
+ * batch_api finished callback
+ *
+ * @see uploadterm_vocabulary_term_reset().
+ */
+function _uploadterm_vocabulary_term_reset_finished($success, $results, $operations) {
+  if ($success) {
+    drupal_set_message(t('Updated media terms for existing nodes'));
+  }
+  else {
+    drupal_set_message(t('Error updating media terms for existing nodes'));
+  }
 }
 
 /********************************************************************
