@@ -1,0 +1,7 @@
+; $Id: taxonomy_image_attach.info,v 1.1.4.2 2008/08/27 17:09:21 nancyw Exp $
+name = Taxonomy Image Attach
+description = Support re-use of existing image nodes as taxonomy images.
+dependencies[] = taxonomy_image
+dependencies[] = image_attach
+package = Taxonomy Image
+core = 6.x
