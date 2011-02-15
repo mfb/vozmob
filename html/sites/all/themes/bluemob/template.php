@@ -77,9 +77,13 @@ function bluemob_preprocess_node(&$vars) {
   }
   // tags
   $vars['terms'] = theme('links', $vocabulary[1], array('class' => 'links inline'));
-  if (module_exists('uploadterm')) {
+  if (module_exists('uploadterm') && module_exists('taxonomy_image')) {
     // media terms
-    $vars['mediaterms'] = theme('item_list', theme('uploadterm_images', $vocabulary[variable_get('uploadterm_vocabulary', 0)]), NULL, 'ul', array('class' => 'links inline media'));
+    $term_image_links = array();
+    foreach ($vocabulary[variable_get('uploadterm_vocabulary', 0)] as $term) {
+      $term_image_links[] = l(taxonomy_image_display($term['tid']), $term['path'], array('html' => TRUE)); // can add size here
+    }
+    $vars['mediaterms'] = theme('item_list', $term_image_links, NULL, 'ul', array('class' => 'links inline media'));
   }
 
   switch ($node->type) {
