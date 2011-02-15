@@ -37,6 +37,13 @@ function taxonomy_image_views_data() {
       'handler' => 'views_handler_field_taxonomy_image',
     ),
   );
+  $data['term_image']['tid_list'] = array(
+    'title' => t('All term images'),
+    'help' => t("All images associated with a node's taxonomy terms."),
+    'field' => array(
+      'handler' => 'views_handler_field_taxonomy_image_list',
+    ),
+  );
 
   return $data;
 }
