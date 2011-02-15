@@ -28,15 +28,6 @@ function uploadterm_init() {
 }
 
 /**
- * Implementation of hook_theme().
- */
-function uploadterm_theme() {
-  return array(
-    'uploadterm_images' => array('arguments' => array('terms')),
-  );
-}
-
-/**
  * Implementation of hook_nodeapi().
  */
 function uploadterm_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
@@ -304,58 +295,4 @@ function _uploadterm_vocabulary_term_reset_finished($success, $results, $operati
   else {
     drupal_set_message(t('Error updating media terms for existing nodes'));
   }
-}
-
-/********************************************************************
- * Theme and display related functions.
- */
-
-/**
- * Location of icons.
- *
- * @todo 
- * For the moment just override with variable_set('uploadterms_iconpaths', array());
- * Should be related to the tid/regex - and could be uploaded from the term edit page.
- * Then should be loaded with the term. Making this function useless, and replace with default fn.
- *
- * @return array keyed with relative path to each icon.
- */
-function uploadterm_iconpath($tid = 0) {
-  static $iconpaths;
-
-  if (! isset($iconpaths)) {
-    $path = drupal_get_path('module', 'uploadterm') . '/icons/';
-    $iconpaths = variable_get('uploadterms_iconpaths', array(
-      457 => $path . 'video.png',
-      458 => $path . 'audio.png',
-      456 => $path . 'photo.png',
-      0 => $path . 'text.png', // default
-    ));
-  }
-
-  return $iconpaths[$tid];
-}
-
-/**
- * Theme terms with with linked icons.
- *
- * @param $term
- *  array term arrays (as keyed by the views module).
- * @return
- *  array of themed icons with links to /taxonomy/term/tid pages.
- *
- * @ingroup themeable
- */
-function theme_uploadterm_images($terms) {
-  $icons = array();
-  foreach ($terms as $term) {
-    // @todo term name translation?
-    $image = theme('image', uploadterm_iconpath($term['tid'], $term['name']));
-    $icons[] = l($image, $term['path'], array('html' => TRUE));
-  }
-  if (! count($icons)) {
-    // default
-    $icons[] = theme('image', uploadterm_iconpath(), t('Text'));
-  }
-  return $icons;
 }
