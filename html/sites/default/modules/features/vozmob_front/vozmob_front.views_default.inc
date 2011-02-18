@@ -12,6 +12,8 @@ function vozmob_front_views_default_views() {
   $view->description = '';
   $view->tag = '';
   $view->base_table = 'node';
+  $view->human_name = '';
+  $view->core = 0;
   $view->api_version = '3.0-alpha1';
   $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 
@@ -61,6 +63,24 @@ function vozmob_front_views_default_views() {
   $handler->display->display_options['fields']['field_image_fid']['multiple']['group'] = 1;
   $handler->display->display_options['fields']['field_image_fid']['multiple']['multiple_number'] = '1';
   $handler->display->display_options['fields']['field_image_fid']['multiple']['multiple_reversed'] = 0;
+  /* Field: Taxonomy: All term images */
+  $handler->display->display_options['fields']['tid_list']['id'] = 'tid_list';
+  $handler->display->display_options['fields']['tid_list']['table'] = 'term_image';
+  $handler->display->display_options['fields']['tid_list']['field'] = 'tid_list';
+  $handler->display->display_options['fields']['tid_list']['label'] = '';
+  $handler->display->display_options['fields']['tid_list']['element_label_colon'] = 1;
+  $handler->display->display_options['fields']['tid_list']['element_default_classes'] = 1;
+  $handler->display->display_options['fields']['tid_list']['hide_empty'] = 0;
+  $handler->display->display_options['fields']['tid_list']['empty_zero'] = 0;
+  $handler->display->display_options['fields']['tid_list']['type'] = 'ul';
+  $handler->display->display_options['fields']['tid_list']['link_to_taxonomy'] = 1;
+  $handler->display->display_options['fields']['tid_list']['limit'] = 1;
+  // limit to upload term vocabulary
+  $vid = variable_get('uploadterm_vocabulary', 0);
+  $handler->display->display_options['fields']['tid_list']['vids'] = array(
+    $vid => $vid,
+    1 => 0,
+  );
   /* Field: User: Name */
   $handler->display->display_options['fields']['name']['id'] = 'name';
   $handler->display->display_options['fields']['name']['table'] = 'users';
@@ -131,11 +151,6 @@ function vozmob_front_views_default_views() {
     'blog' => 'blog',
   );
   $handler->display->display_options['filters']['type']['expose']['operator'] = FALSE;
-  /* Filter: Broken/missing handler */
-  $handler->display->display_options['filters']['content_negotiation']['id'] = 'content_negotiation';
-  $handler->display->display_options['filters']['content_negotiation']['table'] = 'node';
-  $handler->display->display_options['filters']['content_negotiation']['field'] = 'content_negotiation';
-  $handler->display->display_options['filters']['content_negotiation']['operator'] = '';
 
   /* Display: Page */
   $handler = $view->new_display('page', 'Page', 'page_1');
@@ -166,6 +181,8 @@ function vozmob_front_views_default_views() {
   $view->description = 'Recently featured stories';
   $view->tag = '';
   $view->base_table = 'node';
+  $view->human_name = '';
+  $view->core = 0;
   $view->api_version = '3.0-alpha1';
   $view->disabled = FALSE; /* Edit this to true to make a default view disabled initially */
 
