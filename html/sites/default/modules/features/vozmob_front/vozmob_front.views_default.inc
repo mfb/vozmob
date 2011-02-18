@@ -75,10 +75,8 @@ function vozmob_front_views_default_views() {
   $handler->display->display_options['fields']['tid_list']['type'] = 'ul';
   $handler->display->display_options['fields']['tid_list']['link_to_taxonomy'] = 1;
   $handler->display->display_options['fields']['tid_list']['limit'] = 1;
-  // limit to upload term vocabulary
-  $vid = variable_get('uploadterm_vocabulary', 0);
   $handler->display->display_options['fields']['tid_list']['vids'] = array(
-    $vid => $vid,
+    2 => '2',
     1 => 0,
   );
   /* Field: User: Name */
