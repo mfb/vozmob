@@ -130,17 +130,13 @@ function bluemob_media_element($file, $href) {
 }
 
 /**
- * View features, field tid. 
- * 
- * @see views-view-field-field--features--tid.tpl.php
+ * View features: taxonomy image all.
+ *
+ * If there is no output add default image.
  */
-function phptemplate_preprocess_views_view_field__features__tid(&$vars) {
-  if (! empty($vars['field']->items[$vars['row']->node_vid])) {
-    $vars['media']['terms'] = (array) $vars['field']->items[$vars['row']->node_vid];
+function phptemplate_preprocess_views_view_field__tid_list(&$vars) {
+  if ($vars['output'] == '') {
+    $text = drupal_get_path('module', 'vozmob_front') . '/icons/text.png';
+    $vars['output'] = theme('item_list', array(theme('image', $text)));
   }
-  else {
-    $vars['media']['terms'] = array();
-  }
-  $vars['media']['images'] = theme('uploadterm_images', $vars['media']['terms']);
-  $vars['media']['content'] = theme('item_list', $vars['media']['images'], NULL, 'ul', array('class' => 'inline links media'));
 }
