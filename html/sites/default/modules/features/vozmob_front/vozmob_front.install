@@ -1,0 +1,66 @@
+<?php
+/**
+ * @file
+ *  Front page feature install file.
+ */
+
+/**
+ * Implementation of hook_requirements().
+ *
+ * We need uploadterm to not only be installed but to have run its
+ * hook_init once to have created the media terms.
+ */
+function vozmob_front_requirements($phase) {
+  if ($phase != 'install') {
+    return;
+  }
+
+  $t = get_t();
+  $requirements = array();
+  
+  $requirements['uploadterm'] = array(
+    'title' => $t('Upload term'),
+    'description' => $t('Upload term needs to be installed, and a page have been visited once since.'),
+  );
+  if (variable_get('uploadterm_runonce', FALSE)) {
+    $requirements['uploadterm']['severity'] = REQUIREMENT_OK;
+  }
+  else {
+    $requirements['uploadterm']['severity'] = REQUIREMENT_ERROR;
+  }
+
+  return $requirements;
+}
+
+/**
+ * Implementation of hook_install().
+ */
+function vozmob_front_install() {
+  $t = get_t();
+  // Files with the same name as the term in the uploadterm vocabulary will automatically given to the term image.
+  $vid = variable_get('uploadterm_vocabulary', NULL);
+  $terms = db_query('SELECT * FROM {term_data} WHERE vid = %d', $vid);
+  $files = file_scan_directory(dirname(__FILE__) . '/icons', '\.png$', array('.', '..', 'CVS'), 0, FALSE, 'name');
+  $taxonomy_image_path = file_directory_path() . '/' . variable_get('taxonomy_image_path', 'category_pictures');
+  file_check_directory($taxonomy_image_path, FILE_CREATE_DIRECTORY);
+  while ($term = db_fetch_array($terms)) {
+    if (isset($files[$term['name']])) {
+      if (! file_copy($files[$term['name']]->filename, variable_get('taxonomy_image_path', 'category_pictures'), FILE_EXISTS_REPLACE)) {
+        drupal_set_message($t('Failed to move %term term image', array('%term' => $term['name'])));
+      }
+      if (db_result(db_query('SELECT tid FROM {term_image} WHERE tid = %d', $term['tid']))) {
+        db_query("UPDATE {term_image} SET path = '%s' WHERE tid = %d", $term['name'] . '.png', $term['tid']);
+      }
+      else {
+        db_query("INSERT INTO {term_image} (tid, path) VALUES (%d, '%s')", $term['tid'], $term['name'] . '.png');
+      }
+    }
+  }
+}
+
+/**
+ * Implementation of hook_install().
+ */
+function vozmob_front_uninstall() {
+}
+
