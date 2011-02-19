@@ -1,39 +1,3 @@
 <?php
 
 include_once('vozmob_front.features.inc');
-
-function vozmob_front_block($op = 'list', $delta = 0, $edit = array()) {
-  if ($op == 'list') {
-    return array(
-      0 => array(
-        'info' => t('Media'),
-        'weight' => 0,
-        'status' => 0,
-        'region' => 'right',
-      ),
-    );
-  }
-
-  if ($op == 'view') {
-    if ($delta == 0) {
-      return vozmob_front_block_media();
-    }
-  }
-}
-
-function vozmob_front_block_media() {
-  // oh hackish quick and can be made better.
-  $vid = variable_get('uploadterm_vocabulary', NULL);
-  $image = db_fetch_object(db_query("SELECT * FROM {term_data} WHERE vid = %d AND name ='image'", $vid));
-  $video = db_fetch_object(db_query("SELECT * FROM {term_data} WHERE vid = %d AND name = 'video'", $vid));
-  $audio = db_fetch_object(db_query("SELECT * FROM {term_data} WHERE vid = %d AND name = 'audio'", $vid));
-  $links = array(
-    l(theme_image(drupal_get_path('theme', 'bluemob') . '/images/photo.png'), taxonomy_term_path($image), array('html' => true)),
-    l(theme_image(drupal_get_path('theme', 'bluemob') . '/images/video.png'), taxonomy_term_path($video), array('html' => true)),
-    l(theme_image(drupal_get_path('theme', 'bluemob') . '/images/sound.png'), taxonomy_term_path($audio), array('html' => true)),
-  );
-  return array(
-    'subject' => t('Story by Media Type'),
-    'content' => theme('item_list', $links),
-  );
-}

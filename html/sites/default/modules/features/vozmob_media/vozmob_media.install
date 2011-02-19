@@ -10,7 +10,7 @@
  * We need uploadterm to not only be installed but to have run its
  * hook_init once to have created the media terms.
  */
-function vozmob_front_requirements($phase) {
+function vozmob_media_requirements($phase) {
   if ($phase != 'install') {
     return;
   }
@@ -35,7 +35,7 @@ function vozmob_front_requirements($phase) {
 /**
  * Implementation of hook_install().
  */
-function vozmob_front_install() {
+function vozmob_media_install() {
   $t = get_t();
   // Files with the same name as the term in the uploadterm vocabulary will automatically given to the term image.
   $vid = variable_get('uploadterm_vocabulary', NULL);
@@ -61,6 +61,6 @@ function vozmob_front_install() {
 /**
  * Implementation of hook_install().
  */
-function vozmob_front_uninstall() {
+function vozmob_media_uninstall() {
 }
 
