@@ -34,9 +34,9 @@ function vozmob_media_block_media() {
   $video = db_fetch_object(db_query("SELECT * FROM {term_data} WHERE vid = %d AND name = 'video'", $vid));
   $audio = db_fetch_object(db_query("SELECT * FROM {term_data} WHERE vid = %d AND name = 'audio'", $vid));
   $links = array(
-    l(theme_image(drupal_get_path('theme', 'bluemob') . '/images/photo.png'), taxonomy_term_path($image), array('html' => true)),
-    l(theme_image(drupal_get_path('theme', 'bluemob') . '/images/video.png'), taxonomy_term_path($video), array('html' => true)),
-    l(theme_image(drupal_get_path('theme', 'bluemob') . '/images/sound.png'), taxonomy_term_path($audio), array('html' => true)),
+    l(theme_image(drupal_get_path('module', 'vozmob_media') . '/icons/image.png'), taxonomy_term_path($image), array('html' => true)),
+    l(theme_image(drupal_get_path('module', 'vozmob_media') . '/icons/video.png'), taxonomy_term_path($video), array('html' => true)),
+    l(theme_image(drupal_get_path('module', 'vozmob_media') . '/icons/audio.png'), taxonomy_term_path($audio), array('html' => true)),
   );
   return array(
     'subject' => t('Story by Media Type'),
