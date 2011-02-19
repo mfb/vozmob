@@ -44,15 +44,15 @@ function vozmob_media_install() {
   $taxonomy_image_path = file_directory_path() . '/' . variable_get('taxonomy_image_path', 'category_pictures');
   file_check_directory($taxonomy_image_path, FILE_CREATE_DIRECTORY);
   while ($term = db_fetch_array($terms)) {
-    if (isset($files[substr($term['name'], 0, -5)], )) {
-      if (! file_copy($files[$term['name']]->filename, variable_get('taxonomy_image_path', 'category_pictures'), FILE_EXISTS_REPLACE)) {
+    if (isset($files[$term['name'] . '-tiny'])) {
+      if (! file_copy($files[$term['name'] . '-tiny']->filename, variable_get('taxonomy_image_path', 'category_pictures'), FILE_EXISTS_REPLACE)) {
         drupal_set_message($t('Failed to move %term term image', array('%term' => $term['name'])));
       }
       if (db_result(db_query('SELECT tid FROM {term_image} WHERE tid = %d', $term['tid']))) {
-        db_query("UPDATE {term_image} SET path = '%s' WHERE tid = %d", $term['name'] . '.png', $term['tid']);
+        db_query("UPDATE {term_image} SET path = '%s' WHERE tid = %d", $term['name'] . '-tiny.png', $term['tid']);
       }
       else {
-        db_query("INSERT INTO {term_image} (tid, path) VALUES (%d, '%s')", $term['tid'], $term['name'] . '.png');
+        db_query("INSERT INTO {term_image} (tid, path) VALUES (%d, '%s')", $term['tid'], $term['name'] . '-tiny.png');
       }
     }
   }
