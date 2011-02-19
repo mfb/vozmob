@@ -40,11 +40,11 @@ function vozmob_media_install() {
   // Files with the same name as the term in the uploadterm vocabulary will automatically given to the term image.
   $vid = variable_get('uploadterm_vocabulary', NULL);
   $terms = db_query('SELECT * FROM {term_data} WHERE vid = %d', $vid);
-  $files = file_scan_directory(dirname(__FILE__) . '/icons', '\.png$', array('.', '..', 'CVS'), 0, FALSE, 'name');
+  $files = file_scan_directory(dirname(__FILE__) . '/icons', '-tiny\.png$', array('.', '..', 'CVS'), 0, FALSE, 'name');
   $taxonomy_image_path = file_directory_path() . '/' . variable_get('taxonomy_image_path', 'category_pictures');
   file_check_directory($taxonomy_image_path, FILE_CREATE_DIRECTORY);
   while ($term = db_fetch_array($terms)) {
-    if (isset($files[$term['name']])) {
+    if (isset($files[substr($term['name'], 0, -5)], )) {
       if (! file_copy($files[$term['name']]->filename, variable_get('taxonomy_image_path', 'category_pictures'), FILE_EXISTS_REPLACE)) {
         drupal_set_message($t('Failed to move %term term image', array('%term' => $term['name'])));
       }
