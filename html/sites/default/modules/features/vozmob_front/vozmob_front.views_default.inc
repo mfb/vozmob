@@ -217,6 +217,22 @@ function vozmob_front_views_default_views() {
   $handler->display->display_options['fields']['field_image_fid']['multiple']['group'] = 1;
   $handler->display->display_options['fields']['field_image_fid']['multiple']['multiple_number'] = '1';
   $handler->display->display_options['fields']['field_image_fid']['multiple']['multiple_reversed'] = 0;
+  /* Field: Taxonomy: All term images */
+  $handler->display->display_options['fields']['tid_list']['id'] = 'tid_list';
+  $handler->display->display_options['fields']['tid_list']['table'] = 'term_image';
+  $handler->display->display_options['fields']['tid_list']['field'] = 'tid_list';
+  $handler->display->display_options['fields']['tid_list']['label'] = '';
+  $handler->display->display_options['fields']['tid_list']['element_label_colon'] = 1;
+  $handler->display->display_options['fields']['tid_list']['element_default_classes'] = 1;
+  $handler->display->display_options['fields']['tid_list']['hide_empty'] = 0;
+  $handler->display->display_options['fields']['tid_list']['empty_zero'] = 0;
+  $handler->display->display_options['fields']['tid_list']['type'] = 'ul';
+  $handler->display->display_options['fields']['tid_list']['link_to_taxonomy'] = 1;
+  $handler->display->display_options['fields']['tid_list']['limit'] = 1;
+  $handler->display->display_options['fields']['tid_list']['vids'] = array(
+    2 => '2',
+    1 => 0,
+  );
   /* Field: Node: Post date */
   $handler->display->display_options['fields']['created']['id'] = 'created';
   $handler->display->display_options['fields']['created']['table'] = 'node';
