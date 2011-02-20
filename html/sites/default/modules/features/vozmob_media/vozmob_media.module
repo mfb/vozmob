@@ -40,6 +40,6 @@ function vozmob_media_block_media() {
   );
   return array(
     'subject' => t('Story by Media Type'),
-    'content' => theme('item_list', $links),
+    'content' => '<div class="media-types large-icons">' . theme('item_list', $links) . '</div>',
   );
 }
