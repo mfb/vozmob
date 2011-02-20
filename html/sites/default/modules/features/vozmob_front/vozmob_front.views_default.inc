@@ -68,15 +68,17 @@ function vozmob_front_views_default_views() {
   $handler->display->display_options['fields']['tid_list']['table'] = 'term_image';
   $handler->display->display_options['fields']['tid_list']['field'] = 'tid_list';
   $handler->display->display_options['fields']['tid_list']['label'] = '';
-  $handler->display->display_options['fields']['tid_list']['element_label_colon'] = 1;
-  $handler->display->display_options['fields']['tid_list']['element_default_classes'] = 1;
+  $handler->display->display_options['fields']['tid_list']['element_type'] = 'div';
+  $handler->display->display_options['fields']['tid_list']['element_class'] = 'media-types';
+  $handler->display->display_options['fields']['tid_list']['element_label_colon'] = 0;
+  $handler->display->display_options['fields']['tid_list']['element_default_classes'] = 0;
   $handler->display->display_options['fields']['tid_list']['hide_empty'] = 0;
   $handler->display->display_options['fields']['tid_list']['empty_zero'] = 0;
   $handler->display->display_options['fields']['tid_list']['type'] = 'ul';
   $handler->display->display_options['fields']['tid_list']['link_to_taxonomy'] = 1;
   $handler->display->display_options['fields']['tid_list']['limit'] = 1;
   $handler->display->display_options['fields']['tid_list']['vids'] = array(
-    2 => '2',
+    2 => 2,
     1 => 0,
   );
   /* Field: User: Name */
@@ -253,15 +255,17 @@ function vozmob_front_views_default_views() {
   $handler->display->display_options['fields']['tid_list']['table'] = 'term_image';
   $handler->display->display_options['fields']['tid_list']['field'] = 'tid_list';
   $handler->display->display_options['fields']['tid_list']['label'] = '';
-  $handler->display->display_options['fields']['tid_list']['element_label_colon'] = 1;
-  $handler->display->display_options['fields']['tid_list']['element_default_classes'] = 1;
+  $handler->display->display_options['fields']['tid_list']['element_type'] = 'div';
+  $handler->display->display_options['fields']['tid_list']['element_class'] = 'media-types';
+  $handler->display->display_options['fields']['tid_list']['element_label_colon'] = 0;
+  $handler->display->display_options['fields']['tid_list']['element_default_classes'] = 0;
   $handler->display->display_options['fields']['tid_list']['hide_empty'] = 0;
   $handler->display->display_options['fields']['tid_list']['empty_zero'] = 0;
   $handler->display->display_options['fields']['tid_list']['type'] = 'ul';
   $handler->display->display_options['fields']['tid_list']['link_to_taxonomy'] = 1;
   $handler->display->display_options['fields']['tid_list']['limit'] = 1;
   $handler->display->display_options['fields']['tid_list']['vids'] = array(
-    2 => '2',
+    2 => 2,
     1 => 0,
   );
   /* Field: User: Name */
