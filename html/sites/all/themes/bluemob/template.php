@@ -136,7 +136,7 @@ function bluemob_media_element($file, $href) {
  */
 function phptemplate_preprocess_views_view_field__tid_list(&$vars) {
   if ($vars['output'] == '') {
-    $text = drupal_get_path('module', 'vozmob_front') . '/icons/text.png';
+    $text = drupal_get_path('module', 'vozmob_media') . '/icons/text-tiny.png';
     $vars['output'] = theme('item_list', array(theme('image', $text)));
   }
 }
