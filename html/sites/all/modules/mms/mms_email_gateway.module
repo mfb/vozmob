@@ -41,7 +41,7 @@ function mms_email_gateway_is_carrier($mail) {
   if (!$carriers) {
     $carriers = sms_carriers() + mms_email_gateway_get_map();
   }
-  $domain = preg_replace('/.*@/', '', $mail);
+  $domain = drupal_strtolower(preg_replace('/.*@/', '', $mail));
   return isset($carriers[$domain]);
 }
 
