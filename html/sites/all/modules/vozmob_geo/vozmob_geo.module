@@ -18,6 +18,11 @@ function vozmob_geo_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
         $node->field_map[0]['openlayers_wkt'] = 'GEOMETRYCOLLECTION(POINT(' . $node->field_gps_gpslongitude[0]['value'] . ' ' . $node->field_gps_gpslatitude[0]['value'] . '))';
       }
       break;
+    case 'rss item':
+      if (!empty($node->field_map[0]['openlayers_wkt']) && preg_match('/GEOMETRYCOLLECTION\(POINT\((.*)\)\)/', $node->field_map[0]['openlayers_wkt'], $matches)) {
+        return array(array('key' => 'georss:point', 'value' => $matches[1], 'namespace' => array('xmlns:georss' => 'http://www.georss.org/georss')));
+      }
+      break;
   endswitch;
 }
 
