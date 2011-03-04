@@ -83,7 +83,7 @@ function bot_aggregator_plus_irc_msg_channel($data, $from_query = FALSE) {
             $feed['refresh'] = $speed[$matches[3]];
             drupal_write_record('aggregator_feed', $feed);
           }
-          variable_set('bot_aggregator_plus_channel_' . $feed['fid'], $matches[2]);
+          variable_set('bot_aggregator_plus_channel_' . $feed['fid'], variable_get('bot_aggregator_plus_channel_' . $feed['fid'], array()) + array($matches[2] => $matches[2]));
           variable_set('bot_aggregator_plus_cron_' . $feed['fid'], $speed[$matches[3]]);
           bot_message($to, $data->nick . ': ' . t('Following !url on !channel every !frequency seconds.', array('!url' => $feed['url'], '!channel' => $matches[2], '!frequency' => $speed[$matches[3]])));
           variable_set('bot_cache_cleared', time());
