@@ -1,7 +1,0 @@
-; $Id: sms_actions.info,v 1.1.2.2.2.1 2010/11/18 05:37:26 univate Exp $
-name = "SMS Actions"
-description = "Provides an action for sending outgoing messages and the ability to define custom triggers for incoming messages."
-package = SMS Framework
-dependencies[] = sms
-dependencies[] = trigger
-core = 6.x

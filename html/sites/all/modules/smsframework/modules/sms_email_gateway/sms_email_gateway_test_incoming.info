@@ -1,7 +1,0 @@
-; $Id: sms_email_gateway_test_incoming.info,v 1.1.2.2 2010/11/18 05:37:26 univate Exp $
-name = "E-mail Gateway Testing"
-description = "Simple test module for incoming messages via the e-meil gateway."
-dependencies[] = sms
-dependencies[] = sms_email_gateway
-package = SMS Framework
-core = 6.x

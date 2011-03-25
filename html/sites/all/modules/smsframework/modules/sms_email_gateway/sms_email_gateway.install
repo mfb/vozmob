@@ -1,9 +1,0 @@
-<?php
-
-// $Id: sms_email_gateway.install,v 1.1.2.3 2010/11/18 05:37:26 univate Exp $
-
-function sms_email_gateway_uninstall() {
-  // TODO: leaving this here for now, in case we need it.
-  // variable_del('sms_email_gateway_sendmail_path');
-  variable_del('sms_email_gateway_mail_domain');
-}

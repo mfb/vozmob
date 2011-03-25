@@ -7,3 +7,6 @@
 [submodule "html/sites/all/modules/ogrulesextra"]
 	path = html/sites/all/modules/ogrulesextra
 	url = git://git.iskra.net/drupal/custom/ogrulesextra
+[submodule "html/sites/all/modules/smsframework"]
+	path = html/sites/all/modules/smsframework
+	url = git://git.iskra.net/drupal/contrib/smsframework
