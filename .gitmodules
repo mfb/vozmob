@@ -10,3 +10,6 @@
 [submodule "html/sites/all/modules/smsframework"]
 	path = html/sites/all/modules/smsframework
 	url = git://git.iskra.net/drupal/contrib/smsframework
+[submodule "html/sites/all/modules/usermerge"]
+	path = html/sites/all/modules/usermerge
+	url = git://git.drupal.org/project/usermerge
