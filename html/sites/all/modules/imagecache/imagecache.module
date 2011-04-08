@@ -705,6 +705,7 @@ function theme_imagecache_formatter_default($element) {
 function theme_imagecache_formatter_linked_absolute($element) {
   // Call the same correct imagecache_formatter_[preset]_linked with
   // the absolute argument as TRUE
+  $element['#formatter'] = substr($element['#formatter'], 0, -9); 
   return theme(substr($element['#theme'], 0, -9), $element, TRUE);
 }
 
