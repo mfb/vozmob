@@ -5,8 +5,8 @@
 	path = html/sites/all/modules/voip
 	url = git://github.com/leoburd/voip.git
 [submodule "html/sites/all/modules/ogrulesextra"]
-	path = html/sites/all/modules/ogrulesextra
-	url = git://git.iskra.net/drupal/custom/ogrulesextra
+  path = html/sites/all/modules/ogrulesextra
+  url = git://git.drupal.org/sandbox/ekes/1121094.git
 [submodule "html/sites/all/modules/smsframework"]
 	path = html/sites/all/modules/smsframework
 	url = git://git.iskra.net/drupal/contrib/smsframework
