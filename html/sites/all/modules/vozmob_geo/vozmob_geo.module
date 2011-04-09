@@ -8,14 +8,28 @@ function vozmob_geo_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
   switch ($op):
     case 'insert':
     case 'update':
+      // if there is a location code we always try and transcode it.
       if (empty($node->field_map[0]['openlayers_wkt']) && preg_match('/(?i:loc:|%)(.*)/', $node->body, $matches)) {
         $locations = openlayers_geocoder_response(trim($matches[1]));
         if (isset($locations[0]['location'])) {
           $node->field_map[0]['openlayers_wkt'] = 'GEOMETRYCOLLECTION(POINT(' . $locations[0]['location']['lng'] . ' ' . $locations[0]['location']['lat'] . '))';
         }
       }
-      if (!empty($node->field_gps_gpslongitude[0]['value']) && !empty($node->field_gps_gpslatitude[0]['value']) && empty($node->field_map[0]['openlayers_wkt'])) {
-        $node->field_map[0]['openlayers_wkt'] = 'GEOMETRYCOLLECTION(POINT(' . $node->field_gps_gpslongitude[0]['value'] . ' ' . $node->field_gps_gpslatitude[0]['value'] . '))';
+      // check to see if this is being posted to a geograpic group.
+      // @todo check that group has always been attached by this point - inc incoming sms
+      $flag = flag_load('located');
+      if (is_array($node->og_groups)) {
+        // we go through each of the groups and see if any of them is flagged
+        // to include automatic location.
+        foreach ($node->og_groups as $nid) {
+          if ($flag->is_flagged($nid, $account->uid)) {
+            if (!empty($node->field_gps_gpslongitude[0]['value']) && !empty($node->field_gps_gpslatitude[0]['value']) && empty($node->field_map[0]['openlayers_wkt'])) {
+              $node->field_map[0]['openlayers_wkt'] = 'GEOMETRYCOLLECTION(POINT(' . $node->field_gps_gpslongitude[0]['value'] . ' ' . $node->field_gps_gpslatitude[0]['value'] . '))';
+            }
+            // no need to keep checking for other groups that may be flagged.
+            break;
+          }
+        }
       }
       break;
     case 'rss item':
@@ -26,3 +40,41 @@ function vozmob_geo_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
   endswitch;
 }
 
+/**
+ * Implementation of hook_flag_default_flags().
+ */
+function vozmob_geo_flag_default_flags() {
+  $flags = array();
+  // Exported flag: "Location aware group".
+  $flags['located'] = array(
+    'content_type' => 'node',
+    'title' => 'Location aware group',
+    'global' => '1',
+    'types' => array(
+      '0' => 'group',
+    ),
+    'flag_short' => 'Make this a group with located posts',
+    'flag_long' => 'The site will try and put a location on all posts to the group.',
+    'flag_message' => '',
+    'unflag_short' => 'Stop this group having located posts',
+    'unflag_long' => 'The site will stop trying to put a location on all posts in the group.',
+    'unflag_message' => '',
+    'unflag_denied_text' => '',
+    'link_type' => 'toggle',
+    'roles' => array(
+      'flag' => array(
+        '0' => 4,
+      ),
+      'unflag' => array(
+        '0' => 4,
+      ),
+    ),
+    'show_on_page' => 0,
+    'show_on_teaser' => 0,
+    'show_on_form' => 1,
+    'access_author' => 'own',
+    'i18n' => 0,
+    'api_version' => 2,
+  );
+  return $flags;
+}
