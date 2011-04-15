@@ -1,5 +1,5 @@
 <?php
-// $Id: base.inc,v 1.2.2.9 2010/12/10 07:26:04 dereine Exp $
+// $Id: base.inc,v 1.2.2.10 2011/01/18 23:00:16 merlinofchaos Exp $
 /**
  * @file
  *
@@ -88,6 +88,18 @@ class views_object {
     if (!empty($this->view)) {
       // Ensure we have a localization plugin.
       $this->view->init_localization();
+
+      // Set up default localization keys. Handlers and such set this for us
+      if (empty($localization_keys) && isset($this->localization_keys)) {
+        $localization_keys = $this->localization_keys;
+      }
+      // but plugins don't because there isn't a common init() these days.
+      else if (!empty($this->is_plugin)) {
+        if ($this->plugin_type != 'display') {
+          $localization_keys = array($this->view->current_display);
+          $localization_keys[] = $this->plugin_type;
+        }
+      }
     }
 
     foreach ($options as $key => $value) {
@@ -111,9 +123,9 @@ class views_object {
 
         $this->unpack_options($storage[$key], $value, isset($definition[$key]['contains']) ? $definition[$key]['contains'] : array(), $all, FALSE, array_merge($localization_keys, array($key)));
       }
-     // Don't localize strings during editing. When editing, we need to work with
-     // the original data, not the translated version.
-     else if (empty($this->view->editing) && !empty($definition[$key]['translatable']) && !empty($value) || !empty($definition['contains'][$key]['translatable']) && !empty($value)) {
+      // Don't localize strings during editing. When editing, we need to work with
+      // the original data, not the translated version.
+      else if (empty($this->view->editing) && !empty($definition[$key]['translatable']) && !empty($value) || !empty($definition['contains'][$key]['translatable']) && !empty($value)) {
         if (!empty($this->view) && $this->view->is_translatable()) {
           // Allow other modules to make changes to the string before it's
           // sent for translation.
@@ -130,7 +142,7 @@ class views_object {
         else {
           $storage[$key] = t($value);
         }
-     }
+      }
       else if ($all || !empty($definition[$key])) {
         $storage[$key] = $value;
       }

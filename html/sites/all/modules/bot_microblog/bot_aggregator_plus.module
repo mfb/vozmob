@@ -83,7 +83,7 @@ function bot_aggregator_plus_irc_msg_channel($data, $from_query = FALSE) {
             $feed['refresh'] = $speed[$matches[3]];
             drupal_write_record('aggregator_feed', $feed);
           }
-          variable_set('bot_aggregator_plus_channel_' . $feed['fid'], $matches[2]);
+          variable_set('bot_aggregator_plus_channel_' . $feed['fid'], variable_get('bot_aggregator_plus_channel_' . $feed['fid'], array()) + array($matches[2] => $matches[2]));
           variable_set('bot_aggregator_plus_cron_' . $feed['fid'], $speed[$matches[3]]);
           bot_message($to, $data->nick . ': ' . t('Following !url on !channel every !frequency seconds.', array('!url' => $feed['url'], '!channel' => $matches[2], '!frequency' => $speed[$matches[3]])));
           variable_set('bot_cache_cleared', time());
@@ -95,8 +95,10 @@ function bot_aggregator_plus_irc_msg_channel($data, $from_query = FALSE) {
   if (preg_match('/^\.unfollow (.+) (.+)/', $data->message, $matches)) {
     $to = $from_query ? $data->nick : $data->channel;
     if ($feed = db_fetch_array(db_query("SELECT * from {aggregator_feed} WHERE url = '%s'", $matches[1]))) {
-      if (variable_get('bot_aggregator_plus_channel_' . $feed['fid'], '') == $matches[2]) {
-        variable_set('bot_aggregator_plus_channel_' . $feed['fid'], '');
+      $channels = variable_get('bot_aggregator_plus_channel_' . $feed['fid'], array());
+      if (isset($channels[$matches[2]])) {
+        unset($channels[$matches[2]]);
+        variable_set('bot_aggregator_plus_channel_' . $feed['fid'], $channels);
         bot_message($to, $data->nick . ': ' . t('Unfollowing !url on !channel.', array('!url' => $feed['url'], '!channel' => $matches[2])));
         variable_set('bot_cache_cleared', time());
         $GLOBALS['conf'] = variable_init();

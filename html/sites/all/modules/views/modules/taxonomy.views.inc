@@ -1,5 +1,5 @@
 <?php
-// $Id: taxonomy.views.inc,v 1.50.2.17 2010/10/14 21:33:01 merlinofchaos Exp $
+// $Id: taxonomy.views.inc,v 1.50.2.18 2011/01/20 22:06:57 merlinofchaos Exp $
 /**
  * @file
  *
@@ -171,6 +171,9 @@ function taxonomy_views_data() {
       'group' => t('Taxonomy'), // The group it appears in on the UI,
       'handler' => 'views_handler_field_markup',
       'format' => FILTER_FORMAT_DEFAULT,
+    ),
+    'filter' => array(
+      'handler' => 'views_handler_filter_string',
     ),
   );
 

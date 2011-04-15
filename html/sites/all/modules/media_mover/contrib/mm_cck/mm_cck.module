@@ -1,6 +1,6 @@
 <?php
 
-// $Id: mm_cck.module,v 1.1.4.6 2010/03/26 01:58:55 arthuregg Exp $
+// $Id: mm_cck.module,v 1.1.4.7 2010/11/18 01:33:53 arthuregg Exp $
 
 /**
  * This file contains the integration between Media Mover and CCK
@@ -329,7 +329,7 @@ function mm_cck_harvest($configuration, $nid, $job) {
           $file_type_conditions = ' AND ('. implode(' OR ', $conditions) .')';
         }
 
-        $results = db_query('SELECT f.filepath AS harvest_file, n.nid, f.fid FROM {files} f
+        $results = db_query('SELECT DISTINCT f.filepath AS harvest_file, n.nid, f.fid FROM {files} f
           LEFT JOIN {'. $db_info['table'] .'} c ON c.'. $db_info['columns']['fid']['column'] .' = f.fid
           LEFT JOIN {node} n ON c.nid = n.nid
           LEFT JOIN {media_mover_files} m ON m.fid = f.fid AND m.cid = %d

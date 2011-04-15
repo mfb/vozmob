@@ -1,4 +1,4 @@
-// $Id: ajax.js,v 1.25.2.14 2010/12/09 19:22:30 merlinofchaos Exp $
+// $Id: ajax.js,v 1.25.2.15 2011/01/18 22:00:44 merlinofchaos Exp $
 /**
  * @file ajax_admin.js
  *
@@ -233,7 +233,9 @@ Drupal.Views.updatePreviewFilterForm = function() {
 Drupal.Views.updatePreviewLink = function() {
   var url = $(this).attr('href');
   url = url.replace('nojs', 'ajax');
-  if (url.substring(0, 18) != '/admin/build/views') {
+  var intern_url = Drupal.Views.getPath(url);
+
+  if (intern_url.substring(0, 17) != 'admin/build/views') {
     return true;
   }
 
@@ -368,7 +370,7 @@ Drupal.Views.Ajax.handleErrors = function (xhr, path) {
   alert(Drupal.t("An error occurred at @path.\n\nError Description: @error", {'@path': path, '@error': error_text}));
 }
 
-// $Id: ajax.js,v 1.25.2.14 2010/12/09 19:22:30 merlinofchaos Exp $
+// $Id: ajax.js,v 1.25.2.15 2011/01/18 22:00:44 merlinofchaos Exp $
 
 Drupal.behaviors.ViewsGroupedTableDrag = function(context) {
   var table_id = 'arrange';

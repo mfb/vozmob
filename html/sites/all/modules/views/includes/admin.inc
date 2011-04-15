@@ -1,5 +1,5 @@
 <?php
-// $Id: admin.inc,v 1.154.2.55 2011/01/10 23:07:43 merlinofchaos Exp $
+// $Id: admin.inc,v 1.154.2.57 2011/01/18 23:00:16 merlinofchaos Exp $
 /**
  * @file admin.inc
  * Provides the Views' administrative interface.
@@ -1151,7 +1151,7 @@ function template_preprocess_views_ui_edit_tab(&$vars) {
   // Special fields if this is the default display.
   $vars['default'] = ($display->id == 'default');
   $vars['details_class'] = views_ui_item_css('details');
-  
+
   foreach (array('human_name', 'tag', 'description') as $property) {
     if (!empty($view->changed_sections[$property])) {
       $vars['details_changed'][$property] = TRUE;
@@ -2345,7 +2345,7 @@ function views_ui_edit_details_form(&$form_state) {
         '#default_value' => $view->human_name,
       );
       break;
-    
+
     case 'tag':
       $form['tag'] = array(
         '#type' => 'textfield',
@@ -2355,7 +2355,7 @@ function views_ui_edit_details_form(&$form_state) {
         '#autocomplete_path' => 'admin/views/ajax/autocomplete/tag',
       );
       break;
-    
+
     case 'description':
       $form['description'] = array(
         '#type' => 'textfield',
@@ -2536,8 +2536,8 @@ function views_ui_rearrange_form(&$form_state) {
   }
 
   foreach ($display->handler->get_option($types[$type]['plural']) as $id => $field) {
-    $form[$id] = array('#tree' => TRUE);
-    $form[$id]['weight'] = array(
+    $form['fields'][$id] = array('#tree' => TRUE);
+    $form['fields'][$id]['weight'] = array(
       '#type' => 'textfield',
       '#default_value' => ++$count,
     );
@@ -2548,14 +2548,14 @@ function views_ui_rearrange_form(&$form_state) {
         $name = '(' . $relationships[$field['relationship']] . ') ' . $name;
       }
 
-      $form[$id]['name'] = array(
+      $form['fields'][$id]['name'] = array(
         '#value' => $name,
       );
     }
     else {
-      $form[$id]['name'] = array('#value' => t('Broken field @id', array('@id' => $id)));
+      $form['fields'][$id]['name'] = array('#value' => t('Broken field @id', array('@id' => $id)));
     }
-    $form[$id]['removed'] = array(
+    $form['fields'][$id]['removed'] = array(
       '#type' => 'checkbox',
       '#id' => 'views-removed-' . $id,
       '#attributes' => array('class' => 'views-remove-checkbox'),
@@ -2587,13 +2587,13 @@ function views_ui_rearrange_form(&$form_state) {
  */
 function theme_views_ui_rearrange_form($form) {
   $rows = array();
-  foreach (element_children($form) as $id) {
-    if (isset($form[$id]['name'])) {
+  foreach (element_children($form['fields']) as $id) {
+    if (isset($form['fields'][$id]['name'])) {
       $row = array();
-      $row[] = drupal_render($form[$id]['name']);
-      $form[$id]['weight']['#attributes']['class'] = 'weight';
-      $row[] = drupal_render($form[$id]['weight']);
-      $row[] = drupal_render($form[$id]['removed']) . l('<span>' . t('Remove') . '</span>', 'javascript:void()', array('attributes' => array('id' => 'views-remove-link-' . $id, 'class' => 'views-hidden views-button-remove views-remove-link', 'alt' => t('Remove this item'), 'title' => t('Remove this item')), 'html' => true));
+      $row[] = drupal_render($form['fields'][$id]['name']);
+      $form['fields'][$id]['weight']['#attributes']['class'] = 'weight';
+      $row[] = drupal_render($form['fields'][$id]['weight']);
+      $row[] = drupal_render($form['fields'][$id]['removed']) . l('<span>' . t('Remove') . '</span>', 'javascript:void()', array('attributes' => array('id' => 'views-remove-link-' . $id, 'class' => 'views-hidden views-button-remove views-remove-link', 'alt' => t('Remove this item'), 'title' => t('Remove this item')), 'html' => true));
 
       $rows[] = array('data' => $row, 'class' => 'draggable', 'id' => 'views-row-' . $id);
     }
