@@ -1,5 +1,5 @@
 <?php
-// $Id: google.inc,v 1.1.2.15 2010/06/27 16:30:07 zzolo Exp $
+// $Id: google.inc,v 1.1.2.16 2011/01/31 14:31:31 tmcw Exp $
 
 /**
  * @file
@@ -40,7 +40,10 @@ class openlayers_layer_type_google extends openlayers_layer_type {
     $google_layer_types = array(
       'hybrid' => 'Hybrid',
       'normal' => 'Normal',
-      'satellite' => 'Satellite');
+      'satellite' => 'Satellite',
+      'mapmaker-normal' => 'MapMaker Normal',
+      'mapmaker-hybrid' => 'MapMaker Hybrid',
+    );
     return array(
       'type' => array(
         '#title' => t('Google Layer Type'),

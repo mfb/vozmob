@@ -1,0 +1,7 @@
+; $Id: openlayers_geocoder.info,v 1.2.2.1 2010/02/10 21:36:23 antoniodemarco Exp $
+
+name = OpenLayers Geocoder
+description = Provides OpenLayers CCK widget with geocoding capabilities.
+core = 6.x
+package = OpenLayers
+dependencies[] = openlayers_cck

@@ -77,11 +77,16 @@ Class Exif {
     foreach ($arTagNames as $tagName) {
       if ($tagName['section'] != 'iptc') {
         if (!empty($arSmallExif[$tagName['tag']])) {
-          $info[$tagName['section'] .'_'. $tagName['tag']] = utf8_encode($arSmallExif[$tagName['tag']]);
+          $info[$tagName['section'] .'_'. $tagName['tag']] = $arSmallExif[$tagName['tag']];
         } 
         elseif (!empty($arSmallExif[$tagName['section']][$tagName['tag']])) {
-          $info[$tagName['section'] .'_'. $tagName['tag']] = utf8_encode($arSmallExif[$tagName['section']][$tagName['tag']]);
+          $info[$tagName['section'] .'_'. $tagName['tag']] = $arSmallExif[$tagName['section']][$tagName['tag']];
         }
+      }
+    }
+    foreach ($info as $tag => $value) {
+      if (!is_array($value)) {
+        $info[$tag] = utf8_encode($value);
       }
     }
     

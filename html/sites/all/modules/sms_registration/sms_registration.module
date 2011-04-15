@@ -76,6 +76,7 @@ function sms_registration_mailhandler(&$node, $result, $i, $header, $mailbox) {
           'status' => 1,
           'language' => $node->language,
           'sms_user' => array('number' => sms_formatter($from[0]), 'status' => SMS_USER_PENDING, 'gateway' => array('carrier' => $from[1])),
+          'access' => time(),
         ));
       }
       $node->uid = $user->uid;

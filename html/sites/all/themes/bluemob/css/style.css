@@ -127,3 +127,6 @@ div.meta div.terms {
 }
 .terms strong {
 }
+.field-field-map {
+  clear: left;
+}

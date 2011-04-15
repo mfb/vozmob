@@ -1,4 +1,4 @@
-// $Id: google.js,v 1.1.2.2 2010/09/15 21:28:21 tmcw Exp $
+// $Id: google.js,v 1.1.2.3 2011/01/31 14:31:32 tmcw Exp $
 
 /**
  * Process Google Layers
@@ -17,7 +17,9 @@ Drupal.openlayers.layer.google = function(title, map, options) {
     'normal': G_NORMAL_MAP,
     'satellite': G_SATELLITE_MAP,
     'hybrid': G_HYBRID_MAP,
-    'physical': G_PHYSICAL_MAP
+    'physical': G_PHYSICAL_MAP,
+    'mapmaker-normal': G_MAPMAKER_NORMAL_MAP,
+    'mapmaker-hybrid': G_MAPMAKER_HYBRID_MAP,
   };
 
   options.sphericalMercator = true;
