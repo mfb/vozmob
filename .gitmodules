@@ -4,3 +4,6 @@
 [submodule "html/sites/all/modules/voip"]
 	path = html/sites/all/modules/voip
 	url = git://github.com/leoburd/voip.git
+[submodule "html/sites/all/modules/mimedetect"]
+	path = html/sites/all/modules/mimedetect
+	url = git://git.drupal.org/project/mimedetect
