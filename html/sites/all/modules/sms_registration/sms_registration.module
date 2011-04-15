@@ -53,7 +53,9 @@ function sms_registration_mailhandler(&$node, $result, $i, $header, $mailbox) {
   }
 
   // If the message is from SMS gateway, fire sms_incoming callbacks.
-  sms_email_gateway_process_incoming_message($from_address, $to_address, $node->title, $node->body, $header);
+  // Except that firing the sms_incoming callbacks sends a confirmation code
+  // and also logs out the user. so is not compatible.
+  //sms_email_gateway_process_incoming_message($from_address, $to_address, $node->title, $node->body, $header);
 
   // If the user was not authenticated via user account email address.
   if (!$node->uid) {
