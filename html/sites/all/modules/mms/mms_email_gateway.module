@@ -79,6 +79,7 @@ function mms_email_gateway_mailsave_clean(&$node, $result, $i, $header, $mailbox
     }
     // drupal will go on to escape any previous extensions to prevent
     // file being served as previous extension reported.
+    // @todo check this never gets bypassed on programatic upload it's important!
   }
 }
 
