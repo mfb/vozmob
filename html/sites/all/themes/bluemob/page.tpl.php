@@ -102,16 +102,9 @@
 <div id="footer">
 <div id="footer2">
 <?php print theme('image', path_to_theme() . '/images/copy_left.png', t('Copyleft')); ?>
-<ul>
-<li><a href ="">Contact Info</a></li>
-<li>/</li>
-<li><a href ="">About Vozmob</a></li>
-<li>/</li>
-<li><a href ="">Subscribe</a></li>
-<li>/</li>
-<li><a href ="">Login</a></li>
-<li>/</li>
-</ul>
+
+<?php print $footer_links; ?>
+
 <?php print theme('image', path_to_theme() . '/images/idepsca.png', 'IDEPSCA'); ?>
 <?php print theme('image', path_to_theme() . '/images/annenberg.png', 'Annenberg'); ?>
 <p>Powered by</p>
