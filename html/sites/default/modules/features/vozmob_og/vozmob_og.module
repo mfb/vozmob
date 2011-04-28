@@ -36,3 +36,24 @@ function vozmob_og_moderation_access($nid) {
   
   return TRUE;
 }
+function vozmob_og_link_alter(&$links, $node) {
+  global $user;
+
+  // Remove normal node links for group nodes and add group admin links instead.
+  if ($node->type == 'group') {
+    $links = array(); 
+    if (node_access('update', $node, $user)) {
+      $links['og_members'] = array(
+        'title' => t('View Members'),
+        'href' => "og/users/{$node->nid}",
+        'attributes' => array('class' => 'og-memebers-link', 'title' => t('View memebers of ') . $node->title),
+      );
+      $links['og_add_members'] = array(
+        'title' => t('Add Members'),
+        'href' => "og/users/{$node->nid}/add_user",
+        'attributes' => array('class' => 'og-memebers-link', 'title' => t('View memebers of ') . $node->title),
+        'query' => 'destination=node/'. $node->nid,
+      );
+    }
+  }
+}
