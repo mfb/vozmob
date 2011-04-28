@@ -89,6 +89,44 @@ function vozmob_og_flag_default_flags() {
 }
 
 /**
+ * Implementation of hook_imagecache_default_presets().
+ */
+function vozmob_og_imagecache_default_presets() {
+  $items = array(
+    'group_logo_large' => array(
+      'presetname' => 'group_logo_large',
+      'actions' => array(
+        '0' => array(
+          'weight' => '0',
+          'module' => 'imagecache',
+          'action' => 'imagecache_scale',
+          'data' => array(
+            'width' => '200',
+            'height' => '',
+            'upscale' => 0,
+          ),
+        ),
+      ),
+    ),
+    'group_logo_small' => array(
+      'presetname' => 'group_logo_small',
+      'actions' => array(
+        '0' => array(
+          'weight' => '0',
+          'module' => 'imagecache',
+          'action' => 'imagecache_scale_and_crop',
+          'data' => array(
+            'width' => '50',
+            'height' => '50',
+          ),
+        ),
+      ),
+    ),
+  );
+  return $items;
+}
+
+/**
  * Implementation of hook_node_info().
  */
 function vozmob_og_node_info() {
