@@ -371,13 +371,19 @@ function mail2og_mailhandler(&$node, $result, $i, $header, $mailbox) {
   // @TODO This should hook into OG's check if a user can post to a group
   $user = user_load($node->uid);
   if (! $user->og_groups[$group->nid]) {
-    watchdog('mail2og', 'User !user attempted to post to !group that they are not a member of.',
-      array(
-        '!user' => l($user->name, 'user/' . $user->uid),
-        '!group' => l($group->title, 'node/' . $group->nid)
-      ),
-      'warning');
-    return $node;
+    $params = og_subscribe_user($group->nid, $user);
+    list($from_address, $from_name) = mailhandler_get_fromaddress($header, $mailbox);
+    drupal_mail('mail2og', 'subscribe', $from_address, user_preferred_language($user), $params);
+    if ($params['type'] != 'subscribed') {
+      watchdog('mail2og', 'User !user attempted to post to !group that they are not a member of.',
+        array(
+          '!user' => l($user->name, 'user/' . $user->uid),
+          '!group' => l($group->title, 'node/' . $group->nid)
+        ),
+        'warning');
+      return $node;
+    }
+    
   }
   // is this user in this group and can they send to it?
   if (! user_access('send to group')) {
@@ -420,6 +426,13 @@ function mail2og_mailhandler(&$node, $result, $i, $header, $mailbox) {
   return $node;
 }
 
+function mail2og_mail($key, &$message, $params) {
+  switch($key) {
+    case 'subscribe':
+      $message['body'][] = $params['message'];
+      break;
+  }
+}
 
 /**
  * Helper function to clean the group title of non-alpha characters
