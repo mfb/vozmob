@@ -51,7 +51,17 @@ function uploadterm_node_presave(&$node) {
   foreach ($fields as $field) {
     if (isset($node->$field) && is_array($node->$field)) {
       foreach ($node->$field as $file) {
-        if (! $file['remove'] &&  $file['list'] && $type = uploadterm_mimeterm($file['filemime'])) {
+        if (is_array($file)) {
+          $remove = $file['remove'];
+          $list = $file['list'];
+          $filemime = $file['filemime'];
+        }
+        elseif (is_object($file)) {
+          $remove = $file->remove;
+          $list = $file->list;
+          $filemime = $file->filemime;
+        }
+        if (! $remove &&  $list && $type = uploadterm_mimeterm($filemime)) {
           $node->taxonomy[$vid][$type] = $type;
         }
       }
