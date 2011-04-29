@@ -1,9 +1,17 @@
 <?php
 
+/**
+ * @file
+ *   Vozmob organic group content type and settings module file.
+ */
+
+// Adds files maintained by features module.
 include_once('vozmob_og.features.inc');
 
 /**
  * Implementaion of hook_menu_alter().
+ *
+ * Adds access control to organic groups moderation view.
  *
  * Requires weight of module > 10 (of views). Could do something cool with
  * ctools pagemanager? Or could make our own menu item to render the view?
