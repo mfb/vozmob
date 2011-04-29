@@ -21,7 +21,11 @@ Drupal.behaviors.overlayCycle = function(context) {
   });
 
   $('div.overlay-launcher a[rel]').each(function() {
-    $(this).overlay({expose: '#000', close: '.close'});
+    $(this).overlay({expose: '#000', close: '.close', onLoad: function() {
+      if (this.getContent().find('div.media-mover-video').length) {
+        this.getContent().find('div.views-field-field-image-fid').hide();
+      }
+    }});
   });
 
   $('div.field-field-image div.field-items a[rel]').each(function() {
