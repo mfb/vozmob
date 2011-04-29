@@ -1,5 +1,5 @@
 <?php
-// $Id: views_exposed_form.test,v 1.1.4.3 2010/02/14 15:54:32 dereine Exp $
+// $Id: views_exposed_form.test,v 1.1.4.4 2010/11/25 20:17:11 dereine Exp $
 /**
  * @file
  * Test exposed forms.
@@ -60,6 +60,18 @@ class ViewsExposedFormTest extends ViewsSqlTest {
     $this->drupalGet('admin/build/views/nojs/config-item/test_exposed_admin_ui/default/filter/type');
     // Be sure that the button is called exposed
     $this->helperButtonHasLabel('edit-options-expose-button-button', t('Expose'));
+    
+    
+    // Check the validations of the filter handler.
+    $edit = array();
+    $edit['options[expose][identifier]'] = '';
+    $this->drupalPost(NULL, $edit, t('Update'));
+    $this->assertText(t('The identifier is required if the filter is exposed.'));
+    
+    $edit = array();
+    $edit['options[expose][identifier]'] = 'value';
+    $this->drupalPost(NULL, $edit, t('Update'));
+    $this->assertText(t('This identifier is not allowed.'));
 
     // Click the Expose button.
     $this->drupalPost('admin/build/views/nojs/config-item/test_exposed_admin_ui/default/filter/type', $edit, t('Expose'));

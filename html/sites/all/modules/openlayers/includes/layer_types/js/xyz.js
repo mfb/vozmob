@@ -1,4 +1,4 @@
-// $Id: xyz.js,v 1.1.2.2 2010/09/15 21:28:21 tmcw Exp $
+// $Id: xyz.js,v 1.1.2.3 2010/10/13 18:49:16 tmcw Exp $
 
 /**
  * @file
@@ -16,7 +16,7 @@ Drupal.openlayers.layer.xyz = function(title, map, options) {
   options.projection = 'EPSG:' + options.projection;
   options.sphericalMercator = true;
 
-  var layer = new OpenLayers.Layer.XYZ(title, options.url, options);
+  var layer = new OpenLayers.Layer.XYZ(title, options.base_url, options);
   layer.styleMap = styleMap;
   return layer;
 };

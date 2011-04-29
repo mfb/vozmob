@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_numeric.inc,v 1.5.2.2 2010/07/27 21:59:03 merlinofchaos Exp $
+// $Id: views_handler_field_numeric.inc,v 1.5.2.3 2011/01/10 23:14:26 merlinofchaos Exp $
 /**
  * Render a field as a numeric value
  *
@@ -97,7 +97,7 @@ class views_handler_field_numeric extends views_handler_field {
   }
 
   function render($values) {
-    $value = $values->{$this->field_alias};
+    $value = $this->get_value($values);
     if (!empty($this->options['set_precision'])) {
       $value = number_format($value, $this->options['precision'], $this->options['decimal'], $this->options['separator']);
     }
@@ -121,6 +121,6 @@ class views_handler_field_numeric extends views_handler_field {
       $value = format_plural($value, $this->options['format_plural_singular'], $this->options['format_plural_plural']);
     }
 
-    return check_plain($this->options['prefix'] . $value . $this->options['suffix']);
+    return $this->sanitize_value($this->options['prefix'] . $value . $this->options['suffix']);
   }
 }

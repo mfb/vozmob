@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_filter_term_node_tid.inc,v 1.8.2.6 2010/08/13 22:59:44 merlinofchaos Exp $
+// $Id: views_handler_filter_term_node_tid.inc,v 1.8.2.7 2011/01/01 22:47:43 merlinofchaos Exp $
 
 /**
  * Filter by term id
@@ -120,7 +120,7 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
       else {
         $options = array();
         if ($this->options['limit']) {
-          $result = db_query(db_rewrite_sql("SELECT * FROM {term_data} t WHERE vid = %d ORDER BY weight, name", 't', 'tid'), $vocabulary->vid);
+          $result = db_query(db_rewrite_sql("SELECT * FROM {term_data} t WHERE t.vid = %d ORDER BY t.weight, t.name", 't', 'tid'), $vocabulary->vid);
         }
         else {
           $result = db_query(db_rewrite_sql("SELECT td.* FROM {term_data} td INNER JOIN {vocabulary} v ON td.vid = v.vid ORDER BY v.weight, v.name, td.weight, td.name", 'td', 'tid'));
@@ -267,7 +267,7 @@ class views_handler_filter_term_node_tid extends views_handler_filter_many_to_on
     // add the taxonomy vid to the argument list.
     $args[] = $this->options['vid'];
 
-    $result = db_query("SELECT * FROM {term_data} WHERE name IN (" . implode(', ', $placeholders) . ") AND vid = %d", $args);
+    $result = db_query("SELECT * FROM {term_data} td WHERE td.name IN (" . implode(', ', $placeholders) . ") AND td.vid = %d", $args);
     while ($term = db_fetch_object($result)) {
       unset($missing[strtolower($term->name)]);
       $tids[] = $term->tid;

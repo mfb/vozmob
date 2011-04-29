@@ -36,6 +36,10 @@
  *
  *   'features_source': Boolean value for whether this component should be
  *   offered as an option on the initial feature creation form.
+ *
+ *   'base': Optional. An alternative base key to use when calling features
+ *   hooks for this component. Can be used for features component types that
+ *   are declared "dynamically" or are part of a family of components.
  */
 function hook_features_api() {
   return array(
@@ -232,10 +236,8 @@ function hook_features_export_alter(&$export, $module_name) {
  * @param array &$export
  *   By reference. An array of all components to be exported with a given
  *   feature.
- * @param string $module_name
- *   The name of the feature module to be generated.
  */
-function hook_features_pipe_component_alter(&$pipe, $data, $export, $module_name) {
+function hook_features_pipe_component_alter(&$pipe, $data, $export) {
 }
 
 /**

@@ -1,7 +1,33 @@
-// $Id: CHANGELOG.txt,v 1.149.2.63 2010/11/07 18:04:51 sun Exp $
+// $Id: CHANGELOG.txt,v 1.149.2.85 2011/01/10 01:22:54 twod Exp $
 
 Wysiwyg 6.x-2.x, xxxx-xx-xx
 ---------------------------
+#737318 by TwoD: Fixed CKEditor default skin array not being reindexed.
+by sun: Fixed coding style in wysiwyg_schema().
+#964978 by sun, TwoD: Added hook_wysiwyg_editor_settings_alter() documentation.
+#775972 by TwoD, Agileware, sun: Fixed broken user default status preferences.
+#1007066 by TwoD, penguin25: Fixed CKEditor ignores resizable option.
+#613944 by TwoD, sun: Fixed data.node not always present in CKEditor.
+#1009880 by TwoD: Fixed selection handling broken in CKEditor.
+
+
+Wysiwyg 6.x-2.2, 2010-12-20
+---------------------------
+#613944 by TwoD, sun: Fixed data.node not available in CKEditor.
+#748888 by TwoD, sun: Fixed isNode() not called in CKEditor.
+#767550 by TwoD, sun, ungeek: Fixed invalid API docs and logic for
+  $plugin['filename'].
+#988200 by sun: Changed static language list to ISO 639 defaults of Drupal core.
+#973808 by David_Rothstein: Fixed CKEditor incorrectly formatting the <br> tag.
+#773856 by Roi Danton: Added CSS path and file documentation.
+#735186 by TwoD, torbs: Fixed missing Norwegian language code.
+#678580 by TwoD, sun: Fixed Drupal.wysiwygAttachToggleLink breaks click events.
+#497654 by TwoD: Fixed Drupal plugins disabled in FCKeditor/WebKit browsers.
+#735624 by sun: Fixed enabling one button removes default editor toolbar.
+#755610 by sun, TwoD, BrightBold: Fixed white-space in block formats setting
+  breaks editors.
+#713942 by TwoD, sun: Fixed jQuery closure breaks OpenWYSIWYG.
+#679056 by sun, TwoD: Fixed pressing enter in autocomplete detaches editors.
 #80170 by sun: Changed dialog/plugin API for Inline API compatibility.
 #855554 by sun: Merged various changes from 3.x into 2.x.
 #803466 by hotspoons: Fixed TinyMCE image map support in advimage plugin.

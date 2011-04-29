@@ -1,10 +1,10 @@
 <?php
-// $Id: views_handler_field_group_by_numeric.inc,v 1.1.2.1 2009/11/10 23:23:27 merlinofchaos Exp $
+// $Id: views_handler_field_group_by_numeric.inc,v 1.1.2.2 2010/10/12 22:00:48 merlinofchaos Exp $
 
 /**
  * Handler for GROUP BY on simple numeric fields.
  */
-class views_handler_field_group_by_numeric extends views_handler_field {
+class views_handler_field_group_by_numeric extends views_handler_field_numeric {
   function init(&$view, $options) {
     parent::init($view, $options);
 

@@ -1,5 +1,5 @@
 <?php
-// $Id: views.views.inc,v 1.6.2.3 2010/06/30 19:19:02 merlinofchaos Exp $
+// $Id: views.views.inc,v 1.6.2.4 2010/11/05 21:52:36 dereine Exp $
 /**
  * @file
  * Provide views data and handlers that aren't tied to any other module.
@@ -63,7 +63,7 @@ function views_views_data() {
   if (module_invoke('ctools', 'api_version', '1.7.1')) {
     $data['views']['expression'] = array(
       'title' => t('Math expression'),
-      'help' => t('Evaluates a mathematical epression and displays it.'),
+      'help' => t('Evaluates a mathematical expression and displays it.'),
       'field' => array(
         'handler' => 'views_handler_field_math',
       ),

@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_style_rss.inc,v 1.2 2008/12/02 00:02:06 merlinofchaos Exp $
+// $Id: views_plugin_style_rss.inc,v 1.2.2.1 2010/10/12 22:20:57 merlinofchaos Exp $
 /**
  * @file
  * Contains the RSS style plugin.
@@ -50,6 +50,8 @@ class views_plugin_style_rss extends views_plugin_style {
   }
 
   function options_form(&$form, &$form_state) {
+    parent::options_form($form, $form_state);
+
     $form['mission_description'] = array(
       '#type' => 'checkbox',
       '#default_value' => !empty($this->options['mission_description']),

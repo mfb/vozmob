@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_style_table.inc,v 1.5.2.6 2010/03/11 00:06:14 merlinofchaos Exp $
+// $Id: views_plugin_style_table.inc,v 1.5.2.8 2010/12/08 23:17:31 merlinofchaos Exp $
 /**
  * @file
  * Contains the table style plugin.
@@ -20,6 +20,7 @@ class views_plugin_style_table extends views_plugin_style {
     $options['override'] = array('default' => TRUE);
     $options['sticky'] = array('default' => FALSE);
     $options['order'] = array('default' => 'asc');
+    $options['summary'] = array('default' => '');
 
     return $options;
   }
@@ -165,6 +166,13 @@ class views_plugin_style_table extends views_plugin_style {
       '#description' => t('If a default sort order is selected, what order should it use by default.'),
     );
 
+    $form['summary'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Table summary'),
+      '#description' => t('This value will be displayed as table-summary attribute in the html. Set this for better accessiblity of your site.'),
+      '#default_value' => $this->options['summary'],
+    );
+
     // Note: views UI registers this theme handler on our behalf. Your module
     // will have to register your theme handlers if you do stuff like this.
     $form['#theme'] = 'views_ui_style_plugin_table';
@@ -200,6 +208,14 @@ class views_plugin_style_table extends views_plugin_style {
           '#default_value' => !empty($this->options['info'][$field]['sortable']),
           '#process' => array('views_process_dependency'),
           '#dependency' => array($id => array($field)),
+        );
+        $form['info'][$field]['default_sort_order'] = array(
+          '#type' => 'select',
+          '#options' => array('asc' => t('Ascending'), 'desc' => t('Descending')),
+          '#default_value' => !empty($this->options['info'][$field]['default_sort_order']) ? $this->options['info'][$field]['default_sort_order'] : 'asc',
+          '#process' => array('views_process_dependency'),
+          '#dependency_count' => 2,
+          '#dependency' => array($id => array($field), 'edit-style-options-info-' . $safe . '-sortable' => array(1)),
         );
         // Provide an ID so we can have such things.
         $radio_id = form_clean_id('edit-default-' . $field);

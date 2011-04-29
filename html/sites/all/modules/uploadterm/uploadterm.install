@@ -1,0 +1,64 @@
+<?php
+// $Id$
+/**
+ * @file uploadterm.install
+ *   Creates, and removes, the required vocabulary and terms.
+ */
+
+/**
+ * Implements hook_schema().
+ */
+function uploadterm_schema() {
+  return array(
+    'uploadterm_term' => array(
+      'fields' => array(
+        'tid' => array(
+          'type' => 'int',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+          'description' => 'A {term_data}.tid.',
+        ),
+        'regex' => array(
+          'type' => 'varchar',
+          'length' => 254,
+          'not null' => TRUE,
+          'description' => 'A regular expression.',
+        ),
+      ),
+      'primary key' => array('tid', 'regex'),
+      'indexes' => array('tid' => array('tid')),
+    ),
+  );
+}
+
+/**
+ * Implementation of hook_install().
+ */
+function uploadterm_install() {
+  drupal_install_schema('uploadterm');
+
+  $vocabulary = array(
+    'name' => 'Media',
+    'module' => 'taxonomy', // we could override this and control the term path
+    'description' => 'Attached media types',
+    'nodes' => node_get_types('names'),
+    'tags' => 0,
+    'multiple' => 1,
+    'required' => 0,
+    'relations' => 1,
+  );
+
+  taxonomy_save_vocabulary($vocabulary);
+  $vid = db_last_insert_id('vocabulary', 'vid');
+  variable_set('uploadterm_vocabulary', $vid);
+}
+
+/**
+ * Implementation of hook_uninstall().
+ */
+function uploadterm_uninstall() {
+  taxonomy_del_vocabulary(variable_get('uploadterm_vocabulary', NULL));
+  drupal_uninstall_schema('uploadterm');
+  variable_del('uploadterm_runonce');
+  variable_del('uploadterm_vocabulary');
+}

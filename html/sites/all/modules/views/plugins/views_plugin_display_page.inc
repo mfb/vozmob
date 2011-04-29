@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_display_page.inc,v 1.5.2.11 2010/03/11 00:01:56 merlinofchaos Exp $
+// $Id: views_plugin_display_page.inc,v 1.5.2.14 2011/01/04 20:29:56 merlinofchaos Exp $
 /**
  * @file
  * Contains the page display plugin.
@@ -28,7 +28,7 @@ class views_plugin_display_page extends views_plugin_display {
         'title' => array('default' => '', 'translatable' => FALSE),
         'description' => array('default' => '', 'translatable' => FALSE),
         'weight' => array('default' => 0),
-        'name' => array('default' => 'navigation'),
+        'name' => array('default' => variable_get('menu_default_node_menu', 'navigation')),
        ),
     );
     $options['tab_options'] = array(
@@ -55,12 +55,16 @@ class views_plugin_display_page extends views_plugin_display {
 
     $bits = explode('/', $this->get_option('path'));
     $page_arguments = array($this->view->name, $this->display->id);
+    $view_arguments = $this->get_option('arguments');
 
     // Replace % with %views_arg for menu autoloading and add to the
     // page arguments so the argument actually comes through.
     foreach($bits as $pos => $bit) {
       if ($bit == '%') {
-        $bits[$pos] = '%views_arg';
+        $argument = array_shift($view_arguments);
+        if ($argument['validate_type'] != 'none') {
+          $bits[$pos] = '%views_arg';
+        }
         $page_arguments[] = $pos;
       }
     }
@@ -71,6 +75,36 @@ class views_plugin_display_page extends views_plugin_display {
     if (!isset($access_plugin)) {
       $access_plugin = views_get_plugin('access', 'none');
     }
+
+    // Get access callback might return an array of the callback + the dynamic arguments.
+    $access_plugin_callback = $access_plugin->get_access_callback();
+
+    if (is_array($access_plugin_callback)) {
+      $access_arguments = array();
+
+      // Find the plugin arguments.
+      $access_plugin_method = array_shift($access_plugin_callback);
+      $access_plugin_arguments = array_shift($access_plugin_callback);
+      if (!is_array($access_plugin_arguments)) {
+        $access_plugin_arguments = array();
+      }
+
+      $access_arguments[0] = array($access_plugin_method, &$access_plugin_arguments);
+
+      // Move the plugin arguments to the access arguments array.
+      $i = 1;
+      foreach ($access_plugin_arguments as $key => $value) {
+        if (is_int($value)) {
+          $access_arguments[$i] = $value;
+          $access_plugin_arguments[$key] = $i;
+          $i++;
+        }
+      }
+    }
+    else {
+      $access_arguments = array($access_plugin_callback);
+    }
+
     if ($path) {
       $items[$path] = array(
         // default views page entry
@@ -78,7 +112,7 @@ class views_plugin_display_page extends views_plugin_display {
         'page arguments' => $page_arguments,
         // Default access check (per display)
         'access callback' => 'views_access',
-        'access arguments' => array($access_plugin->get_access_callback()),
+        'access arguments' => $access_arguments,
         // Identify URL embedded arguments and correlate them to a handler
         'load arguments'  => array($this->view->name, $this->display->id, '%index'),
       );

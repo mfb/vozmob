@@ -59,12 +59,32 @@ function bluemob_preprocess_node(&$vars) {
       }
     }
   }
-  
-  // Unset sms send link and comment link in terms. Only show terms. 
-  unset($vars['taxonomy']['sms_sendtophone']);
-  unset($vars['taxonomy']['comment_add']);
-  $vars['terms'] = theme('links', $vars['taxonomy'], array('class' => 'links inline'));
 
+  // split term by vocabulary and format appropriatly
+  $vocabulary = array();
+  foreach ($node->taxonomy as $tid => $term) {
+    $vocabulary[$term->vid]['taxonomy_term_' . $term->tid] = array(
+      'tid' => $term->tid,                  // views style
+      'name' => $term->name,                // views style
+      'title' => $term->name,               // taxonomy module style.
+      'href' => taxonomy_term_path($term),  // taxonomy module style
+       'attributes' => array(               // taxonomy module style
+        'rel' => 'tag',
+        'title' => strip_tags($term->description),
+      ),
+      'path' => taxonomy_term_path($term),  // views style
+    );
+  }
+  // tags
+  $vars['terms'] = theme('links', $vocabulary[1], array('class' => 'links inline'));
+  if (module_exists('uploadterm') && module_exists('taxonomy_image')) {
+    // media terms
+    $term_image_links = array();
+    foreach ($vocabulary[variable_get('uploadterm_vocabulary', 0)] as $term) {
+      $term_image_links[] = l(taxonomy_image_display($term['tid']), $term['path'], array('html' => TRUE)); // can add size here
+    }
+    $vars['mediaterms'] = theme('item_list', $term_image_links, NULL, 'ul', array('class' => 'links inline media'));
+  }
 
   switch ($node->type) {
     case 'page':
@@ -106,5 +126,17 @@ function bluemob_media_element($file, $href) {
   list($element) = explode('/', $file->filemime);
   if (isset($elements[$element])) {
     return '<' . $element . ' controls="controls" src="' . check_url($href) . '" />';
+  }
+}
+
+/**
+ * View features: taxonomy image all.
+ *
+ * If there is no output add default image.
+ */
+function phptemplate_preprocess_views_view_field__tid_list(&$vars) {
+  if ($vars['output'] == '') {
+    $text = drupal_get_path('module', 'vozmob_media') . '/icons/text-tiny.png';
+    $vars['output'] = theme('item_list', array(theme('image', $text)));
   }
 }

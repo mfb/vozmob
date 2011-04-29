@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_accesslog_path.inc,v 1.1 2008/09/03 19:21:30 merlinofchaos Exp $
+// $Id: views_handler_field_accesslog_path.inc,v 1.1.2.2 2011/01/10 23:14:26 merlinofchaos Exp $
 /**
  * Field handler to provide simple renderer that turns a URL into a clickable link.
  */
@@ -35,12 +35,17 @@ class views_handler_field_accesslog_path extends views_handler_field {
   }
 
   function render($values) {
-    $title = check_plain($values->{$this->field_alias});
+    $value = $this->get_value($values);
+    return $this->render_link($this->sanitize_value($value), $values);
+  }
+
+  function render_link($data, $values) {
     if (!empty($this->options['display_as_link'])) {
-      return l($title, $values->{$this->aliases['path']}, array('html' => TRUE));
+      $this->options['alter']['make_link'] = TRUE;
+      $this->options['alter']['path'] = $this->get_value($values, 'path');
+      $this->options['alter']['html'] = TRUE;
     }
-    else {
-      return $title;
-    }
+
+    return $data;
   }
 }

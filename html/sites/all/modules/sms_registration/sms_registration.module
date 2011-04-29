@@ -26,21 +26,16 @@ function sms_registration_mail_alter(&$message) {
 }
 
 /**
- * Implementation of hook_mailsave_clean().
- * 
+ * Implementation of hook_mailhandler().
+ *
  * Attempt to match sender to a phone number stored by sms_user module.
- * If no match found and sender is a recognized SMS email gateway, 
+ * If no match found and sender is a recognized SMS email gateway,
  * create a user account.
  */
-function sms_registration_mailsave_clean(&$node, $result, $i, $header, $mailbox) {
-    
+function sms_registration_mailhandler(&$node, $result, $i, $header, $mailbox) {
   // Ignore empty messages.
   if (empty($node)) {
-    return; 
-  }
-
-  if (empty($node->title)) {
-    $node->title = 'Nueva Historia / New Story';
+    return;
   }
 
   list($from_address, $from_name) = mailhandler_get_fromaddress($header, $mailbox);
@@ -52,8 +47,18 @@ function sms_registration_mailsave_clean(&$node, $result, $i, $header, $mailbox)
   $sms_registration_address = variable_get('sms_registration_address', '');
   $number = $from[0];
 
-  // If the user was not authenticated via user account email address and the message is from SMS gateway.
-  if (!$node->uid && isset($providers[$from[1]])) {
+  // If the message is not from SMS gateway, stop processing.
+  if (!isset($providers[$from[1]])) {
+    return $node;
+  }
+
+  // If the message is from SMS gateway, fire sms_incoming callbacks.
+  // Except that firing the sms_incoming callbacks sends a confirmation code
+  // and also logs out the user. so is not compatible.
+  //sms_email_gateway_process_incoming_message($from_address, $to_address, $node->title, $node->body, $header);
+
+  // If the user was not authenticated via user account email address.
+  if (!$node->uid) {
     // Look up the user by phone number.
     if (($uid = sms_user_get_uid($number)) && ($account = user_load(array('uid' => $uid, 'status' => 1)))) {
       $node->uid = $account->uid;
@@ -64,7 +69,7 @@ function sms_registration_mailsave_clean(&$node, $result, $i, $header, $mailbox)
     // If message is from an SMS/MMS gateway, create a user account.
     if (!$node->uid) {
       $user = FALSE;
-      while (!$user) { 
+      while (!$user) {
         $user = user_save(NULL, array(
           'name' => variable_get('sms_registration_username', 'Drupal-') . mt_rand(1, db_result(db_query('SELECT MAX(uid) FROM {users}')) * 10),
           'pass' => user_password(8),
@@ -73,6 +78,7 @@ function sms_registration_mailsave_clean(&$node, $result, $i, $header, $mailbox)
           'status' => 1,
           'language' => $node->language,
           'sms_user' => array('number' => sms_formatter($from[0]), 'status' => SMS_USER_PENDING, 'gateway' => array('carrier' => $from[1])),
+          'access' => time(),
         ));
       }
       $node->uid = $user->uid;
@@ -80,31 +86,58 @@ function sms_registration_mailsave_clean(&$node, $result, $i, $header, $mailbox)
       mailhandler_switch_user($node->uid);
 
       if (strcasecmp($sms_registration_address, $to_address) != 0) {
-        $message = t('Thanks! Do you want to have a blog on !site_name? If yes please send one word identifying the blog.', array('!site_name' => variable_get('site_name', 'Drupal')));
-        $options = array('carrier' => $from[1], 'from' => $sms_registration_address, 'subject' => t('Media posted'), 'action' => 'registration');
-        sms_send($number, $message, $options);
+        if (variable_get('sms_registration_request_user', 'name') == 'name') {
+          $message = t('Thanks! Do you want to have a blog on !site_name? If yes please send one word identifying the blog.', array('!site_name' => variable_get('site_name', 'Drupal')));
+        }
+        elseif (variable_get('sms_registration_request_user', 'name') == 'mail') {
+          $message = t('Thanks! To submit your content to !site_name, please reply with your valid e-mail address.', array('!site_name' => variable_get('site_name', 'Drupal')));
+        }
+        if (isset($message)) {
+          $options = array('carrier' => $from[1], 'from' => $sms_registration_address, 'subject' => t('Media posted'), 'action' => 'registration');
+          sms_send($number, $message, $options);
+        }
       }
     }
   }
 
-  // If user has authenticated and message was sent to a registration address and from a mobile number.
-  if (!empty($node->uid) && strcasecmp($sms_registration_address, $to_address) == 0 && isset($providers[$from[1]])) {
-    $username = strtok(trim(decode_entities(strip_tags($node->body))), "\r\n");
+  if (empty($node->title)) {
+    $node->title = t('New story');
+  }
+
+  // If user has authenticated and message was sent to a registration address.
+  if ($node->uid && strcasecmp($sms_registration_address, $to_address) == 0) {
+    $command = trim(strtok(trim(decode_entities(strip_tags($node->body))), "\r\n"));
     //if it comes from a valid sms email gateway and it was sent to one of the email registration accounts
     $password = user_password(8);
     if (empty($account)) {
       $account = user_load(array('uid' => $node->uid, 'status' => 1));
     }
-    $user = user_save($account, array('name' => $username, 'pass' => $password, 'sms_user' => array('number' => sms_formatter($from[0]), 'status' => SMS_USER_CONFIRMED, 'gateway' => array('carrier' => $from[1]))));
+
+    $save = array('pass' => $password, 'sms_user' => array('number' => sms_formatter($from[0]), 'status' => SMS_USER_CONFIRMED, 'gateway' => array('carrier' => $from[1])));
+
+    if (variable_get('sms_registration_request_user', 'name') == 'name') {
+      $save['name'] = $command;
+    }
+    elseif (variable_get('sms_registration_request_user', 'name') == 'mail') {
+      if (valid_email_address($command)) {
+        $save['mail'] = $command;
+      }
+    }
+
+    $user = user_save($account, $save);
+
     if ($user) {
-      $message = t('Welcome, !name. Your blog was created. Your password is !pass', array('!name' => $username, '!pass' => $password));
+      $message = t('Welcome, !name. Your blog was created. Your password is !pass', array('!name' => $command, '!pass' => $password));
     }
     else {
       $message = t('The blog was not created. Please choose another name.');
     }
     $options = array('carrier'=> $from[1], 'from' => $sms_registration_address);
     sms_send($number, $message, $options);
+
     // Do not post content from the registration address.
     $node = FALSE;
   }
+
+  return $node;
 }

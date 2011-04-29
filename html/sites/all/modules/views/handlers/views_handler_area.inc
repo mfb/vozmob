@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_area.inc,v 1.1.2.1 2010/01/19 22:11:27 merlinofchaos Exp $
+// $Id: views_handler_area.inc,v 1.1.2.3 2010/12/17 21:42:23 merlinofchaos Exp $
 /**
  * @file
  * Views area handlers.
@@ -25,8 +25,7 @@ class views_handler_area extends views_handler {
 
   function option_definition() {
     $options = parent::option_definition();
-
-    $label = !empty($this->definition['label']) ? $this->definition['label'] : $this->definition['field'];
+    $label = !empty($this->definition['label']) ? $this->definition['label'] : $this->definition['title'];
     $options['label'] = array('default' => $label, 'translatable' => TRUE);
     $options['empty'] = array('default' => 0, 'bool' => TRUE);
 
@@ -45,6 +44,7 @@ class views_handler_area extends views_handler {
    * should have.
    */
   function options_form(&$form, &$form_state) {
+    parent::options_form($form, $form_state);
     $form['label'] = array(
       '#type' => 'textfield',
       '#title' => t('Label'),

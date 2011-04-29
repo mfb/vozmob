@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_node_type.inc,v 1.1.2.4 2010/04/29 18:33:36 merlinofchaos Exp $
+// $Id: views_handler_field_node_type.inc,v 1.1.2.5 2011/01/10 23:14:26 merlinofchaos Exp $
 
 /**
  * Field handler to translate a node type into its readable form.
@@ -31,13 +31,13 @@ class views_handler_field_node_type extends views_handler_field_node {
    */
   function render_name($data, $values) {
     if ($this->options['machine_name'] != 1 && $data !== NULL && $data !== '') {
-      return t(check_plain(node_get_types('name', $data)));
+      return t($this->sanitize_value(node_get_types('name', $data)));
     }
-    return check_plain($data);
+    return $this->sanitize_value($data);
   }
 
   function render($values) {
-    return $this->render_link($this->render_name($values->{$this->field_alias}, $values), $values);
+    $value = $this->get_value($values);
+    return $this->render_link($this->render_name($value, $values), $values);
   }
 }
-

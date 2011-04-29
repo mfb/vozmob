@@ -1,3 +1,15 @@
 [submodule "html/sites/all/themes/blueprint/blueprint"]
-	path = html/sites/all/themes/blueprint/blueprint
-	url = git://github.com/joshuaclayton/blueprint-css.git
+  path = html/sites/all/themes/blueprint/blueprint
+  url = git://github.com/joshuaclayton/blueprint-css.git
+[submodule "html/sites/all/modules/voip"]
+	path = html/sites/all/modules/voip
+	url = git://github.com/leoburd/voip.git
+[submodule "html/sites/all/modules/ogrulesextra"]
+	path = html/sites/all/modules/ogrulesextra
+	url = git://git.drupal.org/sandbox/ekes/1121094.git
+[submodule "html/sites/all/modules/smsframework"]
+	path = html/sites/all/modules/smsframework
+	url = git://gitorious.org/vozmob/smsframework.git
+[submodule "html/sites/all/modules/usermerge"]
+	path = html/sites/all/modules/usermerge
+	url = git://git.drupal.org/project/usermerge

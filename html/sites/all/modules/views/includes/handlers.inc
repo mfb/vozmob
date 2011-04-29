@@ -1,5 +1,5 @@
 <?php
-// $Id: handlers.inc,v 1.109.2.17 2010/06/30 19:19:02 merlinofchaos Exp $
+// $Id: handlers.inc,v 1.109.2.24 2011/01/18 23:00:16 merlinofchaos Exp $
 /**
  * @file handlers.inc
  * Defines the various handler objects to help build and display views.
@@ -8,7 +8,7 @@
 /**
  * Instantiate and construct a new handler
  */
-function _views_create_handler($definition, $type = 'handler') {
+function _views_create_handler($definition, $type = 'handler', $handler_type = NULL) {
 //  vpr('Instantiating handler ' . $definition['handler']);
   if (empty($definition['handler'])) {
     return;
@@ -33,6 +33,15 @@ function _views_create_handler($definition, $type = 'handler') {
   }
 
   $handler->set_definition($definition);
+  if ($type == 'handler') {
+    $handler->is_handler = TRUE;
+    $handler->handler_type = $handler_type;
+  }
+  else {
+    $handler->is_plugin = TRUE;
+    $handler->plugin_type = $type;
+  }
+
   // let the handler have something like a constructor.
   $handler->construct();
 
@@ -97,7 +106,7 @@ function views_include_handler($handler, $definition, $type, $count = 0) {
 /**
  * Prepare a handler's data by checking defaults and such.
  */
-function _views_prepare_handler($definition, $data, $field) {
+function _views_prepare_handler($definition, $data, $field, $type) {
   foreach (array('group', 'title', 'title short', 'help', 'real field') as $key) {
     if (!isset($definition[$key])) {
       // First check the field level
@@ -111,7 +120,7 @@ function _views_prepare_handler($definition, $data, $field) {
     }
   }
 
-  return _views_create_handler($definition);
+  return _views_create_handler($definition, 'handler', $type);
 }
 
 /**
@@ -250,6 +259,26 @@ class views_handler extends views_object {
    */
   function init(&$view, $options) {
     $this->view = &$view;
+    $display_id = $this->view->current_display;
+    // Check to see if this handler type is defaulted. Note that
+    // we have to do a lookup because the type is singular but the
+    // option is stored as the plural.
+    $types = views_object_types();
+    $plural = $this->handler_type;
+    if (isset($types[$this->handler_type]['plural'])) {
+      $plural = $types[$this->handler_type]['plural'];
+    }
+    if ($this->view->display_handler->is_defaulted($plural)) {
+      $display_id = 'default';
+    }
+
+    $this->localization_keys = array(
+      $display_id,
+      $this->handler_type,
+      $options['table'],
+      $options['field']
+    );
+
     $this->unpack_options($this->options, $options);
 
     // This exist on most handlers, but not all. So they are still optional.
@@ -283,6 +312,7 @@ class views_handler extends views_object {
     $options['field'] = array('default' => '');
     $options['relationship'] = array('default' => 'none');
     $options['group_type'] = array('default' => 'group');
+    $options['ui_name'] = array('default' => '');
 
     return $options;
   }
@@ -291,6 +321,10 @@ class views_handler extends views_object {
    * Return a string representing this handler's name in the UI.
    */
   function ui_name($short = FALSE) {
+    if (!empty($this->options['ui_name'])) {
+      $title = check_plain($this->options['ui_name']);
+      return $title;
+    }
     $title = ($short && isset($this->definition['title short'])) ? $this->definition['title short'] : $this->definition['title'];
     return t('!group: !title', array('!group' => $this->definition['group'], '!title' => $title));
   }
@@ -328,7 +362,14 @@ class views_handler extends views_object {
    */
   function options_validate($form, &$form_state) { }
 
-  function options_form(&$form, &$form_state) { }
+  function options_form(&$form, &$form_state) {
+    $form['ui_name'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Administrative Title'),
+      '#description' => t('This title will be displayed on the views edit page instead of the default one. This might be useful if you have the same item twice.'),
+      '#default_value' => $this->options['ui_name'],
+    );
+  }
   /**
    * Perform any necessary changes to the form values prior to storage.
    * There is no need for this function to actually store the data.
@@ -931,52 +972,105 @@ class views_many_to_one_helper {
  *
  * @param $str
  *   The string to parse.
- * @param $filter
- *   The filter object to use as a base.
+ * @param $handler
+ *   The handler object to use as a base.
  *
- * @return $filter
- *   The new filter object.
+ * @return $handler
+ *   The new handler object.
  */
-function views_break_phrase($str, &$filter) {
-  if (!$filter) {
-    $filter = new stdClass();
+function views_break_phrase_string($str, &$handler) {
+  if (!$handler) {
+    $handler = new stdClass();
   }
 
   // Set up defaults:
-  if (!isset($filter->value)) {
-    $filter->value = array();
+  if (!isset($handler->value)) {
+    $handler->value = array();
   }
 
-  if (!isset($filter->operator)) {
-    $filter->operator = 'or';
+  if (!isset($handler->operator)) {
+    $handler->operator = 'or';
   }
 
   if ($str == '') {
-    return $filter;
+    return $handler;
+  }
+
+  if (preg_match('/^(\w+[+ ])+\w+$/', $str)) {
+    // The '+' character in a query string may be parsed as ' '.
+    $handler->operator = 'or';
+    $handler->value = preg_split('/[+ ]/', $str);
+  }
+  else if (preg_match('/^(\w+,)*\w+$/', $str)) {
+    $handler->operator = 'and';
+    $handler->value = explode(',', $str);
+  }
+
+  // Keep an 'error' value if invalid strings were given.
+  if (!empty($str) && (empty($handler->value) || !is_array($handler->value))) {
+    $handler->value = array(-1);
+    return $handler;
+  }
+
+  // Doubly ensure that all values are strings only.
+  foreach ($handler->value as $id => $value) {
+    $handler->value[$id] = (string) $value;
+  }
+
+  return $handler;
+}
+
+/*
+ * Break x,y,z and x+y+z into an array. Numeric only.
+ *
+ * @param $str
+ *   The string to parse.
+ * @param $handler
+ *   The handler object to use as a base.
+ *
+ * @return $handler
+ *   The new handler object.
+ */
+function views_break_phrase($str, &$handler) {
+  if (!$handler) {
+    $handler = new stdClass();
+  }
+
+  // Set up defaults:
+  if (!isset($handler->value)) {
+    $handler->value = array();
+  }
+
+  if (!isset($handler->operator)) {
+    $handler->operator = 'or';
+  }
+
+  if ($str == '') {
+    return $handler;
   }
 
   if (preg_match('/^([0-9]+[+ ])+[0-9]+$/', $str)) {
     // The '+' character in a query string may be parsed as ' '.
-    $filter->operator = 'or';
-    $filter->value = preg_split('/[+ ]/', $str);
+    $handler->operator = 'or';
+    $handler->value = preg_split('/[+ ]/', $str);
   }
   else if (preg_match('/^([0-9]+,)*[0-9]+$/', $str)) {
-    $filter->operator = 'and';
-    $filter->value = explode(',', $str);
+    $handler->operator = 'and';
+    $handler->value = explode(',', $str);
   }
 
   // Keep an 'error' value if invalid strings were given.
-  if (!empty($str) && (empty($filter->value) || !is_array($filter->value))) {
-    $filter->value = array(-1);
-    return $filter;
+  if (!empty($str) && (empty($handler->value) || !is_array($handler->value))) {
+    $handler->value = array(-1);
+    return $handler;
   }
 
   // Doubly ensure that all values are numeric only.
-  foreach ($filter->value as $id => $value) {
-    $filter->value[$id] = intval($value);
+  foreach ($handler->value as $id => $value) {
+    $handler->value[$id] = intval($value);
   }
 
-  return $filter;
+  return $handler;
 }
 
 // --------------------------------------------------------------------------
@@ -1083,22 +1177,42 @@ function views_date_sql_format($format, $field, $field_type = 'int', $set_offset
     case 'mysqli':
       $replace = array(
         'Y' => '%Y',
+        'y' => '%y',
+        'M' => '%%b',
         'm' => '%m',
+        'n' => '%c',
+        'F' => '%M',
+        'D' => '%a',
         'd' => '%%d',
+        'l' => '%W',
+        'j' => '%e',
+        'W' => '%v',
         'H' => '%H',
+        'h' => '%h',
         'i' => '%i',
-        's' => '%s',
+        's' => '%%s',
+        'A' => '%p',
         );
       $format = strtr($format, $replace);
       return "DATE_FORMAT($field, '$format')";
     case 'pgsql':
       $replace = array(
         'Y' => 'YYYY',
+        'y' => 'YY',
+        'M' => 'Mon',
         'm' => 'MM',
+        'n' => 'MM', // no format for Numeric representation of a month, without leading zeros
+        'F' => 'Month',
+        'D' => 'Dy',
         'd' => 'DD',
+        'l' => 'Day',
+        'j' => 'DD', // no format for Day of the month without leading zeros
+        'W' => 'WW',
         'H' => 'HH24',
+        'h' => 'HH12',
         'i' => 'MI',
         's' => 'SS',
+        'A' => 'AM',
         );
       $format = strtr($format, $replace);
       return "TO_CHAR($field, '$format')";
@@ -1204,6 +1318,9 @@ function views_views_handlers() {
       'views_handler_argument_null' => array(
         'parent' => 'views_handler_argument',
       ),
+      'views_handler_argument_broken' => array(
+        'parent' => 'views_handler_argument',
+      ),
 
       // field handlers
       'views_handler_field' => array(
@@ -1244,6 +1361,9 @@ function views_views_handlers() {
       'views_handler_field_math' => array(
         'parent' => 'views_handler_field_numeric',
       ),
+      'views_handler_field_broken' => array(
+        'parent' => 'views_handler_field',
+      ),
 
       // filter handlers
       'views_handler_filter' => array(
@@ -1276,10 +1396,16 @@ function views_views_handlers() {
       'views_handler_filter_many_to_one' => array(
         'parent' => 'views_handler_filter_in_operator',
       ),
+      'views_handler_filter_broken' => array(
+        'parent' => 'views_handler_filter',
+      ),
 
       // relationship handlers
       'views_handler_relationship' => array(
         'parent' => 'views_handler',
+      ),
+      'views_handler_relationship_broken' => array(
+        'parent' => 'views_handler_relationship',
       ),
 
 
@@ -1299,13 +1425,16 @@ function views_views_handlers() {
       'views_handler_sort_random' => array(
         'parent' => 'views_handler_sort',
       ),
+      'views_handler_sort_broken' => array(
+        'parent' => 'views_handler_sort',
+      ),
 
       // group by handlers
       'views_handler_argument_group_by_numeric' => array(
         'parent' => 'views_handler_argument',
       ),
       'views_handler_field_group_by_numeric' => array(
-        'parent' => 'views_handler_field',
+        'parent' => 'views_handler_field_numeric',
       ),
       'views_handler_filter_group_by_numeric' => array(
         'parent' => 'views_handler_filter_numeric',
@@ -1319,6 +1448,9 @@ function views_views_handlers() {
         'parent' => 'views_handler',
       ),
       'views_handler_area_text' => array(
+        'parent' => 'views_handler_area',
+      ),
+      'views_handler_area_broken' => array(
         'parent' => 'views_handler_area',
       ),
     ),
@@ -1342,15 +1474,15 @@ function views_views_handlers() {
  *   // PHP 4 doesn't call constructors of the base class automatically from a
  *   // constructor of a derived class. It is your responsibility to propagate
  *   // the call to constructors upstream where appropriate.
- *   function construct($table, $left_table, $left_field, $field, $extra = array(), $type = 'LEFT') {
+ *   function construct($table = NULL, $left_table = NULL, $left_field = NULL, $field = NULL, $extra = array(), $type = 'LEFT') {
  *     parent::construct($table, $left_table, $left_field, $field, $extra, $type);
  *   }
  *
  *   function join($table, &$query) {
  *     $output = parent::join($table, $query);
+ *     $output .= "AND foo.bar = baz.boing";
+ *     return $output;
  *   }
- *   $output .= "AND foo.bar = baz.boing";
- *   return $output;
  * }
  * @endcode
  */

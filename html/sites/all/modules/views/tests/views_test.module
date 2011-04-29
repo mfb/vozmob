@@ -1,5 +1,5 @@
 <?php
-// $Id: views_test.module,v 1.1.4.6 2010/07/10 06:09:56 dereine Exp $
+// $Id: views_test.module,v 1.1.4.8 2011/01/04 20:29:56 merlinofchaos Exp $
 
 /**
  * Implements hook_perm().
@@ -14,6 +14,7 @@ function views_test_perm() {
 function views_test_views_api() {
   return array(
     'api' => 3.0,
+    'template path' => drupal_get_path('module', 'views_test') .'/templates',
   );
 }
 
@@ -29,4 +30,12 @@ function views_test_views_data() {
  */
 function views_test_views_plugins() {
   return variable_get('views_test_views_plugins', array());
+}
+
+function views_test_test_static_access_callback($access) {
+  return $access;
+}
+
+function views_test_test_dynamic_access_callback($access, $argument1, $argument2) {
+  return $access && $argument1 == variable_get('test_dynamic_access_argument1', NULL) && $argument2 == variable_get('test_dynamic_access_argument2', NULL);
 }

@@ -1,6 +1,6 @@
 <?php
 
-// $Id: mm_auto_run.module,v 1.1.2.2.2.6 2010/02/22 21:31:19 arthuregg Exp $
+// $Id: mm_auto_run.module,v 1.1.2.2.2.7 2011/02/07 02:27:00 arthuregg Exp $
 
 
 /**
@@ -49,7 +49,7 @@ function mm_auto_run_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
       // run each configuration that is enabled
       $has_run = array();
       foreach ($configurations as $cid => $enabled) {
-        if ($enabled && !isset($has_run[$cid])) {
+        if ($enabled && ! isset($has_run[$cid])) {
           $config = media_mover_api_get_configuration($cid);
           $has_run[$cid] = true;
           // run the media mover configuration on this node

@@ -1,0 +1,6 @@
+; $Id: taxonomy_image_link_alter.info,v 1.1.4.2 2008/03/03 02:03:24 nancyw Exp $
+name = Taxonomy Image Link Alter
+description = Modify taxonomy term links to use Taxonomy Image.
+dependencies[] = taxonomy_image
+core = 6.x
+package = Taxonomy Image

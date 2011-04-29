@@ -1,0 +1,6 @@
+; $Id: taxonomy_image_blocks.info,v 1.1.2.1 2008/03/28 22:17:47 nancyw Exp $
+name = Taxonomy Image Blocks
+description = Provides blocks for Taxonomy Image.
+dependencies[] = taxonomy_image
+core = 6.x
+package = Taxonomy Image

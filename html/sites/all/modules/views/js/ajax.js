@@ -1,4 +1,4 @@
-// $Id: ajax.js,v 1.25.2.11 2010/04/08 21:29:51 merlinofchaos Exp $
+// $Id: ajax.js,v 1.25.2.15 2011/01/18 22:00:44 merlinofchaos Exp $
 /**
  * @file ajax_admin.js
  *
@@ -82,8 +82,9 @@ Drupal.Views.Ajax.ajaxResponse = function(data) {
   else if (!data.tab) {
     // If no display, reset the form.
     Drupal.Views.Ajax.setForm('', Drupal.settings.views.ajax.defaultForm);
-    //Enable the save button.
+    //Enable the save and delete button.
     $('#edit-save').removeAttr('disabled');
+    $('#edit-delete').removeAttr('disabled');
     // Trigger an update for the live preview when we reach this state:
     if ($('#views-ui-preview-form input#edit-live-preview').is(':checked')) {
       $('#views-ui-preview-form').trigger('submit');
@@ -232,7 +233,9 @@ Drupal.Views.updatePreviewFilterForm = function() {
 Drupal.Views.updatePreviewLink = function() {
   var url = $(this).attr('href');
   url = url.replace('nojs', 'ajax');
-  if (url.substring(0, 18) != '/admin/build/views') {
+  var intern_url = Drupal.Views.getPath(url);
+
+  if (intern_url.substring(0, 17) != 'admin/build/views') {
     return true;
   }
 
@@ -260,8 +263,9 @@ Drupal.behaviors.ViewsAjaxLinks = function() {
     // Turn on the hilite to indicate this is in use.
     $(this).addClass('hilite');
 
-    // Disable the save button.
+    // Disable the save and delete button.
     $('#edit-save').attr('disabled', 'true');
+    $('#edit-delete').attr('disabled', 'true');
 
     $(this).addClass('views-throbbing');
     $.ajax({
@@ -366,7 +370,7 @@ Drupal.Views.Ajax.handleErrors = function (xhr, path) {
   alert(Drupal.t("An error occurred at @path.\n\nError Description: @error", {'@path': path, '@error': error_text}));
 }
 
-// $Id: ajax.js,v 1.25.2.11 2010/04/08 21:29:51 merlinofchaos Exp $
+// $Id: ajax.js,v 1.25.2.15 2011/01/18 22:00:44 merlinofchaos Exp $
 
 Drupal.behaviors.ViewsGroupedTableDrag = function(context) {
   var table_id = 'arrange';

@@ -1,4 +1,4 @@
-// $Id: openlayers_behavior_layerswitcher.js,v 1.1.2.5 2010/08/31 08:26:28 strk Exp $
+// $Id: openlayers_behavior_layerswitcher.js,v 1.1.2.7 2010/10/06 14:31:11 strk Exp $
 
 /**
  * @file
@@ -13,7 +13,9 @@ Drupal.behaviors.openlayers_behavior_layerswitcher = function(context) {
   if (data && data.map.behaviors['openlayers_behavior_layerswitcher']) {
     // Add control
     var control = new OpenLayers.Control.LayerSwitcher({
-      'ascending': !!data.map.behaviors['openlayers_behavior_layerswitcher'].ascending
+      'ascending': !!data.map.behaviors['openlayers_behavior_layerswitcher'].ascending,
+      'roundedCorner' : !!data.map.behaviors['openlayers_behavior_layerswitcher'].roundedCorner,
+      'roundedCornerColor' : data.map.behaviors['openlayers_behavior_layerswitcher'].roundedCornerColor
     });
     data.openlayers.addControl(control);
     control.activate();

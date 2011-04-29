@@ -1,0 +1,38 @@
+<?php
+
+include_once('vozmob_og.features.inc');
+
+/**
+ * Implementaion of hook_menu_alter().
+ *
+ * Requires weight of module > 10 (of views). Could do something cool with
+ * ctools pagemanager? Or could make our own menu item to render the view?
+ */
+function vozmob_og_menu_alter(&$items) {
+  $items['node/%views_arg/moderation']['access callback'] = 'vozmob_og_moderation_access';
+  $items['node/%views_arg/moderation']['access arguments'] = array(1);
+}
+
+/**
+ * Menu access callback.
+ *
+ * node/%views_arg/moderation
+ */
+function vozmob_og_moderation_access($nid) {
+  $node = node_load($nid);
+  if (! og_is_group_admin($node)) {
+    // not able to admin the group
+    return FALSE;
+  }
+  $moderated = flag_get_flag('moderated_group');
+  if (empty($moderated)) {
+    //flag moderate_group missing!
+    return FALSE;
+  }
+  if (! $moderated->is_flagged($nid)) {
+    // this group isn't moderated
+    return FALSE;
+  }
+  
+  return TRUE;
+}

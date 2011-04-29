@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_row.inc,v 1.3.2.2 2009/12/28 21:11:50 merlinofchaos Exp $
+// $Id: views_plugin_row.inc,v 1.3.2.3 2010/12/04 00:15:14 merlinofchaos Exp $
 /**
  * @file
  * Contains the base row style plugin.
@@ -132,7 +132,7 @@ class views_plugin_row extends views_plugin {
    * of some form, but not always.
    */
   function render($row) {
-    return theme($this->theme_functions(), $this->view, $this->options, $row, $this->field_alias);
+    return theme($this->theme_functions(), $this->view, $this->options, $row, isset($this->field_alias) ? $this->field_alias : '');
   }
 }
 

@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_node.inc,v 1.3.2.7 2010/03/16 23:09:03 merlinofchaos Exp $
+// $Id: views_handler_field_node.inc,v 1.3.2.11 2011/01/10 23:14:26 merlinofchaos Exp $
 /**
  * @file
  * Contains the basic 'node' field handler.
@@ -22,7 +22,7 @@ class views_handler_field_node extends views_handler_field {
 
   function option_definition() {
     $options = parent::option_definition();
-    $options['link_to_node'] = array('default' => FALSE);
+    $options['link_to_node'] = array('default' => TRUE);
     return $options;
   }
 
@@ -45,23 +45,30 @@ class views_handler_field_node extends views_handler_field {
    * Data should be made XSS safe prior to calling this function.
    */
   function render_link($data, $values) {
-    if (!empty($this->options['link_to_node']) && $data !== NULL && $data !== '') {
-      $this->options['alter']['make_link'] = TRUE;
-      $this->options['alter']['path'] = "node/" . $values->{$this->aliases['nid']};
-      if (isset($this->aliases['language'])) {
-        $languages = language_list();
-        if (isset($languages[$values->{$this->aliases['language']}])) {
-          $this->options['alter']['language'] = $languages[$values->{$this->aliases['language']}];
+    if (!empty($this->options['link_to_node'])) {
+      if ($data !== NULL && $data !== '') {
+        $this->options['alter']['make_link'] = TRUE;
+        $this->options['alter']['path'] = "node/" . $this->get_value($values, 'nid');
+        if (isset($this->aliases['language'])) {
+          $languages = language_list();
+          $language = $this->get_value($values, 'language');
+          if (isset($languages[$language])) {
+            $this->options['alter']['language'] = $languages[$language];
+          }
+          else {
+            unset($this->options['alter']['language']);
+          }
         }
-        else {
-          unset($this->options['alter']['language']);
-        }
+      }
+      else {
+        $this->options['alter']['make_link'] = FALSE;
       }
     }
     return $data;
   }
 
   function render($values) {
-    return $this->render_link(check_plain($values->{$this->field_alias}), $values);
+    $value = $this->get_value($values);
+    return $this->render_link($this->sanitize_value($value), $values);
   }
 }

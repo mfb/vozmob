@@ -1,0 +1,308 @@
+<?php
+
+/**
+ * @file
+ *  attach terms to node related to file mimetypes attached to node.
+ *
+ * Hardcoded variables at the moment:-
+ *   uploadterm_fields array of string names of fields to check on node;
+ *   uploadterm_iconpaths array of tid => icon path;
+ *
+ * Notes:
+ *   This module addresses a problem that is solved in D7 with the contrib 
+ * media module by adding a column to the core file upload table to hold the
+ * type.
+ */
+
+/**
+ * Implementation of hook_init().
+ *
+ * This wouldn't be needed if we split this out into two modules.
+ * The underlying one wouldn't even need to assume it works with the upload field.
+ */
+function uploadterm_init() {
+  if (! variable_get('uploadterm_runonce', FALSE)) {
+    variable_set('uploadterm_runonce', TRUE);
+    uploadterm_vocabulary_term_reset();
+  }
+}
+
+/**
+ * Implementation of hook_nodeapi().
+ */
+function uploadterm_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
+  if ($op == 'presave') {
+    uploadterm_node_presave($node);
+  }
+}
+
+/**
+ * hook_nodeapi($op = 'presave').
+ *
+ * Override any taxonomy terms in the media vocabulary. Add them related
+ * to any files attached in defined fields.
+ */
+function uploadterm_node_presave(&$node) {
+  $vid = variable_get('uploadterm_vocabulary', NULL);
+  $fields = variable_get('uploadterm_fields', array('files', 'field_image'));
+
+  $node->taxonomy[$vid] = array();
+
+  foreach ($fields as $field) {
+    if (isset($node->$field) && is_array($node->$field)) {
+      foreach ($node->$field as $file) {
+        if (is_array($file)) {
+          $remove = $file['remove'];
+          $list = $file['list'];
+          $filemime = $file['filemime'];
+        }
+        elseif (is_object($file)) {
+          $remove = $file->remove;
+          $list = $file->list;
+          $filemime = $file->filemime;
+        }
+        if (! $remove &&  $list && $type = uploadterm_mimeterm($filemime)) {
+          $node->taxonomy[$vid][$type] = $type;
+        }
+      }
+    }
+  }
+}
+
+/** 
+ * Implementation of hook_form_alter().
+ *
+ * Hides uploadterm_vocabulary from node_form.
+ */
+function uploadterm_form_alter(&$form, &$form_state, $form_id) {
+  if (isset($form['type']) && isset($form['#node']) && $form['type']['#value'] .'_node_form' == $form_id) {
+    $vid = variable_get('uploadterm_vocabulary', NULL);
+    $form['taxonomy'][$vid] = array('#type' => 'value', '#default_value' => array());
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function uploadterm_form_taxonomy_form_term_alter(&$form, &$form_state) {
+  if ($form['vid']['#value'] != variable_get('uploadterm_vocabulary', NULL)) {
+    // Only add the regex box to terms in the vocabularies we control. 
+    return;
+  }
+  if ($form_state['submitted'] || is_array($form_state['post']) && $form_state['post']['op'] == t('Delete')) {
+    return;
+  }
+  if (is_array($form['tid'])) {
+    $regex = implode("\n", uploadterm_term_regex_get($form['tid']['#value']));
+  }
+  else {
+    $regex = '';
+  }
+
+  $form['identification']['uploadterm'] = array(
+    '#default_value' => $regex,
+    '#description' => t('Regular expressions to match where this term should be attached.'),
+    '#title' => t('Term match expressions'),
+    '#type' => 'textarea',
+    '#validate' => array('uploadterm_form_taxonomy_field_validate'),
+    // @todo validation
+  );
+}
+
+/**
+ * Form field validation.
+ *
+ * @see uploadterm_form_taxonomy_form_term_alter().
+ */
+function uploadterm_form_taxonomy_field_validate($a, $b, $c) {
+  // @todo
+  dsm('does validate');
+  return TRUE;
+}
+
+/**
+ * Implementation of hook_taxonomy.
+ */
+function uploadterm_taxonomy($op, $type, $values) {
+  if ($type == 'term' && $values['vid'] == variable_get('uploadterm_vocabulary', -1)) {
+    if ($op == 'update' || $op == 'insert') {
+      uploadterm_term_regex_set($values['tid'], $values['uploadterm']);
+    }
+    if ($op == 'delete') {
+      db_query('DELETE FROM {uploadterm_term} WHERE tid = %d', $values['tid']);
+    }
+  }
+}
+
+/**
+ * Lookup mimetype.
+ *
+ * @param $mime
+ *  string mimetype
+ * @return
+ *  int term tid if matched; 0 if no match.
+ */
+function uploadterm_mimeterm($mime) {
+  $regex = uploadterm_regex_get();
+  foreach ($regex as $pattern => $tid) {
+    if (preg_match($pattern, $mime)) {
+      // we return on the first match. 
+      return $tid;
+    }
+  }
+
+  return 0;
+}
+
+/** 
+ * Get an array of regex for a given tid.
+ *
+ * @param tid
+ *  int taxonomy term tid.
+ * @return 
+ *  int array of regex
+ */
+function uploadterm_term_regex_get($tid) {
+  $regex = array();
+  $result = db_query('SELECT regex FROM {uploadterm_term} WHERE tid = %d', $tid);
+  while ($row = db_fetch_array($result)) {
+    $regex[] = $row['regex'];
+  }
+  return $regex;
+}
+
+/**
+ * Set regex values for a tid.
+ *
+ * @param tid
+ *  int taxonomy term tid.
+ * @param array or string
+ *  array of regex or string with a regex per line.
+ * @return
+ *  bool true on success.
+ */
+function uploadterm_term_regex_set($tid, $regex) {
+  if (is_string($regex)) {
+    $regex = explode("\n", $regex);
+  }
+  if (!empty($array['tid'])) {
+    db_query('DELETE FROM {uploadterm_terms} WHERE tid = %d', $array['tid']);
+  }
+  foreach ($regex as $row) {
+    $record = array('tid' => $tid, 'regex' => trim($row));
+    drupal_write_record('uploadterm_term', $record);
+  }
+}
+
+/**
+ * Get an array of regex mapped to their tid.
+ * 
+ * @return
+ *  array regex => tid
+ */
+function uploadterm_regex_get() {
+  $regex = array();
+  $result = db_query('SELECT tid, regex FROM {uploadterm_term}');
+  while ($row = db_fetch_array($result)) {
+    $regex[$row['regex']] = $row['tid'];
+  }
+  return $regex;
+}
+
+/********************************************************************
+ * Reset terms, and apply them to nodes - batch operation
+ */
+
+/**
+ * Deletes any terms in the uploadterm vocabulary, creates the basic terms with regex.
+ * Re-tags all the content.
+ */
+function uploadterm_vocabulary_term_reset() {
+  $vid = variable_get('uploadterm_vocabulary', NULL);
+  $created = db_query('SELECT tid FROM term_data WHERE vid = %d', $vid);
+  while ($row = db_fetch_array($created)) {
+    taxonomy_del_term($row['tid']);
+  }
+
+  // create terms with defaults
+  $terms = array('image' => '/^image\//', 'video' => '/^video\//', 'audio' => '/^audio\//');
+  foreach ($terms as $term => $regex) {
+    taxonomy_save_term($edit = array('name' => $term, 'vid' => $vid, 'uploadterm' => $regex));
+  }
+  drupal_set_message(t('Added default media upload taxonomy terms.'));
+
+  // (re-)tag content
+  $field_names = variable_get('uploadterm_fields', array('files', 'field_image'));
+  $batch = array(
+    'title' => t('Updating existing nodes with mimetypes'),
+    'operations' => array(),
+    'finished' => '_uploadterm_vocabulary_term_reset_finished',
+  );
+  foreach ($field_names as $field_name) {
+    // standard upload field
+    if ($field_name == 'files') {
+      $batch['operations'][] = array('_uploadterm_vocabulary_term_reset', array(array()));
+    }
+    // cck field
+    else {
+      module_load_include('inc', 'content', 'includes/content.crud');
+      $fields = content_field_instance_read(array('field_name' => $field_name));
+      foreach ($fields as $field) {
+        $field_db = content_database_info($field);
+        $batch['operations'][] = array('_uploadterm_vocabulary_term_reset', array($field_db));
+      }
+    }
+  }
+  batch_set($batch);
+  batch_process();
+  cache_clear_all();
+}
+
+/**
+ * batch_api operation callback
+ *
+ * @see uploadterm_vocabulary_term_reset().
+ */
+function _uploadterm_vocabulary_term_reset($field_db, &$context) {
+  if (empty($field_db)) {
+    $sql_from = '{upload} u INNER JOIN {files} f ON u.fid = f.fid';
+  }
+  else {
+    $sql_from = '{' . $field_db['table']  . '} u INNER JOIN {files} f ON f.fid = u. ' . $field_db['columns']['fid']['column'];
+  }
+
+  if (empty($context['sandbox'])) {
+    $context['sandbox']['progress'] = 0;
+    $context['sandbox']['max'] = db_result(db_query("SELECT COUNT(*) FROM $sql_from"));
+  }
+  $limit = 5000;
+
+  $result = db_query_range("SELECT u.nid, u.vid, f.filemime FROM $sql_from", $context['sandbox']['progress'], $limit);
+  while ($row = db_fetch_array($result)) {
+    if ($tid = uploadterm_mimeterm($row['filemime'])) {
+      db_query('INSERT INTO {term_node} (nid, vid, tid) VALUES (%d, %d, %d)', $row['nid'], $row['vid'], $tid);
+    }
+    $context['sandbox']['progress']++;
+  }
+
+  if ($context['sandbox']['progress'] != $context['sandbox']['max']) {
+    $context['finished'] = $context['sandbox']['progress'] / $context['sandbox']['max'];
+  } 
+  else {
+    $context['finished'] = 1;
+  }
+}
+
+/**
+ * batch_api finished callback
+ *
+ * @see uploadterm_vocabulary_term_reset().
+ */
+function _uploadterm_vocabulary_term_reset_finished($success, $results, $operations) {
+  if ($success) {
+    drupal_set_message(t('Updated media terms for existing nodes'));
+  }
+  else {
+    drupal_set_message(t('Error updating media terms for existing nodes'));
+  }
+}

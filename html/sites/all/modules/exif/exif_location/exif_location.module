@@ -1,5 +1,5 @@
 <?php
-// $Id: exif_location.module,v 1.1.2.3 2010/03/19 22:17:00 rapsli Exp $
+// $Id: exif_location.module,v 1.1.2.4 2010/10/08 17:57:43 rapsli Exp $
 
 /**
  * implementation of hook_nodeapi
@@ -10,7 +10,12 @@
  */
 function exif_location_nodeapi(&$node, $op, $a3 = NULL, $a4 = NULL) {
   switch ($op) {
-    case 'presave':
+    case 'update':
+      //we are only going to update if we have said so
+      if (!variable_get('exif_update', TRUE)) {
+        break;
+      }
+    case 'insert':
       $lid = 0;
       /* Go get the location from EXIF fields */
       if (is_array($node->field_gps_gpslongitude) &&

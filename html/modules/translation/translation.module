@@ -1,5 +1,5 @@
 <?php
-// $Id: translation.module,v 1.23.2.5 2010/11/04 12:24:17 goba Exp $
+// $Id: translation.module,v 1.23.2.6 2010/12/15 12:27:56 goba Exp $
 
 /**
  * @file
@@ -227,6 +227,7 @@ function translation_nodeapi(&$node, $op, $teaser, $page) {
           db_query("UPDATE {node} SET tnid = %d, translate = %d WHERE nid = %d", $tnid, 0, $node->translation_source->nid);
         }
         db_query("UPDATE {node} SET tnid = %d, translate = %d WHERE nid = %d", $tnid, 0, $node->nid);
+        $node->tnid = $tnid;
       }
       break;
 

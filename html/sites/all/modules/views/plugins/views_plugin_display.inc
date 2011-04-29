@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_display.inc,v 1.20.2.44 2010/08/14 00:18:23 merlinofchaos Exp $
+// $Id: views_plugin_display.inc,v 1.20.2.57 2011/01/20 20:09:08 merlinofchaos Exp $
 /**
  * @file
  * Contains the base display plugin.
@@ -113,6 +113,16 @@ class views_plugin_display extends views_plugin {
           $this->set_option($area, array());
         }
       }
+    }
+
+    // Convert distinct setting from display to query settings.
+    $distinct = $this->get_option('distinct');
+    if (!empty($distinct)) {
+      $query_settings = $this->get_option('query');
+      $query_settings['options']['distinct'] = $distinct;
+      $this->set_option('query', $query_settings);
+      // Clear the values
+      $this->set_option('distinct', NULL);
     }
   }
 
@@ -238,7 +248,17 @@ class views_plugin_display extends views_plugin {
    * Can this display accept attachments?
    */
   function accept_attachments() {
-    return !empty($this->definition['accept attachments']);
+    if (empty($this->definition['accept attachments'])) {
+      return FALSE;
+    }
+    if (!empty($this->view->argument) && $this->get_option('hide_attachment_summary')) {
+      foreach ($this->view->argument as $argument_id => $argument) {
+        if ($argument->needs_style_plugin() && empty($argument->argument_validated)) {
+          return FALSE;
+        }
+      }
+    }
+    return TRUE;
   }
 
   /**
@@ -255,14 +275,15 @@ class views_plugin_display extends views_plugin {
       'access' => array('access'),
       'cache' => array('cache'),
       'title' => array('title'),
+      'enabled' => array('enabled'),
       'css_class' => array('css_class'),
       'use_ajax' => array('use_ajax'),
+      'hide_attachment_summary' => array('hide_attachment_summary'),
       'query' => array('query'),
       'items_per_page' => array('items_per_page', 'offset', 'use_pager', 'pager_element'),
       'pager' => array('pager'),
       'use_more' => array('use_more', 'use_more_always', 'use_more_text'),
       'link_display' => array('link_display'),
-      'distinct' => array('distinct'),
       'exposed_block' => array('exposed_block'),
       'exposed_form' => array('exposed_form'),
 
@@ -282,6 +303,13 @@ class views_plugin_display extends views_plugin {
       'arguments' => array('arguments'),
       'filters' => array('filters', 'filter_groups'),
     );
+
+    // If the display cannot use a pager, then we cannot default it.
+    if (empty($this->definition['use pager'])) {
+      unset($sections['pager']);
+      unset($sections['items_per_page']);
+    }
+
     if ($section) {
       if (!empty($sections[$section])) {
         return $sections[$section];
@@ -300,9 +328,13 @@ class views_plugin_display extends views_plugin {
           'cache' => TRUE,
           'query' => TRUE,
           'title' => TRUE,
+          'display_comment' => TRUE,
+          'enabled' => TRUE,
           'css_class' => TRUE,
 
+          'display_description' => FALSE,
           'use_ajax' => TRUE,
+          'hide_attachment_summary' => TRUE,
           'items_per_page' => TRUE,
           'use_pager' => TRUE,
           'offset' => TRUE,
@@ -310,7 +342,6 @@ class views_plugin_display extends views_plugin {
           'use_more' => TRUE,
           'use_more_always' => TRUE,
           'use_more_text' => TRUE,
-          'distinct' => TRUE,
           'exposed_block' => TRUE,
           'exposed_form' => TRUE,
 
@@ -340,11 +371,27 @@ class views_plugin_display extends views_plugin {
         'default' => '',
         'translatable' => TRUE,
       ),
+      'enabled' => array(
+        'default' => TRUE,
+        'translatable' => FALSE,
+        'bool' => TRUE,
+      ),
+      'display_comment' => array(
+        'default' => '',
+      ),
       'css_class' => array(
         'default' => '',
         'translatable' => FALSE,
       ),
+      'display_description' => array(
+        'default' => '',
+        'translatable' => TRUE,
+      ),
       'use_ajax' => array(
+        'default' => FALSE,
+        'bool' => TRUE,
+      ),
+      'hide_attachment_summary' => array(
         'default' => FALSE,
         'bool' => TRUE,
       ),
@@ -373,10 +420,6 @@ class views_plugin_display extends views_plugin {
       'link_display' => array(
         'default' => '',
       ),
-      'distinct' => array(
-        'default' => FALSE,
-        'bool' => TRUE,
-      ),
       'group_by' => array(
         'default' => FALSE,
         'bool' => TRUE,
@@ -386,12 +429,12 @@ class views_plugin_display extends views_plugin {
       // and therefore need special handling.
       'access' => array(
         'contains' => array(
-          'type' => array('default' => 'none', 'export' => 'export_plugin'),
+          'type' => array('default' => 'none', 'export' => 'export_plugin', 'unpack_translatable' => 'unpack_plugin'),
          ),
       ),
       'cache' => array(
         'contains' => array(
-          'type' => array('default' => 'none', 'export' => 'export_plugin'),
+          'type' => array('default' => 'none', 'export' => 'export_plugin', 'unpack_translatable' => 'unpack_plugin'),
          ),
       ),
       'query' => array(
@@ -408,13 +451,13 @@ class views_plugin_display extends views_plugin {
       // should be copied.
       'exposed_form' => array(
         'contains' => array(
-          'type' => array('default' => 'basic', 'export' => 'export_plugin'),
+          'type' => array('default' => 'basic', 'export' => 'export_plugin', 'unpack_translatable' => 'unpack_plugin'),
           'options' => array('default' => array(), 'export' => FALSE),
          ),
       ),
       'pager' => array(
         'contains' => array(
-          'type' => array('default' => 'full', 'export' => 'export_plugin'),
+          'type' => array('default' => 'full', 'export' => 'export_plugin', 'unpack_translatable' => 'unpack_plugin'),
           'options' => array('default' => array(), 'export' => FALSE),
          ),
       ),
@@ -425,6 +468,7 @@ class views_plugin_display extends views_plugin {
       'style_plugin' => array(
         'default' => 'default',
         'export' => 'export_style',
+        'unpack_translatable' => 'unpack_style',
       ),
       'style_options' => array(
         'default' => array(),
@@ -433,6 +477,7 @@ class views_plugin_display extends views_plugin {
       'row_plugin' => array(
         'default' => 'fields',
         'export' => 'export_style',
+        'unpack_translatable' => 'unpack_style',
       ),
       'row_options' => array(
         'default' => array(),
@@ -446,14 +491,17 @@ class views_plugin_display extends views_plugin {
       'header' => array(
         'default' => array(),
         'export' => 'export_handler',
+        'unpack_translatable' => 'unpack_handler',
       ),
       'footer' => array(
         'default' => array(),
         'export' => 'export_handler',
+        'unpack_translatable' => 'unpack_handler',
       ),
       'empty' => array(
         'default' => array(),
         'export' => 'export_handler',
+        'unpack_translatable' => 'unpack_handler',
       ),
 
       // We want these to export last.
@@ -461,18 +509,23 @@ class views_plugin_display extends views_plugin {
       'relationships' => array(
         'default' => array(),
         'export' => 'export_handler',
+        'unpack_translatable' => 'unpack_handler',
+
       ),
       'fields' => array(
         'default' => array(),
         'export' => 'export_handler',
+        'unpack_translatable' => 'unpack_handler',
       ),
       'sorts' => array(
         'default' => array(),
         'export' => 'export_handler',
+        'unpack_translatable' => 'unpack_handler',
       ),
       'arguments' => array(
         'default' => array(),
         'export' => 'export_handler',
+        'unpack_translatable' => 'unpack_handler',
       ),
       'filter_groups' => array(
         'contains' => array(
@@ -483,10 +536,17 @@ class views_plugin_display extends views_plugin {
       'filters' => array(
         'default' => array(),
         'export' => 'export_handler',
+        'unpack_translatable' => 'unpack_handler',
       ),
-
-
     );
+
+    if (empty($this->definition['use pager'])) {
+      $options['defaults']['default']['use_pager'] = FALSE;
+      $options['defaults']['default']['items_per_page'] = FALSE;
+      $options['defaults']['default']['offset'] = FALSE;
+      $options['defaults']['default']['pager'] = FALSE;
+      $options['pager']['contains']['type']['default'] = 'some';
+    }
 
     if ($this->is_default_display()) {
       unset($options['defaults']);
@@ -634,6 +694,13 @@ class views_plugin_display extends views_plugin {
         $plugin->init($this->view, $this->display, $options);
       }
       else {
+        $display_id = $this->is_defaulted($option_name) ? $this->display->id : 'default';
+        $plugin->localization_keys = array($display_id, $type);
+
+        if (!isset($this->base_field)) {
+          $views_data = views_fetch_data($this->view->base_table);
+          $this->view->base_field = $views_data['table']['base']['field'];
+        }
         $plugin->init($this->view->base_table, $this->view->base_field, $options);
       }
       $cache[$type][$name] = $plugin;
@@ -695,6 +762,11 @@ class views_plugin_display extends views_plugin {
 
         $handler = views_get_handler($info['table'], $info['field'], $handler_type, $override);
         if ($handler) {
+          // Special override for area types so they know where they come from.
+          if ($handler_type == 'area') {
+            $handler->handler_type = $type;
+          }
+
           $handler->init($this->view, $info);
           $this->handlers[$type][$id] = &$handler;
         }
@@ -817,6 +889,14 @@ class views_plugin_display extends views_plugin {
       'desc' => t('Change the name of this display.'),
     );
 
+    $display_comment = drupal_substr($this->get_option('display_comment'), 0, 10);
+    $options['display_comment'] = array(
+      'category' => 'basic',
+      'title' => t('Comment'),
+      'value' => !empty($display_comment) ? $display_comment : t('No comment'),
+      'desc' => t('Comment or document this display.'),
+    );
+
     $title = strip_tags($this->get_option('title'));
     if (!$title) {
       $title = t('None');
@@ -827,6 +907,13 @@ class views_plugin_display extends views_plugin {
       'title' => t('Title'),
       'value' => $title,
       'desc' => t('Change the title that this display will use.'),
+    );
+
+    $options['enabled'] = array(
+      'category' => 'basic',
+      'title' => t('Display status'),
+      'value' => $this->get_option('enabled') ? t('Enabled') : t('Disabled'),
+      'desc' => t('Define if this display is or is not enabled.'),
     );
 
     $style_plugin = views_fetch_plugin_data('style', $this->get_option('style_plugin'));
@@ -869,23 +956,33 @@ class views_plugin_display extends views_plugin {
         'desc' => t('Change whether or not this display will use AJAX.'),
       );
     }
-
-    if (!empty($this->definition['use pager'])) {
-
-      $pager_plugin = $this->get_plugin('pager');
-      if (!$pager_plugin) {
-        // default to the no pager plugin.
-        $pager_plugin = views_get_plugin('pager', 'none');
-      }
-
-      $pager_str = $pager_plugin->summary_title();
-
-      $options['pager'] = array(
-        'category' => 'basic',
-        'title' => t('Use pager'),
-        'value' => $pager_str,
-        'desc' => t("Change this display's pager setting."),
+    if (!empty($this->definition['accept attachments'])) {
+      $options['hide_attachment_summary'] = array(
+        'category' => 'advanced',
+        'title' => t('Hide attachments in summary'),
+        'value' => $this->get_option('hide_attachment_summary') ? t('Yes') : t('No'),
+        'desc' => t('Change whether or not to display attachments when displaying an argument summary.'),
       );
+    }
+
+    $pager_plugin = $this->get_plugin('pager');
+    if (!$pager_plugin) {
+      // default to the no pager plugin.
+      $pager_plugin = views_get_plugin('pager', 'none');
+    }
+
+    $pager_str = $pager_plugin->summary_title();
+
+    $options['pager'] = array(
+      'category' => 'basic',
+      'title' => t('Use pager'),
+      'value' => $pager_str,
+      'desc' => t("Change this display's pager setting."),
+    );
+
+    // If pagers aren't allowed, change the text of the item:
+    if (empty($this->definition['use pager'])) {
+      $options['pager']['title'] = t('Items to display');
     }
 
     if (!empty($pager_plugin->definition['uses options'])) {
@@ -900,13 +997,6 @@ class views_plugin_display extends views_plugin {
         'desc' => t('Specify whether this display will provide a "more" link.'),
       );
     }
-
-    $options['distinct'] = array(
-      'category' => 'advanced',
-      'title' => t('Distinct'),
-      'value' => $this->get_option('distinct') ? t('Yes') : t('No'),
-      'desc' => t('Display only distinct items, without duplicates.'),
-    );
 
     $this->view->init_query();
     if ($this->view->query->get_aggregation_info()) {
@@ -1062,18 +1152,33 @@ class views_plugin_display extends views_plugin {
         $form['#title'] .= t('The machine name of this display');
         $form['display_id'] = array(
           '#type' => 'textfield',
-          '#description' => t('This is machine name of the display.'),
+          '#description' => t('This is machine name of the display. It should contain only letters, numbers, and underscores. This name must be unique.'),
           '#default_value' => !empty($this->display->new_id) ? $this->display->new_id : $this->display->id,
           '#required' => TRUE,
           '#size' => 64,
         );
         break;
       case 'display_title':
-        $form['#title'] .= t('The name of this display');
+        $form['#title'] .= t('The name and the description of this display');
         $form['display_title'] = array(
+          '#title' => t('Name'),
           '#type' => 'textfield',
-          '#description' => t('This title will appear only in the administrative interface for the View.'),
+          '#description' => t('This name will appear only in the administrative interface for the View.'),
           '#default_value' => $this->display->display_title,
+        );
+        $form['display_description'] = array(
+          '#title' => t('Description'),
+          '#type' => 'textfield',
+          '#description' => t('This description will appear only in the administrative interface for the View.'),
+          '#default_value' => $this->get_option('display_description'),
+        );
+        break;
+      case 'display_comment':
+        $form['#title'] .= t("This display's comments");
+        $form['display_comment'] = array(
+          '#type' => 'textarea',
+          '#description' => t('This value will be seen and used only within the Views UI and can be used to document this display. You can use this to provide notes for other or future maintainers of your site about how or why this display is configured.'),
+          '#default_value' => $this->get_option('display_comment'),
         );
         break;
       case 'title':
@@ -1082,6 +1187,15 @@ class views_plugin_display extends views_plugin {
           '#type' => 'textfield',
           '#description' => t('This title will be displayed with the view, wherever titles are normally displayed; i.e, as the page title, block title, etc.'),
           '#default_value' => $this->get_option('title'),
+        );
+        break;
+      case 'enabled':
+        $form['#title'] .= t('Status of this display');
+        $form['enabled'] = array(
+          '#type' => 'checkbox',
+          '#title' => t('Enable display'),
+          '#description' => t('If unchecked, this display will not be available in the site.'),
+          '#default_value' => $this->get_option('enabled'),
         );
         break;
       case 'css_class':
@@ -1105,6 +1219,14 @@ class views_plugin_display extends views_plugin {
           '#default_value' => $this->get_option('use_ajax') ? 1 : 0,
         );
         break;
+      case 'hide_attachment_summary':
+        $form['#title'] .= t('Hide attachments when displaying argument summary');
+        $form['hide_attachment_summary'] = array(
+          '#type' => 'radios',
+          '#options' => array(1 => t('Yes'), 0 => t('No')),
+          '#default_value' => $this->get_option('hide_attachment_summary') ? 1 : 0,
+        );
+        break;
       case 'use_more':
         $form['#title'] .= t('Add a more link to the bottom of the display.');
         $form['use_more'] = array(
@@ -1125,15 +1247,6 @@ class views_plugin_display extends views_plugin {
           '#title' => t('More link text'),
           '#description' => t("The text to display for the more link."),
           '#default_value' => $this->get_option('use_more_text'),
-        );
-        break;
-      case 'distinct':
-        $form['#title'] .= t('Display only distinct items, without duplicates.');
-        $form['distinct'] = array(
-          '#type' => 'checkbox',
-          '#title' => t('Distinct'),
-          '#description' => t('This will make the view display only distinct items. If there are multiple identical items, each will be displayed only once. You can use this to try and remove duplicates from a view, though it does not always work. Note that this can slow queries down, so use it with caution.'),
-          '#default_value' => $this->get_option('distinct'),
         );
         break;
       case 'group_by':
@@ -1255,7 +1368,7 @@ class views_plugin_display extends views_plugin {
               '#tree' => TRUE,
             ),
           );
-          
+
           $this->view->query->options_form($form['query']['options'], $form_state);
         }
         break;
@@ -1618,7 +1731,7 @@ class views_plugin_display extends views_plugin {
         $pager = $this->get_option('pager');
         $form['pager']['type'] =  array(
           '#type' => 'radios',
-          '#options' => views_fetch_plugin_names('pager'),
+          '#options' => views_fetch_plugin_names('pager', empty($this->definition['use pager']) ? 'basic' : NULL),
           '#default_value' => $pager['type'],
         );
 
@@ -1699,7 +1812,7 @@ class views_plugin_display extends views_plugin {
       case 'display_id':
         if ($form_state['values']['display_id']) {
           if (preg_match('/[^a-zA-Z0-9_]/', $form_state['values']['display_id'])) {
-            form_error($form['display_id'], t('Display id must be alphanumeric or underscores only.'));
+            form_error($form['display_id'], t('Display name must be letters, numbers, or underscores only.'));
           }
 
           foreach ($this->view->display as $id => $display) {
@@ -1770,6 +1883,7 @@ class views_plugin_display extends views_plugin {
         break;
       case 'display_title':
         $this->display->display_title = $form_state['values']['display_title'];
+        $this->set_option('display_description', $form_state['values']['display_description']);
         break;
       case 'access':
         $access = $this->get_option('access');
@@ -1824,18 +1938,18 @@ class views_plugin_display extends views_plugin {
       case 'title':
       case 'css_class':
       case 'link_display':
+      case 'display_comment':
         $this->set_option($section, $form_state['values'][$section]);
         break;
+      case 'enabled':
       case 'use_ajax':
+      case 'hide_attachment_summary':
         $this->set_option($section, (bool)$form_state['values'][$section]);
         break;
       case 'use_more':
         $this->set_option($section, intval($form_state['values'][$section]));
         $this->set_option('use_more_always', intval($form_state['values']['use_more_always']));
         $this->set_option('use_more_text', $form_state['values']['use_more_text']);
-        break;
-      case 'distinct':
-        $this->set_option($section, $form_state['values'][$section]);
         break;
       case 'group_by':
         $this->set_option($section, $form_state['values'][$section]);
@@ -2021,12 +2135,7 @@ class views_plugin_display extends views_plugin {
   /**
    * Inject anything into the query that the display handler needs.
    */
-  function query() {
-    // Make the query distinct if the option was set.
-    if ($this->get_option('distinct')) {
-      $this->view->query->set_distinct();
-    }
-  }
+  function query() {  }
 
   /**
    * Not all display plugins will support filtering
@@ -2192,6 +2301,13 @@ class views_plugin_display extends views_plugin {
       }
     }
 
+    // Validate query plugin.
+    $query = $this->get_plugin('query');
+    $result = $query->validate();
+    if (!empty($result) && is_array($result)) {
+      $errors = array_merge($errors, $result);
+    }
+
     // Validate handlers
     foreach (views_object_types() as $type => $info) {
       foreach ($this->get_handlers($type) as $handler) {
@@ -2231,6 +2347,7 @@ class views_plugin_display extends views_plugin {
     return array(
       $delta => array(
         'info' => $desc,
+        'cache' => BLOCK_NO_CACHE,
       )
     );
   }
@@ -2385,6 +2502,82 @@ class views_plugin_display extends views_plugin {
 
       // Pass off to the plugin to export itself.
       $output .= $plugin->export_options($indent, $new_prefix);
+    }
+
+    return $output;
+  }
+
+  function unpack_style($indent, $prefix, $storage, $option, $definition, $parents) {
+    $output = '';
+    $style_plugin = $this->get_plugin();
+    if ($option == 'style_plugin') {
+      $type = 'style';
+      $options_field = 'style_options';
+      $plugin = $style_plugin;
+    }
+    else {
+      if (!$style_plugin || !$style_plugin->uses_row_plugin()) {
+        return;
+      }
+
+      $type = 'row';
+      $options_field = 'row_options';
+      $plugin = $this->get_plugin('row');
+      // If the style plugin doesn't use row plugins, don't even bother.
+    }
+
+    if ($plugin) {
+      return $plugin->unpack_translatables($translatable, $parents);
+    }
+  }
+
+  /**
+   * Special handling for plugin unpacking.
+   */
+  function unpack_plugin(&$translatable, $storage, $option, $definition, $parents) {
+    $plugin_type = end($parents);
+    $plugin = $this->get_plugin($plugin_type);
+    if ($plugin) {
+      // Write which plugin to use.
+      return $plugin->unpack_translatables($translatable, $parents);
+    }
+  }
+
+    /**
+   * Special method to unpack items that have handlers.
+   *
+   * This method was specified in the option_definition() as the method to utilize to
+   * export fields, filters, sort criteria, relationships and arguments. This passes
+   * the export off to the individual handlers so that they can export themselves
+   * properly.
+   */
+  function unpack_handler(&$translatable, $storage, $option, $definition, $parents) {
+    $output = '';
+
+    // cut the 's' off because the data is stored as the plural form but we need
+    // the singular form. Who designed that anyway? Oh yeah, I did. :(
+    if ($option != 'header' && $option != 'footer' && $option != 'empty') {
+      $type = substr($option, 0, -1);
+    }
+    else {
+      $type = $option;
+    }
+    $types = views_object_types();
+    foreach ($storage[$option] as $id => $info) {
+      if (!empty($types[$type]['type'])) {
+        $handler_type = $types[$type]['type'];
+      }
+      else {
+        $handler_type = $type;
+      }
+      $handler = views_get_handler($info['table'], $info['field'], $handler_type);
+      if ($handler) {
+        $handler->init($this->view, $info);
+        $handler->unpack_translatables($translatable, array_merge($parents, array($handler_type, $info['table'], $info['field'])));
+      }
+
+      // Prevent reference problems.
+      unset($handler);
     }
 
     return $output;

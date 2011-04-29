@@ -1,0 +1,45 @@
+<?php
+
+include_once('vozmob_media.features.inc');
+
+/**
+ * Implementation of hook_block().
+ */
+function vozmob_media_block($op = 'list', $delta = 0, $edit = array()) {
+  if ($op == 'list') {
+    return array(
+      0 => array(
+       'info' => t('Story by media type'),
+        'weight' => 0,
+        'status' => 0,
+        'region' => 'right',
+      ),
+    );
+  }
+
+  if ($op == 'view') {
+    if ($delta == 0) {
+      return vozmob_media_block_media();
+    }
+  }
+}
+
+/**
+ * 'Story by media type' block.
+ */
+function vozmob_media_block_media() {
+  // oh hackish quick and can be made better.
+  $vid = variable_get('uploadterm_vocabulary', NULL);
+  $image = db_fetch_object(db_query("SELECT * FROM {term_data} WHERE vid = %d AND name ='image'", $vid));
+  $video = db_fetch_object(db_query("SELECT * FROM {term_data} WHERE vid = %d AND name = 'video'", $vid));
+  $audio = db_fetch_object(db_query("SELECT * FROM {term_data} WHERE vid = %d AND name = 'audio'", $vid));
+  $links = array(
+    l(theme_image(drupal_get_path('module', 'vozmob_media') . '/icons/image.png'), taxonomy_term_path($image), array('html' => true)),
+    l(theme_image(drupal_get_path('module', 'vozmob_media') . '/icons/video.png'), taxonomy_term_path($video), array('html' => true)),
+    l(theme_image(drupal_get_path('module', 'vozmob_media') . '/icons/audio.png'), taxonomy_term_path($audio), array('html' => true)),
+  );
+  return array(
+    'subject' => t('Story by Media Type'),
+    'content' => '<div class="media-types large-icons">' . theme('item_list', $links) . '</div>',
+  );
+}

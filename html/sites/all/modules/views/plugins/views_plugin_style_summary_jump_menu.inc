@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_style_summary_jump_menu.inc,v 1.1.4.3 2010/08/13 21:34:08 merlinofchaos Exp $
+// $Id: views_plugin_style_summary_jump_menu.inc,v 1.1.4.6 2010/12/14 00:47:29 merlinofchaos Exp $
 /**
  * @file
  * Contains the default summary style plugin, which displays items in an HTML list.
@@ -17,14 +17,19 @@ class views_plugin_style_summary_jump_menu extends views_plugin_style {
     $options['base_path'] = array('default' => '');
     $options['count'] = array('default' => TRUE);
     $options['hide'] = array('default' => FALSE);
-    $options['text'] = array('default' => t('Go'), 'translatable' => TRUE);
+    $options['text'] = array('default' => 'Go', 'translatable' => TRUE);
+    $options['choose'] = array('default' => '- Choose -', 'translatable' => TRUE);
+    $options['default_value'] = array('default' => FALSE);
 
     return $options;
   }
 
   function query() {
-    $this->view->set_items_per_page(0);
-    $this->view->set_use_pager(0);
+    $pager = array(
+      'type' => 'none',
+      'options' => array(),
+    );
+    $this->display->handler->set_option('pager', $pager);
   }
 
   function options_form(&$form, &$form_state) {
@@ -57,6 +62,20 @@ class views_plugin_style_summary_jump_menu extends views_plugin_style {
       '#title' => t('Button text'),
       '#default_value' => $this->options['text'],
     );
+
+    $form['choose'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Choose text'),
+      '#default_value' => $this->options['choose'],
+      '#description' => t('The text that will appear as the selected option in the jump menu.'),
+    );
+
+    $form['default_value'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Select the current argument.'),
+      '#default_value' => !empty($this->options['default_value']),
+      '#description' => t('If checked, the current argument setting will be displayed as the default option in the jump menu, if applicable.'),
+    );
   }
 
   function render() {
@@ -69,6 +88,7 @@ class views_plugin_style_summary_jump_menu extends views_plugin_style {
     }
 
     $options = array();
+    $default_value = '';
     foreach ($this->view->result as $id => $row) {
       $args = $this->view->args;
       $args[$argument->position] = $argument->summary_argument($row);
@@ -82,12 +102,17 @@ class views_plugin_style_summary_jump_menu extends views_plugin_style {
       if (!empty($this->options['count'])) {
         $options[$path] .= ' (' . intval($row->{$argument->count_alias}) . ')';
       }
+      if ($this->options['default_value'] && $_GET['q'] == $this->view->get_url($args)) {
+        $default_value = $path;
+      }
     }
 
     ctools_include('jump-menu');
     $settings = array(
       'hide' => $this->options['hide'],
       'button' => $this->options['text'],
+      'choose' => $this->options['choose'],
+      'default_value' => $default_value,
     );
 
     return drupal_get_form('ctools_jump_menu', $options, $settings);

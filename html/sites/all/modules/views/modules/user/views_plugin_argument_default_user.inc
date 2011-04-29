@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_argument_default_user.inc,v 1.1.2.1 2009/11/26 00:35:16 merlinofchaos Exp $
+// $Id: views_plugin_argument_default_user.inc,v 1.1.2.3 2011/01/20 20:12:34 merlinofchaos Exp $
 /**
  * @file
  * Contains the user from URL argument default plugin.
@@ -11,15 +11,15 @@
 class views_plugin_argument_default_user extends views_plugin_argument_default {
   function option_definition() {
     $options = parent::option_definition();
-    $options['user'] = array('default' => '');
+    $options['user'] = array('default' => '', 'bool' => TRUE, 'translatable' => FALSE);
 
     return $options;
   }
 
   function options_form(&$form, &$form_state) {
     $form['user'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Default argument'),
+      '#type' => 'checkbox',
+      '#title' => t('Also look for a node and use the node author'),
       '#default_value' => $this->options['user'],
     );
   }
@@ -58,11 +58,20 @@ class views_plugin_argument_default_user extends views_plugin_argument_default {
       return arg(1);
     }
 
-    if (arg(0) == 'node' && is_numeric(arg(1))) {
-      $node = node_load(arg(1));
-      if ($node) {
-        return $node->uid;
+    if (!empty($this->options['user'])) {
+      if (arg(0) == 'node' && is_numeric(arg(1))) {
+        $node = node_load(arg(1));
+        if ($node) {
+          return $node->uid;
+        }
       }
+    }
+
+    // If the current page is a view that takes uid as an argument, return the uid.
+    $views_page = views_get_page_view();
+
+    if ($views_page && isset($views_page->view->argument['uid'])) {
+      return $views_page->view->argument['uid']->argument;
     }
   }
 }

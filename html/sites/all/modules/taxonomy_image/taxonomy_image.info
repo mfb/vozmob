@@ -1,0 +1,6 @@
+; $Id: taxonomy_image.info,v 1.1.2.1.2.2.2.2 2008/03/03 02:03:24 nancyw Exp $
+name = Taxonomy Image
+description = Upload and associate images with taxonomy terms.
+dependencies[] = taxonomy
+core = 6.x
+package = Taxonomy Image

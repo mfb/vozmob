@@ -34,6 +34,19 @@ function mms_email_gateway_rewrite_to_mms($gateway) {
 }
 
 /**
+ * Returns TRUE if given e-mail address is from an SMS or MMS gateway.
+ */
+function mms_email_gateway_is_carrier($mail) {
+  static $carriers;
+  if (!$carriers) {
+    $carriers = sms_carriers() + mms_email_gateway_get_map();
+  }
+  $domain = drupal_strtolower(preg_replace('/.*@/', '', $mail));
+  return isset($carriers[$domain]);
+}
+
+
+/**
  * Implementation of hook_mailsave_clean().
  *
  * Add a file name extension to files that have a mime type but no extension.

@@ -66,13 +66,14 @@ Class Exif {
       return array();
     }
     $exif = exif_read_data($file, 0);
+    
     $arSmallExif = array();
     $arSmallExif = array_change_key_case((array)$exif, CASE_LOWER);
     $arSmallExif['computed'] = array_change_key_case((array)$arSmallExif['computed'], CASE_LOWER); //why this function isn't recursive is beyond me
     $arSmallExif['thumbnail'] = array_change_key_case((array)$arSmallExif['thumbnail'], CASE_LOWER);
     $arSmallExif['comment'] = array_change_key_case((array)$arSmallExif['comment'], CASE_LOWER);
     $info = array();
-
+    
     foreach ($arTagNames as $tagName) {
       if ($tagName['section'] != 'iptc') {
         if (!empty($arSmallExif[$tagName['tag']])) {
@@ -83,6 +84,12 @@ Class Exif {
         }
       }
     }
+    foreach ($info as $tag => $value) {
+      if (!is_array($value)) {
+        $info[$tag] = utf8_encode($value);
+      }
+    }
+    
     return $info;
   }
 
@@ -112,6 +119,7 @@ Class Exif {
     $humanReadableKey = $this->getHumanReadableIPTCkey();
     $size = GetImageSize ($file, $infoImage);
     $iptc = empty($infoImage["APP13"]) ? array() : iptcparse($infoImage["APP13"]);
+
     $arSmallIPTC = array();
     if (is_array($iptc)) {
       foreach ($iptc as $key => $value) {
@@ -167,8 +175,8 @@ Class Exif {
       foreach ($arTagNames as $tagName) {
         if ($tagName['section'] == "xmp") {
           // Get XMP field.
-          $config                                          = $map[$tagName['tag']];
-          $field                                           = $this->readXMPItem($xmp, $config);
+          $config = $map[$tagName['tag']];
+          $field = $this->readXMPItem($xmp, $config);
           $info[$tagName['section'] .'_'. $tagName['tag']] = $field;
         }
       }
@@ -190,6 +198,7 @@ Class Exif {
    */
   function openXMP($file) {
     // Setup.
+    SXMPFiles::Initialize();
     $xmpfiles = new SXMPFiles();
     $xmpmeta  = new SXMPMeta();
 
@@ -241,10 +250,10 @@ Class Exif {
     // Try to read XMP data if the namespace is available.
     if(@$xmpmeta->GetNamespacePrefix($config['ns'])) {
       if ($config['type'] == 'property') {
-        $value = @$xmpmeta->GetProperty($config['name'], $config['ns']);
+        $value = @$xmpmeta->GetProperty($config['ns'], $config['name']);
       }
       elseif ($config['type'] == 'array') {
-        $value = @$xmpmeta->GetArrayItem($config['name'], $key, $config['ns']);
+        $value = @$xmpmeta->GetArrayItem($key, $config['ns'], $config['name']);
       } 
       elseif ($config['type'] == 'struct') {
         $value = @$xmpmeta->GetStructField($config['ns'], $config['struct'], $config['ns'], $config['name']);

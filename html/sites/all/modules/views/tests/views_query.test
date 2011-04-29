@@ -1,5 +1,5 @@
 <?php
-// $Id: views_query.test,v 1.1.4.4 2010/07/10 06:09:56 dereine Exp $
+// $Id: views_query.test,v 1.1.4.9 2011/01/04 20:29:56 merlinofchaos Exp $
 
 /**
  * @file
@@ -93,7 +93,7 @@ abstract class ViewsTestCase extends DrupalWebTestCase {
 abstract class ViewsSqlTest extends ViewsTestCase {
 
   protected function setUp() {
-    parent::setUp('views');
+    parent::setUp('views', 'views_ui');
 
     // Define the schema and views data variable before enabling the test module.
     variable_set('views_test_schema', $this->schemaDefinition());
@@ -108,51 +108,78 @@ abstract class ViewsSqlTest extends ViewsTestCase {
     foreach ($this->dataSet() as $record) {
       drupal_write_record('views_test', $record);
     }
+    $this->checkPermissions(array(), TRUE);
+  }
+
+
+  /**
+   * This function allows to enable views ui from a higher class which can't change the setup function anymore.
+   * 
+   * @TODO
+   *   Convert existing setUp functions.
+   */
+  function enableViewsUi() {
+    module_enable(array('views_ui'));
+    // @TODO Figure out why it's required to clear the cache here.
+    views_module_include('views_default.inc', TRUE);
+    views_get_all_views(TRUE);
+    menu_rebuild();
   }
 
   /**
   * The schema definition.
   */
   protected function schemaDefinition() {
-  $schema['views_test'] = array(
-    'description' => 'Basic test table for Views tests.',
-    'fields' => array(
-      'id' => array(
-        'type' => 'serial',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
+    $schema['views_test'] = array(
+      'description' => 'Basic test table for Views tests.',
+      'fields' => array(
+        'id' => array(
+          'type' => 'serial',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+        ),
+        'name' => array(
+          'description' => "A person's name",
+          'type' => 'varchar',
+          'length' => 255,
+          'not null' => TRUE,
+          'default' => '',
+        ),
+        'age' => array(
+          'description' => "The person's age",
+          'type' => 'int',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+          'default' => 0),
+        'job' => array(
+          'description' => "The person's job",
+          'type' => 'varchar',
+          'length' => 255,
+          'not null' => TRUE,
+          'default' => 'Undefined',
+        ),
+        'created' => array(
+          'description' => "The creation date of this record",
+          'type' => 'int',
+          'unsigned' => TRUE,
+          'not null' => TRUE,
+          'default' => 0,
+        ),
       ),
-      'name' => array(
-        'description' => "A person's name",
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => '',
+      'primary key' => array('id'),
+      'unique keys' => array(
+        'name' => array('name')
       ),
-      'age' => array(
-        'description' => "The person's age",
-        'type' => 'int',
-        'unsigned' => TRUE,
-        'not null' => TRUE,
-        'default' => 0),
-      'job' => array(
-        'description' => "The person's job",
-        'type' => 'varchar',
-        'length' => 255,
-        'not null' => TRUE,
-        'default' => 'Undefined',
+      'indexes' => array(
+        'ages' => array('age'),
       ),
-    ),
-    'primary key' => array('id'),
-    'unique keys' => array(
-      'name' => array('name')
-    ),
-    'indexes' => array(
-      'ages' => array('age'),
-    ),
-  );
-  return $schema;
-}
+    );
+    return $schema;
+  }
+
+  protected function viewsPlugins() {
+    return array();
+  }
 
   /**
    * The views data definition.
@@ -237,14 +264,24 @@ abstract class ViewsSqlTest extends ViewsTestCase {
         'handler' => 'views_handler_sort',
       ),
     );
+    $data['views_test']['created'] = array(
+      'title' => t('Created'),
+      'help' => t('The creation date of this record'),
+      'field' => array(
+        'handler' => 'views_handler_field_date',
+        'click sortable' => TRUE,
+      ),
+      'argument' => array(
+        'handler' => 'views_handler_argument_date',
+      ),
+      'filter' => array(
+        'handler' => 'views_handler_filter_date',
+      ),
+      'sort' => array(
+        'handler' => 'views_handler_sort_date',
+      ),
+    );
     return $data;
-  }
-
-  /*
-   * The views plugin definition. Override it if you test provides a plugin.
-   */
-  protected function viewsPlugins() {
-    return array();
   }
 
   /**
@@ -256,26 +293,31 @@ abstract class ViewsSqlTest extends ViewsTestCase {
         'name' => 'John',
         'age' => 25,
         'job' => 'Singer',
+        'created' => gmmktime(0, 0, 0, 1, 1, 2000),
       ),
       array(
         'name' => 'George',
         'age' => 27,
         'job' => 'Singer',
+        'created' => gmmktime(0, 0, 0, 1, 2, 2000),
       ),
       array(
         'name' => 'Ringo',
         'age' => 28,
         'job' => 'Drummer',
+        'created' => gmmktime(6, 30, 30, 1, 1, 2000),
       ),
       array(
         'name' => 'Paul',
         'age' => 26,
         'job' => 'Songwriter',
+        'created' => gmmktime(6, 0, 0, 1, 1, 2000),
       ),
       array(
         'name' => 'Meredith',
         'age' => 30,
         'job' => 'Speaker',
+        'created' => gmmktime(6, 30, 10, 1, 1, 2000),
       ),
     );
   }

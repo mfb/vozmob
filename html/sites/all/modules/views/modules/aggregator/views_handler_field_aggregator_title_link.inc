@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_aggregator_title_link.inc,v 1.1.2.1 2010/06/17 02:47:02 merlinofchaos Exp $
+// $Id: views_handler_field_aggregator_title_link.inc,v 1.1.2.3 2011/01/10 23:14:26 merlinofchaos Exp $
 
  /**
  * Field handler that turns an item's title into a clickable link to the original
@@ -32,13 +32,18 @@ class views_handler_field_aggregator_title_link extends views_handler_field {
   }
 
   function render($values) {
-    $value = $values->{$this->field_alias};
-    $link = $values->{$this->table_alias . '_link'};
+    $value = $this->get_value($values);
+    return $this->render_link($this->sanitize_value($value), $values);
+  }
+
+  function render_link($data, $values) {
+    $link = $this->get_value($values, 'link');
     if (!empty($this->options['display_as_link'])) {
-      return l(check_plain($value), $link, array('html' => TRUE));
+      $this->options['alter']['make_link'] = TRUE;
+      $this->options['alter']['path'] = $link;
+      $this->options['alter']['html'] = TRUE;
     }
-    else {
-      return check_plain($value);
-    }
+
+    return $data;
   }
 }

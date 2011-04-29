@@ -1,5 +1,5 @@
 <?php
-// $Id: exif.module,v 1.9.2.18 2010/07/23 17:47:46 rapsli Exp $:
+// $Id: exif.module,v 1.9.2.19 2010/10/12 17:34:27 rapsli Exp $:
 
 /**
  * @file implementing the drupal api
@@ -161,7 +161,7 @@ function _exif_date_handler($field, $exif_date) {
   }
 
   require_once drupal_get_path('module', 'date_api') .'/date_api_elements.inc';
-  $date_datetime = date_convert_from_custom($exif_date, variable_get('date_format_exif', 'Y:m:d H:i:s'));
+  $date_datetime = date_convert_from_custom($exif_date, variable_get('date_format_EXIF', 'Y:m:d H:i:s'));
   if (! in_array($field['type'], array('date', 'datetime', 'datestamp'))) {
     // Field is not a date field type, so we return a ISO-8601 representation
     return array('value' => date_convert($date_datetime, DATE_DATETIME, DATE_ISO));

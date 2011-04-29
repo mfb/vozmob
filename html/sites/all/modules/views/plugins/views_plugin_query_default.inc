@@ -1,5 +1,5 @@
 <?php
-// $Id: views_plugin_query_default.inc,v 1.1.2.24 2010/08/14 00:18:23 merlinofchaos Exp $
+// $Id: views_plugin_query_default.inc,v 1.1.2.28 2011/01/04 21:24:31 merlinofchaos Exp $
 /**
  * @file views_plugin_query_default.inc
  * Defines the default query object which builds SQL to execute using the
@@ -157,6 +157,10 @@ class views_plugin_query_default extends views_plugin_query{
       'translatable' => FALSE,
       'bool' => TRUE,
     );
+    $options['distinct'] = array(
+      'default' => FALSE,
+      'bool' => TRUE,
+    );
 
     return $options;
   }
@@ -171,6 +175,12 @@ class views_plugin_query_default extends views_plugin_query{
       '#type' => 'checkbox',
       '#default_value' => !empty($this->options['disable_sql_rewrite']),
       '#prefix' =>  '<div class="messages warning">' . t('WARNING: Disabling SQL rewriting means that node access security is disabled. This may allow users to see data they should not be able to see if your view is misconfigured. Please use this option only if you understand and accept this security risk.') . '</div>',
+    );
+    $form['distinct'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Distinct'),
+      '#description' => t('This will make the view display only distinct items. If there are multiple identical items, each will be displayed only once. You can use this to try and remove duplicates from a view, though it does not always work. Note that this can slow queries down, so use it with caution.'),
+      '#default_value' => !empty($this->options['distinct']),
     );
   }
 
@@ -1056,14 +1066,26 @@ class views_plugin_query_default extends views_plugin_query{
    * Builds the necessary info to execute the query.
    */
   function build(&$view) {
+    // Make the query distinct if the option was set.
+    if (!empty($this->options['distinct'])) {
+      $this->set_distinct();
+    }
+
     $view->init_pager();
 
     // Let the pager modify the query to add limits.
     $this->pager->query();
 
-    $view->build_info['query'] = $this->query();
-    $view->build_info['count_query'] = $this->query(TRUE);
-    $view->build_info['query_args'] = $this->get_where_args();
+    $this->query = $this->query();
+    if (empty($this->options['disable_sql_rewrite'])) {
+      $this->final_query = db_rewrite_sql($this->query, $view->base_table, $view->base_field, array('view' => &$view));
+      $this->count_query = db_rewrite_sql($this->query(TRUE), $view->base_table, $view->base_field, array('view' => &$view));;
+    }
+    else {
+      $this->final_query = $this->query;
+      $this->count_query = $this->query(TRUE);
+    }
+    $this->query_args = $this->get_where_args();
   }
 
   /**
@@ -1075,13 +1097,9 @@ class views_plugin_query_default extends views_plugin_query{
    */
   function execute(&$view) {
     $external = FALSE; // Whether this query will run against an external database.
-    $query = $view->build_info['query'];
-    $count_query = $view->build_info['count_query'];
-    if (empty($this->options['disable_sql_rewrite'])) {
-      $query = db_rewrite_sql($view->build_info['query'], $view->base_table, $view->base_field, array('view' => &$view));
-      $count_query = db_rewrite_sql($view->build_info['count_query'], $view->base_table, $view->base_field, array('view' => &$view));
-    }
-    $args = $view->build_info['query_args'];
+    $query = $this->final_query;
+    $count_query = $this->count_query;
+    $args = $this->query_args;
 
     vpr($query);
 
@@ -1116,10 +1134,10 @@ class views_plugin_query_default extends views_plugin_query{
         // We can't have an offset without a limit, so provide a very large limit instead.
         $limit  = intval(!empty($this->limit) ? $this->limit : 999999);
         $offset = intval(!empty($this->offset) ? $this->offset : 0);
-        $result = db_query_range($query, $args, $offset, $limit);
+        $result = $this->db_query_range($query, $args, $offset, $limit);
       }
       else {
-        $result = db_query($query, $args);
+        $result = $this->db_query($query, $args);
       }
 
       $view->result = array();
@@ -1139,6 +1157,53 @@ class views_plugin_query_default extends views_plugin_query{
     }
     $view->execute_time = views_microtime() - $start;
   }
+
+  /**
+   * Wrapper method for db_query().
+   *
+   * @param $query
+   *   A string containing an SQL query.
+   * @param $args
+   *   An array containing the query arguments.
+   * @return
+   *   A database query result resource, or FALSE if the query was not executed
+   *   correctly.
+   */
+  function db_query($query, $args = array()) {
+    return db_query($query, $args);
+  }
+
+  /**
+   * Wrapper method for db_query_range().
+   *
+   * @param $query
+   *   A string containing an SQL query.
+   * @param $from
+   *   The first result row to return.
+   * @param $count
+   *   The maximum number of result rows to return.
+   * @param $args
+   *   An array containing the query arguments.
+   * @return
+   *   A database query result resource, or FALSE if the query was not executed
+   *   correctly.
+   */
+  function db_query_range($query, $from, $count, $args = array()) {
+    return db_query_range($query, $from, $count, $args);
+  }
+
+  /**
+   * Wrapper method for db_result().
+   *
+   * @param $result
+   *   A database query result resource, as returned from db_query().
+   * @return
+   *   The resulting field or FALSE.
+   */
+  function db_result($result) {
+    return db_result($result);
+  }
+
 
   function add_signature(&$view) {
     $view->query->add_field(NULL, "'" . $view->name . ':' . $view->current_display . "'", 'view_name');
@@ -1204,6 +1269,40 @@ class views_plugin_query_default extends views_plugin_query{
       ),
     );
   }
+
+  /**
+   * Return info to base the uniqueness of the result on.
+   *
+   * @return $cache_info
+   *   A string or array with query unique data or FALSE to deactivate caching
+   */
+  function get_cache_info() {
+    return array(
+      'final_query' => $this->final_query,
+      'count_query' => $this->count_query,
+      'query_args' => $this->query_args,
+    );
+  }
+
+  /**
+   * Return preview info.
+   *
+   * @return $rows
+   *   An array of strings with info to be shown in the preview.
+   */
+  function get_preview_info() {
+    $rows = array();
+
+    $query = db_prefix_tables($this->query);
+    if ($this->query_args) {
+      _db_query_callback($this->query_args, TRUE);
+      $query = preg_replace_callback(DB_QUERY_REGEXP, '_db_query_callback', $query);
+    }
+    $rows[] = array('<strong>' . t('Query') . '</strong>', '<pre>' . check_plain($query) . '</pre>');
+
+    return $rows;
+  }
+
 }
 
 function views_query_default_aggregation_method_simple($group_type, $field) {

@@ -1,7 +1,0 @@
-; $Id: sms_track.info,v 1.1.4.2 2010/11/18 11:05:46 univate Exp $
-name = Tracking
-description = Message archiving and delivery tracking for the SMS Framework.
-core = 6.x
-package = SMS Framework
-dependencies[] = sms
-dependencies[] = views

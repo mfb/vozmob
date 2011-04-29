@@ -1,5 +1,5 @@
 <?php
-// $Id: cache.inc,v 1.24.2.5 2010/03/12 01:51:42 merlinofchaos Exp $
+// $Id: cache.inc,v 1.24.2.6 2010/10/12 22:10:11 merlinofchaos Exp $
 /**
  * @file cache.inc
  *
@@ -24,9 +24,9 @@ function _views_include_default_views() {
 /**
  * Fetch Views' data from the cache
  */
-function _views_fetch_data($table = NULL) {
+function _views_fetch_data($table = NULL, $reset = FALSE) {
   static $cache = NULL;
-  if (!isset($cache)) {
+  if (!isset($cache) || $reset) {
     $start = views_microtime();
     // NOTE: This happens whether we retrieve them from cache or otherwise.
     views_include_handlers();
@@ -63,9 +63,9 @@ function _views_fetch_data($table = NULL) {
 /**
  * Fetch the plugin data from cache.
  */
-function _views_fetch_plugin_data($type = NULL, $plugin = NULL) {
+function _views_fetch_plugin_data($type = NULL, $plugin = NULL, $reset = FALSE) {
   static $cache = NULL;
-  if (!isset($cache)) {
+  if (!isset($cache) || $reset) {
     $start = views_microtime();
     views_include_handlers();
 

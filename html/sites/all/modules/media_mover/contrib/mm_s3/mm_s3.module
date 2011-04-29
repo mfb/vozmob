@@ -1,6 +1,6 @@
 <?php
 
-// $Id: mm_s3.module,v 1.1.2.2.2.37 2010/03/26 05:35:12 msonnabaum Exp $
+// $Id: mm_s3.module,v 1.1.2.2.2.39 2010/12/16 17:58:39 arthuregg Exp $
 
 define('ACL_PRIVATE', 'private');
 define('ACL_PUBLIC_READ', 'public-read');
@@ -34,7 +34,7 @@ function mm_s3_menu() {
     'type' => MENU_LOCAL_TASK,
     'file' => 'mm_s3_test.inc',
   );
-  
+
   $items['mm_s3_cloudfront_autodetect'] = array(
     'page callback' => 'mm_s3_cloudfront_autodetect',
     'access arguments' => array('administer media_mover'),
@@ -124,11 +124,6 @@ function mm_s3_class_check($key = false, $skey = false) {
   // If the flash video module is installed, do not require this
   if (! module_exists('flashvideo_s3')) {
     require_once drupal_get_path('module', 'mm_s3') .'/S3.php';
-  }
-
-  // Check for CURL
-  if (!extension_loaded('curl') && !@dl(PHP_SHLIB_SUFFIX == 'so' ? 'curl.so' : 'php_curl.dll')) {
-    drupal_set_message(t('PHP CURL extension are not loaded. S3 connections will not work. Please contact your systems administrator to make sure you have PHP CURL installed.'), 'error');
   }
 
   // if keys are being passed in, override defaults
@@ -414,7 +409,9 @@ function mm_s3_send($file, $configuration, $verb, $action_id) {
   $perms = $configuration['mm_s3_perm'] ? $configuration['mm_s3_perm'] : ACL_PUBLIC_READ;
 
   // Create the bucket on S3 if it does not exist
-  $s3->putBucket($bucket, $perms);
+  if (! mm_s3_bucket_exists($bucket, $s3)) {
+  	$s3->putBucket($bucket, $perms);
+  }
 
   // We need to set the filename based on the setting in this configuration
   // Sometimes it is a good idea to save the full $filepath as the filename
@@ -474,7 +471,7 @@ function mm_s3_send($file, $configuration, $verb, $action_id) {
 
   // Create the return filepath. We add the bucket file path if
   // the a custom domain is not being used
-  // Create the return filepath. 
+  // Create the return filepath.
   // We add the bucket file path if http(s)://s3.amazonaws.com is being used as the s3 url
   preg_match('@^(?:https?://)?([^/]+)@i', $configuration['mm_s3_server_url'], $domain);
   if ($domain[1] == 's3.amazonaws.com') {
@@ -584,11 +581,11 @@ function mm_s3_cloudfront_autodetect() {
   $url = mm_s3_get_cfurl($bucket);
 
   // Set a message if a bucket is used that doesn't have a CloudFront instance setup.
-  if (!$url) { 
+  if (!$url) {
     if ($bucket) {
       drupal_set_message(t('Could not find CloudFront instance for bucket !bucket!', array('!bucket' => $bucket)),  'error');
     }
-  } 
+  }
   if ($form_id == 'media_mover_api_add_config_form') {
     $form[0]['complete']['mm_s3'][3]['complete--mm_s3--3--mm_s3_cloudfront']['complete--mm_s3--3--mm_s3_cloudfront_url']['#value'] = $url;
     $changed_elements = $form[0]['complete']['mm_s3'][3]['complete--mm_s3--3--mm_s3_cloudfront']['complete--mm_s3--3--mm_s3_cloudfront_url'];

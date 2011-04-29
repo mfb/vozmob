@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_term_link_edit.inc,v 1.1.2.1 2010/02/22 18:24:16 merlinofchaos Exp $
+// $Id: views_handler_field_term_link_edit.inc,v 1.1.2.2 2011/01/10 23:14:27 merlinofchaos Exp $
 
 /**
  * Field handler to present a term edit link .
@@ -35,8 +35,8 @@ class views_handler_field_term_link_edit extends views_handler_field {
   function render($values) {
     if (user_access('administer taxonomy')) {
       $text = !empty($this->options['text']) ? $this->options['text'] : t('edit');
-      return l($text, 'admin/content/taxonomy/edit/term/'. $values->{$this->aliases['tid']}, array('query' => drupal_get_destination()));
+      $tid = $this->get_value($values, 'tid');
+      return l($text, 'admin/content/taxonomy/edit/term/'. $tid, array('query' => drupal_get_destination()));
     }
   }
 }
-

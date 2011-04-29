@@ -150,8 +150,12 @@ function imagecache_theme() {
       'function' => 'theme_imagecache_formatter_default',
     );
     $theme['imagecache_formatter_'. $preset['presetname'] .'_linked'] = array(
-      'arguments' => array('element' => NULL),
+      'arguments' => array('element' => NULL, 'absolute' => FALSE),
       'function' => 'theme_imagecache_formatter_linked',
+    );
+    $theme['imagecache_formatter_'. $preset['presetname'] .'_linked_absolute'] = array(
+      'arguments' => array('element' => NULL),
+      'function' => 'theme_imagecache_formatter_linked_absolute',
     );
     $theme['imagecache_formatter_'. $preset['presetname'] .'_imagelink'] = array(
       'arguments' => array('element' => NULL),
@@ -656,6 +660,10 @@ function imagecache_field_formatter_info() {
       'label' => t('@preset image linked to node', array('@preset' => $preset['presetname'])),
       'field types' => array('image', 'filefield'),
     );
+    $formatters[$preset['presetname'] .'_linked_absolute'] = array(
+      'label' => t('@preset image linked to node (for rss)', array('@preset' => $preset['presetname'])),
+      'field types' => array('image', 'filefield'),
+    );
     $formatters[$preset['presetname'] .'_imagelink'] = array(
       'label' => t('@preset image linked to image', array('@preset' => $preset['presetname'])),
       'field types' => array('image', 'filefield'),
@@ -691,7 +699,17 @@ function theme_imagecache_formatter_default($element) {
   return theme('imagecache', $presetname, $item['filepath'], $item['data']['alt'], $item['data']['title'], array('class' => $class));
 }
 
-function theme_imagecache_formatter_linked($element) {
+/**
+ * Theme formatter for imagecache preset with an absolute link to node.
+ */
+function theme_imagecache_formatter_linked_absolute($element) {
+  // Call the same correct imagecache_formatter_[preset]_linked with
+  // the absolute argument as TRUE
+  $element['#formatter'] = substr($element['#formatter'], 0, -9); 
+  return theme(substr($element['#theme'], 0, -9), $element, TRUE);
+}
+
+function theme_imagecache_formatter_linked($element, $absolute = FALSE) {
   // Inside a view $element may contain NULL data. In that case, just return.
   if (empty($element['#item']['fid'])) {
     return '';
@@ -708,7 +726,7 @@ function theme_imagecache_formatter_linked($element) {
   $imagetag = theme('imagecache', $presetname, $item['filepath'], $item['data']['alt'], $item['data']['title']);
   $path = empty($item['nid']) ? '' : 'node/'. $item['nid'];
   $class = "imagecache imagecache-$presetname imagecache-$style imagecache-{$element['#formatter']}";
-  return l($imagetag, $path, array('attributes' => array('class' => $class), 'html' => TRUE));
+  return l($imagetag, $path, array('attributes' => array('class' => $class), 'html' => TRUE, 'absolute' => $absolute));
 }
 
 function theme_imagecache_formatter_imagelink($element) {

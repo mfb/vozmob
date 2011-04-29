@@ -1,5 +1,5 @@
 <?php
-// $Id: ctools_export_ui.class.php,v 1.1.2.16 2010/08/05 22:41:02 merlinofchaos Exp $
+// $Id: ctools_export_ui.class.php,v 1.1.2.20 2010/10/15 21:05:55 merlinofchaos Exp $
 
 /**
  * Base class for export UI.
@@ -38,6 +38,25 @@ class ctools_export_ui {
     return $title;
   }
 
+  /**
+   * Add text on the top of the page.
+   */
+  function help_area($form_state) {
+      // If needed add advanced help strings.
+    $output = '';
+    if (!empty($this->plugin['use advanced help'])) {
+      $config = $this->plugin['advanced help'];
+      if ($config['enabled']) {
+        $output = theme('advanced_help_topic', $config['module'], $config['topic']);
+        $output .= '&nbsp;' . $this->plugin['strings']['advanced help']['enabled'];
+      }
+      else {
+        $output = $this->plugin['strings']['advanced help']['disabled'];
+      }
+    }
+    return $output;
+  }
+
   // ------------------------------------------------------------------------
   // Menu item manipulation
 
@@ -57,20 +76,21 @@ class ctools_export_ui {
 
     $prefix = ctools_export_ui_plugin_base_path($this->plugin);
 
-    $my_items = array();
-    foreach ($this->plugin['menu']['items'] as $item) {
-      // Add menu item defaults.
-      $item += array(
-        'file' => 'export-ui.inc',
-        'file path' => drupal_get_path('module', 'ctools') . '/includes',
-      );
+    if (isset($this->plugin['menu']['items']) && is_array($this->plugin['menu']['items'])) {
+      $my_items = array();
+      foreach ($this->plugin['menu']['items'] as $item) {
+        // Add menu item defaults.
+        $item += array(
+          'file' => 'export-ui.inc',
+          'file path' => drupal_get_path('module', 'ctools') . '/includes',
+        );
 
-      $path = !empty($item['path']) ? $prefix . '/' . $item['path'] : $prefix;
-      unset($item['path']);
-      $my_items[$path] = $item;
+        $path = !empty($item['path']) ? $prefix . '/' . $item['path'] : $prefix;
+        unset($item['path']);
+        $my_items[$path] = $item;
+      }
+      $items += $my_items;
     }
-
-    $items += $my_items;
   }
 
   /**
@@ -177,6 +197,8 @@ class ctools_export_ui {
       'object' => &$this,
     );
 
+    $help_area = $this->help_area($form_state);
+
     ctools_include('form');
     $form = ctools_build_form('ctools_export_ui_list_form', $form_state);
 
@@ -184,7 +206,7 @@ class ctools_export_ui {
 
     if (!$js) {
       $this->list_css();
-      return $form . $output;
+      return $help_area . $form . $output;
     }
 
     ctools_include('ajax');
@@ -824,7 +846,7 @@ class ctools_export_ui {
       $form_state['step'] = reset(array_keys($form_info['order']));
     }
 
-    if (empty($form_info['order'][$form_state['step']])) {
+    if (empty($form_info['order'][$form_state['step']]) && empty($form_info['forms'][$form_state['step']])) {
       return MENU_NOT_FOUND;
     }
 
@@ -983,7 +1005,7 @@ class ctools_export_ui {
       '#title' => t($schema['export']['key name']),
       '#type' => 'textfield',
       '#default_value' => $item->{$export_key},
-      '#description' => t('The unique ID for this @export.', array('@export' => $this->plugin['title'])),
+      '#description' => t('The unique ID for this @export.', array('@export' => $this->plugin['title singular'])),
       '#required' => TRUE,
       '#maxlength' => 255,
     );

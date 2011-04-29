@@ -49,7 +49,7 @@
             <?php endif; ?>
             <?php $playlist[$mmfid['fid']] = array('url' => file_create_url($mmfid['complete_file'])); ?>
           <?php endif; ?>
-          <?php if (substr($mmfid['complete_file'], -4, 4) == '.flv'): ?>
+          <?php if (substr($mmfid['complete_file'], -4, 4) == '.flv' || substr($mmfid['complete_file'], -4, 4) == '.m4v'): ?>
             <?php $playlist[$mmfid['fid']] = array('url' => file_create_url($mmfid['complete_file'])); ?>
             <?php $video = 'flowplayer-video '; ?>
           <?php endif; ?>

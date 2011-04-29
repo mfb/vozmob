@@ -1,0 +1,26 @@
+<?php
+// $Id$
+
+/**
+ * @file
+ * Install file for SMS registration module.
+ */
+
+/**
+ * Implements hook_install().
+ */
+function sms_registration_install() {
+  // Ensure that sms_registration is weighted above mailsave so that users are
+  // authenticated prior to permission checks made by mailsave modules.
+  db_query("UPDATE {system} SET weight = -5 WHERE name = 'sms_registration'");
+}
+
+/**
+ * Implements hook_update_N().
+ */
+function sms_registration_update_6000() {
+  // Ensure that sms_registration is weighted above mailsave so that users are
+  // authenticated prior to permission checks made by mailsave modules.
+  $ret[] = update_sql("UPDATE {system} SET weight = -5 WHERE name = 'sms_registration'");
+  return $ret;
+}

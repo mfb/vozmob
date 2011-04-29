@@ -1,5 +1,5 @@
 <?php
-// $Id: views_handler_field_user_picture.inc,v 1.1.2.3 2010/01/06 20:55:10 merlinofchaos Exp $
+// $Id: views_handler_field_user_picture.inc,v 1.1.2.4 2011/01/10 23:14:27 merlinofchaos Exp $
 
 /**
  * Field handler to provide simple renderer that allows using a themed user link
@@ -19,10 +19,10 @@ class views_handler_field_user_picture extends views_handler_field {
   function render($values) {
     // Fake an account object.
     $account = new stdClass();
-    $account->uid = $values->{$this->aliases['uid']};
-    $account->name = $values->{$this->aliases['name']};
-    $account->mail = $values->{$this->aliases['mail']};
-    $account->picture = $values->{$this->field_alias};
+    $account->uid = $this->get_value($values, 'uid');
+    $account->name = $this->get_value($values, 'name');
+    $account->mail = $this->get_value($values, 'mail');
+    $account->picture = $this->get_value($values);
 
     return theme('user_picture', $account);
   }

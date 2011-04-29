@@ -1,0 +1,144 @@
+<?php
+
+/**
+ * @file
+ *  Vozmob og features tests.
+ */
+
+// require_once(drupal_get_path('module', 'og') . '/tests/og_testcase.php');
+// could inherit, but some of the assertions fail at the moment because of names used :(
+
+/**
+ * Test basic functionality.
+ */
+class VozmobOgWebTestCase extends DrupalWebTestCase {
+  public $og_type = 'group';
+  public $post_type = 'blog';
+
+  /**
+   * User to admin group.
+   */
+  public $admin_user;
+  /**
+   * User able to create og.
+   */
+  public $og_editor_user;
+  /**
+   * Standard user to post content to a group.
+   */
+  public $og_basic_user;
+
+  /**
+   * Drupal SimpleTest method: test metadata.
+   */
+  public static function getInfo() {
+    return array(
+      'name' => t('Vozmob OG: Moderate'),
+      'description' => t('Check moderated group functionality.'),
+      'group' => t('Vozmob'),
+    );
+  }
+
+  /**
+   * Simpletest core method: setup for test.
+   */
+  public function setUp() {
+    // vozmob_og feature and all dependencies
+    parent::setUp(
+      // used in tests
+      'blog',
+      // direct dependencies
+      'og',
+      'views',
+      'views_bulk_operations',
+      'features',
+      'strongarm',
+      'flag',
+      'rules',
+      'ogrulesextra',
+      'token',
+      'ctools',
+      'mail2og',
+      'notifications',
+      'og_notifications', // check
+      'og_views', //check
+      'mailhandler',
+      'notifications_content', //check
+      'notifications_lite', //check
+      'messaging', //check
+      'location', // why
+      // module itself
+      'vozmob_og'
+    );
+ 
+    // force features rebuild and flush caches
+    features_rebuild();
+    cache_clear_all();
+    // Force a reset of the internal SimpleTest permission list cache now that the feature is fully loaded.
+    $this->checkPermissions(array('access content'), TRUE);
+
+    $this->og_basic_user = $this->drupalCreateUser(array('access content', 'create blog entries'));
+    //$this->og_editor_user = $this->drupalCreateUser(array('access content', 'create blog entries', 'create group content', 'edit any group content'));
+    $this->og_editor_user = $this->drupalCreateUser(array('create blog entries'));
+    db_query("insert into {users_roles} (uid, rid) values (%d, (select rid from {role} where name = '%s'))", $this->og_editor_user->uid, 'editor');
+    $this->admin_user = $this->drupalCreateUser(array('administer nodes', 'administer content types', 'access administration pages', 'administer site configuration', 'administer organic groups'));
+    // db_query("insert into users_roles (uid, rid) values (%d, (select rid from role where name = '%s'))", $this->og_admin_user->uid, 'sysadmin');
+  }
+
+  /**
+   * Test creating moderated group, and posting into it. Test it unmoderated.
+   */
+  public function testModeratedGroup() {
+    $this->drupalGet('');
+    $this->drupalLogin($this->admin_user);
+
+    // add group, make it moderated
+    $this->drupalGet('node/add/' . $this->og_type);
+    $this->assertText(t('Make this a moderated group'));
+    $edit = array();
+    $edit['title'] = $this->randomName(8);
+    $edit['body'] = $this->randomName(16);
+    $edit['og_description'] = $this->randomName(16);
+    $edit['og_selective'] = OG_OPEN;
+    $edit['flag[moderated_group]'] = TRUE;
+    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->assertText(t('Moderation'));
+    $this->assertRaw(t('!type %title has been created', array('!type' => node_get_types('name', $this->og_type), '%title' => $edit['title'])));
+    $group = node_load(array('title' => $edit['title']));
+
+    // add post to moderated group
+    $edit = array();
+    $edit['title'] = $this->randomName(8);
+    $edit['body'] = $this->randomName(16);
+    $edit['og_groups['. $group->nid .']'] = TRUE;
+    $this->drupalPost('node/add/' . $this->post_type, $edit, t('Save'));
+    $this->assertRaw(t('!type %title has been created', array('!type' => node_get_types('name', $this->post_type), '%title' => $edit['title'])));
+    $this->assertFalse($post->status, t('Post to moderated group not published.'));
+    
+    // check moderation page
+    $this->drupalGet('node/' . $group->nid .'/moderation');
+    // views bulk operations doesn't seem to appear correctly?
+    $this->assertText($edit['title']);
+
+    // make group unmoderated
+    $this->drupalGet('node/' . $group->nid . '/edit');
+    $edit = array();
+    $edit['flag[moderated_group]'] = FALSE;
+    $this->drupalPost(NULL, $edit, t('Save'));
+    $this->assertNoText(t('Moderation'));
+
+    // post to now unmoderated group
+    $edit = array();
+    $edit['title'] = $this->randomName(8);
+    $edit['body'] = $this->randomName(16);
+    $edit['og_groups['. $group->nid .']'] = TRUE;
+    $this->drupalPost('node/add/' . $this->post_type, $edit, t('Save'));
+    $this->assertRaw(t('!type %title has been created', array('!type' => node_get_types('name', $this->post_type), '%title' => $edit['title'])));
+    $post = node_load(array('title' => $edit['title']));
+    $this->assertTrue($post->status, t('Post to unmoderated group published.'));
+  }
+
+  public function testRoles() {
+    // todo make clear what each role should be able to do first?
+  }
+}

@@ -1,12 +1,13 @@
 <?php
-// $Id: views_handler_field_node_comment.inc,v 1.1 2008/09/03 19:21:29 merlinofchaos Exp $
+// $Id: views_handler_field_node_comment.inc,v 1.1.2.1 2011/01/10 23:14:26 merlinofchaos Exp $
 
 /**
  * Display node comment status
  */
 class views_handler_field_node_comment extends views_handler_field {
   function render($values) {
-    switch ($values->{$this->field_alias}) {
+    $value = $this->get_value($values);
+    switch ($value) {
       case COMMENT_NODE_DISABLED:
       default:
         return t('Disabled');

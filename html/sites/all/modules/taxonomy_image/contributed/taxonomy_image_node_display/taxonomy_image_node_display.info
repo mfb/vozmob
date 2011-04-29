@@ -1,0 +1,6 @@
+; $Id: taxonomy_image_node_display.info,v 1.1.4.2 2008/03/03 02:03:24 nancyw Exp $
+name = Taxonomy Image Node Display
+description = Display taxonomy images in nodes where and when you want them.
+dependencies[] = taxonomy_image
+core = 6.x
+package = Taxonomy Image

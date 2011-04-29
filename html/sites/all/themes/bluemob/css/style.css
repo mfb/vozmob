@@ -125,5 +125,28 @@ div.col-right div.block-views div.item-list ul li { clear: both; display: block;
 div.meta div.terms {
   padding-left: 20px;
 }
+
 .terms strong {
+}
+
+.field-field-map {
+  clear: left;
+}
+
+/* mime icon views row (taxonomy image all terms) */
+div.views-field-tid-list {
+  display: inline;
+  float: left;
+  margin-right: 0.5em;
+}
+
+div.media-types div.item-list ul,
+div.media-types div.item-list ul li {
+  margin: 0;
+  display: inline;
+}
+
+div.media-types div.item-list ul li {
+  list-style-image: none;
+  list-style-type: none;
 }
