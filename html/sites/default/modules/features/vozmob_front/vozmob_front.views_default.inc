@@ -19,17 +19,18 @@ function vozmob_front_views_default_views() {
 
   /* Display: Defaults */
   $handler = $view->new_display('default', 'Defaults', 'default');
-  $handler->display->display_options['title'] = 'Historia Destacada';
+  $handler->display->display_options['title'] = 'Historias Destacadas';
   $handler->display->display_options['access']['type'] = 'none';
   $handler->display->display_options['cache']['type'] = 'none';
   $handler->display->display_options['query']['type'] = 'views_query';
   $handler->display->display_options['exposed_form']['type'] = 'basic';
+  $handler->display->display_options['exposed_form']['options']['reset_button_label'] = 'Restablecer';
   $handler->display->display_options['pager']['type'] = 'some';
   $handler->display->display_options['pager']['options']['items_per_page'] = 5;
   $handler->display->display_options['style_plugin'] = 'default';
   $handler->display->display_options['row_plugin'] = 'fields';
   $handler->display->display_options['row_options']['hide_empty'] = 0;
-  /* Field: Node: Title */
+  /* Field: Nodo: Título */
   $handler->display->display_options['fields']['title']['id'] = 'title';
   $handler->display->display_options['fields']['title']['table'] = 'node';
   $handler->display->display_options['fields']['title']['field'] = 'title';
@@ -44,7 +45,7 @@ function vozmob_front_views_default_views() {
   $handler->display->display_options['fields']['title']['hide_empty'] = 0;
   $handler->display->display_options['fields']['title']['empty_zero'] = 0;
   $handler->display->display_options['fields']['title']['link_to_node'] = 1;
-  /* Field: Content: Image (field_image) */
+  /* Field: Contenido: Image (field_image) */
   $handler->display->display_options['fields']['field_image_fid']['id'] = 'field_image_fid';
   $handler->display->display_options['fields']['field_image_fid']['table'] = 'node_data_field_image';
   $handler->display->display_options['fields']['field_image_fid']['field'] = 'field_image_fid';
@@ -63,7 +64,7 @@ function vozmob_front_views_default_views() {
   $handler->display->display_options['fields']['field_image_fid']['multiple']['group'] = 1;
   $handler->display->display_options['fields']['field_image_fid']['multiple']['multiple_number'] = '1';
   $handler->display->display_options['fields']['field_image_fid']['multiple']['multiple_reversed'] = 0;
-  /* Field: Taxonomy: All term images */
+  /* Field: Taxonomía: All term images */
   $handler->display->display_options['fields']['tid_list']['id'] = 'tid_list';
   $handler->display->display_options['fields']['tid_list']['table'] = 'term_image';
   $handler->display->display_options['fields']['tid_list']['field'] = 'tid_list';
@@ -81,11 +82,11 @@ function vozmob_front_views_default_views() {
     2 => 2,
     1 => 0,
   );
-  /* Field: User: Name */
+  /* Field: Usuario: Nombre */
   $handler->display->display_options['fields']['name']['id'] = 'name';
   $handler->display->display_options['fields']['name']['table'] = 'users';
   $handler->display->display_options['fields']['name']['field'] = 'name';
-  $handler->display->display_options['fields']['name']['label'] = 'by';
+  $handler->display->display_options['fields']['name']['label'] = 'por';
   $handler->display->display_options['fields']['name']['alter']['alter_text'] = 0;
   $handler->display->display_options['fields']['name']['alter']['make_link'] = 0;
   $handler->display->display_options['fields']['name']['alter']['trim'] = 0;
@@ -97,7 +98,7 @@ function vozmob_front_views_default_views() {
   $handler->display->display_options['fields']['name']['empty_zero'] = 0;
   $handler->display->display_options['fields']['name']['link_to_user'] = 1;
   $handler->display->display_options['fields']['name']['overwrite_anonymous'] = 0;
-  /* Field: Node: Post date */
+  /* Field: Nodo: Post date */
   $handler->display->display_options['fields']['created']['id'] = 'created';
   $handler->display->display_options['fields']['created']['table'] = 'node';
   $handler->display->display_options['fields']['created']['field'] = 'created';
@@ -111,7 +112,7 @@ function vozmob_front_views_default_views() {
   $handler->display->display_options['fields']['created']['alter']['html'] = 0;
   $handler->display->display_options['fields']['created']['hide_empty'] = 0;
   $handler->display->display_options['fields']['created']['empty_zero'] = 0;
-  /* Field: Node: Body */
+  /* Field: Nodo: Cuerpo */
   $handler->display->display_options['fields']['body']['id'] = 'body';
   $handler->display->display_options['fields']['body']['table'] = 'node_revisions';
   $handler->display->display_options['fields']['body']['field'] = 'body';
@@ -126,24 +127,24 @@ function vozmob_front_views_default_views() {
   $handler->display->display_options['fields']['body']['alter']['html'] = 0;
   $handler->display->display_options['fields']['body']['hide_empty'] = 0;
   $handler->display->display_options['fields']['body']['empty_zero'] = 0;
-  /* Sort criterion: Node: Post date */
+  /* Sort criterion: Nodo: Post date */
   $handler->display->display_options['sorts']['created']['id'] = 'created';
   $handler->display->display_options['sorts']['created']['table'] = 'node';
   $handler->display->display_options['sorts']['created']['field'] = 'created';
   $handler->display->display_options['sorts']['created']['order'] = 'DESC';
-  /* Filter: Node: Promoted to front page */
+  /* Filtrar: Nodo: Promocionado a la página principal */
   $handler->display->display_options['filters']['promote']['id'] = 'promote';
   $handler->display->display_options['filters']['promote']['table'] = 'node';
   $handler->display->display_options['filters']['promote']['field'] = 'promote';
   $handler->display->display_options['filters']['promote']['value'] = '1';
   $handler->display->display_options['filters']['promote']['expose']['operator'] = FALSE;
-  /* Filter: Node: Published */
+  /* Filtrar: Nodo: Publicado */
   $handler->display->display_options['filters']['status']['id'] = 'status';
   $handler->display->display_options['filters']['status']['table'] = 'node';
   $handler->display->display_options['filters']['status']['field'] = 'status';
   $handler->display->display_options['filters']['status']['value'] = '1';
   $handler->display->display_options['filters']['status']['expose']['operator'] = FALSE;
-  /* Filter: Node: Type */
+  /* Filtrar: Nodo: Tipo */
   $handler->display->display_options['filters']['type']['id'] = 'type';
   $handler->display->display_options['filters']['type']['table'] = 'node';
   $handler->display->display_options['filters']['type']['field'] = 'type';
@@ -151,6 +152,13 @@ function vozmob_front_views_default_views() {
     'blog' => 'blog',
   );
   $handler->display->display_options['filters']['type']['expose']['operator'] = FALSE;
+  /* Filtrar: Node translation: Idioma */
+  $handler->display->display_options['filters']['language']['id'] = 'language';
+  $handler->display->display_options['filters']['language']['table'] = 'node';
+  $handler->display->display_options['filters']['language']['field'] = 'language';
+  $handler->display->display_options['filters']['language']['value'] = array(
+    '***CURRENT_LANGUAGE***' => '***CURRENT_LANGUAGE***',
+  );
 
   /* Display: Page */
   $handler = $view->new_display('page', 'Page', 'page_1');
@@ -162,14 +170,14 @@ function vozmob_front_views_default_views() {
   $handler->display->display_options['menu']['name'] = 'primary-links';
   $translatables['feature'] = array(
     t('Defaults'),
-    t('Historia Destacada'),
+    t('Historias Destacadas'),
     t('more'),
     t('Apply'),
-    t('Reset'),
+    t('Restablecer'),
     t('Sort By'),
     t('Asc'),
     t('Desc'),
-    t('by'),
+    t('por'),
     t('Page'),
   );
 
@@ -188,19 +196,20 @@ function vozmob_front_views_default_views() {
 
   /* Display: Defaults */
   $handler = $view->new_display('default', 'Defaults', 'default');
-  $handler->display->display_options['title'] = 'Historias Recientemente Destacadas';
+  $handler->display->display_options['title'] = 'Historias Recientamente Destacadas';
   $handler->display->display_options['use_ajax'] = TRUE;
   $handler->display->display_options['access']['type'] = 'none';
   $handler->display->display_options['cache']['type'] = 'none';
   $handler->display->display_options['query']['type'] = 'views_query';
   $handler->display->display_options['exposed_form']['type'] = 'basic';
+  $handler->display->display_options['exposed_form']['options']['reset_button_label'] = 'Restablecer';
   $handler->display->display_options['pager']['type'] = 'mini';
   $handler->display->display_options['pager']['options']['items_per_page'] = '5';
   $handler->display->display_options['pager']['options']['offset'] = '0';
   $handler->display->display_options['pager']['options']['id'] = '0';
   $handler->display->display_options['style_plugin'] = 'default';
   $handler->display->display_options['row_plugin'] = 'fields';
-  /* Field: Content: Image (field_image) */
+  /* Field: Contenido: Image (field_image) */
   $handler->display->display_options['fields']['field_image_fid']['id'] = 'field_image_fid';
   $handler->display->display_options['fields']['field_image_fid']['table'] = 'node_data_field_image';
   $handler->display->display_options['fields']['field_image_fid']['field'] = 'field_image_fid';
@@ -219,7 +228,7 @@ function vozmob_front_views_default_views() {
   $handler->display->display_options['fields']['field_image_fid']['multiple']['group'] = 1;
   $handler->display->display_options['fields']['field_image_fid']['multiple']['multiple_number'] = '1';
   $handler->display->display_options['fields']['field_image_fid']['multiple']['multiple_reversed'] = 0;
-  /* Field: Node: Post date */
+  /* Field: Nodo: Post date */
   $handler->display->display_options['fields']['created']['id'] = 'created';
   $handler->display->display_options['fields']['created']['table'] = 'node';
   $handler->display->display_options['fields']['created']['field'] = 'created';
@@ -235,7 +244,7 @@ function vozmob_front_views_default_views() {
   $handler->display->display_options['fields']['created']['empty_zero'] = 0;
   $handler->display->display_options['fields']['created']['date_format'] = 'custom';
   $handler->display->display_options['fields']['created']['custom_date_format'] = 'n/j/Y';
-  /* Field: Node: Title */
+  /* Field: Nodo: Título */
   $handler->display->display_options['fields']['title']['id'] = 'title';
   $handler->display->display_options['fields']['title']['table'] = 'node';
   $handler->display->display_options['fields']['title']['field'] = 'title';
@@ -250,7 +259,7 @@ function vozmob_front_views_default_views() {
   $handler->display->display_options['fields']['title']['hide_empty'] = 0;
   $handler->display->display_options['fields']['title']['empty_zero'] = 0;
   $handler->display->display_options['fields']['title']['link_to_node'] = 1;
-  /* Field: Taxonomy: All term images */
+  /* Field: Taxonomía: All term images */
   $handler->display->display_options['fields']['tid_list']['id'] = 'tid_list';
   $handler->display->display_options['fields']['tid_list']['table'] = 'term_image';
   $handler->display->display_options['fields']['tid_list']['field'] = 'tid_list';
@@ -268,11 +277,11 @@ function vozmob_front_views_default_views() {
     2 => 2,
     1 => 0,
   );
-  /* Field: User: Name */
+  /* Field: Usuario: Nombre */
   $handler->display->display_options['fields']['name']['id'] = 'name';
   $handler->display->display_options['fields']['name']['table'] = 'users';
   $handler->display->display_options['fields']['name']['field'] = 'name';
-  $handler->display->display_options['fields']['name']['label'] = 'by';
+  $handler->display->display_options['fields']['name']['label'] = 'por';
   $handler->display->display_options['fields']['name']['alter']['alter_text'] = 0;
   $handler->display->display_options['fields']['name']['alter']['make_link'] = 0;
   $handler->display->display_options['fields']['name']['alter']['trim'] = 0;
@@ -300,24 +309,24 @@ function vozmob_front_views_default_views() {
   $handler->display->display_options['fields']['upload_fid']['empty_zero'] = 0;
   $handler->display->display_options['fields']['upload_fid']['link_to_file'] = 0;
   $handler->display->display_options['fields']['upload_fid']['only_listed'] = 0;
-  /* Sort criterion: Node: Post date */
+  /* Sort criterion: Nodo: Post date */
   $handler->display->display_options['sorts']['created']['id'] = 'created';
   $handler->display->display_options['sorts']['created']['table'] = 'node';
   $handler->display->display_options['sorts']['created']['field'] = 'created';
   $handler->display->display_options['sorts']['created']['order'] = 'DESC';
-  /* Filter: Node: Promoted to front page */
+  /* Filtrar: Nodo: Promocionado a la página principal */
   $handler->display->display_options['filters']['promote']['id'] = 'promote';
   $handler->display->display_options['filters']['promote']['table'] = 'node';
   $handler->display->display_options['filters']['promote']['field'] = 'promote';
   $handler->display->display_options['filters']['promote']['value'] = '1';
   $handler->display->display_options['filters']['promote']['expose']['operator'] = FALSE;
-  /* Filter: Node: Published */
+  /* Filtrar: Nodo: Publicado */
   $handler->display->display_options['filters']['status']['id'] = 'status';
   $handler->display->display_options['filters']['status']['table'] = 'node';
   $handler->display->display_options['filters']['status']['field'] = 'status';
   $handler->display->display_options['filters']['status']['value'] = '1';
   $handler->display->display_options['filters']['status']['expose']['operator'] = FALSE;
-  /* Filter: Node: Type */
+  /* Filtrar: Nodo: Tipo */
   $handler->display->display_options['filters']['type']['id'] = 'type';
   $handler->display->display_options['filters']['type']['table'] = 'node';
   $handler->display->display_options['filters']['type']['field'] = 'type';
@@ -325,6 +334,13 @@ function vozmob_front_views_default_views() {
     'blog' => 'blog',
   );
   $handler->display->display_options['filters']['type']['expose']['operator'] = FALSE;
+  /* Filtrar: Node translation: Idioma */
+  $handler->display->display_options['filters']['language']['id'] = 'language';
+  $handler->display->display_options['filters']['language']['table'] = 'node';
+  $handler->display->display_options['filters']['language']['field'] = 'language';
+  $handler->display->display_options['filters']['language']['value'] = array(
+    '***CURRENT_LANGUAGE***' => '***CURRENT_LANGUAGE***',
+  );
 
   /* Display: Page */
   $handler = $view->new_display('page', 'Page', 'page_1');
@@ -353,10 +369,10 @@ function vozmob_front_views_default_views() {
   $handler->display->display_options['block_caching'] = '8';
   $translatables['features'] = array(
     t('Defaults'),
-    t('Historias Recientemente Destacadas'),
+    t('Historias Recientamente Destacadas'),
     t('more'),
     t('Apply'),
-    t('Reset'),
+    t('Restablecer'),
     t('Sort By'),
     t('Asc'),
     t('Desc'),
@@ -364,7 +380,7 @@ function vozmob_front_views_default_views() {
     t('- All -'),
     t('Offset'),
     t('on'),
-    t('by'),
+    t('por'),
     t('Attached files'),
     t('Page'),
     t('Feed'),
@@ -374,6 +390,7 @@ function vozmob_front_views_default_views() {
 
   $views[$view->name] = $view;
 
+  // Exported view: stories
   $view = new view;
   $view->name = 'stories';
   $view->description = 'New stories';
@@ -387,7 +404,6 @@ function vozmob_front_views_default_views() {
   /* Display: Defaults */
   $handler = $view->new_display('default', 'Defaults', 'default');
   $handler->display->display_options['title'] = 'Historias Nuevas';
-  $handler->display->display_options['use_ajax'] = TRUE;
   $handler->display->display_options['use_more'] = TRUE;
   $handler->display->display_options['use_more_always'] = TRUE;
   $handler->display->display_options['use_more_text'] = 'More New Stories';
@@ -395,12 +411,13 @@ function vozmob_front_views_default_views() {
   $handler->display->display_options['cache']['type'] = 'none';
   $handler->display->display_options['query']['type'] = 'views_query';
   $handler->display->display_options['exposed_form']['type'] = 'basic';
+  $handler->display->display_options['exposed_form']['options']['reset_button_label'] = 'Restablecer';
   $handler->display->display_options['pager']['type'] = 'some';
   $handler->display->display_options['pager']['options']['items_per_page'] = '15';
   $handler->display->display_options['pager']['options']['offset'] = '0';
   $handler->display->display_options['style_plugin'] = 'default';
   $handler->display->display_options['row_plugin'] = 'fields';
-  /* Field: Content: Image (field_image) */
+  /* Field: Contenido: Image (field_image) */
   $handler->display->display_options['fields']['field_image_fid']['id'] = 'field_image_fid';
   $handler->display->display_options['fields']['field_image_fid']['table'] = 'node_data_field_image';
   $handler->display->display_options['fields']['field_image_fid']['field'] = 'field_image_fid';
@@ -420,7 +437,7 @@ function vozmob_front_views_default_views() {
   $handler->display->display_options['fields']['field_image_fid']['multiple']['multiple_number'] = '1';
   $handler->display->display_options['fields']['field_image_fid']['multiple']['multiple_from'] = '0';
   $handler->display->display_options['fields']['field_image_fid']['multiple']['multiple_reversed'] = 0;
-  /* Field: Taxonomy: All term images */
+  /* Field: Taxonomía: All term images */
   $handler->display->display_options['fields']['tid_list']['id'] = 'tid_list';
   $handler->display->display_options['fields']['tid_list']['table'] = 'term_image';
   $handler->display->display_options['fields']['tid_list']['field'] = 'tid_list';
@@ -438,11 +455,11 @@ function vozmob_front_views_default_views() {
     2 => 2,
     1 => 0,
   );
-  /* Field: User: Name */
+  /* Field: Usuario: Nombre */
   $handler->display->display_options['fields']['name']['id'] = 'name';
   $handler->display->display_options['fields']['name']['table'] = 'users';
   $handler->display->display_options['fields']['name']['field'] = 'name';
-  $handler->display->display_options['fields']['name']['label'] = 'by';
+  $handler->display->display_options['fields']['name']['label'] = 'por';
   $handler->display->display_options['fields']['name']['alter']['alter_text'] = 0;
   $handler->display->display_options['fields']['name']['alter']['make_link'] = 0;
   $handler->display->display_options['fields']['name']['alter']['trim'] = 0;
@@ -454,7 +471,7 @@ function vozmob_front_views_default_views() {
   $handler->display->display_options['fields']['name']['empty_zero'] = 0;
   $handler->display->display_options['fields']['name']['link_to_user'] = 1;
   $handler->display->display_options['fields']['name']['overwrite_anonymous'] = 0;
-  /* Field: Node: Post date */
+  /* Field: Nodo: Post date */
   $handler->display->display_options['fields']['created']['id'] = 'created';
   $handler->display->display_options['fields']['created']['table'] = 'node';
   $handler->display->display_options['fields']['created']['field'] = 'created';
@@ -470,7 +487,7 @@ function vozmob_front_views_default_views() {
   $handler->display->display_options['fields']['created']['empty_zero'] = 0;
   $handler->display->display_options['fields']['created']['date_format'] = 'custom';
   $handler->display->display_options['fields']['created']['custom_date_format'] = 'n/j/Y - g:ia';
-  /* Field: Node: Title */
+  /* Field: Nodo: Título */
   $handler->display->display_options['fields']['title']['id'] = 'title';
   $handler->display->display_options['fields']['title']['table'] = 'node';
   $handler->display->display_options['fields']['title']['field'] = 'title';
@@ -501,7 +518,7 @@ function vozmob_front_views_default_views() {
   $handler->display->display_options['fields']['upload_fid']['empty_zero'] = 0;
   $handler->display->display_options['fields']['upload_fid']['link_to_file'] = 0;
   $handler->display->display_options['fields']['upload_fid']['only_listed'] = 0;
-  /* Field: Node: Body */
+  /* Field: Nodo: Cuerpo */
   $handler->display->display_options['fields']['body']['id'] = 'body';
   $handler->display->display_options['fields']['body']['table'] = 'node_revisions';
   $handler->display->display_options['fields']['body']['field'] = 'body';
@@ -516,18 +533,18 @@ function vozmob_front_views_default_views() {
   $handler->display->display_options['fields']['body']['alter']['html'] = 0;
   $handler->display->display_options['fields']['body']['hide_empty'] = 0;
   $handler->display->display_options['fields']['body']['empty_zero'] = 0;
-  /* Sort criterion: Node: Post date */
+  /* Sort criterion: Nodo: Post date */
   $handler->display->display_options['sorts']['created']['id'] = 'created';
   $handler->display->display_options['sorts']['created']['table'] = 'node';
   $handler->display->display_options['sorts']['created']['field'] = 'created';
   $handler->display->display_options['sorts']['created']['order'] = 'DESC';
-  /* Filter: Node: Published */
+  /* Filtrar: Nodo: Publicado */
   $handler->display->display_options['filters']['status']['id'] = 'status';
   $handler->display->display_options['filters']['status']['table'] = 'node';
   $handler->display->display_options['filters']['status']['field'] = 'status';
   $handler->display->display_options['filters']['status']['value'] = '1';
   $handler->display->display_options['filters']['status']['expose']['operator'] = FALSE;
-  /* Filter: Node: Type */
+  /* Filtrar: Nodo: Tipo */
   $handler->display->display_options['filters']['type']['id'] = 'type';
   $handler->display->display_options['filters']['type']['table'] = 'node';
   $handler->display->display_options['filters']['type']['field'] = 'type';
@@ -571,11 +588,11 @@ function vozmob_front_views_default_views() {
     t('Historias Nuevas'),
     t('More New Stories'),
     t('Apply'),
-    t('Reset'),
+    t('Restablecer'),
     t('Sort By'),
     t('Asc'),
     t('Desc'),
-    t('by'),
+    t('por'),
     t('Attached files'),
     t('Page'),
     t('more'),
