@@ -60,17 +60,25 @@ function bot_microblog_settings() {
     '#title'          => t('Twitter'),
     '#type'           => 'fieldset',
   );
-  $form['twitter']['bot_microblog_twitter_username'] = array(
-    '#title'         => t('Twitter username'),
-    '#description'   => t('Enter your Twitter username.'),
+  $form['twitter']['bot_microblog_consumer_key'] = array(
+    '#title'         => t('Twitter consumer key'),
     '#type'          => 'textfield',
-    '#default_value' => variable_get('bot_microblog_twitter_username', ''),
+    '#default_value' => variable_get('bot_microblog_consumer_key', ''),
   );
-  $form['twitter']['bot_microblog_twitter_password'] = array(
-    '#title'         => t('Twitter password'),
-    '#description'   => t('Enter your Twitter password.'),
+  $form['twitter']['bot_microblog_consumer_secret'] = array(
+    '#title'         => t('Twitter consumer secret'),
     '#type'          => 'textfield',
-    '#default_value' => variable_get('bot_microblog_twitter_password', ''),
+    '#default_value' => variable_get('bot_microblog_consumer_secret', ''),
+  );
+  $form['twitter']['bot_microblog_auth_token'] = array(
+    '#title'         => t('Twitter auth token'),
+    '#type'          => 'textfield',
+    '#default_value' => variable_get('bot_microblog_auth_token', ''),
+  );
+  $form['twitter']['bot_microblog_token_secret'] = array(
+    '#title'         => t('Twitter token secret'),
+    '#type'          => 'textfield',
+    '#default_value' => variable_get('bot_microblog_token_secret', ''),
   );
   return system_settings_form($form);
 }
@@ -113,7 +121,13 @@ function bot_microblog_factory() {
   static $twitter;
   if (!isset($twitter)) {
     include_once('Services/Twitter.php');
-    $twitter = new Services_Twitter(variable_get('bot_microblog_twitter_username', ''), variable_get('bot_microblog_twitter_password', ''));
+    include_once('HTTP/OAuth/Consumer.php');
+    $twitter = new Services_Twitter();
+    $oauth = new HTTP_OAuth_Consumer(variable_get('bot_microblog_consumer_key', ''),
+      variable_get('bot_microblog_consumer_secret', ''),
+      variable_get('bot_microblog_auth_token', ''),
+      variable_get('bot_microblog_token_secret', ''));
+    $twitter->setOAuth($oauth);
   }
   return $twitter;
 }

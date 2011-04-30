@@ -1,4 +1,3 @@
-; $Id$
 name = Mail to Term
 description = Tag incoming messages based on the To: address.
 dependencies[] = mailhandler

@@ -12,6 +12,9 @@ function vozmob_front_user_default_permissions() {
     'roles' => array(
       '0' => 'anonymous user',
       '1' => 'authenticated user',
+      '2' => 'blogger',
+      '3' => 'editor',
+      '4' => 'sysadmin',
     ),
   );
 
