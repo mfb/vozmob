@@ -1,43 +1,10 @@
 <?php
-// $Id$
 
-/**
- * Implements hook_install().
- */
-function mail2term_install() {
-  drupal_install_schema('mail2term');
+function mail2term_update_6000() {
+  $result = db_query('SELECT m.tid, m.mail FROM {mail2term} m INNER JOIN {term_data} t ON m.tid = t.tid WHERE m.mail <> t.name');
+  while ($term = db_fetch_object($result)) {
+    db_query("INSERT INTO {term_synonym} (tid, name) VALUES (%d, '%s')", $term->tid, $term->mail);
+  }
+  db_drop_table($ret, 'mail2term');
+  return $ret;
 }
-
-/**
- * Implements hook_schema().
- */
-function mail2term_schema() {
-  return array(
-    'mail2term' => array(
-      'fields' => array(
-        'mail' => array(
-          'type' => 'varchar',
-          'length' => 32,
-          'not null' => TRUE,
-          'description' => 'An e-mail address component.',
-        ),
-        'tid' => array(
-          'type' => 'int',
-          'unsigned' => TRUE,
-          'not null' => TRUE,
-          'description' => 'A {term_data}.tid.',
-        ),
-      ),
-      'primary key' => array('mail', 'tid'),
-      'indexes' => array('tid' => array('tid', 'mail')),
-    ),
-  );
-}
-
-/**
- * Implements hook_uninstall().
- */
-function mail2term_uninstall() {
-  drupal_uninstall_schema('mail2term');
-}
-
