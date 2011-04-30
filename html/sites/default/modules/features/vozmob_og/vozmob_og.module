@@ -59,7 +59,7 @@ function vozmob_og_link_alter(&$links, $node) {
       $links['og_add_members'] = array(
         'title' => t('Add Members'),
         'href' => "og/users/{$node->nid}/add_user",
-        'attributes' => array('class' => 'og-memebers-link', 'title' => t('View memebers of ') . $node->title),
+        'attributes' => array('class' => 'og-memebers-link', 'title' => t('Add memebers to ') . $node->title),
         'query' => 'destination=node/'. $node->nid,
       );
     }
