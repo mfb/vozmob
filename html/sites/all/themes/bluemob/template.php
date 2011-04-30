@@ -12,6 +12,9 @@ function bluemob_preprocess_page(&$vars) {
   if (strpos($headers, 'HTTP/1.1 403 Forbidden') && !$user->uid) {
     $vars['content'] .= "\n" . l(t('Please login to continue'), 'user/login', array('query' => drupal_get_destination()));
   }
+  // Add drupal menu for footer links
+  $footer_links_source = menu_navigation_links(variable_get('menu_footer_links_source', 'menu-footer-links'));
+  $vars['footer_links'] = theme('links', $footer_links_source, array('class' => 'footer-links'));
 }
 
 /**
