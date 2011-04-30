@@ -4,6 +4,15 @@
  * Implementation of hook_views_default_views().
  */
 function vozmob_front_views_default_views() {
+  /**
+   * Select correct vocabulary for media icons.
+   *
+   * This will be ovewritten, if datases have different vid
+   * it needs replacing. @todo can we make this permenant, or do the
+   * view as non-auto export?
+   */
+  $media_vocab = array(variable_get('uploadterm_vocabulary', NULL) => variable_get('uploadterm_vocabulary', NULL));
+
   $views = array();
 
   // Exported view: feature
@@ -78,10 +87,7 @@ function vozmob_front_views_default_views() {
   $handler->display->display_options['fields']['tid_list']['type'] = 'ul';
   $handler->display->display_options['fields']['tid_list']['link_to_taxonomy'] = 1;
   $handler->display->display_options['fields']['tid_list']['limit'] = 1;
-  $handler->display->display_options['fields']['tid_list']['vids'] = array(
-    2 => 2,
-    1 => 0,
-  );
+  $handler->display->display_options['fields']['tid_list']['vids'] = $media_vocab; 
   /* Field: Usuario: Nombre */
   $handler->display->display_options['fields']['name']['id'] = 'name';
   $handler->display->display_options['fields']['name']['table'] = 'users';
@@ -273,10 +279,7 @@ function vozmob_front_views_default_views() {
   $handler->display->display_options['fields']['tid_list']['type'] = 'ul';
   $handler->display->display_options['fields']['tid_list']['link_to_taxonomy'] = 1;
   $handler->display->display_options['fields']['tid_list']['limit'] = 1;
-  $handler->display->display_options['fields']['tid_list']['vids'] = array(
-    2 => 2,
-    1 => 0,
-  );
+  $handler->display->display_options['fields']['tid_list']['vids'] = $media_vocab;
   /* Field: Usuario: Nombre */
   $handler->display->display_options['fields']['name']['id'] = 'name';
   $handler->display->display_options['fields']['name']['table'] = 'users';
@@ -451,10 +454,7 @@ function vozmob_front_views_default_views() {
   $handler->display->display_options['fields']['tid_list']['type'] = 'ul';
   $handler->display->display_options['fields']['tid_list']['link_to_taxonomy'] = 1;
   $handler->display->display_options['fields']['tid_list']['limit'] = 1;
-  $handler->display->display_options['fields']['tid_list']['vids'] = array(
-    2 => 2,
-    1 => 0,
-  );
+  $handler->display->display_options['fields']['tid_list']['vids'] = $media_vocab; 
   /* Field: Usuario: Nombre */
   $handler->display->display_options['fields']['name']['id'] = 'name';
   $handler->display->display_options['fields']['name']['table'] = 'users';
