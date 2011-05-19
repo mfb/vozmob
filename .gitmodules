@@ -1,9 +1,9 @@
 [submodule "html/sites/all/themes/blueprint/blueprint"]
   path = html/sites/all/themes/blueprint/blueprint
   url = git://github.com/joshuaclayton/blueprint-css.git
-[submodule "html/sites/all/modules/voip"]
-	path = html/sites/all/modules/voip
-	url = git://github.com/leoburd/voip.git
+[submodule "html/sites/all/modules/contrib/voipdrupal"]
+	path = html/sites/all/modules/contrib/voipdrupal
+	url = git://git.drupal.org/project/voipdrupal
 [submodule "html/sites/all/modules/custom/ogrulesextra"]
 	path = html/sites/all/modules/custom/ogrulesextra
 	url = git://git.drupal.org/sandbox/ekes/1121094.git
