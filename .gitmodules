@@ -7,8 +7,8 @@
 [submodule "html/sites/all/modules/custom/ogrulesextra"]
 	path = html/sites/all/modules/custom/ogrulesextra
 	url = git://git.drupal.org/sandbox/ekes/1121094.git
-[submodule "html/sites/all/modules/smsframework"]
-	path = html/sites/all/modules/smsframework
+[submodule "html/sites/all/modules/patched/smsframework"]
+	path = html/sites/all/modules/patched/smsframework
 	url = git://gitorious.org/vozmob/smsframework.git
 [submodule "html/sites/all/modules/usermerge"]
 	path = html/sites/all/modules/usermerge
