@@ -19,3 +19,6 @@
 [submodule "html/sites/all/modules/devel/devel"]
 	path = html/sites/all/modules/devel/devel
 	url = git://git.drupal.org/project/devel
+[submodule "html/sites/all/modules/devel/coder"]
+	path = html/sites/all/modules/devel/coder
+	url = git://git.drupal.org/project/coder
