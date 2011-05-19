@@ -10,8 +10,8 @@
 [submodule "html/sites/all/modules/patched/smsframework"]
 	path = html/sites/all/modules/patched/smsframework
 	url = git://gitorious.org/vozmob/smsframework.git
-[submodule "html/sites/all/modules/usermerge"]
-	path = html/sites/all/modules/usermerge
+[submodule "html/sites/all/modules/contrib/usermerge"]
+	path = html/sites/all/modules/contrib/usermerge
 	url = git://git.drupal.org/project/usermerge
 [submodule "html/sites/all/modules/contrib/features"]
 	path = html/sites/all/modules/contrib/features
