@@ -13,3 +13,6 @@
 [submodule "html/sites/all/modules/usermerge"]
 	path = html/sites/all/modules/usermerge
 	url = git://git.drupal.org/project/usermerge
+[submodule "html/sites/all/modules/contrib/features"]
+	path = html/sites/all/modules/contrib/features
+	url = git://git.drupal.org/project/features
