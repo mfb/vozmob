@@ -1,18 +1,27 @@
 [submodule "html/sites/all/themes/blueprint/blueprint"]
   path = html/sites/all/themes/blueprint/blueprint
   url = git://github.com/joshuaclayton/blueprint-css.git
-[submodule "html/sites/all/modules/voip"]
-	path = html/sites/all/modules/voip
-	url = git://github.com/leoburd/voip.git
-[submodule "html/sites/all/modules/ogrulesextra"]
-	path = html/sites/all/modules/ogrulesextra
+[submodule "html/sites/all/modules/contrib/voipdrupal"]
+	path = html/sites/all/modules/contrib/voipdrupal
+	url = git://git.drupal.org/project/voipdrupal
+[submodule "html/sites/all/modules/custom/ogrulesextra"]
+	path = html/sites/all/modules/custom/ogrulesextra
 	url = git://git.drupal.org/sandbox/ekes/1121094.git
-[submodule "html/sites/all/modules/smsframework"]
-	path = html/sites/all/modules/smsframework
+[submodule "html/sites/all/modules/patched/smsframework"]
+	path = html/sites/all/modules/patched/smsframework
 	url = git://gitorious.org/vozmob/smsframework.git
-[submodule "html/sites/all/modules/usermerge"]
-	path = html/sites/all/modules/usermerge
+[submodule "html/sites/all/modules/contrib/usermerge"]
+	path = html/sites/all/modules/contrib/usermerge
 	url = git://git.drupal.org/project/usermerge
-[submodule "html/sites/all/modules/mimedetect"]
-	path = html/sites/all/modules/mimedetect
+[submodule "html/sites/all/modules/contrib/mimedetect"]
+	path = html/sites/all/modules/contrib/mimedetect
 	url = git://git.drupal.org/project/mimedetect
+[submodule "html/sites/all/modules/contrib/features"]
+	path = html/sites/all/modules/contrib/features
+	url = git://git.drupal.org/project/features
+[submodule "html/sites/all/modules/devel/devel"]
+	path = html/sites/all/modules/devel/devel
+	url = git://git.drupal.org/project/devel
+[submodule "html/sites/all/modules/devel/coder"]
+	path = html/sites/all/modules/devel/coder
+	url = git://git.drupal.org/project/coder
