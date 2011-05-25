@@ -409,12 +409,25 @@ function mail2og_mailhandler(&$node, $result, $i, $header, $mailbox) {
   $node->type = $content_type;
   // add the group id to this node
   $node->og_groups[$group->nid] = $group->nid;
-  // set the access to the group
-  // @TODO this needs to be in admin settings
-  $node->og_access = variable_get('mail2og_default_node_access', true);
-  // set the public/private flag
-  // @TODO this needs to be in admin settings
-  $node->og_public = variable_get('mail2og_default_public', false);
+  if (module_exists('og_access')) {
+    // use og_access defaults for node visibility,
+    // @see og_access_alter_nongroup_form() for defaults logic.
+    $vis = variable_get('og_visibility', 0);
+    // If the post is to a private group, visibility must default to one of the private options.
+    if ($group->og_private) {
+      $vis = variable_get('og_visibility', 0) == OG_VISIBLE_GROUPONLY ? OG_VISIBLE_GROUPONLY : OG_VISIBLE_CHOOSE_PRIVATE;
+    }
+    switch ($vis) {
+      case OG_VISIBLE_BOTH:
+      case OG_VISIBLE_CHOOSE_PUBLIC:
+        $node->og_public = 1;
+        break;
+      case OG_VISIBLE_GROUPONLY:
+      case OG_VISIBLE_CHOOSE_PRIVATE:
+        $node->og_public = 0;
+        break;
+    }
+  }
   // Set node language to organic group language.
   if (!empty($group->og_language)) {
     $node->language = $group->og_language;
