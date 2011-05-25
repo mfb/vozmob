@@ -1,5 +1,4 @@
 <?php
-// $Id: common.inc,v 1.756.2.107 2010/12/15 21:34:35 goba Exp $
 
 /**
  * @file
@@ -201,7 +200,7 @@ function drupal_get_feeds($delimiter = "\n") {
 }
 
 /**
- * @name HTTP handling
+ * @defgroup http_handling HTTP handling
  * @{
  * Functions to properly handle HTTP responses.
  */
@@ -631,7 +630,7 @@ function drupal_error_handler($errno, $message, $filename, $line, $context) {
     return;
   }
 
-  if ($errno & (E_ALL ^ E_DEPRECATED)) {
+  if ($errno & (E_ALL ^ E_DEPRECATED ^ E_NOTICE)) {
     $types = array(1 => 'error', 2 => 'warning', 4 => 'parse error', 8 => 'notice', 16 => 'core error', 32 => 'core warning', 64 => 'compile error', 128 => 'compile warning', 256 => 'user error', 512 => 'user warning', 1024 => 'user notice', 2048 => 'strict warning', 4096 => 'recoverable fatal error');
 
     // For database errors, we want the line number/file name of the place that
@@ -653,7 +652,7 @@ function drupal_error_handler($errno, $message, $filename, $line, $context) {
       }
     }
 
-    $entry = $types[$errno] .': '. $message .' in '. $filename .' on line '. $line .'.';
+    $entry = check_plain($types[$errno]) .': '. filter_xss($message) .' in '. check_plain($filename) .' on line '. check_plain($line) .'.';
 
     // Force display of error messages in update.php.
     if (variable_get('error_level', 1) == 1 || strstr($_SERVER['SCRIPT_NAME'], 'update.php')) {
@@ -1639,7 +1638,8 @@ function drupal_page_footer() {
  *   A linear array.
  * @param $function
  *   A name of a function to apply to all values before output.
- * @result
+ *
+ * @return
  *   An associative array.
  */
 function drupal_map_assoc($array, $function = NULL) {

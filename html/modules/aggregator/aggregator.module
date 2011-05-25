@@ -1,5 +1,4 @@
 <?php
-// $Id: aggregator.module,v 1.374.2.6 2010/05/28 16:06:59 goba Exp $
 
 /**
  * @file
@@ -752,17 +751,7 @@ function aggregator_parse_feed(&$data, $feed) {
     else {
       $link = $feed['link'];
     }
-
-    // Atom feeds use ID rather than GUID.
-    if (isset($item['GUID'])) {
-      $guid = $item['GUID'];
-    }
-    elseif (isset($item['ID'])) {
-      $guid = $item['ID'];
-    }
-    else {
-      $guid = '';
-    }
+    $guid = isset($item['GUID']) ? $item['GUID'] : '';
 
     // Atom feeds have a CONTENT and/or SUMMARY tag instead of a DESCRIPTION tag.
     if (!empty($item['CONTENT:ENCODED'])) {
