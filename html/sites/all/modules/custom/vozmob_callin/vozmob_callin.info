@@ -1,0 +1,5 @@
+core = "6.x"
+dependencies[] = "voipcall"
+description = "Implements audio blogging capabilities for VozMob."
+name = "VozMob audioblog"
+package = "VoIP Drupal"
