@@ -25,7 +25,7 @@ function _vozmob_callin_load_script($script_name) {
 
   $script->addLabel('language_selection');
   $script->addSetLanguage('es');
-  $text = "Para espanol, oprima el numero uno";
+  $text = 'Para español, oprima el número uno.';
   $url = '';
   $timeout = 3;
   $end_key = '';
@@ -52,11 +52,10 @@ function _vozmob_callin_load_script($script_name) {
 
   $script->addGotoIf('no recording detected', '^%recording_duration == 0');
 
-  $script->addSay('You said ');
-  //$script->addPlay('%recording_url');
+  $script->addSay(t('You said @message', array('@message' => '%recording_url')));
 
   $script->addLabel('accept menu');
-  $text = "To accept this recording, press 1.  To record it once again, press 2. To hangup, press the pound key.";
+  $text = 'To accept this recording, press 1. To record it once again, press 2. To hangup, press the pound key.';
   $url = '';
   $timeout = 5;
   $end_key = '';
@@ -73,13 +72,9 @@ function _vozmob_callin_load_script($script_name) {
   $script->addGoto('accept menu');
 
   $script->addLabel('accept recording');
-  $script->addSet('uid', $vars['uid']);
-  $script->addSet('name', $vars['name']);
-  $script->addSet('number', $vars['number']);
   // Process recording.
   $script->addSay('About to start processing the recorded file.');
-  $script->addSet('callback_result',
-        '^_vozmob_callin_record_callback(%call_id, %recording_url, %recording_duration, %uid, %name, %number)');
+  $script->addSet('callback_result', '^_vozmob_callin_record_callback(%call_id, %recording_url, %recording_duration)');
   $script->addSay('The callback returned: %callback_result');
   $script->addGoto('end call');
 
@@ -101,27 +96,64 @@ function _vozmob_callin_load_script($script_name) {
  * Callback function associated with the script vozmob_callin_record_script.
  * It is called whenever that script records a new entry from the user.
  */
-function _vozmob_callin_record_callback($call_id, $recording_url, $recording_duration, $uid, $name, $number) {
-  watchdog('vozmob_callin', 'in _vozmob_callin_record_callback(%call_id, %recording_url, %recording_duration, %uid, %name, %number)', array('%call_id' => $call_id, '%recording_url' => $recording_url, '%recording_duration' => $recording_duration, '%uid' => $uid, '%name' => $name, '%number' => $number));
-
+function _vozmob_callin_record_callback($call_id, $recording_url, $recording_duration) {
+  watchdog('vozmob_callin', 'in _vozmob_callin_record_callback(%call_id, %recording_url, %recording_duration)', array('%call_id' => $call_id, '%recording_url' => $recording_url, '%recording_duration' => $recording_duration));
+  $language = 'en';
+  $uid = sms_user_get_uid(substr($_REQUEST['From'], 1));
+  if (!$uid) {
+    // Find number stored without a 1-digit country code.
+    $uid = sms_user_get_uid(substr($_REQUEST['From'], 2));
+  }
+  while (!$uid) {
+    $user = user_save(NULL, array(
+      'name' => variable_get('sms_registration_username', 'Drupal-') . mt_rand(1, db_result(db_query('SELECT MAX(uid) FROM {users}')) * 10),
+      'pass' => user_password(8),
+      'mail' => $_REQUEST['From'],
+      'roles' => ($role = variable_get('sms_registration_role', NULL)) ? array($role => 1) : NULL,
+      'status' => 1,
+      'language' => $language,
+      'sms_user' => array('number' => sms_formatter($_REQUEST['From']), 'status' => SMS_USER_PENDING, 'gateway' => array()),
+    ));
+    if ($user) {
+      $uid = $user->uid;
+    }
+  }
   // Construct the new node object.
   $node = new stdClass();
-
-  $node->title = "callin message from $number";
-  $body = t("New callin message recorded with call_id: $call_id, recording_url: $recording_url, uid: $uid, name: $name, number: $number");
-  $node->body = $body;
-  $node->type = 'story';
-  $node->created = time();
+  if ($filename = basename($recording_url)) {
+    if (pathinfo($filename, PATHINFO_EXTENSION) == 'mp3') {
+      if ($result = drupal_http_request($recording_url)) {
+        if ($filepath = file_save_data($result->data, $filename)) {
+          $file = new stdClass();
+          $file->uid = $uid;
+          $file->filename = $filename;
+          $file->filepath = $filepath;
+          $file->filemime = file_get_mimetype($filename);
+          $file->filesize = filesize($filepath);
+          $file->status = FILE_STATUS_TEMPORARY;
+          $file->timestamp = $_SERVER['REQUEST_TIME'];
+          drupal_write_record('files', $file);
+          $file->list = variable_get('upload_list_default', 1);
+          $file->description = $file->filename;
+          $node->files[$file->fid] = $file;
+          // Force upload module to recognize the file attachment.
+          $node->old_vid = 1;
+        }
+      }
+    }
+  }
+  $node->title = t('Voice message');
+  $node->body = '';
+  $node->type = 'blog';
+  $node->created = $_SERVER['REQUEST_TIME'];
   $node->changed = $node->created;
-  $node->status = 1;          // Published?
-  $node->promote = 1;       // Display on front page?
-  $node->sticky = 0;          // Display top of page?
-  $node->format = 1;         // Filtered HTML?
-  $node->uid = $uid;             //  Content owner uid (author)?
-  $node->language = 'en';
-
-  node_submit($node);
+  $node->status = 1;
+  $node->promote = 1;
+  $node->sticky = 0;
+  $node->format = 1;
+  $node->uid = $uid;
+  $node->language = $language;
+  $node = node_submit($node);
   node_save($node);
-
   return 'Success';
 }
