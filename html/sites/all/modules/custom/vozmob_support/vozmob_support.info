@@ -1,4 +1,4 @@
-; $Id$
 name = VozMob
 description = VozMob custom support module.
 core = 6.x
+package = VozMob
