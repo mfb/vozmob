@@ -7,24 +7,21 @@
  * Implementation of hook_voipscript_load_script()
  */
 function vozmob_callin_voipscript_load_script($script_name, $params=NULL) {
-  $script = _vozmob_callin_load_sample_scripts($script_name);
-  return $script;
+  return _vozmob_callin_load_script($script_name);
 }
 
 /**
  * Implementation of hook_voipscript_get_script_names()
  */
 function vozmob_callin_voipscript_get_script_names() {
-  return array('voipscript_vozmob_callin');
+  return array('vozmob_callin_record_script');
 }
 
 /*
  * Sample scripts that highlight VoIP Drupal capabilities
  */
-function _vozmob_callin_load_sample_scripts($script_name) {
-  if ($script_name == 'voipscript_vozmob_callin') {
-
-  $script = new VoipScript('vozmob_callin');
+function _vozmob_callin_load_script($script_name) {
+  $script = new VoipScript('vozmob_callin_record_script');
 
   $script->addLabel('language_selection');
   $script->addSetLanguage('es');
@@ -97,7 +94,6 @@ function _vozmob_callin_load_sample_scripts($script_name) {
   $script->addLabel('end call');
   $script->addSay('Bye bye.');
   $script->addHangup();
-  }
   return $script;
 }
 
@@ -106,7 +102,7 @@ function _vozmob_callin_load_sample_scripts($script_name) {
  * It is called whenever that script records a new entry from the user.
  */
 function _vozmob_callin_record_callback($call_id, $recording_url, $recording_duration, $uid, $name, $number) {
-watchdog('vozmob_callin', "in _vozmob_callin_record_callback($call_id, $recording_url, $recording_duration, $uid, $name, $number)");
+  watchdog('vozmob_callin', 'in _vozmob_callin_record_callback(%call_id, %recording_url, %recording_duration, %uid, %name, %number)', array('%call_id' => $call_id, '%recording_url' => $recording_url, '%recording_duration' => $recording_duration, '%uid' => $uid, '%name' => $name, '%number' => $number));
 
   // Construct the new node object.
   $node = new stdClass();
