@@ -56,7 +56,7 @@ function _vozmob_callin_load_sample_scripts($script_name) {
   $script->addGotoIf('no recording detected', '^%recording_duration == 0');
 
   $script->addSay('You said ');
-  $script->addPlay('%recording_url');
+  //$script->addPlay('%recording_url');
 
   $script->addLabel('accept menu');
   $text = "To accept this recording, press 1.  To record it once again, press 2. To hangup, press the pound key.";
@@ -82,7 +82,7 @@ function _vozmob_callin_load_sample_scripts($script_name) {
   // Process recording.
   $script->addSay('About to start processing the recorded file.');
   $script->addSet('callback_result',
-        '^_vozmob_callback_record_callback(%call_id, %recording_url, %recording_duration, %uid, %name, %number)');
+        '^_vozmob_callin_record_callback(%call_id, %recording_url, %recording_duration, %uid, %name, %number)');
   $script->addSay('The callback returned: %callback_result');
   $script->addGoto('end call');
 
@@ -102,17 +102,17 @@ function _vozmob_callin_load_sample_scripts($script_name) {
 }
 
 /**
- * Callback function associated with the script vozmob_callback_record_script.
+ * Callback function associated with the script vozmob_callin_record_script.
  * It is called whenever that script records a new entry from the user.
  */
-function _vozmob_callback_record_callback($call_id, $recording_url, $recording_duration, $uid, $name, $number) {
-watchdog('vozmob_callback', "in _vozmob_callback_record_callback($call_id, $recording_url, $recording_duration, $uid, $name, $number)");
+function _vozmob_callin_record_callback($call_id, $recording_url, $recording_duration, $uid, $name, $number) {
+watchdog('vozmob_callin', "in _vozmob_callin_record_callback($call_id, $recording_url, $recording_duration, $uid, $name, $number)");
 
   // Construct the new node object.
   $node = new stdClass();
 
-  $node->title = "Callback message from $number";
-  $body = t("New callback message recorded with call_id: $call_id, recording_url: $recording_url, uid: $uid, name: $name, number: $number");
+  $node->title = "callin message from $number";
+  $body = t("New callin message recorded with call_id: $call_id, recording_url: $recording_url, uid: $uid, name: $name, number: $number");
   $node->body = $body;
   $node->type = 'story';
   $node->created = time();
