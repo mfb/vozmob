@@ -1,6 +1,3 @@
-[submodule "html/sites/all/themes/blueprint/blueprint"]
-  path = html/sites/all/themes/blueprint/blueprint
-  url = git://github.com/joshuaclayton/blueprint-css.git
 [submodule "html/sites/all/modules/contrib/voipdrupal"]
 	path = html/sites/all/modules/contrib/voipdrupal
 	url = git://git.drupal.org/project/voipdrupal
@@ -25,3 +22,6 @@
 [submodule "html/sites/all/modules/devel/coder"]
 	path = html/sites/all/modules/devel/coder
 	url = git://git.drupal.org/project/coder
+[submodule "html/sites/all/libraries/blueprint"]
+	path = html/sites/all/libraries/blueprint
+	url = git://github.com/joshuaclayton/blueprint-css.git

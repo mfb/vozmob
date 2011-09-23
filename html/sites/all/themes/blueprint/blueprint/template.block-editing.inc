@@ -1,5 +1,4 @@
 <?php
-// $Id: template.block-editing.inc,v 1.1 2008/09/11 11:26:27 johnalbin Exp $
 
 /**
  * @file

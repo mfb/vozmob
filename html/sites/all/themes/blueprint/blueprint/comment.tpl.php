@@ -1,11 +1,10 @@
-<div class="clear-block comment<?php print ($comment->new) ? ' comment-new' : ''; print(isset($comment->status) && $comment->status == COMMENT_NOT_PUBLISHED) ? ' comment-unpublished' : ''; if (isset($author_comment)) print ' author'; print ' '. $zebra; ?>">
-  <?php if ($picture): ?>
-    <div class="picture span-3">
-      <?php print $picture ?>
-    </div>
-  <?php endif; ?>
-
+<div class="clear-block comment<?php print($comment->new) ? ' comment-new' : ''; print(isset($comment->status) && $comment->status == COMMENT_NOT_PUBLISHED) ? ' comment-unpublished' : ''; if (isset($author_comment)) print ' author'; print ' '. $zebra; ?>">
   <div class="comment-content">
+    <?php if ($picture): ?>
+      <div class="picture span-3">
+        <?php print $picture ?>
+      </div>
+    <?php endif; ?>
     <div class="meta">
       <div class="permalink clearfix">
         <?php if ($comment->new) : ?>
@@ -18,7 +17,7 @@
         <span class="username"><?php print theme('username', $comment); ?></span> <span class="date"><?php print t('wrote !date ago', array( '!date' => format_interval(time() - $comment->timestamp))); ?></span>
       <?php endif; ?>
     </div>
-    
+
     <div class="content">
       <?php if ($title): ?><h3><?php print $title; ?></h3><?php endif; ?>
       <?php print $content ?>

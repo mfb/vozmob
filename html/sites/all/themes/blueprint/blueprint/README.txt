@@ -1,16 +1,8 @@
-# $Id: README.txt,v 1.18.2.2.2.13 2010/02/02 19:25:52 designerbrent Exp $
 
 
 --- README  -------------------------------------------------------------
 
-Blueprint, Version 1.2
-
-Written by Ted Serbinski, aka, m3avrck
-  hello@tedserbinski.com
-  http://tedserbinski.com
-
-
-Co-Maintainer:
+Blueprint, Version 2.x
 
 Brent Hardinge, aka, designerbrent
  designerbrent@gmail.com
@@ -19,12 +11,33 @@ Brent Hardinge, aka, designerbrent
  
 Contributors:
 
+Originally by Ted Serbinski, aka, m3avrck
+  hello@tedserbinski.com
+  http://tedserbinski.com
+
 Richard Burford, aka, psynaptic
  rich@freestylesystems.co.uk
  http://www.freestylesystems.co.uk
 
-Requirements: Drupal 6.x
+Requirements: Drupal 6.x, Blueprint Framework downloaded from blueprintcss.org
 
+
+--- INSTALLATION --------------------------------------------------------
+
+1. Place the blueprint folder in your themes directory.
+
+2. Download Blueprint http://www.blueprintcss.org/
+   a. Extract folder, creating something like "joshuaclayton-blueprint-css-28c8aa9ae2686442e00a5c7f46dfe2de76b3bd83"
+   b. Move folder to /sites/all/libraries and rename to "blueprint".
+   c. Ensure your path looks like /sites/all/libraries/blueprint/blueprint/screen.css
+   
+   * Optionally, Blueprint now also supports the Libraries module (http://drupal.org/project/libraries) so you can put your Blueprint framework files in any of the locations that libraries supports. 
+      - sites/default/libraries
+      - sites/all/libraries
+      - profiles/{profile_name}/libraries
+      - sites/com.example.www/libraries
+
+3. Enable theme under Administer > Site building > Themes
 
 
 --- FEATURES --------------------------------------------------------
@@ -53,19 +66,6 @@ Requirements: Drupal 6.x
 Drupal 6 version:
 - Hover over blocks to reveal admin links to edit and configure the blocks as well as edit the menu blocks.
 - Support for sub-themes.
-
---- INSTALLATION --------------------------------------------------------
-
-1. Place the blueprint folder in your themes directory.
-
-2. Download Blueprint http://www.blueprintcss.org/
-   a. Extract folder, creating something like "joshuaclayton-blueprint-css-28c8aa9ae2686442e00a5c7f46dfe2de76b3bd83"
-   b. Rename to "blueprint"
-   c. Ensure your path looks like themes/blueprint/blueprint/blueprint/screen.css
-
-3. Enable theme under Administer > Site building > Themes
-
-
 
 --- TIPS --------------------------------------------------------
 
@@ -147,9 +147,9 @@ calculations work:
 
 
 --- NOTE: -----------------------------------------------------------
-Blueprint theme does not include the Drupal $logo variable. 
+Blueprint theme now includes two ways of adding a logo: via the $logo variable or via css. There is a setting in the theme settings to choose your method.
 
-The preferred method for adding a logo to the design is to do it in the CSS was a background image. An example of the way I typically do it is as follows:
+If you use the css method, here are some tips for adding it.
 
 h1 a{
 width: [width of logo];
@@ -161,38 +161,3 @@ background: url(../images/logo.png) no-repeat left top;
 
 What this ends up doing is removing the text title of the site, and replacing it with a background image of the logo that is still linked to the homepage of the site.
 
-
---- CHANGELOG --------------------------------------------------------
-
-1.x, 2010-02-02
-----------------------
-- Fixed: Added a temporary fix to the BlueprintCSS that makes the input boxes not aligned properly. [#700464]
-
-1.x, 2008-12-08
-----------------------
-- Fix sidebar variables so they don't build unnecessary nested divs when using sub-themes.
-
-1.x, 2008-10-01
-----------------------
-- add admin links in each block on hover to edit and configure the blocks as well as edit the menu blocks.
-
-1.x, xxxx-xx-xx
-----------------------
-- add permalinks to each comment
-
-1.2, 2008-09-04
-----------------------
-- add missing header region
-- add missing primary and secondary links
-
-1.1, 2008-08-26
-----------------------
-- Don't allow search engines to index duplicate pages created by the pager
-  More: http://www.seo-expert-blog.com/blog/avoiding-duplicate-title-tags-on-pager-pages-in-drupal
-- Show node body as meta description if teaser not available
-
-
-1.0, 2008-06-04
-----------------------
-
-- Initial 1.0 release

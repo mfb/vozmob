@@ -24,6 +24,12 @@ h1, h2, h3, h4, h5, h6 {
   color: #222;
 }
 
+div.site_title, h1.site_title{
+  font-size: 3em;
+  line-height: 1;
+  margin-bottom: 0.5em;
+}
+
 thead th, th {
   background: #f7f7f7;
   border-bottom: 1px solid #ccc;
@@ -122,7 +128,6 @@ input.form-text, textarea {
 
 textarea, input {
   font-size: 1em;
-  vertical-align:text-bottom;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
 }
 
@@ -358,12 +363,12 @@ div.node div.meta ul.links {
 /* @group comments */
 
 div.comment-content {
-  float: left;
   margin-right: 10px;
 }
 
 div.comment div.picture {
   text-align: right;
+  float:left;
 }
 
 div.comment span.username {
@@ -382,6 +387,7 @@ div.comment span.new {
 div.comment div.permalink {
   width:32px;
   float:right;
+  text-align:right;
 }
 
 div.comment img {
@@ -499,17 +505,5 @@ ul.pager span.pager-ellipsis {
 
 /* @group Fixes */
 
-/* These are fixes to an issue in blueprint.
-See: http://blueprintcss.lighthouseapp.com/projects/15318-blueprint-css/tickets/94-checkbox-and-radio-button-alignment
-http://drupal.org/node/491052
-http://drupal.org/node/700464 */
-
-input[type=checkbox], input[type=radio], input.checkbox, input.radio {
-  top: 0;
-}
-
-textarea, input {
-  vertical-align: inherit;
-}
 
 /* @end */
