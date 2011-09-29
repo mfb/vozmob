@@ -7,7 +7,9 @@
  * Implementation of hook_voipscript_load_script()
  */
 function vozmob_callin_voipscript_load_script($script_name, $params=NULL) {
-  return _vozmob_callin_load_script($script_name);
+  if ($script_name == 'vozmob_callin_record_script') {
+    return _vozmob_callin_load_script($script_name);
+  }
 }
 
 /**
@@ -25,6 +27,7 @@ function _vozmob_callin_load_script($script_name) {
 
   $script->addLabel('language_selection');
   $script->addSetLanguage('es');
+//TODO: translate the remaining sentences to Spanish using Drupal's locale functionality. the commands "say" and "get input" automatically call t() with the appropriate language;
   $text = 'Para español, oprima el número uno.';
   $url = '';
   $timeout = 3;
@@ -39,8 +42,7 @@ function _vozmob_callin_load_script($script_name) {
 
   $script->addLabel('switch_to_spanish');
   $script->addSetLanguage('es');
-  $script->addSet('msg', 'Graba tu mensaje despues del tono. Quando estiver listo, oprime el #.');
-//TODO: translate the remaining sentences to Spanish using Drupal's locale functionality. the commands "say" and "get input" automatically call t() with the appropriate language;
+  $script->addSet('msg', url(drupal_get_path('module', 'vozmob_callin') . '/audio/greeting.es.mp3', array('absolute' => TRUE, 'language' => (object) array('prefix' => '', 'domain' => $GLOBALS['language']->domain))));
   $script->addGoto('start_recording');
   
   $script->addLabel('start_recording');
