@@ -25,64 +25,22 @@ function vozmob_callin_voipscript_get_script_names() {
 function _vozmob_callin_load_script($script_name) {
   $script = new VoipScript('vozmob_callin_record_script');
 
-  $script->addLabel('language_selection');
-  $script->addSetLanguage('es');
-//TODO: translate the remaining sentences to Spanish using Drupal's locale functionality. the commands "say" and "get input" automatically call t() with the appropriate language;
-  $text = 'Para español, oprima el número uno.';
-  $url = '';
-  $timeout = 3;
-  $end_key = '';
-  $num_digits = 1;
-  $script->addGetInput($text, $url, $timeout, $end_key, $num_digits);
-
-  $script->addGotoIf('switch_to_spanish', "^%input_digits == '1'");
-  $script->addSetLanguage('en');
-  $script->addSet('msg', 'Please record your message after the beep.  When done, press the pound key.');
-  $script->addGoto('start_recording');
-
   $script->addLabel('switch_to_spanish');
   $script->addSetLanguage('es');
-  $script->addSet('msg', url(drupal_get_path('module', 'vozmob_callin') . '/audio/greeting.es.mp3', array('absolute' => TRUE, 'language' => (object) array('prefix' => '', 'domain' => $GLOBALS['language']->domain))));
-  $script->addGoto('start_recording');
-  
+
   $script->addLabel('start_recording');
-  $script->addSay('%msg');
+  $script->addSet('msg', url(drupal_get_path('module', 'vozmob_callin') . '/audio/greeting.es.mp3', array('absolute' => TRUE, 'language' => (object) array('prefix' => '', 'domain' => $GLOBALS['language']->domain))));
   $timeout = 5;
   $end_key = '#';
   $max_length = 20;
-  $script->addRecord($timeout, $end_key, $max_length);
-
+  $script->addRecord('%msg', $timeout, $end_key, $max_length);
+  
+  // if recording return 0 don't save
   $script->addGotoIf('no recording detected', '^%recording_duration == 0');
 
-  $script->addSay(t('You said @message', array('@message' => '%recording_url')));
-
-  $script->addLabel('accept menu');
-  $text = 'To accept this recording, press 1. To record it once again, press 2. To hangup, press the pound key.';
-  $url = '';
-  $timeout = 5;
-  $end_key = '';
-  $num_digits = 1;
-  $script->addGetInput($text, $url, $timeout, $end_key, $num_digits);
-
-  $script->addGotoIf('accept recording', "^%input_digits == '1'");
-
-  $script->addGotoIf('start_recording', "^%input_digits == '2'");
-
-  $script->addGotoIf('end call', "^%input_digits == '#'");
-
-  $script->addSay('Invalid input received. Please try again.');
-  $script->addGoto('accept menu');
-
-  $script->addLabel('accept recording');
-  // Process recording.
-  $script->addSay('About to start processing the recorded file.');
-  $script->addSet('callback_result', '^_vozmob_callin_record_callback(%call_id, %recording_url, %recording_duration)');
-  $script->addSay('The callback returned: %callback_result');
+  // otherwise just save
+  $script->addSet('callback_result', '^_vozmob_callin_record_callback(%call_id, %recording_fid, %recording_duration)');
   $script->addGoto('end call');
-
-  $script->addLabel('no input received');
-  $script->addSay("No input received. Please try again.");
-  $script->addGoto('start_recording');
 
   $script->addLabel('no recording detected');
   $script->addSay("No recording detected. Please try again.");
@@ -91,6 +49,7 @@ function _vozmob_callin_load_script($script_name) {
   $script->addLabel('end call');
   $script->addSay('Bye bye.');
   $script->addHangup();
+
   return $script;
 }
 
@@ -98,9 +57,9 @@ function _vozmob_callin_load_script($script_name) {
  * Callback function associated with the script vozmob_callin_record_script.
  * It is called whenever that script records a new entry from the user.
  */
-function _vozmob_callin_record_callback($call_id, $recording_url, $recording_duration) {
-  watchdog('vozmob_callin', 'in _vozmob_callin_record_callback(%call_id, %recording_url, %recording_duration)', array('%call_id' => $call_id, '%recording_url' => $recording_url, '%recording_duration' => $recording_duration));
-  $language = 'en';
+function _vozmob_callin_record_callback($call_id, $fid, $recording_duration) {
+  watchdog('vozmob_callin', 'in _vozmob_callin_record_callback(%call_id, %recording_fid, %recording_duration)', array('%call_id' => $call_id, '%recording_fid' => $fid, '%recording_duration' => $recording_duration));
+  $language = 'es';
   $uid = sms_user_get_uid(substr($_REQUEST['From'], 1));
   if (!$uid) {
     // Find number stored without a 1-digit country code.
@@ -122,27 +81,12 @@ function _vozmob_callin_record_callback($call_id, $recording_url, $recording_dur
   }
   // Construct the new node object.
   $node = new stdClass();
-  if ($filename = basename($recording_url)) {
-    if (pathinfo($filename, PATHINFO_EXTENSION) == 'mp3') {
-      if ($result = drupal_http_request($recording_url)) {
-        if ($filepath = file_save_data($result->data, $filename)) {
-          $file = new stdClass();
-          $file->uid = $uid;
-          $file->filename = $filename;
-          $file->filepath = $filepath;
-          $file->filemime = file_get_mimetype($filename);
-          $file->filesize = filesize($filepath);
-          $file->status = FILE_STATUS_TEMPORARY;
-          $file->timestamp = $_SERVER['REQUEST_TIME'];
-          drupal_write_record('files', $file);
-          $file->list = variable_get('upload_list_default', 1);
-          $file->description = $file->filename;
-          $node->files[$file->fid] = $file;
-          // Force upload module to recognize the file attachment.
-          $node->old_vid = 1;
-        }
-      }
-    }
+  $result = db_query('SELECT * FROM {files} WHERE fid = %d', $fid);
+  if ($file = db_fetch_object($result)) {
+    $file->list = variable_get('upload_list_default', 1);
+    $node->files[$file->fid] = $file;
+    // Force upload module to recognize the file attachment.
+    $node->old_vid = 1;
   }
   $node->title = t('Voice message');
   $node->body = '';
