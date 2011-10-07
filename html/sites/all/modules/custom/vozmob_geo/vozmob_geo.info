@@ -1,7 +1,8 @@
 name = VozMob Geo
 description = Provides integration between Exif and OpenLayers modules.
 core = 6.x
-depends[] = exif
-depends[] = openlayers_geocoder
-depends[] = openlayers_cck
+dependencies[] = exif
+dependencies[] = openlayers_geocoder
+dependencies[] = openlayers_cck
+dependencies[] = flag
 package = VozMob
