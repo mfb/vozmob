@@ -13,6 +13,8 @@ function mms_us_straight_mailsave_clean(&$node, $result, $i, $header, $mailbox) 
     $node->body = preg_replace('/This picture message .*? select Minimum for faster download\./s', '', $node->body);
     // Message spam may have been cut off at invalid character.
     $node->body = preg_replace('/This picture message .*?To play video messages sent to email, Apple/s', '', $node->body);
+    // Strip Verizon spam from message.
+    $node->body = preg_replace('/This message has been sent using .* or higher is required\./s', '', $node->body);
 
     $node->teaser = node_teaser($node->body);
 
