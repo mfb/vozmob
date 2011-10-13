@@ -27,13 +27,21 @@ function _vozmob_callin_load_script($script_name) {
 
   $script->addLabel('switch_to_spanish');
   $script->addSetLanguage('es');
+  $script->addSet('spanishmsg', url(drupal_get_path('module', 'vozmob_callin') . '/audio/VozMob-Bienven-Es-mono.mp3', array('absolute' => TRUE, 'language' => (object) array('prefix' => '', 'domain' => $GLOBALS['language']->domain))));
+  $script->addGetInput('%spanishmsg', 1, '', 1);
+  $script->addGotoIf('switch_to_english', "^%input_digits == '2'");
+  $script->addGoto('start_recording');
+
+  $script->addLabel('switch_to_english');
+  $script->addSetLanguage('en');
+  $script->addSet('englishmsg', url(drupal_get_path('module', 'vozmob_callin') . '/audio/VozMob-Welcome-En-mono.mp3', array('absolute' => TRUE, 'language' => (object) array('prefix' => '', 'domain' => $GLOBALS['language']->domain))));
+  $script->addSay('%englishmsg');
 
   $script->addLabel('start_recording');
-  $script->addSet('msg', url(drupal_get_path('module', 'vozmob_callin') . '/audio/greeting.es.mp3', array('absolute' => TRUE, 'language' => (object) array('prefix' => '', 'domain' => $GLOBALS['language']->domain))));
   $timeout = 5;
   $end_key = '#';
   $max_length = 20;
-  $script->addRecord('%msg', $timeout, $end_key, $max_length);
+  $script->addRecord(' ', $timeout, $end_key, $max_length);
   
   // if recording return 0 don't save
   $script->addGotoIf('no recording detected', '^%recording_duration == 0');
