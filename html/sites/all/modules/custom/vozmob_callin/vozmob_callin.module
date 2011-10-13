@@ -39,10 +39,10 @@ function _vozmob_callin_load_script($script_name) {
 
   $script->addLabel('start_recording');
   $timeout = 5;
-  $end_key = '#';
+  $end_key = '#2';
   $max_length = 20;
   $script->addRecord(' ', $timeout, $end_key, $max_length);
-  
+  $script->addGotoIf('switch_to_english', "^%recording_digits == '2'");
   // if recording return 0 don't save
   $script->addGotoIf('no recording detected', '^%recording_duration == 0');
 
