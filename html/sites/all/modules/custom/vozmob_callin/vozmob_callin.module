@@ -1,0 +1,113 @@
+<?php
+/**
+ * @file Provides sample scripts that demonstrate the capabilities of the VoIP Drupal platform
+ */ 
+
+/**
+ * Implementation of hook_voipscript_load_script()
+ */
+function vozmob_callin_voipscript_load_script($script_name, $params=NULL) {
+  if ($script_name == 'vozmob_callin_record_script') {
+    return _vozmob_callin_load_script($script_name);
+  }
+}
+
+/**
+ * Implementation of hook_voipscript_get_script_names()
+ */
+function vozmob_callin_voipscript_get_script_names() {
+  return array('vozmob_callin_record_script');
+}
+
+/*
+ * Sample scripts that highlight VoIP Drupal capabilities
+ */
+function _vozmob_callin_load_script($script_name) {
+  $script = new VoipScript('vozmob_callin_record_script');
+
+  $script->addLabel('switch_to_spanish');
+  $script->addSetLanguage('es');
+  $script->addSet('spanishmsg', url(drupal_get_path('module', 'vozmob_callin') . '/audio/VozMob-Bienven-Es-mono.mp3', array('absolute' => TRUE, 'language' => (object) array('prefix' => '', 'domain' => $GLOBALS['language']->domain))));
+  $script->addGetInput('%spanishmsg', 1, '', 1);
+  $script->addGotoIf('switch_to_english', "^%input_digits == '2'");
+  $script->addGoto('start_recording');
+
+  $script->addLabel('switch_to_english');
+  $script->addSetLanguage('en');
+  $script->addSet('englishmsg', url(drupal_get_path('module', 'vozmob_callin') . '/audio/VozMob-Welcome-En-mono.mp3', array('absolute' => TRUE, 'language' => (object) array('prefix' => '', 'domain' => $GLOBALS['language']->domain))));
+  $script->addSay('%englishmsg');
+
+  $script->addLabel('start_recording');
+  $timeout = 5;
+  $end_key = '#2';
+  $max_length = 20;
+  $script->addRecord(' ', $timeout, $end_key, $max_length);
+  $script->addGotoIf('switch_to_english', "^%recording_digits == '2'");
+  // if recording return 0 don't save
+  $script->addGotoIf('no recording detected', '^%recording_duration == 0');
+
+  // otherwise just save
+  $script->addSet('callback_result', '^_vozmob_callin_record_callback(%call_id, %recording_fid, %recording_duration)');
+  $script->addGoto('end call');
+
+  $script->addLabel('no recording detected');
+  $script->addSay("No recording detected. Please try again.");
+  $script->addGoto('start_recording');
+
+  $script->addLabel('end call');
+  $script->addSay('Bye bye.');
+  $script->addHangup();
+
+  return $script;
+}
+
+/**
+ * Callback function associated with the script vozmob_callin_record_script.
+ * It is called whenever that script records a new entry from the user.
+ */
+function _vozmob_callin_record_callback($call_id, $fid, $recording_duration) {
+  watchdog('vozmob_callin', 'in _vozmob_callin_record_callback(%call_id, %recording_fid, %recording_duration)', array('%call_id' => $call_id, '%recording_fid' => $fid, '%recording_duration' => $recording_duration));
+  $language = 'es';
+  $uid = sms_user_get_uid(substr($_REQUEST['From'], 1));
+  if (!$uid) {
+    // Find number stored without a 1-digit country code.
+    $uid = sms_user_get_uid(substr($_REQUEST['From'], 2));
+  }
+  while (!$uid) {
+    $user = user_save(NULL, array(
+      'name' => variable_get('sms_registration_username', 'Drupal-') . mt_rand(1, db_result(db_query('SELECT MAX(uid) FROM {users}')) * 10),
+      'pass' => user_password(8),
+      'mail' => $_REQUEST['From'],
+      'roles' => ($role = variable_get('sms_registration_role', NULL)) ? array($role => 1) : NULL,
+      'status' => 1,
+      'language' => $language,
+      'sms_user' => array('number' => sms_formatter($_REQUEST['From']), 'status' => SMS_USER_PENDING, 'gateway' => array()),
+    ));
+    if ($user) {
+      $uid = $user->uid;
+    }
+  }
+  // Construct the new node object.
+  $node = new stdClass();
+  $result = db_query('SELECT * FROM {files} WHERE fid = %d', $fid);
+  if ($file = db_fetch_object($result)) {
+    $file->list = variable_get('upload_list_default', 1);
+    $node->files[$file->fid] = $file;
+    // Force upload module to recognize the file attachment.
+    $node->old_vid = 1;
+  }
+  $node->title = t('Voice message');
+  $node->body = '';
+  $node->type = 'blog';
+  $node->created = $_SERVER['REQUEST_TIME'];
+  $node->changed = $node->created;
+  $node->status = 1;
+  $node->promote = 1;
+  $node->sticky = 0;
+  $node->format = 1;
+  $node->uid = $uid;
+  $node->language = $language;
+  $node = node_submit($node);
+  node_save($node);
+  return 'Success';
+}

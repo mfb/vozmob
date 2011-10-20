@@ -1,0 +1,43 @@
+name = Blueprint
+description = Drupal base theme built with Blueprint CSS framework.
+
+core = 6.x
+engine = phptemplate
+
+stylesheets[screen,projection][] = css/blueprint.css
+stylesheets[screen,projection][] = css/style.css
+
+scripts[] = scripts/general.js
+
+screenshot = screenshot.png
+
+regions[left] = First sidebar
+regions[right] = Second sidebar
+regions[content] = Content
+regions[header] = Header
+regions[footer] = Footer
+
+; Let's enable some features
+features[] = logo
+features[] = name
+features[] = slogan
+features[] = mission
+features[] = node_user_picture
+features[] = comment_user_picture
+features[] = search
+features[] = favicon
+features[] = primary_links
+features[] = secondary_links
+
+; Set the default settings to be used in theme-settings.php
+settings[blueprint_block_edit_links]        = 1
+settings[blueprint_rebuild_registry]        = 0
+settings[blueprint_showgrid]                = 0
+settings[blueprint_animated_submit]         = 1
+
+; Information added by drupal.org packaging script on 2011-09-21
+version = "6.x-2.1"
+core = "6.x"
+project = "blueprint"
+datestamp = "1316633800"
+

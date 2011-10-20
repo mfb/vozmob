@@ -19,7 +19,7 @@ function mail2term_mailhandler($node, $result, $i, $header, $mailbox) {
       $node->taxonomy[$term->tid] = $term->tid;
     }
     if ($new_component) {
-      $result = db_query("SELECT v.vid FROM {vocabulary} v INNER JOIN {vocabulary_node_types} n ON v.vid = n.vid WHERE n.type = '%s' and v.tags = %d", $node->type, 1);
+      $result = db_query(db_rewrite_sql("SELECT v.vid FROM {vocabulary} v INNER JOIN {vocabulary_node_types} n ON v.vid = n.vid WHERE n.type = '%s' and v.tags = %d", 'v', 'vid'), $node->type, 1);
       while ($vocabulary = db_fetch_object($result)) {
         $term = array('name' => $component, 'vid' => $vocabulary->vid);
         taxonomy_save_term($term);

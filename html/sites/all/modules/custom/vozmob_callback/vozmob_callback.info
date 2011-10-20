@@ -1,0 +1,5 @@
+core = "6.x"
+dependencies[] = "voipcall"
+description = "Implements a phone-based callback mechanism for VozMob."
+name = "VozMob callback"
+package = "VozMob"
