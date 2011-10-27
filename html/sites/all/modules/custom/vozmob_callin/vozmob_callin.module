@@ -102,7 +102,7 @@ function _vozmob_callin_record_callback($call_id, $fid, $recording_duration) {
   $node->created = $_SERVER['REQUEST_TIME'];
   $node->changed = $node->created;
   $node->status = 1;
-  $node->promote = 1;
+  $node->promote = 0;
   $node->sticky = 0;
   $node->format = 1;
   $node->uid = $uid;
